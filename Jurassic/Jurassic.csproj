@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2CE5502D-8710-4BE3-9D90-201D526904B3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Intrinsics</RootNamespace>
+    <AssemblyName>Intrinsics</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Library\JSON\JSONParser.cs" />
+    <Compile Include="Library\JSON\JSONSerializer.cs" />
+    <Compile Include="Library\JSON\JSONLexer.cs" />
+    <Compile Include="Core\ExecutionStack.cs" />
+    <Compile Include="Core\TypeUtilities.cs" />
+    <Compile Include="Core\ReflectionHelpers.cs" />
+    <Compile Include="Compiler\Lexer\IdentifierToken.cs" />
+    <Compile Include="Compiler\Lexer\JSLexer.Perf.cs" />
+    <Compile Include="Compiler\Lexer\KeywordToken.cs" />
+    <Compile Include="Compiler\Lexer\Lexer.cs" />
+    <Compile Include="Compiler\Lexer\LiteralToken.cs" />
+    <Compile Include="Compiler\Lexer\PunctuatorToken.cs" />
+    <Compile Include="Compiler\Lexer\Token.cs" />
+    <Compile Include="Library\Array\ArrayInstance.cs" />
+    <Compile Include="Library\Array\SparseArray.cs" />
+    <Compile Include="Library\Boolean\BooleanInstance.cs" />
+    <Compile Include="Library\Boolean\BooleanConstructor.cs" />
+    <Compile Include="Library\Array\ArrayConstructor.cs" />
+    <Compile Include="Library\Date\DateParser.cs" />
+    <Compile Include="Library\Function\ArgumentsInstance.cs" />
+    <Compile Include="Library\Function\UserDefinedFunction.cs" />
+    <Compile Include="Library\Function\FunctionBinderFlags.cs" />
+    <Compile Include="Library\Function\ClrFunction.cs" />
+    <Compile Include="Library\Function\FunctionBinderMethod.cs" />
+    <Compile Include="Library\Function\FunctionBinder.cs" />
+    <Compile Include="Library\JSON\JSONObject.cs" />
+    <Compile Include="Library\Object\PropertyAttributes.cs" />
+    <Compile Include="Library\Object\PropertyNameAndValue.cs" />
+    <Compile Include="Compiler\Parser\ExpressionTreeHelpers.cs" />
+    <Compile Include="Compiler\Parser\LexicalScope.cs" />
+    <Compile Include="Compiler\Parser\IEnvironmentRecord.cs" />
+    <Compile Include="Compiler\Parser\FunctionContext.cs" />
+    <Compile Include="Compiler\Parser\Operators\BinaryJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\AssignmentJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\GroupingJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\NewJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\TernaryJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\ListJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\LiteralJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\FunctionCallJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\MemberJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\UnaryJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\JSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\OperatorJSExpression.cs" />
+    <Compile Include="Compiler\Parser\Operators\Operator.cs" />
+    <Compile Include="Compiler\Parser\Parser.cs" />
+    <Compile Include="Core\TypeComparer.cs" />
+    <Compile Include="Core\Null.cs" />
+    <Compile Include="Library\Error\ErrorConstructor.cs" />
+    <Compile Include="Library\Function\Delegates.cs" />
+    <Compile Include="Core\JavaScriptException.cs" />
+    <Compile Include="Core\TypeConverter.cs" />
+    <Compile Include="Core\Undefined.cs" />
+    <Compile Include="Library\Object\PropertyDescriptor.cs" />
+    <Compile Include="Library\Function\FunctionConstructor.cs" />
+    <Compile Include="Library\Object\ObjectConstructor.cs" />
+    <Compile Include="Library\Global\GlobalObject.cs" />
+    <Compile Include="Library\RegExp\RegExpConstructor.cs" />
+    <Compile Include="Library\RegExp\RegExpInstance.cs" />
+    <Compile Include="Library\String\StringInstance.cs" />
+    <Compile Include="Library\Function\FunctionInstance.cs" />
+    <Compile Include="Library\Date\DateConstructor.cs" />
+    <Compile Include="Library\Date\DateInstance.cs" />
+    <Compile Include="Library\Number\NumberInstance.cs" />
+    <Compile Include="Library\Error\ErrorInstance.cs" />
+    <Compile Include="Library\String\StringConstructor.cs" />
+    <Compile Include="Library\Number\NumberConstructor.cs" />
+    <Compile Include="Library\Global\MathObject.cs" />
+    <Compile Include="Library\Object\ObjectInstance.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Library\Object\Attributes.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
