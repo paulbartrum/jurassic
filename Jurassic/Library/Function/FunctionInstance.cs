@@ -93,7 +93,7 @@ namespace Jurassic.Library
             throw new NotImplementedException();
         }
 
-        public virtual ObjectInstance ConstructLateBound(params object[] parameters)
+        public virtual ObjectInstance ConstructLateBound(params object[] arguments)
         {
             throw new NotImplementedException();
         }

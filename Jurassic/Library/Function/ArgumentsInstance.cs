@@ -11,7 +11,7 @@ namespace Jurassic.Library
     public class ArgumentsInstance : ObjectInstance
     {
         private UserDefinedFunction callee;
-        private LexicalScope scope;
+        private DeclarativeScope scope;
         private bool[] mappedArguments;
 
 
@@ -24,9 +24,9 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="callee"> The function that was called. </param>
-        /// <param name="scope">  </param>
-        /// <param name="argumentValues"> The arguments that were passed to the function. </param>
-        internal ArgumentsInstance(ObjectInstance prototype, UserDefinedFunction callee, LexicalScope scope, object[] argumentValues)
+        /// <param name="scope"> The function scope. </param>
+        /// <param name="argumentValues"> The argument values that were passed to the function. </param>
+        internal ArgumentsInstance(ObjectInstance prototype, UserDefinedFunction callee, DeclarativeScope scope, object[] argumentValues)
             : base(prototype)
         {
             if (callee == null)
@@ -82,9 +82,9 @@ namespace Jurassic.Library
             // variable names.
             if (index < this.mappedArguments.Length && this.mappedArguments[index] == true)
             {
-                if (this.scope.HasBinding(this.callee.ArgumentNames[(int)index], true) == false)
+                if (this.scope.HasValue(this.callee.ArgumentNames[(int)index]) == false)
                     return PropertyDescriptor.Undefined;
-                object value = this.scope.GetBindingValue(this.callee.ArgumentNames[(int)index], false);
+                object value = this.scope.GetValue(this.callee.ArgumentNames[(int)index]);
                 return new PropertyDescriptor(value, PropertyAttributes.NonEnumerable);
             }
 
@@ -127,7 +127,7 @@ namespace Jurassic.Library
             // variable names.
             if (index >= 0 && index < this.mappedArguments.Length && this.mappedArguments[index] == true)
             {
-                this.scope.SetMutableBinding(this.callee.ArgumentNames[(int)index], value, false);
+                this.scope.SetValue(this.callee.ArgumentNames[(int)index], value);
                 return;
             }
 

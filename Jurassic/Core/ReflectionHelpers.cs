@@ -37,12 +37,6 @@ namespace Jurassic
         internal static MethodInfo FunctionInstance_CallLateBound;
         internal static MethodInfo FunctionInstance_InstancePrototype;
 
-        internal static MethodInfo IEnvironmentRecord_CreateMutableBinding;
-        internal static MethodInfo IEnvironmentRecord_DeleteBinding;
-        internal static MethodInfo IEnvironmentRecord_GetBindingValue;
-        internal static MethodInfo IEnvironmentRecord_SetMutableBinding;
-        internal static MethodInfo IEnvironmentRecord_HasBinding;
-
         internal static MethodInfo Global_Instance;
         internal static MethodInfo Global_Boolean;
         internal static MethodInfo Global_Function;
@@ -50,26 +44,49 @@ namespace Jurassic
         internal static MethodInfo Global_Array;
         internal static MethodInfo Global_Object;
 
+        internal static MethodInfo String_Concat;
+        internal static MethodInfo String_Length;
+        internal static MethodInfo String_CompareOrdinal;
+        internal static MethodInfo String_Format;
+
         internal static MethodInfo IEnumerable_GetEnumerator;
         internal static MethodInfo IEnumerator_MoveNext;
         internal static MethodInfo IEnumerator_Current;
+
         internal static MethodInfo Debugger_Break;
         internal static MethodInfo JavaScriptException_ErrorObject;
-        internal static MethodInfo String_Concat;
-        internal static MethodInfo String_Length;
         internal static MethodInfo Boolean_Construct;
-        internal static MethodInfo ObjectInstance_HasProperty;
-        internal static MethodInfo LexicalScope_GetImplicitThisValue;
+        internal static MethodInfo Object_Construct;
+        
         internal static MethodInfo RegExp_Construct;
         internal static MethodInfo Array_New;
-        internal static MethodInfo Object_Construct;
-        internal static MethodInfo ObjectInstance_Put;
         internal static MethodInfo Delegate_CreateDelegate;
+        internal static MethodInfo Type_GetTypeFromHandle;
+        internal static MethodInfo MethodBase_GetMethodFromHandle;
 
-        internal static ConstructorInfo LexicalScope_Constructor;
+        internal static MethodInfo ObjectInstance_Delete;
+        internal static MethodInfo ObjectInstance_HasProperty;
+        internal static MethodInfo ObjectInstance_GetItem_String;
+        internal static MethodInfo ObjectInstance_GetItem_Int;
+        internal static MethodInfo ObjectInstance_SetItem_String;
+        internal static MethodInfo ObjectInstance_SetItem_Int;
+        internal static MethodInfo ObjectInstance_SetPropertyIfExists;
+        internal static MethodInfo ObjectInstance_PropertyValues;
+        internal static MethodInfo ObjectInstance_CacheKey;
+        internal static MethodInfo ObjectInstance_InlineGetPropertyValue;
+        internal static MethodInfo ObjectInstance_InlineSetPropertyValue;
+        internal static MethodInfo ObjectInstance_InlineSetPropertyValueIfExists;
+
+        internal static MethodInfo Scope_ParentScope;
+        internal static MethodInfo ObjectScope_CreateRuntimeScope;
+        internal static MethodInfo ObjectScope_ScopeObject;
+        internal static MethodInfo DeclarativeScope_CreateRuntimeScope;
+        internal static MethodInfo DeclarativeScope_Values;
+
         internal static ConstructorInfo JavaScriptException_Constructor2;
         internal static ConstructorInfo JavaScriptException_Constructor3;
         internal static ConstructorInfo UserDefinedFunction_Constructor;
+        internal static ConstructorInfo FunctionDelegate_Constructor;
 
         internal static FieldInfo Undefined_Value;
         internal static FieldInfo Null_Value;
@@ -97,11 +114,27 @@ namespace Jurassic
             TypeUtilities_EnumeratePropertyNames = GetStaticMethod(typeof(TypeUtilities), "EnumeratePropertyNames", typeof(object));
             TypeUtilities_Add = GetStaticMethod(typeof(TypeUtilities), "Add", typeof(object), typeof(object));
 
-            IEnvironmentRecord_CreateMutableBinding = GetInstanceMethod(typeof(IEnvironmentRecord), "CreateMutableBinding", typeof(string), typeof(bool));
-            IEnvironmentRecord_DeleteBinding = GetInstanceMethod(typeof(IEnvironmentRecord), "DeleteBinding", typeof(string));
-            IEnvironmentRecord_GetBindingValue = GetInstanceMethod(typeof(IEnvironmentRecord), "GetBindingValue", typeof(string), typeof(bool));
-            IEnvironmentRecord_SetMutableBinding = GetGenericInstanceMethod(typeof(IEnvironmentRecord), "SetMutableBinding");
-            IEnvironmentRecord_HasBinding = GetInstanceMethod(typeof(IEnvironmentRecord), "HasBinding", typeof(string));
+            ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(string), typeof(bool));
+            ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(string));
+            ObjectInstance_GetItem_String = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(string));
+            ObjectInstance_GetItem_Int = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(uint));
+            ObjectInstance_SetItem_String = GetInstanceMethod(typeof(ObjectInstance), "set_Item", typeof(string), typeof(object));
+            ObjectInstance_SetItem_Int = GetInstanceMethod(typeof(ObjectInstance), "set_Item", typeof(uint), typeof(object));
+            ObjectInstance_SetPropertyIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyIfExists", typeof(string), typeof(object));
+            ObjectInstance_PropertyValues = GetInstanceMethod(typeof(ObjectInstance), "get_PropertyValues");
+            ObjectInstance_CacheKey = GetInstanceMethod(typeof(ObjectInstance), "get_CacheKey");
+            ObjectInstance_InlineGetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineGetPropertyValue",
+                new Type[] { typeof(string), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
+            ObjectInstance_InlineSetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineSetPropertyValue",
+                new Type[] { typeof(string), typeof(object), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
+            ObjectInstance_InlineSetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "InlineSetPropertyValueIfExists",
+                new Type[] { typeof(string), typeof(object), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
+
+            Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
+            ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance));
+            ObjectScope_ScopeObject = GetInstanceMethod(typeof(ObjectScope), "get_ScopeObject");
+            DeclarativeScope_CreateRuntimeScope = GetStaticMethod(typeof(DeclarativeScope), "CreateRuntimeScope", typeof(Scope), typeof(int));
+            DeclarativeScope_Values = GetInstanceMethod(typeof(DeclarativeScope), "get_Values");
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));
             FunctionInstance_ConstructLateBound = GetInstanceMethod(typeof(FunctionInstance), "ConstructLateBound", typeof(object[]));
@@ -115,26 +148,29 @@ namespace Jurassic
             Global_Array = GetStaticMethod(typeof(GlobalObject), "get_Array");
             Global_Object = GetStaticMethod(typeof(GlobalObject), "get_Object");
 
-            String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(object), typeof(object));
+            String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
+            String_CompareOrdinal = GetStaticMethod(typeof(string), "CompareOrdinal", typeof(string), typeof(string));
+            String_Format = GetStaticMethod(typeof(string), "Format", typeof(string), typeof(object[]));
+
             JavaScriptException_Constructor2 = GetConstructor(typeof(JavaScriptException), typeof(string), typeof(string));
             JavaScriptException_Constructor3 = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string));
             IEnumerable_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<string>), "GetEnumerator");
             IEnumerator_MoveNext = GetInstanceMethod(typeof(System.Collections.IEnumerator), "MoveNext");
             IEnumerator_Current = GetInstanceMethod(typeof(IEnumerator<string>), "get_Current");
             Debugger_Break = GetStaticMethod(typeof(System.Diagnostics.Debugger), "Break");
-            LexicalScope_Constructor = typeof(LexicalScope).GetConstructor(new Type[] { typeof(LexicalScope), typeof(ObjectInstance), typeof(bool) });
             JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));
-            LexicalScope_GetImplicitThisValue = GetInstanceMethod(typeof(LexicalScope), "GetImplicitThisValue", typeof(string));
-            ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(string));
+            
             RegExp_Construct = GetInstanceMethod(typeof(Jurassic.Library.RegExpConstructor), "Construct", typeof(string), typeof(string));
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
-            ObjectInstance_Put = GetInstanceMethod(typeof(ObjectInstance), "Put", typeof(string), typeof(object), typeof(bool));
             UserDefinedFunction_Constructor = GetConstructor(typeof(UserDefinedFunction), typeof(ObjectInstance),
-                typeof(string), typeof(IList<string>), typeof(LexicalScope), typeof(Func<LexicalScope, object>));
+                typeof(string), typeof(IList<string>), typeof(Scope), typeof(Library.FunctionDelegate));
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));
+            Type_GetTypeFromHandle = GetStaticMethod(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
+            MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
+            FunctionDelegate_Constructor = GetConstructor(typeof(Library.FunctionDelegate), typeof(object), typeof(IntPtr));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

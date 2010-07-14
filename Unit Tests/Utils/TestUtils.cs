@@ -50,21 +50,32 @@ namespace UnitTests
 
         public static object EvaluateExceptionType(string script)
         {
-            try
+            if (Engine == JSEngine.JScript)
             {
-                Evaluate("try { " + script + "; globalErrorName = 'No error was thrown' } catch(e) { globalErrorName = e.name; }");
+                try
+                {
+                    Evaluate("try { " + script + "; globalErrorName = 'No error was thrown' } catch(e) { globalErrorName = e.name; }");
+                }
+                catch (System.Runtime.InteropServices.COMException ex)
+                {
+                    if (ex.Message == "Syntax error")
+                        return "SyntaxError";
+                    throw;
+                }
+                return Evaluate("globalErrorName");
             }
-            catch (Jurassic.JavaScriptException ex)
+            else
             {
-                return ex.Name;
+                try
+                {
+                    Evaluate(script);
+                }
+                catch (Jurassic.JavaScriptException ex)
+                {
+                    return ex.Name;
+                }
+                return "No error was thrown";
             }
-            catch (System.Runtime.InteropServices.COMException ex)
-            {
-                if (ex.Message == "Syntax error")
-                    return "SyntaxError";
-                throw;
-            }
-            return Evaluate("globalErrorName");
         }
 
         public static Jurassic.Library.PropertyAttributes EvaluateAccessibility(string objectExpression, string propertyName)

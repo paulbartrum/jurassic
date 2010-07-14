@@ -161,6 +161,7 @@ namespace Jurassic.Library
         /// <returns> An array of types. </returns>
         private Type[] GetArgumentTypes(object[] arguments)
         {
+            // Possibly use Type.GetTypeArray instead?
             Type[] argumentTypes = new Type[arguments.Length];
             for (int i = 0; i < arguments.Length; i++)
             {

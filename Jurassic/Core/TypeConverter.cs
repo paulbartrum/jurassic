@@ -49,16 +49,18 @@ namespace Jurassic
         /// <returns> A primitive number value. </returns>
         public static double ToNumber(object value)
         {
+            if (value is double)
+                return (double)value;
+            if (value is int)
+                return (double)(int)value;
+            if (value is uint)
+                return (double)(uint)value;
             if (value == null || value == Undefined.Value)
                 return double.NaN;
             if (value == Null.Value)
                 return +0;
             if (value is bool)
                 return (bool)value ? 1 : 0;
-            if (value is int)
-                return (double)(int)value;
-            if (value is double)
-                return (double)value;
             if (value is string)
                 return GlobalObject.ParseNumber((string)value, allowHexPrefix: true, allowTrailingJunk: false, returnZeroIfEmpty: true);
             if (value is ObjectInstance)
@@ -153,6 +155,8 @@ namespace Jurassic
         /// <returns> A 32-bit integer value. </returns>
         public static int ToInt32(object value)
         {
+            if (value is int)
+                return (int)value;
             return (int)(uint)ToNumber(value);
         }
 
@@ -163,6 +167,8 @@ namespace Jurassic
         /// <returns> An unsigned 32-bit integer value. </returns>
         public static uint ToUint32(object value)
         {
+            if (value is uint)
+                return (uint)value;
             return (uint)ToNumber(value);
         }
 

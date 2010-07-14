@@ -7,9 +7,9 @@ using System.Text;
 namespace Jurassic.Compiler
 {
     /// <summary>
-    /// Represents the current state of the parser.
+    /// Represents the current expression state of the parser.
     /// </summary>
-    public enum ParserContext
+    public enum ExpressionState
     {
         /// <summary>
         /// Indicates the context is not known.  The lexer will guess.
@@ -79,7 +79,7 @@ namespace Jurassic.Compiler
         /// an operator is valid as the next token.  This is only required to disambiguate the
         /// slash symbol (/) which can be a division operator or a regular expression literal.
         /// </summary>
-        public Func<ParserContext> ParserContextCallback
+        public Func<ExpressionState> ExpressionStateCallback
         {
             get;
             set;
@@ -274,6 +274,9 @@ namespace Jurassic.Compiler
                             break;
                         this.reader.Read();
                     }
+
+                    if (result == (double)(int)result)
+                        return new LiteralToken((int)result);
                     return new LiteralToken(result);
                 }
             }
@@ -340,6 +343,8 @@ namespace Jurassic.Compiler
                     result /= System.Math.Pow(10, -exponent);
             }
 
+            if (result == (double)(int)result)
+                return new LiteralToken((int)result);
             return new LiteralToken(result);
         }
 
@@ -611,19 +616,19 @@ namespace Jurassic.Compiler
                 // Divide or regular expression.
 
                 // Get the current parser context.
-                var parserContext = ParserContext.UnknownContext;
-                if (this.ParserContextCallback != null)
-                    parserContext = this.ParserContextCallback();
+                var parserContext = ExpressionState.UnknownContext;
+                if (this.ExpressionStateCallback != null)
+                    parserContext = this.ExpressionStateCallback();
 
                 // Determine from the context whether the token is a regular expression
                 // or a division operator.
                 bool isDivisionOperator;
                 switch (parserContext)
                 {
-                    case ParserContext.LiteralContext:
+                    case ExpressionState.LiteralContext:
                         isDivisionOperator = false;
                         break;
-                    case ParserContext.OperatorContext:
+                    case ExpressionState.OperatorContext:
                         isDivisionOperator = true;
                         break;
                     default:
@@ -705,7 +710,7 @@ namespace Jurassic.Compiler
             }
 
             // Create a new literal token.
-            return new LiteralToken(new RegularExpressionLiteralValue(body.ToString(), flags.ToString()));
+            return new LiteralToken(Library.GlobalObject.RegExp.Construct(body.ToString(), flags.ToString()));
         }
 
         /// <summary>

@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayBenchmarks.cs" />
+    <Compile Include="OperatorBenchmarks.cs" />
     <Compile Include="LexerBenchmarks.cs" />
     <Compile Include="JSONBenchmarks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -103,7 +104,7 @@
     <Content Include="JSLitmus.js" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Sunspider Tokens.xlsx" />
+    <None Include="Sunspider.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jurassic\Jurassic.csproj">
