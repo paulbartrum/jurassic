@@ -9,7 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jurassic", "Jurassic\Jurass
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3C73BC26-5032-48A5-B32E-01639B5A4D5E}"
 	ProjectSection(SolutionItems) = preProject
-		Documentation\ECMA-262.pdf = Documentation\ECMA-262.pdf
+		Documentation\ECMA-262 (ECMAScript 5).pdf = Documentation\ECMA-262 (ECMAScript 5).pdf
+		Documentation\ECMA-335 (CLI).pdf = Documentation\ECMA-335 (CLI).pdf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Performance", "Performance\Performance.csproj", "{C0B52B91-21C0-4669-9B2E-F33838BD7F65}"

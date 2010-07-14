@@ -49,15 +49,6 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ILReader\DynamicMethodILProvider.cs" />
-    <Compile Include="ILReader\DynamicScopeTokenResolver.cs" />
-    <Compile Include="ILReader\FormatProvider.cs" />
-    <Compile Include="ILReader\ILInstruction.cs" />
-    <Compile Include="ILReader\ILProvider.cs" />
-    <Compile Include="ILReader\ILReader.cs" />
-    <Compile Include="ILReader\ILReaderFactory.cs" />
-    <Compile Include="ILReader\ReadableILStringVisitor.cs" />
-    <Compile Include="ILReader\TokenResolver.cs" />
     <Compile Include="Library\ArrayTests.cs" />
     <Compile Include="Core\FunctionBinderTests.cs" />
     <Compile Include="Library\JSONTests.cs" />
@@ -78,9 +69,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ActiveScriptEngine.cs" />
     <Compile Include="Library\MathTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ILReader\README.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jurassic\Jurassic.csproj">

@@ -9,7 +9,7 @@ namespace Performance
 
     public static class TestUtils
     {
-        public static void Benchmark(Action codeToTest)
+        public static void Benchmark(Action codeToTest, double previousResult = 0)
         {
             // Up the thread priority.
             var priorPriority = System.Threading.Thread.CurrentThread.Priority;
@@ -71,7 +71,8 @@ namespace Performance
                     Console.WriteLine("Test #{0}: {1:f1} milliseconds.", i + 1, elapsedTimes[i] * ticksToMilliseconds);
 
                 // Show the results in the unit test error message column.
-                throw new AssertInconclusiveException(string.Format("{0:f1} operations/sec (± {1:f1})", 1000.0 / average, (1000.0 / (average - min) - 1000.0 / (average + max)) / 2));
+                throw new AssertInconclusiveException(string.Format("{0:f1} operations/sec (± {1:f1}), was {2}",
+                    1000.0 / average, (1000.0 / (average - min) - 1000.0 / (average + max)) / 2, previousResult));
 
                 //if (testName != null)
                 //{
@@ -89,6 +90,28 @@ namespace Performance
                 // Revert the thread priority.
                 System.Threading.Thread.CurrentThread.Priority = priorPriority;
             }
+        }
+
+        public static void Benchmark(string code, double previousResult = 0)
+        {
+            // Parse the javascript code.
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            var context = new Jurassic.Compiler.GlobalContext(new System.IO.StringReader(code), null);
+            context.Parse();
+            Console.WriteLine("Parse: {0:n1}ms", timer.Elapsed.TotalMilliseconds);
+
+            // Optimize the code.
+            timer.Reset();
+            context.Optimize();
+            Console.WriteLine("Optimization: {0:n1}ms", timer.Elapsed.TotalMilliseconds);
+
+            // Compile the code.
+            timer.Reset();
+            context.GenerateCode();
+            Console.WriteLine("Code generation: {0:n1}ms", timer.Elapsed.TotalMilliseconds);
+
+            // Run the javascript code.
+            Benchmark(() => context.Execute(), previousResult);
         }
     }
 

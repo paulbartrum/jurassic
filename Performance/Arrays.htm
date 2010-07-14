@@ -36,6 +36,18 @@
                     ret.splice(0, 0, j);
             });
 
+            JSLitmus.test("Bitwise AND", function () {
+                var x = 0;
+                for (var i = 0; i < 600000; i++)
+                    x = x & i
+            });
+
+            JSLitmus.test("Modulo", function () {
+                var x = 0;
+                for (var i = 1; i < 600000; i++)
+                    x = x % i
+            });
+
 //            JSLitmus.test("Array Deconstruction, shift", function () {
 //                var a = ret.slice();
 //                for (var j = 0; j < i; j++)

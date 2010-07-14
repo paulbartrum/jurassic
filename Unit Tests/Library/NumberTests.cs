@@ -104,6 +104,7 @@ namespace UnitTests
             Assert.AreEqual("77", TestUtils.Evaluate("77.1234.toFixed()"));
             Assert.AreEqual("77.13", TestUtils.Evaluate("77.1274.toFixed(2)"));
             Assert.AreEqual("77.00", TestUtils.Evaluate("77 .toFixed(2)"));
+            Assert.AreEqual("0.1", TestUtils.Evaluate("(0.09).toFixed(1)"));
 
             // Negative tests.
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("num.toFixed(-1)"));

@@ -376,7 +376,25 @@ namespace Jurassic.Library
         [JSFunction(Name = "eval")]
         public static object Eval(string code)
         {
-            return Jurassic.Compiler.Parser.Eval(code);
+            var scope = Compiler.ObjectScope.CreateGlobalScope();
+            var evalContext = new Jurassic.Compiler.EvalContext(scope, scope.ScopeObject, code);
+            return evalContext.Execute();
+        }
+
+        /// <summary>
+        /// Evaluates the given javascript source code and returns the result.
+        /// </summary>
+        /// <param name="scope"> The containing scope. </param>
+        /// <param name="thisObject"> The value of the "this" keyword in the containing scope. </param>
+        /// <param name="code"> The source code to evaluate. </param>
+        /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
+        /// there were no executed statements. </returns>
+        internal static object Eval(Compiler.Scope scope, object thisObject, string code)
+        {
+            if (scope == null)
+                throw new ArgumentNullException("scope");
+            var evalContext = new Jurassic.Compiler.EvalContext(scope, thisObject, code);
+            return evalContext.Execute();
         }
 
         /// <summary>

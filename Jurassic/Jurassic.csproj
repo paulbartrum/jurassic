@@ -8,8 +8,8 @@
     <ProjectGuid>{2CE5502D-8710-4BE3-9D90-201D526904B3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Intrinsics</RootNamespace>
-    <AssemblyName>Intrinsics</AssemblyName>
+    <RootNamespace>Jurassic</RootNamespace>
+    <AssemblyName>Jurassic</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
@@ -25,7 +25,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,13 +34,66 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler\Parser\Context\EvalContext.cs" />
+    <Compile Include="Compiler\Parser\Context\FunctionContext.cs" />
+    <Compile Include="Compiler\Parser\Context\GlobalContext.cs" />
+    <Compile Include="Compiler\Parser\Context\ScriptContext.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILGenerator\ILGenerator.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILGenerator\ReflectionEmitILGenerator.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\DynamicILInfoTokenResolver.cs" />
+    <Compile Include="Compiler\Parser\Emit\OptimizationInfo.cs" />
+    <Compile Include="Compiler\Parser\Emit\EmitHelpers.cs" />
+    <Compile Include="Compiler\Parser\Expressions\ThisExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\FunctionExpression.cs" />
+    <Compile Include="Compiler\Parser\Scope\ObjectScope.cs" />
+    <Compile Include="Compiler\Parser\Scope\DeclarativeScope.cs" />
+    <Compile Include="Compiler\Parser\Scope\DeclaredVariable.cs" />
+    <Compile Include="Compiler\Parser\Scope\Scope.cs" />
+    <Compile Include="Compiler\Parser\Expressions\IReferenceExpression.cs" />
+    <Compile Include="Compiler\Parser\PrimitiveTypeUtilities.cs" />
+    <Compile Include="Compiler\Parser\PrimitiveType.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\ByteArrayILProvider.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\DynamicMethodILProvider.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\DynamicScopeTokenResolver.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\FormatProvider.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\ILInstruction.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\ILProvider.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\ILReader.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\ILReaderFactory.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\ReadableILStringVisitor.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILReader\TokenResolver.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILGenerator\ILLocalVariable.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILGenerator\ILLabel.cs" />
+    <Compile Include="Compiler\Parser\Emit\ILGenerator\DynamicILGenerator.cs" />
+    <Compile Include="Compiler\Parser\Emit\EmitConversion.cs" />
+    <Compile Include="Compiler\Parser\Expressions\NameExpression.cs" />
+    <Compile Include="Compiler\Parser\Statements\BlockStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\BreakStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\ContinueStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\ForInStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\SwitchStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\TryCatchFinallyStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\DebuggerStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\ThrowStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\WithStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\ReturnStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\WhileStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\DoWhileStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\IfStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\EmptyStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\VarStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\LoopStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\ExpressionStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\ForStatement.cs" />
+    <Compile Include="Compiler\Parser\Statements\Statement.cs" />
+    <Compile Include="Compiler\Parser\SourceCodeRange.cs" />
     <Compile Include="Library\JSON\JSONParser.cs" />
     <Compile Include="Library\JSON\JSONSerializer.cs" />
     <Compile Include="Library\JSON\JSONLexer.cs" />
@@ -48,7 +101,6 @@
     <Compile Include="Core\TypeUtilities.cs" />
     <Compile Include="Core\ReflectionHelpers.cs" />
     <Compile Include="Compiler\Lexer\IdentifierToken.cs" />
-    <Compile Include="Compiler\Lexer\JSLexer.Perf.cs" />
     <Compile Include="Compiler\Lexer\KeywordToken.cs" />
     <Compile Include="Compiler\Lexer\Lexer.cs" />
     <Compile Include="Compiler\Lexer\LiteralToken.cs" />
@@ -67,25 +119,22 @@
     <Compile Include="Library\Function\FunctionBinderMethod.cs" />
     <Compile Include="Library\Function\FunctionBinder.cs" />
     <Compile Include="Library\JSON\JSONObject.cs" />
+    <Compile Include="Library\Object\HiddenClassSchema.cs" />
     <Compile Include="Library\Object\PropertyAttributes.cs" />
     <Compile Include="Library\Object\PropertyNameAndValue.cs" />
-    <Compile Include="Compiler\Parser\ExpressionTreeHelpers.cs" />
-    <Compile Include="Compiler\Parser\LexicalScope.cs" />
-    <Compile Include="Compiler\Parser\IEnvironmentRecord.cs" />
-    <Compile Include="Compiler\Parser\FunctionContext.cs" />
-    <Compile Include="Compiler\Parser\Operators\BinaryJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\AssignmentJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\GroupingJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\NewJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\TernaryJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\ListJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\LiteralJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\FunctionCallJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\MemberJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\UnaryJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\JSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\OperatorJSExpression.cs" />
-    <Compile Include="Compiler\Parser\Operators\Operator.cs" />
+    <Compile Include="Compiler\Parser\Expressions\BinaryExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\AssignmentExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\GroupingExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\NewExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\TernaryExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\ListExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\LiteralExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\FunctionCallExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\MemberAccessExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\UnaryExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\Expression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\OperatorExpression.cs" />
+    <Compile Include="Compiler\Parser\Expressions\Operator.cs" />
     <Compile Include="Compiler\Parser\Parser.cs" />
     <Compile Include="Core\TypeComparer.cs" />
     <Compile Include="Core\Null.cs" />
@@ -113,7 +162,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Library\Object\Attributes.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Compiler\Parser\Emit\ILReader\README.txt" />
+    <Content Include="Compiler\Parser\Optimizations.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

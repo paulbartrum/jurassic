@@ -8,13 +8,16 @@ namespace Jurassic.Library
     /// <summary>
     /// Provides functionality common to all JavaScript objects.
     /// </summary>
-    public class ObjectInstance : Jurassic.Compiler.IEnvironmentRecord
+    public class ObjectInstance
     {
         // Internal prototype chain.
         private ObjectInstance prototype;
 
-        // Stores the properties of the object.
-        private Dictionary<string, PropertyDescriptor> properties;
+        // Stores the property names and attributes for this object.
+        private HiddenClassSchema schema = HiddenClassSchema.Empty;
+
+        // Stores the property values for this object.
+        private object[] propertyValues = new object[4];
 
         [Flags]
         private enum ObjectFlags
@@ -48,7 +51,6 @@ namespace Jurassic.Library
         /// </summary>
         private ObjectInstance()
         {
-            this.properties = new Dictionary<string, PropertyDescriptor>();
         }
 
         /// <summary>
@@ -60,7 +62,6 @@ namespace Jurassic.Library
             if (prototype == null)
                 throw new ArgumentNullException("prototype");
             this.prototype = prototype;
-            this.properties = new Dictionary<string, PropertyDescriptor>();
         }
 
         /// <summary>
@@ -180,9 +181,116 @@ namespace Jurassic.Library
             get
             {
                 // Enumerate named properties.
-                foreach (var keyValuePair in this.properties)
-                    yield return new PropertyNameAndValue(keyValuePair.Key, keyValuePair.Value);
+                return this.schema.EnumeratePropertyNamesAndValues(this.PropertyValues);
             }
+        }
+
+
+
+        //     INLINE CACHING
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets an object to use as a cache key.  Adding, deleting, or changing attributes will cause
+        /// the value of this property to change.
+        /// </summary>
+        public object CacheKey
+        {
+            get { return this.schema; }
+        }
+
+        /// <summary>
+        /// Gets the values stored against this object - one for each property.  The first element
+        /// is always "undefined".
+        /// </summary>
+        public object[] PropertyValues
+        {
+            get { return this.propertyValues; }
+        }
+
+        /// <summary>
+        /// Gets the value of the given property plus the information needed to speed up access to
+        /// the property in future.
+        /// </summary>
+        /// <param name="name"> The name of the property. </param>
+        /// <param name="index"> Set to a zero-based index that can be used to retrieve the
+        /// property value in future (provided the version number is equal to <paramref name="version"/>). </param>
+        /// <param name="version"> Set to the version of the class.  Can be <c>-1</c> to prohibit
+        /// caching. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        public object InlineGetPropertyValue(string name, out int index, out object cacheKey)
+        {
+            index = this.schema.GetPropertyIndex(name);
+            if (index < 0)
+            {
+                // The property is in the prototype or is non-existant.
+                cacheKey = null;
+                if (this.Prototype == null)
+                    return null;
+                return this.Prototype.Get(name);
+            }
+            cacheKey = this.CacheKey;
+            return this.PropertyValues[index];
+        }
+
+        /// <summary>
+        /// Sets the value of the given property plus retrieves the information needed to speed up
+        /// access to the property in future.
+        /// </summary>
+        /// <param name="name"> The name of the property. </param>
+        /// <param name="value"> The value of the property. </param>
+        /// <param name="index"> Set to a zero-based index that can be used to retrieve the
+        /// property value in future (provided the version number is equal to <paramref name="version"/>). </param>
+        /// <param name="version"> Set to the version of the class.  Can be <c>-1</c> to prohibit
+        /// caching. </param>
+        public void InlineSetPropertyValue(string name, object value, out int index, out object cacheKey)
+        {
+            index = this.schema.GetPropertyIndex(name);
+            if (index < 0)
+            {
+                // The property is in the prototype or doesn't exist - add a new property.
+                this.schema = this.schema.AddProperty(name);
+                index = this.schema.GetPropertyIndex(name);
+                if (index >= this.PropertyValues.Length)
+                {
+                    // Resize the value array.
+                    Array.Resize(ref this.propertyValues, this.PropertyValues.Length * 2);
+                }
+            }
+            cacheKey = this.CacheKey;
+            this.PropertyValues[index] = value;
+        }
+
+        /// <summary>
+        /// Sets the value of the given property plus retrieves the information needed to speed up
+        /// access to the property in future.
+        /// </summary>
+        /// <param name="name"> The name of the property. </param>
+        /// <param name="value"> The value of the property. </param>
+        /// <param name="index"> Set to a zero-based index that can be used to retrieve the
+        /// property value in future (provided the version number is equal to <paramref name="version"/>). </param>
+        /// <param name="version"> Set to the version of the class.  Can be <c>-1</c> to prohibit
+        /// caching. </param>
+        /// <returns> <c>true</c> if the property value exists; <c>false</c> otherwise. </returns>
+        public bool InlineSetPropertyValueIfExists(string name, object value, out int index, out object cacheKey)
+        {
+            index = this.schema.GetPropertyIndex(name);
+            if (index < 0)
+            {
+                // The property is in the prototype or is non-existant.
+                cacheKey = null;
+                if (this.Prototype == null)
+                    return false;
+                if (this.Prototype.HasProperty(name) == true)
+                {
+                    this.Prototype[name] = value;
+                    return true;
+                }
+                return false;
+            }
+            cacheKey = this.CacheKey;
+            this.PropertyValues[index] = value;
+            return true;
         }
 
 
@@ -191,21 +299,61 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Adds a property with the given name, value and attributes.  The property must not
-        /// already exist.
+        /// Sets a property value and attributes, or adds a new property if it doesn't already
+        /// exist.  Any existing attributes are overwritten.
         /// </summary>
         /// <param name="propertyName"> The name of the property. </param>
-        /// <param name="value"> The initial value of the property. </param>
+        /// <param name="value"> The intended value of the property. </param>
         /// <param name="attributes"> Attributes that indicate whether the property is writable,
         /// configurable and enumerable. </param>
         public void SetProperty(string propertyName, object value, PropertyAttributes attributes = PropertyAttributes.Sealed)
         {
-            var descriptor = new PropertyDescriptor(value, attributes);
-            this.properties[propertyName] = descriptor;
+            int index = this.schema.GetPropertyIndex(propertyName);
+            if (index < 0)
+            {
+                // The property is in the prototype or doesn't exist - add a new property.
+                this.schema = this.schema.AddProperty(propertyName, attributes);
+                index = this.schema.GetPropertyIndex(propertyName);
+                if (index >= this.PropertyValues.Length)
+                {
+                    // Resize the value array.
+                    Array.Resize(ref this.propertyValues, this.PropertyValues.Length * 2);
+                }
+            }
+            else
+                this.schema = this.schema.SetPropertyAttributes(propertyName, attributes);
+            this.PropertyValues[index] = value;
             if (attributes != PropertyAttributes.FullAccess)
                 this.IsFullyAccessible = false;
-            if (descriptor.IsAccessor == true)
-                this.HasAccessorProperty = true;
+        }
+
+        /// <summary>
+        /// Sets a property value, but only if the property exists.
+        /// </summary>
+        /// <param name="propertyName"> The name of the property. </param>
+        /// <param name="value"> The intended value of the property. </param>
+        /// <returns> <c>true</c> if the property value exists; <c>false</c> otherwise. </returns>
+        public bool SetPropertyIfExists(string propertyName, object value)
+        {
+            int index = this.schema.GetPropertyIndex(propertyName);
+            if (index < 0)
+            {
+                // The property is in the prototype or doesn't exist.
+                if (this.Prototype == null)
+                    return false;
+                if (this.Prototype.HasProperty(propertyName) == false)
+                    return false;
+                // Add a new property.
+                this.schema = this.schema.AddProperty(propertyName, PropertyAttributes.FullAccess);
+                index = this.schema.GetPropertyIndex(propertyName);
+                if (index >= this.PropertyValues.Length)
+                {
+                    // Resize the value array.
+                    Array.Resize(ref this.propertyValues, this.PropertyValues.Length * 2);
+                }
+            }
+            this.PropertyValues[index] = value;
+            return true;
         }
 
         /// <summary>
@@ -285,11 +433,11 @@ namespace Jurassic.Library
         /// result will be <c>PropertyDescriptor.Undefined</c> if the property doesn't exist. </returns>
         internal virtual PropertyDescriptor GetOwnProperty(string propertyName)
         {
-            // Query the dictionary.
-            PropertyDescriptor result;
-            if (this.properties.TryGetValue(propertyName, out result) == true)
-                return result;
-            return PropertyDescriptor.Undefined;
+            PropertyAttributes attributes;
+            int index = this.schema.GetPropertyIndexAndAttributes(propertyName, out attributes);
+            if (index == -1)
+                return PropertyDescriptor.Undefined;
+            return new PropertyDescriptor(this.propertyValues[index], attributes);
         }
 
         /// <summary>
@@ -446,7 +594,7 @@ namespace Jurassic.Library
                 }
 
                 // Add or modify the property.
-                this.properties[propertyName] = new PropertyDescriptor(value, PropertyAttributes.FullAccess);
+                this.SetProperty(propertyName, value, PropertyAttributes.FullAccess);
                 return;
             }
 
@@ -466,7 +614,7 @@ namespace Jurassic.Library
                 if (property.IsAccessor == false)
                 {
                     // The property contains a simple value.  Set the property value.
-                    this.properties[propertyName] = new PropertyDescriptor(value, property.Attributes);
+                    this.SetProperty(propertyName, value, property.Attributes);
                 }
                 else
                 {
@@ -506,8 +654,7 @@ namespace Jurassic.Library
             }
 
             // Create a new property.
-            property = new PropertyDescriptor(value, PropertyAttributes.FullAccess);
-            this.properties.Add(propertyName, property);
+            this.SetProperty(propertyName, value, PropertyAttributes.FullAccess);
         }
 
         /// <summary>
@@ -556,7 +703,7 @@ namespace Jurassic.Library
             }
 
             // Delete the property.
-            this.properties.Remove(propertyName);
+            this.schema = this.schema.DeleteProperty(propertyName);
             return true;
         }
 
@@ -585,7 +732,7 @@ namespace Jurassic.Library
                 }
 
                 // Create a new property.
-                this.properties.Add(propertyName, descriptor);
+                this.SetProperty(propertyName, descriptor.Value, descriptor.Attributes);
 
                 // If the property is not full access, set a flag to that effect.
                 if (descriptor.Attributes != PropertyAttributes.FullAccess)
@@ -614,7 +761,7 @@ namespace Jurassic.Library
             }
 
             // Set the property value and attributes.
-            this.properties[propertyName] = descriptor;
+            this.SetProperty(propertyName, descriptor.Value, descriptor.Attributes);
 
             // If the property is not full access, set a flag to that effect.
             if (descriptor.Attributes != PropertyAttributes.FullAccess)
@@ -712,7 +859,7 @@ namespace Jurassic.Library
         /// <c>false</c> otherwise. </returns>
         /// <remarks> Objects in the prototype chain are not considered. </remarks>
         [JSFunction(Name = "hasOwnProperty", Flags = FunctionBinderFlags.HasThisObject)]
-        public static bool hasOwnProperty(object thisObject, string propertyName)
+        public static bool HasOwnProperty(object thisObject, string propertyName)
         {
             return TypeConverter.ToObject(thisObject).GetOwnProperty(propertyName).Exists;
         }
@@ -786,67 +933,67 @@ namespace Jurassic.Library
 
 
 
-        //     IEnvironmentRecord IMPLEMENTATION
-        //_________________________________________________________________________________________
+        ////     IEnvironmentRecord IMPLEMENTATION
+        ////_________________________________________________________________________________________
 
-        /// <summary>
-        /// Determines if an environment record has a binding for an identifier.
-        /// </summary>
-        /// <param name="name"> The name of the identifier. </param>
-        /// <returns> <c>true</c> the binding exists; <c>false</c> if it does not. </returns>
-        bool Compiler.IEnvironmentRecord.HasBinding(string name)
-        {
-            return this.HasProperty(name);
-        }
+        ///// <summary>
+        ///// Determines if an environment record has a binding for an identifier.
+        ///// </summary>
+        ///// <param name="name"> The name of the identifier. </param>
+        ///// <returns> <c>true</c> the binding exists; <c>false</c> if it does not. </returns>
+        //bool Compiler.IEnvironmentRecord.HasBinding(string name)
+        //{
+        //    return this.HasProperty(name);
+        //}
 
-        /// <summary>
-        /// Creates a new mutable binding in the environment record.
-        /// </summary>
-        /// <param name="name"> The name of the identifier. </param>
-        /// <param name="mayBeDeleted"> <c>true</c> if the binding can be deleted; <c>false</c>
-        /// otherwise. </param>
-        void Compiler.IEnvironmentRecord.CreateMutableBinding(string name, bool mayBeDeleted)
-        {
-            throw new NotSupportedException();
-        }
+        ///// <summary>
+        ///// Creates a new mutable binding in the environment record.
+        ///// </summary>
+        ///// <param name="name"> The name of the identifier. </param>
+        ///// <param name="mayBeDeleted"> <c>true</c> if the binding can be deleted; <c>false</c>
+        ///// otherwise. </param>
+        //void Compiler.IEnvironmentRecord.CreateMutableBinding(string name, bool mayBeDeleted)
+        //{
+        //    throw new NotSupportedException();
+        //}
 
-        /// <summary>
-        /// Sets the value of an already existing mutable binding in the environment record.
-        /// </summary>
-        /// <param name="name"> The name of the identifier. </param>
-        /// <param name="value"> The new value of the binding. </param>
-        /// <param name="strict"> Indicates whether to use strict mode semantics. </param>
-        /// <returns> The new value of the binding. </returns>
-        T Compiler.IEnvironmentRecord.SetMutableBinding<T>(string name, T value, bool strict)
-        {
-            this.Put(name, value, strict);
-            return value;
-        }
+        ///// <summary>
+        ///// Sets the value of an already existing mutable binding in the environment record.
+        ///// </summary>
+        ///// <param name="name"> The name of the identifier. </param>
+        ///// <param name="value"> The new value of the binding. </param>
+        ///// <param name="strict"> Indicates whether to use strict mode semantics. </param>
+        ///// <returns> The new value of the binding. </returns>
+        //T Compiler.IEnvironmentRecord.SetMutableBinding<T>(string name, T value, bool strict)
+        //{
+        //    this.Put(name, value, strict);
+        //    return value;
+        //}
 
-        /// <summary>
-        /// Returns the value of an already existing binding from the environment record.
-        /// </summary>
-        /// <param name="name"> The name of the identifier. </param>
-        /// <param name="strict"> Indicates whether to use strict mode semantics. </param>
-        /// <returns> The value of the binding. </returns>
-        object Compiler.IEnvironmentRecord.GetBindingValue(string name, bool strict)
-        {
-            object result = this.Get(name);
-            if (result == null && strict == true)
-                throw new JavaScriptException("ReferenceError", name + " is not defined");
-            return result;
-        }
+        ///// <summary>
+        ///// Returns the value of an already existing binding from the environment record.
+        ///// </summary>
+        ///// <param name="name"> The name of the identifier. </param>
+        ///// <param name="strict"> Indicates whether to use strict mode semantics. </param>
+        ///// <returns> The value of the binding. </returns>
+        //object Compiler.IEnvironmentRecord.GetBindingValue(string name, bool strict)
+        //{
+        //    object result = this.Get(name);
+        //    if (result == null && strict == true)
+        //        throw new JavaScriptException("ReferenceError", name + " is not defined");
+        //    return result;
+        //}
 
-        /// <summary>
-        /// Deletes a binding from the environment record.
-        /// </summary>
-        /// <param name="name"> The name of the identifier. </param>
-        /// <returns> <c>true</c> if the binding exists and could be deleted, or if the binding
-        /// doesn't exist; <c>false</c> if the binding couldn't be deleted. </returns>
-        bool Compiler.IEnvironmentRecord.DeleteBinding(string name)
-        {
-            return this.Delete(name, false);
-        }
+        ///// <summary>
+        ///// Deletes a binding from the environment record.
+        ///// </summary>
+        ///// <param name="name"> The name of the identifier. </param>
+        ///// <returns> <c>true</c> if the binding exists and could be deleted, or if the binding
+        ///// doesn't exist; <c>false</c> if the binding couldn't be deleted. </returns>
+        //bool Compiler.IEnvironmentRecord.DeleteBinding(string name)
+        //{
+        //    return this.Delete(name, false);
+        //}
 
 
         //     ATTRIBUTE-BASED PROTOTYPE POPULATION
