@@ -710,7 +710,7 @@ namespace Jurassic.Compiler
             }
 
             // Create a new literal token.
-            return new LiteralToken(Library.GlobalObject.RegExp.Construct(body.ToString(), flags.ToString()));
+            return new LiteralToken(new RegularExpressionLiteral(body.ToString(), flags.ToString()));
         }
 
         /// <summary>

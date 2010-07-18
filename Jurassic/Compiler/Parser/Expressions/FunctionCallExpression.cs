@@ -40,6 +40,13 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Check if this is a direct call to eval().
+            if (this.Target is NameExpression && ((NameExpression)this.Target).Name == "eval")
+            {
+                GenerateEval(generator, optimizationInfo);
+                return;
+            }
+
             // Emit the function instance first.
             this.Target.GenerateCode(generator, optimizationInfo);
             EmitConversion.ToAny(generator, this.Target.ResultType);
@@ -140,6 +147,38 @@ namespace Jurassic.Compiler
                     generator.StoreArrayElement(typeof(object));
                 }
             }
+        }
+
+        /// <summary>
+        /// Generates CIL for a call to eval().
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        private void GenerateEval(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            // scope
+            generator.LoadArgument(0);
+
+            // thisObject
+            generator.LoadArgument(1);
+
+            // code
+            if (this.OperandCount < 2)
+            {
+                // No arguments were supplied.
+                generator.LoadNull();
+            }
+            else
+            {
+                // Take the first argument and convert it to a string.
+                GenerateArgumentsArray(generator, optimizationInfo);
+                generator.LoadInt32(0);
+                generator.LoadArrayElement(typeof(object));
+                EmitConversion.ToString(generator, PrimitiveType.Any);
+            }
+
+            // Call Global.Eval(scope, thisValue, code)
+            generator.Call(ReflectionHelpers.Global_Eval);
         }
     }
 

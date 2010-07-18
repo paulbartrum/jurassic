@@ -1021,14 +1021,7 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.LeftBrace);
 
             // Create a new scope and assign variables within the with statement to the scope.
-            var scope = this.currentScope = DeclarativeScope.CreateFunctionScope(this.currentScope);
-
-            // Declare the function name, "this" and the argument names as variables within the function scope.
-            if (string.IsNullOrEmpty(functionName) == false)
-                scope.DeclareVariable(functionName);
-            scope.DeclareVariable("this");
-            foreach (var argumentName in argumentNames)
-                scope.DeclareVariable(argumentName);
+            var scope = this.currentScope = DeclarativeScope.CreateFunctionScope(this.currentScope, functionName, argumentNames);
 
             // The parser needs to know whether it is inside a function.
             bool original = this.insideFunction;

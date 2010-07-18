@@ -26,9 +26,20 @@ namespace Jurassic.Compiler
         /// <param name="parentScope"> A reference to the parent scope, or <c>null</c> if this is
         /// the global scope. </param>
         protected Scope(Scope parentScope)
+            : this(parentScope, 0)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new Scope instance.
+        /// </summary>
+        /// <param name="parentScope"> A reference to the parent scope, or <c>null</c> if this is
+        /// the global scope. </param>
+        /// <param name="declaredVariableCount"> The number of variables declared in this scope. </param>
+        protected Scope(Scope parentScope, int declaredVariableCount)
         {
             this.ParentScope = parentScope;
-            this.variables = new Dictionary<string, DeclaredVariable>();
+            this.variables = new Dictionary<string, DeclaredVariable>(declaredVariableCount);
         }
 
         /// <summary>
@@ -46,6 +57,23 @@ namespace Jurassic.Compiler
         internal int DeclaredVariableCount
         {
             get { return this.variables.Count; }
+        }
+
+        /// <summary>
+        /// Gets an enumerable list of the names of all the declared variables (including function
+        /// declarations), listed in the order they were declared.
+        /// </summary>
+        internal IEnumerable<string> DeclaredVariableNames
+        {
+            get
+            {
+                var declaredVariables = new List<DeclaredVariable>(this.variables.Values);
+                declaredVariables.Sort((a, b) => a.Index - b.Index);
+                var names = new string[declaredVariables.Count];
+                for (int i = 0; i < declaredVariables.Count; i++)
+                    names[i] = declaredVariables[i].Name;
+                return names;
+            }
         }
 
         /// <summary>

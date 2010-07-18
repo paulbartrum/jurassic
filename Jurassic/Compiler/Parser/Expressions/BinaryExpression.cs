@@ -61,7 +61,9 @@ namespace Jurassic.Compiler
                         {
                             var lhs = this.Left.ResultType;
                             var rhs = this.Right.ResultType;
-                            if (lhs == PrimitiveType.String || rhs == PrimitiveType.String)
+                            if (lhs == PrimitiveType.String || lhs == PrimitiveType.ConcatenatedString ||
+                                rhs == PrimitiveType.String || rhs == PrimitiveType.ConcatenatedString)
+                                //return PrimitiveType.ConcatenatedString;
                                 return PrimitiveType.String;
                             if (lhs == PrimitiveType.Any || lhs == PrimitiveType.Object ||
                                 rhs == PrimitiveType.Any || rhs == PrimitiveType.Object)
@@ -322,17 +324,20 @@ namespace Jurassic.Compiler
 
             // The add operator adds two strings together if at least one of the operands
             // is a string, otherwise it adds two numbers.
-            if (leftType == PrimitiveType.String || rightType == PrimitiveType.String)
+            if (PrimitiveTypeUtilities.IsString(leftType) || PrimitiveTypeUtilities.IsString(rightType))
             {
                 // One or both of the operands are strings.
 
-                // Load the left hand side onto the stack.
+                // Load the left-hand side onto the stack.
                 this.Left.GenerateCode(generator, optimizationInfo);
+
+                // Convert the operand to a concatenated string.
+                //EmitConversion.ToConcatenatedString(generator, leftType);
 
                 // Convert the operand to a string.
                 EmitConversion.ToString(generator, leftType);
 
-                // Load the right hand side onto the stack.
+                // Load the right-hand side onto the stack.
                 this.Right.GenerateCode(generator, optimizationInfo);
 
                 // Convert the operand to a string.
@@ -340,6 +345,17 @@ namespace Jurassic.Compiler
 
                 // Concatenate the two strings.
                 generator.Call(ReflectionHelpers.String_Concat);
+
+                //if (rightType == PrimitiveType.String)
+                //{
+                //    // Concatenate the two strings using ConcatenatedString.Append(string).
+                //    generator.Call(ReflectionHelpers.ConcatenatedString_Append_String);
+                //}
+                //else
+                //{
+                //    // Concatenate the two strings using ConcatenatedString.Append(ConcatenatedString).
+                //    generator.Call(ReflectionHelpers.ConcatenatedString_Append_ConcatenatedString);
+                //}
             }
             else if (leftType != PrimitiveType.Any && leftType != PrimitiveType.Object &&
                 rightType != PrimitiveType.Any && rightType != PrimitiveType.Object)

@@ -85,7 +85,7 @@ namespace Jurassic.Compiler
             if (this.BodyRoot != null)
                 return this.BodyRoot;
             var lexer = new Lexer(new System.IO.StringReader(this.BodyText), this.Path);
-            var parser = new Parser(lexer, this.InitialScope, false);
+            var parser = new Parser(lexer, this.InitialScope, true);
             return parser.Parse();
         }
 
@@ -132,6 +132,22 @@ namespace Jurassic.Compiler
                 var functionName = new NameExpression(this.InitialScope, this.Name);
                 functionName.GenerateSet(generator, OptimizationInfo.Empty, PrimitiveType.Any, false);
             }
+
+            // Transfer the arguments object into the scope.
+            // prototype
+            generator.Call(ReflectionHelpers.Global_Object);
+            generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
+            // callee
+            generator.LoadArgument(2);
+            generator.CastClass(typeof(Library.UserDefinedFunction));
+            // scope
+            generator.LoadArgument(0);
+            generator.CastClass(typeof(DeclarativeScope));
+            // argumentValues
+            generator.LoadArgument(3);
+            generator.NewObject(ReflectionHelpers.Arguments_Constructor);
+            var arguments = new NameExpression(this.InitialScope, "arguments");
+            arguments.GenerateSet(generator, OptimizationInfo.Empty, PrimitiveType.Any, false);
 
             // Transfer the arguments into the scope.
             // Note: the arguments array can be smaller than expected.

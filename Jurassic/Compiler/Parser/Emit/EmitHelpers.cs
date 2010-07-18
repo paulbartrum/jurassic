@@ -53,6 +53,7 @@ namespace Jurassic.Compiler
                 case PrimitiveType.Any:
                 case PrimitiveType.Object:
                 case PrimitiveType.String:
+                case PrimitiveType.ConcatenatedString:
                     generator.LoadNull();
                     break;
                 default:

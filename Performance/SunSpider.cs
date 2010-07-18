@@ -173,7 +173,7 @@ namespace Performance
         [TestMethod]
         public void string_validate_input()
         {
-            RunTest(@"string-validate-input.js", 5343.1);
+            RunTest(@"string-validate-input.js", 5343.1);   // 4500-6000
         }
 
         [TestMethod]

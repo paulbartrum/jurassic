@@ -118,7 +118,7 @@ namespace Jurassic.Compiler
 
 
 
-        //     SCRIPT CONTEXT
+        //     VARIABLES
         //_________________________________________________________________________________________
 
         /// <summary>
@@ -129,6 +129,36 @@ namespace Jurassic.Compiler
         {
             get;
             set;
+        }
+
+        private Dictionary<RegularExpressionLiteral, ILLocalVariable> regularExpressionVariables;
+
+        /// <summary>
+        /// Retrieves a variable that can be used to store a shared instance of a regular
+        /// expression.
+        /// </summary>
+        /// <param name="generator"> The IL generator used to create the variable. </param>
+        /// <param name="literal"> The regular expression literal. </param>
+        /// <returns> A varaible that can be used to store a shared instance of a regular
+        /// expression. </returns>
+        public ILLocalVariable GetRegExpVariable(ILGenerator generator, RegularExpressionLiteral literal)
+        {
+            if (literal == null)
+                throw new ArgumentNullException("literal");
+
+            // Create a new Dictionary if it hasn't been created before.
+            if (this.regularExpressionVariables == null)
+                this.regularExpressionVariables = new Dictionary<RegularExpressionLiteral, ILLocalVariable>();
+
+            // Check if the literal already exists in the dictionary.
+            ILLocalVariable variable;
+            if (this.regularExpressionVariables.TryGetValue(literal, out variable) == false)
+            {
+                // The literal does not exist - add it.
+                variable = generator.DeclareVariable(typeof(Library.RegExpInstance));
+                this.regularExpressionVariables.Add(literal, variable);
+            }
+            return variable;
         }
 
 

@@ -314,6 +314,11 @@ namespace UnitTests
 
             // NaN
             Assert.AreEqual(false, TestUtils.Evaluate("NaN == NaN"));
+
+            // Variables
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x == 10"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x.valueOf() == 10"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); 10 == x.valueOf()"));
         }
 
         [TestMethod]
@@ -355,6 +360,7 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("false === true"));
             Assert.AreEqual(true, TestUtils.Evaluate("false === false"));
             Assert.AreEqual(true, TestUtils.Evaluate("10 === 10"));
+            Assert.AreEqual(true, TestUtils.Evaluate("10.0 === 10"));
             Assert.AreEqual(false, TestUtils.Evaluate("10 === 11"));
             Assert.AreEqual(true, TestUtils.Evaluate("'test' === 'test'"));
             Assert.AreEqual(false, TestUtils.Evaluate("'test' === 'TEST'"));
@@ -378,6 +384,11 @@ namespace UnitTests
 
             // NaN
             Assert.AreEqual(false, TestUtils.Evaluate("NaN === NaN"));
+
+            // Variables
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10.0); x === 10"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x.valueOf() === 10"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); 10 === x.valueOf()"));
         }
 
         [TestMethod]
@@ -1109,6 +1120,7 @@ namespace UnitTests
             Assert.AreEqual(5, TestUtils.Evaluate("x = { a: 234 }; with (x) { var a = 5; } x.a"));
             Assert.AreEqual(0, TestUtils.Evaluate("a = 0; x = { a: 234 }; with (x) { var a = 5; } a"));
             Assert.AreEqual(5, TestUtils.Evaluate("b = 0; x = { a: 234 }; with (x) { var b = 5; } b"));
+            Assert.AreEqual(4, TestUtils.Evaluate("foo = {x: 4}; with (foo) { var x; x }"));
 
             // With and prototype chains.
             Assert.AreEqual(10, TestUtils.Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } x.b"));
@@ -1138,7 +1150,7 @@ namespace UnitTests
             Assert.AreEqual("Error", TestUtils.EvaluateExceptionType("throw new Error('test')"));
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void TryCatchFinally()
         {
             Assert.AreEqual(5, TestUtils.Evaluate("try { throw 5 } catch (e) { e }"));
@@ -1168,6 +1180,8 @@ namespace UnitTests
 
             // Closures.
             Assert.AreEqual(7, TestUtils.Evaluate("function f(a, b, c) { return f2(a + 1); function f2(d) { return d + b + c; } } f(1, 2, 3)"));
+            Assert.AreEqual(11, TestUtils.Evaluate("function makeAdder(a) { return function(b) { return a + b; } } x = makeAdder(5); x(6)"));
+            Assert.AreEqual(27, TestUtils.Evaluate("function makeAdder(a) { return function(b) { return a + b; } } y = makeAdder(20); y(7)"));
 
             // Function expressions.
             Assert.AreEqual(3, TestUtils.Evaluate("var f = function () { return 3; }; f()"));
@@ -1181,9 +1195,12 @@ namespace UnitTests
             // The function name is defined in the function scope.
             Assert.AreEqual(24, TestUtils.Evaluate("var fact='test'; Math.factorial = function fact(n) {return n<=1?1:n*fact(n-1)}; Math.factorial(4)"));
 
-            // Argument names override the function name.
+            // Argument names override the function name and 'arguments'.
             Assert.AreEqual(5, TestUtils.Evaluate("(function test(test) { return test; })(5)"));
             Assert.AreEqual(5, TestUtils.Evaluate("function test(test) { return test; } test(5)"));
+            Assert.AreEqual(5, TestUtils.Evaluate("(function f(arguments) { return arguments })(5)"));
+            Assert.AreEqual(5, TestUtils.Evaluate("(function f(a) { arguments = 5; return arguments })(5)"));
+            Assert.AreEqual("[object Arguments]", TestUtils.Evaluate("function arguments() { return arguments } arguments().toString()"));
         }
 
         [TestMethod]

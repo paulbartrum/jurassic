@@ -147,11 +147,6 @@ namespace Jurassic.Library
 
         public override object CallLateBound(object thisObject, params object[] arguments)
         {
-            // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
-            if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
-                thisObject = GlobalObject.Instance;
-            else
-                thisObject = TypeConverter.ToObject(thisObject);
             return this.callBinder.Call(bindThis == true ? this : thisObject, arguments);
         }
 

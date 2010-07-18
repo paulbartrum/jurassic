@@ -27,18 +27,40 @@ namespace Jurassic.Library
         /// g (global search for all occurrences of pattern)
         /// i (ignore case)
         /// m (multiline search)</param>
-        public RegExpInstance(ObjectInstance prototype, string pattern, string flags = null)
+        internal RegExpInstance(ObjectInstance prototype, string pattern, string flags = null)
             : base(prototype)
         {
             if (pattern == null)
                 throw new ArgumentNullException("pattern");
             this.value = new Regex(pattern, ParseFlags(flags));
 
-            // Add the javascript properties.
+            // Initialize the javascript properties.
             this.SetProperty("source", pattern);
             this.SetProperty("global", this.Global);
             this.SetProperty("multiline", this.Multiline);
             this.SetProperty("ignoreCase", this.IgnoreCase);
+            this.SetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+        }
+
+        /// <summary>
+        /// Creates a new regular expression instance by copying the pattern and flags from another
+        /// RegExp instance.
+        /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        /// <param name="existingInstance"> The instance to copy the pattern and flags from. </param>
+        internal RegExpInstance(ObjectInstance prototype, RegExpInstance existingInstance)
+            : base(prototype)
+        {
+            if (existingInstance == null)
+                throw new ArgumentNullException("existingInstance");
+            this.value = existingInstance.value;
+            this.globalSearch = existingInstance.globalSearch;
+
+            // Initialize the javascript properties.
+            this.SetProperty("source", existingInstance.Source);
+            this.SetProperty("global", existingInstance.Global);
+            this.SetProperty("multiline", existingInstance.Multiline);
+            this.SetProperty("ignoreCase", existingInstance.IgnoreCase);
             this.SetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
         }
 
