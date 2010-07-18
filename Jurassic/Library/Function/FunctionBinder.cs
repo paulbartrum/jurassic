@@ -630,10 +630,16 @@ namespace Jurassic.Library
                 // &&
                 il.Emit(OpCodes.Ceq);
             }
-            else if (fromType == typeof(string))
+            else if (fromType == typeof(string) || fromType == typeof(ConcatenatedString))
             {
-                // Easy case: convert from double.
+                // Easy case: convert from string or StringBuilder.
                 // output = input != null && input.Length > 0
+
+                if (fromType == typeof(ConcatenatedString))
+                {
+                    // Convert to a string first.
+                    il.Emit(OpCodes.Callvirt, ReflectionHelpers.ConcatenatedString_ToString);
+                }
 
                 // input != null
                 var temp = il.DeclareLocal(fromType);   // }

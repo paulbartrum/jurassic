@@ -398,6 +398,10 @@ namespace UnitTests
 
             // Global regex replacement (replaces all matches).
             Assert.AreEqual("A ew!ng ew!ring for teew!ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, 'ew!')"));
+            Assert.AreEqual("[{ ]@ ], ]@ ] }]", TestUtils.Evaluate(@"
+                '[{ \""tag\"": ""titillation"", \""popularity\"": 4294967296 }]'.
+                replace(/""[^""\\\n\r]*""|true|false|null|-?\d+(?:\.\d*)?(:?[eE][+\-]?\d+)?/g, ']').
+                replace(/:/g, '@')"));
 
             // Replacement patterns.
             Assert.AreEqual("A $ng $ring for te$ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, '$$')"));

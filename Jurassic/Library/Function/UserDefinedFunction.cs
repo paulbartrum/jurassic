@@ -27,12 +27,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             // Set up a new function scope.
-            var scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope());
-            if (string.IsNullOrEmpty(name) == false)
-                scope.DeclareVariable(name);
-            scope.DeclareVariable("this");
-            foreach (var argumentName in argumentNames)
-                scope.DeclareVariable(argumentName);
+            var scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(), name, argumentNames);
 
             // Compile the code.
             var context = new FunctionContext(scope, name, argumentNames, body, "[user function]");

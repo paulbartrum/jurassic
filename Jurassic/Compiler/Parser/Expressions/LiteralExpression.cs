@@ -42,6 +42,10 @@ namespace Jurassic.Compiler
                 if (this.Value is Dictionary<string, Expression>)
                     return PrimitiveType.Object;
 
+                // RegExp literal.
+                if (this.Value is RegularExpressionLiteral)
+                    return PrimitiveType.Object;
+
                 // Everything else.
                 return PrimitiveTypeUtilities.ToPrimitiveType(this.Value.GetType());
             }
@@ -67,13 +71,38 @@ namespace Jurassic.Compiler
                 generator.LoadString((string)this.Value);
             else if (this.Value is bool)
                 generator.LoadBoolean((bool)this.Value);
-            else if (this.Value is Library.RegExpInstance)
+            else if (this.Value is RegularExpressionLiteral)
             {
                 // RegExp
+                var sharedRegExpVariable = optimizationInfo.GetRegExpVariable(generator, (RegularExpressionLiteral)this.Value);
+                var label1 = generator.CreateLabel();
+                var label2 = generator.CreateLabel();
+
+                // if (sharedRegExp == null) {
+                generator.LoadVariable(sharedRegExpVariable);
+                generator.LoadNull();
+                generator.BranchIfNotEqual(label1);
+
+                // sharedRegExp = Global.RegExp.Construct(source, flags)
                 generator.Call(ReflectionHelpers.Global_RegExp);
-                generator.LoadString(((Library.RegExpInstance)this.Value).Source);
-                generator.LoadString(((Library.RegExpInstance)this.Value).Flags);
-                generator.Call(ReflectionHelpers.RegExp_Construct);
+                generator.LoadString(((RegularExpressionLiteral)this.Value).Pattern);
+                generator.LoadString(((RegularExpressionLiteral)this.Value).Flags);
+                generator.Call(ReflectionHelpers.RegExp_Construct1);
+                generator.Duplicate();
+                generator.StoreVariable(sharedRegExpVariable);
+
+                // } else {
+                generator.Branch(label2);
+                generator.DefineLabelPosition(label1);
+
+                // Global.RegExp.Construct(sharedRegExp, flags)
+                generator.Call(ReflectionHelpers.Global_RegExp);
+                generator.LoadVariable(sharedRegExpVariable);
+                generator.LoadNull();
+                generator.Call(ReflectionHelpers.RegExp_Construct2);
+
+                // }
+                generator.DefineLabelPosition(label2);
             }
             else if (this.Value == Null.Value)
             {

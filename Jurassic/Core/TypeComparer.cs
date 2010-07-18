@@ -42,6 +42,10 @@ namespace Jurassic
         {
             x = x ?? Undefined.Value;
             y = y ?? Undefined.Value;
+            if (x is int)
+                x = (double)(int)x;
+            if (y is int)
+                y = (double)(int)y;
             if (x is double && double.IsNaN((double)x) == true)
                 return false;
             return object.Equals(x, y);
@@ -58,25 +62,28 @@ namespace Jurassic
         /// <c>false</c> otherwise. </returns>
         public static bool LessThan(object x, object y, bool leftFirst)
         {
-            object x2, y2;
             if (leftFirst == true)
             {
-                x2 = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
-                y2 = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
+                x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
+                y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
             }
             else
             {
-                y2 = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
-                x2 = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
+                y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
+                x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             }
 
-            if (x2 is string && y is string)
+            if ((x is string || x is ConcatenatedString) && (y is string || y is ConcatenatedString))
             {
-                return string.CompareOrdinal((string)x2, (string)y2) < 0;
+                if (x is ConcatenatedString)
+                    x = ((ConcatenatedString)x).ToString();
+                if (y is ConcatenatedString)
+                    y = ((ConcatenatedString)y).ToString();
+                return string.CompareOrdinal((string)x, (string)y) < 0;
             }
             else
             {
-                return TypeConverter.ToNumber(x2) < TypeConverter.ToNumber(y2);
+                return TypeConverter.ToNumber(x) < TypeConverter.ToNumber(y);
             }
         }
 
@@ -91,25 +98,28 @@ namespace Jurassic
         /// <paramref name="y"/>; <c>false</c> otherwise. </returns>
         public static bool LessThanOrEqual(object x, object y, bool leftFirst)
         {
-            object x2, y2;
             if (leftFirst == true)
             {
-                x2 = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
-                y2 = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
+                x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
+                y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
             }
             else
             {
-                y2 = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
-                x2 = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
+                y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
+                x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             }
 
-            if (x2 is string && y is string)
+            if ((x is string || x is ConcatenatedString) && (y is string || y is ConcatenatedString))
             {
-                return string.CompareOrdinal((string)x2, (string)y2) <= 0;
+                if (x is ConcatenatedString)
+                    x = ((ConcatenatedString)x).ToString();
+                if (y is ConcatenatedString)
+                    y = ((ConcatenatedString)y).ToString();
+                return string.CompareOrdinal((string)x, (string)y) <= 0;
             }
             else
             {
-                return TypeConverter.ToNumber(x2) <= TypeConverter.ToNumber(y2);
+                return TypeConverter.ToNumber(x) <= TypeConverter.ToNumber(y);
             }
         }
     }

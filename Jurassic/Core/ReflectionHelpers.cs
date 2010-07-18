@@ -43,11 +43,18 @@ namespace Jurassic
         internal static MethodInfo Global_RegExp;
         internal static MethodInfo Global_Array;
         internal static MethodInfo Global_Object;
+        internal static MethodInfo Global_Eval;
 
         internal static MethodInfo String_Concat;
         internal static MethodInfo String_Length;
         internal static MethodInfo String_CompareOrdinal;
         internal static MethodInfo String_Format;
+
+        internal static ConstructorInfo ConcatenatedString_Constructor;
+        internal static MethodInfo ConcatenatedString_Append_String;
+        internal static MethodInfo ConcatenatedString_Append_ConcatenatedString;
+        internal static MethodInfo ConcatenatedString_Length;
+        internal static MethodInfo ConcatenatedString_ToString;
 
         internal static MethodInfo IEnumerable_GetEnumerator;
         internal static MethodInfo IEnumerator_MoveNext;
@@ -58,7 +65,8 @@ namespace Jurassic
         internal static MethodInfo Boolean_Construct;
         internal static MethodInfo Object_Construct;
         
-        internal static MethodInfo RegExp_Construct;
+        internal static MethodInfo RegExp_Construct1;
+        internal static MethodInfo RegExp_Construct2;
         internal static MethodInfo Array_New;
         internal static MethodInfo Delegate_CreateDelegate;
         internal static MethodInfo Type_GetTypeFromHandle;
@@ -87,6 +95,7 @@ namespace Jurassic
         internal static ConstructorInfo JavaScriptException_Constructor3;
         internal static ConstructorInfo UserDefinedFunction_Constructor;
         internal static ConstructorInfo FunctionDelegate_Constructor;
+        internal static ConstructorInfo Arguments_Constructor;
 
         internal static FieldInfo Undefined_Value;
         internal static FieldInfo Null_Value;
@@ -133,7 +142,7 @@ namespace Jurassic
             Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
             ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance));
             ObjectScope_ScopeObject = GetInstanceMethod(typeof(ObjectScope), "get_ScopeObject");
-            DeclarativeScope_CreateRuntimeScope = GetStaticMethod(typeof(DeclarativeScope), "CreateRuntimeScope", typeof(Scope), typeof(int));
+            DeclarativeScope_CreateRuntimeScope = GetStaticMethod(typeof(DeclarativeScope), "CreateRuntimeScope", typeof(Scope), typeof(string[]));
             DeclarativeScope_Values = GetInstanceMethod(typeof(DeclarativeScope), "get_Values");
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));
@@ -147,11 +156,18 @@ namespace Jurassic
             Global_RegExp = GetStaticMethod(typeof(GlobalObject), "get_RegExp");
             Global_Array = GetStaticMethod(typeof(GlobalObject), "get_Array");
             Global_Object = GetStaticMethod(typeof(GlobalObject), "get_Object");
+            Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(Scope), typeof(object), typeof(string));
 
             String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
             String_CompareOrdinal = GetStaticMethod(typeof(string), "CompareOrdinal", typeof(string), typeof(string));
             String_Format = GetStaticMethod(typeof(string), "Format", typeof(string), typeof(object[]));
+
+            ConcatenatedString_Constructor = GetConstructor(typeof(ConcatenatedString), typeof(string));
+            ConcatenatedString_Append_String = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(string));
+            ConcatenatedString_Append_ConcatenatedString = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(ConcatenatedString));
+            ConcatenatedString_Length = GetInstanceMethod(typeof(ConcatenatedString), "get_Length");
+            ConcatenatedString_ToString = GetInstanceMethod(typeof(ConcatenatedString), "ToString");
 
             JavaScriptException_Constructor2 = GetConstructor(typeof(JavaScriptException), typeof(string), typeof(string));
             JavaScriptException_Constructor3 = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string));
@@ -162,7 +178,8 @@ namespace Jurassic
             JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));
             
-            RegExp_Construct = GetInstanceMethod(typeof(Jurassic.Library.RegExpConstructor), "Construct", typeof(string), typeof(string));
+            RegExp_Construct1 = GetInstanceMethod(typeof(Jurassic.Library.RegExpConstructor), "Construct", typeof(string), typeof(string));
+            RegExp_Construct2 = GetInstanceMethod(typeof(Jurassic.Library.RegExpConstructor), "Construct", typeof(RegExpInstance), typeof(string));
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
             UserDefinedFunction_Constructor = GetConstructor(typeof(UserDefinedFunction), typeof(ObjectInstance),
@@ -171,6 +188,7 @@ namespace Jurassic
             Type_GetTypeFromHandle = GetStaticMethod(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
             FunctionDelegate_Constructor = GetConstructor(typeof(Library.FunctionDelegate), typeof(object), typeof(IntPtr));
+            Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

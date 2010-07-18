@@ -89,8 +89,7 @@ namespace Jurassic.Library
         {
             if (flags != null)
                 throw new JavaScriptException("TypeError", "Cannot supply flags when constructing one RegExp from another");
-            return new RegExpInstance(this.InstancePrototype, regExp.Source, regExp.Flags);
+            return new RegExpInstance(this.InstancePrototype, regExp);
         }
-
     }
 }

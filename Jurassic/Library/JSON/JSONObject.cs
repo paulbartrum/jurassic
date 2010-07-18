@@ -87,8 +87,10 @@ namespace Jurassic.Library
                 spacer = ((NumberInstance)spacer).Value;
             else if (spacer is StringInstance)
                 spacer = ((StringInstance)spacer).Value;
-            if (spacer is double || spacer is int)
+            if (spacer is double)
                 serializer.Indentation = new string(' ', Math.Max(Math.Min(TypeConverter.ToInteger((double)spacer), 10), 0));
+            else if (spacer is int)
+                serializer.Indentation = new string(' ', Math.Max(Math.Min(TypeConverter.ToInteger((int)spacer), 10), 0));
             else if (spacer is string)
                 serializer.Indentation = ((string)spacer).Substring(0, Math.Min(((string)spacer).Length, 10));
 

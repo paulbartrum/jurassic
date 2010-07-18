@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -8,15 +9,28 @@ namespace Jurassic.Compiler
     public class DeclarativeScope : Scope
     {
         /// <summary>
-        /// Creates a new declarative scope for use inside a method body.
+        /// Creates a new declarative scope for use inside a function body.
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
+        /// <param name="functionName"> The name of the function.  Can be empty for an anonymous function. </param>
+        /// <param name="argumentNames"> The names of each of the function arguments. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        public static DeclarativeScope CreateFunctionScope(Scope parentScope)
+        public static DeclarativeScope CreateFunctionScope(Scope parentScope, string functionName, IEnumerable<string> argumentNames)
         {
             if (parentScope == null)
-                throw new ArgumentException("Function scopes must have a parent scope.");
-            return new DeclarativeScope(parentScope);
+                throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
+            if (functionName == null)
+                throw new ArgumentNullException("functionName");
+            if (argumentNames == null)
+                throw new ArgumentNullException("argumentNames");
+            var result = new DeclarativeScope(parentScope, 0);
+            if (string.IsNullOrEmpty(functionName) == false)
+                result.DeclareVariable(functionName);
+            result.DeclareVariable("this");
+            result.DeclareVariable("arguments");
+            foreach (var argumentName in argumentNames)
+                result.DeclareVariable(argumentName);
+            return result;
         }
 
         /// <summary>
@@ -27,24 +41,26 @@ namespace Jurassic.Compiler
         public static DeclarativeScope CreateCatchScope(Scope parentScope)
         {
             if (parentScope == null)
-                throw new ArgumentException("Function scopes must have a parent scope.");
-            return new DeclarativeScope(parentScope);
+                throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
+            return new DeclarativeScope(parentScope, 0);
         }
 
         /// <summary>
         /// Creates a new declarative scope for use at runtime.
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
-        /// <param name="variableCount"> The number of variables that were declared in this scope. </param>
+        /// <param name="declaredVariableNames"> The names of variables that were declared in this scope. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        public static DeclarativeScope CreateRuntimeScope(Scope parentScope, int variableCount)
+        public static DeclarativeScope CreateRuntimeScope(Scope parentScope, string[] declaredVariableNames)
         {
             if (parentScope == null)
-                throw new ArgumentException("Function scopes must have a parent scope.");
-            if (variableCount < 0)
-                throw new ArgumentOutOfRangeException("variableCount");
-            var result = new DeclarativeScope(parentScope);
-            result.Values = new object[variableCount];
+                throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
+            if (declaredVariableNames == null)
+                throw new ArgumentNullException("declaredVariableNames");
+            var result = new DeclarativeScope(parentScope, declaredVariableNames.Length);
+            foreach (string variableName in declaredVariableNames)
+                result.DeclareVariable(variableName);
+            result.Values = new object[declaredVariableNames.Length];
             return result;
         }
 
@@ -53,8 +69,9 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope, or <c>null</c> if this is
         /// the global scope. </param>
-        private DeclarativeScope(Scope parentScope)
-            : base(parentScope)
+        /// <param name="declaredVariableCount"> The number of variables declared in this scope. </param>
+        private DeclarativeScope(Scope parentScope, int declaredVariableCount)
+            : base(parentScope, declaredVariableCount)
         {
         }
 
@@ -123,10 +140,26 @@ namespace Jurassic.Compiler
         internal override void GenerateScopeCreation(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Create a new declarative scope.
-            // DeclarativeScope.CreateRuntimeScope(scope, variableCount)
+            
+            // parentScope
             generator.LoadArgument(0);
+
+            // declaredVariableNames
             generator.LoadInt32(this.DeclaredVariableCount);
+            generator.NewArray(typeof(string));
+            int i = 0;
+            foreach (string variableName in this.DeclaredVariableNames)
+            {
+                generator.Duplicate();
+                generator.LoadInt32(i ++);
+                generator.LoadString(variableName);
+                generator.StoreArrayElement(typeof(string));
+            }
+
+            // DeclarativeScope.CreateRuntimeScope(parentScope, declaredVariableNames)
             generator.Call(ReflectionHelpers.DeclarativeScope_CreateRuntimeScope);
+
+            // Store the new scope in the first method parameter.
             generator.StoreArgument(0);
         }
     }

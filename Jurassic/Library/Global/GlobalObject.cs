@@ -393,6 +393,8 @@ namespace Jurassic.Library
         {
             if (scope == null)
                 throw new ArgumentNullException("scope");
+            if (code == null)
+                return Undefined.Value;
             var evalContext = new Jurassic.Compiler.EvalContext(scope, thisObject, code);
             return evalContext.Execute();
         }
