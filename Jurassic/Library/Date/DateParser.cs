@@ -19,30 +19,41 @@ namespace Jurassic.Library
         internal static DateTime Parse(string input)
         {
             /* Regex tested using http://derekslager.com/blog/posts/2007/09/a-better-dotnet-regular-expression-tester.ashx
-             * With multiline on and the following source strings:
+             * These should succeed:
              * 2010
              * 2010-03
              * 2010-02-07
-             * T12:34
-             * T12:34:56
-             * T12:34:56.012
-             * T12:34Z
-             * T12:34:56Z
-             * T12:34:56.012Z
-             * T12:34+09:00
-             * T12:34:56+09:00
-             * T12:34:56.012-09:00
+             * 2010T12:34
+             * 2010-02T12:34:56
+             * 2010-02-07T12:34:56.012
+             * 2010T12:34Z
+             * 2010-02T12:34:56Z
+             * 2010-02-07T12:34:56.012Z
+             * 2010T12:34+09:00
+             * 2010-02T12:34:56+09:00
+             * 2010-02-07T12:34:56.012-09:00
              * 2010-02-05T12:34:56.012
+             * 
+             * And these should fail:
+             * 201
+             * 2010-1
+             * T12:34
+             * 12:34
+             * 2010-02T1:34:56
+             * 2010-02T12:3:56
+             * 2010-02T12:53:1
+             * 2010-02T12:53:12.1
+             * 2010-02T12:53:12.12
              */
 
             var regex = new Regex(
                 @"^(  (?<year> [0-9]{4} )
                    (- (?<month> [0-9]{2} )
-                   (- (?<day> [0-9]{2} ))?)?)?
+                   (- (?<day> [0-9]{2} ))?)?)
                    (T (?<hour> [0-9]{2} )
                     : (?<minute> [0-9]{2} )
                    (: (?<second> [0-9]{2} )
-                  (\. (?<millisecond> [0-9]{1,9} ))?)?
+                  (\. (?<millisecond> [0-9]{3} ))?)?
                       (?<zone> Z | (?<zoneHours> [+-][0-9]{2} ) : (?<zoneMinutes> [0-9]{2} ) )?)?$",
                 RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
             
@@ -82,33 +93,28 @@ namespace Jurassic.Library
                     offsetInMinutes += 24 * 60;
                 }
 
-                // Parse the zone information.
-                DateTimeKind kind = DateTimeKind.Local;
-                if (match.Groups["zone"].Value != string.Empty)
+                // Parse the zone information (the default is UTC).
+                if (match.Groups["zone"].Value != string.Empty && match.Groups["zone"].Value != "Z")
                 {
-                    kind = DateTimeKind.Utc;
-                    if (match.Groups["zone"].Value != "Z")
-                    {
-                        // Parse the numeric values.
-                        int zoneHours, zoneMinutes;
-                        if (int.TryParse(match.Groups["zoneHours"].Value, out zoneHours) == false)
-                            return DateTime.MinValue;
-                        if (int.TryParse(match.Groups["zoneMinutes"].Value, out zoneMinutes) == false)
-                            return DateTime.MinValue;
+                    // Parse the numeric values.
+                    int zoneHours, zoneMinutes;
+                    if (int.TryParse(match.Groups["zoneHours"].Value, out zoneHours) == false)
+                        return DateTime.MinValue;
+                    if (int.TryParse(match.Groups["zoneMinutes"].Value, out zoneMinutes) == false)
+                        return DateTime.MinValue;
 
-                        // Validate the components.
-                        if (zoneHours >= 24)
-                            return DateTime.MinValue;
-                        if (zoneMinutes >= 60)
-                            return DateTime.MinValue;
+                    // Validate the components.
+                    if (zoneHours >= 24)
+                        return DateTime.MinValue;
+                    if (zoneMinutes >= 60)
+                        return DateTime.MinValue;
 
-                        // Calculate the zone offset, in minutes.
-                        offsetInMinutes -= zoneHours < 0 ? zoneHours * 60 - zoneMinutes : zoneHours * 60 + zoneMinutes;
-                    }
+                    // Calculate the zone offset, in minutes.
+                    offsetInMinutes -= zoneHours < 0 ? zoneHours * 60 - zoneMinutes : zoneHours * 60 + zoneMinutes;
                 }
 
                 // Create a date from the components.
-                var result = new DateTime(year, month, day, hour, minute, second, millisecond, kind);
+                var result = new DateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc);
                 if (offsetInMinutes != 0)
                     result = result.AddMinutes(offsetInMinutes);
                 return result;
