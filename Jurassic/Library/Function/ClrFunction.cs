@@ -145,11 +145,22 @@ namespace Jurassic.Library
         //     OVERRIDES
         //_________________________________________________________________________________________
 
+        /// <summary>
+        /// Calls this function, passing in the given "this" value and zero or more arguments.
+        /// </summary>
+        /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
+        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] arguments)
         {
             return this.callBinder.Call(bindThis == true ? this : thisObject, arguments);
         }
 
+        /// <summary>
+        /// Creates an object, using this function as the constructor.
+        /// </summary>
+        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(params object[] arguments)
         {
             if (this.constructBinder == null)

@@ -1020,7 +1020,7 @@ namespace Jurassic.Library
                 return TypeConverter.ToString(result);
 
             // Otherwise, use the default Object.prototype.toString() method.
-            return thisObj.ToStringJS();
+            return ObjectInstance.ToStringJS(thisObj);
         }
 
 

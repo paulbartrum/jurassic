@@ -50,7 +50,15 @@ namespace Jurassic.Library
         /// </summary>
         public string Name
         {
-            get { return this["name"] as string; }
+            get { return TypeConverter.ToString(this["name"]); }
+        }
+
+        /// <summary>
+        /// Gets the number of arguments expected by the function.
+        /// </summary>
+        public int Length
+        {
+            get { return TypeConverter.ToInteger("length"); }
         }
 
 
@@ -66,7 +74,7 @@ namespace Jurassic.Library
         /// <param name="instance"> The instance to check. </param>
         /// <returns> <c>true</c> if the object inherits from this function; <c>false</c>
         /// otherwise. </returns>
-        public bool HasInstance(object instance)
+        public virtual bool HasInstance(object instance)
         {
             if ((instance is ObjectInstance) == false)
                 return false;
@@ -83,20 +91,20 @@ namespace Jurassic.Library
             return false;
         }
 
+        /// <summary>
+        /// Calls this function, passing in the given "this" value and zero or more arguments.
+        /// </summary>
+        /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
+        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <returns> The value that was returned from the function. </returns>
+        public abstract object CallLateBound(object thisObject, params object[] arguments);
 
-
-        //     .NET METHODS
-        //_________________________________________________________________________________________
-
-        public virtual object CallLateBound(object thisObject, params object[] arguments)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual ObjectInstance ConstructLateBound(params object[] arguments)
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        /// Creates an object, using this function as the constructor.
+        /// </summary>
+        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <returns> The object that was created. </returns>
+        public abstract ObjectInstance ConstructLateBound(params object[] arguments);
 
 
 
@@ -151,13 +159,13 @@ namespace Jurassic.Library
         /// Creates a new function that, when called, calls this function with the given "this"
         /// value and, optionally, one or more more arguments.
         /// </summary>
-        /// <param name="thisObj"> The fixed value of "this". </param>
-        /// <param name="arguments"> Any number of fixed arguments values. </param>
+        /// <param name="boundThis"> The fixed value of "this". </param>
+        /// <param name="boundArguments"> Any number of fixed arguments values. </param>
         /// <returns> A new function. </returns>
-        [JSFunction(Name = "bind")]
-        public FunctionInstance Bind(object thisObj, params object[] arguments)
+        [JSFunction(Name = "bind", Length = 1)]
+        public FunctionInstance Bind(object boundThis, params object[] boundArguments)
         {
-            throw new NotSupportedException();
+            return new BoundFunction(this, boundThis, boundArguments);
         }
 
         /// <summary>
