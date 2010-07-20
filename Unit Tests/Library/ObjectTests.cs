@@ -591,9 +591,9 @@ namespace UnitTests
             // Error in toString will result in error.
             Assert.AreEqual("Error", TestUtils.EvaluateExceptionType("({ toString: function() { throw new Error('test') } }).toString()"));
 
-            // "this" must be convertible to an object.
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.toString.call(undefined)"));
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.toString.call(null)"));
+            // Addendum 7-1-10: null and undefined return their own strings.
+            Assert.AreEqual("[object undefined]", TestUtils.Evaluate("({}).toString.call(undefined)"));
+            Assert.AreEqual("[object null]", TestUtils.Evaluate("({}).toString.call(null)"));
         }
 
         [TestMethod]

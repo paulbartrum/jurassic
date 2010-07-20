@@ -85,6 +85,8 @@ namespace Jurassic.Library
         /// "prototype" property; <c>false</c> if the "prototype" property should be <c>null</c>. </param>
         private void Init(string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body, bool hasInstancePrototype)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
             if (argumentNames == null)
                 throw new ArgumentNullException("argumentNames");
             if (body == null)
@@ -159,6 +161,12 @@ namespace Jurassic.Library
         //     OVERRIDES
         //_________________________________________________________________________________________
 
+        /// <summary>
+        /// Calls this function, passing in the given "this" value and zero or more arguments.
+        /// </summary>
+        /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
+        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
             //// Create a new declarative scope.
@@ -196,6 +204,11 @@ namespace Jurassic.Library
             return this.body(this.ParentScope, thisObject, this, argumentValues);
         }
 
+        /// <summary>
+        /// Creates an object, using this function as the constructor.
+        /// </summary>
+        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {
             // Create a new object and set the prototype to the instance prototype of the function.

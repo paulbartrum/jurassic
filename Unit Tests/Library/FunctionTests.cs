@@ -141,8 +141,10 @@ namespace UnitTests
         [TestMethod]
         public void bind()
         {
-            Assert.AreEqual("[object Math]", TestUtils.Evaluate("({}.toString.call(Math))"));
-            Assert.AreEqual(2, TestUtils.Evaluate("new Function('a,b', 'return a / b').bind(undefined, 10)(2)"));
+            Assert.AreEqual("[object Math]", TestUtils.Evaluate("var f = {}.toString.bind(Math); f();"));
+            Assert.AreEqual(32, TestUtils.Evaluate("var f = Math.pow.bind(undefined, 2); f(5);"));
+            Assert.AreEqual(5, TestUtils.Evaluate("new Function('a,b', 'return a / b').bind(undefined, 10)(2)"));
+            Assert.AreEqual(15, TestUtils.Evaluate("new Function('a,b', 'return a + b').bind(undefined, 10, 5)(2)"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Function.prototype.bind.length"));

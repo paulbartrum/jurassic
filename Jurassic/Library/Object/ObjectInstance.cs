@@ -924,11 +924,16 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string representing the current object.
         /// </summary>
+        /// <param name="thisObject"> The value of the "this" keyword. </param>
         /// <returns> A string representing the current object. </returns>
-        [JSFunction(Name = "toString")]
-        public string ToStringJS()
+        [JSFunction(Name = "toString", Flags = FunctionBinderFlags.HasThisObject)]
+        public static string ToStringJS(object thisObject)
         {
-            return string.Format("[object {0}]", this.InternalClassName);
+            if (thisObject == null || thisObject == Undefined.Value)
+                return "[object undefined]";
+            if (thisObject == Null.Value)
+                return "[object null]";
+            return string.Format("[object {0}]", TypeConverter.ToObject(thisObject).InternalClassName);
         }
 
 
