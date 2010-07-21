@@ -90,6 +90,8 @@ namespace Jurassic.Library
         {
             if (string.IsNullOrEmpty(this.Message))
                 return this.Name;
+            else if (string.IsNullOrEmpty(this.Name))
+                return this.Message;
             else
                 return string.Format("{0}: {1}", this.Name, this.Message);
         }
