@@ -182,6 +182,17 @@ namespace Jurassic.Compiler
             // Return undefined if control gets to the end of the function.
             EmitHelpers.EmitUndefined(generator);
         }
+
+        /// <summary>
+        /// Converts this object to a string.
+        /// </summary>
+        /// <returns> A string representing this object. </returns>
+        public override string ToString()
+        {
+            if (this.BodyRoot != null)
+                return string.Format("function {0}({1}) {2}", this.Name, string.Join(", ", this.ArgumentNames), this.BodyRoot);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, string.Join(", ", this.ArgumentNames), this.BodyText);
+        }
     }
 
 }

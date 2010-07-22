@@ -35,11 +35,11 @@ namespace Jurassic.Library
             this.value = new Regex(pattern, ParseFlags(flags));
 
             // Initialize the javascript properties.
-            this.SetProperty("source", pattern);
-            this.SetProperty("global", this.Global);
-            this.SetProperty("multiline", this.Multiline);
-            this.SetProperty("ignoreCase", this.IgnoreCase);
-            this.SetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+            this.FastSetProperty("source", pattern);
+            this.FastSetProperty("global", this.Global);
+            this.FastSetProperty("multiline", this.Multiline);
+            this.FastSetProperty("ignoreCase", this.IgnoreCase);
+            this.FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
         }
 
         /// <summary>
@@ -57,11 +57,11 @@ namespace Jurassic.Library
             this.globalSearch = existingInstance.globalSearch;
 
             // Initialize the javascript properties.
-            this.SetProperty("source", existingInstance.Source);
-            this.SetProperty("global", existingInstance.Global);
-            this.SetProperty("multiline", existingInstance.Multiline);
-            this.SetProperty("ignoreCase", existingInstance.IgnoreCase);
-            this.SetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+            this.FastSetProperty("source", existingInstance.Source);
+            this.FastSetProperty("global", existingInstance.Global);
+            this.FastSetProperty("multiline", existingInstance.Multiline);
+            this.FastSetProperty("ignoreCase", existingInstance.IgnoreCase);
+            this.FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
         }
 
 
@@ -175,10 +175,10 @@ namespace Jurassic.Library
             this.value = new Regex(pattern, ParseFlags(flags) | RegexOptions.Compiled);
 
             // Update the javascript properties.
-            this.SetProperty("source", pattern);
-            this.SetProperty("global", this.Global);
-            this.SetProperty("multiline", this.Multiline);
-            this.SetProperty("ignoreCase", this.IgnoreCase);
+            this.FastSetProperty("source", pattern);
+            this.FastSetProperty("global", this.Global);
+            this.FastSetProperty("multiline", this.Multiline);
+            this.FastSetProperty("ignoreCase", this.IgnoreCase);
             this.LastIndex = 0;
         }
 

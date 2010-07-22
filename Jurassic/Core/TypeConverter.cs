@@ -132,7 +132,7 @@ namespace Jurassic
         public static object ToPrimitive(object value, PrimitiveTypeHint typeHint)
         {
             if (value is ObjectInstance)
-                return ((ObjectInstance)value).GetDefaultValue(typeHint);
+                return ((ObjectInstance)value).GetPrimitiveValue(typeHint);
             else
                 return value;
         }
@@ -188,18 +188,6 @@ namespace Jurassic
         public static ushort ToUint16(object value)
         {
             return (ushort)(uint)ToNumber(value);
-        }
-
-        /// <summary>
-        /// Throws a TypeError when the given value is <c>null</c> or <c>undefined.</c>
-        /// </summary>
-        /// <param name="value"> The value to check. </param>
-        public static void CheckCoercibleToObject(object value)
-        {
-            if (value == null || value == Undefined.Value)
-                throw new JavaScriptException("TypeError", "undefined cannot be converted to an object");
-            if (value == Null.Value)
-                throw new JavaScriptException("TypeError", "null cannot be converted to an object");
         }
 
     }

@@ -79,10 +79,10 @@ namespace Jurassic.Library
                 this.constructBinder = new FunctionBinder(new FunctionBinderMethod(new Func<ObjectInstance>(() => GlobalObject.Object.Construct()).Method));
 
             // Add function properties.
-            this.SetProperty("name", name);
-            this.SetProperty("length", callBinderMethods.FirstOrDefault() == null ? 0 : callBinderMethods.Max(bm => bm.ParameterCount));
-            this.SetProperty("prototype", instancePrototype);
-            instancePrototype.SetProperty("constructor", this, PropertyAttributes.NonEnumerable);
+            this.FastSetProperty("name", name);
+            this.FastSetProperty("length", callBinderMethods.FirstOrDefault() == null ? 0 : callBinderMethods.Max(bm => bm.ParameterCount));
+            this.FastSetProperty("prototype", instancePrototype);
+            instancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
         /// <summary>
@@ -102,10 +102,10 @@ namespace Jurassic.Library
             this.callBinder = new FunctionBinder(new FunctionBinderMethod(delegateToCall.Method));
 
             // Add function properties.
-            this.SetProperty("name", name != null ? name : binderMethod.Name);
-            this.SetProperty("length", length >= 0 ? length : binderMethod.ParameterCount);
-            this.SetProperty("prototype", GlobalObject.Object.Construct());
-            this.InstancePrototype.SetProperty("constructor", this, PropertyAttributes.NonEnumerable);
+            this.FastSetProperty("name", name != null ? name : binderMethod.Name);
+            this.FastSetProperty("length", length >= 0 ? length : binderMethod.ParameterCount);
+            this.FastSetProperty("prototype", GlobalObject.Object.Construct());
+            this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
         /// <summary>
@@ -134,10 +134,10 @@ namespace Jurassic.Library
             }
 
             // Add function properties.
-            this.SetProperty("name", name);
-            this.SetProperty("length", length >= 0 ? length : methods.Max(bm => bm.ParameterCount));
-            this.SetProperty("prototype", GlobalObject.Object.Construct());
-            this.InstancePrototype.SetProperty("constructor", this, PropertyAttributes.NonEnumerable);
+            this.FastSetProperty("name", name);
+            this.FastSetProperty("length", length >= 0 ? length : methods.Max(bm => bm.ParameterCount));
+            this.FastSetProperty("prototype", GlobalObject.Object.Construct());
+            this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
         
@@ -149,7 +149,7 @@ namespace Jurassic.Library
         /// Calls this function, passing in the given "this" value and zero or more arguments.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] arguments)
         {
@@ -159,13 +159,13 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The object that was created. </returns>
-        public override ObjectInstance ConstructLateBound(params object[] arguments)
+        public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {
             if (this.constructBinder == null)
                 return GlobalObject.Object.Construct();
-            return (ObjectInstance)this.constructBinder.Call(this, arguments);
+            return (ObjectInstance)this.constructBinder.Call(this, argumentValues);
         }
 
         /// <summary>

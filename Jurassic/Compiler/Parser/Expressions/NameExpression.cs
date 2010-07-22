@@ -110,7 +110,7 @@ namespace Jurassic.Compiler
                     generator.CastClass(typeof(ObjectScope));
                     generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
                     generator.LoadString(this.Name);
-                    generator.Call(ReflectionHelpers.ObjectInstance_GetItem_String);
+                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_String);
 
                     // Check if the value is null.
                     generator.Duplicate();
@@ -204,16 +204,17 @@ namespace Jurassic.Compiler
                     generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
                     generator.LoadString(this.Name);
                     generator.LoadVariable(valueVariable);
+                    generator.LoadBoolean(optimizationInfo.StrictMode);
 
                     if (scope.ParentScope == null && throwIfUnresolvable == false)
                     {
                         // Set the property value unconditionally.
-                        generator.Call(ReflectionHelpers.ObjectInstance_SetItem_String);
+                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
                     }
                     else
                     {
                         // Set the property value if the property exists.
-                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyIfExists);
+                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValueIfExists);
 
                         // The return value is true if the property was defined, and false if it wasn't.
                         generator.BranchIfTrue(endOfSet);

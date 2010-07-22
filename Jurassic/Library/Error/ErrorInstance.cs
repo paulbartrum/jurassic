@@ -28,13 +28,13 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (name != null)
-                this.SetProperty("name", name, PropertyAttributes.FullAccess);
+                this.FastSetProperty("name", name, PropertyAttributes.FullAccess);
             if (message != null)
-                this.SetProperty("message", message, PropertyAttributes.FullAccess);
+                this.FastSetProperty("message", message, PropertyAttributes.FullAccess);
             if (generateStack == true)
             {
                 var stackTrace = string.Concat(this.ToStringJS(), Environment.NewLine, Environment.StackTrace);
-                this.SetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
+                this.FastSetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
             }
         }
 
@@ -86,7 +86,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <returns> A string representing the current object. </returns>
         [JSFunction(Name = "toString")]
-        public new string ToStringJS()
+        public string ToStringJS()
         {
             if (string.IsNullOrEmpty(this.Message))
                 return this.Name;

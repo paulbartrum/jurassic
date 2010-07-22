@@ -49,6 +49,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\TypeComparerTests.cs" />
     <Compile Include="Library\ArrayTests.cs" />
     <Compile Include="Core\FunctionBinderTests.cs" />
     <Compile Include="Library\JSONTests.cs" />

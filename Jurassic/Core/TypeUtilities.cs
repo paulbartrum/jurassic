@@ -90,6 +90,31 @@ namespace Jurassic
 
             return TypeConverter.ToNumber(leftPrimitive) + TypeConverter.ToNumber(rightPrimitive);
         }
+
+        /// <summary>
+        /// Determines if the given type is a supported JavaScript primitive type.
+        /// </summary>
+        /// <param name="type"> The type to test. </param>
+        /// <returns> <c>true</c> if the given type is a supported JavaScript primitive type;
+        /// <c>false</c> otherwise. </returns>
+        internal static bool IsPrimitiveType(Type type)
+        {
+            return type == typeof(bool) || type == typeof(int) || type == typeof(double) ||
+                type == typeof(string) || type == typeof(Null) || type == typeof(Undefined);
+        }
+
+        /// <summary>
+        /// Throws a TypeError when the given value is <c>null</c> or <c>undefined.</c>
+        /// </summary>
+        /// <param name="value"> The value to check. </param>
+        /// <param name="functionName"> The name of the function which is doing the check. </param>
+        internal static void VerifyThisObject(object value, string functionName)
+        {
+            if (value == null || value == Undefined.Value)
+                throw new JavaScriptException("TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
+            if (value == Null.Value)
+                throw new JavaScriptException("TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
+        }
     }
 
 }

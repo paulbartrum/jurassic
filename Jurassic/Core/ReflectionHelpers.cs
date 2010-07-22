@@ -31,6 +31,7 @@ namespace Jurassic
         internal static MethodInfo TypeUtilities_TypeOf;
         internal static MethodInfo TypeUtilities_EnumeratePropertyNames;
         internal static MethodInfo TypeUtilities_Add;
+        internal static MethodInfo TypeUtilities_VerifyThisObject;
 
         internal static MethodInfo FunctionInstance_HasInstance;
         internal static MethodInfo FunctionInstance_ConstructLateBound;
@@ -73,14 +74,15 @@ namespace Jurassic
         internal static MethodInfo MethodBase_GetMethodFromHandle;
 
         internal static MethodInfo ObjectInstance_Delete;
+        internal static MethodInfo ObjectInstance_DefineProperty;
         internal static MethodInfo ObjectInstance_HasProperty;
-        internal static MethodInfo ObjectInstance_GetItem_String;
-        internal static MethodInfo ObjectInstance_GetItem_Int;
-        internal static MethodInfo ObjectInstance_SetItem_String;
-        internal static MethodInfo ObjectInstance_SetItem_Int;
-        internal static MethodInfo ObjectInstance_SetPropertyIfExists;
-        internal static MethodInfo ObjectInstance_PropertyValues;
-        internal static MethodInfo ObjectInstance_CacheKey;
+        internal static MethodInfo ObjectInstance_GetPropertyValue_String;
+        internal static MethodInfo ObjectInstance_GetPropertyValue_Int;
+        internal static MethodInfo ObjectInstance_SetPropertyValue_String;
+        internal static MethodInfo ObjectInstance_SetPropertyValue_Int;
+        internal static MethodInfo ObjectInstance_SetPropertyValueIfExists;
+        internal static MethodInfo ObjectInstance_InlinePropertyValues;
+        internal static MethodInfo ObjectInstance_InlineCacheKey;
         internal static MethodInfo ObjectInstance_InlineGetPropertyValue;
         internal static MethodInfo ObjectInstance_InlineSetPropertyValue;
         internal static MethodInfo ObjectInstance_InlineSetPropertyValueIfExists;
@@ -96,6 +98,7 @@ namespace Jurassic
         internal static ConstructorInfo UserDefinedFunction_Constructor;
         internal static ConstructorInfo FunctionDelegate_Constructor;
         internal static ConstructorInfo Arguments_Constructor;
+        internal static ConstructorInfo PropertyDescriptor_Constructor;
 
         internal static FieldInfo Undefined_Value;
         internal static FieldInfo Null_Value;
@@ -122,16 +125,18 @@ namespace Jurassic
             TypeUtilities_TypeOf = GetStaticMethod(typeof(TypeUtilities), "TypeOf", typeof(object));
             TypeUtilities_EnumeratePropertyNames = GetStaticMethod(typeof(TypeUtilities), "EnumeratePropertyNames", typeof(object));
             TypeUtilities_Add = GetStaticMethod(typeof(TypeUtilities), "Add", typeof(object), typeof(object));
+            TypeUtilities_VerifyThisObject = GetStaticMethod(typeof(TypeUtilities), "VerifyThisObject", typeof(object), typeof(string));
 
             ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(string), typeof(bool));
+            ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(string), typeof(PropertyDescriptor), typeof(bool));
             ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(string));
-            ObjectInstance_GetItem_String = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(string));
-            ObjectInstance_GetItem_Int = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(uint));
-            ObjectInstance_SetItem_String = GetInstanceMethod(typeof(ObjectInstance), "set_Item", typeof(string), typeof(object));
-            ObjectInstance_SetItem_Int = GetInstanceMethod(typeof(ObjectInstance), "set_Item", typeof(uint), typeof(object));
-            ObjectInstance_SetPropertyIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyIfExists", typeof(string), typeof(object));
-            ObjectInstance_PropertyValues = GetInstanceMethod(typeof(ObjectInstance), "get_PropertyValues");
-            ObjectInstance_CacheKey = GetInstanceMethod(typeof(ObjectInstance), "get_CacheKey");
+            ObjectInstance_GetPropertyValue_String = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(string));
+            ObjectInstance_GetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(uint));
+            ObjectInstance_SetPropertyValue_String = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(string), typeof(object), typeof(bool));
+            ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
+            ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(string), typeof(object), typeof(bool));
+            ObjectInstance_InlinePropertyValues = GetInstanceMethod(typeof(ObjectInstance), "get_InlinePropertyValues");
+            ObjectInstance_InlineCacheKey = GetInstanceMethod(typeof(ObjectInstance), "get_InlineCacheKey");
             ObjectInstance_InlineGetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineGetPropertyValue",
                 new Type[] { typeof(string), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
             ObjectInstance_InlineSetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineSetPropertyValue",
@@ -189,6 +194,7 @@ namespace Jurassic
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
             FunctionDelegate_Constructor = GetConstructor(typeof(Library.FunctionDelegate), typeof(object), typeof(IntPtr));
             Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
+            PropertyDescriptor_Constructor = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

@@ -669,7 +669,7 @@ namespace Jurassic.Compiler
         /// Parses a continue statement.
         /// </summary>
         /// <returns> A continue statement. </returns>
-        public ContinueStatement ParseContinue()
+        private ContinueStatement ParseContinue()
         {
             var result = new ContinueStatement(this.labelsForCurrentStatement);
 
@@ -695,7 +695,7 @@ namespace Jurassic.Compiler
         /// Parses a break statement.
         /// </summary>
         /// <returns> A break statement. </returns>
-        public BreakStatement ParseBreak()
+        private BreakStatement ParseBreak()
         {
             var result = new BreakStatement(this.labelsForCurrentStatement);
 
@@ -721,7 +721,7 @@ namespace Jurassic.Compiler
         /// Parses a return statement.
         /// </summary>
         /// <returns> A return statement. </returns>
-        public ReturnStatement ParseReturn()
+        private ReturnStatement ParseReturn()
         {
             if (this.insideFunction == false)
                 throw new JavaScriptException("SyntaxError", "Return statements are only allowed inside functions");
@@ -747,7 +747,7 @@ namespace Jurassic.Compiler
         /// Parses a with statement.
         /// </summary>
         /// <returns> An expression representing the with statement. </returns>
-        public WithStatement ParseWith()
+        private WithStatement ParseWith()
         {
             var result = new WithStatement(this.labelsForCurrentStatement);
 
@@ -780,7 +780,7 @@ namespace Jurassic.Compiler
         /// Parses a switch statement.
         /// </summary>
         /// <returns> A switch statement. </returns>
-        public SwitchStatement ParseSwitch()
+        private SwitchStatement ParseSwitch()
         {
             var result = new SwitchStatement(this.labelsForCurrentStatement);
 
@@ -859,7 +859,7 @@ namespace Jurassic.Compiler
         /// Parses a throw statement.
         /// </summary>
         /// <returns> A throw statement. </returns>
-        public ThrowStatement ParseThrow()
+        private ThrowStatement ParseThrow()
         {
             var result = new ThrowStatement(this.labelsForCurrentStatement);
 
@@ -883,7 +883,7 @@ namespace Jurassic.Compiler
         /// Parses a try statement.
         /// </summary>
         /// <returns> A try-catch-finally statement. </returns>
-        public TryCatchFinallyStatement ParseTry()
+        private TryCatchFinallyStatement ParseTry()
         {
             var result = new TryCatchFinallyStatement(this.labelsForCurrentStatement);
 
@@ -941,7 +941,7 @@ namespace Jurassic.Compiler
         /// Parses a debugger statement.
         /// </summary>
         /// <returns> A debugger statement. </returns>
-        public DebuggerStatement ParseDebugger()
+        private DebuggerStatement ParseDebugger()
         {
             // Consume the debugger keyword.
             this.Expect(KeywordToken.Debugger);
@@ -956,10 +956,10 @@ namespace Jurassic.Compiler
         /// Parses a function declaration.
         /// </summary>
         /// <returns> A statement representing the function. </returns>
-        public Statement ParseFunctionDeclaration()
+        private Statement ParseFunctionDeclaration()
         {
             // Parse the function declaration.
-            var expression = ParseFunction(false);
+            var expression = ParseFunction(FunctionType.Declaration);
 
             // Add the function to the scope.
             this.currentScope.DeclareFunction(expression.Context.Name, expression);
@@ -969,24 +969,46 @@ namespace Jurassic.Compiler
             return new EmptyStatement(this.labelsForCurrentStatement);
         }
 
+        private enum FunctionType
+        {
+            Declaration,
+            Expression,
+            GetterOrSetter,
+        }
+
         /// <summary>
         /// Parses a function declaration or a function expression.
         /// </summary>
-        /// <param name="insideExpression"> <c>true</c> to parse a function expression;
-        /// <c>false</c> to parse a function declaration. </param>
+        /// <param name="functionType"> The type of function to parse. </param>
         /// <returns> A function expression. </returns>
-        public FunctionExpression ParseFunction(bool insideExpression)
+        private FunctionExpression ParseFunction(FunctionType functionType)
         {
-            // Consume the function keyword.
-            this.Expect(KeywordToken.Function);
-
-            // Optionally read the function name.
-            var functionName = string.Empty;
-            if (insideExpression == false || this.nextToken is IdentifierToken)
+            if (functionType != FunctionType.GetterOrSetter)
             {
-                // The function name is optional for function expressions.
+                // Consume the function keyword.
+                this.Expect(KeywordToken.Function);
+            }
+
+            // Read the function name.
+            var functionName = string.Empty;
+            if (functionType == FunctionType.Declaration)
+            {
                 functionName = this.ExpectIdentifier();
             }
+            else if (functionType == FunctionType.Expression)
+            {
+                // The function name is optional for function expressions.
+                if (this.nextToken is IdentifierToken)
+                    functionName = this.ExpectIdentifier();
+            }
+            else if (functionType == FunctionType.GetterOrSetter)
+            {
+                // Getters and setters can have any name that is allowed of a property.
+                bool wasIdentifier;
+                functionName = ReadPropertyName(out wasIdentifier);
+            }
+            else
+                throw new ArgumentOutOfRangeException("functionType");
 
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
@@ -1036,7 +1058,7 @@ namespace Jurassic.Compiler
             // Revert the scope.
             this.currentScope = this.currentScope.ParentScope;
 
-            if (insideExpression == true)
+            if (functionType == FunctionType.Expression)
             {
                 // The end token '}' will be consumed by the parent function.
                 if (this.nextToken != PunctuatorToken.RightBrace)
@@ -1150,7 +1172,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="endToken"> A token that indicates the end of the expression. </param>
         /// <returns> An expression tree that represents the expression. </returns>
-        public Expression ParseExpression(params Token[] endTokens)
+        private Expression ParseExpression(params Token[] endTokens)
         {
             // The root of the expression tree.
             Expression root = null;
@@ -1437,6 +1459,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Used to store the getter and setter for an object literal property.
+        /// </summary>
+        internal class ObjectLiteralAccessor
+        {
+            public FunctionExpression Getter;
+            public FunctionExpression Setter;
+        }
+
+        /// <summary>
         /// Parses an object literal (e.g. "{a: 5}").
         /// </summary>
         /// <returns> A literal expression that represents the object literal. </returns>
@@ -1446,7 +1477,7 @@ namespace Jurassic.Compiler
             Debug.Assert(this.nextToken == PunctuatorToken.LeftBrace);
             this.Consume();
 
-            var properties = new Dictionary<string, Expression>();
+            var properties = new Dictionary<string, object>();
             while (true)
             {
                 // If the next token is '}', then the object literal is complete.
@@ -1454,47 +1485,80 @@ namespace Jurassic.Compiler
                     break;
 
                 // Read the next property name.
-                string propertyName;
-                if (this.nextToken is LiteralToken)
-                {
-                    // The property name can be a string or a number.
-                    object literalValue = ((LiteralToken)this.nextToken).Value;
-                    if ((literalValue is string || literalValue is double || literalValue is int) == false)
-                        throw new JavaScriptException("SyntaxError", "Expected property name", 1, "");
-                    propertyName = ((LiteralToken)this.nextToken).Value.ToString();
-                }
-                else if (this.nextToken is IdentifierToken)
-                {
-                    // An identifier is also okay.
-                    propertyName = ((IdentifierToken)this.nextToken).Name;
-                 
-                    // Check the property name is valid.
-                    ValidateVariableName(propertyName);
-                }
-                else if (this.nextToken is KeywordToken)
-                {
-                    // In ES5 a keyword is also okay.
-                    propertyName = ((KeywordToken)this.nextToken).Name;
+                bool mightBeGetOrSet;
+                string propertyName = ReadPropertyName(out mightBeGetOrSet);
 
-                    // Check the property name is valid.
-                    ValidateVariableName(propertyName);
+                // Check if this is a getter or setter.
+                Expression propertyValue;
+                if (this.nextToken != PunctuatorToken.Colon && mightBeGetOrSet == true && (propertyName == "get" || propertyName == "set"))
+                {
+                    // Parse the function name and body.
+                    var function = ParseFunction(FunctionType.GetterOrSetter);
+
+                    // Get the function name.
+                    var getOrSet = propertyName;
+                    propertyName = function.Context.Name;
+
+                    if (getOrSet == "get")
+                    {
+                        // This is a getter property.
+                        object existingValue;
+                        if (properties.TryGetValue(propertyName, out existingValue) == false)
+                            // The property has not been seen before.
+                            properties.Add(propertyName, new ObjectLiteralAccessor() { Getter = function });
+                        else
+                        {
+                            // Add to the existing property.
+                            var existingAccessor = existingValue as ObjectLiteralAccessor;
+                            if (existingAccessor == null)
+                                throw new JavaScriptException("SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter", propertyName));
+                            if (existingAccessor.Getter != null)
+                                throw new JavaScriptException("SyntaxError", string.Format("The property '{0}' cannot have multiple getters", propertyName));
+                            existingAccessor.Getter = function;
+                        }
+                    }
+                    else
+                    {
+                        // This is a setter property.
+                        object existingValue;
+                        if (properties.TryGetValue(propertyName, out existingValue) == false)
+                            // The property has not been seen before.
+                            properties.Add(propertyName, new ObjectLiteralAccessor() { Setter = function });
+                        else
+                        {
+                            // Add to the existing property.
+                            var existingAccessor = existingValue as ObjectLiteralAccessor;
+                            if (existingAccessor == null)
+                                throw new JavaScriptException("SyntaxError", string.Format("The property '{0}' cannot have both a data property and a setter", propertyName));
+                            if (existingAccessor.Setter != null)
+                                throw new JavaScriptException("SyntaxError", string.Format("The property '{0}' cannot have multiple setters", propertyName));
+                            existingAccessor.Setter = function;
+                        }
+                    }
                 }
                 else
-                    throw new JavaScriptException("SyntaxError", "Expected property name", 1, "");
-                this.Consume();
-                
-                // Read the colon.
-                this.Expect(PunctuatorToken.Colon);
+                {
+                    // This is a regular property.
 
-                // Now read the property value.
-                var propertyValue = ParseExpression(PunctuatorToken.Comma, PunctuatorToken.RightBrace);
+                    // Read the colon.
+                    this.Expect(PunctuatorToken.Colon);
 
-                // In strict mode, properties cannot be added twice.
-                if (this.StrictMode == true && properties.ContainsKey(propertyName) == true)
-                    throw new JavaScriptException("SyntaxError", string.Format("Property name '{0}' already exists in object literal", propertyName), 1, "");
+                    // Now read the property value.
+                    propertyValue = ParseExpression(PunctuatorToken.Comma, PunctuatorToken.RightBrace);
 
-                // Add the property setter to the list.
-                properties[propertyName] = propertyValue;
+                    // In strict mode, properties cannot be added twice.
+                    object existingValue;
+                    if (properties.TryGetValue(propertyName, out existingValue) == true)
+                    {
+                        if (existingValue is ObjectLiteralAccessor)
+                            throw new JavaScriptException("SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter/setter", propertyName), 1, "");
+                        if (this.StrictMode == true)
+                            throw new JavaScriptException("SyntaxError", string.Format("The property '{0}' already has a value", propertyName), 1, "");
+                    }
+
+                    // Add the property setter to the list.
+                    properties[propertyName] = propertyValue;
+                }
 
                 // Read past the comma.
                 Debug.Assert(this.nextToken == PunctuatorToken.Comma || this.nextToken == PunctuatorToken.RightBrace);
@@ -1509,12 +1573,55 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Reads a property name, used in object literals.
+        /// </summary>
+        /// <param name="wasIdentifier"> Receives <c>true</c> if the property name was identifier;
+        /// <c>false</c> otherwise. </param>
+        /// <returns> The property name that was read. </returns>
+        private string ReadPropertyName(out bool wasIdentifier)
+        {
+            string propertyName;
+            if (this.nextToken is LiteralToken)
+            {
+                // The property name can be a string or a number.
+                object literalValue = ((LiteralToken)this.nextToken).Value;
+                if ((literalValue is string || literalValue is double || literalValue is int) == false)
+                    throw new JavaScriptException("SyntaxError", string.Format("Expected property name but found '{0}'", this.nextToken.Text), 1, "");
+                propertyName = ((LiteralToken)this.nextToken).Value.ToString();
+                wasIdentifier = false;
+            }
+            else if (this.nextToken is IdentifierToken)
+            {
+                // An identifier is also okay.
+                propertyName = ((IdentifierToken)this.nextToken).Name;
+                wasIdentifier = true;
+            }
+            else if (this.nextToken is KeywordToken)
+            {
+                // In ES5 a keyword is also okay.
+                propertyName = ((KeywordToken)this.nextToken).Name;
+                wasIdentifier = false;
+            }
+            else
+                throw new JavaScriptException("SyntaxError", string.Format("Expected property name but found '{0}'", this.nextToken.Text), 1, "");
+
+            // Check the property name is valid.
+            ValidateVariableName(propertyName);
+
+            // Consume the token.
+            this.Consume();
+
+            // Return the property name.
+            return propertyName;
+        }
+
+        /// <summary>
         /// Parses a function expression.
         /// </summary>
         /// <returns> A function expression. </returns>
-        public FunctionExpression ParseFunctionExpression()
+        private FunctionExpression ParseFunctionExpression()
         {
-            return ParseFunction(true);
+            return ParseFunction(FunctionType.Expression);
         }
     }
 

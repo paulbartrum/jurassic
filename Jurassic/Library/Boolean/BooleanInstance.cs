@@ -70,7 +70,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <returns> A string representing this object. </returns>
         [JSFunction(Name = "toString")]
-        public new string ToStringJS()
+        public string ToStringJS()
         {
             return this.value ? "true" : "false";
         }

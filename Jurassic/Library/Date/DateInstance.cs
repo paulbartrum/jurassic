@@ -134,11 +134,11 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="hint"> Indicates the preferred type of the result. </param>
         /// <returns> A primitive value that represents the current object. </returns>
-        protected internal override object GetDefaultValue(PrimitiveTypeHint typeHint)
+        protected internal override object GetPrimitiveValue(PrimitiveTypeHint typeHint)
         {
             if (typeHint == PrimitiveTypeHint.None)
-                return base.GetDefaultValue(PrimitiveTypeHint.String);
-            return base.GetDefaultValue(PrimitiveTypeHint.Number);
+                return base.GetPrimitiveValue(PrimitiveTypeHint.String);
+            return base.GetPrimitiveValue(PrimitiveTypeHint.Number);
         }
         
 
@@ -867,7 +867,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <returns> A string representing the date and time. </returns>
         [JSFunction(Name = "toString")]
-        public new string ToStringJS()
+        public string ToStringJS()
         {
             if (this.value == InvalidDate)
                 return "Invalid Date";
