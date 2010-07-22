@@ -182,7 +182,30 @@ namespace Performance
             var timer = System.Diagnostics.Stopwatch.StartNew();
             foreach (string path in Directory.EnumerateFiles(@"..\..\..\Performance\Files\sunspider-0.9.1"))
                 RunTest(path, 0, false);
-            Assert.Inconclusive(string.Format("{0}ms, was 40355ms", timer.ElapsedMilliseconds));
+            Assert.Inconclusive(string.Format("{0}ms, was 24471ms", timer.ElapsedMilliseconds));
+        }
+
+        [TestMethod]
+        public void RunAllTestsWithJint()
+        {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            var engine = new Jint.JintEngine();
+            foreach (string path in Directory.EnumerateFiles(@"..\..\..\Performance\Files\sunspider-0.9.1"))
+            {
+                //try
+                //{
+                    var timer2 = System.Diagnostics.Stopwatch.StartNew();
+                    engine.Run(File.ReadAllText(path));
+                    Console.WriteLine("{0}\t{1:n1}",
+                        Path.GetFileNameWithoutExtension(path),
+                        timer2.ElapsedMilliseconds);
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine("{0}\tFAILED ({1})", Path.GetFileNameWithoutExtension(path), ex.Message);
+                //}
+            }
+            Assert.Inconclusive(string.Format("{0}ms, was ?ms", timer.ElapsedMilliseconds));
         }
 
         private void RunTest(string scriptPath, double previous, bool assertResults = true)
