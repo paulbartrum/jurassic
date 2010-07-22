@@ -45,6 +45,7 @@
     <Compile Include="Compiler\Parser\Context\FunctionContext.cs" />
     <Compile Include="Compiler\Parser\Context\GlobalContext.cs" />
     <Compile Include="Compiler\Parser\Context\ScriptContext.cs" />
+    <Compile Include="Compiler\Parser\Emit\FunctionOptimizationInfo.cs" />
     <Compile Include="Compiler\Parser\Emit\ILGenerator\ILGenerator.cs" />
     <Compile Include="Compiler\Parser\Emit\ILGenerator\ReflectionEmitILGenerator.cs" />
     <Compile Include="Compiler\Parser\Emit\ILReader\DynamicILInfoTokenResolver.cs" />
