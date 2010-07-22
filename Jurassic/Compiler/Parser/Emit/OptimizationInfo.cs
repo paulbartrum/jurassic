@@ -118,6 +118,20 @@ namespace Jurassic.Compiler
 
 
 
+        //     FUNCTION OPTIMIZATION
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets or sets function optimization information.
+        /// </summary>
+        public FunctionOptimizationInfo FunctionOptimizationInfo
+        {
+            get;
+            set;
+        }
+
+
+
         //     VARIABLES
         //_________________________________________________________________________________________
 

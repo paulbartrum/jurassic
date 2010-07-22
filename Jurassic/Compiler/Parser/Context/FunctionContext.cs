@@ -77,6 +77,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets or sets function optimization information.
+        /// </summary>
+        public FunctionOptimizationInfo Optimizations
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Parses the source text into an abstract syntax tree.
         /// </summary>
         /// <returns> The root node of the abstract syntax tree. </returns>
@@ -134,20 +143,23 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the arguments object into the scope.
-            // prototype
-            generator.Call(ReflectionHelpers.Global_Object);
-            generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
-            // callee
-            generator.LoadArgument(2);
-            generator.CastClass(typeof(Library.UserDefinedFunction));
-            // scope
-            generator.LoadArgument(0);
-            generator.CastClass(typeof(DeclarativeScope));
-            // argumentValues
-            generator.LoadArgument(3);
-            generator.NewObject(ReflectionHelpers.Arguments_Constructor);
-            var arguments = new NameExpression(this.InitialScope, "arguments");
-            arguments.GenerateSet(generator, OptimizationInfo.Empty, PrimitiveType.Any, false);
+            if (this.Optimizations != null && this.Optimizations.HasArguments == true)
+            {
+                // prototype
+                generator.Call(ReflectionHelpers.Global_Object);
+                generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
+                // callee
+                generator.LoadArgument(2);
+                generator.CastClass(typeof(Library.UserDefinedFunction));
+                // scope
+                generator.LoadArgument(0);
+                generator.CastClass(typeof(DeclarativeScope));
+                // argumentValues
+                generator.LoadArgument(3);
+                generator.NewObject(ReflectionHelpers.Arguments_Constructor);
+                var arguments = new NameExpression(this.InitialScope, "arguments");
+                arguments.GenerateSet(generator, OptimizationInfo.Empty, PrimitiveType.Any, false);
+            }
 
             // Transfer the arguments into the scope.
             // Note: the arguments array can be smaller than expected.

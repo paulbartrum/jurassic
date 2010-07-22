@@ -15,7 +15,7 @@ namespace Jurassic.Compiler
         private bool consumedLineTerminator;
         private ExpressionState expressionState;
         private Scope currentScope;
-        private bool insideFunction;
+        private Stack<FunctionOptimizationInfo> functionOptimizations;
         private List<string> labelsForCurrentStatement = new List<string>();
 
 
@@ -35,7 +35,9 @@ namespace Jurassic.Compiler
             this.lexer = lexer;
             this.lexer.ExpressionStateCallback = () => this.expressionState;
             this.currentScope = initialScope;
-            this.insideFunction = insideFunction;
+            this.functionOptimizations = new Stack<FunctionOptimizationInfo>();
+            if (insideFunction == true)
+                this.functionOptimizations.Push(new FunctionOptimizationInfo());
             this.Consume();
         }
 
@@ -201,7 +203,7 @@ namespace Jurassic.Compiler
             while (this.nextToken != null)
             {
                 // Check if we are at the end of a function.
-                if (this.insideFunction == true && this.nextToken == PunctuatorToken.RightBrace)
+                if (this.functionOptimizations.Count > 0 && this.nextToken == PunctuatorToken.RightBrace)
                     break;
 
                 // Parse a single statement.
@@ -723,7 +725,7 @@ namespace Jurassic.Compiler
         /// <returns> A return statement. </returns>
         private ReturnStatement ParseReturn()
         {
-            if (this.insideFunction == false)
+            if (this.functionOptimizations.Count == 0)
                 throw new JavaScriptException("SyntaxError", "Return statements are only allowed inside functions");
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
@@ -1045,15 +1047,16 @@ namespace Jurassic.Compiler
             // Create a new scope and assign variables within the with statement to the scope.
             var scope = this.currentScope = DeclarativeScope.CreateFunctionScope(this.currentScope, functionName, argumentNames);
 
-            // The parser needs to know whether it is inside a function.
-            bool original = this.insideFunction;
-            this.insideFunction = true;
+            // Add function optimization info.
+            if (this.functionOptimizations.Count > 0)
+                this.functionOptimizations.Peek().HasNestedFunction = true;
+            this.functionOptimizations.Push(new FunctionOptimizationInfo());
 
             // Read the function body.
             var body = Parse();
 
-            // Revert the insideFunction value.
-            this.insideFunction = original;
+            // Pop the function optimization info.
+            var optimizations = this.functionOptimizations.Pop();
 
             // Revert the scope.
             this.currentScope = this.currentScope.ParentScope;
@@ -1071,7 +1074,9 @@ namespace Jurassic.Compiler
             }
 
             // Create a new function expression.
-            return new FunctionExpression(new FunctionContext(scope, functionName, argumentNames, body, this.SourcePath));
+            var context = new FunctionContext(scope, functionName, argumentNames, body, this.SourcePath);
+            context.Optimizations = optimizations;
+            return new FunctionExpression(context);
         }
 
         /// <summary>
@@ -1218,8 +1223,20 @@ namespace Jurassic.Compiler
                         // If the token is a literal, convert it to a literal expression.
                         terminal = new LiteralExpression(((LiteralToken)this.nextToken).Value);
                     else if (this.nextToken is IdentifierToken)
-                        // If the token is an identifier, convert it to a member access expression.
-                        terminal = new NameExpression(this.currentScope, ((IdentifierToken)this.nextToken).Name);
+                    {
+                        // If the token is an identifier, convert it to a NameExpression.
+                        var identifierName = ((IdentifierToken)this.nextToken).Name;
+                        terminal = new NameExpression(this.currentScope, identifierName);
+
+                        // Add function optimization info.
+                        if (this.functionOptimizations.Count > 0 && (unboundOperator == null || unboundOperator.OperatorType != OperatorType.MemberAccess))
+                        {
+                            if (identifierName == "eval")
+                                this.functionOptimizations.Peek().HasEval = true;
+                            if (identifierName == "arguments")
+                                this.functionOptimizations.Peek().HasArguments = true;
+                        }
+                    }
                     else if (this.nextToken == KeywordToken.This)
                         // Convert "this" to an expression.
                         terminal = new ThisExpression();
