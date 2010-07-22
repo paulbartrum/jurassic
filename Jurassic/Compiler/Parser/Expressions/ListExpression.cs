@@ -61,7 +61,7 @@ namespace Jurassic.Compiler
             for (int i = 0; i < items.Count - 1; i++)
             {
                 // Generate code for the item, evaluating the side-effects but not producing any values.
-                items[i].GenerateCode(generator, optimizationInfo.AddFlags(OptimizationFlags.SuppressReturnValue));
+                items[i].GenerateCode(generator, optimizationInfo); //.AddFlags(OptimizationFlags.SuppressReturnValue));
             }
 
             // Generate code for the last item and return the value.
