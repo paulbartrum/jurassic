@@ -2,8 +2,11 @@
 
 namespace Jurassic.Library
 {
+    /// <summary>
+    /// The base class of the javascript function attributes.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class BaseJSFunctionAttribute : Attribute
+    public abstract class BaseJSFunctionAttribute : Attribute
     {
         /// <summary>
         /// Creates a new BaseJSFunctionAttribute instance with no flags.
@@ -32,6 +35,9 @@ namespace Jurassic.Library
         }
     }
 
+    /// <summary>
+    /// Marks a method as being visible to javascript code.
+    /// </summary>
     public sealed class JSFunctionAttribute : BaseJSFunctionAttribute
     {
         /// <summary>
@@ -42,16 +48,6 @@ namespace Jurassic.Library
         {
             this.Length = -1;
         }
-
-        ///// <summary>
-        ///// Creates a new JSFunctionAttribute instance.
-        ///// </summary>
-        ///// <param name="flags"> One or more flags. </param>
-        //public JSFunctionAttribute(FunctionBinderFlags flags)
-        //    : base(flags)
-        //{
-        //    this.Length = -1;
-        //}
 
         /// <summary>
         /// Get or sets the name of the function, as exposed to javascript.
@@ -107,6 +103,10 @@ namespace Jurassic.Library
     {
     }
 
+    /// <summary>
+    /// Marks a field as being visible to javascript code.  Currently only <c>const</c> fields
+    /// are supported.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public sealed class JSFieldAttribute : Attribute
     {

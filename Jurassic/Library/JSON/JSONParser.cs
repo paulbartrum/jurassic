@@ -233,7 +233,7 @@ namespace Jurassic.Library
                 var propertyValue = ParseValue();
 
                 // Set the property value.
-                result.SetProperty(propertyName, propertyValue, PropertyAttributes.FullAccess);
+                result.FastSetProperty(propertyName, propertyValue, PropertyAttributes.FullAccess);
 
                 // Apply the reviver function.
                 if (this.ReviverFunction != null)

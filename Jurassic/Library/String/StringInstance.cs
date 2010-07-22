@@ -24,7 +24,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             this.value = string.Empty;
-            this.SetProperty("length", 0);
+            this.FastSetProperty("length", 0);
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Jurassic.Library
             if (value == null)
                 throw new ArgumentNullException("value");
             this.value = value;
-            this.SetProperty("length", value.Length);
+            this.FastSetProperty("length", value.Length);
         }
 
 
@@ -77,38 +77,21 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the property descriptor for the property with the given array index.  The
-        /// prototype chain is not searched.
+        /// Gets a descriptor for the property with the given array index.
         /// </summary>
-        /// <param name="index"> The array index of the property. </param>
-        /// <returns> A property descriptor containing the property value and attributes.  The
-        /// result will be <c>PropertyDescriptor.Undefined</c> if the property doesn't exist. </returns>
-        internal override PropertyDescriptor GetOwnProperty(uint index)
+        /// <param name="propertyName"> The array index of the property. </param>
+        /// <returns> A property descriptor containing the property value and attributes. </returns>
+        /// <remarks> The prototype chain is not searched. </remarks>
+        public override PropertyDescriptor GetOwnPropertyDescriptor(uint index)
         {
             if (index < this.value.Length)
             {
                 var result = this.value[(int)index].ToString();
                 return new PropertyDescriptor(result, PropertyAttributes.Enumerable);
             }
-            return base.GetOwnProperty(index);
-        }
-
-        /// <summary>
-        /// Gets the property descriptor for the property with the given name.  The prototype
-        /// chain is not searched.
-        /// </summary>
-        /// <param name="propertyName"> The name of the property. </param>
-        /// <returns> A property descriptor containing the property value and attributes.  The
-        /// result will be <c>PropertyDescriptor.Undefined</c> if the property doesn't exist. </returns>
-        internal override PropertyDescriptor GetOwnProperty(string propertyName)
-        {
-            // Check if the property name is an array index.
-            uint arrayIndex = ArrayInstance.ParseArrayIndex(propertyName);
-            if (arrayIndex != uint.MaxValue && arrayIndex < this.value.Length)
-                return GetOwnProperty(arrayIndex);
 
             // Delegate to the base class.
-            return base.GetOwnProperty(propertyName);
+            return base.GetOwnPropertyDescriptor(index);
         }
 
         /// <summary>

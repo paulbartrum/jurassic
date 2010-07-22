@@ -146,6 +146,10 @@ namespace UnitTests
 
             // charAt is generic.
             Assert.AreEqual("2", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.charAt; x.f(3)"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.charAt.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.charAt.call(null)"));
         }
 
         [TestMethod]
@@ -165,6 +169,10 @@ namespace UnitTests
 
             // charCodeAt is generic.
             Assert.AreEqual(50, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.charCodeAt; x.f(3)"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.charCodeAt.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.charCodeAt.call(null)"));
         }
 
         [TestMethod]
@@ -180,6 +188,10 @@ namespace UnitTests
 
             // concat is generic.
             Assert.AreEqual("6.1234300", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.concat; x.f(300)"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.concat.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.concat.call(null)"));
         }
 
         [TestMethod]
@@ -224,6 +236,10 @@ namespace UnitTests
 
             // indexOf is generic.
             Assert.AreEqual(2, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.indexOf; x.f('123')"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.indexOf.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.indexOf.call(null)"));
         }
 
         [TestMethod]
@@ -254,6 +270,10 @@ namespace UnitTests
 
             // lastIndexOf is generic.
             Assert.AreEqual(2, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.lastIndexOf; x.f('123')"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.lastIndexOf.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.lastIndexOf.call(null)"));
         }
 
         [TestMethod]
@@ -277,6 +297,10 @@ namespace UnitTests
 
             // localeCompare is generic.
             Assert.AreEqual(0, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.localeCompare; x.f('6.1234')"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.localeCompare.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.localeCompare.call(null)"));
         }
 
         [TestMethod]
@@ -383,6 +407,10 @@ namespace UnitTests
             TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.match; var result = x.f('12')");
             Assert.AreEqual(1, TestUtils.Evaluate("result.length"));
             Assert.AreEqual("12", TestUtils.Evaluate("result[0]"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.match.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.match.call(null)"));
         }
 
         [TestMethod]
@@ -435,6 +463,10 @@ namespace UnitTests
 
             // replace is generic.
             Assert.AreEqual("6.4334", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.replace; x.f('12', '43')"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.replace.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.replace.call(null)"));
         }
 
         [TestMethod]
@@ -465,6 +497,10 @@ namespace UnitTests
 
             // search is generic.
             Assert.AreEqual(2, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.search; x.f('12')"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.search.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.search.call(null)"));
         }
 
         [TestMethod]
@@ -496,6 +532,10 @@ namespace UnitTests
 
             // slice is generic.
             Assert.AreEqual("23", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.slice; x.f(3, 5)"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.slice.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.slice.call(null)"));
         }
 
         [TestMethod]
@@ -578,6 +618,10 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("result.length"));
             Assert.AreEqual("6.1", TestUtils.Evaluate("result[0]"));
             Assert.AreEqual("34", TestUtils.Evaluate("result[1]"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.split.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.split.call(null)"));
         }
 
         [TestMethod]
@@ -641,6 +685,10 @@ namespace UnitTests
 
             // substring is generic.
             Assert.AreEqual("23", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.substring; x.f(5, 3)"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.substring.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.substring.call(null)"));
         }
 
         [TestMethod]
@@ -658,6 +706,10 @@ namespace UnitTests
             Assert.AreEqual("hello world", TestUtils.Evaluate("'  hello world  '.trim()"));
             Assert.AreEqual("6.1234", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.trim; x.f()"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.trim.length"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.trim.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.trim.call(null)"));
         }
 
         [TestMethod]
@@ -666,6 +718,10 @@ namespace UnitTests
             Assert.AreEqual("hello world", TestUtils.Evaluate("'Hello World'.toLocaleLowerCase()"));
             Assert.AreEqual("6.1234", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.toLocaleLowerCase; x.f()"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.toLocaleLowerCase.length"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toLocaleLowerCase.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toLocaleLowerCase.call(null)"));
         }
 
         [TestMethod]
@@ -674,6 +730,10 @@ namespace UnitTests
             Assert.AreEqual("HELLO WORLD", TestUtils.Evaluate("'Hello World'.toLocaleUpperCase()"));
             Assert.AreEqual("6.1234", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.toLocaleUpperCase; x.f()"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.toLocaleUpperCase.length"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toLocaleUpperCase.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toLocaleUpperCase.call(null)"));
         }
 
         [TestMethod]
@@ -682,6 +742,10 @@ namespace UnitTests
             Assert.AreEqual("hello world", TestUtils.Evaluate("'Hello World'.toLowerCase()"));
             Assert.AreEqual("6.1234", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.toLowerCase; x.f()"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.toLowerCase.length"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toLowerCase.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toLowerCase.call(null)"));
         }
 
         [TestMethod]
@@ -690,6 +754,10 @@ namespace UnitTests
             Assert.AreEqual("HELLO WORLD", TestUtils.Evaluate("'Hello World'.toUpperCase()"));
             Assert.AreEqual("6.1234", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.toUpperCase; x.f()"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.toUpperCase.length"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toUpperCase.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toUpperCase.call(null)"));
         }
 
         [TestMethod]
@@ -697,7 +765,9 @@ namespace UnitTests
         {
             Assert.AreEqual("hello world", TestUtils.Evaluate("'hello world'.toString()"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.toString.length"));
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("var x = {}; x.f = ''.toString; x.f()"));
+
+            // toString is not generic.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.toString.call(5)"));
         }
 
         [TestMethod]
@@ -705,7 +775,9 @@ namespace UnitTests
         {
             Assert.AreEqual("hello world", TestUtils.Evaluate("'hello world'.valueOf()"));
             Assert.AreEqual(0, TestUtils.Evaluate("'hello world'.valueOf.length"));
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("var x = {}; x.f = ''.valueOf; x.f()"));
+
+            // valueOf is not generic.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.valueOf.call(5)"));
         }
     }
 }

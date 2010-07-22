@@ -98,18 +98,18 @@ namespace Jurassic.Library
             this.ParentScope = parentScope;
 
             // Add function properties.
-            this.SetProperty("name", name);
-            this.SetProperty("length", argumentNames.Count);
+            this.FastSetProperty("name", name);
+            this.FastSetProperty("length", argumentNames.Count);
             if (hasInstancePrototype == true)
             {
-                this.SetProperty("prototype", GlobalObject.Object.Construct(), PropertyAttributes.Writable);
-                this.InstancePrototype.SetProperty("constructor", this, PropertyAttributes.NonEnumerable);
+                this.FastSetProperty("prototype", GlobalObject.Object.Construct(), PropertyAttributes.Writable);
+                this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
             }
             else
             {
                 // The empty function doesn't have an instance prototype.
                 // i.e. Object.getPrototypeOf(Function).prototype === null
-                this.SetProperty("prototype", Null.Value, PropertyAttributes.Sealed);
+                this.FastSetProperty("prototype", Null.Value, PropertyAttributes.Sealed);
             }
         }
 
@@ -165,7 +165,7 @@ namespace Jurassic.Library
         /// Calls this function, passing in the given "this" value and zero or more arguments.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <param name="argumentValues"> An array of argument values to pass to the function. </param>
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
@@ -202,23 +202,6 @@ namespace Jurassic.Library
 
             // Call the function.
             return this.body(this.ParentScope, thisObject, this, argumentValues);
-        }
-
-        /// <summary>
-        /// Creates an object, using this function as the constructor.
-        /// </summary>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
-        /// <returns> The object that was created. </returns>
-        public override ObjectInstance ConstructLateBound(params object[] argumentValues)
-        {
-            // Create a new object and set the prototype to the instance prototype of the function.
-            var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
-            
-            // Run the function, with the new object as the "this" keyword.
-            CallLateBound(newObject, argumentValues);
-            
-            // Return the new object.
-            return newObject;
         }
 
         /// <summary>

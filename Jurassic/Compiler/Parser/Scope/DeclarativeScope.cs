@@ -107,7 +107,7 @@ namespace Jurassic.Compiler
         public override object GetValue(string variableName)
         {
             if (this.Values == null)
-                throw new InvalidOperationException("");
+                throw new InvalidOperationException("This method can only be used when the DeclarativeScope is created using CreateRuntimeScope().");
             int index = GetDeclaredVariableIndex(variableName);
             if (index < 0)
                 return null;

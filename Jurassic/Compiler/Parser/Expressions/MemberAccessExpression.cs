@@ -104,7 +104,7 @@ namespace Jurassic.Compiler
                 EmitConversion.ToUInt32(generator, rhs.ResultType);
 
                 // Call the indexer.
-                generator.Call(ReflectionHelpers.ObjectInstance_GetItem_Int);
+                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Int);
             }
             else if (propertyName != null)
             {
@@ -115,7 +115,7 @@ namespace Jurassic.Compiler
 
                 // Call Get(string)
                 generator.LoadString(propertyName);
-                generator.Call(ReflectionHelpers.ObjectInstance_GetItem_String);
+                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_String);
 
                 // Named property access
                 // ---------------------
@@ -187,7 +187,7 @@ namespace Jurassic.Compiler
                 EmitConversion.ToString(generator, rhs.ResultType);
 
                 // Call Get(string)
-                generator.Call(ReflectionHelpers.ObjectInstance_GetItem_String);
+                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_String);
             }
         }
 
@@ -251,7 +251,8 @@ namespace Jurassic.Compiler
 
                 // Call the indexer.
                 generator.LoadVariable(value);
-                generator.Call(ReflectionHelpers.ObjectInstance_SetItem_Int);
+                generator.LoadBoolean(optimizationInfo.StrictMode);
+                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Int);
             }
             else if (propertyName != null)
             {
@@ -263,7 +264,8 @@ namespace Jurassic.Compiler
                 // Call the indexer.
                 generator.LoadString(propertyName);
                 generator.LoadVariable(value);
-                generator.Call(ReflectionHelpers.ObjectInstance_SetItem_String);
+                generator.LoadBoolean(optimizationInfo.StrictMode);
+                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
 
                 // Example for setting "object.property"
                 // __object_cachedVersion = 0;
@@ -293,7 +295,8 @@ namespace Jurassic.Compiler
 
                 // Call the indexer.
                 generator.LoadVariable(value);
-                generator.Call(ReflectionHelpers.ObjectInstance_SetItem_String);
+                generator.LoadBoolean(optimizationInfo.StrictMode);
+                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
             }
 
             // The temporary variable is no longer needed.

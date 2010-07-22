@@ -96,6 +96,7 @@
     <Compile Include="Compiler\Parser\SourceCodeRange.cs" />
     <Compile Include="Core\ConcatenatedString.cs" />
     <Compile Include="Library\Function\BoundFunction.cs" />
+    <Compile Include="Library\Function\ThrowTypeErrorFunction.cs" />
     <Compile Include="Library\JSON\JSONParser.cs" />
     <Compile Include="Library\JSON\JSONSerializer.cs" />
     <Compile Include="Library\JSON\JSONLexer.cs" />
@@ -121,6 +122,8 @@
     <Compile Include="Library\Function\FunctionBinderMethod.cs" />
     <Compile Include="Library\Function\FunctionBinder.cs" />
     <Compile Include="Library\JSON\JSONObject.cs" />
+    <Compile Include="Library\Object\PropertyAccessorValue.cs" />
+    <Compile Include="Library\Object\SchemaProperty.cs" />
     <Compile Include="Library\Object\HiddenClassSchema.cs" />
     <Compile Include="Library\Object\PropertyAttributes.cs" />
     <Compile Include="Library\Object\PropertyNameAndValue.cs" />

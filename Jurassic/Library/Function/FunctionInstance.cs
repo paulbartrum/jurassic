@@ -95,16 +95,26 @@ namespace Jurassic.Library
         /// Calls this function, passing in the given "this" value and zero or more arguments.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The value that was returned from the function. </returns>
-        public abstract object CallLateBound(object thisObject, params object[] arguments);
+        public abstract object CallLateBound(object thisObject, params object[] argumentValues);
 
         /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The object that was created. </returns>
-        public abstract ObjectInstance ConstructLateBound(params object[] arguments);
+        public virtual ObjectInstance ConstructLateBound(params object[] argumentValues)
+        {
+            // Create a new object and set the prototype to the instance prototype of the function.
+            var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
+
+            // Run the function, with the new object as the "this" keyword.
+            CallLateBound(newObject, argumentValues);
+
+            // Return the new object.
+            return newObject;
+        }
 
 
 
@@ -149,7 +159,7 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The value of <c>this</c> in the context of the function. </param>
         /// <param name="arguments"> Any number of arguments that will be passed to the function. </param>
         /// <returns> The result from the function call. </returns>
-        [JSFunction(Name = "call")]
+        [JSFunction(Name = "call", Length = 1)]
         public object Call(object thisObj, params object[] arguments)
         {
             return this.CallLateBound(thisObj, arguments);
@@ -173,7 +183,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <returns> A string representing this object. </returns>
         [JSFunction(Name = "toString")]
-        public new string ToStringJS()
+        public string ToStringJS()
         {
             return this.ToString();
         }

@@ -261,6 +261,20 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("delete x.a"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x.a"));
 
+            // Add write-only accessor property.
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = {}; Object.defineProperty(x, 'a', {set: function(value) { this.a2 = value }, enumerable: true, configurable: true}) === x"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x.a"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').value"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').get"));
+            Assert.AreEqual("function", TestUtils.Evaluate("typeof(Object.getOwnPropertyDescriptor(x, 'a').set)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').enumerable"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').writable"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').configurable"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x.a = 5; x.a"));
+            Assert.AreEqual(5, TestUtils.Evaluate("x.a = 5; x.a2"));
+            Assert.AreEqual(true, TestUtils.Evaluate("delete x.a"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x.a"));
+
             // Not all the properties need to be specified.
             Assert.AreEqual(true, TestUtils.Evaluate("var x = {a: 5}; Object.defineProperty(x, 'a', {}) === x"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x.a"));
@@ -508,6 +522,7 @@ namespace UnitTests
 
             // "this" object must be convertible to object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Math.hasOwnProperty.call(undefined, 'max')"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Math.hasOwnProperty.call(null, 'max')"));
 
             // First parameter must be convertible to string.
             Assert.AreEqual("Error", TestUtils.EvaluateExceptionType("Math.hasOwnProperty({toString: function() { throw new Error('test') }})"));
@@ -531,8 +546,9 @@ namespace UnitTests
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Object.isPrototypeOf.length"));
 
-            // "this" object must be convertible to object.
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.isPrototypeOf.call(undefined, Object.prototype)"));
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.isPrototypeOf.call(undefined, {})"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.isPrototypeOf.call(null, {})"));
         }
 
         [TestMethod]
@@ -552,6 +568,7 @@ namespace UnitTests
 
             // "this" object must be convertible to object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.propertyIsEnumerable.call(undefined, 'max')"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.propertyIsEnumerable.call(null, 'max')"));
 
             // First parameter must be convertible to string.
             Assert.AreEqual("Error", TestUtils.EvaluateExceptionType("Math.propertyIsEnumerable({toString: function() { throw new Error('test') }})"));

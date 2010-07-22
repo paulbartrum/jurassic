@@ -39,7 +39,7 @@ namespace Jurassic.Compiler
                     return PrimitiveType.Object;
 
                 // Object literal.
-                if (this.Value is Dictionary<string, Expression>)
+                if (this.Value is Dictionary<string, object>)
                     return PrimitiveType.Object;
 
                 // RegExp literal.
@@ -147,10 +147,10 @@ namespace Jurassic.Compiler
                 // ArrayConstructor.New(object[])
                 generator.Call(ReflectionHelpers.Array_New);
             }
-            else if (this.Value is Dictionary<string, Expression>)
+            else if (this.Value is Dictionary<string, object>)
             {
                 // This is an object literal.
-                var properties = (Dictionary<string, Expression>)this.Value;
+                var properties = (Dictionary<string, object>)this.Value;
 
                 // Create a new object.
                 generator.Call(ReflectionHelpers.Global_Object);
@@ -159,14 +159,45 @@ namespace Jurassic.Compiler
                 foreach (var keyValuePair in properties)
                 {
                     string propertyName = keyValuePair.Key;
-                    Expression propertyValue = keyValuePair.Value;
+                    object propertyValue = keyValuePair.Value;
 
-                    // Add a new property to the object.
                     generator.Duplicate();
                     generator.LoadString(propertyName);
-                    propertyValue.GenerateCode(generator, optimizationInfo);
-                    EmitConversion.ToAny(generator, propertyValue.ResultType);
-                    generator.Call(ReflectionHelpers.ObjectInstance_SetItem_String);
+                    if (propertyValue is Expression)
+                    {
+                        // Add a new property to the object.
+                        var dataPropertyValue = (Expression)propertyValue;
+                        dataPropertyValue.GenerateCode(generator, optimizationInfo);
+                        EmitConversion.ToAny(generator, dataPropertyValue.ResultType);
+                        generator.LoadBoolean(optimizationInfo.StrictMode);
+                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
+                    }
+                    else if (propertyValue is Parser.ObjectLiteralAccessor)
+                    {
+                        // Add a new getter/setter to the object.
+                        var accessorValue = (Parser.ObjectLiteralAccessor)propertyValue;
+                        if (accessorValue.Getter != null)
+                        {
+                            accessorValue.Getter.GenerateCode(generator, optimizationInfo);
+                            EmitConversion.ToAny(generator, accessorValue.Getter.ResultType);
+                        }
+                        else
+                            generator.LoadNull();
+                        if (accessorValue.Setter != null)
+                        {
+                            accessorValue.Setter.GenerateCode(generator, optimizationInfo);
+                            EmitConversion.ToAny(generator, accessorValue.Setter.ResultType);
+                        }
+                        else
+                            generator.LoadNull();
+                        generator.LoadInt32((int)Library.PropertyAttributes.FullAccess);
+                        generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor);
+                        generator.LoadBoolean(false);
+                        generator.Call(ReflectionHelpers.ObjectInstance_DefineProperty);
+                        generator.Pop();
+                    }
+                    else
+                        throw new InvalidOperationException("Invalid property value type in object literal.");
                 }
             }
             else if (PrimitiveTypeUtilities.ToPrimitiveType(this.Value.GetType()) != PrimitiveType.Undefined)
@@ -181,6 +212,61 @@ namespace Jurassic.Compiler
         /// <returns> A string representing this expression. </returns>
         public override string ToString()
         {
+            // Array literal.
+            if (this.Value is List<Expression>)
+            {
+                var result = new System.Text.StringBuilder("[");
+                foreach (var item in (List<Expression>)this.Value)
+                {
+                    if (result.Length > 1)
+                        result.Append(", ");
+                    result.Append(item);
+                }
+                result.Append("]");
+                return result.ToString();
+            }
+
+            // Object literal.
+            if (this.Value is Dictionary<string, object>)
+            {
+                var result = new System.Text.StringBuilder("{");
+                foreach (var keyValuePair in (Dictionary<string, object>)this.Value)
+                {
+                    if (result.Length > 1)
+                        result.Append(", ");
+                    if (keyValuePair.Value is Expression)
+                    {
+                        result.Append(keyValuePair.Key);
+                        result.Append(": ");
+                        result.Append(keyValuePair.Value);
+
+                    }
+                    else if (keyValuePair.Value is Parser.ObjectLiteralAccessor)
+                    {
+                        var accessor = (Parser.ObjectLiteralAccessor)keyValuePair.Value;
+                        if (accessor.Getter != null)
+                        {
+                            result.Append("get ");
+                            result.Append(accessor.Getter.ToString().Substring(9));
+                            if (accessor.Setter != null)
+                                result.Append(", ");
+                        }
+                        if (accessor.Setter != null)
+                        {
+                            result.Append("set ");
+                            result.Append(accessor.Setter.ToString().Substring(9));
+                        }
+                    }
+                }
+                result.Append("}");
+                return result.ToString();
+            }
+
+            // RegExp literal.
+            if (this.Value is RegularExpressionLiteral)
+                return this.Value.ToString();
+
+            // Everything else.
             return TypeConverter.ToString(this.Value);
         }
     }

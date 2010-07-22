@@ -88,6 +88,7 @@ namespace UnitTests
                 Assert.AreEqual("two", TestUtils.Evaluate("array[1]"));
                 Assert.AreEqual(3, TestUtils.Evaluate("array[2]"));
                 Assert.AreEqual("twenty", TestUtils.Evaluate("array[20]"));
+                Assert.AreEqual("twenty", TestUtils.Evaluate("array['20']"));
                 Assert.AreEqual("1,two,3", TestUtils.Evaluate("array.toString()"));
             }
             finally
@@ -95,6 +96,15 @@ namespace UnitTests
                 TestUtils.Evaluate("delete Array.prototype[1]");
                 TestUtils.Evaluate("delete Array.prototype[20]");
             }
+
+            // Array indexes should work even if the array is in the prototype.
+            TestUtils.Evaluate("var array = Object.create(['one', 'two', 'three'])");
+            Assert.AreEqual(false, TestUtils.Evaluate("array.hasOwnProperty(0)"));
+            Assert.AreEqual(3, TestUtils.Evaluate("array.length"));
+            Assert.AreEqual("one", TestUtils.Evaluate("array[0]"));
+            Assert.AreEqual("one", TestUtils.Evaluate("array['0']"));
+            Assert.AreEqual("two", TestUtils.Evaluate("array[1]"));
+            Assert.AreEqual("three", TestUtils.Evaluate("array[2]"));
         }
 
         [TestMethod]
@@ -115,6 +125,9 @@ namespace UnitTests
             Assert.AreEqual("1,2", TestUtils.Evaluate("var x = [1, 2, 3]; x.length = 2; x.toString()"));
             Assert.AreEqual(false, TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.hasOwnProperty(2)"));
             Assert.AreEqual("1,2", TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.toString()"));
+
+            // The length property is virtual, but it should behave as though it was a real property.
+            Assert.AreEqual(0, TestUtils.Evaluate("length = 0; with (Object.create(['one', 'two', 'three'])) { length = 5 } length"));
         }
 
         [TestMethod]

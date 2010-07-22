@@ -38,7 +38,10 @@ namespace Jurassic.Library
             {
                 this.sparse = new SparseArray();
             }
+
+            // Create a fake property for length plus initialize the real length property.
             this.length = length;
+            FastSetProperty("length", -1, PropertyAttributes.Writable | PropertyAttributes.IsLengthProperty);
         }
 
         public ArrayInstance(ObjectInstance prototype, object[] elements)
@@ -47,8 +50,12 @@ namespace Jurassic.Library
             if (elements == null)
                 throw new ArgumentNullException("elements");
             this.dense = elements;
-            this.length = (uint)elements.Length;
+            
             this.denseMayContainHoles = Array.IndexOf(elements, null) >= 0;
+
+            // Create a fake property for length plus initialize the real length property.
+            this.length = (uint)elements.Length;
+            FastSetProperty("length", -1, PropertyAttributes.Writable | PropertyAttributes.IsLengthProperty);
         }
 
         private ArrayInstance(ObjectInstance prototype, SparseArray sparseArray, uint length)
@@ -57,7 +64,10 @@ namespace Jurassic.Library
             if (sparseArray == null)
                 throw new ArgumentNullException("sparseArray");
             this.sparse = sparseArray;
+
+            // Create a fake property for length plus initialize the real length property.
             this.length = length;
+            FastSetProperty("length", -1, PropertyAttributes.Writable | PropertyAttributes.IsLengthProperty);
         }
 
 
@@ -75,12 +85,31 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets the number of elements in the array.  Equivalent to the JavaScript
+        /// Gets or sets the number of elements in the array.  Equivalent to the javascript
         /// Array.prototype.length property.
         /// </summary>
         public uint Length
         {
             get { return this.length; }
+            set
+            {
+                uint previousLength = this.length;
+                this.length = value;
+
+                if (this.dense != null)
+                {
+                    // Resize the array.
+                    ResizeDenseArray(this.length);
+                    if (this.length > previousLength)
+                        this.denseMayContainHoles = true;
+                }
+                else
+                {
+                    // Remove all the elements with indices > length.
+                    if (this.length < previousLength)
+                        this.sparse.DeleteRange(this.length, previousLength - this.length);
+                }
+            }
         }
 
 
@@ -160,21 +189,18 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the property descriptor for the property with the given array index.  The
-        /// prototype chain is not searched.
+        /// Gets a descriptor for the property with the given array index.
         /// </summary>
-        /// <param name="index"> The array index of the property. </param>
-        /// <returns> A property descriptor containing the property value and attributes.  The
-        /// result will be <c>PropertyDescriptor.Undefined</c> if the property doesn't exist. </returns>
-        internal override PropertyDescriptor GetOwnProperty(uint index)
+        /// <param name="propertyName"> The array index of the property. </param>
+        /// <returns> A property descriptor containing the property value and attributes. </returns>
+        /// <remarks> The prototype chain is not searched. </remarks>
+        public override PropertyDescriptor GetOwnPropertyDescriptor(uint index)
         {
             if (this.dense != null)
             {
                 // The array is dense and therefore has at least "length" elements.
                 if (index < this.length)
                     return new PropertyDescriptor(this.dense[index], PropertyAttributes.FullAccess);
-
-                // Otherwise, the element is undefined.
                 return PropertyDescriptor.Undefined;
             }
 
@@ -183,35 +209,16 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets the property descriptor for the property with the given name.  The prototype
-        /// chain is not searched.
-        /// </summary>
-        /// <param name="propertyName"> The name of the property. </param>
-        /// <returns> A property descriptor containing the property value and attributes.  The
-        /// result will be <c>PropertyDescriptor.Undefined</c> if the property doesn't exist. </returns>
-        internal override PropertyDescriptor GetOwnProperty(string propertyName)
-        {
-            // Check if the property name is an array index.
-            uint arrayIndex = ParseArrayIndex(propertyName);
-            if (arrayIndex != uint.MaxValue)
-                return GetOwnProperty(arrayIndex);
-
-            // Get the value of the length property.
-            if (propertyName == "length")
-                return new PropertyDescriptor((int)this.length, PropertyAttributes.Writable);
-
-            // Delegate to the base class.
-            return base.GetOwnProperty(propertyName);
-        }
-
-        /// <summary>
-        /// Sets the value of the property with the given array index.
+        /// Sets the value of the property with the given array index.  If a property with the
+        /// given index does not exist, or exists in the prototype chain (and is not a setter) then
+        /// a new property is created.
         /// </summary>
         /// <param name="index"> The array index of the property to set. </param>
-        /// <param name="value"> The value to set the property to. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
-        internal override void Put(uint index, object value, bool throwOnError)
+        public override void SetPropertyValue(uint index, object value, bool throwOnError)
         {
             value = value ?? Undefined.Value;
             if (this.dense != null)
@@ -261,59 +268,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Sets the value of the property with the given name.
-        /// </summary>
-        /// <param name="propertyName"> The name of the property to set. </param>
-        /// <param name="value"> The value to set the property to. </param>
-        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
-        /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
-        internal override void Put(string propertyName, object value, bool throwOnError)
-        {
-            // Check if the property is an array index.
-            uint arrayIndex = ParseArrayIndex(propertyName);
-            if (arrayIndex != uint.MaxValue)
-            {
-                Put(arrayIndex, value, throwOnError);
-                return;
-            }
-
-            // Set the value of the length property.
-            if (propertyName == "length")
-            {
-                double length = TypeConverter.ToNumber(value);
-                if (length < 0 || length > uint.MaxValue)
-                    throw new JavaScriptException("RangeError", "Invalid array length");
-                uint previousLength = this.length;
-                this.length = TypeConverter.ToUint32(length);
-
-                if (this.dense != null)
-                {
-                    // Resize the array.
-                    ResizeDenseArray(this.length);
-                    if (this.length > previousLength)
-                        this.denseMayContainHoles = true;
-                }
-                else
-                {
-                    // Remove all the elements with indices > length.
-                    if (this.length < previousLength)
-                        this.sparse.DeleteRange(this.length, previousLength - this.length);
-                }
-                return;
-            }
-
-            // Delegate to the base class.
-            base.Put(propertyName, value, throwOnError);
-        }
-
-        /// <summary>
         /// Deletes the property with the given array index.
         /// </summary>
         /// <param name="index"> The array index of the property to delete. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
-        /// be set.  This can happen if the property is not configurable.  </param>
-        /// <returns> <c>true</c> if the property was successfully deleted; <c>false</c> otherwise. </returns>
-        internal override bool Delete(uint index, bool throwOnError)
+        /// be set because the property was marked as non-configurable.  </param>
+        /// <returns> <c>true</c> if the property was successfully deleted, or if the property did
+        /// not exist; <c>false</c> if the property was marked as non-configurable and
+        /// <paramref name="throwOnError"/> was <c>false</c>. </returns>
+        public override bool Delete(uint index, bool throwOnError)
         {
             if (this.dense != null)
             {
@@ -326,32 +289,16 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Deletes the property with the given name.
-        /// </summary>
-        /// <param name="propertyName"> The name of the property to delete. </param>
-        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
-        /// be set.  This can happen if the property is not configurable. </param>
-        /// <returns> <c>true</c> if the property was successfully deleted; <c>false</c> otherwise. </returns>
-        internal override bool Delete(string propertyName, bool throwOnError)
-        {
-            // Check if the property name is an array index.
-            uint arrayIndex = ParseArrayIndex(propertyName);
-            if (arrayIndex != uint.MaxValue)
-                return Delete(arrayIndex, throwOnError);
-
-            // Delegate to the base class.
-            return base.Delete(propertyName, throwOnError);
-        }
-
-        /// <summary>
-        /// Defines or redefines the value and attributes of a property.
+        /// Defines or redefines the value and attributes of a property.  The prototype chain is
+        /// not searched so if the property exists but only in the prototype chain a new property
+        /// will be created.
         /// </summary>
         /// <param name="propertyName"> The name of the property to modify. </param>
         /// <param name="descriptor"> The property value and attributes. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is not configurable or the object is sealed. </param>
         /// <returns> <c>true</c> if the property was successfully modified; <c>false</c> otherwise. </returns>
-        internal override bool DefineOwnProperty(string propertyName, PropertyDescriptor descriptor, bool throwOnError)
+        public override bool DefineProperty(string propertyName, PropertyDescriptor descriptor, bool throwOnError)
         {
             // Make sure the property name isn't actually an array index.
             uint arrayIndex = ParseArrayIndex(propertyName);
@@ -383,7 +330,7 @@ namespace Jurassic.Library
             }
 
             // Delegate to the base class.
-            return base.DefineOwnProperty(propertyName, descriptor, throwOnError);
+            return base.DefineProperty(propertyName, descriptor, throwOnError);
         }
 
         /// <summary>
@@ -414,9 +361,6 @@ namespace Jurassic.Library
                                 yield return new PropertyNameAndValue(i.ToString(), new PropertyDescriptor(arrayElementValue, PropertyAttributes.FullAccess));
                         }
                 }
-
-                // Return the "length" property.
-                yield return new PropertyNameAndValue("length", new PropertyDescriptor(this.length, PropertyAttributes.Writable));
 
                 // Delegate to the base implementation.
                 foreach (var nameAndValue in base.Properties)
@@ -658,7 +602,7 @@ namespace Jurassic.Library
             for (int i = 0; i < items.Length; i++)
             {
                 // Append the new item to the array.
-                thisObj.Put(arrayLength ++, items[i], true);
+                thisObj.SetPropertyValue(arrayLength ++, items[i], true);
             }
 
             // Update the length property.
@@ -917,7 +861,7 @@ namespace Jurassic.Library
                     // Find all the holes and populate them from the prototype.
                     for (int i = 0; i < array.length; i++)
                         if (array.dense[i] == null)
-                            array.dense[i] = array.Prototype.Get((uint)i);
+                            array.dense[i] = array.Prototype.GetPropertyValue((uint)i);
                 }
 
                 // Allocate some more space if required.
@@ -954,7 +898,7 @@ namespace Jurassic.Library
 
             // Prepend the new items.
             for (uint i = 0; i < items.Length; i++)
-                thisObj.Put(i, items[i], true);
+                thisObj.SetPropertyValue(i, items[i], true);
             
             // Return the new length of the array.
             return arrayLength + (uint)items.Length;
@@ -1430,7 +1374,7 @@ namespace Jurassic.Library
         {
             if (thisObj is ArrayInstance)
                 ((ArrayInstance)thisObj).length = value;
-            thisObj.Put("length", (double)value, true);
+            thisObj.SetPropertyValue("length", (double)value, true);
         }
 
         /// <summary>

@@ -122,5 +122,33 @@ namespace Jurassic
                 return TypeConverter.ToNumber(x) <= TypeConverter.ToNumber(y);
             }
         }
+
+        /// <summary>
+        /// Implements the SameValue algorithm.
+        /// </summary>
+        /// <param name="x"> The first object to compare. </param>
+        /// <param name="y"> The second object to compare. </param>
+        /// <returns> <c>true</c> if the objects are the same value according to the SameValue
+        /// algorithm. </returns>
+        /// <remarks>
+        /// This algorithm differs from the StrictEquals algorithm in two ways:
+        /// 1. NaN compares equal with itself
+        /// 2. Negative zero is considered different from positive zero.
+        /// </remarks>
+        public static bool SameValue(object x, object y)
+        {
+            if (x == null)
+                x = Undefined.Value;
+            if (y == null)
+                y = Undefined.Value;
+            if (x is int)
+                x = (double)(int)x;
+            if (y is int)
+                y = (double)(int)y;
+            if (x is double && (double) x == 0.0 && y is double && (double)y == 0.0)
+                if ((1 / (double)x) != (1 / (double)y))
+                    return false;
+            return object.Equals(x, y);
+        }
     }
 }

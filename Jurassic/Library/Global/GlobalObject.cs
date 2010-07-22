@@ -47,9 +47,9 @@ namespace Jurassic.Library
             : base(prototype)
         {
             // Add the global constants.
-            this.SetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed);
-            this.SetProperty("NaN", double.NaN, PropertyAttributes.Sealed);
-            this.SetProperty("undefined", Undefined.Value, PropertyAttributes.Sealed);
+            this.FastSetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed);
+            this.FastSetProperty("NaN", double.NaN, PropertyAttributes.Sealed);
+            this.FastSetProperty("undefined", Undefined.Value, PropertyAttributes.Sealed);
         }
 
         /// <summary>

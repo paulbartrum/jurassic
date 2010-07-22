@@ -91,7 +91,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "getOwnPropertyDescriptor")]
         public static ObjectInstance GetOwnPropertyDescriptor([JSDoNotConvert] ObjectInstance obj, string propertyName)
         {
-            var descriptor = obj.GetOwnProperty(propertyName);
+            var descriptor = obj.GetOwnPropertyDescriptor(propertyName);
             if (descriptor.Exists == false)
                 return null;
             return descriptor.ToObject();
@@ -146,7 +146,7 @@ namespace Jurassic.Library
         public static ObjectInstance DefineProperty([JSDoNotConvert] ObjectInstance obj, string propertyName, ObjectInstance attributes)
         {
             var descriptor = PropertyDescriptor.FromObject(attributes, new PropertyDescriptor(Undefined.Value, PropertyAttributes.Sealed));
-            obj.DefineOwnProperty(propertyName, descriptor, true);
+            obj.DefineProperty(propertyName, descriptor, true);
             return obj;
         }
 
@@ -178,8 +178,8 @@ namespace Jurassic.Library
                 properties.Add(property);
             foreach (var property in properties)
             {
-                obj.SetProperty(property.Name, property.Value,
-                    property.Attributes & ~PropertyAttributes.Configurable);
+                obj.FastSetProperty(property.Name, property.Value,
+                    property.Attributes & ~PropertyAttributes.Configurable, overwriteAttributes: true);
             }
             obj.IsExtensible = false;
             return obj;
@@ -198,8 +198,8 @@ namespace Jurassic.Library
                 properties.Add(property);
             foreach (var property in properties)
             {
-                obj.SetProperty(property.Name, property.Value,
-                    property.Attributes & ~(PropertyAttributes.NonEnumerable));
+                obj.FastSetProperty(property.Name, property.Value,
+                    property.Attributes & ~(PropertyAttributes.NonEnumerable), overwriteAttributes: true);
             }
             obj.IsExtensible = false;
             return obj;

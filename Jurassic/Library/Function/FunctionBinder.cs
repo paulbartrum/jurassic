@@ -311,7 +311,19 @@ namespace Jurassic.Library
             // Emit the "this" parameter.
             if (binderMethod.HasThisParameter)
             {
+                // Load the "this" parameter passed by the client.
                 il.Emit(OpCodes.Ldarg_0);
+
+                if (binderMethod.ThisType != typeof(object))
+                {
+                    // If the target "this" object type is not of type object, throw an error if
+                    // the value is undefined or null.
+                    il.Emit(OpCodes.Dup);
+                    il.Emit(OpCodes.Ldstr, binderMethod.Name);
+                    il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject, null);
+                }
+
+                // Convert to the target type.
                 EmitConversion(il, typeof(object), binderMethod.ThisType);
 
                 if (binderMethod.ThisType != typeof(ObjectInstance) && typeof(ObjectInstance).IsAssignableFrom(binderMethod.ThisType))
@@ -384,8 +396,8 @@ namespace Jurassic.Library
             if (binderMethod.HasParamArray)
             {
                 // Create an array to pass to the ParamArray parameter.
-                var elementType = targetParameters[targetParameters.Length - 1].ParameterType.GetElementType();;
-                il.Emit(OpCodes.Ldc_I4, argumentTypes.Length - initialEmitCount);
+                var elementType = targetParameters[targetParameters.Length - 1].ParameterType.GetElementType();
+                il.Emit(OpCodes.Ldc_I4, Math.Max(argumentTypes.Length - initialEmitCount, 0));
                 il.Emit(OpCodes.Newarr, elementType);
 
                 for (int i = initialEmitCount; i < argumentTypes.Length; i++)

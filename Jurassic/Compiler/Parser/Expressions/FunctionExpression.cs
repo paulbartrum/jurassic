@@ -76,6 +76,15 @@ namespace Jurassic.Compiler
             // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body)
             generator.NewObject(ReflectionHelpers.UserDefinedFunction_Constructor);
         }
+
+        /// <summary>
+        /// Converts the expression to a string.
+        /// </summary>
+        /// <returns> A string representing this expression. </returns>
+        public override string ToString()
+        {
+            return this.Context.ToString();
+        }
     }
 
 }

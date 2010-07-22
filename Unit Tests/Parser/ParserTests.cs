@@ -734,7 +734,8 @@ namespace UnitTests
 
             // Call functions in the global scope.
             Assert.AreEqual("a%20b", TestUtils.Evaluate("encodeURI('a b')"));
-            Assert.AreEqual(true, TestUtils.Evaluate("b = 5; hasOwnProperty('b')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("b = 5; this.hasOwnProperty('b')"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("b = 5; hasOwnProperty('b')"));
 
             // Argument conversion.
             Assert.AreEqual(123, TestUtils.Evaluate("Math.abs('-123')"));
@@ -827,6 +828,7 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("2 in [5, 6]"));
             Assert.AreEqual(true, TestUtils.Evaluate("'a' in {a: 1, b: 2}"));
             Assert.AreEqual(false, TestUtils.Evaluate("'c' in {a: 1, b: 2}"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'valueOf' in {a: 1, b: 2}"));
             Assert.AreEqual(true, TestUtils.Evaluate("'toString' in new Number(5)"));
             Assert.AreEqual(false, TestUtils.Evaluate("'abcdefgh' in new Number(5)"));
             Assert.AreEqual(true, TestUtils.Evaluate("'toString' in new String()"));
@@ -893,6 +895,9 @@ namespace UnitTests
         [TestMethod]
         public void ObjectLiteral()
         {
+            Assert.AreEqual("[object Object]", TestUtils.Evaluate("x = {}; x.toString()"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {a: 1}.a"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {a: 1, }.a"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {a: 1, b: 2}.a"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {'a': 1, 'b': 2}.a"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {0: 1, 1: 2}[0]"));
@@ -900,7 +905,26 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("x = {a: 1, a: 2}.a"));   // This is an error in strict mode.
             Assert.AreEqual(3, TestUtils.Evaluate("var obj = {valueOf:0, toString:1, foo:2}; x = 0; for (var y in obj) { x ++; } x"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {if: 1}; x.if"));
+
+            // Object literals can have getters and setters.
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {get f() { return 1; }}; x.f"));
+            Assert.AreEqual(5, TestUtils.Evaluate("x = {set f(value) { this.a = value; }}; x.f = 5; x.a"));
+            Assert.AreEqual(5, TestUtils.Evaluate("x = {get f() { return this.a; }, set f(value) { this.a = value; }}; x.f = 5; x.f"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {get f() { return 1; }}; x.f = 5; x.f"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {set f(value) { this.a = value; }}; x.f"));
+            Assert.AreEqual(2, TestUtils.Evaluate("x = {get: 2}; x.get"));
+            Assert.AreEqual(3, TestUtils.Evaluate("x = {set: 3}; x.set"));
+
+            // Errors
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("{a: 1, b: 2}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {a: 1,, }.a"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {get a() { return 2 }, get a() { return 2 }}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set a(value) { }, set a(value) { }}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {a: 1, get a() { return 2 }}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {a: 1, set a(value) { }}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {get a() { return 2 }, a: 1}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set a(value) { }, a: 1}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set a() { }, a: 1}"));
         }
 
         [TestMethod]
@@ -910,6 +934,10 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("x = {a: 1, b: 2}; delete x.a"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = {a: 1, b: 2}; delete(x.a)"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {a: 1, b: 2}; delete x.a; x.a"));
+
+            // Delete does not operate against the prototype chain.
+            Assert.AreEqual(true, TestUtils.Evaluate("x = Object.create({a: 1}); delete x.a"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = Object.create({a: 1}); delete x.a; x.a"));
 
             // Delete non-configurable property.
             Assert.AreEqual(false, TestUtils.Evaluate("delete Number.prototype"));

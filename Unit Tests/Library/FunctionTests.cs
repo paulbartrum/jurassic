@@ -132,7 +132,8 @@ namespace UnitTests
         {
             Assert.AreEqual("[object Math]", TestUtils.Evaluate("({}.toString.call(Math))"));
             Assert.AreEqual(2, TestUtils.Evaluate("new Function('a', 'return this / a').call(10, 5)"));
-            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("new Function('return this').call()"));
+            Assert.AreEqual(GlobalObject.Instance, TestUtils.Evaluate("new Function('return this').call()"));
+            Assert.AreEqual("[object undefined]", TestUtils.Evaluate("toString.call()"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Function.prototype.call.length"));
@@ -181,25 +182,21 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("(function(a, b, c) { delete arguments[0]; arguments[0] = 9; return a })(1, 2, 3)"));
 
             // However, deleting the parameter doesn't break the mapping.
-            if (TestUtils.Engine != JSEngine.JScript)   // JScript bug?
-            {
-                Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("(function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
-                Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("a = 5; (function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
-            }
+            //if (TestUtils.Engine != JSEngine.JScript)   // JScript bug?
+            //{
+                Assert.AreEqual(1, TestUtils.Evaluate("(function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
+                Assert.AreEqual(1, TestUtils.Evaluate("a = 5; (function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
+            //}
 
             // The callee property is the function that is associated with the arguments object.
             Assert.AreEqual(true, TestUtils.Evaluate("f = function(a, b, c) { return arguments.callee }; f() === f"));
 
             // If one of the parameters is "arguments" then the arguments object is never created.
             Assert.AreEqual(5, TestUtils.Evaluate("(function(arguments) { return arguments; })(5)"));
-        }
 
-        [TestMethod]
-        public void Arguments_Enumeration()
-        {
-            // For-in on an arguments object produces nothing since the array elements are defined as non-enumerable.  v8 bug?
-            Assert.AreEqual("+", TestUtils.Evaluate("(function(a, b, c) { var str = '+'; for (var key in arguments) str += key; return str; })(1, 2)"));
-            Assert.AreEqual("+2", TestUtils.Evaluate("(function(a, b, c) { arguments[1] = 3; arguments[2] = 4; var str = '+'; for (var key in arguments) str += key; return str; })(1, 2)"));
+            // The argument array indices are enumerable.
+            Assert.AreEqual("+10", TestUtils.Evaluate("(function(a, b, c) { var str = '+'; for (var key in arguments) str += key; return str; })(1, 2)"));
+            Assert.AreEqual("+102", TestUtils.Evaluate("(function(a, b, c) { arguments[1] = 3; arguments[2] = 4; var str = '+'; for (var key in arguments) str += key; return str; })(1, 2)"));
         }
 
         [TestMethod]

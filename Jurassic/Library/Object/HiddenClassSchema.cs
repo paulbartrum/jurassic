@@ -10,12 +10,7 @@ namespace Jurassic.Library
     internal class HiddenClassSchema
     {
         // Properties
-        private struct PropertyInfo
-        {
-            public int Index;
-            public PropertyAttributes Attributes;
-        }
-        private Dictionary<string, PropertyInfo> properties;
+        private Dictionary<string, SchemaProperty> properties;
 
         // Transitions
         private struct AddPropertyTransition
@@ -34,7 +29,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a new HiddenClassSchema instance.
         /// </summary>
-        private HiddenClassSchema(Dictionary<string, PropertyInfo> properties)
+        private HiddenClassSchema(Dictionary<string, SchemaProperty> properties)
         {
             this.properties = properties;
             this.addTransitions = new Dictionary<AddPropertyTransition, HiddenClassSchema>();
@@ -50,9 +45,17 @@ namespace Jurassic.Library
             get
             {
                 if (empty == null)
-                    empty = new HiddenClassSchema(new Dictionary<string, PropertyInfo>());
+                    empty = new HiddenClassSchema(new Dictionary<string, SchemaProperty>());
                 return empty;
             }
+        }
+
+        /// <summary>
+        /// Gets the number of properties defined in this schema.
+        /// </summary>
+        public int PropertyCount
+        {
+            get { return this.properties.Count; }
         }
 
         /// <summary>
@@ -76,7 +79,7 @@ namespace Jurassic.Library
         /// given name does not exist. </returns>
         public int GetPropertyIndex(string name)
         {
-            PropertyInfo propertyInfo;
+            SchemaProperty propertyInfo;
             if (this.properties.TryGetValue(name, out propertyInfo) == false)
                 return -1;
             return propertyInfo.Index;
@@ -87,19 +90,14 @@ namespace Jurassic.Library
         /// associated with the property.
         /// </summary>
         /// <param name="name"> The name of the property. </param>
-        /// <param name="attributes"> A variable that will receive the property attributes. </param>
-        /// <returns> The zero-based index of the property, or <c>-1</c> if a property with the
+        /// <returns> A structure containing the zero-based index of the property, or <c>-1</c> if a property with the
         /// given name does not exist. </returns>
-        public int GetPropertyIndexAndAttributes(string name, out PropertyAttributes attributes)
+        public SchemaProperty GetPropertyIndexAndAttributes(string name)
         {
-            PropertyInfo propertyInfo;
+            SchemaProperty propertyInfo;
             if (this.properties.TryGetValue(name, out propertyInfo) == false)
-            {
-                attributes = PropertyAttributes.Sealed;
-                return -1;
-            }
-            attributes = propertyInfo.Attributes;
-            return propertyInfo.Index;
+                return SchemaProperty.Undefined;
+            return propertyInfo;
         }
 
         /// <summary>
@@ -117,8 +115,8 @@ namespace Jurassic.Library
             if (newSchema == null)
             {
                 // Create a new schema based on this one.
-                var properties = new Dictionary<string, PropertyInfo>(this.properties);
-                properties.Add(name, new PropertyInfo() { Index = this.properties.Count, Attributes = attributes });
+                var properties = new Dictionary<string, SchemaProperty>(this.properties);
+                properties.Add(name, new SchemaProperty(this.properties.Count, attributes));
                 newSchema = new HiddenClassSchema(properties);
 
                 // Add a transition to the new schema.
@@ -142,7 +140,7 @@ namespace Jurassic.Library
             if (newSchema == null)
             {
                 // Create a new schema based on this one.
-                var properties = new Dictionary<string, PropertyInfo>(this.properties);
+                var properties = new Dictionary<string, SchemaProperty>(this.properties);
                 if (properties.Remove(name) == false)
                     throw new InvalidOperationException(string.Format("The property '{0}' does not exist.", name));
                 newSchema = new HiddenClassSchema(properties);
@@ -169,15 +167,15 @@ namespace Jurassic.Library
             if (newSchema == null)
             {
                 // Check the attributes differ from the existing attributes.
-                PropertyInfo propertyInfo;
+                SchemaProperty propertyInfo;
                 if (this.properties.TryGetValue(name, out propertyInfo) == false)
                     throw new InvalidOperationException(string.Format("The property '{0}' does not exist.", name));
                 if (attributes == propertyInfo.Attributes)
                     return this;
 
                 // Create a new schema based on this one.
-                var properties = new Dictionary<string, PropertyInfo>(this.properties);
-                properties[name] = new PropertyInfo() { Index = propertyInfo.Index, Attributes = attributes };
+                var properties = new Dictionary<string, SchemaProperty>(this.properties);
+                properties[name] = new SchemaProperty(propertyInfo.Index, attributes);
                 newSchema = new HiddenClassSchema(properties);
 
                 // Add a transition to the new schema.

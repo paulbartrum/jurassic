@@ -14,10 +14,10 @@ namespace UnitTests
         public void Constructor()
         {
             // toString
-            Assert.AreEqual("[object Global]", TestUtils.Evaluate("toString()"));
+            Assert.AreEqual("[object Global]", TestUtils.Evaluate("this.toString()"));
 
             // valueOf()
-            Assert.AreEqual(true, TestUtils.Evaluate("valueOf() === this"));
+            Assert.AreEqual(true, TestUtils.Evaluate("this.valueOf() === this"));
         }
 
         [TestMethod]
