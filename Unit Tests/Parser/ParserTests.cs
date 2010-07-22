@@ -594,6 +594,9 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("1, 2"));
             Assert.AreEqual("aliens", TestUtils.Evaluate("1, 'aliens'"));
             Assert.AreEqual(true, TestUtils.Evaluate("'go', true"));
+            Assert.AreEqual(3, TestUtils.Evaluate("1, 2, 3"));
+            Assert.AreEqual(2, TestUtils.Evaluate("var x, y, z = 2; x, y, z"));
+            Assert.AreEqual(2, TestUtils.Evaluate("var x = [1, 2, 3]; x[0], x[1], x[2]"));
         }
 
         [TestMethod]
