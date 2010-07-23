@@ -261,6 +261,10 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public void GenerateDelete(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Deleting a variable is not allowed in strict mode.
+            if (optimizationInfo.StrictMode == true)
+                throw new JavaScriptException("SyntaxError", string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name));
+
             var endOfDelete = generator.CreateLabel();
             var scope = this.Scope;
             ILLocalVariable scopeVariable = generator.CreateTemporaryVariable(typeof(Scope));

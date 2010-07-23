@@ -172,14 +172,14 @@ namespace Jurassic.Library
             //// Create a new declarative scope.
             //var scope = DeclarativeScope.CreateFunctionScope(this.Scope.ParentScope);
 
-            // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
-            if (this.StrictMode == false)
-            {
-                if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
-                    thisObject = GlobalObject.Instance;
-                else
-                    thisObject = TypeConverter.ToObject(thisObject);
-            }
+            //// In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
+            //if (this.StrictMode == false)
+            //{
+            //    if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
+            //        thisObject = GlobalObject.Instance;
+            //    else
+            //        thisObject = TypeConverter.ToObject(thisObject);
+            //}
 
             //// Bind the "this" value.
             //scope.CreateMutableBinding("this", false);

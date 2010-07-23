@@ -24,6 +24,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('a,15,b', 'return a+b')"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('a,this,b', 'return a+b')"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('a,c d,b', 'return a+b')"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('a,c d,b', 'return a+b }')"));
 
             // Call
             Assert.AreEqual(4, TestUtils.Evaluate("f = Function('a', 'b', 'return a+b'); f(1, 3)"));

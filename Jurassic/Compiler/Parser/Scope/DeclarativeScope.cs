@@ -46,6 +46,18 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Creates a new declarative scope for use inside a strict mode eval statement.
+        /// </summary>
+        /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
+        /// <returns> A new DeclarativeScope instance. </returns>
+        public static DeclarativeScope CreateEvalScope(Scope parentScope)
+        {
+            if (parentScope == null)
+                throw new ArgumentNullException("parentScope", "Eval scopes must have a parent scope.");
+            return new DeclarativeScope(parentScope, 0);
+        }
+
+        /// <summary>
         /// Creates a new declarative scope for use at runtime.
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>

@@ -161,7 +161,7 @@ namespace Jurassic
             Global_RegExp = GetStaticMethod(typeof(GlobalObject), "get_RegExp");
             Global_Array = GetStaticMethod(typeof(GlobalObject), "get_Array");
             Global_Object = GetStaticMethod(typeof(GlobalObject), "get_Object");
-            Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(Scope), typeof(object), typeof(string));
+            Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(string), typeof(Scope), typeof(object), typeof(bool));
 
             String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");

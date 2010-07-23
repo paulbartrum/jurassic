@@ -156,12 +156,6 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         private void GenerateEval(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // scope
-            generator.LoadArgument(0);
-
-            // thisObject
-            generator.LoadArgument(1);
-
             // code
             if (this.OperandCount < 2)
             {
@@ -177,7 +171,16 @@ namespace Jurassic.Compiler
                 EmitConversion.ToString(generator, PrimitiveType.Any);
             }
 
-            // Call Global.Eval(scope, thisValue, code)
+            // scope
+            generator.LoadArgument(0);
+
+            // thisObject
+            generator.LoadArgument(1);
+
+            // strictMode
+            generator.LoadBoolean(optimizationInfo.StrictMode);
+
+            // Call Global.Eval(code, scope, thisValue, strictMode)
             generator.Call(ReflectionHelpers.Global_Eval);
         }
     }

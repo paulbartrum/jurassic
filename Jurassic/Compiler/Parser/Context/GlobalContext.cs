@@ -35,7 +35,9 @@ namespace Jurassic.Compiler
         {
             var lexer = new Lexer(this.Reader, this.Path);
             var parser = new Parser(lexer, this.InitialScope, false);
-            return parser.Parse();
+            var result = parser.Parse();
+            this.StrictMode = parser.StrictMode;
+            return result;
         }
 
         /// <summary>
@@ -44,7 +46,10 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         protected override void GenerateCode(ILGenerator generator)
         {
+            // Store the state of the StrictMode flag in the optimization info instance.
             var optimizationInfo = OptimizationInfo.Empty;
+            if (this.StrictMode == true)
+                optimizationInfo = optimizationInfo.AddFlags(OptimizationFlags.StrictMode);
 
             // Initialize any function or variable declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);

@@ -1242,8 +1242,9 @@ namespace UnitTests
             Assert.AreEqual(5, TestUtils.Evaluate("this.x = 5; this.x"));
 
             // In ES3 functions will get the global object as the "this" value by default.
-            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("(function() { return this })()"));
-            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("(function f() { var g = function() { return this }; return g() })()"));
+            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("(function(){ return this; }).call(null)"));
+            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("(function(){ return this; }).call(undefined)"));
+            Assert.AreEqual("object", TestUtils.Evaluate("typeof (function(){ return this; }).call(5)"));
 
             // Check that the this parameter is passed correctly.
             Assert.AreEqual(true, TestUtils.Evaluate("x = { f: function() { return this } }; x.f() === x"));
@@ -1285,54 +1286,59 @@ namespace UnitTests
         [TestMethod]
         public void StrictMode()
         {
-            // Attempts to set a variable that has not been declared is dissallowed.
+            // Attempts to set a variable that has not been declared is disallowed.
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; asddfsgwqewert = 'test'"));
 
             // Cannot write to a non-writable property.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: true}); x.a = 5;"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: true}); x.a = 5;"));
+
+            // Cannot write to a non-existant property when the object is non-extensible.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.preventExtensions(x); x.a = 5;"));
+
+            // Cannot write to a property that has a getter but no setter.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {get: function() { return 1 }}); x.a = 5;"));
 
             // Cannot delete a non-configurable property.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: false}); delete x.a;"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: false}); delete x.a;"));
 
             // Deleting a variable fails.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; var foo = 'test'; delete foo"));
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){} delete test"));
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg) { delete arg; })()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var foo = 'test'; delete foo"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function test(){} delete test"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg) { delete arg; })()"));
 
             // Defining a property more than once fails.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; var x = {a: 1, a: 2};"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {a: 1, a: 2};"));
 
             // Attempts to use the name "eval" are not allowed in strict mode.
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var obj = {}; obj.eval = 5"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var obj = {}; obj.foo = eval"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var eval = 5"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; for (var eval in {a:1}) {}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function eval(){}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function test(eval){}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function(eval){}"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; new Function('eval')"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; new Function('eval', '')"));
 
             // Eval has it's own scope.
-            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; eval('var a = false'); typeof a"));
+            Assert.AreEqual("undefined", TestUtils.Evaluate("'use strict'; eval('var a = false'); typeof a"));
+
+            // The "this" object is not coerced to an object.
+            Assert.AreEqual(Null.Value, TestUtils.Evaluate("'use strict'; (function(){ return this; }).call(null)"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; (function(){ return this; }).call(undefined)"));
+            Assert.AreEqual("number", TestUtils.Evaluate("'use strict'; typeof (function(){ return this; }).call(5)"));
+
+            // With statements are disallowed.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; with (x) { }"));
+
+            // Argument names cannot be identical.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg, arg) { })()"));
 
             // Arguments cannot be redefined.
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg) { arguments = 5; })()"));
-
-            // Argument names cannot be identical.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg, arg) { })()"));
 
             // Arguments and caller don't exist outside the function.
             Assert.AreEqual("undefined", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(test.arguments); } return inner(); } test()"));
             Assert.AreEqual("undefined", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(inner.caller); } return inner(); } test()"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ test.arguments = 5; } return inner(); } test()"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ inner.caller = 5; } return inner(); } test()"));
-
-            // The "this" object cannot be null or undefined.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; (function(){ return 5; }).call(null)"));
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; (function(){ return 5; }).call(undefined)"));
-
-            // With statements are disallowed.
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; with (x) { }"));
         }
     }
 }
