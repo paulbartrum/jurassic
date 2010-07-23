@@ -95,7 +95,9 @@ namespace Jurassic.Compiler
                 return this.BodyRoot;
             var lexer = new Lexer(new System.IO.StringReader(this.BodyText), this.Path);
             var parser = new Parser(lexer, this.InitialScope, true);
-            return parser.Parse();
+            var result = parser.Parse();
+            this.StrictMode = parser.StrictMode;
+            return result;
         }
 
         /// <summary>
@@ -131,15 +133,57 @@ namespace Jurassic.Compiler
         {
             // Method signature: object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments)
 
+            // Store the state of the StrictMode flag in the optimization info instance.
+            var optimizationInfo = OptimizationInfo.Empty;
+            if (this.StrictMode == true)
+                optimizationInfo = optimizationInfo.AddFlags(OptimizationFlags.StrictMode);
+
             // Create a new scope.
-            this.InitialScope.GenerateScopeCreation(generator, OptimizationInfo.Empty);
+            this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
+
+            // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
+            if (this.StrictMode == false)
+            {
+                // if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
+                generator.LoadArgument(1);
+                generator.LoadNull();
+                generator.Equal();
+                generator.LoadArgument(1);
+                EmitHelpers.EmitNull(generator);
+                generator.Equal();
+                generator.BitwiseOr();
+                generator.LoadArgument(1);
+                EmitHelpers.EmitUndefined(generator);
+                generator.Equal();
+                generator.BitwiseOr();
+
+                // {
+                var startOfFalse = generator.CreateLabel();
+                generator.BranchIfFalse(startOfFalse);
+
+                // thisObject = GlobalObject.Instance;
+                generator.Call(ReflectionHelpers.Global_Instance);
+                
+                // } else {
+                var endOfIf = generator.CreateLabel();
+                generator.Branch(endOfIf);
+                generator.DefineLabelPosition(startOfFalse);
+                
+                // thisObject = TypeConverter.ToObject(thisObject);
+                generator.LoadArgument(1);
+                EmitConversion.ToObject(generator, PrimitiveType.Any);
+
+                // }
+                generator.DefineLabelPosition(endOfIf);
+                generator.StoreArgument(1);
+            }
 
             // Transfer the function name into the scope.
             if (string.IsNullOrEmpty(this.Name) == false)
             {
                 generator.LoadArgument(2);
                 var functionName = new NameExpression(this.InitialScope, this.Name);
-                functionName.GenerateSet(generator, OptimizationInfo.Empty, PrimitiveType.Any, false);
+                functionName.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
             }
 
             // Transfer the arguments object into the scope.
@@ -158,10 +202,10 @@ namespace Jurassic.Compiler
                 generator.LoadArgument(3);
                 generator.NewObject(ReflectionHelpers.Arguments_Constructor);
                 var arguments = new NameExpression(this.InitialScope, "arguments");
-                arguments.GenerateSet(generator, OptimizationInfo.Empty, PrimitiveType.Any, false);
+                arguments.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
             }
 
-            // Transfer the arguments into the scope.
+            // Transfer the argument values into the scope.
             // Note: the arguments array can be smaller than expected.
             var endOfArguments = generator.CreateLabel();
             for (int i = 0; i < this.ArgumentNames.Count; i ++)
@@ -177,19 +221,19 @@ namespace Jurassic.Compiler
                 generator.LoadInt32(i);
                 generator.LoadArrayElement(typeof(object));
                 var argument = new NameExpression(this.InitialScope, this.ArgumentNames[i]);
-                argument.GenerateSet(generator, OptimizationInfo.Empty, PrimitiveType.Any, false);
+                argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
             }
             generator.DefineLabelPosition(endOfArguments);
 
             // Initialize any declarations.
-            this.InitialScope.GenerateDeclarations(generator, OptimizationInfo.Empty);
+            this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 
             //generator.LoadArgument(0);
             //EmitConversion.ToObject(generator, PrimitiveType.Any);
             //generator.Pop();
 
             // Generate code for the body of the function.
-            this.AbstractSyntaxTree.GenerateCode(generator, OptimizationInfo.Empty);
+            this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);
 
             // Return undefined if control gets to the end of the function.
             EmitHelpers.EmitUndefined(generator);

@@ -17,6 +17,8 @@ namespace Jurassic.Compiler
         private Scope currentScope;
         private Stack<FunctionOptimizationInfo> functionOptimizations;
         private List<string> labelsForCurrentStatement = new List<string>();
+        private bool startedInsideFunction;
+
 
 
         //     INITIALIZATION
@@ -36,6 +38,7 @@ namespace Jurassic.Compiler
             this.lexer.ExpressionStateCallback = () => this.expressionState;
             this.currentScope = initialScope;
             this.functionOptimizations = new Stack<FunctionOptimizationInfo>();
+            this.startedInsideFunction = insideFunction;
             if (insideFunction == true)
                 this.functionOptimizations.Push(new FunctionOptimizationInfo());
             this.Consume();
@@ -198,61 +201,62 @@ namespace Jurassic.Compiler
         /// source code. </returns>
         public Statement Parse()
         {
+            // Read the directive prologue.
+            Statement initialStatement = null;
+            while (true)
+            {
+                if (this.functionOptimizations.Count > (this.startedInsideFunction ? 1 : 0))
+                {
+                    // Check if we are at the end of a function.
+                    if (this.nextToken == PunctuatorToken.RightBrace)
+                        return new BlockStatement(this.labelsForCurrentStatement);
+                }
+                else
+                {
+                    // Check if we are at the end of global or eval code.
+                    if (this.nextToken == null)
+                        return new BlockStatement(this.labelsForCurrentStatement);
+                }
+
+
+                // Parse a single statement.
+                initialStatement = ParseSourceStatement();
+
+                // In order for the statement to be part of the directive prologue, it must have
+                // the following tree structure: ExpressionStatement -> LiteralExpression -> string
+                if ((initialStatement is ExpressionStatement) == false)
+                    break;
+                if ((((ExpressionStatement)initialStatement).Expression is LiteralExpression) == false)
+                    break;
+                if ((((LiteralExpression)((ExpressionStatement)initialStatement).Expression).Value is string) == false)
+                    break;
+                string directive = (string)((LiteralExpression)((ExpressionStatement)initialStatement).Expression).Value;
+                if (directive == "use strict")
+                    this.StrictMode = true;
+            }
+
             // Read zero or more statements.
             var result = new BlockStatement(this.labelsForCurrentStatement);
-            while (this.nextToken != null)
+            result.Statements.Add(initialStatement);
+            while (true)
             {
-                // Check if we are at the end of a function.
-                if (this.functionOptimizations.Count > 0 && this.nextToken == PunctuatorToken.RightBrace)
-                    break;
+                if (this.functionOptimizations.Count > (this.startedInsideFunction ? 1 : 0))
+                {
+                    // Check if we are at the end of a function.
+                    if (this.nextToken == PunctuatorToken.RightBrace)
+                        break;
+                }
+                else
+                {
+                    // Check if we are at the end of global or eval code.
+                    if (this.nextToken == null)
+                        break;
+                }
 
                 // Parse a single statement.
                 result.Statements.Add(ParseSourceStatement());
             }
             return result;
-
-            //// Bind any local variables at the top of the function/global code.
-            //var initializationStatements = new List<Expression>(this.executionContext.LocalVariables.Count + 2);
-            //initializationStatements.Add(Expression.DebugInfo(this.document, 1, 1, 1, int.MaxValue));
-            
-            //foreach (KeyValuePair<string, Expression> variableNameAndValue in this.executionContext.LocalVariables)
-            //{
-            //    string variableName = variableNameAndValue.Key;
-            //    initializationStatements.Add(Expression.Call(
-            //        this.executionContext.LexicalEnvironment,
-            //        ReflectionHelpers.IEnvironmentRecord_CreateMutableBinding,
-            //        Expression.Constant(variableName),
-            //        Expression.Constant(true)));
-
-            //    // If the variable is a function, initialize the variable.
-            //    Expression initialValue = variableNameAndValue.Value;
-            //    if (initialValue != null)
-            //        initializationStatements.Add(new MemberJSExpression(variableName).GetSetterExpression(
-            //            this.executionContext.LexicalEnvironment, initialValue));
-            //}
-
-            //if (this.executionContext.ScriptContext != ScriptContext.Function)
-            //{
-            //    // Initialize the return value for the block to "undefined".
-            //    initializationStatements.Add(Expression.Assign(this.executionContext.ReturnValue, ExpressionTreeHelpers.Undefined()));
-
-            //    // Construct a block expression containing the initialization statements and the
-            //    // program statements.
-            //    return Expression.Block(
-            //        new ParameterExpression[] { this.executionContext.ReturnValue },
-            //        ExpressionTreeHelpers.Block(initializationStatements),
-            //        ExpressionTreeHelpers.Block(statements),
-            //        this.executionContext.ReturnValue);
-            //}
-            //else
-            //{
-            //    // Construct a block expression containing the initialization statements and the
-            //    // program statements.
-            //    return Expression.Block(
-            //        ExpressionTreeHelpers.Block(initializationStatements),
-            //        ExpressionTreeHelpers.Block(statements),
-            //        Expression.Label(this.executionContext.EndOfProgram, ExpressionTreeHelpers.Undefined()));
-            //}
         }
 
         /// <summary>
@@ -377,6 +381,7 @@ namespace Jurassic.Compiler
 
                 // The next token must be a variable name.
                 declaration.VariableName = this.ExpectIdentifier();
+                ValidateVariableName(declaration.VariableName);
 
                 // Add the variable to the current function's list of local variables.
                 this.currentScope.DeclareVariable(declaration.VariableName);
@@ -548,6 +553,7 @@ namespace Jurassic.Compiler
 
                     // The next token must be a variable name.
                     declaration.VariableName = this.ExpectIdentifier();
+                    ValidateVariableName(declaration.VariableName);
 
                     // Add the variable to the current function's list of local variables.
                     this.currentScope.DeclareVariable(declaration.VariableName);
@@ -1011,6 +1017,7 @@ namespace Jurassic.Compiler
             }
             else
                 throw new ArgumentOutOfRangeException("functionType");
+            ValidateVariableName(functionName);
 
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
@@ -1020,7 +1027,11 @@ namespace Jurassic.Compiler
 
             // Read the first argument name.
             if (this.nextToken != PunctuatorToken.RightParenthesis)
-                argumentNames.Add(this.ExpectIdentifier());
+            {
+                var argumentName = this.ExpectIdentifier();
+                ValidateVariableName(argumentName);
+                argumentNames.Add(argumentName);
+            }
 
             while (true)
             {
@@ -1029,8 +1040,10 @@ namespace Jurassic.Compiler
                     // Consume the comma.
                     this.Consume();
 
-                    // Read the argument name.
-                    argumentNames.Add(this.ExpectIdentifier());
+                    // Read and validate the argument name.
+                    var argumentName = this.ExpectIdentifier();
+                    ValidateVariableName(argumentName);
+                    argumentNames.Add(argumentName);
                 }
                 else if (this.nextToken == PunctuatorToken.RightParenthesis)
                     break;
@@ -1051,12 +1064,15 @@ namespace Jurassic.Compiler
             if (this.functionOptimizations.Count > 0)
                 this.functionOptimizations.Peek().HasNestedFunction = true;
             this.functionOptimizations.Push(new FunctionOptimizationInfo());
+            var originalStrictMode = this.StrictMode;
 
             // Read the function body.
             var body = Parse();
 
-            // Pop the function optimization info.
+            // Revert any information that is specific to a single function.
             var optimizations = this.functionOptimizations.Pop();
+            var functionStrictMode = this.StrictMode;
+            this.StrictMode = originalStrictMode;
 
             // Revert the scope.
             this.currentScope = this.currentScope.ParentScope;
@@ -1076,6 +1092,7 @@ namespace Jurassic.Compiler
             // Create a new function expression.
             var context = new FunctionContext(scope, functionName, argumentNames, body, this.SourcePath);
             context.Optimizations = optimizations;
+            context.StrictMode = functionStrictMode;
             return new FunctionExpression(context);
         }
 

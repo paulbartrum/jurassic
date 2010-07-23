@@ -377,25 +377,27 @@ namespace Jurassic.Library
         public static object Eval(string code)
         {
             var scope = Compiler.ObjectScope.CreateGlobalScope();
-            var evalContext = new Jurassic.Compiler.EvalContext(scope, scope.ScopeObject, code);
+            var evalContext = new Jurassic.Compiler.EvalContext(scope, scope.ScopeObject, code, false);
             return evalContext.Execute();
         }
 
         /// <summary>
         /// Evaluates the given javascript source code and returns the result.
         /// </summary>
+        /// <param name="code"> The source code to evaluate. </param>
         /// <param name="scope"> The containing scope. </param>
         /// <param name="thisObject"> The value of the "this" keyword in the containing scope. </param>
-        /// <param name="code"> The source code to evaluate. </param>
+        /// <param name="strictMode"> Indicates whether the eval statement is being called from
+        /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        internal static object Eval(Compiler.Scope scope, object thisObject, string code)
+        internal static object Eval(string code, Compiler.Scope scope, object thisObject, bool strictMode)
         {
             if (scope == null)
                 throw new ArgumentNullException("scope");
             if (code == null)
                 return Undefined.Value;
-            var evalContext = new Jurassic.Compiler.EvalContext(scope, thisObject, code);
+            var evalContext = new Jurassic.Compiler.EvalContext(scope, thisObject, code, strictMode);
             return evalContext.Execute();
         }
 

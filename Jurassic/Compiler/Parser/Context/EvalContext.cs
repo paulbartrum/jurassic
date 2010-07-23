@@ -10,14 +10,31 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new EvalContext instance.
         /// </summary>
-        /// <param name="scope"> The scope to use inside the eval statement. </param>
+        /// <param name="parentScope"> The scope of the calling code. </param>
         /// <param name="thisObject"> The value of the "this" keyword. </param>
         /// <param name="script"> The script code to execute. </param>
-        public EvalContext(Scope scope, object thisObject, string script)
-            : base(scope, "[eval code]")
+        /// <param name="strictMode"> Indicates whether the code should run in strict mode. </param>
+        public EvalContext(Scope parentScope, object thisObject, string script, bool strictMode)
+            : base(GetScope(parentScope, strictMode), "[eval code]")
         {
             this.ThisObject = thisObject;
             this.Script = script;
+            this.StrictMode = strictMode;
+        }
+
+        /// <summary>
+        /// Gets the scope to use.  This is the same as the parent scope when
+        /// <paramref name="strictMode"/> is <c>false</c>, or a new declarative scope if
+        /// <paramref name="strictMode"/> is <c>true</c>.
+        /// </summary>
+        /// <param name="parentScope"> The scope of the calling code. </param>
+        /// <param name="strictMode"> The state of the strict mode flag. </param>
+        /// <returns> The scope to use inside the eval statement. </returns>
+        private static Scope GetScope(Scope parentScope, bool strictMode)
+        {
+            if (strictMode == false)
+                return parentScope;
+            return DeclarativeScope.CreateEvalScope(parentScope);
         }
 
         /// <summary>
@@ -46,7 +63,10 @@ namespace Jurassic.Compiler
         {
             var lexer = new Lexer(new System.IO.StringReader(this.Script), this.Path);
             var parser = new Parser(lexer, this.InitialScope, false);
-            return parser.Parse();
+            parser.StrictMode = this.StrictMode;
+            var result = parser.Parse();
+            this.StrictMode = parser.StrictMode;
+            return result;
         }
 
         /// <summary>
@@ -58,6 +78,14 @@ namespace Jurassic.Compiler
             // Declare a variable to store the eval result.
             var optimizationInfo = OptimizationInfo.Empty;
             optimizationInfo.EvalResult = generator.DeclareVariable(typeof(object));
+            if (this.StrictMode == true)
+                optimizationInfo = optimizationInfo.AddFlags(OptimizationFlags.StrictMode);
+
+            if (this.StrictMode == true)
+            {
+                // Create a new scope.
+                this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
+            }
 
             // Initialize any declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
