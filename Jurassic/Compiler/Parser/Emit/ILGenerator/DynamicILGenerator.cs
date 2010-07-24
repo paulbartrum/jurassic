@@ -601,7 +601,7 @@ namespace Jurassic.Compiler
             //    return;
             var argumentType = this.operands.Peek();
             if (argumentType != VESType.Int32 && argumentType != VESType.Float)
-                throw new InvalidOperationException(string.Format("Binary operations can only operate on numbers ({2} found)", argumentType));
+                throw new InvalidOperationException(string.Format("This binary operation can only operate on numbers ({0} found).", argumentType));
             PopStackOperands(argumentType, argumentType);
             PushStackOperand(argumentType);
         }
@@ -610,14 +610,23 @@ namespace Jurassic.Compiler
         /// Checks that stack operands are valid for a binary operation.
         /// </summary>
         /// <param name="pushType"> The type of operand that is pushed on the stack. </param>
+        /// <param name="worksOnObjects"> <c>true</c> if the operation works on object references. </param>
         [System.Diagnostics.Conditional("DEBUG")]
-        private void CheckBinaryOperation(VESType pushType)
+        private void CheckBinaryOperation(VESType pushType, bool worksOnObjects = false)
         {
             //if (this.stackIsIndeterminate == true)
             //    return;
             var argumentType = this.operands.Peek();
-            if (argumentType != VESType.Int32 && argumentType != VESType.Float)
-                throw new InvalidOperationException(string.Format("Binary operations can only operate on numbers ({2} found)", argumentType));
+            if (worksOnObjects == true)
+            {
+                if (argumentType != VESType.Int32 && argumentType != VESType.Float && argumentType != VESType.Object)
+                    throw new InvalidOperationException(string.Format("This binary operation can only operate on numbers or object references ({0} found).", argumentType));
+            }
+            else
+            {
+                if (argumentType != VESType.Int32 && argumentType != VESType.Float)
+                    throw new InvalidOperationException(string.Format("This binary operation can only operate on numbers ({0} found).", argumentType));
+            }
             PopStackOperands(argumentType, argumentType);
             PushStackOperand(pushType);
         }
@@ -1162,7 +1171,7 @@ namespace Jurassic.Compiler
         public override void Equal()
         {
             Emit2ByteOpCode(0xFE, 0x01, 2, 1);
-            CheckBinaryOperation(VESType.Int32);
+            CheckBinaryOperation(VESType.Int32, worksOnObjects: true);
         }
 
         /// <summary>
@@ -1953,10 +1962,12 @@ namespace Jurassic.Compiler
         public override void EndExceptionBlock()
         {
             if (this.activeExceptionRegions == null || this.activeExceptionRegions.Count == 0)
-                throw new InvalidOperationException("BeginTryCatchFinallyBlock() must have been called before calling this method.");
+                throw new InvalidOperationException("BeginExceptionBlock() must have been called before calling this method.");
 
             // Remove the top-most exception region from the stack.
             var exceptionRegion = this.activeExceptionRegions.Pop();
+            if (exceptionRegion.Clauses.Count == 0)
+                throw new InvalidOperationException("At least one catch, finally, fault or filter block is required.");
 
             // Close off the current exception clause.
             EndCurrentClause(exceptionRegion);
@@ -1971,7 +1982,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Begins a catch block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a catch block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         /// <param name="exceptionType"> The type of exception to handle. </param>
         public override void BeginCatchBlock(Type exceptionType)
@@ -1979,7 +1990,7 @@ namespace Jurassic.Compiler
             if (exceptionType == null)
                 throw new ArgumentNullException("exceptionType");
             if (this.activeExceptionRegions == null || this.activeExceptionRegions.Count == 0)
-                throw new InvalidOperationException("BeginTryCatchFinallyBlock() must have been called before calling this method.");
+                throw new InvalidOperationException("BeginExceptionBlock() must have been called before calling this method.");
 
             // Get a token for the exception type.
             var exceptionTypeToken = this.GetToken(exceptionType);
@@ -2033,7 +2044,7 @@ namespace Jurassic.Compiler
         private void BeginExceptionBlock(ExceptionClauseType type)
         {
             if (this.activeExceptionRegions == null || this.activeExceptionRegions.Count == 0)
-                throw new InvalidOperationException("BeginTryCatchFinallyBlock() must have been called before calling this method.");
+                throw new InvalidOperationException("BeginExceptionBlock() must have been called before calling this method.");
 
             // Get the top-most exception region.
             var exceptionRegion = this.activeExceptionRegions.Peek();

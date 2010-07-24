@@ -71,22 +71,46 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Create a temporary variable to store the exception and set it to null.
+            var exception = generator.CreateTemporaryVariable(typeof(JavaScriptException));
+            generator.LoadNull();
+            generator.StoreVariable(exception);
+
             // Begin the exception block.
             generator.BeginExceptionBlock();
 
             // Generate code for the try block.
             this.TryBlock.GenerateCode(generator, optimizationInfo);
 
+            // Generate a catch block, but do not generate any user code inside the catch block!
+            // This is because code inside a catch block has numerous restrictions that javascript
+            // does not have.  For example, in javascript a return statement is allowed within
+            // catch and finally blocks, but the CLR does not allow this.  Therefore we have to
+            // simulate the catch and finally blocks.
+
+            // Store the exception in the temporary variable.
+            // The exception is on the top of the stack.
+            generator.BeginCatchBlock(typeof(JavaScriptException));
+            generator.StoreVariable(exception);
+            generator.EndExceptionBlock();
+
             // Generate code for the catch block.
             if (this.CatchBlock != null)
             {
-                generator.BeginCatchBlock(typeof(JavaScriptException));
+                // if (exception != null)
+                var endOfCatch = generator.CreateLabel();
+                generator.LoadVariable(exception);
+                generator.LoadNull();
+                generator.BranchIfEqual(endOfCatch);
 
                 // Create a new DeclarativeScope.
                 this.CatchScope.GenerateScopeCreation(generator, optimizationInfo);
 
-                // The exception is on the top of the stack.
-                // Store the exception object in the variable provided.
+                // Make sure the scope is reverted even if an exception is thrown.
+                generator.BeginExceptionBlock();
+
+                // Store the error object in the variable provided.
+                generator.LoadVariable(exception);
                 generator.Call(ReflectionHelpers.JavaScriptException_ErrorObject);
                 var catchVariable = new NameExpression(this.CatchScope, this.CatchVariableName);
                 catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
@@ -95,20 +119,41 @@ namespace Jurassic.Compiler
                 this.CatchBlock.GenerateCode(generator, optimizationInfo);
 
                 // Revert the scope.
+                generator.BeginFinallyBlock();
                 generator.LoadArgument(0);
                 generator.Call(ReflectionHelpers.Scope_ParentScope);
                 generator.StoreArgument(0);
+                generator.EndExceptionBlock();
+
+                // Branch here if no exception was thrown.
+                generator.DefineLabelPosition(endOfCatch);
             }
 
             // Generate code for the finally block.
             if (this.FinallyBlock != null)
             {
-                generator.BeginFinallyBlock();
                 this.FinallyBlock.GenerateCode(generator, optimizationInfo);
             }
 
-            // End the exception block.
-            generator.EndExceptionBlock();
+            // Generate code to rethrow the exception if no catch block was present.
+            if (this.CatchBlock == null)
+            {
+                // if (exception != null)
+                var endOfCatch2 = generator.CreateLabel();
+                generator.LoadVariable(exception);
+                generator.LoadNull();
+                generator.BranchIfEqual(endOfCatch2);
+
+                // Rethrow the exception.
+                generator.LoadVariable(exception);
+                generator.Throw();
+
+                // Branch here if no exception was thrown.
+                generator.DefineLabelPosition(endOfCatch2);
+            }
+
+            // We no longer need the temporary variable.
+            generator.ReleaseTemporaryVariable(exception);
         }
 
         /// <summary>
