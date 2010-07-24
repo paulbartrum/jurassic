@@ -234,7 +234,10 @@ namespace Jurassic.Compiler
 
             // Increment the loop variable.
             if (this.Increment != null)
-                this.Increment.GenerateCode(generator, optimizationInfo.AddFlags(OptimizationFlags.SuppressReturnValue));
+            {
+                this.Increment.GenerateCode(generator, optimizationInfo);
+                generator.Pop();
+            }
 
             // Strengthen the variable types.
             //List<Tuple<VariableInfo, VariableInfo>> revertVariableInfo = null;
@@ -286,7 +289,10 @@ namespace Jurassic.Compiler
 
             // Increment the loop variable.
             if (this.Increment != null)
-                this.Increment.GenerateCode(generator, optimizationInfo.AddFlags(OptimizationFlags.SuppressReturnValue));
+            {
+                this.Increment.GenerateCode(generator, optimizationInfo);
+                generator.Pop();
+            }
 
             // Unconditionally branch back to the start of the loop.
             generator.Branch(startOfLoop);

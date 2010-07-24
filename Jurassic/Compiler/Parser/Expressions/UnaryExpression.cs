@@ -73,11 +73,11 @@ namespace Jurassic.Compiler
             }
 
             // If a return value is not expected, generate only the side-effects.
-            if (optimizationInfo.SuppressReturnValue == true)
+            /*if (optimizationInfo.SuppressReturnValue == true)
             {
                 this.GenerateSideEffects(generator, optimizationInfo);
                 return;
-            }
+            }*/
 
             // Special-case the typeof operator.
             if (this.OperatorType == OperatorType.Typeof)
@@ -143,11 +143,11 @@ namespace Jurassic.Compiler
         private void GenerateTypeof(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // If a return value is not expected, generate only the side-effects.
-            if (optimizationInfo.SuppressReturnValue == true)
+            /*if (optimizationInfo.SuppressReturnValue == true)
             {
                 this.GenerateSideEffects(generator, optimizationInfo);
                 return;
-            }
+            }*/
 
             if (this.Operand is NameExpression)
             {
@@ -177,7 +177,7 @@ namespace Jurassic.Compiler
             // Attempting to delete something that isn't a reference returns true but otherwise does nothing.
             if ((this.Operand is IReferenceExpression) == false)
             {
-                if (optimizationInfo.SuppressReturnValue == false)
+                //if (optimizationInfo.SuppressReturnValue == false)
                     generator.LoadBoolean(true);
                 return;
             }

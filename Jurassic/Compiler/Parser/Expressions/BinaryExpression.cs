@@ -133,11 +133,11 @@ namespace Jurassic.Compiler
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // If a return value is not expected, generate only the side-effects.
-            if (optimizationInfo.SuppressReturnValue == true)
+            /*if (optimizationInfo.SuppressReturnValue == true)
             {
                 this.GenerateSideEffects(generator, optimizationInfo);
                 return;
-            }
+            }*/
 
             // Special case the addition operator.
             if (this.OperatorType == OperatorType.Add)

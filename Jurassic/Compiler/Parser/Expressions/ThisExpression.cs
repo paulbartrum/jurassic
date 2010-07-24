@@ -38,8 +38,8 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            if (optimizationInfo.SuppressReturnValue == true)
-                return;
+            //if (optimizationInfo.SuppressReturnValue == true)
+            //    return;
             generator.LoadArgument(1);
         }
 

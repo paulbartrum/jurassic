@@ -42,11 +42,11 @@ namespace Jurassic.Compiler
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // If a return value is not expected, generate only the side-effects.
-            if (optimizationInfo.SuppressReturnValue == true)
+            /*if (optimizationInfo.SuppressReturnValue == true)
             {
                 this.GenerateSideEffects(generator, optimizationInfo);
                 return;
-            }
+            }*/
 
             // Emit the condition.
             var condition = this.GetOperand(0);

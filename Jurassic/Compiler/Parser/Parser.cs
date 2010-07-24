@@ -236,7 +236,7 @@ namespace Jurassic.Compiler
             }
 
             // Read zero or more statements.
-            var result = new BlockStatement(this.labelsForCurrentStatement);
+            var result = new BlockStatement(new string[0]);
             result.Statements.Add(initialStatement);
             while (true)
             {

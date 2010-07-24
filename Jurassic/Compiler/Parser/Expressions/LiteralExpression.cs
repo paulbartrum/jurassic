@@ -60,8 +60,8 @@ namespace Jurassic.Compiler
         {
             // Literals cannot have side-effects so if a return value is not expected then generate
             // nothing.
-            if (optimizationInfo.SuppressReturnValue == true) 
-                return;
+            //if (optimizationInfo.SuppressReturnValue == true) 
+            //    return;
 
             if (this.Value is int)
                 generator.LoadInt32((int)this.Value);

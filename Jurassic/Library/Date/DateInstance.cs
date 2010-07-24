@@ -804,7 +804,7 @@ namespace Jurassic.Library
         /// Returns the date as a string using GMT (Greenwich Mean Time).
         /// </summary>
         /// <returns> The date as a string. </returns>
-        [JSFunction(Deprecated = true, Name = "toISOString")]
+        [JSFunction(Name = "toISOString")]
         public string ToISOString()
         {
             if (this.value == InvalidDate)

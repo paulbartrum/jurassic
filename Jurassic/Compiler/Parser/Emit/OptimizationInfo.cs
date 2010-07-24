@@ -19,7 +19,7 @@ namespace Jurassic.Compiler
         /// Indicates the return value from an expression is not used and therefore should not be
         /// generated.
         /// </summary>
-        SuppressReturnValue = 2,
+        //SuppressReturnValue = 2,
 
         /// <summary>
         /// Indicates that object scope variable lookup and property access should be optimized
@@ -49,14 +49,14 @@ namespace Jurassic.Compiler
             this.flags = flags;
         }
 
-        /// <summary>
-        /// If <c>true</c>, indicates the return value from an expression is not used and
-        /// therefore should not be generated.
-        /// </summary>
-        public bool SuppressReturnValue
-        {
-            get { return (this.flags & OptimizationFlags.SuppressReturnValue) != 0; }
-        }
+        ///// <summary>
+        ///// If <c>true</c>, indicates the return value from an expression is not used and
+        ///// therefore should not be generated.
+        ///// </summary>
+        //public bool SuppressReturnValue
+        //{
+        //    get { return (this.flags & OptimizationFlags.SuppressReturnValue) != 0; }
+        //}
 
         /// <summary>
         /// If <c>true</c>, indicates that object scope variable lookup and property access should
