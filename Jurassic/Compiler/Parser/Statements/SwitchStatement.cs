@@ -124,6 +124,9 @@ namespace Jurassic.Compiler
             result.Append("switch (");
             result.Append(this.Value);
             result.AppendLine(")");
+            result.Append(new string('\t', indentLevel));
+            result.AppendLine("{");
+            indentLevel++;
             foreach (var caseClause in this.CaseClauses)
             {
                 result.Append(new string('\t', indentLevel));
@@ -135,11 +138,14 @@ namespace Jurassic.Compiler
                 }
                 else
                 {
-                    result.Append("default:");
+                    result.AppendLine("default:");
                 }
                 foreach (var statement in caseClause.BodyStatements)
                     result.AppendLine(statement.ToString(indentLevel + 1));
             }
+            indentLevel--;
+            result.Append(new string('\t', indentLevel));
+            result.Append("}");
             return result.ToString();
         }
     }

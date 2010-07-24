@@ -42,18 +42,18 @@ namespace Jurassic.Compiler
             this.GenerateCodeCore(generator, optimizationInfo);
 
 #if DEBUG
-            if (optimizationInfo.SuppressReturnValue == true)
+            /*if (optimizationInfo.SuppressReturnValue == true)
             {
                 // Check that the stack count did not change.
                 if (generator is DynamicILGenerator &&  ((DynamicILGenerator)generator).StackSize != originalStackSize)
                     throw new InvalidOperationException(string.Format("Encountered unexpected stack imbalance for expression '{0}'.", this));
             }
             else
-            {
+            {*/
                 // Check that the stack count increased by one.
                 if (generator is DynamicILGenerator && ((DynamicILGenerator)generator).StackSize != originalStackSize + 1)
                     throw new InvalidOperationException(string.Format("Encountered unexpected stack imbalance for expression '{0}'.", this));
-            }
+            //}
 #endif
         }
 

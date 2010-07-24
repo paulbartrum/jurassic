@@ -203,7 +203,7 @@ namespace Jurassic.Compiler
         {
             string propertyName = null;
             bool isArrayIndex = false;
-            optimizationInfo = optimizationInfo.RemoveFlags(OptimizationFlags.SuppressReturnValue);
+            //optimizationInfo = optimizationInfo.RemoveFlags(OptimizationFlags.SuppressReturnValue);
 
             // Right-hand-side can be a property name (a.b)
             if (this.OperatorType == OperatorType.MemberAccess)
@@ -331,8 +331,8 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.ObjectInstance_Delete);
 
             // If the return value is not wanted then pop it from the stack.
-            if (optimizationInfo.SuppressReturnValue == true)
-                generator.Pop();
+            //if (optimizationInfo.SuppressReturnValue == true)
+            //    generator.Pop();
         }
 
         /// <summary>

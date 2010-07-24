@@ -62,10 +62,20 @@ namespace Jurassic.Compiler
             {
                 // Generate code for the item, evaluating the side-effects but not producing any values.
                 items[i].GenerateCode(generator, optimizationInfo); //.AddFlags(OptimizationFlags.SuppressReturnValue));
+                generator.Pop();
             }
 
             // Generate code for the last item and return the value.
             items[items.Count - 1].GenerateCode(generator, optimizationInfo);
+        }
+
+        /// <summary>
+        /// Converts the expression to a string.
+        /// </summary>
+        /// <returns> A string representing this expression. </returns>
+        public override string ToString()
+        {
+            return string.Format("{0}, {1}", this.GetOperand(0), this.GetOperand(1));
         }
     }
 

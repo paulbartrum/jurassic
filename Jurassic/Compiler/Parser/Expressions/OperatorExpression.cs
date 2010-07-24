@@ -223,16 +223,16 @@ namespace Jurassic.Compiler
                 this.operands[i].Visit(visitor);
         }
 
-        /// <summary>
-        /// Generates CIL that evaluates the side-effects of the expression and does not generate any value.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        protected void GenerateSideEffects(ILGenerator generator, OptimizationInfo optimizationInfo)
-        {
-            for (int i = 0; i < this.OperandCount; i++)
-                this.GetOperand(i).GenerateCode(generator, optimizationInfo.AddFlags(OptimizationFlags.SuppressReturnValue));
-        }
+        ///// <summary>
+        ///// Generates CIL that evaluates the side-effects of the expression and does not generate any value.
+        ///// </summary>
+        ///// <param name="generator"> The generator to output the CIL to. </param>
+        ///// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        //protected void GenerateSideEffects(ILGenerator generator, OptimizationInfo optimizationInfo)
+        //{
+        //    for (int i = 0; i < this.OperandCount; i++)
+        //        this.GetOperand(i).GenerateCode(generator, optimizationInfo.AddFlags(OptimizationFlags.SuppressReturnValue));
+        //}
 
         /// <summary>
         /// Converts the expression to a string.
@@ -246,7 +246,7 @@ namespace Jurassic.Compiler
             int i = 0;
             if (this.Operator.HasLHSOperand)
             {
-                result.Append(this.OperandCount > i ? this.operands[i].ToString() : "?");
+                result.Append(this.OperandCount > i ? this.operands[i].ToString() : string.Empty);
                 i++;
                 if (this.Operator.SecondaryToken == null || this.Operator == Operator.Conditional)
                     result.Append(' ');
@@ -260,7 +260,7 @@ namespace Jurassic.Compiler
             {
                 if (this.Operator.SecondaryToken == null || this.Operator == Operator.Conditional)
                     result.Append(' ');
-                result.Append(this.OperandCount > i ? this.operands[i].ToString() : "?");
+                result.Append(this.OperandCount > i ? this.operands[i].ToString() : string.Empty);
                 i++;
                 if (this.Operator == Operator.Conditional)
                     result.Append(' ');
@@ -275,7 +275,7 @@ namespace Jurassic.Compiler
             {
                 if (this.Operator == Operator.Conditional)
                     result.Append(' ');
-                result.Append(this.OperandCount > i ? this.operands[i].ToString() : "?");
+                result.Append(this.OperandCount > i ? this.operands[i].ToString() : string.Empty);
             }
 
             return result.ToString();

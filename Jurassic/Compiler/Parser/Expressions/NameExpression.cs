@@ -151,8 +151,8 @@ namespace Jurassic.Compiler
 
             // Object scope references may have side-effects (because of getters) so if the value
             // is to be ignored we evaluate the value then pop the value from the stack.
-            if (optimizationInfo.SuppressReturnValue == true)
-                generator.Pop();
+            //if (optimizationInfo.SuppressReturnValue == true)
+            //    generator.Pop();
         }
 
         /// <summary>
@@ -331,8 +331,8 @@ namespace Jurassic.Compiler
 
             // Delete obviously has side-effects so we evaluate the return value then pop it from
             // the stack.
-            if (optimizationInfo.SuppressReturnValue == true)
-                generator.Pop();
+            //if (optimizationInfo.SuppressReturnValue == true)
+            //    generator.Pop();
         }
 
         /// <summary>

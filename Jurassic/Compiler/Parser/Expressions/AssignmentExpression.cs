@@ -120,7 +120,7 @@ namespace Jurassic.Compiler
                         EmitHelpers.EmitThrow(generator, "ReferenceError", "Invalid left-hand side in assignment");
                         break;
                 }
-                if (optimizationInfo.SuppressReturnValue == false)
+                //if (optimizationInfo.SuppressReturnValue == false)
                     EmitHelpers.EmitDummyValue(generator, this.ResultType);
                 return;
             }
@@ -131,10 +131,10 @@ namespace Jurassic.Compiler
 
                     // Load the value to assign.
                     var rhs = this.GetOperand(1);
-                    rhs.GenerateCode(generator, optimizationInfo.RemoveFlags(OptimizationFlags.SuppressReturnValue));
+                    rhs.GenerateCode(generator, optimizationInfo);
                     
                     // Duplicate the value so it remains on the stack afterwards.
-                    if (optimizationInfo.SuppressReturnValue == false)
+                    //if (optimizationInfo.SuppressReturnValue == false)
                         generator.Duplicate();
 
                     // Store the value.
@@ -157,10 +157,10 @@ namespace Jurassic.Compiler
                 default:
                     // Load the value to assign.
                     var compoundOperator = new BinaryExpression(GetCompoundBaseOperator(this.OperatorType), this.GetOperand(0), this.GetOperand(1));
-                    compoundOperator.GenerateCode(generator, optimizationInfo.RemoveFlags(OptimizationFlags.SuppressReturnValue));
+                    compoundOperator.GenerateCode(generator, optimizationInfo);
 
                     // Duplicate the value so it remains on the stack afterwards.
-                    if (optimizationInfo.SuppressReturnValue == false)
+                    //if (optimizationInfo.SuppressReturnValue == false)
                         generator.Duplicate();
 
                     // Store the value.
@@ -183,14 +183,14 @@ namespace Jurassic.Compiler
             // cannot happen.
 
             // Get the target value.
-            target.GenerateGet(generator, optimizationInfo.RemoveFlags(OptimizationFlags.SuppressReturnValue), true);
+            target.GenerateGet(generator, optimizationInfo, true);
 
             // Convert it to a number.
             if (target.Type != PrimitiveType.Int32)
                 EmitConversion.ToNumber(generator, target.Type);
 
             // If this is PostIncrement or PostDecrement, duplicate the value so it can be produced as the return value.
-            if (returnOriginalValue == true && optimizationInfo.SuppressReturnValue == false)
+            if (returnOriginalValue == true)
                 generator.Duplicate();
 
             // Load the increment constant.
@@ -203,7 +203,7 @@ namespace Jurassic.Compiler
             generator.Add();
 
             // If this is PreIncrement or PreDecrement, duplicate the value so it can be produced as the return value.
-            if (returnOriginalValue == false && optimizationInfo.SuppressReturnValue == false)
+            if (returnOriginalValue == false)
                 generator.Duplicate();
 
             // Store the value.
