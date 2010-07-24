@@ -1181,19 +1181,29 @@ namespace UnitTests
             Assert.AreEqual("Error", TestUtils.EvaluateExceptionType("throw new Error('test')"));
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
         public void TryCatchFinally()
         {
+            // Try to catch various values.
             Assert.AreEqual(5, TestUtils.Evaluate("try { throw 5 } catch (e) { e }"));
+            Assert.AreEqual("test", TestUtils.Evaluate("try { throw 'test' } catch (e) { e }"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("try { throw undefined } catch (e) { e }"));
+            Assert.AreEqual("test", TestUtils.Evaluate("try { throw new String('test') } catch (e) { e.valueOf() }"));
+
+            // Test the finally block runs in all circumstances.
+            Assert.AreEqual(6, TestUtils.Evaluate("try { } finally { 6 }"));
+            Assert.AreEqual(6, TestUtils.Evaluate("try { } catch (e) { e } finally { 6 }"));
+            Assert.AreEqual(6, TestUtils.Evaluate("try { throw 5 } catch (e) { e } finally { 6 }"));
+            Assert.AreEqual(6, TestUtils.Evaluate("try { try { throw 5 } finally { 6 } } catch (e) { }"));
+
+            // Exceptions can be swallowed using finally.
+            Assert.AreEqual(6, TestUtils.Evaluate("function f() { try { throw 5 } finally { return 6 } } f()"));
 
             // Catch creates a new scope.
             Assert.AreEqual(5, TestUtils.Evaluate("e = 5; try { throw 6; } catch (e) { } e"));
 
             // Try without catch or finally is an error.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("try { }"));
-
-            // Exceptions can be swallowed using finally.
-            Assert.AreEqual(5, TestUtils.Evaluate("function f() { try { throw 5 } finally { return 6 } } f()"));
         }
 
         [TestMethod]
