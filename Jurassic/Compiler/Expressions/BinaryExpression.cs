@@ -531,22 +531,19 @@ namespace Jurassic.Compiler
                 switch (this.OperatorType)
                 {
                     case OperatorType.LessThan:
-                        generator.LoadBoolean(false);
                         generator.Call(ReflectionHelpers.TypeComparer_LessThan);
                         break;
 
                     case OperatorType.LessThanOrEqual:
-                        generator.LoadBoolean(false);
                         generator.Call(ReflectionHelpers.TypeComparer_LessThanOrEqual);
                         break;
 
                     case OperatorType.GreaterThan:
-                        generator.LoadBoolean(true);
-                        generator.Call(ReflectionHelpers.TypeComparer_LessThan);
+                        generator.Call(ReflectionHelpers.TypeComparer_GreaterThan);
                         break;
+
                     case OperatorType.GreaterThanOrEqual:
-                        generator.LoadBoolean(true);
-                        generator.Call(ReflectionHelpers.TypeComparer_LessThanOrEqual);
+                        generator.Call(ReflectionHelpers.TypeComparer_GreaterThanOrEqual);
                         break;
                 }
             }
