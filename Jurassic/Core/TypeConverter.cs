@@ -41,7 +41,7 @@ namespace Jurassic
                 return ((ConcatenatedString)value).Length > 0;
             if (value is ObjectInstance)
                 return true;
-            throw new ArgumentException("Unexpected type.", "value");
+            throw new ArgumentException(string.Format("Unexpected type {0}.", value.GetType()), "value");
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Jurassic
                 return GlobalObject.ParseNumber(((ConcatenatedString)value).ToString(), allowHexPrefix: true, allowTrailingJunk: false, returnZeroIfEmpty: true);
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
-            throw new ArgumentException("Unexpected type.", "value");
+            throw new ArgumentException(string.Format("Unexpected type {0}.", value.GetType()), "value");
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Jurassic
                 return ((ConcatenatedString)value).ToString();
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
-            throw new ArgumentException("Unexpected type.", "value");
+            throw new ArgumentException(string.Format("Unexpected type {0}.", value.GetType()), "value");
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Jurassic
                 return GlobalObject.String.Construct((string)value);
             if (value is ConcatenatedString)
                 return GlobalObject.String.Construct(((ConcatenatedString)value).ToString());
-            throw new ArgumentException("Unexpected type.", "value");
+            throw new ArgumentException(string.Format("Unexpected type {0}.", value.GetType()), "value");
         }
 
         /// <summary>

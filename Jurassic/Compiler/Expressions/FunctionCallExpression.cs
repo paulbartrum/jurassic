@@ -61,11 +61,15 @@ namespace Jurassic.Compiler
             var targetValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(targetValue);
             generator.LoadString("TypeError");
-            generator.LoadString("Method calls require a function, found a '{0}' instead");
-            generator.LoadInt32(1);
+            generator.LoadString("Cannot call '{0}' because it is not a function (was '{1}')");
+            generator.LoadInt32(2);
             generator.NewArray(typeof(object));
             generator.Duplicate();
             generator.LoadInt32(0);
+            generator.LoadString(this.Target.ToString());
+            generator.StoreArrayElement(typeof(object));
+            generator.Duplicate();
+            generator.LoadInt32(1);
             generator.LoadVariable(targetValue);
             generator.Call(ReflectionHelpers.TypeUtilities_TypeOf);
             generator.StoreArrayElement(typeof(object));
