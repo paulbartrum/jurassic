@@ -27,6 +27,8 @@ namespace Jurassic
         internal static MethodInfo TypeComparer_StrictEquals;
         internal static MethodInfo TypeComparer_LessThan;
         internal static MethodInfo TypeComparer_LessThanOrEqual;
+        internal static MethodInfo TypeComparer_GreaterThan;
+        internal static MethodInfo TypeComparer_GreaterThanOrEqual;
 
         internal static MethodInfo TypeUtilities_TypeOf;
         internal static MethodInfo TypeUtilities_EnumeratePropertyNames;
@@ -119,8 +121,10 @@ namespace Jurassic
 
             TypeComparer_Equals = GetStaticMethod(typeof(TypeComparer), "Equals", typeof(object), typeof(object));
             TypeComparer_StrictEquals = GetStaticMethod(typeof(TypeComparer), "StrictEquals", typeof(object), typeof(object));
-            TypeComparer_LessThan = GetStaticMethod(typeof(TypeComparer), "LessThan", typeof(object), typeof(object), typeof(bool));
-            TypeComparer_LessThanOrEqual = GetStaticMethod(typeof(TypeComparer), "LessThanOrEqual", typeof(object), typeof(object), typeof(bool));
+            TypeComparer_LessThan = GetStaticMethod(typeof(TypeComparer), "LessThan", typeof(object), typeof(object));
+            TypeComparer_LessThanOrEqual = GetStaticMethod(typeof(TypeComparer), "LessThanOrEqual", typeof(object), typeof(object));
+            TypeComparer_GreaterThan = GetStaticMethod(typeof(TypeComparer), "GreaterThan", typeof(object), typeof(object));
+            TypeComparer_GreaterThanOrEqual = GetStaticMethod(typeof(TypeComparer), "GreaterThanOrEqual", typeof(object), typeof(object));
 
             TypeUtilities_TypeOf = GetStaticMethod(typeof(TypeUtilities), "TypeOf", typeof(object));
             TypeUtilities_EnumeratePropertyNames = GetStaticMethod(typeof(TypeUtilities), "EnumeratePropertyNames", typeof(object));

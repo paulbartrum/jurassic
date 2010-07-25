@@ -442,6 +442,9 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("2 < '15'"));
             Assert.AreEqual(false, TestUtils.Evaluate("'15' < 2"));
             Assert.AreEqual(true, TestUtils.Evaluate("false < true"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = 0.3; y = 0.5; x < y"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = 0.4; y = 0.4; x < y"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = 0.5; y = 0.3; x < y"));
         }
 
         [TestMethod]
@@ -463,6 +466,9 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("2 <= '15'"));
             Assert.AreEqual(false, TestUtils.Evaluate("'15' <= 2"));
             Assert.AreEqual(true, TestUtils.Evaluate("false <= true"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = 0.3; y = 0.5; x <= y"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = 0.4; y = 0.4; x <= y"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = 0.5; y = 0.3; x <= y"));
         }
 
         [TestMethod]
@@ -484,6 +490,9 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("2 > '15'"));
             Assert.AreEqual(true, TestUtils.Evaluate("'15' > 2"));
             Assert.AreEqual(false, TestUtils.Evaluate("false > true"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = 0.3; y = 0.5; x > y"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = 0.4; y = 0.4; x > y"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = 0.5; y = 0.3; x > y"));
         }
 
         [TestMethod]
@@ -505,6 +514,9 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("2 >= '15'"));
             Assert.AreEqual(true, TestUtils.Evaluate("'15' >= 2"));
             Assert.AreEqual(false, TestUtils.Evaluate("false >= true"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = 0.3; y = 0.5; x >= y"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = 0.4; y = 0.4; x >= y"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = 0.5; y = 0.3; x >= y"));
         }
 
         [TestMethod]
