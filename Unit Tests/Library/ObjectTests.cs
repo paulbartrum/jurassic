@@ -51,6 +51,10 @@ namespace UnitTests
             // constructor
             Assert.AreEqual(true, TestUtils.Evaluate("Object.prototype.constructor === Object"));
             Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("Object.prototype", "constructor"));
+
+            // Functions are writable and configurable.
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("Object", "keys"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("Object.prototype", "hasOwnProperty"));
         }
 
 

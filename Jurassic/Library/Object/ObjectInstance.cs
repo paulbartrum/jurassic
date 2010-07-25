@@ -1065,7 +1065,7 @@ namespace Jurassic.Library
                 MethodGroup methodGroup = pair.Value;
 
                 // Add the function as a property of the object.
-                this.FastSetProperty(name, new ClrFunction(GlobalObject.Function.InstancePrototype, methodGroup.Methods, name, methodGroup.Length));
+                this.FastSetProperty(name, new ClrFunction(GlobalObject.Function.InstancePrototype, methodGroup.Methods, name, methodGroup.Length), PropertyAttributes.NonEnumerable);
             }
         }
 
