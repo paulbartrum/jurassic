@@ -32,6 +32,12 @@ namespace UnitTests
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "Infinity"));
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "NaN"));
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "undefined"));
+
+            // Functions are writable and configurable.
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "decodeURI"));
+
+            // length is sealed.
+            Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this.decodeURI", "length"));
         }
 
         [TestMethod]
