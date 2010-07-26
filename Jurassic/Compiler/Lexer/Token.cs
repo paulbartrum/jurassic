@@ -27,9 +27,14 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class WhiteSpaceToken : Token
     {
-        public WhiteSpaceToken(int count)
+        /// <summary>
+        /// Creates a new WhiteSpaceToken instance.
+        /// </summary>
+        /// <param name="lineTerminatorCount"> The number of line terminators encountered while
+        /// reading the whitespace. </param>
+        public WhiteSpaceToken(int lineTerminatorCount)
         {
-            this.LineTerminatorCount = count;
+            this.LineTerminatorCount = lineTerminatorCount;
         }
 
         /// <summary>
@@ -41,6 +46,9 @@ namespace Jurassic.Compiler
             private set;
         }
 
+        /// <summary>
+        /// Gets a string that represents the token in a parseable form.
+        /// </summary>
         public override string Text
         {
             get { return Environment.NewLine; }

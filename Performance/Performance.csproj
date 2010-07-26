@@ -102,13 +102,14 @@
     <Content Include="Files\ubench\loop-empty-resolve.js" />
     <Content Include="Files\ubench\loop-empty.js" />
     <Content Include="Files\ubench\loop-sum.js" />
-    <Content Include="Files\v8-v4\v8-crypto.js" />
-    <Content Include="Files\v8-v4\v8-deltablue.js" />
-    <Content Include="Files\v8-v4\v8-earley-boyer.js" />
-    <Content Include="Files\v8-v4\v8-raytrace.js" />
-    <Content Include="Files\v8-v4\v8-regexp.js" />
-    <Content Include="Files\v8-v4\v8-richards.js" />
-    <Content Include="Files\v8-v4\v8-splay.js" />
+    <Content Include="Files\v8\crypto.js" />
+    <Content Include="Files\v8\deltablue.js" />
+    <Content Include="Files\v8\earley-boyer.js" />
+    <Content Include="Files\v8\raytrace.js" />
+    <Content Include="Files\v8\README.txt" />
+    <Content Include="Files\v8\regexp.js" />
+    <Content Include="Files\v8\richards.js" />
+    <Content Include="Files\v8\splay.js" />
     <Content Include="JSLitmus.js" />
   </ItemGroup>
   <ItemGroup>

@@ -70,7 +70,7 @@ namespace Jurassic.Compiler
 
             // body
             generator.LoadNull();
-            generator.LoadMethodPointer(this.Context.DynamicMethod);
+            generator.LoadMethodPointer(this.Context.GeneratedMethod);
             generator.NewObject(ReflectionHelpers.FunctionDelegate_Constructor);
 
             // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body)

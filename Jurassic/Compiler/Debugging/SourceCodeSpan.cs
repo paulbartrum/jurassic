@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Jurassic.Compiler
 {
@@ -36,6 +33,19 @@ namespace Jurassic.Compiler
             this.StartColumn = startColumn;
             this.EndLine = endLine;
             this.EndColumn = endColumn;
+        }
+
+        /// <summary>
+        /// Creates a new SourceCodeSpan instance.
+        /// </summary>
+        /// <param name="start"> The start line and column of this SourceCodeSpan. </param>
+        /// <param name="end"> The end line and column of this SourceCodeSpan. </param>
+        public SourceCodeSpan(SourceCodePosition start, SourceCodePosition end)
+        {
+            this.StartLine = start.Line;
+            this.StartColumn = start.Column;
+            this.EndLine = end.Line;
+            this.EndColumn = end.Column;
         }
 
         /// <summary>

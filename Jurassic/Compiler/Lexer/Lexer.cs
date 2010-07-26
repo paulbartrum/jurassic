@@ -33,7 +33,7 @@ namespace Jurassic.Compiler
     internal class Lexer
     {
         private TextReader reader;
-        private int lineNumber;
+        private int lineNumber, columnNumber;
         private string sourcePath;
 
         /// <summary>
@@ -47,6 +47,7 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException("reader");
             this.reader = reader;
             this.lineNumber = 1;
+            this.columnNumber = 1;
             this.sourcePath = sourcePath;
         }
 
@@ -64,6 +65,14 @@ namespace Jurassic.Compiler
         public int LineNumber
         {
             get { return this.lineNumber; }
+        }
+
+        /// <summary>
+        /// Gets the column number of the start of the next token.
+        /// </summary>
+        public int ColumnNumber
+        {
+            get { return this.columnNumber; }
         }
 
         /// <summary>
@@ -85,6 +94,17 @@ namespace Jurassic.Compiler
             set;
         }
 
+        /// <summary>
+        /// Reads the next character from the input stream.
+        /// </summary>
+        /// <returns> The character that was read, or <c>-1</c> if the end of the input stream has
+        /// been reached. </returns>
+        private int ReadNextChar()
+        {
+            this.columnNumber++;
+            return this.reader.Read();
+        }
+
         // Needed to disambiguate regular expressions.
         private Token lastSignificantToken;
 
@@ -94,64 +114,57 @@ namespace Jurassic.Compiler
         /// <returns> A token, or <c>null</c> if there are no more tokens. </returns>
         public Token NextToken()
         {
-            Token token = null;
-            do
+            int c1 = ReadNextChar();
+
+            if (IsPunctuatorStartChar(c1) == true)
             {
-                int c1 = this.reader.Read();
-
-                if (IsPunctuatorStartChar(c1) == true)
-                {
-                    // Punctuator (puntcuation + operators).
-                    token = ReadPunctuator(c1);
-                }
-                else if (IsWhiteSpace(c1) == true)
-                {
-                    // White space.
-                    token = ReadWhiteSpace();
-                }
-                else if (IsIdentifierStartChar(c1) == true)
-                {
-                    // Identifier or reserved word.
-                    token = ReadIdentifier(c1);
-                }
-                else if (IsStringLiteralStartChar(c1) == true)
-                {
-                    // String literal.
-                    token = ReadStringLiteral(c1);
-                }
-                else if (IsNumericLiteralStartChar(c1) == true)
-                {
-                    // Number literal.
-                    token = ReadNumericLiteral(c1);
-                }
-                else if (IsLineTerminator(c1) == true)
-                {
-                    // Line Terminator.
-                    token = ReadLineTerminator(c1);
-                }
-                else if (c1 == '/')
-                {
-                    // Comment or divide or regular expression.
-                    token = ReadDivideCommentOrRegularExpression();
-                }
-                else if (c1 == -1)
-                {
-                    // End of input.
-                    this.lastSignificantToken = null;
-                    return null;
-                }
-                else
-                    throw new JavaScriptException("SyntaxError", string.Format("Unexpected character '{0}'.", (char)c1), this.lineNumber, this.sourcePath);
-
-                // Record the last non-whitespace token.
-                if (token != null && (token is WhiteSpaceToken) == false)
-                {
-                    this.lastSignificantToken = token;
-                }
-
-            } while (token == null);
-
-            return token;
+                // Punctuator (puntcuation + operators).
+                this.lastSignificantToken = ReadPunctuator(c1);
+                return this.lastSignificantToken;
+            }
+            else if (IsWhiteSpace(c1) == true)
+            {
+                // White space.
+                return ReadWhiteSpace();
+            }
+            else if (IsIdentifierStartChar(c1) == true)
+            {
+                // Identifier or reserved word.
+                this.lastSignificantToken = ReadIdentifier(c1);
+                return this.lastSignificantToken;
+            }
+            else if (IsStringLiteralStartChar(c1) == true)
+            {
+                // String literal.
+                this.lastSignificantToken = ReadStringLiteral(c1);
+                return this.lastSignificantToken;
+            }
+            else if (IsNumericLiteralStartChar(c1) == true)
+            {
+                // Number literal.
+                this.lastSignificantToken = ReadNumericLiteral(c1);
+                return this.lastSignificantToken;
+            }
+            else if (IsLineTerminator(c1) == true)
+            {
+                // Line Terminator.
+                this.lastSignificantToken = ReadLineTerminator(c1);
+                return this.lastSignificantToken;
+            }
+            else if (c1 == '/')
+            {
+                // Comment or divide or regular expression.
+                this.lastSignificantToken = ReadDivideCommentOrRegularExpression();
+                return this.lastSignificantToken;
+            }
+            else if (c1 == -1)
+            {
+                // End of input.
+                this.lastSignificantToken = null;
+                return null;
+            }
+            else
+                throw new JavaScriptException("SyntaxError", string.Format("Unexpected character '{0}'.", (char)c1), this.lineNumber, this.sourcePath);
         }
 
         /// <summary>
@@ -166,7 +179,7 @@ namespace Jurassic.Compiler
             if (firstChar == '\\')
             {
                 // Unicode escape sequence.
-                if (this.reader.Read() != 'u')
+                if (ReadNextChar() != 'u')
                     throw new JavaScriptException("SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.sourcePath);
                 firstChar = ReadHexNumber(4);
                 if (IsIdentifierChar(firstChar) == false)
@@ -184,8 +197,8 @@ namespace Jurassic.Compiler
                 if (c == '\\')
                 {
                     // Unicode escape sequence.
-                    this.reader.Read();
-                    if (this.reader.Read() != 'u')
+                    ReadNextChar();
+                    if (ReadNextChar() != 'u')
                         throw new JavaScriptException("SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.sourcePath);
                     c = ReadHexNumber(4);
                     if (IsIdentifierChar(c) == false)
@@ -198,7 +211,7 @@ namespace Jurassic.Compiler
                     name.Append((char)c);
 
                     // Advance the input stream.
-                    this.reader.Read();
+                    ReadNextChar();
                 }
             }
 
@@ -235,7 +248,7 @@ namespace Jurassic.Compiler
                 punctuator = longPunctuator;
 
                 // Advance the input stream.
-                this.reader.Read();
+                ReadNextChar();
             }
             return punctuator;
         }
@@ -257,7 +270,7 @@ namespace Jurassic.Compiler
                 int c = this.reader.Peek();
                 if (c == 'x' || c == 'X')
                 {
-                    this.reader.Read();
+                    ReadNextChar();
 
                     // Read numeric digits 0-9, a-z or A-Z.
                     result = 0;
@@ -272,7 +285,7 @@ namespace Jurassic.Compiler
                             result = result * 16 + c - 'A' + 10;
                         else
                             break;
-                        this.reader.Read();
+                        ReadNextChar();
                     }
 
                     if (result == (double)(int)result)
@@ -292,7 +305,7 @@ namespace Jurassic.Compiler
             {
                 // Skip past the '.'.
                 if (firstChar != '.')
-                    this.reader.Read();
+                    ReadNextChar();
 
                 // Read the fractional component.
                 double fraction = ReadInteger(0.0, out digitsRead);
@@ -322,10 +335,10 @@ namespace Jurassic.Compiler
                 double exponentSign = 1.0;
                 int c = this.reader.Peek();
                 if (c == '+')
-                    this.reader.Read();
+                    ReadNextChar();
                 else if (c == '-')
                 {
-                    this.reader.Read();
+                    ReadNextChar();
                     exponentSign = -1.0;
                 }
 
@@ -364,7 +377,7 @@ namespace Jurassic.Compiler
                 int c = this.reader.Peek();
                 if (c < '0' || c > '9')
                     break;
-                this.reader.Read();
+                ReadNextChar();
                 digitsRead++;
                 result = result * 10 + (c - '0');
             }
@@ -384,7 +397,7 @@ namespace Jurassic.Compiler
             int lineTerminatorCount = 0;
             while (true)
             {
-                int c = this.reader.Read();
+                int c = ReadNextChar();
                 if (c == firstChar)
                     break;
                 if (c == -1)
@@ -394,7 +407,7 @@ namespace Jurassic.Compiler
                 if (c == '\\')
                 {
                     // Escape sequence or line continuation.
-                    c = this.reader.Read();
+                    c = ReadNextChar();
                     if (IsLineTerminator(c))
                     {
                         // Line continuation.
@@ -406,6 +419,7 @@ namespace Jurassic.Compiler
 
                         // Increment the internal line number so errors can be tracked properly.
                         this.lineNumber++;
+                        this.columnNumber = 1;
                     }
                     else
                     {
@@ -474,7 +488,7 @@ namespace Jurassic.Compiler
             var contents = new StringBuilder(digitCount);
             for (int i = 0; i < digitCount; i++)
             {
-                int c = this.reader.Read();
+                int c = ReadNextChar();
                 contents.Append((char)c);
                 if (IsHexDigit(c) == false)
                     throw new JavaScriptException("SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.sourcePath);
@@ -495,10 +509,10 @@ namespace Jurassic.Compiler
                 int c = this.reader.Peek();
                 if (IsLineTerminator(c) || c == -1)
                     break;
-                this.reader.Read();
+                ReadNextChar();
             }
 
-            return null;
+            return new WhiteSpaceToken(0);
         }
 
         /// <summary>
@@ -514,14 +528,14 @@ namespace Jurassic.Compiler
             int lineTerminatorCount = 0;
 
             // Read the first character.
-            int c1 = this.reader.Read();
+            int c1 = ReadNextChar();
             if (c1 == -1)
                 throw new JavaScriptException("SyntaxError", "Unexpected end of input in multi-line comment.", this.lineNumber, this.sourcePath);
 
             // Read all the characters up to the "*/".
             while (true)
             {
-                int c2 = this.reader.Read();
+                int c2 = ReadNextChar();
 
                 if (IsLineTerminator(c1) == true)
                 {
@@ -531,10 +545,11 @@ namespace Jurassic.Compiler
 
                     // Increment the internal line number so errors can be tracked properly.
                     this.lineNumber++;
+                    this.columnNumber = 1;
 
                     // If the sequence is CRLF then only count that as one new line rather than two.
                     if (c1 == 0x0D && c2 == 0x0A)   // CRLF
-                        c1 = c2 = this.reader.Read();
+                        c1 = c2 = ReadNextChar();
                 }
 
                 // Look for */ combination.
@@ -543,7 +558,7 @@ namespace Jurassic.Compiler
                 c1 = c2;
             }
 
-            return lineTerminatorCount > 0 ? new WhiteSpaceToken(lineTerminatorCount) : null;
+            return new WhiteSpaceToken(lineTerminatorCount);
         }
 
         /// <summary>
@@ -560,9 +575,9 @@ namespace Jurassic.Compiler
                     break;
 
                 // Advance the reader.
-                this.reader.Read();
+                ReadNextChar();
             }
-            return null;
+            return new WhiteSpaceToken(0);
         }
 
         /// <summary>
@@ -575,10 +590,11 @@ namespace Jurassic.Compiler
             // Check for a CRLF sequence, if so that counts as one line terminator and not two.
             int c = this.reader.Peek();
             if (firstChar == 0x0D && c == 0x0A)   // CRLF
-                this.reader.Read();
+                ReadNextChar();
 
             // Increment the internal line number so errors can be tracked properly.
             this.lineNumber++;
+            this.columnNumber = 1;
 
             // Return a line terminator token.
             return new WhiteSpaceToken(1);
@@ -598,7 +614,7 @@ namespace Jurassic.Compiler
                 // Multi-line comment.
 
                 // Skip the asterisk.
-                this.reader.Read();
+                ReadNextChar();
 
                 return ReadMultiLineComment();
             }
@@ -607,7 +623,7 @@ namespace Jurassic.Compiler
                 // Single-line comment.
 
                 // Skip the slash.
-                this.reader.Read();
+                ReadNextChar();
 
                 return ReadSingleLineComment();
             }
@@ -651,7 +667,7 @@ namespace Jurassic.Compiler
                     // Two division operators: "/" and "/=".
                     if (c2 == '=')
                     {
-                        this.reader.Read();
+                        ReadNextChar();
                         return PunctuatorToken.CompoundDivide;
                     }
                     else
@@ -678,7 +694,7 @@ namespace Jurassic.Compiler
             bool insideCharacterClass = false;
             while (true)
             {
-                int c = this.reader.Read();
+                int c = ReadNextChar();
                 if (c == '/' && insideCharacterClass == false)
                     break;
                 if (c == -1)
@@ -689,7 +705,7 @@ namespace Jurassic.Compiler
                 {
                     // Escape sequence.
                     body.Append((char)c);
-                    c = this.reader.Read();
+                    c = ReadNextChar();
                 }
                 else if (c == '[')
                     insideCharacterClass = true;
@@ -705,7 +721,7 @@ namespace Jurassic.Compiler
                 int c = this.reader.Peek();
                 if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z'))
                     break;
-                this.reader.Read();
+                ReadNextChar();
                 flags.Append((char)c);
             }
 

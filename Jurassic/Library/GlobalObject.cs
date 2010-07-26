@@ -391,7 +391,7 @@ namespace Jurassic.Library
         /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        internal static object Eval(string code, Compiler.Scope scope, object thisObject, bool strictMode)
+        public static object Eval(string code, Compiler.Scope scope, object thisObject, bool strictMode)
         {
             if (scope == null)
                 throw new ArgumentNullException("scope");

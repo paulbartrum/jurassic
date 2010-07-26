@@ -26,7 +26,7 @@ namespace Jurassic.Library
         /// <param name="callee"> The function that was called. </param>
         /// <param name="scope"> The function scope. </param>
         /// <param name="argumentValues"> The argument values that were passed to the function. </param>
-        internal ArgumentsInstance(ObjectInstance prototype, UserDefinedFunction callee, DeclarativeScope scope, object[] argumentValues)
+        public ArgumentsInstance(ObjectInstance prototype, UserDefinedFunction callee, DeclarativeScope scope, object[] argumentValues)
             : base(prototype)
         {
             if (callee == null)

@@ -31,9 +31,8 @@ namespace Jurassic.Compiler
         /// <param name="name"> The name of the function. </param>
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="body"> The source code for the body of the function. </param>
-        /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
-        public FunctionContext(Scope scope, string functionName, IList<string> argumentNames, string body, string scriptPath)
-            : base(scope, scriptPath)
+        public FunctionContext(Scope scope, string functionName, IList<string> argumentNames, string body)
+            : base(scope, null)
         {
             this.Name = functionName;
             this.ArgumentNames = argumentNames;
@@ -86,18 +85,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Parses the source text into an abstract syntax tree.
+        /// Gets a name for the generated method.
         /// </summary>
-        /// <returns> The root node of the abstract syntax tree. </returns>
-        protected override Statement ParseCore()
+        /// <returns> A name for the generated method. </returns>
+        protected override string GetMethodName()
         {
-            if (this.BodyRoot != null)
-                return this.BodyRoot;
-            var lexer = new Lexer(new System.IO.StringReader(this.BodyText), this.Path);
-            var parser = new Parser(lexer, this.InitialScope, true);
-            var result = parser.Parse();
-            this.StrictMode = parser.StrictMode;
-            return result;
+            if (string.IsNullOrEmpty(this.Name))
+                return "anonymous";
+            else
+                return this.Name;
         }
 
         /// <summary>
@@ -116,6 +112,21 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Parses the source text into an abstract syntax tree.
+        /// </summary>
+        /// <returns> The root node of the abstract syntax tree. </returns>
+        protected override Statement ParseCore()
+        {
+            if (this.BodyRoot != null)
+                return this.BodyRoot;
+            var lexer = new Lexer(new System.IO.StringReader(this.BodyText), this.Path);
+            var parser = new Parser(lexer, this.InitialScope, true);
+            var result = parser.Parse();
+            this.StrictMode = parser.StrictMode;
+            return result;
+        }
+
+        /// <summary>
         /// Retrieves a delegate for the generated method.
         /// </summary>
         /// <param name="types"> The parameter types. </param>
@@ -129,14 +140,10 @@ namespace Jurassic.Compiler
         /// Generates IL for the script.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
-        protected override void GenerateCode(ILGenerator generator)
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        protected override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Method signature: object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments)
-
-            // Store the state of the StrictMode flag in the optimization info instance.
-            var optimizationInfo = OptimizationInfo.Empty;
-            if (this.StrictMode == true)
-                optimizationInfo = optimizationInfo.AddFlags(OptimizationFlags.StrictMode);
 
             // Create a new scope.
             this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);

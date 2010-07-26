@@ -39,7 +39,9 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets or sets the portion of source code associated with this statement.
+        /// Gets or sets the portion of source code associated with this statement.  For
+        /// single-line statements this encompasses the whole statement but for multi-line (block)
+        /// statements it only encompasses part of the statement.
         /// </summary>
         public SourceCodeSpan DebugInfo
         {
@@ -89,6 +91,10 @@ namespace Jurassic.Compiler
                 endOfStatement = generator.CreateLabel();
                 optimizationInfo.PushBreakOrContinueInfo(this.Labels, endOfStatement, null, true);
             }
+
+            // Emit debugging information.
+            if (optimizationInfo.DebugDocument != null && this.DebugInfo != null)
+                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.DebugInfo);
 
             // Generate the code.
             this.GenerateCodeCore(generator, optimizationInfo);

@@ -40,6 +40,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler\Debugging\COMHelpers.cs" />
+    <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
     <Compile Include="Compiler\Lexer\RegularExpressionLiteral.cs" />
     <Compile Include="Compiler\Context\EvalContext.cs" />
     <Compile Include="Compiler\Context\FunctionContext.cs" />
@@ -94,7 +96,7 @@
     <Compile Include="Compiler\Statements\ExpressionStatement.cs" />
     <Compile Include="Compiler\Statements\ForStatement.cs" />
     <Compile Include="Compiler\Statements\Statement.cs" />
-    <Compile Include="Compiler\Parser\SourceCodeRange.cs" />
+    <Compile Include="Compiler\Debugging\SourceCodeSpan.cs" />
     <Compile Include="Core\ConcatenatedString.cs" />
     <Compile Include="Library\FirebugConsole.cs" />
     <Compile Include="Library\Function\BoundFunction.cs" />
@@ -173,9 +175,7 @@
     <Content Include="Compiler\Emit\ILReader\README.txt" />
     <Content Include="Compiler\Emit\Optimizations.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Library\Global\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

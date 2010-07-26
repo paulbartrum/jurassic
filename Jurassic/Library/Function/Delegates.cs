@@ -13,7 +13,7 @@ namespace Jurassic.Library
     /// <param name="functionObject"> The function object. </param>
     /// <param name="arguments"> The arguments that were passed to the function. </param>
     /// <returns> The result of calling the method. </returns>
-    internal delegate object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments);
+    public delegate object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments);
 
     /// <summary>
     /// Represents a generic delegate that all method calls pass through.  For internal use only.

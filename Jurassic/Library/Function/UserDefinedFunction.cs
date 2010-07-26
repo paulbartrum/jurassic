@@ -30,7 +30,7 @@ namespace Jurassic.Library
             var scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(), name, argumentNames);
 
             // Compile the code.
-            var context = new FunctionContext(scope, name, argumentNames, body, "[user function]");
+            var context = new FunctionContext(scope, name, argumentNames, body);
             context.GenerateCode();
 
             // Create a new user defined function.
@@ -45,7 +45,7 @@ namespace Jurassic.Library
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="parentScope"> The scope at the point the function is declared. </param>
         /// <param name="body"> A delegate which represents the body of the function. </param>
-        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body)
+        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body)
             : base(prototype)
         {
             Init(name, argumentNames, parentScope, body, true);

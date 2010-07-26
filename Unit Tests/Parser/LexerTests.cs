@@ -54,17 +54,17 @@ namespace UnitTests
         public void Comments()
         {
             // Single-line comment.
-            Assert.AreEqual("", ToTokenString("// testing"));
-            Assert.AreEqual("{LT 1}", ToTokenString("// testing\r\n"));
+            Assert.AreEqual("{WS 0}", ToTokenString("// testing"));
+            Assert.AreEqual("{WS 0}{WS 1}", ToTokenString("// testing\r\n"));
 
             // Multi-line comment.
-            Assert.AreEqual("", ToTokenString("/* testing */"));
-            Assert.AreEqual("{LT 1}", ToTokenString("/* test\r\ning */"));
-            Assert.AreEqual("{LT 2}", ToTokenString("/*\r\n test\r\ning */"));
-            Assert.AreEqual("{LT 1}", ToTokenString("/* testing \r\n*/"));
-            Assert.AreEqual("{LT 1}", ToTokenString("/* test\ning */"));
-            Assert.AreEqual("{LT 1}", ToTokenString("/* test\ring */"));
-            Assert.AreEqual("", ToTokenString("/* te*sting**/"));
+            Assert.AreEqual("{WS 0}", ToTokenString("/* testing */"));
+            Assert.AreEqual("{WS 1}", ToTokenString("/* test\r\ning */"));
+            Assert.AreEqual("{WS 2}", ToTokenString("/*\r\n test\r\ning */"));
+            Assert.AreEqual("{WS 1}", ToTokenString("/* testing \r\n*/"));
+            Assert.AreEqual("{WS 1}", ToTokenString("/* test\ning */"));
+            Assert.AreEqual("{WS 1}", ToTokenString("/* test\ring */"));
+            Assert.AreEqual("{WS 0}", ToTokenString("/* te*sting**/"));
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace UnitTests
             Assert.AreEqual("{Literal 3400}", ToTokenString("34e2"));
             Assert.AreEqual("{Literal 3.45}", ToTokenString("34.5e-1"));
             Assert.AreEqual("{Literal 0.345}", ToTokenString("34.5E-2"));
-            Assert.AreEqual("{Literal 11}", ToTokenString(" 11"));
+            Assert.AreEqual("{WS 0}{Literal 11}", ToTokenString(" 11"));
             Assert.AreEqual("{Literal 0.5}", ToTokenString("0.5"));
             Assert.AreEqual("{Literal 0.005}", ToTokenString("0.005"));
             Assert.AreEqual("{Literal 255}", ToTokenString("0xff"));
@@ -137,9 +137,9 @@ namespace UnitTests
         [TestMethod]
         public void Punctuator()
         {
-            Assert.AreEqual("{Identifier x}{Punctuator +=}{Literal 5}", ToTokenString("x += 5"));
-            Assert.AreEqual("{Identifier x}{Punctuator /}{Literal 5}", ToTokenString("x / 5"));
-            Assert.AreEqual("{Identifier x}{Punctuator /=}{Literal 5}", ToTokenString("x /= 5"));
+            Assert.AreEqual("{Identifier x}{WS 0}{Punctuator +=}{WS 0}{Literal 5}", ToTokenString("x += 5"));
+            Assert.AreEqual("{Identifier x}{WS 0}{Punctuator /}{WS 0}{Literal 5}", ToTokenString("x / 5"));
+            Assert.AreEqual("{Identifier x}{WS 0}{Punctuator /=}{WS 0}{Literal 5}", ToTokenString("x /= 5"));
         }
 
         [TestMethod]
@@ -180,7 +180,7 @@ namespace UnitTests
                 else if (token is LiteralToken)
                     result.AppendFormat("{{Literal {0}}}", ((LiteralToken)token).Value);
                 else if (token is WhiteSpaceToken)
-                    result.AppendFormat("{{LT {0}}}", ((WhiteSpaceToken)token).LineTerminatorCount);
+                    result.AppendFormat("{{WS {0}}}", ((WhiteSpaceToken)token).LineTerminatorCount);
                 else if (token is KeywordToken)
                     result.AppendFormat("{{Keyword {0}}}", ((KeywordToken)token).Name);
                 else if (token is PunctuatorToken)

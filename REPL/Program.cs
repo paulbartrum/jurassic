@@ -10,7 +10,8 @@ namespace REPL
         static void Main(string[] args)
         {
             // Register the firebug console object.
-            var console = new FirebugConsole(2);
+            var console = new Jurassic.Library.FirebugConsole();
+            console.CurrentIndentation = 2;
             Jurassic.Library.GlobalObject.Instance["console"] = console;
 
             Console.WriteLine("JavaScript console (type 'quit' to exit)");
@@ -39,7 +40,7 @@ namespace REPL
                 }
                 catch (Exception ex)
                 {
-                    console.error(ex.Message);
+                    console.Error(ex.Message);
                 }
             }
         }
