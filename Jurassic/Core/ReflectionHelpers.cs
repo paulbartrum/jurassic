@@ -202,19 +202,64 @@ namespace Jurassic
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");
+
+#if DEBUG
+            // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus
+            // must be public.
+            var text = new System.Text.StringBuilder();
+            foreach (var reflectionField in GetMembers())
+            {
+                var methodBase = reflectionField.MemberInfo as MethodBase;
+                if (methodBase != null && (methodBase.Attributes & MethodAttributes.Public) != MethodAttributes.Public)
+                {
+                    text.Append(methodBase.DeclaringType.ToString());
+                    text.Append("/");
+                    text.AppendLine(methodBase.ToString());
+                }
+                var field = reflectionField.MemberInfo as FieldInfo;
+                if (field != null && (field.Attributes & FieldAttributes.Public) != FieldAttributes.Public)
+                    text.AppendLine(field.ToString());
+                if ((reflectionField.MemberInfo.DeclaringType.Attributes & TypeAttributes.Public) != TypeAttributes.Public)
+                    text.AppendLine(reflectionField.MemberInfo.DeclaringType.ToString());
+            }
+            if (text.Length > 0)
+                throw new InvalidOperationException("The following members need to be public: " + Environment.NewLine + text.ToString());
+
+            // For ease of debugging, all runtime calls should have the DebuggerHidden
+            // attribute.
+            //text.Clear();
+            //foreach (var reflectionField in GetMembers())
+            //{
+            //    var methodBase = reflectionField.MemberInfo as MethodBase;
+            //    if (methodBase != null && Attribute.GetCustomAttribute(methodBase, typeof(System.Diagnostics.DebuggerHiddenAttribute)) == null)
+            //    {
+            //        text.Append(methodBase.DeclaringType.ToString());
+            //        text.Append("/");
+            //        text.AppendLine(methodBase.ToString());
+            //    }
+            //}
+            //if (text.Length > 0)
+            //    throw new InvalidOperationException("The following methods do not have [DebuggerHidden]: " + Environment.NewLine + text.ToString());
+#endif
+        }
+
+        internal struct ReflectionField
+        {
+            public string FieldName;
+            public MemberInfo MemberInfo;
         }
 
         /// <summary>
         /// Gets an enumerable list of all the MemberInfos that are statically known to be used by this DLL.
         /// </summary>
         /// <returns> An enumerable list of all the MemberInfos that are used by this DLL. </returns>
-        internal static IEnumerable<Tuple<string, MemberInfo>> GetMembers()
+        internal static IEnumerable<ReflectionField> GetMembers()
         {
             foreach (FieldInfo field in typeof(ReflectionHelpers).GetFields(BindingFlags.NonPublic | BindingFlags.Static))
             {
                 if (field.FieldType != typeof(MethodInfo) && field.FieldType != typeof(ConstructorInfo) && field.FieldType != typeof(FieldInfo))
                     continue;
-                yield return Tuple.Create(field.Name, (MemberInfo)field.GetValue(null));
+                yield return new ReflectionField() { FieldName = field.Name, MemberInfo = (MemberInfo)field.GetValue(null) };
             }
         }
 

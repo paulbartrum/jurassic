@@ -11,6 +11,7 @@ namespace Jurassic.Compiler
     internal sealed class Parser
     {
         private Lexer lexer;
+        private SourceCodePosition positionBeforeWhitespace, positionAfterWhitespace;
         private Token nextToken;
         private bool consumedLineTerminator;
         private ExpressionState expressionState;
@@ -54,7 +55,23 @@ namespace Jurassic.Compiler
         /// </summary>
         public int LineNumber
         {
-            get { return this.lexer.LineNumber; }
+            get { return this.positionAfterWhitespace.Line; }
+        }
+
+        /// <summary>
+        /// Gets the position of the next token.
+        /// </summary>
+        public SourceCodePosition PositionBeforeWhitespace
+        {
+            get { return this.positionBeforeWhitespace; }
+        }
+
+        /// <summary>
+        /// Gets the position of the next token.
+        /// </summary>
+        public SourceCodePosition PositionAfterWhitespace
+        {
+            get { return this.positionAfterWhitespace; }
         }
 
         /// <summary>
@@ -85,6 +102,7 @@ namespace Jurassic.Compiler
         }
 
 
+
         //     VARIABLES
         //_________________________________________________________________________________________
      
@@ -113,12 +131,16 @@ namespace Jurassic.Compiler
         {
             this.expressionState = expressionState;
             this.consumedLineTerminator = false;
+            this.positionBeforeWhitespace = new SourceCodePosition(this.lexer.LineNumber, this.lexer.ColumnNumber);
+            this.positionAfterWhitespace = this.positionBeforeWhitespace;
             while (true)
             {
                 this.nextToken = this.lexer.NextToken();
                 if ((this.nextToken is WhiteSpaceToken) == false)
                     break;
-                this.consumedLineTerminator = true;
+                if (((WhiteSpaceToken)this.nextToken).LineTerminatorCount > 0)
+                    this.consumedLineTerminator = true;
+                this.positionAfterWhitespace = new SourceCodePosition(this.lexer.LineNumber, this.lexer.ColumnNumber);
             }
         }
 
@@ -154,6 +176,12 @@ namespace Jurassic.Compiler
             }
         }
 
+        /// <summary>
+        /// Returns a value that indicates whether the current position is a valid position to end
+        /// a statement.
+        /// </summary>
+        /// <returns> <c>true</c> if the current position is a valid position to end a statement;
+        /// <c>false</c> otherwise. </returns>
         private bool AtValidEndOfStatement()
         {
             // A statement can be terminator in four ways: by a semi-colon (;), by a right brace (}),
@@ -164,6 +192,10 @@ namespace Jurassic.Compiler
                 this.nextToken == null;
         }
 
+        /// <summary>
+        /// Indicates that the next token should end the current statement.  This implies that the
+        /// next token is a semicolon, right brace or a line terminator.
+        /// </summary>
         private void ExpectEndOfStatement()
         {
             if (this.nextToken == PunctuatorToken.Semicolon)
@@ -277,7 +309,7 @@ namespace Jurassic.Compiler
         private Statement ParseStatement()
         {
             // Record the line number of the start of the statement.
-            int startLine = this.LineNumber;
+            //int startLine = this.LineNumber;
 
             // This is a new statement so clear any labels.
             this.labelsForCurrentStatement.Clear();
@@ -286,7 +318,7 @@ namespace Jurassic.Compiler
             Statement statement = ParseStatementNoNewContext();
 
             // Record the line number of the end of the statement and insert debug info.
-            statement.DebugInfo = new SourceCodeSpan(startLine, 1, Math.Max(startLine, this.LineNumber - 1), int.MaxValue);
+            //statement.DebugInfo = new SourceCodeSpan(startLine, 1, Math.Max(startLine, this.LineNumber - 1), int.MaxValue);
 
             return statement;
         }
@@ -369,10 +401,13 @@ namespace Jurassic.Compiler
         /// <returns> A var statement. </returns>
         private VarStatement ParseVar()
         {
+            var result = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
+
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Read past the var token.
             this.Expect(KeywordToken.Var);
-
-            var result = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
 
             // There can be multiple declarations.
             while (true)
@@ -410,6 +445,9 @@ namespace Jurassic.Compiler
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
 
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
             return result;
         }
 
@@ -419,8 +457,18 @@ namespace Jurassic.Compiler
         /// <returns> An empty statement. </returns>
         private Statement ParseEmpty()
         {
+            var result = new EmptyStatement(this.labelsForCurrentStatement);
+
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
+            // Read past the semicolon.
             this.Expect(PunctuatorToken.Semicolon);
-            return new EmptyStatement(this.labelsForCurrentStatement);
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
+            return result;
         }
 
         /// <summary>
@@ -437,8 +485,14 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Parse the condition.
             result.Condition = ParseExpression(PunctuatorToken.RightParenthesis);
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -479,8 +533,14 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Parse the condition.
             result.Condition = ParseExpression(PunctuatorToken.RightParenthesis);
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -505,8 +565,14 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Parse the condition.
             result.Condition = ParseExpression(PunctuatorToken.RightParenthesis);
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -681,6 +747,9 @@ namespace Jurassic.Compiler
         {
             var result = new ContinueStatement(this.labelsForCurrentStatement);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Consume the continue keyword.
             this.Expect(KeywordToken.Continue);
 
@@ -696,6 +765,9 @@ namespace Jurassic.Compiler
             // Consume the semi-colon, if there was one.
             this.ExpectEndOfStatement();
 
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
             return result;
         }
 
@@ -706,6 +778,9 @@ namespace Jurassic.Compiler
         private BreakStatement ParseBreak()
         {
             var result = new BreakStatement(this.labelsForCurrentStatement);
+
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
 
             // Consume the break keyword.
             this.Expect(KeywordToken.Break);
@@ -722,6 +797,9 @@ namespace Jurassic.Compiler
             // Consume the semi-colon, if there was one.
             this.ExpectEndOfStatement();
 
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
             return result;
         }
 
@@ -736,6 +814,9 @@ namespace Jurassic.Compiler
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Consume the return keyword.
             this.Expect(KeywordToken.Return);
 
@@ -747,6 +828,9 @@ namespace Jurassic.Compiler
 
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
         }
@@ -765,8 +849,14 @@ namespace Jurassic.Compiler
             // Read a left parenthesis token "(".
             this.Expect(PunctuatorToken.LeftParenthesis);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Read an object reference.
             var objectEnvironment = ParseExpression(PunctuatorToken.RightParenthesis);
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read a right parenthesis token ")".
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -798,8 +888,14 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Parse the switch expression.
             result.Value = ParseExpression(PunctuatorToken.RightParenthesis);
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -871,6 +967,9 @@ namespace Jurassic.Compiler
         {
             var result = new ThrowStatement(this.labelsForCurrentStatement);
 
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Consume the throw keyword.
             this.Expect(KeywordToken.Throw);
 
@@ -883,6 +982,9 @@ namespace Jurassic.Compiler
 
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
+
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
         }
@@ -951,13 +1053,21 @@ namespace Jurassic.Compiler
         /// <returns> A debugger statement. </returns>
         private DebuggerStatement ParseDebugger()
         {
+            var result = new DebuggerStatement(this.labelsForCurrentStatement);
+
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Consume the debugger keyword.
             this.Expect(KeywordToken.Debugger);
 
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
 
-            return new DebuggerStatement(this.labelsForCurrentStatement);
+            // Record the end of the statement and add debugging info.
+            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
+            return result;
         }
 
         /// <summary>
@@ -1103,6 +1213,9 @@ namespace Jurassic.Compiler
         /// <returns> A statement. </returns>
         private Statement ParseLabelOrExpressionStatement()
         {
+            // Record the position of the start of the statement.
+            var start = this.PositionAfterWhitespace;
+
             // Parse the statement as though it was an expression - but stop if there is an unexpected colon.
             var expression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Colon);
 
@@ -1126,9 +1239,13 @@ namespace Jurassic.Compiler
                 // Consume the end of the statement.
                 this.ExpectEndOfStatement();
 
-                // Return a new expression statement.
-                return new ExpressionStatement(this.labelsForCurrentStatement, expression) { ContributesToEvalResult = true };
+                // Create a new expression statement.
+                var result = new ExpressionStatement(this.labelsForCurrentStatement, expression) { ContributesToEvalResult = true };
 
+                // Record the end of the statement and add debugging info.
+                result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
+                return result;
             }
         }
 

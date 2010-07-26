@@ -38,84 +38,98 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class OptimizationInfo
     {
-        private OptimizationFlags flags;
-
-        /// <summary>
-        /// Creates a new OptimizationInfo instance.
-        /// </summary>
-        /// <param name="flags"> Determines the optimizations to perform. </param>
-        private OptimizationInfo(OptimizationFlags flags)
+        public OptimizationInfo()
         {
-            this.flags = flags;
         }
 
+        //private OptimizationFlags flags;
+
         ///// <summary>
-        ///// If <c>true</c>, indicates the return value from an expression is not used and
-        ///// therefore should not be generated.
+        ///// Creates a new OptimizationInfo instance.
         ///// </summary>
-        //public bool SuppressReturnValue
+        ///// <param name="flags"> Determines the optimizations to perform. </param>
+        //private OptimizationInfo(OptimizationFlags flags)
         //{
-        //    get { return (this.flags & OptimizationFlags.SuppressReturnValue) != 0; }
+        //    this.flags = flags;
+        //}
+
+        /////// <summary>
+        /////// If <c>true</c>, indicates the return value from an expression is not used and
+        /////// therefore should not be generated.
+        /////// </summary>
+        ////public bool SuppressReturnValue
+        ////{
+        ////    get { return (this.flags & OptimizationFlags.SuppressReturnValue) != 0; }
+        ////}
+
+        ///// <summary>
+        ///// If <c>true</c>, indicates that object scope variable lookup and property access should
+        ///// be optimized using the hidden class as the cache key.
+        ///// </summary>
+        //public bool InlineCachingEnabled
+        //{
+        //    get { return (this.flags & OptimizationFlags.EnableInlineCaching) != 0; }
         //}
 
         /// <summary>
-        /// If <c>true</c>, indicates that object scope variable lookup and property access should
-        /// be optimized using the hidden class as the cache key.
+        /// Gets a value that indicates whether strict mode is enabled.
         /// </summary>
-        public bool InlineCachingEnabled
-        {
-            get { return (this.flags & OptimizationFlags.EnableInlineCaching) != 0; }
-        }
+        public bool StrictMode;
+
+        ///// <summary>
+        ///// Gets a reference to an OptimizationInfo that performs no optimizations.
+        ///// </summary>
+        //public static OptimizationInfo Empty
+        //{
+        //    get { return new OptimizationInfo(OptimizationFlags.None); }
+        //}
+
+        ///// <summary>
+        ///// Clones this instance and adds one or more flags.
+        ///// </summary>
+        ///// <param name="flags"> The flags to add. </param>
+        ///// <returns> A new instance that is based on this one. </returns>
+        //public OptimizationInfo AddFlags(OptimizationFlags flags)
+        //{
+        //    var result = this.Clone();
+        //    result.flags |= flags;
+        //    return result;
+        //}
+
+        ///// <summary>
+        ///// Clones this instance and removes one or more flags.
+        ///// </summary>
+        ///// <param name="flags"> The flags to remove. </param>
+        ///// <returns> A new instance that is based on this one. </returns>
+        //public OptimizationInfo RemoveFlags(OptimizationFlags flags)
+        //{
+        //    var result = this.Clone();
+        //    result.flags &= ~flags;
+        //    return result;
+        //}
+
+        ///// <summary>
+        ///// Clones the optimization information.
+        ///// </summary>
+        ///// <returns> A clone of the optimization information. </returns>
+        //private OptimizationInfo Clone()
+        //{
+        //    return (OptimizationInfo)this.MemberwiseClone();
+        //}
+
+
+
+        //     FUNCTION OPTIMIZATION
+        //_________________________________________________________________________________________
 
         /// <summary>
-        /// If <c>true</c>, indicates that strict mode is enabled.
+        /// Gets or sets the symbol store to write debugging information to.
         /// </summary>
-        public bool StrictMode
+        public System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument
         {
-            get { return (this.flags & OptimizationFlags.StrictMode) != 0; }
+            get;
+            set;
         }
-
-        /// <summary>
-        /// Gets a reference to an OptimizationInfo that performs no optimizations.
-        /// </summary>
-        public static OptimizationInfo Empty
-        {
-            get { return new OptimizationInfo(OptimizationFlags.None); }
-        }
-
-        /// <summary>
-        /// Clones this instance and adds one or more flags.
-        /// </summary>
-        /// <param name="flags"> The flags to add. </param>
-        /// <returns> A new instance that is based on this one. </returns>
-        public OptimizationInfo AddFlags(OptimizationFlags flags)
-        {
-            var result = this.Clone();
-            result.flags |= flags;
-            return result;
-        }
-
-        /// <summary>
-        /// Clones this instance and removes one or more flags.
-        /// </summary>
-        /// <param name="flags"> The flags to remove. </param>
-        /// <returns> A new instance that is based on this one. </returns>
-        public OptimizationInfo RemoveFlags(OptimizationFlags flags)
-        {
-            var result = this.Clone();
-            result.flags &= ~flags;
-            return result;
-        }
-
-        /// <summary>
-        /// Clones the optimization information.
-        /// </summary>
-        /// <returns> A clone of the optimization information. </returns>
-        private OptimizationInfo Clone()
-        {
-            return (OptimizationInfo)this.MemberwiseClone();
-        }
-
 
 
         //     FUNCTION OPTIMIZATION

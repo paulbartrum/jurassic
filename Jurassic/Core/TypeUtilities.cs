@@ -108,7 +108,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="value"> The value to check. </param>
         /// <param name="functionName"> The name of the function which is doing the check. </param>
-        internal static void VerifyThisObject(object value, string functionName)
+        public static void VerifyThisObject(object value, string functionName)
         {
             if (value == null || value == Undefined.Value)
                 throw new JavaScriptException("TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));

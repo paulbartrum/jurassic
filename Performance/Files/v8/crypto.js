@@ -29,6 +29,7 @@
  * and disclaimer.
  */
 
+
 // Basic JavaScript BN library - subset useful for RSA encryption.
 
 // Bits per digit
@@ -1689,7 +1690,5 @@ function decrypt() {
   }
 }
 
-for (var i = 0; i < 8; ++i) {
-  encrypt();
-  decrypt();
-}
+encrypt();
+decrypt();

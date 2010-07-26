@@ -9,7 +9,7 @@ namespace Jurassic
     /// Represents a string that is composed of one or more strings appended together.  This class
     /// is immutable.
     /// </summary>
-    internal sealed class ConcatenatedString
+    public sealed class ConcatenatedString
     {
         private string[] strings;
         private int count;

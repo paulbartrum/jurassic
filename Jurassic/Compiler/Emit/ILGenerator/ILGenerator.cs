@@ -590,6 +590,8 @@ namespace Jurassic.Compiler
         /// <param name="method"> The method to retrieve a pointer for. </param>
         public void LoadMethodPointer(System.Reflection.MethodInfo method)
         {
+            if (method == null)
+                throw new ArgumentNullException("method");
             if (method.IsStatic == true || method.DeclaringType.IsValueType == true)
                 LoadStaticMethodPointer(method);
             else
@@ -740,13 +742,35 @@ namespace Jurassic.Compiler
         public abstract void EndFilter();
 
 
-        //     MISC
+        //     DEBUGGING SUPPORT
         //_________________________________________________________________________________________
 
         /// <summary>
         /// Triggers a breakpoint in an attached debugger.
         /// </summary>
         public abstract void Breakpoint();
+
+        /// <summary>
+        /// Marks a sequence point in the Microsoft intermediate language (MSIL) stream.
+        /// </summary>
+        /// <param name="document"> The document for which the sequence point is being defined. </param>
+        /// <param name="span"> The start and end positions which define the sequence point. </param>
+        public void MarkSequencePoint(System.Diagnostics.SymbolStore.ISymbolDocumentWriter document, SourceCodeSpan span)
+        {
+            if (span == null)
+                throw new ArgumentNullException("span");
+            MarkSequencePoint(document, span.StartLine, span.StartColumn, span.EndLine, span.EndColumn);
+        }
+
+        /// <summary>
+        /// Marks a sequence point in the Microsoft intermediate language (MSIL) stream.
+        /// </summary>
+        /// <param name="document"> The document for which the sequence point is being defined. </param>
+        /// <param name="startLine"> The line where the sequence point begins. </param>
+        /// <param name="startColumn"> The column in the line where the sequence point begins. </param>
+        /// <param name="endLine"> The line where the sequence point ends. </param>
+        /// <param name="endColumn"> The column in the line where the sequence point ends. </param>
+        public abstract void MarkSequencePoint(System.Diagnostics.SymbolStore.ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn);
     }
 
 }

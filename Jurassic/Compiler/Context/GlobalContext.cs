@@ -28,6 +28,24 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets a name for the generated method.
+        /// </summary>
+        /// <returns> A name for the generated method. </returns>
+        protected override string GetMethodName()
+        {
+            // Take the path of the script and replace the non-alphanumeric characters with
+            // underscores.
+            var sanitizedPath = new System.Text.StringBuilder(this.Path);
+            for (int i = 0; i < sanitizedPath.Length; i++)
+            {
+                char c = sanitizedPath[i];
+                if ((c < '0' || c > '9') && (c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
+                    sanitizedPath[i] = '_';
+            }
+            return string.Format("global_{0}", sanitizedPath.ToString());
+        }
+
+        /// <summary>
         /// Parses the source text into an abstract syntax tree.
         /// </summary>
         /// <returns> The root node of the abstract syntax tree. </returns>
@@ -44,13 +62,9 @@ namespace Jurassic.Compiler
         /// Generates IL for the script.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
-        protected override void GenerateCode(ILGenerator generator)
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        protected override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // Store the state of the StrictMode flag in the optimization info instance.
-            var optimizationInfo = OptimizationInfo.Empty;
-            if (this.StrictMode == true)
-                optimizationInfo = optimizationInfo.AddFlags(OptimizationFlags.StrictMode);
-
             // Initialize any function or variable declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 
@@ -68,7 +82,7 @@ namespace Jurassic.Compiler
         public object Execute()
         {
             // Compile the code if it hasn't already been compiled.
-            if (this.DynamicMethod == null)
+            if (this.GeneratedMethod == null)
                 GenerateCode();
 
             // Execute the compiled delegate and return the result.

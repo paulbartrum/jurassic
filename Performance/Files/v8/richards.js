@@ -533,5 +533,4 @@ Packet.prototype.toString = function () {
   return "Packet";
 };
 
-for (var i = 0; i < 350; ++i)
-  runRichards();
+runRichards();

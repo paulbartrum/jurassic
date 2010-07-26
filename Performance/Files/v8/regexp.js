@@ -1609,5 +1609,4 @@ function runRegExpBenchmark() {
   }
 }
 
-for (var i = 0; i < 3; ++i)
-    runRegExpBenchmark();
+runRegExpBenchmark();

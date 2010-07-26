@@ -113,9 +113,12 @@ namespace Jurassic.Compiler
             result.Append(this.Condition.ToString());
             result.AppendLine(")");
             result.AppendLine(this.IfClause.ToString(indentLevel + 1));
-            result.Append(new string('\t', indentLevel));
-            result.AppendLine("else");
-            result.AppendLine(this.ElseClause.ToString(indentLevel + 1));
+            if (this.ElseClause != null)
+            {
+                result.Append(new string('\t', indentLevel));
+                result.AppendLine("else");
+                result.AppendLine(this.ElseClause.ToString(indentLevel + 1));
+            }
             return result.ToString();
         }
     }

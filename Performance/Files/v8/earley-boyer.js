@@ -4677,7 +4677,5 @@ function RunBenchmark(name, count, run, warn) {
 
 var BgL_runzd2benchmarkzd2 = RunBenchmark;
 
-for (var i = 0; i < 4; ++i) {
-  BgL_earleyzd2benchmarkzd2();
-  BgL_nboyerzd2benchmarkzd2();
-}
+BgL_earleyzd2benchmarkzd2();
+BgL_nboyerzd2benchmarkzd2();
