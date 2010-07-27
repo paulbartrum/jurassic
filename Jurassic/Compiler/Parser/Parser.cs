@@ -403,7 +403,7 @@ namespace Jurassic.Compiler
         {
             var result = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Read past the var token.
@@ -429,6 +429,9 @@ namespace Jurassic.Compiler
 
                     // Read the setter expression.
                     declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
+
+                    // Record the portion of the source document that will be highlighted when debugging.
+                    declaration.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
                 }
 
                 // Add the declaration to the result.
@@ -440,13 +443,13 @@ namespace Jurassic.Compiler
 
                 // Read past the comma token.
                 this.Expect(PunctuatorToken.Comma);
+
+                // Keep track of the start of the statement so that source debugging works correctly.
+                start = this.PositionAfterWhitespace;
             }
 
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
-
-            // Record the end of the statement and add debugging info.
-            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
         }
@@ -459,13 +462,13 @@ namespace Jurassic.Compiler
         {
             var result = new EmptyStatement(this.labelsForCurrentStatement);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Read past the semicolon.
             this.Expect(PunctuatorToken.Semicolon);
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
@@ -485,13 +488,13 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Parse the condition.
             result.Condition = ParseExpression(PunctuatorToken.RightParenthesis);
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
@@ -533,13 +536,15 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Parse the condition.
-            result.Condition = ParseExpression(PunctuatorToken.RightParenthesis);
+            start = this.PositionAfterWhitespace;
+            result.ConditionStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.RightParenthesis));
+            result.ConditionStatement.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
@@ -565,14 +570,10 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // Record the position of the start of the statement.
-            var start = this.PositionAfterWhitespace;
-
             // Parse the condition.
-            result.Condition = ParseExpression(PunctuatorToken.RightParenthesis);
-
-            // Record the end of the statement and add debugging info.
-            result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+            var start = this.PositionAfterWhitespace;
+            result.ConditionStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.RightParenthesis));
+            result.ConditionStatement.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -600,6 +601,9 @@ namespace Jurassic.Compiler
 
             // The for-in expression needs a variable to assign to.  Is null for a regular for statement.
             IReferenceExpression forInReference = null;
+
+            // Keep track of the start of the statement so that source debugging works correctly.
+            var start = this.PositionAfterWhitespace;
 
             if (this.nextToken == KeywordToken.Var)
             {
@@ -633,6 +637,9 @@ namespace Jurassic.Compiler
                         // Read the setter expression.
                         declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
 
+                        // Record the portion of the source document that will be highlighted when debugging.
+                        declaration.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
                         // This is a regular for statement.
                         cannotBeForIn = true;
                     }
@@ -657,9 +664,15 @@ namespace Jurassic.Compiler
                     // Read past the comma token.
                     this.Expect(PunctuatorToken.Comma);
 
+                    // Keep track of the start of the statement so that source debugging works correctly.
+                    start = this.PositionAfterWhitespace;
+
                     // Multiple initializers are not allowed in for-in statements.
                     cannotBeForIn = true;
                 }
+
+                // Record the portion of the source document that will be highlighted when debugging.
+                varStatement.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
             }
             else
             {
@@ -667,18 +680,19 @@ namespace Jurassic.Compiler
                 // The expression can be empty.
                 if (this.nextToken != PunctuatorToken.Semicolon)
                 {
+                    // Parse an expression.
                     var initializationExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In);
+
+                    // Record debug info for the expression.
+                    initializationStatement = new ExpressionStatement(this.labelsForCurrentStatement, initializationExpression);
+                    initializationStatement.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
                     if (this.nextToken == KeywordToken.In)
                     {
                         // This is a for-in statement.
                         if ((initializationExpression is IReferenceExpression) == false)
                             throw new JavaScriptException("ReferenceError", "Invalid left-hand side in for-in", 1, "");
                         forInReference = (IReferenceExpression)initializationExpression;
-                    }
-                    else
-                    {
-                        // This is a regular for statement.
-                        initializationStatement = new ExpressionStatement(this.labelsForCurrentStatement, initializationExpression);
                     }
                 }
             }
@@ -689,12 +703,15 @@ namespace Jurassic.Compiler
                 // for (var x in y)
                 var result = new ForInStatement(this.labelsForCurrentStatement);
                 result.Variable = forInReference;
+                result.VariableDebugInfo = initializationStatement.DebugInfo;
                 
                 // Consume the "in".
                 this.Expect(KeywordToken.In);
 
                 // Parse the right-hand-side expression.
+                start = this.PositionAfterWhitespace;
                 result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis);
+                result.TargetObjectDebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                 // Read the right parenthesis.
                 this.Expect(PunctuatorToken.RightParenthesis);
@@ -718,7 +735,11 @@ namespace Jurassic.Compiler
                 // Parse the optional condition expression.
                 // Note: if the condition is omitted then it is considered to always be true.
                 if (this.nextToken != PunctuatorToken.Semicolon)
-                    result.Condition = ParseExpression(PunctuatorToken.Semicolon);
+                {
+                    start = this.PositionAfterWhitespace;
+                    result.ConditionStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.Semicolon));
+                    result.ConditionStatement.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                }
 
                 // Read the semicolon.
                 // Note: automatic semicolon insertion never inserts a semicolon in the header of a
@@ -727,7 +748,11 @@ namespace Jurassic.Compiler
 
                 // Parse the optional increment expression.
                 if (this.nextToken != PunctuatorToken.RightParenthesis)
-                    result.Increment = ParseExpression(PunctuatorToken.RightParenthesis);
+                {
+                    start = this.PositionAfterWhitespace;
+                    result.IncrementStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.RightParenthesis));
+                    result.IncrementStatement.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                }
 
                 // Read the right parenthesis.
                 this.Expect(PunctuatorToken.RightParenthesis);
@@ -747,7 +772,7 @@ namespace Jurassic.Compiler
         {
             var result = new ContinueStatement(this.labelsForCurrentStatement);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Consume the continue keyword.
@@ -765,7 +790,7 @@ namespace Jurassic.Compiler
             // Consume the semi-colon, if there was one.
             this.ExpectEndOfStatement();
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
@@ -779,7 +804,7 @@ namespace Jurassic.Compiler
         {
             var result = new BreakStatement(this.labelsForCurrentStatement);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Consume the break keyword.
@@ -797,7 +822,7 @@ namespace Jurassic.Compiler
             // Consume the semi-colon, if there was one.
             this.ExpectEndOfStatement();
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
@@ -814,7 +839,7 @@ namespace Jurassic.Compiler
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Consume the return keyword.
@@ -829,7 +854,7 @@ namespace Jurassic.Compiler
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
@@ -849,13 +874,13 @@ namespace Jurassic.Compiler
             // Read a left parenthesis token "(".
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Read an object reference.
             var objectEnvironment = ParseExpression(PunctuatorToken.RightParenthesis);
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read a right parenthesis token ")".
@@ -888,13 +913,13 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Parse the switch expression.
             result.Value = ParseExpression(PunctuatorToken.RightParenthesis);
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             // Read the right parenthesis.
@@ -967,7 +992,7 @@ namespace Jurassic.Compiler
         {
             var result = new ThrowStatement(this.labelsForCurrentStatement);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Consume the throw keyword.
@@ -983,7 +1008,7 @@ namespace Jurassic.Compiler
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
@@ -1055,7 +1080,7 @@ namespace Jurassic.Compiler
         {
             var result = new DebuggerStatement(this.labelsForCurrentStatement);
 
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Consume the debugger keyword.
@@ -1064,7 +1089,7 @@ namespace Jurassic.Compiler
             // Consume the end of the statement.
             this.ExpectEndOfStatement();
 
-            // Record the end of the statement and add debugging info.
+            // Record the portion of the source document that will be highlighted when debugging.
             result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
             return result;
@@ -1076,11 +1101,14 @@ namespace Jurassic.Compiler
         /// <returns> A statement representing the function. </returns>
         private Statement ParseFunctionDeclaration()
         {
+            // Keep track of the start of the statement so that source debugging works correctly.
+            var start = this.PositionAfterWhitespace;
+
             // Parse the function declaration.
             var expression = ParseFunction(FunctionType.Declaration);
 
             // Add the function to the scope.
-            this.currentScope.DeclareFunction(expression.Context.Name, expression);
+            this.currentScope.DeclareFunction(expression.Context.Name, expression, new SourceCodeSpan(start, this.PositionBeforeWhitespace));
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1213,7 +1241,7 @@ namespace Jurassic.Compiler
         /// <returns> A statement. </returns>
         private Statement ParseLabelOrExpressionStatement()
         {
-            // Record the position of the start of the statement.
+            // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
 
             // Parse the statement as though it was an expression - but stop if there is an unexpected colon.
@@ -1242,7 +1270,7 @@ namespace Jurassic.Compiler
                 // Create a new expression statement.
                 var result = new ExpressionStatement(this.labelsForCurrentStatement, expression) { ContributesToEvalResult = true };
 
-                // Record the end of the statement and add debugging info.
+                // Record the portion of the source document that will be highlighted when debugging.
                 result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                 return result;

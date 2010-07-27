@@ -57,7 +57,6 @@
     <Compile Include="Compiler\Expressions\FunctionExpression.cs" />
     <Compile Include="Compiler\Scope\ObjectScope.cs" />
     <Compile Include="Compiler\Scope\DeclarativeScope.cs" />
-    <Compile Include="Compiler\Scope\DeclaredVariable.cs" />
     <Compile Include="Compiler\Scope\Scope.cs" />
     <Compile Include="Compiler\Expressions\IReferenceExpression.cs" />
     <Compile Include="Compiler\Emit\PrimitiveTypeUtilities.cs" />

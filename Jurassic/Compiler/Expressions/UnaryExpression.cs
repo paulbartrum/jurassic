@@ -122,7 +122,7 @@ namespace Jurassic.Compiler
 
                 case OperatorType.LogicalNot:
                     generator.LoadBoolean(false);
-                    generator.Equal();
+                    generator.CompareEqual();
                     break;
 
                 case OperatorType.Void:

@@ -44,21 +44,37 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets or sets the expression that checks whether the loop should terminate.
+        /// Gets or sets the statement that checks whether the loop should terminate.
         /// </summary>
-        public Expression Condition
+        public ExpressionStatement ConditionStatement
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets the expression that increments (or decrements) the loop variable.
+        /// Gets the expression that checks whether the loop should terminate.
         /// </summary>
-        public Expression Increment
+        public Expression Condition
+        {
+            get { return this.ConditionStatement.Expression; }
+        }
+
+        /// <summary>
+        /// Gets or sets the statement that increments (or decrements) the loop variable.
+        /// </summary>
+        public ExpressionStatement IncrementStatement
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets the expression that increments (or decrements) the loop variable.
+        /// </summary>
+        public Expression Increment
+        {
+            get { return this.IncrementStatement.Expression; }
         }
 
         /// <summary>
@@ -222,6 +238,8 @@ namespace Jurassic.Compiler
             // Check the condition and jump to the end if it is false.
             if (this.CheckConditionAtEnd == false && this.Condition != null)
             {
+                if (optimizationInfo.DebugDocument != null)
+                    generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.ConditionStatement.DebugInfo);
                 this.Condition.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToBool(generator, this.Condition.ResultType);
                 generator.BranchIfFalse(breakTarget1);
@@ -233,11 +251,8 @@ namespace Jurassic.Compiler
             optimizationInfo.PopBreakOrContinueInfo();
 
             // Increment the loop variable.
-            if (this.Increment != null)
-            {
-                this.Increment.GenerateCode(generator, optimizationInfo);
-                generator.Pop();
-            }
+            if (this.IncrementStatement != null)
+                this.IncrementStatement.GenerateCode(generator, optimizationInfo);
 
             // Strengthen the variable types.
             //List<Tuple<VariableInfo, VariableInfo>> revertVariableInfo = null;
@@ -274,6 +289,8 @@ namespace Jurassic.Compiler
             // Check the condition and jump to the end if it is false.
             if (this.Condition != null)
             {
+                if (optimizationInfo.DebugDocument != null)
+                    generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.ConditionStatement.DebugInfo);
                 this.Condition.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToBool(generator, this.Condition.ResultType);
                 generator.BranchIfFalse(breakTarget2);
@@ -288,11 +305,8 @@ namespace Jurassic.Compiler
             generator.DefineLabelPosition(continueTarget);
 
             // Increment the loop variable.
-            if (this.Increment != null)
-            {
-                this.Increment.GenerateCode(generator, optimizationInfo);
-                generator.Pop();
-            }
+            if (this.IncrementStatement != null)
+                this.IncrementStatement.GenerateCode(generator, optimizationInfo);
 
             // Unconditionally branch back to the start of the loop.
             generator.Branch(startOfLoop);

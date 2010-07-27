@@ -54,6 +54,8 @@ namespace Jurassic.Compiler
                 if (declaration.InitExpression != null)
                 {
                     // Create a new assignment expression and generate code for it.
+                    if (optimizationInfo.DebugDocument != null)
+                        generator.MarkSequencePoint(optimizationInfo.DebugDocument, declaration.DebugInfo);
                     var initializationStatement = new ExpressionStatement(
                         new AssignmentExpression(this.Scope, declaration.VariableName, declaration.InitExpression));
                     initializationStatement.GenerateCode(generator, optimizationInfo);
@@ -103,6 +105,11 @@ namespace Jurassic.Compiler
         /// Gets or sets the initial value of the variable.  Can be <c>null</c>.
         /// </summary>
         public Expression InitExpression { get; set; }
+
+        /// <summary>
+        /// Gets or sets the portion of source code associated with the declaration.
+        /// </summary>
+        public SourceCodeSpan DebugInfo { get; set; }
     }
 
 }

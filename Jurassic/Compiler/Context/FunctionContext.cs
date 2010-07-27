@@ -154,14 +154,14 @@ namespace Jurassic.Compiler
                 // if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
                 generator.LoadArgument(1);
                 generator.LoadNull();
-                generator.Equal();
+                generator.CompareEqual();
                 generator.LoadArgument(1);
                 EmitHelpers.EmitNull(generator);
-                generator.Equal();
+                generator.CompareEqual();
                 generator.BitwiseOr();
                 generator.LoadArgument(1);
                 EmitHelpers.EmitUndefined(generator);
-                generator.Equal();
+                generator.CompareEqual();
                 generator.BitwiseOr();
 
                 // {

@@ -28,9 +28,27 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets or sets the portion of source code associated with the variable.
+        /// </summary>
+        public SourceCodeSpan VariableDebugInfo
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets an expression that evaluates to the object to enumerate.
         /// </summary>
         public Expression TargetObject
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the portion of source code associated with the target object.
+        /// </summary>
+        public SourceCodeSpan TargetObjectDebugInfo
         {
             get;
             set;
@@ -64,6 +82,10 @@ namespace Jurassic.Compiler
             // }
             // break-target:
 
+            // Emit debugging information.
+            if (optimizationInfo.DebugDocument != null)
+                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.TargetObjectDebugInfo);
+
             // Emit the right-hand side object and convert to an object.
             this.TargetObject.GenerateCode(generator, optimizationInfo);
             EmitConversion.ToAny(generator, this.TargetObject.ResultType);
@@ -80,6 +102,10 @@ namespace Jurassic.Compiler
 
             var breakTarget = generator.CreateLabel();
             var continueTarget = generator.DefineLabelPosition();
+
+            // Emit debugging information.
+            if (optimizationInfo.DebugDocument != null)
+                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.VariableDebugInfo);
 
             //   if (enumerator.MoveNext() == false)
             //     goto break-target;
