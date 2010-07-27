@@ -391,7 +391,7 @@ namespace Jurassic.Compiler
         /// is equal to the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public override void Equal()
+        public override void CompareEqual()
         {
             this.generator.Emit(OpCodes.Ceq);
         }
@@ -401,7 +401,7 @@ namespace Jurassic.Compiler
         /// is greater than the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public override void GreaterThan()
+        public override void CompareGreaterThan()
         {
             this.generator.Emit(OpCodes.Cgt);
         }
@@ -411,7 +411,7 @@ namespace Jurassic.Compiler
         /// is greater than the second, or <c>0</c> otherwise.  Produces <c>1</c> if one or both
         /// of the arguments are <c>NaN</c>.  Integers are considered to be unsigned.
         /// </summary>
-        public override void GreaterThanUnsigned()
+        public override void CompareGreaterThanUnsigned()
         {
             this.generator.Emit(OpCodes.Cgt_Un);
         }
@@ -421,7 +421,7 @@ namespace Jurassic.Compiler
         /// is less than the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public override void LessThan()
+        public override void CompareLessThan()
         {
             this.generator.Emit(OpCodes.Clt);
         }
@@ -431,7 +431,7 @@ namespace Jurassic.Compiler
         /// is less than the second, or <c>0</c> otherwise.  Produces <c>1</c> if one or both
         /// of the arguments are <c>NaN</c>.  Integers are considered to be unsigned.
         /// </summary>
-        public override void LessThanUnsigned()
+        public override void CompareLessThanUnsigned()
         {
             this.generator.Emit(OpCodes.Clt_Un);
         }
@@ -930,6 +930,19 @@ namespace Jurassic.Compiler
         public override void MarkSequencePoint(System.Diagnostics.SymbolStore.ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn)
         {
             this.generator.MarkSequencePoint(document, startLine, startColumn, endLine, endColumn);
+        }
+
+
+
+        //     MISC
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Does nothing.
+        /// </summary>
+        public override void NoOperation()
+        {
+            this.generator.Emit(OpCodes.Nop);
         }
     }
 

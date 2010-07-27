@@ -95,7 +95,7 @@ namespace Jurassic.Compiler
                 case PrimitiveType.UInt32:
                     // Converting from an integer produces true if the integer is non-zero.
                     generator.LoadInt32(0);
-                    generator.GreaterThanUnsigned();
+                    generator.CompareGreaterThanUnsigned();
                     break;
 
                 case PrimitiveType.Number:
@@ -104,31 +104,31 @@ namespace Jurassic.Compiler
                     generator.StoreVariable(temp);
                     generator.LoadVariable(temp);
                     generator.LoadDouble(0.0);
-                    generator.Equal();
+                    generator.CompareEqual();
                     generator.LoadInt32(0);
-                    generator.Equal();
+                    generator.CompareEqual();
 
                     // input == input
                     generator.LoadVariable(temp);
                     generator.Duplicate();
-                    generator.Equal();
+                    generator.CompareEqual();
 
                     // &&
-                    generator.Equal();
+                    generator.CompareEqual();
                     break;
 
                 case PrimitiveType.String:
                     // Converting from a string produces true if the string is not empty.
                     generator.Call(ReflectionHelpers.String_Length);
                     generator.LoadInt32(0);
-                    generator.GreaterThan();
+                    generator.CompareGreaterThan();
                     break;
 
                 case PrimitiveType.ConcatenatedString:
                     // Converting from a string produces true if the string is not empty.
                     generator.Call(ReflectionHelpers.ConcatenatedString_Length);
                     generator.LoadInt32(0);
-                    generator.GreaterThan();
+                    generator.CompareGreaterThan();
                     break;
 
                 case PrimitiveType.Any:
@@ -174,14 +174,14 @@ namespace Jurassic.Compiler
                     var isPositiveInfinity = generator.DeclareVariable(typeof(bool));
                     generator.Duplicate();
                     generator.LoadDouble(2147483647.0);
-                    generator.GreaterThan();
+                    generator.CompareGreaterThan();
                     generator.StoreVariable(isPositiveInfinity);
 
                     // bool notNaN = input == input
                     var notNaN = generator.DeclareVariable(typeof(bool));
                     generator.Duplicate();
                     generator.Duplicate();
-                    generator.Equal();
+                    generator.CompareEqual();
                     generator.StoreVariable(notNaN);
 
                     // input = (int)input

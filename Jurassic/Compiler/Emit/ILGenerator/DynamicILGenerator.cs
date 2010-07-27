@@ -1168,7 +1168,7 @@ namespace Jurassic.Compiler
         /// is equal to the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public override void Equal()
+        public override void CompareEqual()
         {
             Emit2ByteOpCode(0xFE, 0x01, 2, 1);
             CheckBinaryOperation(VESType.Int32, worksOnObjects: true);
@@ -1179,7 +1179,7 @@ namespace Jurassic.Compiler
         /// is greater than the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public override void GreaterThan()
+        public override void CompareGreaterThan()
         {
             Emit2ByteOpCode(0xFE, 0x02, 2, 1);
             CheckBinaryOperation(VESType.Int32);
@@ -1190,7 +1190,7 @@ namespace Jurassic.Compiler
         /// is greater than the second, or <c>0</c> otherwise.  Produces <c>1</c> if one or both
         /// of the arguments are <c>NaN</c>.  Integers are considered to be unsigned.
         /// </summary>
-        public override void GreaterThanUnsigned()
+        public override void CompareGreaterThanUnsigned()
         {
             Emit2ByteOpCode(0xFE, 0x03, 2, 1);
             CheckBinaryOperation(VESType.Int32);
@@ -1201,7 +1201,7 @@ namespace Jurassic.Compiler
         /// is less than the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public override void LessThan()
+        public override void CompareLessThan()
         {
             Emit2ByteOpCode(0xFE, 0x04, 2, 1);
             CheckBinaryOperation(VESType.Int32);
@@ -1212,7 +1212,7 @@ namespace Jurassic.Compiler
         /// is less than the second, or <c>0</c> otherwise.  Produces <c>1</c> if one or both
         /// of the arguments are <c>NaN</c>.  Integers are considered to be unsigned.
         /// </summary>
-        public override void LessThanUnsigned()
+        public override void CompareLessThanUnsigned()
         {
             Emit2ByteOpCode(0xFE, 0x05, 2, 1);
             CheckBinaryOperation(VESType.Int32);
@@ -2202,6 +2202,19 @@ namespace Jurassic.Compiler
         }
 
 #endif
+
+
+
+        //     MISC
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Does nothing.
+        /// </summary>
+        public override void NoOperation()
+        {
+            Emit1ByteOpCode(0x00, 0, 0);
+        }
 
     }
 

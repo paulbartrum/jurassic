@@ -298,12 +298,12 @@ namespace Jurassic.Compiler
                 case OperatorType.NotEqual:
                     generator.Call(ReflectionHelpers.TypeComparer_Equals);
                     generator.LoadBoolean(false);
-                    generator.Equal();
+                    generator.CompareEqual();
                     break;
                 case OperatorType.StrictlyNotEqual:
                     generator.Call(ReflectionHelpers.TypeComparer_StrictEquals);
                     generator.LoadBoolean(false);
-                    generator.Equal();
+                    generator.CompareEqual();
                     break;
 
                 default:
@@ -422,19 +422,19 @@ namespace Jurassic.Compiler
                 {
                     case OperatorType.LessThan:
                         generator.LoadInt32(0);
-                        generator.LessThan();
+                        generator.CompareLessThan();
                         break;
                     case OperatorType.LessThanOrEqual:
                         generator.LoadInt32(1);
-                        generator.LessThan();
+                        generator.CompareLessThan();
                         break;
                     case OperatorType.GreaterThan:
                         generator.LoadInt32(0);
-                        generator.GreaterThan();
+                        generator.CompareGreaterThan();
                         break;
                     case OperatorType.GreaterThanOrEqual:
                         generator.LoadInt32(-1);
-                        generator.GreaterThan();
+                        generator.CompareGreaterThan();
                         break;
                 }
             }
@@ -452,24 +452,24 @@ namespace Jurassic.Compiler
                 switch (this.OperatorType)
                 {
                     case OperatorType.LessThan:
-                        generator.LessThan();
+                        generator.CompareLessThan();
                         break;
                     case OperatorType.GreaterThan:
-                        generator.GreaterThan();
+                        generator.CompareGreaterThan();
                         break;
 
                     case OperatorType.LessThanOrEqual:
                         // a <= b   <-->   (a > b) == false
-                        generator.GreaterThan();
+                        generator.CompareGreaterThan();
                         generator.LoadBoolean(false);
-                        generator.Equal();
+                        generator.CompareEqual();
                         break;
 
                     case OperatorType.GreaterThanOrEqual:
                         // a >= b   <-->   (a < b) == false
-                        generator.LessThan();
+                        generator.CompareLessThan();
                         generator.LoadBoolean(false);
-                        generator.Equal();
+                        generator.CompareEqual();
                         break;
                 }
             }
@@ -495,24 +495,24 @@ namespace Jurassic.Compiler
                 switch (this.OperatorType)
                 {
                     case OperatorType.LessThan:
-                        generator.LessThan();
+                        generator.CompareLessThan();
                         break;
                     case OperatorType.GreaterThan:
-                        generator.GreaterThan();
+                        generator.CompareGreaterThan();
                         break;
 
                     case OperatorType.LessThanOrEqual:
                         // a <= b   <-->   (a > b) == false
-                        generator.GreaterThanUnsigned();
+                        generator.CompareGreaterThanUnsigned();
                         generator.LoadBoolean(false);
-                        generator.Equal();
+                        generator.CompareEqual();
                         break;
 
                     case OperatorType.GreaterThanOrEqual:
                         // a >= b   <-->   (a < b) == false
-                        generator.LessThanUnsigned();
+                        generator.CompareLessThanUnsigned();
                         generator.LoadBoolean(false);
-                        generator.Equal();
+                        generator.CompareEqual();
                         break;
                 }
             }

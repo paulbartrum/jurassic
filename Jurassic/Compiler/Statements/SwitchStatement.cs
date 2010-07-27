@@ -44,6 +44,10 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Emit debugging information.
+            if (optimizationInfo.DebugDocument != null)
+                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.DebugInfo);
+
             // We need a label for each case clause and one for the default case.
             var jumpTargets = new ILLabel[this.CaseClauses.Count];
             int defaultIndex = -1;

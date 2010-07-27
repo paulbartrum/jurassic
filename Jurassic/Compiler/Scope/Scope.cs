@@ -18,6 +18,7 @@ namespace Jurassic.Compiler
             public int Index;
             public string Name;
             public FunctionExpression ValueAtTopOfScope;
+            public SourceCodeSpan DebugInfo;
         }
 
         /// <summary>
@@ -110,7 +111,7 @@ namespace Jurassic.Compiler
         /// <param name="name"> The name of the variable. </param>
         internal void DeclareVariable(string name)
         {
-            DeclareVariableOrFunction(name, null);
+            DeclareVariableOrFunction(name, null, null);
         }
 
         /// <summary>
@@ -120,11 +121,11 @@ namespace Jurassic.Compiler
         /// <param name="name"> The name of the variable. </param>
         /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
         /// function declarations (not function expressions). </param>
-        internal void DeclareFunction(string name, FunctionExpression valueAtTopOfScope)
+        internal void DeclareFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
         {
             if (valueAtTopOfScope == null)
                 throw new ArgumentNullException("valueAtTopOfScope");
-            DeclareVariableOrFunction(name, valueAtTopOfScope);
+            DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
         }
 
         /// <summary>
@@ -134,7 +135,7 @@ namespace Jurassic.Compiler
         /// <param name="name"> The name of the variable. </param>
         /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
         /// function declarations (not function expressions). </param>
-        internal void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope)
+        private void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -149,7 +150,10 @@ namespace Jurassic.Compiler
 
             // Set the initial value, if one was provided.
             if (valueAtTopOfScope != null)
+            {
                 variable.ValueAtTopOfScope = valueAtTopOfScope;
+                variable.DebugInfo = debugInfo;
+            }
         }
 
         /// <summary>
@@ -218,6 +222,8 @@ namespace Jurassic.Compiler
                 else
                 {
                     // Emit a function declaration.
+                    if (optimizationInfo.DebugDocument != null && variable.DebugInfo != null)
+                        generator.MarkSequencePoint(optimizationInfo.DebugDocument, variable.DebugInfo);
                     variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
                     var functionDeclaration = new NameExpression(this, variable.Name);
                     functionDeclaration.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);

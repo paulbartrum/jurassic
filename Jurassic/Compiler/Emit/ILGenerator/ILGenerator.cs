@@ -331,35 +331,35 @@ namespace Jurassic.Compiler
         /// is equal to the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public abstract void Equal();
+        public abstract void CompareEqual();
 
         /// <summary>
         /// Pops two values from the stack, compares, then pushes <c>1</c> if the first argument
         /// is greater than the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public abstract void GreaterThan();
+        public abstract void CompareGreaterThan();
 
         /// <summary>
         /// Pops two values from the stack, compares, then pushes <c>1</c> if the first argument
         /// is greater than the second, or <c>0</c> otherwise.  Produces <c>1</c> if one or both
         /// of the arguments are <c>NaN</c>.  Integers are considered to be unsigned.
         /// </summary>
-        public abstract void GreaterThanUnsigned();
+        public abstract void CompareGreaterThanUnsigned();
 
         /// <summary>
         /// Pops two values from the stack, compares, then pushes <c>1</c> if the first argument
         /// is less than the second, or <c>0</c> otherwise.  Produces <c>0</c> if one or both
         /// of the arguments are <c>NaN</c>.
         /// </summary>
-        public abstract void LessThan();
+        public abstract void CompareLessThan();
 
         /// <summary>
         /// Pops two values from the stack, compares, then pushes <c>1</c> if the first argument
         /// is less than the second, or <c>0</c> otherwise.  Produces <c>1</c> if one or both
         /// of the arguments are <c>NaN</c>.  Integers are considered to be unsigned.
         /// </summary>
-        public abstract void LessThanUnsigned();
+        public abstract void CompareLessThanUnsigned();
 
 
 
@@ -771,6 +771,16 @@ namespace Jurassic.Compiler
         /// <param name="endLine"> The line where the sequence point ends. </param>
         /// <param name="endColumn"> The column in the line where the sequence point ends. </param>
         public abstract void MarkSequencePoint(System.Diagnostics.SymbolStore.ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn);
+
+
+
+        //     MISC
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Does nothing.
+        /// </summary>
+        public abstract void NoOperation();
     }
 
 }
