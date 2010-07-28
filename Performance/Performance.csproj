@@ -54,7 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayBenchmarks.cs" />
-    <Compile Include="StepTest.cs" />
     <Compile Include="v8.cs" />
     <Compile Include="OperatorBenchmarks.cs" />
     <Compile Include="LexerBenchmarks.cs" />
@@ -68,7 +67,6 @@
     <Content Include="bin\Jint.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Files\step-test.js" />
     <Content Include="Files\sunspider-0.9.1\3d-cube.js" />
     <Content Include="Files\sunspider-0.9.1\3d-morph.js" />
     <Content Include="Files\sunspider-0.9.1\3d-raytrace.js" />

@@ -37,6 +37,5 @@ using System.Runtime.InteropServices;
 // Unit tests and performance tests need access to internal members.
 [assembly: InternalsVisibleTo("Unit Tests")]
 [assembly: InternalsVisibleTo("Performance")]
-
-// The javascript generated module needs access to internal members.
 [assembly: InternalsVisibleTo("JavaScript")]
+[assembly: InternalsVisibleTo("DebuggerTest")]
