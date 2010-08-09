@@ -8,6 +8,10 @@ namespace Jurassic.Compiler
     /// </summary>
     public class DeclarativeScope : Scope
     {
+        // Catch scopes behave like other scopes except variables cannot be declared inside them -
+        // they always only have a single variable (the catch variable).
+        private bool preventExtensions;
+
         /// <summary>
         /// Creates a new declarative scope for use inside a function body.
         /// </summary>
@@ -37,12 +41,18 @@ namespace Jurassic.Compiler
         /// Creates a new declarative scope for use inside a catch statement.
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
+        /// <param name="catchVariableName"> The name of the catch variable. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        internal static DeclarativeScope CreateCatchScope(Scope parentScope)
+        internal static DeclarativeScope CreateCatchScope(Scope parentScope, string catchVariableName)
         {
             if (parentScope == null)
-                throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
-            return new DeclarativeScope(parentScope, 0);
+                throw new ArgumentNullException("parentScope", "Catch scopes must have a parent scope.");
+            if (catchVariableName == null)
+                throw new ArgumentNullException("catchVariableName");
+            var result = new DeclarativeScope(parentScope, 0);
+            result.DeclareVariable(catchVariableName);
+            result.preventExtensions = true;    // Only the catch variable can be declared in this scope.
+            return result;
         }
 
         /// <summary>
@@ -138,6 +148,26 @@ namespace Jurassic.Compiler
             if (index < 0)
                 return null;
             return this.Values[index];
+        }
+
+        /// <summary>
+        /// Declares a variable or function in this scope.  This will be initialized with the value
+        /// of the given expression.
+        /// </summary>
+        /// <param name="name"> The name of the variable. </param>
+        /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
+        /// function declarations (not function expressions). </param>
+        internal override void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
+        {
+            // The normal case is to delegate to the Scope class.
+            if (this.preventExtensions == false)
+            {
+                base.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
+                return;
+            }
+
+            // Variables cannot be declared in this scope - try the parent scope.
+            this.ParentScope.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
         }
 
         /// <summary>

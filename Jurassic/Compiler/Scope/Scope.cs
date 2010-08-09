@@ -135,7 +135,7 @@ namespace Jurassic.Compiler
         /// <param name="name"> The name of the variable. </param>
         /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
         /// function declarations (not function expressions). </param>
-        private void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
+        internal virtual void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
         {
             if (name == null)
                 throw new ArgumentNullException("name");

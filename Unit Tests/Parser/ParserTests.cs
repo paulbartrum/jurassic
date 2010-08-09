@@ -1211,11 +1211,16 @@ namespace UnitTests
             // Exceptions can be swallowed using finally.
             Assert.AreEqual(6, TestUtils.Evaluate("function f() { try { throw 5 } finally { return 6 } } f()"));
 
-            // Catch creates a new scope.
+            // Catch creates a new scope - but only for the exception variable.
             Assert.AreEqual(5, TestUtils.Evaluate("e = 5; try { throw 6; } catch (e) { } e"));
+            Assert.AreEqual(5, TestUtils.Evaluate("e = 5; try { throw 6; } catch (e) { var e = 10; } e"));
+            Assert.AreEqual(5, TestUtils.Evaluate("var b = 2; try { throw 6; } catch (e) { var b = 5; } b"));
 
             // Try without catch or finally is an error.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("try { }"));
+
+            // Cannot declare a function inside a catch block.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("try { throw 6; } catch (e) { function foo() { return 2; } foo() }"));
         }
 
         [TestMethod]

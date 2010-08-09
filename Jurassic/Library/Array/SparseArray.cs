@@ -209,7 +209,7 @@ namespace Jurassic.Library
                     newRoot.array[0] = this.root;
                     this.root = newRoot;
                     this.depth++;
-                    this.mask = (1 << (NodeShift * this.depth)) - 1;
+                    this.mask = NodeShift * this.depth >= 32 ? -1 : (1 << NodeShift * this.depth) - 1;
                 } while ((index & this.mask) != index);
             }
             

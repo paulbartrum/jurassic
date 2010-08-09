@@ -55,7 +55,7 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Try()
         {
-            RunTests("Try");
+            RunTests("Try", "12.14-5");
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Array()
         {
-            RunTests("Array", new string[] { "15.4.4.14-1-16", "15.4.4.14-2-16" });
+            RunTests("Array", "15.4.4.14-1-16", "15.4.4.14-2-16");
         }
 
         [TestMethod]
@@ -123,7 +123,7 @@ namespace Performance
 
 
 
-        private void RunTests(string folderName, string[] suppressTests = null)
+        private void RunTests(string folderName, params string[] suppressTests)
         {
             foreach (string path in Directory.EnumerateFiles(Path.Combine(@"..\..\..\Unit Tests\IETestCenter\", folderName)))
                 RunTestFile(path, suppressTests);
@@ -171,8 +171,22 @@ namespace Performance
             // One test uses "window" as a synonym for the global object.
             engine.SetGlobalValue("window", engine.Global);
 
-            // Run the script file to register the test.
-            engine.ExecuteFile(path);
+            // Check if the test is suppressed.
+            if (suppressTests != null && System.Array.IndexOf(suppressTests, Path.GetFileNameWithoutExtension(path)) >= 0)
+            {
+                Console.WriteLine("Suppressed test file '{0}'", path);
+                return;
+            }
+
+            try
+            {
+                // Run the script file to register the test.
+                engine.ExecuteFile(path);
+            }
+            catch (Exception ex)
+            {
+                throw new FormatException(string.Format("Failed to run script '{0}'", path), ex);
+            }
 
             foreach (var registeredTest in harness.RegisteredTests)
             {
