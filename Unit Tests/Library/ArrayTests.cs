@@ -66,7 +66,7 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void indexer()
+        public void ArrayIndexer()
         {
             // Check basic indexer access.
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("[4, 5][-1]"));
@@ -105,6 +105,13 @@ namespace UnitTests
             Assert.AreEqual("one", TestUtils.Evaluate("array['0']"));
             Assert.AreEqual("two", TestUtils.Evaluate("array[1]"));
             Assert.AreEqual("three", TestUtils.Evaluate("array[2]"));
+        }
+
+        [TestMethod]
+        public void LargeArrays()
+        {
+            Assert.AreEqual(5, TestUtils.Evaluate("var x = []; x[4294967295] = 5; x[4294967295]"));
+            Assert.AreEqual(5, TestUtils.Evaluate("var x = []; x[4294967294] = 5; x[4294967294]"));
         }
 
         [TestMethod]

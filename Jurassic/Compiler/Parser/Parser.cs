@@ -370,6 +370,8 @@ namespace Jurassic.Compiler
                 return ParseTry();
             if (this.nextToken == KeywordToken.Debugger)
                 return ParseDebugger();
+            if (this.nextToken == KeywordToken.Function)
+                throw new JavaScriptException(this.engine, "SyntaxError", "Functions must be declared in a top-level context", this.LineNumber, this.SourcePath);
             if (this.nextToken == null)
                 throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input", this.LineNumber, this.SourcePath);
 
@@ -1055,9 +1057,7 @@ namespace Jurassic.Compiler
                 this.Expect(PunctuatorToken.RightParenthesis);
 
                 // Create a new scope for the catch variable.
-                this.currentScope = DeclarativeScope.CreateCatchScope(this.currentScope);
-                this.currentScope.DeclareVariable(result.CatchVariableName);
-                result.CatchScope = this.currentScope;
+                this.currentScope = result.CatchScope = DeclarativeScope.CreateCatchScope(this.currentScope, result.CatchVariableName);
 
                 // Parse the statements inside the catch block.
                 result.CatchBlock = ParseBlock();
