@@ -33,12 +33,19 @@ description: "delete operator returns true for property (stringify) defined on b
 test: function testcase() {
   try {
       var o = JSON.stringify;
+	  var desc;
+	  try {
+	  	desc = Object.getOwnPropertyDescriptor(JSON, 'stringify')
+	  } 
+	  catch (e) {
+	  };
       var d = delete JSON.stringify;
       if (d === true && JSON.stringify === undefined) {
         return true;
       }
   } finally {
-    JSON.stringify = o;
+    if (desc) Object.defineProperty(JSON, 'stringify', desc)
+	else JSON.stringify = o  /* this branch screws up the attributes */;
   }
  }
 });

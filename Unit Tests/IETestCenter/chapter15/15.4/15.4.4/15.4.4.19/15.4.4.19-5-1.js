@@ -27,17 +27,16 @@ path: "TestCases/chapter15/15.4/15.4.4/15.4.4.19/15.4.4.19-5-1.js",
 description: "Array.prototype.map - thisArg not passed",
 
 test: function testcase() {
-  this._15_4_4_19_5_1 = true;
-  var _15_4_4_19_5_1 = false;
+  var innerThisCorrect = false;
   
   function callbackfn(val, idx, obj)
   {
-    return this._15_4_4_19_5_1;
+     innerThisCorrect = this===fnGlobalObject();
+     return true;
   }
-  var srcArr = [1];
-  var resArr = srcArr.map(callbackfn);
-  if( resArr[0] === true)
-    return true;    
+
+  [1].map(callbackfn);
+  return innerThisCorrect;    
  },
 
 precondition: function prereq() {

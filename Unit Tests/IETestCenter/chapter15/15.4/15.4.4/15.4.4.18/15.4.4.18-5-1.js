@@ -27,17 +27,16 @@ path: "TestCases/chapter15/15.4/15.4.4/15.4.4.18/15.4.4.18-5-1.js",
 description: "Array.prototype.forEach - thisArg not passed",
 
 test: function testcase() {
-  this._15_4_4_18_5_1 = true;
-  var _15_4_4_18_5_1 = false;
-  var result;
+  var innerThisCorrect = false;
+
   function callbackfn(val, idx, obj)
   {
-    result = this._15_4_4_18_5_1;
+    innerThisCorrect = this===fnGlobalObject();
+    return true;
   }
-  var arr = [1];
-  arr.forEach(callbackfn)
-  if( result === true)
-    return true;    
+
+  [1].forEach(callbackfn)
+  return innerThisCorrect;    
  },
 
 precondition: function prereq() {

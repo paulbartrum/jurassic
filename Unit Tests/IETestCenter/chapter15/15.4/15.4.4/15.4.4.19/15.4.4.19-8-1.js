@@ -24,21 +24,21 @@ id: "15.4.4.19-8-1",
 
 path: "TestCases/chapter15/15.4/15.4.4/15.4.4.19/15.4.4.19-8-1.js",
 
-description: "Array.prototype.map doesn't consider new elements added to array after it is called",
+description: "Array.prototype.map doesn't consider new elements added beyond the initial length of array after it is called",
 
 test: function testcase() { 
  
+  var lastIndexVisited=-1; 
+ 
   function callbackfn(val, idx, obj)
   {
-    srcArr[2] = 3;
-    srcArr[5] = 6;
-    return 1;
+    if (idx===0) obj[10] = 10;
+    lastIndexVisited=idx;
+    return true;
   }
-
-  var srcArr = [1,2,,4,5];
-  var resArr = srcArr.map(callbackfn);
-  if(resArr.length === 5)
-      return true;  
+  
+  [0,1].map(callbackfn);
+  return lastIndexVisited === 1;  
   
  },
 

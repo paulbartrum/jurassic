@@ -24,21 +24,20 @@ id: "15.4.4.20-9-1",
 
 path: "TestCases/chapter15/15.4/15.4.4/15.4.4.20/15.4.4.20-9-1.js",
 
-description: "Array.prototype.filter doesn't consider new elements added to array after it is called",
+description: "Array.prototype.filter doesn't consider new elements added beyond the initial length of array after it is called",
 
 test: function testcase() { 
+  var lastIndexVisited=-1; 
  
   function callbackfn(val, idx, obj)
   {
-    srcArr[2] = 3;    
-    srcArr[5] = 6;
+    if (idx===0) obj[10] = 10;
+    lastIndexVisited=idx;
     return true;
   }
 
-  var srcArr = [1,2,,4,5];
-  var resArr = srcArr.filter(callbackfn);
-  if(resArr.length === 4)
-      return true;  
+  [0,1].filter(callbackfn);
+  return lastIndexVisited === 1;  
   
  },
 

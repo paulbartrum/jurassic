@@ -18,11 +18,6 @@
 /// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 /// ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-/*
-This test relies on 'this' being bound to the global object.
-This test must be run in a non-strict context.
-*/
-
 
 ES5Harness.registerTest( {
 id: "15.2.3.3-4-10",
@@ -32,8 +27,9 @@ path: "TestCases/chapter15/15.2/15.2.3/15.2.3.3/15.2.3.3-4-10.js",
 description: "Object.getOwnPropertyDescriptor returns data desc for functions on built-ins (Global.decodeURIComponent)",
 
 test: function testcase() {
-  var desc = Object.getOwnPropertyDescriptor(fnGlobalObject(),  "decodeURIComponent");
-  if (desc.value === this.decodeURIComponent &&
+  var global = fnGlobalObject();
+  var desc = Object.getOwnPropertyDescriptor(global,  "decodeURIComponent");
+  if (desc.value === global.decodeURIComponent &&
       desc.writable === true &&
       desc.enumerable === false &&
       desc.configurable === true) {

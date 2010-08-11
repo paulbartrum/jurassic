@@ -18,11 +18,6 @@
 /// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 /// ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-/*
-This test relies on 'this' being bound to the global object.
-This test must be run in a non-strict context.
-*/
-
 
 ES5Harness.registerTest( {
 id: "15.2.3.3-4-7",
@@ -32,8 +27,9 @@ path: "TestCases/chapter15/15.2/15.2.3/15.2.3.3/15.2.3.3-4-7.js",
 description: "Object.getOwnPropertyDescriptor returns data desc for functions on built-ins (Global.isNaN)",
 
 test: function testcase() {
-  var desc = Object.getOwnPropertyDescriptor(fnGlobalObject(),  "isNaN");
-  if (desc.value === this.isNaN &&
+  var global = fnGlobalObject();
+  var desc = Object.getOwnPropertyDescriptor(global,  "isNaN");
+  if (desc.value === global.isNaN &&
       desc.writable === true &&
       desc.enumerable === false &&
       desc.configurable === true) {

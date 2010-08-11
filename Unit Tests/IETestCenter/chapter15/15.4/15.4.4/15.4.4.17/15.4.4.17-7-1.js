@@ -28,19 +28,17 @@ description: "Array.prototype.some doesn't consider new elements added to array 
 
 test: function testcase() { 
  
+  var lastIndexVisited=-1; 
+ 
   function callbackfn(val, idx, obj)
   {
-    arr[2] = 3;
-    if(val !== 3)
-       return false;
-    else 
-       return true;
+    if (idx===0) obj[10] = 10;
+    lastIndexVisited=idx;
+    return false
   }
-
-  var arr = [1,2,,4,5];
   
-  if(arr.some(callbackfn) === false)    
-      return true;  
+  [0,1].some(callbackfn);
+  return lastIndexVisited === 1;  
   
  },
 

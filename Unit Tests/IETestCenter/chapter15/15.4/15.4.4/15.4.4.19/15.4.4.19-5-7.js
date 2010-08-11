@@ -51,6 +51,6 @@ test: function testcase() {
  },
 
 precondition: function prereq() {
-  return fnExists(Array.prototype.map);
+  return fnExists(Array.prototype.map,Array.isArray);
  }
 });
