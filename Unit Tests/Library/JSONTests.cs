@@ -97,6 +97,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"JSON.parse('""te \\uF""')"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"JSON.parse('""te \\uFF""')"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"JSON.parse('""te \\uFFF""')"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"JSON.parse(""\\u0022abc\\u0022"")"));
         }
 
         [TestMethod]

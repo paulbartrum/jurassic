@@ -112,7 +112,7 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Array()
         {
-            RunTests(@"chapter15\15.4", "15.4.4.14-1-16", "15.4.4.14-2-16");
+            RunTests(@"chapter15\15.4");
         }
 
         [TestMethod]
@@ -136,7 +136,10 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_JSON()
         {
-            RunTests(@"chapter15\15.12");
+            RunTests(@"chapter15\15.12",
+                "15.12.2-0-3",      // precondition does not return true
+                "15.12.3-0-3"       // precondition does not return true
+                );
         }
 
         [TestMethod]
@@ -208,14 +211,38 @@ namespace Performance
 
             // Create the fnExists helper function.
             engine.Execute(@"
-                function fnExists(f) {
-                  if (typeof(f) === 'function') {
+                function fnExists() {
+                    for (var i=0; i<arguments.length; i++) {
+                        if (typeof(arguments[i]) !== ""function"") return false;
+                    }
                     return true;
-                  }
                 }");
 
             // Create the fnSupportsStrict helper function.
             engine.Execute(@"function fnSupportsStrict() { return true; }");
+
+            // Create the fnGlobalObject helper function.
+            engine.Execute(@"function fnGlobalObject() { return (function () {return this}).call(null); }");
+
+            // Create the compareArray helper function.
+            engine.Execute(@"
+                function compareArray(aExpected, aActual) {
+                  if (aActual.length != aExpected.length) {
+                    return false;
+                  }
+
+                  aExpected.sort();
+                  aActual.sort();
+
+                  var s;
+                  for (var i = 0; i < aExpected.length; i++) {
+                    if (aActual[i] !== aExpected[i]) {
+                      return false;
+                    }
+                  }
+  
+                  return true;
+                }");
 
             // One test uses "window" as a synonym for the global object.
             engine.SetGlobalValue("window", engine.Global);
@@ -230,7 +257,7 @@ namespace Performance
             try
             {
                 // Run the script file to register the test.
-                engine.ExecuteFile(path);
+                engine.ExecuteFile(path, System.Text.Encoding.Default);
             }
             catch (Exception ex)
             {
@@ -259,7 +286,7 @@ namespace Performance
 
                 // Run the actual test.
                 result = registeredTest.CallMemberFunction("test");
-                if (TypeComparer.StrictEquals(result, true) == false)
+                if (TypeComparer.Equals(result, true) == false)
                     Assert.Fail("Test '{0}' ({1}) returned {2} (should return true)", registeredTest["id"], registeredTest["description"], result);
             }
         }

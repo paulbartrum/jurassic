@@ -396,10 +396,12 @@ namespace Jurassic
         /// </summary>
         /// <param name="path"> The path to a javascript file.  This can be a local file path or a
         /// UNC path. </param>
+        /// <param name="encoding"> The character encoding to use if the file lacks a byte order
+        /// mark (BOM).  If this parameter is omitted, the file is assumed to be UTF8. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="path"/> is a <c>null</c> reference. </exception>
-        public void ExecuteFile(string path)
+        public void ExecuteFile(string path, System.Text.Encoding encoding = null)
         {
-            Execute(new FileScriptSource(path));
+            Execute(new FileScriptSource(path, encoding));
         }
 
         /// <summary>
