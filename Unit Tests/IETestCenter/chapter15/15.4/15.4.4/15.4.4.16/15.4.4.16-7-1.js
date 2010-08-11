@@ -24,23 +24,21 @@ id: "15.4.4.16-7-1",
 
 path: "TestCases/chapter15/15.4/15.4.4/15.4.4.16/15.4.4.16-7-1.js",
 
-description: "Array.prototype.every doesn't consider new elements added to array after the call",
+description: "Array.prototype.every doesn't consider new elements beyond the initial length of array after it is called",
 
 test: function testcase() { 
  
-  function callbackfn(val, Idx, obj)
+  var lastIndexVisited=-1; 
+ 
+  function callbackfn(val, idx, obj)
   {
-    arr[2] = 3;
-    if(val !== 3)
-       return true;
-    else 
-       return false;
+    if (idx===0) obj[10] = 10;
+    lastIndexVisited=idx;
+    return true;
   }
-
-  var arr = [1,2,,4,5];
   
-  if(arr.every(callbackfn) === true)    
-      return true;  
+  [0,1].every(callbackfn);
+  return lastIndexVisited === 1;  
   
  },
 

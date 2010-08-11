@@ -28,7 +28,7 @@ description: "A JSONString may not be delimited by Uncode escaped quotes ",
 
 test: function testcase() {
     try {
-        if (JSON.parse("\u0022abc\u0022") ==='abc') return false;
+        if (JSON.parse("\\u0022abc\\u0022") ==='abc') return false;
        }
      catch (e) {
         return true;

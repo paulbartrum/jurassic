@@ -27,14 +27,14 @@ path: "TestCases/chapter15/15.4/15.4.4/15.4.4.16/15.4.4.16-8-10.js",
 description: "Array.prototype.every - subclassed array when length is reduced",
 
 test: function testcase() {
-  foo.prototype = new Array(1, 2, 3);
+  foo.prototype = [1, 2, 3];
   function foo() {}
   var f = new foo();
   f.length = 2;
   
-  function cb(val)
+  function cb(val, idx)
   {
-    if(val>1)
+    if(idx>1)
       return false;
     else
       return true;    

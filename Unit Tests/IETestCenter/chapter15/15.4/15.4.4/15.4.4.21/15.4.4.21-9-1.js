@@ -24,20 +24,21 @@ id: "15.4.4.21-9-1",
 
 path: "TestCases/chapter15/15.4/15.4.4/15.4.4.21/15.4.4.21-9-1.js",
 
-description: "Array.prototype.reduce doesn't consider new elements added to array after it is called",
+description: "Array.prototype.reduce doesn't consider new elements added beyond the initial length of array after it is called",
 
 test: function testcase() { 
  
-  function callbackfn(prevVal, curVal, idx, obj)
+  var lastIndexVisited=-1; 
+ 
+  function callbackfn(preval, val, idx, obj)
   {
-    arr[5] = 6;
-    arr[2] = 3;   
-    return prevVal + curVal;
+    if (idx===0) obj[10] = 10;
+    lastIndexVisited=idx;
+    return true;
   }
-
-  var arr = [1,2,,4,'5'];
-  if(arr.reduce(callbackfn) === "75")
-    return true;  
+  
+  [0,1].reduce(callbackfn);
+  return lastIndexVisited === 1;  
   
  },
 

@@ -24,14 +24,14 @@ id: "15.4.4.22-9-c-ii-2",
 
 path: "TestCases/chapter15/15.4/15.4.4/15.4.4.22/15.4.4.22-9-c-ii-2.js",
 
-description: "Array.prototype.reduceRight - callbackfn called with correct parameters (initialvalue passed)",
+description: "Array.prototype.reduceRight - callbackfn called with correct parameters (initialValue passed)",
 
 test: function testcase() { 
  
   var bParCorrect = false;
   function callbackfn(prevVal, curVal, idx, obj)
   {
-    if(idx === obj.length-1 && obj[idx] === curVal && prevVal === initialvalue)
+    if(idx === obj.length-1 && obj[idx] === curVal && prevVal === initialValue)
       return curVal;
     else if (idx+1 < obj.length && obj[idx] === curVal && obj[idx+1] === prevVal)
       return curVal;

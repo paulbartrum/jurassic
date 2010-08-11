@@ -31,5 +31,9 @@ test: function testcase() {
   if (b === false) {
     return true;
   }
+  },
+
+precondition: function prereq() {
+  return fnExists(Object.isSealed);
  }
 });

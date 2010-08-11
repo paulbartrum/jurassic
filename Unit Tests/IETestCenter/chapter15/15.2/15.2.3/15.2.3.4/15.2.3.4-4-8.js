@@ -28,7 +28,7 @@ description: "Object.getOwnPropertyNames returns array of property names (Boolea
 
 test: function testcase() {
   var result = Object.getOwnPropertyNames(Boolean.prototype);
-  var expResult = ["constructor", "toString", "valueOf", "toJSON"];
+  var expResult = ["constructor", "toString", "valueOf"];
   if (compareArray(expResult, result)) {
     return true;
   }

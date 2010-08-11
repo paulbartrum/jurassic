@@ -48,6 +48,6 @@ test: function testcase() {
  },
 
 precondition: function prereq() {
-  return fnExists(Array.prototype.filter);
+  return fnExists(Array.prototype.filter,Object.getOwnPropertyDescriptor);
  }
 });

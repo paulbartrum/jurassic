@@ -27,8 +27,8 @@ path: "TestCases/chapter15/15.2/15.2.3/15.2.3.4/15.2.3.4-4-1.js",
 description: "Object.getOwnPropertyNames returns array of property names (Global)",
 
 test: function testcase() {
-  var result = Object.getOwnPropertyNames(this);
-  var expResult = ["eval", "parseInt", "parseFloat", "isNaN", "isFinite", "decodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape", "NaN", "Infinity", "undefined", "length"];
+  var result = Object.getOwnPropertyNames(fnGlobalObject());
+  var expResult = ["eval", "parseInt", "parseFloat", "isNaN", "isFinite", "decodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape", "NaN", "Infinity", "undefined"];
   if (compareArray(expResult, result)) {
     return true;
   }
