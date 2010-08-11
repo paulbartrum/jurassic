@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace Jurassic
 {
@@ -9,16 +10,20 @@ namespace Jurassic
     public class FileScriptSource : ScriptSource
     {
         private string path;
+        private Encoding encoding;
 
         /// <summary>
         /// Creates a new FileScriptSource instance.
         /// </summary>
         /// <param name="path"> The path of the script file. </param>
-        public FileScriptSource(string path)
+        /// <param name="encoding"> The character encoding to use if the file lacks a byte order
+        /// mark (BOM).  If this parameter is omitted, the file is assumed to be UTF8. </param>
+        public FileScriptSource(string path, Encoding encoding = null)
         {
             if (path == null)
                 throw new ArgumentNullException("path");
             this.path = path;
+            this.encoding = encoding ?? Encoding.UTF8;
         }
 
         /// <summary>
@@ -39,7 +44,7 @@ namespace Jurassic
         /// same source code. </remarks>
         public override TextReader GetReader()
         {
-            return new StreamReader(this.Path);
+            return new StreamReader(this.Path, this.encoding, true);
         }
     }
 }
