@@ -211,13 +211,6 @@ namespace Jurassic.Library
             }
         }
 
-        //private unsafe int CalculateBase10Exponent(double num)
-        //{
-        //    ulong bitPattern = *((ulong*)&num);
-        //    int exponent = ((int)((bitPattern & 0x7FF0000000000000) >> 52)) - 1023;
-        //    return (int)((double)exponent / 3.3219280948873623478703194294894);
-        //}
-
         /// <summary>
         /// Returns the textual representation of the number.
         /// </summary>
