@@ -133,23 +133,51 @@ namespace UnitTests
         [TestMethod]
         public void toPrecision()
         {
-            TestUtils.Evaluate("var num=77.1274");
-            Assert.AreEqual("77.1274", TestUtils.Evaluate("num.toPrecision()"));
-            Assert.AreEqual("77.13", TestUtils.Evaluate("num.toPrecision(4)"));
-            Assert.AreEqual("77", TestUtils.Evaluate("num.toPrecision(2)"));
-            Assert.AreEqual("8e+1", TestUtils.Evaluate("num.toPrecision(1)"));
-            Assert.AreEqual("77.1274000000000000000", TestUtils.Evaluate("num.toPrecision(21)"));
-            Assert.AreEqual("77.1274", TestUtils.Evaluate("num.toPrecision(undefined)"));
+            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toPrecision()"));
+            Assert.AreEqual("8e+1", TestUtils.Evaluate("77.1274.toPrecision(1)"));
+            Assert.AreEqual("77", TestUtils.Evaluate("77.1274.toPrecision(2)"));
+            Assert.AreEqual("77.13", TestUtils.Evaluate("77.1274.toPrecision(4)"));
+            Assert.AreEqual("77.127", TestUtils.Evaluate("77.1274.toPrecision(5)"));
+            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toPrecision(6)"));
+            Assert.AreEqual("77.12740", TestUtils.Evaluate("77.1274.toPrecision(7)"));
+            Assert.AreEqual("77.1274000000000", TestUtils.Evaluate("77.1274.toPrecision(15)"));
+            Assert.AreEqual("77.12740000000000", TestUtils.Evaluate("77.1274.toPrecision(16)"));
+            Assert.AreEqual("77.127400000000000", TestUtils.Evaluate("77.1274.toPrecision(17)"));
+            Assert.AreEqual("77.1274000000000000", TestUtils.Evaluate("77.1274.toPrecision(18)"));
+            Assert.AreEqual("77.12740000000000000", TestUtils.Evaluate("77.1274.toPrecision(19)"));
+            Assert.AreEqual("77.127400000000000000", TestUtils.Evaluate("77.1274.toPrecision(20)"));
+            Assert.AreEqual("77.1274000000000000000", TestUtils.Evaluate("77.1274.toPrecision(21)"));
+            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toPrecision(undefined)"));
             Assert.AreEqual("0.0000012", TestUtils.Evaluate("0.00000123.toPrecision(2)"));
             Assert.AreEqual("1.2e-7", TestUtils.Evaluate("0.000000123.toPrecision(2)"));
-            Assert.AreEqual("0.00000123000000000000008198", TestUtils.Evaluate("0.00000123.toPrecision(21)"));
+            Assert.AreEqual("0.00000123000000000000000000", TestUtils.Evaluate("0.00000123.toPrecision(21)"));
             Assert.AreEqual("1.23e+5", TestUtils.Evaluate("123456 .toPrecision(3)"));
             Assert.AreEqual("1.80e+308", TestUtils.Evaluate("Number.MAX_VALUE.toPrecision(3)"));
             Assert.AreEqual("123456.000000000", TestUtils.Evaluate("123456 .toPrecision(15)"));
+            Assert.AreEqual("0.0000", TestUtils.Evaluate("0 .toPrecision(5)"));
+            Assert.AreEqual("0.000001000000000", TestUtils.Evaluate("0.000001.toPrecision(10)"));   // Why more than 10 digits?!?
+            Assert.AreEqual("1.000000000e-7", TestUtils.Evaluate("0.0000001.toPrecision(10)"));
+            Assert.AreEqual("1e-11", TestUtils.Evaluate("0.00000000001.toPrecision(1)"));
+            Assert.AreEqual("1.0e-11", TestUtils.Evaluate("0.00000000001.toPrecision(2)"));
+            Assert.AreEqual("55", TestUtils.Evaluate("(55).toPrecision(2)"));
+            Assert.AreEqual("6e+1", TestUtils.Evaluate("(55).toPrecision(1)"));
+            Assert.AreEqual("-55", TestUtils.Evaluate("(-55).toPrecision(2)"));
+            Assert.AreEqual("-6e+1", TestUtils.Evaluate("(-55).toPrecision(1)"));
+            Assert.AreEqual("-6e+20", TestUtils.Evaluate("(-555555555555555555555).toPrecision(1)"));
+            Assert.AreEqual("-6e+21", TestUtils.Evaluate("(-5555555555555555555555).toPrecision(1)"));
+
+            // NaN & infinity
+            Assert.AreEqual("NaN", TestUtils.Evaluate("Number.NaN.toPrecision()"));
+            Assert.AreEqual("NaN", TestUtils.Evaluate("Number.NaN.toPrecision(3)"));
+            Assert.AreEqual("Infinity", TestUtils.Evaluate("Number.POSITIVE_INFINITY.toPrecision()"));
+            Assert.AreEqual("Infinity", TestUtils.Evaluate("Number.POSITIVE_INFINITY.toPrecision(3)"));
+            Assert.AreEqual("-Infinity", TestUtils.Evaluate("Number.NEGATIVE_INFINITY.toPrecision()"));
+            Assert.AreEqual("-Infinity", TestUtils.Evaluate("Number.NEGATIVE_INFINITY.toPrecision(3)"));
 
             // Precision out of range.
-            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("num.toPrecision(-1)"));
-            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("num.toPrecision(22)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("77.1274.toPrecision(-1)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("77.1274.toPrecision(0)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("77.1274.toPrecision(22)"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("NaN.toPrecision.length"));
