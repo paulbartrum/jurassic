@@ -115,6 +115,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Removes a declared variable from the scope.
+        /// </summary>
+        /// <param name="name"> The name of the variable. </param>
+        internal void RemovedDeclaredVariable(string name)
+        {
+            this.variables.Remove(name);
+        }
+
+        /// <summary>
         /// Declares a function in this scope.  This will be initialized with the value of the
         /// given expression.
         /// </summary>
@@ -191,6 +200,12 @@ namespace Jurassic.Compiler
         /// <param name="variableName"> The name of the variable. </param>
         /// <param name="value"> The new value of the variable. </param>
         public abstract void SetValue(string variableName, object value);
+
+        /// <summary>
+        /// Deletes the variable from the scope.
+        /// </summary>
+        /// <param name="variableName"> The name of the variable. </param>
+        public abstract bool Delete(string variableName);
 
         /// <summary>
         /// Generates code that creates a new scope.

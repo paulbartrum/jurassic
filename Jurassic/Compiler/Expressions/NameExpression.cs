@@ -99,6 +99,31 @@ namespace Jurassic.Compiler
                         generator.LoadArrayElement(typeof(object));
                         break;
                     }
+                    else
+                    {
+                        // The variable was not defined at compile time, but may have been
+                        // introduced by an eval() statement.
+                        if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
+                        {
+                            // Check the variable exists: if (scope.HasValue(variableName) == true) {
+                            EmitHelpers.LoadScope(generator);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.LoadString(this.Name);
+                            generator.Call(ReflectionHelpers.Scope_HasValue);
+                            var hasValueClause = generator.CreateLabel();
+                            generator.BranchIfFalse(hasValueClause);
+
+                            // Load the value of the variable.
+                            EmitHelpers.LoadScope(generator);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.LoadString(this.Name);
+                            generator.Call(ReflectionHelpers.Scope_GetValue);
+                            generator.Branch(endOfGet);
+
+                            // }
+                            generator.DefineLabelPosition(hasValueClause);
+                        }
+                    }
                 }
                 else
                 {
@@ -193,6 +218,32 @@ namespace Jurassic.Compiler
                         generator.StoreArrayElement(typeof(object));
                         break;
                     }
+                    else
+                    {
+                        // The variable was not defined at compile time, but may have been
+                        // introduced by an eval() statement.
+                        if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
+                        {
+                            // Check the variable exists: if (scope.HasValue(variableName) == true) {
+                            EmitHelpers.LoadScope(generator);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.LoadString(this.Name);
+                            generator.Call(ReflectionHelpers.Scope_HasValue);
+                            var hasValueClause = generator.CreateLabel();
+                            generator.BranchIfFalse(hasValueClause);
+
+                            // Set the value of the variable.
+                            EmitHelpers.LoadScope(generator);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.LoadString(this.Name);
+                            generator.LoadVariable(valueVariable);
+                            generator.Call(ReflectionHelpers.Scope_SetValue);
+                            generator.Branch(endOfSet);
+
+                            // }
+                            generator.DefineLabelPosition(hasValueClause);
+                        }
+                    }
                 }
                 else
                 {
@@ -277,9 +328,34 @@ namespace Jurassic.Compiler
                     // delete on a DeclarativeScope throws an exception in strict more or does nothing otherwise.
                     if (scope.HasDeclaredVariable(this.Name))
                     {
-                        // The variable exists in the declarative scope - return false.
+                        // The variable exists in the declarative scope and is immutable - return false.
                         generator.LoadBoolean(false);
                         break;
+                    }
+                    else
+                    {
+                        // The variable was not defined at compile time, but may have been
+                        // introduced by an eval() statement.
+                        if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
+                        {
+                            // Check the variable exists: if (scope.HasValue(variableName) == true) {
+                            EmitHelpers.LoadScope(generator);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.LoadString(this.Name);
+                            generator.Call(ReflectionHelpers.Scope_HasValue);
+                            var hasValueClause = generator.CreateLabel();
+                            generator.BranchIfFalse(hasValueClause);
+
+                            // If the variable does exist, return true.
+                            EmitHelpers.LoadScope(generator);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.LoadString(this.Name);
+                            generator.Call(ReflectionHelpers.Scope_Delete);
+                            generator.Branch(endOfDelete);
+
+                            // }
+                            generator.DefineLabelPosition(hasValueClause);
+                        }
                     }
                 }
                 else

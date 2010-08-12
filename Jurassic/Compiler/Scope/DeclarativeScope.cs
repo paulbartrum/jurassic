@@ -8,6 +8,11 @@ namespace Jurassic.Compiler
     /// </summary>
     public class DeclarativeScope : Scope
     {
+        // Variables declared at compile-time cannot be deleted but variables that are declared at
+        // runtime (i.e. inside a eval() statement are mutable and can be deleted.  This values
+        // indicates which values are immutable and which are mutable.
+        private int immutableCount;
+
         // Catch scopes behave like other scopes except variables cannot be declared inside them -
         // they always only have a single variable (the catch variable).
         private bool preventExtensions;
@@ -83,6 +88,7 @@ namespace Jurassic.Compiler
             foreach (string variableName in declaredVariableNames)
                 result.DeclareVariable(variableName);
             result.Values = new object[declaredVariableNames.Length];
+            result.immutableCount = declaredVariableNames.Length;
             return result;
         }
 
@@ -105,6 +111,26 @@ namespace Jurassic.Compiler
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Declares a variable or function in this scope.  This will be initialized with the value
+        /// of the given expression.
+        /// </summary>
+        /// <param name="name"> The name of the variable. </param>
+        /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
+        /// function declarations (not function expressions). </param>
+        internal override void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
+        {
+            // The normal case is to delegate to the Scope class.
+            if (this.preventExtensions == false)
+            {
+                base.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
+                return;
+            }
+
+            // Variables cannot be declared in this scope - try the parent scope.
+            this.ParentScope.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
         }
 
         /// <summary>
@@ -151,26 +177,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Declares a variable or function in this scope.  This will be initialized with the value
-        /// of the given expression.
-        /// </summary>
-        /// <param name="name"> The name of the variable. </param>
-        /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
-        /// function declarations (not function expressions). </param>
-        internal override void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
-        {
-            // The normal case is to delegate to the Scope class.
-            if (this.preventExtensions == false)
-            {
-                base.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
-                return;
-            }
-
-            // Variables cannot be declared in this scope - try the parent scope.
-            this.ParentScope.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
-        }
-
-        /// <summary>
         /// Sets the value of the given variable.
         /// </summary>
         /// <param name="variableName"> The name of the variable. </param>
@@ -188,6 +194,29 @@ namespace Jurassic.Compiler
                 index = GetDeclaredVariableIndex(variableName);
             }
             this.Values[index] = value;
+        }
+
+        /// <summary>
+        /// Deletes the variable from the scope.
+        /// </summary>
+        /// <param name="variableName"> The name of the variable. </param>
+        public override bool Delete(string variableName)
+        {
+            if (this.Values == null)
+                throw new InvalidOperationException("This method can only be used when the DeclarativeScope is created using CreateRuntimeScope().");
+            int index = GetDeclaredVariableIndex(variableName);
+
+            // Delete returns true if the variable doesn't exist.
+            if (index < 0)
+                return true;
+
+            // Variables that are known at compile-time are immutable.
+            if (index < this.immutableCount)
+                return false;
+
+            // This variable was declared in an eval() statement - remove the variable from the scope.
+            RemovedDeclaredVariable(variableName);
+            return true;
         }
 
         /// <summary>

@@ -172,6 +172,9 @@ namespace Jurassic.Compiler
         {
             // Method signature: object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments)
 
+            // Make function optimization information available to all code generation methods.
+            optimizationInfo.FunctionOptimizationInfo = this.Optimizations;
+
             // Create a new scope.
             this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
 
