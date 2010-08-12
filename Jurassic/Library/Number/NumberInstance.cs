@@ -105,27 +105,13 @@ namespace Jurassic.Library
         {
             return this.value.ToString();
         }
-        
-        /// <summary>
-        /// Returns a string containing a number represented either in exponential or fixed-point
-        /// notation.
-        /// </summary>
-        /// <returns> A string containing a number represented either in exponential or fixed-point
-        /// notation </returns>
-        /// <remarks>
-        /// If precision is not supplied or is undefined, the toString method is called instead.
-        /// </remarks>
-        [JSFunction(Name = "toPrecision")]
-        public string ToPrecision()
-        {
-            return ToString();
-        }
 
         /// <summary>
         /// Returns a string containing a number represented either in exponential or fixed-point
         /// notation with a specified number of digits.
         /// </summary>
-        /// <param name="precision"> Number of significant digits. Must be in the range 1 – 21, inclusive. </param>
+        /// <param name="precision"> The number of significant digits. Must be in the range 1 – 21,
+        /// inclusive. </param>
         /// <returns> A string containing a number represented either in exponential or fixed-point
         /// notation with a specified number of digits. </returns>
         /// <remarks>
@@ -135,13 +121,102 @@ namespace Jurassic.Library
         /// If precision is not supplied or is undefined, the toString method is called instead.
         /// </remarks>
         [JSFunction(Name = "toPrecision")]
-        public string ToPrecision(int precision)
+        public string ToPrecision(object precision)
         {
-            if (precision < 0 || precision > 21)
+            // If precision is undefined, delegate to "toString()".
+            if (precision == null || precision == Undefined.Value)
+                return this.ToStringJS();
+
+            double value = this.value;
+            int p = TypeConverter.ToInteger(precision);
+
+            // Return "NaN" if the number is NaN.
+            if (double.IsNaN(this.value) == true)
+                return "NaN";
+
+            // Reverse the sign of the number if it is negative.
+            var result = new System.Text.StringBuilder(p + 5);
+            if (value < 0.0)
+            {
+                result.Append("-");
+                value = -value;
+            }
+
+            // Check if the number is Infinity.
+            if (double.IsPositiveInfinity(value))
+            {
+                result.Append("Infinity");
+                return result.ToString();
+            }
+
+            // Check the p is in range.
+            if (p < 1 || p > 21)
                 throw new JavaScriptException(this.Engine, "RangeError", "toPrecision() argument must be between 0 and 21.");
-            return this.value.ToString("g" + precision, System.Globalization.CultureInfo.InvariantCulture).
-                Replace("e+0", "e+").Replace("e-0", "e-");  // Hack: remove the extra zero in the exponent.
+
+            // Handle zero as a special case.
+            if (value == 0.0)
+            {
+                result.Append('0');
+                if (p > 1)
+                {
+                    result.Append('.');
+                    result.Append('0', p - 1);
+                }
+                return result.ToString();
+            }
+
+            // 10 ^ (p – 1) ≤ n < 10 ^ p
+            // n x 10 ^ (e - p + 1) - value = 0
+            // n = value / (10 ^ (e - p + 1))
+            int e = (int)Math.Floor(Math.Log10(value));
+            value = Math.Round(value * Math.Pow(10, p - e - 1), MidpointRounding.AwayFromZero);
+
+            // If the absolute value of the exponent is large enough, add a 'e+xx' part.
+            if (e < -6 || e >= p)
+            {
+                value *= Math.Pow(10, 1 - p);
+                result.Append(value.ToString("f" + (p - 1).ToString()));
+                result.Append('e');
+                if (e >= 0)
+                {
+                    result.Append('+');
+                    result.Append(e);
+                }
+                else
+                    result.Append(e);
+                return result.ToString();
+            }
+
+            // If the exponent is less than zero, add zero digits to the start.
+            if (e < 0)
+            {
+                result.Append('0');
+                result.Append('.');
+                result.Append('0', -(e + 1));
+                result.Append(value.ToString("f0"));
+                return result.ToString();
+            }
+            else if (e == p - 1)
+            {
+                // This is a positive whole number.
+                result.Append(value);
+                return result.ToString();
+            }
+            else
+            {
+                // This is a fractional number.
+                value *= Math.Pow(10, e - p + 1);
+                result.Append(value.ToString("f" + (p - e - 1).ToString()));
+                return result.ToString();
+            }
         }
+
+        //private unsafe int CalculateBase10Exponent(double num)
+        //{
+        //    ulong bitPattern = *((ulong*)&num);
+        //    int exponent = ((int)((bitPattern & 0x7FF0000000000000) >> 52)) - 1023;
+        //    return (int)((double)exponent / 3.3219280948873623478703194294894);
+        //}
 
         /// <summary>
         /// Returns the textual representation of the number.
