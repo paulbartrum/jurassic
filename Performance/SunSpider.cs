@@ -191,14 +191,14 @@ namespace Performance
             RunTest(@"string-validate-input.js", 5343.1);   // 4500-6000
         }
 
-        [TestMethod]
-        public void RunAllTests()
-        {
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            foreach (string path in Directory.EnumerateFiles(@"..\..\..\Performance\Files\sunspider-0.9.1"))
-                RunTest(path, 0, false);
-            Assert.Inconclusive(string.Format("{0}ms, was 24471ms", timer.ElapsedMilliseconds));
-        }
+        //[TestMethod]
+        //public void RunAllTests()
+        //{
+        //    var timer = System.Diagnostics.Stopwatch.StartNew();
+        //    foreach (string path in Directory.EnumerateFiles(@"..\..\..\Performance\Files\sunspider-0.9.1"))
+        //        RunTest(path, 0, false);
+        //    Assert.Inconclusive(string.Format("{0}ms, was 24471ms", timer.ElapsedMilliseconds));
+        //}
 
         private void RunTest(string scriptPath, double previous, bool assertResults = true)
         {
@@ -228,6 +228,11 @@ namespace Performance
                 parseTime + optimizationTime + codeGenerationTime + runTime);
             if (assertResults == true)
                 throw new AssertInconclusiveException(infoString);
+
+            //var engine = new Jint.JintEngine();
+            //var timer = System.Diagnostics.Stopwatch.StartNew();
+            //engine.Run(script);
+            //throw new AssertInconclusiveException(string.Format("{0:n1}ms", timer.Elapsed.TotalMilliseconds));
         }
     }
 
