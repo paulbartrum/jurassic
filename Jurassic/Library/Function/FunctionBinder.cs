@@ -332,7 +332,7 @@ namespace Jurassic.Library
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldloc_S, temp);
                     il.Emit(OpCodes.Ldstr, binderMethod.Name);
-                    il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject2, null);
+                    il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject, null);
                 }
 
                 // Convert to the target type.
@@ -895,7 +895,7 @@ namespace Jurassic.Library
                 il.Emit(OpCodes.Ldloc_S, temp);
                 if (fromType.IsValueType == true)
                     il.Emit(OpCodes.Box, fromType);
-                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToObject2);
+                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToObject);
             }
 
             if (toType != typeof(ObjectInstance))

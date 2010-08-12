@@ -189,7 +189,7 @@ namespace Jurassic.Compiler
             generator.LoadBoolean(optimizationInfo.StrictMode);
 
             // Call Global.Eval(engine, code, scope, thisValue, strictMode)
-            generator.Call(ReflectionHelpers.Global_Eval2);
+            generator.Call(ReflectionHelpers.Global_Eval);
         }
     }
 

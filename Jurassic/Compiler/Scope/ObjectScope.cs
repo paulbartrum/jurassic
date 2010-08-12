@@ -134,6 +134,17 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Deletes the variable from the scope.
+        /// </summary>
+        /// <param name="variableName"> The name of the variable. </param>
+        public override bool Delete(string variableName)
+        {
+            if (this.ScopeObject == null)
+                throw new InvalidOperationException("The scope object is not yet available.");
+            return this.ScopeObject.Delete(variableName, false);
+        }
+
+        /// <summary>
         /// Generates code that creates a new scope.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>

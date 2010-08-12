@@ -150,12 +150,19 @@ namespace UnitTests
             // The lexical environment does not change inside an eval if it is a direct call.
             Assert.AreEqual(5, TestUtils.Evaluate("(function() { var a = 5; return eval('a'); })()"));
             Assert.AreEqual(6, TestUtils.Evaluate("(function() { var a = 5; eval('a = 6'); return a; })()"));
+
+            // Eval() can introduce new variables into a function scope.
             Assert.AreEqual(5, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); return b; })()"));
+            Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); b = 4; })(); b;"));
+            Assert.AreEqual(true, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); return delete b; })()"));
+            Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); delete b; })(); b;"));
+            Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); delete b; return b; })()"));
 
             // The global lexical environment is used for a non-direct call.
             Assert.AreEqual(5, TestUtils.Evaluate("e = eval; (function() { var a = 5; e('a = 6'); return a; })()"));
             Assert.AreEqual(1, TestUtils.Evaluate("e = eval; a = 1; (function() { var a = 5; return e('a'); })()"));
-            Assert.AreEqual(5, TestUtils.Evaluate("e = eval; b = 2; (function() { var a = 5; e('var b = a'); return b; })()"));
+            Assert.AreEqual(3, TestUtils.Evaluate("e = eval; a = 3; b = 2; (function() { var a = 5; e('var b = a'); return b; })()"));
+            Assert.AreEqual(3, TestUtils.Evaluate("e = eval; a = 3; b = 2; (function() { var a = 5; e('var b = a'); })(); b"));
         }
 
         [TestMethod]

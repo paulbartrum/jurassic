@@ -92,7 +92,7 @@ namespace Jurassic.Compiler
             EmitConversion.ToAny(generator, this.TargetObject.ResultType);
 
             // Call EnumeratePropertyNames()
-            generator.Call(ReflectionHelpers.TypeUtilities_EnumeratePropertyNames2);
+            generator.Call(ReflectionHelpers.TypeUtilities_EnumeratePropertyNames);
 
             // Call GetEnumerator()
             generator.Call(ReflectionHelpers.IEnumerable_GetEnumerator);
