@@ -981,6 +981,9 @@ namespace UnitTests
 
             // Delete from a parent scope.
             Assert.AreEqual(false, TestUtils.Evaluate("a = 5; function f() { delete a } f(); this.hasOwnProperty('a')"));
+
+            // Make sure delete calls functions.
+            Assert.AreEqual(true, TestUtils.Evaluate("called = false; function f() { called = true; } delete f(); called"));
         }
 
         [TestMethod]

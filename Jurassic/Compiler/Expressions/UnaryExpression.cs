@@ -177,10 +177,16 @@ namespace Jurassic.Compiler
             // Attempting to delete something that isn't a reference returns true but otherwise does nothing.
             if ((this.Operand is IReferenceExpression) == false)
             {
-                //if (optimizationInfo.SuppressReturnValue == false)
-                    generator.LoadBoolean(true);
+                // Make sure the expression is evaluated.
+                this.Operand.GenerateCode(generator, optimizationInfo);
+
+                // Discard the result and return true.
+                generator.Pop();
+                generator.LoadBoolean(true);
                 return;
             }
+
+            // The operand is a variable or property reference.
             ((IReferenceExpression)this.Operand).GenerateDelete(generator, optimizationInfo);
         }
     }
