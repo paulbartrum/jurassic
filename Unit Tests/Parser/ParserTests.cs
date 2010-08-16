@@ -964,6 +964,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {get a() { return 2 }, a: 1}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set a(value) { }, a: 1}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set a() { }, a: 1}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {'get' f() { return 1; }}"));
         }
 
         [TestMethod]
