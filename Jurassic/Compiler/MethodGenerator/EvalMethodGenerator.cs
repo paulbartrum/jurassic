@@ -70,12 +70,6 @@ namespace Jurassic.Compiler
                 this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
             }
 
-            if (this.InitialScope is DeclarativeScope)
-            {
-                // Resize the values array if any values were declared in the eval statement.
-                ((DeclarativeScope)this.InitialScope).GenerateRuntimeResize(generator, optimizationInfo);
-            }
-
             // Initialize any declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 
