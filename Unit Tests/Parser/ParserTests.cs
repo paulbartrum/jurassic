@@ -886,7 +886,8 @@ namespace UnitTests
             Assert.AreEqual("b", TestUtils.Evaluate("y = 1; 'abc'[y]"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; x['a']"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; y = 'a'; x[y]"));
-            Assert.AreEqual(true, TestUtils.Evaluate("var a = { 'abc' : 1 }; a[[[['abc']]]] === a['abc']"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var a = [1]; a[[[[0]]]]"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var a = { 'abc' : 1 }; a[[[['abc']]]]"));
 
             // Index operator (set)
             Assert.AreEqual("5.6", TestUtils.Evaluate("var x = 5.6; x['toString'] = function() { }; x.toString()"));

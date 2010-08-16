@@ -77,7 +77,7 @@ namespace Jurassic.Compiler
             if (this.OperatorType == OperatorType.Index)
             {
                 var rhs = this.GetOperand(1) as LiteralExpression;
-                if (rhs != null)
+                if (rhs != null && (PrimitiveTypeUtilities.IsNumeric(rhs.ResultType) || rhs.ResultType == PrimitiveType.String))
                 {
                     propertyName = TypeConverter.ToString(rhs.Value);
 
