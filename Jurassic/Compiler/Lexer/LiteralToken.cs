@@ -34,6 +34,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets a value that indicates whether the literal is a keyword.  Literal keywords are
+        /// <c>false</c>, <c>true</c> and <c>null</c>.
+        /// </summary>
+        public bool IsKeyword
+        {
+            get { return this.value is bool || this.value is Null; }
+        }
+
+        /// <summary>
         /// Gets a string that represents the token in a parseable form.
         /// </summary>
         public override string Text

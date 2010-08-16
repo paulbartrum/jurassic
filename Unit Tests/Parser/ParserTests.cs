@@ -886,8 +886,9 @@ namespace UnitTests
             Assert.AreEqual("b", TestUtils.Evaluate("y = 1; 'abc'[y]"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; x['a']"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; y = 'a'; x[y]"));
-            Assert.AreEqual(1, TestUtils.Evaluate("var a = [1]; a[[[[0]]]]"));
-            Assert.AreEqual(1, TestUtils.Evaluate("var a = { 'abc' : 1 }; a[[[['abc']]]]"));
+            Assert.AreEqual(3, TestUtils.Evaluate("var a = {false: 3}; a[false]"));
+            Assert.AreEqual(4, TestUtils.Evaluate("var a = [4]; a[[[[0]]]]"));
+            Assert.AreEqual(5, TestUtils.Evaluate("var a = { 'abc' : 5 }; a[[[['abc']]]]"));
 
             // Index operator (set)
             Assert.AreEqual("5.6", TestUtils.Evaluate("var x = 5.6; x['toString'] = function() { }; x.toString()"));
@@ -936,8 +937,13 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("x = {a: 1, b: 2}.b"));
             Assert.AreEqual(2, TestUtils.Evaluate("x = {a: 1, a: 2}.a"));   // This is an error in strict mode.
             Assert.AreEqual(3, TestUtils.Evaluate("var obj = {valueOf:0, toString:1, foo:2}; x = 0; for (var y in obj) { x ++; } x"));
+
+            // Keywords are allowed in ES5.
             Assert.AreEqual(1, TestUtils.Evaluate("x = {if: 1}; x.if"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {eval: 1}; x.eval"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {false: 1}; x.false"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {true: 1}; x.true"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {null: 1}; x.null"));
 
             // Object literals can have getters and setters.
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get f() { return 1; }}; x.f"));
