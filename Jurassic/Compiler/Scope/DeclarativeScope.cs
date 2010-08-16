@@ -17,6 +17,9 @@ namespace Jurassic.Compiler
         // they always only have a single variable (the catch variable).
         private bool preventExtensions;
 
+        // An array of values - one element for each variable declared in the scope.
+        private object[] values;
+
         /// <summary>
         /// Creates a new declarative scope for use inside a function body.
         /// </summary>
@@ -87,7 +90,7 @@ namespace Jurassic.Compiler
             var result = new DeclarativeScope(parentScope, declaredVariableNames.Length);
             foreach (string variableName in declaredVariableNames)
                 result.DeclareVariable(variableName);
-            result.Values = new object[declaredVariableNames.Length];
+            result.values = new object[declaredVariableNames.Length];
             result.immutableCount = declaredVariableNames.Length;
             return result;
         }
@@ -109,8 +112,7 @@ namespace Jurassic.Compiler
         /// </summary>
         public object[] Values
         {
-            get;
-            private set;
+            get { return this.values; }
         }
 
         /// <summary>
@@ -122,6 +124,11 @@ namespace Jurassic.Compiler
         /// function declarations (not function expressions). </param>
         internal override void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
         {
+            // Variables can be added to a declarative scope using eval().  When this happens the
+            // values array needs to be resized.  That check happens here.
+            if (this.values != null && this.DeclaredVariableCount >= this.Values.Length)
+                Array.Resize(ref this.values, this.DeclaredVariableCount + 10);
+
             // The normal case is to delegate to the Scope class.
             if (this.preventExtensions == false)
             {
@@ -131,20 +138,6 @@ namespace Jurassic.Compiler
 
             // Variables cannot be declared in this scope - try the parent scope.
             this.ParentScope.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
-        }
-
-        /// <summary>
-        /// The number of items available in the Values array can get out of sync with the number
-        /// of declared variables.  This method enlarges the values array to accommodate any new
-        /// declarations.
-        /// </summary>
-        public void ResizeValuesArray()
-        {
-            if (this.Values.Length == this.DeclaredVariableCount)
-                return;
-            var values = this.Values;
-            Array.Resize(ref values, this.DeclaredVariableCount);
-            this.Values = values;
         }
 
         /// <summary>
@@ -248,20 +241,6 @@ namespace Jurassic.Compiler
 
             // Save the new scope.
             EmitHelpers.StoreScope(generator);
-        }
-
-        /// <summary>
-        /// Generates code that makes more variables available at runtime.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        internal void GenerateRuntimeResize(ILGenerator generator, OptimizationInfo optimizationInfo)
-        {
-            // This is needed because we rely on the fact that the number of declared variables is
-            // known at compile-time when we create the Values array but eval() can introduce new
-            // variables into the scope.
-            EmitHelpers.LoadScope(generator);
-            generator.Call(ReflectionHelpers.DeclarativeScope_ResizeValuesArray);
         }
     }
 

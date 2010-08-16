@@ -94,7 +94,6 @@ namespace Jurassic
         internal static MethodInfo ObjectScope_ScopeObject;
         internal static MethodInfo DeclarativeScope_CreateRuntimeScope;
         internal static MethodInfo DeclarativeScope_Values;
-        internal static MethodInfo DeclarativeScope_ResizeValuesArray;
         internal static MethodInfo Scope_HasValue;
         internal static MethodInfo Scope_GetValue;
         internal static MethodInfo Scope_SetValue;
@@ -158,7 +157,6 @@ namespace Jurassic
             ObjectScope_ScopeObject = GetInstanceMethod(typeof(ObjectScope), "get_ScopeObject");
             DeclarativeScope_CreateRuntimeScope = GetStaticMethod(typeof(DeclarativeScope), "CreateRuntimeScope", typeof(Scope), typeof(string[]));
             DeclarativeScope_Values = GetInstanceMethod(typeof(DeclarativeScope), "get_Values");
-            DeclarativeScope_ResizeValuesArray = GetInstanceMethod(typeof(DeclarativeScope), "ResizeValuesArray");
             Scope_HasValue = GetInstanceMethod(typeof(Scope), "HasValue", typeof(string));
             Scope_GetValue = GetInstanceMethod(typeof(Scope), "GetValue", typeof(string));
             Scope_SetValue = GetInstanceMethod(typeof(Scope), "SetValue", typeof(string), typeof(object));
