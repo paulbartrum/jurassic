@@ -260,8 +260,12 @@ namespace Jurassic.Compiler
                         return new BlockStatement(this.labelsForCurrentStatement);
                 }
 
+                // A directive must start with a string literal token.  Record it now so that the
+                // escape sequence and line continuation information is not lost.  (Directives
+                // cannot have escape sequences or line continuations).
+                var directiveToken = this.nextToken as StringLiteralToken;
 
-                // Parse a single statement.
+                // Parse the statement - this reads past the semi-colon and any whitespace.
                 initialStatement = ParseSourceStatement();
 
                 // In order for the statement to be part of the directive prologue, it must have
@@ -272,8 +276,9 @@ namespace Jurassic.Compiler
                     break;
                 if ((((LiteralExpression)((ExpressionStatement)initialStatement).Expression).Value is string) == false)
                     break;
-                string directive = (string)((LiteralExpression)((ExpressionStatement)initialStatement).Expression).Value;
-                if (directive == "use strict")
+                if (directiveToken == null)
+                    break;
+                if (directiveToken.Value == "use strict" && directiveToken.EscapeSequenceCount == 0 && directiveToken.LineContinuationCount == 0)
                     this.StrictMode = true;
             }
 
