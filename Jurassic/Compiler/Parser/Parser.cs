@@ -1387,12 +1387,12 @@ namespace Jurassic.Compiler
                     }
 
                     // New in ECMAScript 5 is the ability to use keywords as property names.
-                    if (this.nextToken is KeywordToken &&
+                    if ((this.nextToken is KeywordToken || (this.nextToken is LiteralToken && ((LiteralToken)this.nextToken).IsKeyword == true)) &&
                         unboundOperator != null &&
                         unboundOperator.OperatorType == OperatorType.MemberAccess &&
                         this.expressionState == ExpressionState.LiteralContext)
                     {
-                        this.nextToken = new IdentifierToken(((KeywordToken)this.nextToken).Text);
+                        this.nextToken = new IdentifierToken(this.nextToken.Text);
                     }
 
                     Expression terminal;
@@ -1777,11 +1777,19 @@ namespace Jurassic.Compiler
             string propertyName;
             if (this.nextToken is LiteralToken)
             {
-                // The property name can be a string or a number.
-                object literalValue = ((LiteralToken)this.nextToken).Value;
-                if ((literalValue is string || literalValue is double || literalValue is int) == false)
-                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found '{0}'", this.nextToken.Text), 1, "");
-                propertyName = ((LiteralToken)this.nextToken).Value.ToString();
+                // The property name can be a string or a number or (in ES5) a keyword.
+                if (((LiteralToken)this.nextToken).IsKeyword == true)
+                {
+                    // false, true or null.
+                    propertyName = this.nextToken.Text;
+                }
+                else
+                {
+                    object literalValue = ((LiteralToken)this.nextToken).Value;
+                    if ((literalValue is string || literalValue is double || literalValue is int) == false)
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found '{0}'", this.nextToken.Text), 1, "");
+                    propertyName = ((LiteralToken)this.nextToken).Value.ToString();
+                }
                 wasIdentifier = false;
             }
             else if (this.nextToken is IdentifierToken)
