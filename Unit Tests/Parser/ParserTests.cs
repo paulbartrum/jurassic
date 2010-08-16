@@ -315,10 +315,25 @@ namespace UnitTests
             // NaN
             Assert.AreEqual(false, TestUtils.Evaluate("NaN == NaN"));
 
+            // Doug Crockford's truth table.
+            Assert.AreEqual(false, TestUtils.Evaluate( "''        ==   '0'           "));
+            Assert.AreEqual(true,  TestUtils.Evaluate( "0         ==   ''            "));
+            Assert.AreEqual(true,  TestUtils.Evaluate( "0         ==   '0'           "));
+            Assert.AreEqual(false, TestUtils.Evaluate( "false     ==   'false'       "));
+            Assert.AreEqual(true,  TestUtils.Evaluate( "false     ==   '0'           "));
+            Assert.AreEqual(false, TestUtils.Evaluate( "false     ==   undefined     "));
+            Assert.AreEqual(true,  TestUtils.Evaluate( "false     ==   null          "));
+            Assert.AreEqual(true,  TestUtils.Evaluate( "null      ==   undefined     "));
+            Assert.AreEqual(true,  TestUtils.Evaluate(@"' \t\r\n' ==   0             "));
+
             // Variables
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x == 10"));
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x.valueOf() == 10"));
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); 10 == x.valueOf()"));
+
+            // Arrays
+            Assert.AreEqual(true, TestUtils.Evaluate("2 == [2]"));
+            Assert.AreEqual(true, TestUtils.Evaluate("2 == [[[2]]]"));
         }
 
         [TestMethod]
@@ -871,6 +886,7 @@ namespace UnitTests
             Assert.AreEqual("b", TestUtils.Evaluate("y = 1; 'abc'[y]"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; x['a']"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; y = 'a'; x[y]"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var a = { 'abc' : 1 }; a[[[['abc']]]] === a['abc']"));
 
             // Index operator (set)
             Assert.AreEqual("5.6", TestUtils.Evaluate("var x = 5.6; x['toString'] = function() { }; x.toString()"));
@@ -963,7 +979,7 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("abcdefg = 1; delete abcdefg; this.hasOwnProperty('abcdefg')"));
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "TypeError" : "ReferenceError", TestUtils.EvaluateExceptionType("x = 5; delete x; x"));
 
-            // Delete function variable.
+            // Deleting function variables fails.
             Assert.AreEqual(false, TestUtils.Evaluate("(function f(a) { return delete a; })(1)"));
             Assert.AreEqual(1, TestUtils.Evaluate("(function f(a) { delete a; return a; })(1)"));
 
@@ -981,6 +997,11 @@ namespace UnitTests
 
             // Delete from a parent scope.
             Assert.AreEqual(false, TestUtils.Evaluate("a = 5; function f() { delete a } f(); this.hasOwnProperty('a')"));
+
+            // Deleting variables defined within an eval statement inside a function scope succeeds.
+            Assert.AreEqual(true, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); return delete b; })()"));
+            Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); delete b; })(); b;"));
+            Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); delete b; return b; })()"));
 
             // Make sure delete calls functions.
             Assert.AreEqual(true, TestUtils.Evaluate("called = false; function f() { called = true; } delete f(); called"));
@@ -1172,6 +1193,12 @@ namespace UnitTests
             // With and prototype chains.
             Assert.AreEqual(10, TestUtils.Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } x.b"));
             Assert.AreEqual(5, TestUtils.Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } Object.getPrototypeOf(x).b"));
+
+            // With statements are syntax errors in strict mode.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; with (x) { }"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"eval(""'use strict'; var o = {}; with (o) {}"")"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"'use strict'; eval(""var o = {}; with (o) {}"")"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"eval(""function f() { 'use strict'; var o = {}; with (o) {} }"")"));
         }
 
         [TestMethod]
@@ -1357,9 +1384,6 @@ namespace UnitTests
             Assert.AreEqual(Null.Value, TestUtils.Evaluate("'use strict'; (function(){ return this; }).call(null)"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; (function(){ return this; }).call(undefined)"));
             Assert.AreEqual("number", TestUtils.Evaluate("'use strict'; typeof (function(){ return this; }).call(5)"));
-
-            // With statements are disallowed.
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; with (x) { }"));
 
             // Argument names cannot be identical.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg, arg) { })()"));

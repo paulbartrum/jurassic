@@ -43,10 +43,6 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // This statement is not allowed in strict mode.
-            if (optimizationInfo.StrictMode == true)
-                throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "The with statement is not supported in strict mode");
-
             // Create the scope.
             this.Scope.GenerateScopeCreation(generator, optimizationInfo);
 
