@@ -266,6 +266,7 @@ namespace Jurassic.Compiler
                 int c = this.reader.Peek();
                 if (c == 'x' || c == 'X')
                 {
+                    // Hex number.
                     ReadNextChar();
 
                     // Read numeric digits 0-9, a-z or A-Z.
@@ -287,6 +288,11 @@ namespace Jurassic.Compiler
                     if (result == (double)(int)result)
                         return new LiteralToken((int)result);
                     return new LiteralToken(result);
+                }
+                else if (c >= '0' && c <= '9')
+                {
+                    // Octal number.
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not supported.", this.lineNumber, this.Source.Path);
                 }
             }
 
@@ -456,8 +462,11 @@ namespace Jurassic.Compiler
                                 contents.Append(ReadHexNumber(4));
                                 break;
                             case '0':
-                                // Zero.
+                                // Null character or octal escape sequence.
                                 contents.Append((char)0);
+                                c = this.reader.Peek();
+                                if (c >= '0' && c <= '9')
+                                    throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are not supported.", this.lineNumber, this.Source.Path);
                                 break;
                             default:
                                 contents.Append((char)c);

@@ -19,7 +19,9 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Literals()
         {
-            RunTests(@"chapter07\7.8");
+            RunTests(@"chapter07\7.8",
+                "7.8.4-1-s" // Bug in test - http://es5conform.codeplex.com/workitem/28578
+                );
         }
 
 
@@ -73,7 +75,9 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Try()
         {
-            RunTests(@"chapter12\12.14", "12.14-5");
+            RunTests(@"chapter12\12.14",
+                "12.14-5"   // Bug in test - http://es5conform.codeplex.com/workitem/28580
+                );
         }
 
         [TestMethod]
@@ -137,8 +141,8 @@ namespace Performance
         public void IETestCenter_JSON()
         {
             RunTests(@"chapter15\15.12",
-                "15.12.2-0-3",      // precondition does not return true
-                "15.12.3-0-3"       // precondition does not return true
+                "15.12.2-0-3",      // precondition does not return true - http://es5conform.codeplex.com/workitem/28581
+                "15.12.3-0-3"       // precondition does not return true - http://es5conform.codeplex.com/workitem/28581
                 );
         }
 
