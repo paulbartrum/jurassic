@@ -878,6 +878,10 @@ namespace Jurassic.Compiler
         /// <returns> An expression representing the with statement. </returns>
         private WithStatement ParseWith()
         {
+            // This statement is not allowed in strict mode.
+            if (this.StrictMode == true)
+                throw new JavaScriptException(this.engine, "SyntaxError", "The with statement is not supported in strict mode");
+
             var result = new WithStatement(this.labelsForCurrentStatement);
 
             // Read past the "with" token.
