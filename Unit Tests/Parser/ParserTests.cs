@@ -1422,8 +1422,16 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void DivisionAmbiguity()
+        public void Lexer()
         {
+            // Octal numbers and escape sequences are not supported.
+            Assert.AreEqual(0, TestUtils.Evaluate("0"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("05"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("09"));
+            Assert.AreEqual("\0", TestUtils.Evaluate("'\\0'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\05'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\09'"));
+
             // Division and regular expressions are ambiguous in the lexical grammar.  The parser
             // is required to resolve the ambiguity.
             Assert.AreEqual("/abc/", TestUtils.Evaluate("/abc/.toString()"));

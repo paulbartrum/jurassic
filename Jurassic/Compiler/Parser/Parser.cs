@@ -244,20 +244,20 @@ namespace Jurassic.Compiler
         public Statement Parse()
         {
             // Read the directive prologue.
-            Statement initialStatement = null;
+            var result = new BlockStatement(new string[0]);
             while (true)
             {
                 if (this.functionOptimizations.Count > (this.startedInsideFunction ? 1 : 0))
                 {
                     // Check if we are at the end of a function.
                     if (this.nextToken == PunctuatorToken.RightBrace)
-                        return new BlockStatement(this.labelsForCurrentStatement);
+                        return result;
                 }
                 else
                 {
                     // Check if we are at the end of global or eval code.
                     if (this.nextToken == null)
-                        return new BlockStatement(this.labelsForCurrentStatement);
+                        return result;
                 }
 
                 // A directive must start with a string literal token.  Record it now so that the
@@ -266,15 +266,16 @@ namespace Jurassic.Compiler
                 var directiveToken = this.nextToken as StringLiteralToken;
 
                 // Parse the statement - this reads past the semi-colon and any whitespace.
-                initialStatement = ParseSourceStatement();
+                var possibleDirectiveStatement = ParseSourceStatement();
+                result.Statements.Add(possibleDirectiveStatement);
 
                 // In order for the statement to be part of the directive prologue, it must have
                 // the following tree structure: ExpressionStatement -> LiteralExpression -> string
-                if ((initialStatement is ExpressionStatement) == false)
+                if ((possibleDirectiveStatement is ExpressionStatement) == false)
                     break;
-                if ((((ExpressionStatement)initialStatement).Expression is LiteralExpression) == false)
+                if ((((ExpressionStatement)possibleDirectiveStatement).Expression is LiteralExpression) == false)
                     break;
-                if ((((LiteralExpression)((ExpressionStatement)initialStatement).Expression).Value is string) == false)
+                if ((((LiteralExpression)((ExpressionStatement)possibleDirectiveStatement).Expression).Value is string) == false)
                     break;
                 if (directiveToken == null)
                     break;
@@ -282,9 +283,7 @@ namespace Jurassic.Compiler
                     this.StrictMode = true;
             }
 
-            // Read zero or more statements.
-            var result = new BlockStatement(new string[0]);
-            result.Statements.Add(initialStatement);
+            // Read zero or more regular statements.
             while (true)
             {
                 if (this.functionOptimizations.Count > (this.startedInsideFunction ? 1 : 0))
