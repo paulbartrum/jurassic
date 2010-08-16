@@ -391,6 +391,7 @@ namespace Jurassic.Compiler
             System.Diagnostics.Debug.Assert(firstChar == '\'' || firstChar == '"');
             var contents = new StringBuilder();
             int lineTerminatorCount = 0;
+            int escapeSequenceCount = 0;
             while (true)
             {
                 int c = ReadNextChar();
@@ -462,6 +463,7 @@ namespace Jurassic.Compiler
                                 contents.Append((char)c);
                                 break;
                         }
+                        escapeSequenceCount ++;
                     }
                 }
                 else
@@ -469,9 +471,7 @@ namespace Jurassic.Compiler
                     contents.Append((char)c);
                 }
             }
-            if (lineTerminatorCount > 0)
-                return new MultiLineLiteralToken(contents.ToString(), lineTerminatorCount);
-            return new LiteralToken(contents.ToString());
+            return new StringLiteralToken(contents.ToString(), escapeSequenceCount, lineTerminatorCount);
         }
 
         /// <summary>

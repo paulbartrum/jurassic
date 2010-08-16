@@ -59,24 +59,44 @@ namespace Jurassic.Compiler
     }
 
     /// <summary>
-    /// Represents a multi-line literal (i.e. a string literal with line continuations).
+    /// Represents a string literal.
     /// </summary>
-    internal class MultiLineLiteralToken : LiteralToken
+    internal class StringLiteralToken : LiteralToken
     {
-        public MultiLineLiteralToken(object value, int lineTerminatorCount)
+        public StringLiteralToken(string value, int escapeSequenceCount, int lineContinuationCount)
             : base(value)
         {
-            this.LineTerminatorCount = lineTerminatorCount;
+            if (value == null)
+                throw new ArgumentNullException("value");
+            this.EscapeSequenceCount = escapeSequenceCount;
+            this.LineContinuationCount = lineContinuationCount;
         }
 
         /// <summary>
-        /// Gets the number of line terminators encounted while parsing the string literal.  This
-        /// is not the same as the number of line terminators within the literal itself.
+        /// Gets the number of character escape sequences encounted while parsing the string
+        /// literal.
         /// </summary>
-        public int LineTerminatorCount
+        public int EscapeSequenceCount
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Gets the number of line continuations encounted while parsing the string literal.
+        /// </summary>
+        public int LineContinuationCount
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the contents of the string literal.
+        /// </summary>
+        public new string Value
+        {
+            get { return (string)base.Value; }
         }
     }
 
