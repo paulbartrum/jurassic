@@ -59,6 +59,9 @@ namespace UnitTests
             Assert.AreEqual(-2147483638, TestUtils.Evaluate("~~2147483658"));
             Assert.AreEqual(-2147483637, TestUtils.Evaluate("~~6442450955"));
 
+            // Objects
+            Assert.AreEqual(-6, TestUtils.Evaluate("~new Number(5)"));
+
             // Variables
             Assert.AreEqual(-1, TestUtils.Evaluate("x = 0; ~x"));
             Assert.AreEqual(-21, TestUtils.Evaluate("x = 20; ~x"));
@@ -76,6 +79,9 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("!0"));
             Assert.AreEqual(false, TestUtils.Evaluate("!'hello'"));
             Assert.AreEqual(true, TestUtils.Evaluate("!''"));
+
+            // Objects
+            Assert.AreEqual(false, TestUtils.Evaluate("!new Number(5)"));
 
             // Variables
             Assert.AreEqual(true, TestUtils.Evaluate("x = false; !x"));
@@ -100,6 +106,11 @@ namespace UnitTests
             Assert.AreEqual("5Thu Jan 01 1970 13:00:00 GMT+1300 (New Zealand Daylight Time)", TestUtils.Evaluate("5 + new Date(5)"));
             Assert.AreEqual("5/abc/g", TestUtils.Evaluate("5 + /abc/g"));
             Assert.AreEqual("5[object Object]", TestUtils.Evaluate("5 + {}"));
+
+            // Objects
+            Assert.AreEqual(11, TestUtils.Evaluate("new Number(5) + new Number(6)"));
+            Assert.AreEqual("test6", TestUtils.Evaluate("'test' + new Number(6)"));
+            Assert.AreEqual("5test", TestUtils.Evaluate("new Number(5) + 'test'"));
 
             // Variables
             Assert.AreEqual(35, TestUtils.Evaluate("x = 15; x + 20"));
@@ -127,6 +138,11 @@ namespace UnitTests
             Assert.AreEqual(10,            TestUtils.Evaluate("'10' - null"));
             Assert.AreEqual(-6,            TestUtils.Evaluate("6 - 6 - 6"));
 
+            // Objects
+            Assert.AreEqual(-1, TestUtils.Evaluate("new Number(5) - new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("'test' - new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Number(5) - 'test'"));
+
             // Variables
             Assert.AreEqual(-5, TestUtils.Evaluate("x = 15; x - 20"));
             Assert.AreEqual(-18.5, TestUtils.Evaluate("x = 20; 1.5 - x"));
@@ -147,6 +163,11 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("true * true"));
             Assert.AreEqual(20, TestUtils.Evaluate("'10' * 2"));
             Assert.AreEqual(0, TestUtils.Evaluate("'10' * null"));
+
+            // Objects
+            Assert.AreEqual(30, TestUtils.Evaluate("new Number(5) * new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("'test' * new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Number(5) * 'test'"));
 
             // Variables
             Assert.AreEqual(300, TestUtils.Evaluate("x = 15; x * 20"));
@@ -170,6 +191,11 @@ namespace UnitTests
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("'10' / null"));
             Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("'-10' / null"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("0 / 0"));
+
+            // Objects
+            Assert.AreEqual(2, TestUtils.Evaluate("new Number(12) / new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("'test' / new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Number(5) / 'test'"));
 
             // Variables
             Assert.AreEqual(0.75, TestUtils.Evaluate("x = 15; x / 20"));
@@ -195,6 +221,11 @@ namespace UnitTests
             Assert.AreEqual(-2.2, (double)TestUtils.Evaluate("-17.2 % 5"), 0.00000000000001);
             Assert.AreEqual(-2.8, (double)TestUtils.Evaluate("-17.8 % 5"), 0.00000000000001);
 
+            // Objects
+            Assert.AreEqual(1, TestUtils.Evaluate("new Number(7) % new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("'test' % new Number(6)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Number(5) % 'test'"));
+
             // Variables
             Assert.AreEqual(2, TestUtils.Evaluate("x = 17; x % 5"));
             Assert.AreEqual(2, TestUtils.Evaluate("x = -5; 17 % x"));
@@ -215,6 +246,11 @@ namespace UnitTests
             Assert.AreEqual(20, TestUtils.Evaluate("10 << 1.8"));
             Assert.AreEqual(16, TestUtils.Evaluate("4294967304 << 1"));
             Assert.AreEqual(0, TestUtils.Evaluate("8 << -2"));
+
+            // Objects
+            Assert.AreEqual(448, TestUtils.Evaluate("new Number(7) << new Number(6)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("'test' << new Number(6)"));
+            Assert.AreEqual(5, TestUtils.Evaluate("new Number(5) << 'test'"));
 
             // Variables
             Assert.AreEqual(40, TestUtils.Evaluate("x = 10; x << 2"));
@@ -240,6 +276,11 @@ namespace UnitTests
             Assert.AreEqual(-2147483638, TestUtils.Evaluate("2147483658 >> 0"));
             Assert.AreEqual(-2147483637, TestUtils.Evaluate("6442450955 >> 0"));
 
+            // Objects
+            Assert.AreEqual(3, TestUtils.Evaluate("new Number(7) >> new Number(1)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("'test' >> new Number(6)"));
+            Assert.AreEqual(5, TestUtils.Evaluate("new Number(5) >> 'test'"));
+
             // Variables
             Assert.AreEqual(2, TestUtils.Evaluate("x = 10; x >> 2"));
             Assert.AreEqual(-25, TestUtils.Evaluate("x = 2; -100 >> x"));
@@ -263,6 +304,11 @@ namespace UnitTests
             Assert.AreEqual(32, TestUtils.Evaluate("17179869216 >>> 0"));
             Assert.AreEqual(2147483658.0, TestUtils.Evaluate("2147483658 >>> 0"));
             Assert.AreEqual(2147483659.0, TestUtils.Evaluate("6442450955 >>> 0"));
+
+            // Objects
+            Assert.AreEqual(3, TestUtils.Evaluate("new Number(7) >>> new Number(1)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("'test' >>> new Number(6)"));
+            Assert.AreEqual(5, TestUtils.Evaluate("new Number(5) >>> 'test'"));
 
             // Variables
             Assert.AreEqual(2, TestUtils.Evaluate("x = 10; x >>> 2"));
@@ -330,6 +376,8 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x == 10"));
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x.valueOf() == 10"));
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); 10 == x.valueOf()"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10); x == new Number(10)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10); x == x"));
 
             // Arrays
             Assert.AreEqual(true, TestUtils.Evaluate("2 == [2]"));
@@ -366,6 +414,13 @@ namespace UnitTests
 
             // NaN
             Assert.AreEqual(true, TestUtils.Evaluate("NaN != NaN"));
+
+            // Variables
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10.0); x != 10"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10.0); x.valueOf() != 10"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10.0); 10 != x.valueOf()"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10); x != new Number(10)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10); x != x"));
         }
 
         [TestMethod]
@@ -404,6 +459,8 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10.0); x === 10"));
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x.valueOf() === 10"));
             Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); 10 === x.valueOf()"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10); x === new Number(10)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10); x === x"));
         }
 
         [TestMethod]
@@ -436,6 +493,13 @@ namespace UnitTests
 
             // NaN
             Assert.AreEqual(true, TestUtils.Evaluate("NaN !== NaN"));
+
+            // Variables
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10.0); x !== 10"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10.0); x.valueOf() !== 10"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10.0); 10 !== x.valueOf()"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = new Number(10); x !== new Number(10)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new Number(10); x !== x"));
         }
 
         [TestMethod]
@@ -556,23 +620,39 @@ namespace UnitTests
         [TestMethod]
         public void BitwiseXor()
         {
+            // Constants
             Assert.AreEqual(12, TestUtils.Evaluate("11 ^ 7"));
             Assert.AreEqual(-14, TestUtils.Evaluate("11 ^ -7"));
             Assert.AreEqual(247, TestUtils.Evaluate("4294967304 ^ 255"));
             Assert.AreEqual(10, TestUtils.Evaluate("11.5 ^ 1.5"));
             Assert.AreEqual(3, TestUtils.Evaluate("'5' ^ '6'"));
             Assert.AreEqual(1, TestUtils.Evaluate("'a' ^ 1"));
+
+            // Variables
+            Assert.AreEqual(12, TestUtils.Evaluate("x = 11; x ^ 7"));
+            Assert.AreEqual(-14, TestUtils.Evaluate("x = 11; x ^ -7"));
+            Assert.AreEqual(247, TestUtils.Evaluate("x = 4294967304; x ^ 255"));
+            Assert.AreEqual(1797692751, TestUtils.Evaluate("x = 42949673042; x ^ -401929233123"));
+            Assert.AreEqual(10, TestUtils.Evaluate("x = 11.5; x ^ 1.5"));
         }
 
         [TestMethod]
         public void BitwiseOr()
         {
-            //Assert.AreEqual(15, TestUtils.Evaluate("11 | 7"));
-            //Assert.AreEqual(-5, TestUtils.Evaluate("11 | -7"));
+            Assert.AreEqual(15, TestUtils.Evaluate("11 | 7"));
+            Assert.AreEqual(-5, TestUtils.Evaluate("11 | -7"));
             Assert.AreEqual(255, TestUtils.Evaluate("8 | 255"));
             Assert.AreEqual(11, TestUtils.Evaluate("11.5 | 1.5"));
             Assert.AreEqual(7, TestUtils.Evaluate("'5' | '6'"));
             Assert.AreEqual(1, TestUtils.Evaluate("'a' | 1"));
+
+            // Variables
+            Assert.AreEqual(15, TestUtils.Evaluate("x = 11; x | 7"));
+            Assert.AreEqual(-5, TestUtils.Evaluate("x = -7; 11 | x"));
+            Assert.AreEqual(255, TestUtils.Evaluate("x = 8; x | 255"));
+            Assert.AreEqual(11, TestUtils.Evaluate("x = 1.5; 11.5 | x"));
+            Assert.AreEqual(7, TestUtils.Evaluate("x = '5'; y = '6'; x | y"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = 1; 'a' | x"));
         }
 
         [TestMethod]
@@ -593,6 +673,13 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("11 && true"));
             Assert.AreEqual(11, TestUtils.Evaluate("true && 11"));
             Assert.AreEqual(false, TestUtils.Evaluate("false && 11"));
+
+            // Variables.
+            Assert.AreEqual(false, TestUtils.Evaluate("x = false; x && false"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = true; false && x"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = true; y = false; x && y"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = true; y = true; x && y"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x = false; y = 11; x && y"));
         }
 
         [TestMethod]
@@ -613,6 +700,13 @@ namespace UnitTests
             Assert.AreEqual(11, TestUtils.Evaluate("11 || true"));
             Assert.AreEqual(true, TestUtils.Evaluate("true || 11"));
             Assert.AreEqual(11, TestUtils.Evaluate("false || 11"));
+
+            // Variables.
+            Assert.AreEqual(false, TestUtils.Evaluate("x = false; x || false"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = true; false || x"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = true; y = false; x || y"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = true; y = true; x || y"));
+            Assert.AreEqual(11, TestUtils.Evaluate("x = false; y = 11; x || y"));
         }
 
         [TestMethod]
@@ -622,7 +716,7 @@ namespace UnitTests
             Assert.AreEqual("aliens", TestUtils.Evaluate("1, 'aliens'"));
             Assert.AreEqual(true, TestUtils.Evaluate("'go', true"));
             Assert.AreEqual(3, TestUtils.Evaluate("1, 2, 3"));
-            Assert.AreEqual(2, TestUtils.Evaluate("var x, y, z = 2; x, y, z"));
+            Assert.AreEqual(3, TestUtils.Evaluate("var x = 1, y = 2, z = 3; x, y, z"));
             Assert.AreEqual(3, TestUtils.Evaluate("var x = [1, 2, 3]; x[0], x[1], x[2]"));
         }
 
@@ -644,7 +738,7 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("x = 5; x = 0 ? 1 : 2"));
             Assert.AreEqual(2, TestUtils.Evaluate("x = 5; x, 0 ? 1 : 2"));
 
-            //// Test the precedence in the middle of the conditional.
+            // Test the precedence in the middle of the conditional.
             Assert.AreEqual(1, TestUtils.Evaluate("x = 5; true ? x = 1 : 2"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = 5; true ? 1, x : 2"));
 
@@ -652,6 +746,10 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("x = 4; true ? 1 : x = 2"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = 4; true ? 1 : x += 2"));
             Assert.AreEqual(2, TestUtils.Evaluate("x = 3; true ? 1 : x, 2"));
+
+            // Variables
+            Assert.AreEqual(2, TestUtils.Evaluate("var x = 1, y = 2, z = 3; x ? y : z"));
+            Assert.AreEqual(3, TestUtils.Evaluate("var x = 0, y = 2, z = 3; x ? y : z"));
         }
 
         [TestMethod]
@@ -862,6 +960,7 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("'toString' in new Number(5)"));
             Assert.AreEqual(false, TestUtils.Evaluate("'abcdefgh' in new Number(5)"));
             Assert.AreEqual(true, TestUtils.Evaluate("'toString' in new String()"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = 'atan2', y = Math; x in y"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'toString' in 5"));
         }
 
@@ -1030,6 +1129,8 @@ namespace UnitTests
             Assert.AreEqual("object", TestUtils.Evaluate("typeof {}"));
             Assert.AreEqual("object", TestUtils.Evaluate("typeof []"));
             Assert.AreEqual("function", TestUtils.Evaluate("typeof Math.toString"));
+            Assert.AreEqual("number", TestUtils.Evaluate("x = 1.5; typeof x"));
+            Assert.AreEqual("string", TestUtils.Evaluate("x = 'hello'; typeof x"));
             Assert.AreEqual("number", TestUtils.Evaluate("x = 5; (function() { return typeof(x) })()"));
         }
 
@@ -1170,6 +1271,7 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f() { } f()"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f() { return } f()"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("return 5"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("eval('return 5')"));
         }
 
         [TestMethod]
@@ -1322,6 +1424,8 @@ namespace UnitTests
         [TestMethod]
         public void DivisionAmbiguity()
         {
+            // Division and regular expressions are ambiguous in the lexical grammar.  The parser
+            // is required to resolve the ambiguity.
             Assert.AreEqual("/abc/", TestUtils.Evaluate("/abc/.toString()"));
             Assert.AreEqual(3, TestUtils.Evaluate("abc = 2; 6/abc"));
             Assert.AreEqual("/abc/", TestUtils.Evaluate("if (true) /abc/.toString()"));
