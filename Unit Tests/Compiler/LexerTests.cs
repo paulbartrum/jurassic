@@ -66,6 +66,7 @@ namespace UnitTests
             Assert.AreEqual(0.5, TestUtils.Evaluate(".5"));
             Assert.AreEqual(50, TestUtils.Evaluate(".5e2"));
             Assert.AreEqual(5, TestUtils.Evaluate("5."));
+            Assert.AreEqual(244837814094590, TestUtils.Evaluate("0xdeadbeefcafe"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5.e"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5e"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5e+"));

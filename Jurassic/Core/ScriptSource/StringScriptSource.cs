@@ -9,16 +9,28 @@ namespace Jurassic
     public class StringScriptSource : ScriptSource
     {
         private string code;
+        private string path;
 
         /// <summary>
         /// Creates a new StringScriptSource instance.
         /// </summary>
         /// <param name="code"> The script code. </param>
         public StringScriptSource(string code)
+            : this(code, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new StringScriptSource instance.
+        /// </summary>
+        /// <param name="code"> The script code. </param>
+        /// <param name="path"> The path of the file the script code was retrieved from. </param>
+        public StringScriptSource(string code, string path)
         {
             if (code == null)
                 throw new ArgumentNullException("code");
             this.code = code;
+            this.path = path;
         }
 
         /// <summary>
@@ -27,7 +39,7 @@ namespace Jurassic
         /// </summary>
         public override string Path
         {
-            get { return null; }
+            get { return this.path; }
         }
 
         /// <summary>
