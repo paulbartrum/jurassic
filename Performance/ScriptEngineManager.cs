@@ -58,6 +58,11 @@ namespace Performance
         {
             // Initialize the script engine.
             var engine = new ScriptEngine();
+
+#if DEBUG
+            engine.EnableDebugging = true;
+#endif
+
             engine.OptimizationStarted += (sender, e) => { parseTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
             engine.CodeGenerationStarted += (sender, e) => { optimizationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
             engine.ExecutionStarted += (sender, e) => { codeGenerationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
@@ -89,7 +94,7 @@ namespace Performance
 
             // Execute the javascript code.
             timer = System.Diagnostics.Stopwatch.StartNew();
-            this.ScriptEngine.Execute(new Jurassic.StringScriptSource(script));
+            this.ScriptEngine.Execute(new Jurassic.StringScriptSource(script, scriptPath));
             double runTime = timer.Elapsed.TotalMilliseconds;
 
             string infoString = string.Format("{0:n1}ms (parse: {1:n1}ms, compile: {2:n1}ms, optimize: {3:n1}ms, runtime: {4:n1}ms)",

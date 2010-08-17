@@ -1133,14 +1133,11 @@ namespace Jurassic.Compiler
         /// <returns> A statement representing the function. </returns>
         private Statement ParseFunctionDeclaration()
         {
-            // Keep track of the start of the statement so that source debugging works correctly.
-            var start = this.PositionAfterWhitespace;
-
             // Parse the function declaration.
             var expression = ParseFunction(FunctionType.Declaration);
 
             // Add the function to the scope.
-            this.currentScope.DeclareFunction(expression.Context.Name, expression, new SourceCodeSpan(start, this.PositionBeforeWhitespace));
+            this.currentScope.DeclareFunction(expression.Context.Name, expression, null);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
