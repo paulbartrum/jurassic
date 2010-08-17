@@ -156,7 +156,42 @@ namespace Performance
         public void IETestCenter_Object()
         {
             RunTests(@"chapter15\15.2",
-                "15.2.3.3-4-188"    // assumes Function.prototype.name does not exist - 
+                "15.2.3.3-4-188",   // assumes Function.prototype.name does not exist - http://es5conform.codeplex.com/workitem/28594
+                "15.2.3.4-4-1",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-2",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-3",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-4",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-5",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-6",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-7",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-8",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-9",     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-10",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-11",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-12",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-13",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-14",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-15",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-16",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-17",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-18",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-19",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-20",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-21",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-22",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-23",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-24",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-25",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-26",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-27",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-28",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-29",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-30",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-31",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-32",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-33",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-34",    // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
+                "15.2.3.4-4-35"     // assumes fixed list of properties on global object - http://es5conform.codeplex.com/workitem/28595
                 );
         }
 
