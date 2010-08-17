@@ -160,6 +160,9 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("e = eval; a = 1; (function() { var a = 5; return e('a'); })()"));
             Assert.AreEqual(3, TestUtils.Evaluate("e = eval; a = 3; b = 2; (function() { var a = 5; e('var b = a'); return b; })()"));
             Assert.AreEqual(3, TestUtils.Evaluate("e = eval; a = 3; b = 2; (function() { var a = 5; e('var b = a'); })(); b"));
+
+            // Strict mode: eval has it's own scope.
+            Assert.AreEqual("undefined", TestUtils.Evaluate("'use strict'; eval('var a = false'); typeof a"));
         }
 
         [TestMethod]

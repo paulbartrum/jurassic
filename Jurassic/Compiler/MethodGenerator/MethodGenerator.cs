@@ -169,6 +169,10 @@ namespace Jurassic.Compiler
                 Optimize();
             }
 
+            // Initialize global code-gen information.
+            var optimizationInfo = new OptimizationInfo(this.Engine);
+            optimizationInfo.StrictMode = this.StrictMode;
+
             if (this.Options.EnableDebugging == false)
             {
                 // Create a new dynamic method.
@@ -181,7 +185,7 @@ namespace Jurassic.Compiler
 
                 // Generate the IL.
                 var generator = new DynamicILGenerator(dynamicMethod);
-                GenerateCode(generator, new OptimizationInfo(this.Engine));
+                GenerateCode(generator, optimizationInfo);
                 generator.Complete();
 
                 // Create a delegate from the method.
@@ -204,9 +208,11 @@ namespace Jurassic.Compiler
                     // Mark the assembly as debuggable.  This must be done before the module is created.
                     var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetConstructor(
                         new Type[] { typeof(System.Diagnostics.DebuggableAttribute.DebuggingModes) });
-                    reflectionEmitInfo.AssemblyBuilder.SetCustomAttribute(new System.Reflection.Emit.CustomAttributeBuilder(debuggableAttributeConstructor, new object[] { 
-                System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations | 
-                System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
+                    reflectionEmitInfo.AssemblyBuilder.SetCustomAttribute(
+                        new System.Reflection.Emit.CustomAttributeBuilder(debuggableAttributeConstructor,
+                            new object[] { 
+                                System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations | 
+                                System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
                     // Create a dynamic module.
                     reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", System.IO.Path.GetFileName(filePath), true);
@@ -225,8 +231,6 @@ namespace Jurassic.Compiler
 
                 // Generate the IL for the method.
                 var generator = new ReflectionEmitILGenerator(methodBuilder);
-                var optimizationInfo = new OptimizationInfo(this.Engine);
-                optimizationInfo.StrictMode = this.StrictMode;
                 if (this.Source.Path != null)
                     optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, COMHelpers.LanguageType, COMHelpers.LanguageVendor, COMHelpers.DocumentType);
                 GenerateCode(generator, optimizationInfo);
