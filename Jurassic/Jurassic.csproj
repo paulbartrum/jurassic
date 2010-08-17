@@ -55,7 +55,7 @@
     <Compile Include="Compiler\MethodGenerator\FunctionMethodGenerator.cs" />
     <Compile Include="Compiler\MethodGenerator\GlobalMethodGenerator.cs" />
     <Compile Include="Compiler\MethodGenerator\MethodGenerator.cs" />
-    <Compile Include="Compiler\Emit\FunctionOptimizationInfo.cs" />
+    <Compile Include="Compiler\Emit\MethodOptimizationHints.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ILGenerator.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ReflectionEmitILGenerator.cs" />
     <Compile Include="Compiler\Emit\ILReader\DynamicILInfoTokenResolver.cs" />

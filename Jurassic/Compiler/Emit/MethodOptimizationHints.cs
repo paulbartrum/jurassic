@@ -5,9 +5,9 @@ namespace Jurassic.Compiler
 {
 
     /// <summary>
-    /// Represents information useful for optimizing a function.
+    /// Represents information useful for optimizing a method.
     /// </summary>
-    internal class FunctionOptimizationInfo
+    internal class MethodOptimizationHints
     {
         /// <summary>
         /// Gets a value that indicates whether the function being generated contains an eval

@@ -46,12 +46,26 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Parses the source text into an abstract syntax tree.
+        /// </summary>
+        public override void Parse()
+        {
+            var lexer = new Lexer(this.Engine, this.Source);
+            var parser = new Parser(this.Engine, lexer, this.InitialScope, false, this.Options);
+            this.AbstractSyntaxTree = parser.Parse();
+            this.StrictMode = parser.StrictMode;
+        }
+
+        /// <summary>
         /// Generates IL for the script.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Verify the scope is correct.
+            VerifyScope(generator);
+
             // Initialize any function or variable declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 

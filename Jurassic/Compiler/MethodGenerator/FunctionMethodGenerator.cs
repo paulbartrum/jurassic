@@ -105,7 +105,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets function optimization information.
         /// </summary>
-        public FunctionOptimizationInfo Optimizations
+        public MethodOptimizationHints Optimizations
         {
             get;
             set;
@@ -150,7 +150,11 @@ namespace Jurassic.Compiler
                 this.AbstractSyntaxTree = this.BodyRoot;
                 return;
             }
-            base.Parse();
+
+            var lexer = new Lexer(this.Engine, this.Source);
+            var parser = new Parser(this.Engine, lexer, this.InitialScope, true, this.Options);
+            this.AbstractSyntaxTree = parser.Parse();
+            this.StrictMode = parser.StrictMode;
         }
 
         /// <summary>
@@ -177,6 +181,9 @@ namespace Jurassic.Compiler
 
             // Create a new scope.
             this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
+            
+            // Verify the scope is correct.
+            VerifyScope(generator);
 
             // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
             if (this.StrictMode == false)

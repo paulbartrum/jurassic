@@ -16,24 +16,9 @@ namespace Jurassic.Compiler
         /// <param name="options"> Options that influence the compiler. </param>
         /// <param name="thisObject"> The value of the "this" keyword in the calling code. </param>
         public EvalMethodGenerator(ScriptEngine engine, Scope parentScope, ScriptSource source, CompilerOptions options, object thisObject)
-            : base(engine, GetScope(parentScope, options.ForceStrictMode), source, options)
+            : base(engine, parentScope, source, options)
         {
             this.ThisObject = thisObject;
-        }
-
-        /// <summary>
-        /// Gets the scope to use.  This is the same as the parent scope when
-        /// <paramref name="strictMode"/> is <c>false</c>, or a new declarative scope if
-        /// <paramref name="strictMode"/> is <c>true</c>.
-        /// </summary>
-        /// <param name="parentScope"> The scope of the calling code. </param>
-        /// <param name="strictMode"> The state of the strict mode flag. </param>
-        /// <returns> The scope to use inside the eval statement. </returns>
-        private static Scope GetScope(Scope parentScope, bool strictMode)
-        {
-            if (strictMode == false)
-                return parentScope;
-            return DeclarativeScope.CreateEvalScope(parentScope);
         }
 
         /// <summary>
@@ -55,6 +40,27 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Parses the source text into an abstract syntax tree.
+        /// </summary>
+        public override void Parse()
+        {
+            var lexer = new Lexer(this.Engine, this.Source);
+            var parser = new Parser(this.Engine, lexer, this.InitialScope, false, this.Options);
+
+            // If the eval() is running strict mode, create a new scope.
+            parser.DirectivePrologueProcessedCallback = parser2 =>
+            {
+                if (parser2.StrictMode == true)
+                    parser2.Scope = DeclarativeScope.CreateEvalScope(parser2.Scope);
+            };
+
+            this.AbstractSyntaxTree = parser.Parse();
+
+            this.StrictMode = parser.StrictMode;
+            this.InitialScope = parser.Scope;
+        }
+
+        /// <summary>
         /// Generates IL for the script.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
@@ -69,6 +75,9 @@ namespace Jurassic.Compiler
                 // Create a new scope.
                 this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
             }
+
+            // Verify the scope is correct.
+            VerifyScope(generator);
 
             // Initialize any declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
@@ -98,8 +107,13 @@ namespace Jurassic.Compiler
             if (this.GeneratedMethod == null)
                 GenerateCode();
 
+            // Strict mode creates a new scope so pass the parent scope in this case.
+            var scope = this.InitialScope;
+            if (this.StrictMode == true)
+                scope = scope.ParentScope;
+
             // Execute the compiled delegate and return the result.
-            return ((Func<ScriptEngine, Scope, object, object>)this.CompiledDelegate)(this.Engine, this.InitialScope, this.ThisObject);
+            return ((Func<ScriptEngine, Scope, object, object>)this.CompiledDelegate)(this.Engine, scope, this.ThisObject);
         }
     }
 
