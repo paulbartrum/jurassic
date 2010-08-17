@@ -487,6 +487,7 @@ namespace UnitTests
             Assert.AreEqual("a", TestUtils.Evaluate("Object.keys({a: 1}).toString()"));
             Assert.AreEqual("0,1,2", TestUtils.Evaluate("Object.keys([1, 2, 3]).toString()"));
             Assert.AreEqual("0,1,2", TestUtils.Evaluate("Object.keys(new String('sdf')).toString()"));
+            Assert.AreEqual("0,1,2", TestUtils.Evaluate("function foo() { return Object.keys(arguments) } foo(1, 2, 3).toString()"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Object.keys.length"));

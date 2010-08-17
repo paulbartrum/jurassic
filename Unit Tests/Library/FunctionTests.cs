@@ -203,8 +203,8 @@ namespace UnitTests
             Assert.AreEqual(5, TestUtils.Evaluate("(function(arguments) { return arguments; })(5)"));
 
             // The argument array indices are enumerable.
-            Assert.AreEqual("+10", TestUtils.Evaluate("(function(a, b, c) { var str = '+'; for (var key in arguments) str += key; return str; })(1, 2)"));
-            Assert.AreEqual("+102", TestUtils.Evaluate("(function(a, b, c) { arguments[1] = 3; arguments[2] = 4; var str = '+'; for (var key in arguments) str += key; return str; })(1, 2)"));
+            Assert.AreEqual("01", TestUtils.Evaluate("(function(a, b, c) { var str = ''; for (var key in arguments) str += key; return str; })(1, 2)"));
+            Assert.AreEqual("012", TestUtils.Evaluate("(function(a, b, c) { arguments[1] = 3; arguments[2] = 4; var str = ''; for (var key in arguments) str += key; return str; })(1, 2)"));
         }
 
         [TestMethod]
