@@ -65,8 +65,10 @@
     <Compile Include="Library\DateTests.cs" />
     <Compile Include="Library\ErrorTests.cs" />
     <Compile Include="Library\NumberTests.cs" />
-    <Compile Include="Parser\ParserTests.cs" />
-    <Compile Include="Parser\LexerTests.cs" />
+    <Compile Include="Compiler\StatementTests.cs" />
+    <Compile Include="Compiler\ExpressionTests.cs" />
+    <Compile Include="Compiler\ParserTests.cs" />
+    <Compile Include="Compiler\LexerTests.cs" />
     <Compile Include="Utils\DynamicCodeDebugger.cs" />
     <Compile Include="Utils\TestUtils.cs" />
     <Compile Include="Utils\Interop.cs" />

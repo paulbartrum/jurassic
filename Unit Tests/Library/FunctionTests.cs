@@ -222,6 +222,15 @@ namespace UnitTests
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; (function(a, b, c) { arguments.callee = 5 })(1, 2, 3)"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; (function(a, b, c) { return arguments.caller })(1, 2, 3)"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; (function(a, b, c) { arguments.caller = 5 })(1, 2, 3)"));
+
+            // Arguments cannot be redefined.
+            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg) { arguments = 5; })()"));
+
+            // Arguments and caller don't exist outside the function.
+            Assert.AreEqual("undefined", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(test.arguments); } return inner(); } test()"));
+            Assert.AreEqual("undefined", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(inner.caller); } return inner(); } test()"));
+            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ test.arguments = 5; } return inner(); } test()"));
+            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ inner.caller = 5; } return inner(); } test()"));
         }
 
         [TestMethod]
