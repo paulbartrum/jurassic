@@ -155,7 +155,9 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Object()
         {
-            RunTests(@"chapter15\15.2");
+            RunTests(@"chapter15\15.2",
+                "15.2.3.3-4-188"    // assumes Function.prototype.name does not exist - 
+                );
         }
 
         [TestMethod]

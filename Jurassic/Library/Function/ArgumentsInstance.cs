@@ -43,22 +43,39 @@ namespace Jurassic.Library
             // Create an array mappedArguments where mappedArguments[i] = true means a mapping is
             // maintained between arguments[i] and the corresponding variable.
             this.mappedArguments = new bool[argumentValues.Length];
-            var mappedNames = new HashSet<string>();
-            for (int i = argumentValues.Length - 1; i >= 0; i--)
+            var mappedNames = new Dictionary<string, int>();    // maps argument name -> index
+            for (int i = 0; i < argumentValues.Length; i ++)
             {
-                this[(uint)i] = argumentValues[i];    // Note: this.mappedArguments[i] is currently false.
                 if (i < callee.ArgumentNames.Count)
                 {
-                    // The argument name is mapped if it hasn't been seen before.
-                    this.mappedArguments[i] = mappedNames.Add(callee.ArgumentNames[i]);
-                    if (this.mappedArguments[i] == true)
+                    // Check if the argument name appeared previously in the argument list.
+                    int previousIndex;
+                    if (mappedNames.TryGetValue(callee.ArgumentNames[i], out previousIndex) == true)
                     {
-                        var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter);
-                        getter.SetPropertyValue("argumentIndex", i, false);
-                        var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter);
-                        setter.SetPropertyValue("argumentIndex", i, false);
-                        this.DefineProperty(i.ToString(), new PropertyDescriptor(getter, setter, PropertyAttributes.FullAccess), false);
+                        // The argument name has appeared before.  Remove the getter/setter.
+                        this.DefineProperty(previousIndex.ToString(), new PropertyDescriptor(argumentValues[previousIndex], PropertyAttributes.FullAccess), false);
+
+                        // The argument is no longer mapped.
+                        this.mappedArguments[previousIndex] = false;
                     }
+
+                    // Add the argument name and index to the hashtable.
+                    mappedNames[callee.ArgumentNames[i]] = i;
+
+                    // The argument is mapped by default.
+                    this.mappedArguments[i] = true;
+
+                    // Define a getter and setter so that the property value reflects that of the argument.
+                    var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter);
+                    getter.SetPropertyValue("argumentIndex", i, false);
+                    var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter);
+                    setter.SetPropertyValue("argumentIndex", i, false);
+                    this.DefineProperty(i.ToString(), new PropertyDescriptor(getter, setter, PropertyAttributes.FullAccess), false);
+                }
+                else
+                {
+                    // This argument is unnamed - no mapping needs to happen.
+                    this[(uint)i] = argumentValues[i];
                 }
             }
 
