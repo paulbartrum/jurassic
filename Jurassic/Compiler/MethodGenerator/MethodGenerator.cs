@@ -50,12 +50,21 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets the source of javascript code.
+        /// </summary>
+        public ScriptSource Source
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Gets a value that indicates whether strict mode is enabled.
         /// </summary>
         public bool StrictMode
         {
             get;
-            private set;
+            protected set;
         }
 
         /// <summary>
@@ -64,16 +73,7 @@ namespace Jurassic.Compiler
         public Scope InitialScope
         {
             get;
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the source of javascript code.
-        /// </summary>
-        public ScriptSource Source
-        {
-            get;
-            private set;
+            protected set;
         }
 
         /// <summary>
@@ -138,13 +138,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Parses the source text into an abstract syntax tree.
         /// </summary>
-        public virtual void Parse()
-        {
-            var lexer = new Lexer(this.Engine, this.Source);
-            var parser = new Parser(this.Engine, lexer, this.InitialScope, this is FunctionMethodGenerator, this.Options);
-            this.AbstractSyntaxTree = parser.Parse();
-            this.StrictMode = parser.StrictMode;
-        }
+        public abstract void Parse();
 
         /// <summary>
         /// Optimizes the abstract syntax tree.
@@ -283,6 +277,49 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected abstract void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo);
+
+        /// <summary>
+        /// Verifies the scope has the same structure at runtime as at compile time.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        [System.Diagnostics.Conditional("DEBUG")]
+        protected void VerifyScope(ILGenerator generator)
+        {
+            // Get the top-level scope.
+            EmitHelpers.LoadScope(generator);
+            var scope = this.InitialScope;
+
+            while (scope != null)
+            {
+                // if (scope == null)
+                //   throw new JavaScriptException()
+                generator.Duplicate();
+                var endOfIf1 = generator.CreateLabel();
+                generator.BranchIfNotNull(endOfIf1);
+                EmitHelpers.EmitThrow(generator, "EvalError", "Internal error: runtime scope chain is too short");
+                generator.DefineLabelPosition(endOfIf1);
+
+                // if ((scope is DeclarativeScope/ObjectScope) == false)
+                //   throw new JavaScriptException()
+                generator.IsInstance(scope.GetType());
+                generator.Duplicate();
+                var endOfIf2 = generator.CreateLabel();
+                generator.BranchIfNotNull(endOfIf2);
+                EmitHelpers.EmitThrow(generator, "EvalError", "Internal error: incorrect runtime scope type");
+                generator.DefineLabelPosition(endOfIf2);
+
+                // scope = scope.ParentScope
+                generator.Call(ReflectionHelpers.Scope_ParentScope);
+                scope = scope.ParentScope;
+            }
+
+            // if (scope != null)
+            //   throw new JavaScriptException()
+            var endOfIf3 = generator.CreateLabel();
+            generator.BranchIfNull(endOfIf3);
+            EmitHelpers.EmitThrow(generator, "EvalError", "Internal error: runtime scope chain is too long");
+            generator.DefineLabelPosition(endOfIf3);
+        }
 
         /// <summary>
         /// Retrieves a delegate for the generated method.

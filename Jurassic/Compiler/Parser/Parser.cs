@@ -17,10 +17,11 @@ namespace Jurassic.Compiler
         private bool consumedLineTerminator;
         private ExpressionState expressionState;
         private Scope currentScope;
-        private Stack<FunctionOptimizationInfo> functionOptimizations;
+        private MethodOptimizationHints methodOptimizationHints;
         private List<string> labelsForCurrentStatement = new List<string>();
-        private bool startedInsideFunction;
+        private Token endToken;
         private CompilerOptions options;
+        private bool insideFunction;
 
 
 
@@ -33,7 +34,7 @@ namespace Jurassic.Compiler
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="lexer"> The lexical analyser that provides the tokens. </param>
         /// <param name="initialScope"> The initial variable scope. </param>
-        /// <param name="insideFunction"> <c>true</c> if the code to parse is inside a function. </param>
+        /// <param name="insideFunction"> <c>true</c> if the code is a method body. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         public Parser(ScriptEngine engine, Lexer lexer, Scope initialScope, bool insideFunction, CompilerOptions options)
         {
@@ -47,12 +48,29 @@ namespace Jurassic.Compiler
             this.lexer = lexer;
             this.lexer.ExpressionStateCallback = () => this.expressionState;
             this.currentScope = initialScope;
-            this.functionOptimizations = new Stack<FunctionOptimizationInfo>();
-            this.startedInsideFunction = insideFunction;
-            if (insideFunction == true)
-                this.functionOptimizations.Push(new FunctionOptimizationInfo());
+            this.methodOptimizationHints = new MethodOptimizationHints();
+            this.insideFunction = insideFunction;
             this.options = options;
+            this.StrictMode = options.ForceStrictMode;
             this.Consume();
+        }
+
+        /// <summary>
+        /// Creates a parser that can read the body of a function.
+        /// </summary>
+        /// <param name="parser"> The parser for the parent context. </param>
+        /// <param name="scope"> The function scope. </param>
+        /// <returns> A new parser. </returns>
+        private static Parser CreateFunctionBodyParser(Parser parser, Scope scope)
+        {
+            var result = (Parser)parser.MemberwiseClone();
+            result.lexer.ExpressionStateCallback = () => result.expressionState;
+            result.currentScope = scope;
+            result.methodOptimizationHints = new MethodOptimizationHints();
+            result.insideFunction = true;
+            result.endToken = PunctuatorToken.RightBrace;
+            result.DirectivePrologueProcessedCallback = null;
+            return result;
         }
 
 
@@ -93,6 +111,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets or sets the scope that variables are declared in.
+        /// </summary>
+        public Scope Scope
+        {
+            get { return this.currentScope; }
+            set { this.currentScope = value; }
+        }
+
+        /// <summary>
         /// Gets or sets a value that indicates whether the parser is operating in strict mode.
         /// </summary>
         public bool StrictMode
@@ -102,10 +129,10 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets or sets a value that indicates whether the javascript source can be debugged.
-        /// Setting this to <c>true</c> disables optimizations and negatively impacts memory usage.
+        /// Gets or sets a callback that is called after the directive prologue has been processed.
+        /// This callback will be called even if no directive prologue exists.
         /// </summary>
-        public bool EnableDebugging
+        public Action<Parser> DirectivePrologueProcessedCallback
         {
             get;
             set;
@@ -247,23 +274,16 @@ namespace Jurassic.Compiler
             var result = new BlockStatement(new string[0]);
             while (true)
             {
-                if (this.functionOptimizations.Count > (this.startedInsideFunction ? 1 : 0))
-                {
-                    // Check if we are at the end of a function.
-                    if (this.nextToken == PunctuatorToken.RightBrace)
-                        return result;
-                }
-                else
-                {
-                    // Check if we are at the end of global or eval code.
-                    if (this.nextToken == null)
-                        return result;
-                }
+                // Check if we should stop parsing.
+                if (this.nextToken == this.endToken)
+                    break;
 
                 // A directive must start with a string literal token.  Record it now so that the
                 // escape sequence and line continuation information is not lost.  (Directives
                 // cannot have escape sequences or line continuations).
                 var directiveToken = this.nextToken as StringLiteralToken;
+                if (directiveToken == null)
+                    break;
 
                 // Parse the statement - this reads past the semi-colon and any whitespace.
                 var possibleDirectiveStatement = ParseSourceStatement();
@@ -277,31 +297,25 @@ namespace Jurassic.Compiler
                     break;
                 if ((((LiteralExpression)((ExpressionStatement)possibleDirectiveStatement).Expression).Value is string) == false)
                     break;
-                if (directiveToken == null)
-                    break;
                 if (directiveToken.Value == "use strict" && directiveToken.EscapeSequenceCount == 0 && directiveToken.LineContinuationCount == 0)
                     this.StrictMode = true;
             }
 
+            // Call the directive prologue callback.
+            if (this.DirectivePrologueProcessedCallback != null)
+                this.DirectivePrologueProcessedCallback(this);
+
             // Read zero or more regular statements.
             while (true)
             {
-                if (this.functionOptimizations.Count > (this.startedInsideFunction ? 1 : 0))
-                {
-                    // Check if we are at the end of a function.
-                    if (this.nextToken == PunctuatorToken.RightBrace)
-                        break;
-                }
-                else
-                {
-                    // Check if we are at the end of global or eval code.
-                    if (this.nextToken == null)
-                        break;
-                }
+                // Check if we should stop parsing.
+                if (this.nextToken == this.endToken)
+                    break;
 
                 // Parse a single statement.
                 result.Statements.Add(ParseSourceStatement());
             }
+
             return result;
         }
 
@@ -850,7 +864,7 @@ namespace Jurassic.Compiler
         /// <returns> A return statement. </returns>
         private ReturnStatement ParseReturn()
         {
-            if (this.functionOptimizations.Count == 0)
+            if (this.insideFunction == false)
                 throw new JavaScriptException(this.engine, "SyntaxError", "Return statements are only allowed inside functions");
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
@@ -1213,25 +1227,19 @@ namespace Jurassic.Compiler
             // Read the start brace.
             this.Expect(PunctuatorToken.LeftBrace);
 
-            // Create a new scope and assign variables within the with statement to the scope.
-            var scope = this.currentScope = DeclarativeScope.CreateFunctionScope(this.currentScope, functionName, argumentNames);
+            // This context has a nested function.
+            this.methodOptimizationHints.HasNestedFunction = true;
 
-            // Add function optimization info.
-            if (this.functionOptimizations.Count > 0)
-                this.functionOptimizations.Peek().HasNestedFunction = true;
-            this.functionOptimizations.Push(new FunctionOptimizationInfo());
-            var originalStrictMode = this.StrictMode;
+            // Create a new scope and assign variables within the function body to the scope.
+            var scope = DeclarativeScope.CreateFunctionScope(this.currentScope, functionName, argumentNames);
 
             // Read the function body.
-            var body = Parse();
+            var functionParser = Parser.CreateFunctionBodyParser(this, scope);
+            var body = functionParser.Parse();
 
-            // Revert any information that is specific to a single function.
-            var optimizations = this.functionOptimizations.Pop();
-            var functionStrictMode = this.StrictMode;
-            this.StrictMode = originalStrictMode;
-
-            // Revert the scope.
-            this.currentScope = this.currentScope.ParentScope;
+            // Transfer state back from the function parser.
+            this.nextToken = functionParser.nextToken;
+            this.lexer.ExpressionStateCallback = () => this.expressionState;
 
             if (functionType == FunctionType.Expression)
             {
@@ -1247,9 +1255,9 @@ namespace Jurassic.Compiler
 
             // Create a new function expression.
             var options = this.options.Clone();
-            options.ForceStrictMode = functionStrictMode;
+            options.ForceStrictMode = functionParser.StrictMode;
             var context = new FunctionMethodGenerator(this.engine, scope, functionName, argumentNames, body, this.SourcePath, options);
-            context.Optimizations = optimizations;
+            context.Optimizations = functionParser.methodOptimizationHints;
             return new FunctionExpression(context);
         }
 
@@ -1409,13 +1417,13 @@ namespace Jurassic.Compiler
                         var identifierName = ((IdentifierToken)this.nextToken).Name;
                         terminal = new NameExpression(this.currentScope, identifierName);
 
-                        // Add function optimization info.
-                        if (this.functionOptimizations.Count > 0 && (unboundOperator == null || unboundOperator.OperatorType != OperatorType.MemberAccess))
+                        // Add method optimization info.
+                        if (unboundOperator == null || unboundOperator.OperatorType != OperatorType.MemberAccess)
                         {
                             if (identifierName == "eval")
-                                this.functionOptimizations.Peek().HasEval = true;
+                                this.methodOptimizationHints.HasEval = true;
                             if (identifierName == "arguments")
-                                this.functionOptimizations.Peek().HasArguments = true;
+                                this.methodOptimizationHints.HasArguments = true;
                         }
                     }
                     else if (this.nextToken == KeywordToken.This)

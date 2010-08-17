@@ -152,7 +152,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets function optimization information.
         /// </summary>
-        public FunctionOptimizationInfo FunctionOptimizationInfo
+        public MethodOptimizationHints FunctionOptimizationInfo
         {
             get;
             set;
