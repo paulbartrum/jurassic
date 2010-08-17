@@ -35,6 +35,16 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Returns <c>true</c> if the given value is undefined.
+        /// </summary>
+        /// <param name="obj"> The object to check. </param>
+        /// <returns> <c>true</c> if the given value is undefined; <c>false</c> otherwise. </returns>
+        public static bool IsUndefined(object obj)
+        {
+            return obj == null || obj == Undefined.Value;
+        }
+
+        /// <summary>
         /// Enumerates the names of the enumerable properties on the given object, including
         /// properties defined on the object's prototype.  Used by the for-in statement.
         /// </summary>
