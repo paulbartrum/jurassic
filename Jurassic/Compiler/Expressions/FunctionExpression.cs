@@ -78,6 +78,33 @@ namespace Jurassic.Compiler
             generator.NewObject(ReflectionHelpers.UserDefinedFunction_Constructor);
         }
 
+        
+        /// <summary>
+        /// Generates CIL to set the display name of the function.  The function should be on top of the stack.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        /// <param name="displayName"> The display name of the function. </param>
+        public void GenerateDisplayName(ILGenerator generator, OptimizationInfo optimizationInfo, string displayName)
+        {
+            if (displayName == null)
+                throw new ArgumentNullException("displayName");
+
+            // We only infer names for functions if the function doesn't have a name.
+            if (string.IsNullOrEmpty(this.Context.Name))
+            {
+                // Statically set the display name.
+                this.Context.DisplayName = displayName;
+
+                // Generate code to set the display name at runtime.
+                generator.Duplicate();
+                generator.LoadString("displayName");
+                generator.LoadString(displayName);
+                generator.LoadBoolean(false);
+                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
+            }
+        }
+
         /// <summary>
         /// Converts the expression to a string.
         /// </summary>

@@ -76,6 +76,17 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets or sets the display name for the function.  This is statically inferred from the
+        /// context if the function is the target of an assignment or if the function is within an
+        /// object literal.  Only set if the function name is empty.
+        /// </summary>
+        public string DisplayName
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets a list of argument names.
         /// </summary>
         public IList<string> ArgumentNames
