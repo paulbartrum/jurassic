@@ -21,6 +21,10 @@ namespace Jurassic
         {
             x = x ?? Undefined.Value;
             y = y ?? Undefined.Value;
+            if (x is int)
+                x = (double)(int)x;
+            if (y is int)
+                y = (double)(int)y;
             if (x.GetType() == y.GetType())
             {
                 if (x is double && double.IsNaN((double)x) == true)
@@ -29,7 +33,30 @@ namespace Jurassic
             }
             if ((x == Undefined.Value && y == Null.Value) || (x == Null.Value && y == Undefined.Value))
                 return true;
-            return TypeConverter.ToNumber(x) == TypeConverter.ToNumber(y);
+
+            // 5.5 == "5.5"
+            if (TypeUtilities.IsNumeric(x) && TypeUtilities.IsString(y))
+                return TypeConverter.ToNumber(x) == TypeConverter.ToNumber(y);
+            if (TypeUtilities.IsString(x) && TypeUtilities.IsNumeric(y))
+                return TypeConverter.ToNumber(x) == TypeConverter.ToNumber(y);
+
+            // false == 0, true == 1
+            if (x is bool)
+                return Equals(TypeConverter.ToNumber(x), y);
+            if (y is bool)
+                return Equals(x, TypeConverter.ToNumber(y));
+
+            // false == new Boolean(false), 1.5 == new Number(1.5)
+            if (TypeUtilities.IsNumeric(x) && y is Jurassic.Library.ObjectInstance)
+                return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number));
+            if (TypeUtilities.IsString(x) && y is Jurassic.Library.ObjectInstance)
+                return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.String));
+            if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsNumeric(y))
+                return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number), y);
+            if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsString(x))
+                return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.String), y);
+
+            return false;
         }
 
         /// <summary>
