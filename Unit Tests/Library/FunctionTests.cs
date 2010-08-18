@@ -99,6 +99,28 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void name()
+        {
+            Assert.AreEqual("f", TestUtils.Evaluate("function f() { } f.name"));
+            Assert.AreEqual("g", TestUtils.Evaluate("f = function g() { }; f.name"));
+            Assert.AreEqual("", TestUtils.Evaluate("f = function() { }; f.name"));
+            Assert.AreEqual("f", TestUtils.Evaluate("x = { y: function f() { } }; x.y.name"));
+            Assert.AreEqual("", TestUtils.Evaluate("x = { y: function() { } }; x.y.name"));
+            Assert.AreEqual("f", TestUtils.Evaluate("x = { get f() { } }; Object.getOwnPropertyDescriptor(x, 'f').get.name"));
+        }
+
+        [TestMethod]
+        public void displayName()
+        {
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f() { } f.displayName"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("f = function g() { }; f.displayName"));
+            Assert.AreEqual("f", TestUtils.Evaluate("f = function() { }; f.displayName"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = { y: function f() { } }; x.y.displayName"));
+            Assert.AreEqual("y", TestUtils.Evaluate("x = { y: function() { } }; x.y.displayName"));
+            Assert.AreEqual("get f", TestUtils.Evaluate("x = { get f() { } }; Object.getOwnPropertyDescriptor(x, 'f').get.displayName"));
+        }
+
+        [TestMethod]
         public void toString()
         {
             Assert.AreEqual("function anonymous(a, b) {\nreturn a + b\n}", TestUtils.Evaluate("new Function('a, b', 'return a + b').toString()"));

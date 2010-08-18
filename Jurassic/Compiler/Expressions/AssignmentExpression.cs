@@ -135,7 +135,7 @@ namespace Jurassic.Compiler
 
                     // Support the inferred function displayName property.
                     if (rhs is FunctionExpression)
-                        ((FunctionExpression)rhs).GenerateDisplayName(generator, optimizationInfo, target.ToString());
+                        ((FunctionExpression)rhs).GenerateDisplayName(generator, optimizationInfo, target.ToString(), false);
                     
                     // Duplicate the value so it remains on the stack afterwards.
                     //if (optimizationInfo.SuppressReturnValue == false)

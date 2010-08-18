@@ -85,13 +85,14 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         /// <param name="displayName"> The display name of the function. </param>
-        public void GenerateDisplayName(ILGenerator generator, OptimizationInfo optimizationInfo, string displayName)
+        /// <param name="force"> <c>true</c> to set the displayName property, even if the function has a name already. </param>
+        public void GenerateDisplayName(ILGenerator generator, OptimizationInfo optimizationInfo, string displayName, bool force)
         {
             if (displayName == null)
                 throw new ArgumentNullException("displayName");
 
             // We only infer names for functions if the function doesn't have a name.
-            if (string.IsNullOrEmpty(this.Context.Name))
+            if (force == true || string.IsNullOrEmpty(this.Context.Name))
             {
                 // Statically set the display name.
                 this.Context.DisplayName = displayName;
