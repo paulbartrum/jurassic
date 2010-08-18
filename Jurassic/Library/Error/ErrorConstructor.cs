@@ -42,7 +42,7 @@ namespace Jurassic.Library
             {
                 // This constructor is for derived Error objects like RangeError, etc.
                 // Prototype chain: XXXError instance -> XXXError prototype -> Error prototype -> Object prototype
-                return new ErrorInstance(engine.Error.InstancePrototype, typeName, null, false);
+                return new ErrorInstance(engine.Error.InstancePrototype, typeName, string.Empty, false);
             }
         }
 

@@ -31,7 +31,7 @@ test: function testcase() {
   
   // 'compile' is a JScript extension
   var expResult = ["constructor", "exec", "test", "toString", "source", "global", "ignoreCase", "multiline", "lastIndex", "compile"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },

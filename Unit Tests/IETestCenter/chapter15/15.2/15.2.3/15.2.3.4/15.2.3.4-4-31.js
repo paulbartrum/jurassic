@@ -29,7 +29,7 @@ description: "Object.getOwnPropertyNames returns array of property names (RangeE
 test: function testcase() {
   var result = Object.getOwnPropertyNames(RangeError);
   var expResult = ["prototype"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },

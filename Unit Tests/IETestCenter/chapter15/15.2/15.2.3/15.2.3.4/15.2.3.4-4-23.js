@@ -34,7 +34,7 @@ test: function testcase() {
   
   var result = Object.getOwnPropertyNames(f);
   var expResult = ["length"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },

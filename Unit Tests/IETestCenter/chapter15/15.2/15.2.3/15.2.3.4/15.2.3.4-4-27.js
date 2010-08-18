@@ -32,7 +32,7 @@ test: function testcase() {
 
   var result = Object.getOwnPropertyNames(Number);
   var expResult = ["prototype", "MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY", "length"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },
