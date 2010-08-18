@@ -29,7 +29,7 @@ description: "Object.getOwnPropertyNames returns array of property names (Math)"
 test: function testcase() {
   var result = Object.getOwnPropertyNames(Math);
   var expResult = ["abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "exp", "floor", "log", "max", "min", "pow", "random", "round", "sin", "sqrt", "tan", "E", "LN10", "LN2", "LOG2E", "LOG10E", "PI", "SQRT1_2", "SQRT2"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },

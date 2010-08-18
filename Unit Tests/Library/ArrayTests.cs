@@ -496,6 +496,21 @@ namespace UnitTests
             Assert.AreEqual(11, TestUtils.Evaluate("array[2]"));
             Assert.AreEqual(21, TestUtils.Evaluate("array[3]"));
 
+            // Try sorting some small arrays.
+            TestUtils.Evaluate("var array = ['a', 'b'].sort()");
+            Assert.AreEqual("a", TestUtils.Evaluate("array[0]"));
+            Assert.AreEqual("b", TestUtils.Evaluate("array[1]"));
+            Assert.AreEqual(2, TestUtils.Evaluate("array.length"));
+            TestUtils.Evaluate("var array = ['b', 'a'].sort()");
+            Assert.AreEqual("a", TestUtils.Evaluate("array[0]"));
+            Assert.AreEqual("b", TestUtils.Evaluate("array[1]"));
+            Assert.AreEqual(2, TestUtils.Evaluate("array.length"));
+            TestUtils.Evaluate("var array = ['a'].sort()");
+            Assert.AreEqual("a", TestUtils.Evaluate("array[0]"));
+            Assert.AreEqual(1, TestUtils.Evaluate("array.length"));
+            TestUtils.Evaluate("var array = [].sort()");
+            Assert.AreEqual(0, TestUtils.Evaluate("array.length"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.sort.length"));
         }

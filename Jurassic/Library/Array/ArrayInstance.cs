@@ -783,6 +783,10 @@ namespace Jurassic.Library
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
+            // An array of size 1 or less is already sorted.
+            if (arrayLength <= 1)
+                return thisObj;
+
             // Create a comparer delegate.
             Comparison<object> comparer;
             if (comparisonFunction == null)
@@ -1440,17 +1444,32 @@ namespace Jurassic.Library
                         low++;
                     while (comparer(y, array[high]) < 0)
                         high--;
-                    if (low > high)
-                        break;
-                    if (low < high)
+                    
+                    if (low >= high)
                     {
-                        object temp = array[low];
-                        array[low] = array[high];
-                        array[high] = temp;
+                        // if low == high then the swap is not needed, however we cannot rely on
+                        // comparison at the end of the loop to exit - high might be 4294967295
+                        // (zero minus one when using unsigned arithmetic).
+                        if (low == high)
+                        {
+                            low++;
+                            high--;
+                        }
+                        break;
                     }
+
+                    object temp = array[low];
+                    array[low] = array[high];
+                    array[high] = temp;
+
                     low++;
                     high--;
                 } while (low <= high);
+
+                // Because we are using unsigned integers for array indices, high can wrap
+                // to uint.MaxValue.
+                if (high == uint.MaxValue)
+                    break;
 
                 if (high - start <= end - low)
                 {

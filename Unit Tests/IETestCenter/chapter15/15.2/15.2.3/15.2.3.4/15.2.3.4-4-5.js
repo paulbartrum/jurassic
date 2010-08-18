@@ -29,7 +29,7 @@ description: "Object.getOwnPropertyNames returns array of property names (Array.
 test: function testcase() {
   var result = Object.getOwnPropertyNames(Array.prototype);
   var expResult = ["constructor", "concat", "join", "reverse", "slice", "sort", "toString", "push", "pop", "shift", "unshift", "splice", "toLocaleString", "indexOf", "lastIndexOf", "every", "some", "forEach", "map", "filter", "reduce", "reduceRight"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },

@@ -29,7 +29,7 @@ description: "Object.getOwnPropertyNames returns array of property names (Date.p
 test: function testcase() {
   var result = Object.getOwnPropertyNames(Date.prototype);
   var expResult = ["constructor", "getTime", "getTimezoneOffset", "getYear", "getFullYear", "getMonth", "getDate", "getDay", "getHours", "getMinutes", "getSeconds", "getMilliseconds", "getUTCFullYear", "getUTCMonth", "getUTCDate", "getUTCDay", "getUTCHours", "getUTCMinutes", "getUTCSeconds", "getUTCMilliseconds", "setTime", "setYear", "setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds", "setMilliseconds", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes", "setUTCSeconds", "setUTCMilliseconds", "toLocaleString", "toString", "toUTCString", "toGMTString", "toTimeString", "toDateString", "toLocaleDateString", "toLocaleTimeString", "valueOf", "toISOString", "toJSON"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },

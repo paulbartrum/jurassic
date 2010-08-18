@@ -29,7 +29,7 @@ description: "Object.getOwnPropertyNames returns array of property names (Date)"
 test: function testcase() {
   var result = Object.getOwnPropertyNames(Date);
   var expResult = ["length", "parse", "UTC", "prototype"];
-  if (compareArray(expResult, result)) {
+  if (isSubsetOf(expResult, result)) {
     return true;
   }
  },
