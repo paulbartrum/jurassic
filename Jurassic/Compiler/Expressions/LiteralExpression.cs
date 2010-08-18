@@ -172,6 +172,9 @@ namespace Jurassic.Compiler
                         // Add a new property to the object.
                         var dataPropertyValue = (Expression)propertyValue;
                         dataPropertyValue.GenerateCode(generator, optimizationInfo);
+                        // Support the inferred function displayName property.
+                        if (dataPropertyValue is FunctionExpression)
+                            ((FunctionExpression)dataPropertyValue).GenerateDisplayName(generator, optimizationInfo, propertyName);
                         EmitConversion.ToAny(generator, dataPropertyValue.ResultType);
                         generator.LoadBoolean(optimizationInfo.StrictMode);
                         generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
@@ -183,6 +186,8 @@ namespace Jurassic.Compiler
                         if (accessorValue.Getter != null)
                         {
                             accessorValue.Getter.GenerateCode(generator, optimizationInfo);
+                            // Support the inferred function displayName property.
+                            accessorValue.Getter.GenerateDisplayName(generator, optimizationInfo, propertyName);
                             EmitConversion.ToAny(generator, accessorValue.Getter.ResultType);
                         }
                         else
@@ -190,6 +195,8 @@ namespace Jurassic.Compiler
                         if (accessorValue.Setter != null)
                         {
                             accessorValue.Setter.GenerateCode(generator, optimizationInfo);
+                            // Support the inferred function displayName property.
+                            accessorValue.Setter.GenerateDisplayName(generator, optimizationInfo, propertyName);
                             EmitConversion.ToAny(generator, accessorValue.Setter.ResultType);
                         }
                         else

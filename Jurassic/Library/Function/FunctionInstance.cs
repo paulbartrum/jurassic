@@ -54,6 +54,23 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Gets the display name of the function.  This is equal to the displayName property, if
+        /// it exists, or the name property otherwise.
+        /// </summary>
+        public string DisplayName
+        {
+            get
+            {
+                if (this.HasProperty("displayName"))
+                    return TypeConverter.ToString(this["displayName"]);
+                var name = TypeConverter.ToString(this["name"]);
+                if (name == string.Empty)
+                    return "[Anonymous]";
+                return name;
+            }
+        }
+
+        /// <summary>
         /// Gets the number of arguments expected by the function.
         /// </summary>
         public int Length
