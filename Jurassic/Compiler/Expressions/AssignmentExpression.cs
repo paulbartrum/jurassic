@@ -132,6 +132,10 @@ namespace Jurassic.Compiler
                     // Load the value to assign.
                     var rhs = this.GetOperand(1);
                     rhs.GenerateCode(generator, optimizationInfo);
+
+                    // Support the inferred function displayName property.
+                    if (rhs is FunctionExpression)
+                        ((FunctionExpression)rhs).GenerateDisplayName(generator, optimizationInfo, target.ToString());
                     
                     // Duplicate the value so it remains on the stack afterwards.
                     //if (optimizationInfo.SuppressReturnValue == false)
