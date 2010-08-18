@@ -169,37 +169,6 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            //// Create a new declarative scope.
-            //var scope = DeclarativeScope.CreateFunctionScope(this.Scope.ParentScope);
-
-            //// In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
-            //if (this.StrictMode == false)
-            //{
-            //    if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
-            //        thisObject = this.Engine.Global;
-            //    else
-            //        thisObject = TypeConverter.ToObject(thisObject);
-            //}
-
-            //// Bind the "this" value.
-            //scope.CreateMutableBinding("this", false);
-            //scope.SetMutableBinding("this", thisObject, this.StrictMode);
-
-            //// Bind the argument names to the argument values.
-            //for (int i = 0; i < this.ArgumentNames.Count; i ++)
-            //{
-            //    scope.CreateMutableBinding(this.ArgumentNames[i], true);
-            //    if (i < argumentValues.Length)
-            //        scope.SetMutableBinding(this.ArgumentNames[i], argumentValues[i], this.StrictMode);
-            //}
-
-            //// Create a new arguments object and bind it to the "arguments" variable.
-            //if (scope.HasValue("arguments", true) == false)
-            //{
-            //    scope.CreateMutableBinding("arguments", false);
-            //    scope.SetMutableBinding("arguments", new ArgumentsInstance(this.Engine.Object.InstancePrototype, this, scope, argumentValues), this.StrictMode);
-            //}
-
             // Call the function.
             return this.body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
         }

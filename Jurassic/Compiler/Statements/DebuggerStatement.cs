@@ -25,7 +25,13 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Inserts a breakpoint into the IL.
             generator.Breakpoint();
+
+            // When the debugger stops, it stops at the first instruction after the breakpoint.  By
+            // inserting a no-op operation the debugger will highlight the "debugger" statement
+            // instead of the statement after the "debugger" statement.
+            generator.NoOperation();
         }
 
         /// <summary>
