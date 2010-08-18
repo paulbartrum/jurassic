@@ -174,7 +174,7 @@ namespace Jurassic.Compiler
                         dataPropertyValue.GenerateCode(generator, optimizationInfo);
                         // Support the inferred function displayName property.
                         if (dataPropertyValue is FunctionExpression)
-                            ((FunctionExpression)dataPropertyValue).GenerateDisplayName(generator, optimizationInfo, propertyName);
+                            ((FunctionExpression)dataPropertyValue).GenerateDisplayName(generator, optimizationInfo, propertyName, false);
                         EmitConversion.ToAny(generator, dataPropertyValue.ResultType);
                         generator.LoadBoolean(optimizationInfo.StrictMode);
                         generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
@@ -187,7 +187,7 @@ namespace Jurassic.Compiler
                         {
                             accessorValue.Getter.GenerateCode(generator, optimizationInfo);
                             // Support the inferred function displayName property.
-                            accessorValue.Getter.GenerateDisplayName(generator, optimizationInfo, propertyName);
+                            accessorValue.Getter.GenerateDisplayName(generator, optimizationInfo, "get " + propertyName, true);
                             EmitConversion.ToAny(generator, accessorValue.Getter.ResultType);
                         }
                         else
@@ -196,7 +196,7 @@ namespace Jurassic.Compiler
                         {
                             accessorValue.Setter.GenerateCode(generator, optimizationInfo);
                             // Support the inferred function displayName property.
-                            accessorValue.Setter.GenerateDisplayName(generator, optimizationInfo, propertyName);
+                            accessorValue.Setter.GenerateDisplayName(generator, optimizationInfo, "set " + propertyName, true);
                             EmitConversion.ToAny(generator, accessorValue.Setter.ResultType);
                         }
                         else
