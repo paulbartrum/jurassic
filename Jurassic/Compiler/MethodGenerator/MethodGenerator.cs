@@ -227,15 +227,11 @@ namespace Jurassic.Compiler
                 var generator = new ReflectionEmitILGenerator(methodBuilder);
                 if (this.Source.Path != null)
                 {
-                    // Initialize the debug document.
+                    // Initialize the debugging information.
                     optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, COMHelpers.LanguageType, COMHelpers.LanguageVendor, COMHelpers.DocumentType);
-                    //var symbolDocument = reflectionEmitInfo.ModuleBuilder.GetSymWriter();
-                    //symbolDocument.DefineParameter("scriptEngine", System.Reflection.ParameterAttributes.None, 0, System.Diagnostics.SymbolStore.SymAddressKind.
-                    //    symbolDocument.DefineParameter("scope", 
-                    //symbolDocument.DefineParameter("scope", 
                     methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
                     methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
-                    methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "this");
+                    methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
                     generator.MarkSequencePoint(optimizationInfo.DebugDocument, new SourceCodeSpan(1, 1, 1, 1));
                 }
                 GenerateCode(generator, optimizationInfo);
