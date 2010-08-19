@@ -32,6 +32,10 @@ namespace UnitTests
         [TestMethod]
         public void Call()
         {
+            // RegExp
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp().source"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp(undefined).source"));
+
             // RegExp(pattern)
             TestUtils.Evaluate("var x = RegExp('abc')");
             Assert.AreEqual("abc", TestUtils.Evaluate("x.source"));
@@ -97,6 +101,7 @@ namespace UnitTests
             // new RegExp(regExp, flags)
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "RegExpError" : "TypeError",
                 TestUtils.EvaluateExceptionType("new RegExp(new RegExp('abc', 'g'), 'i')"));
+            Assert.AreEqual("abc", TestUtils.Evaluate("new RegExp(/abc/, undefined).source"));
         }
 
         [TestMethod]

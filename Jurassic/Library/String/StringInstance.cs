@@ -331,7 +331,7 @@ namespace Jurassic.Library
         /// <param name="regExp"> The string to search for. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
         [JSFunction(Name = "search", Flags = FunctionBinderFlags.HasThisObject | FunctionBinderFlags.Preferred)]
-        public static int Search(string thisObject, string substr)
+        public static int Search(string thisObject, string substr = "")
         {
             return thisObject.IndexOf(substr);
         }

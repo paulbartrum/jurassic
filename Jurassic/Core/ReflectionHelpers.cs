@@ -68,8 +68,7 @@ namespace Jurassic
         internal static MethodInfo Boolean_Construct;
         internal static MethodInfo Object_Construct;
         
-        internal static MethodInfo RegExp_Construct1;
-        internal static MethodInfo RegExp_Construct2;
+        internal static MethodInfo RegExp_Construct;
         internal static MethodInfo Array_New;
         internal static MethodInfo Delegate_CreateDelegate;
         internal static MethodInfo Type_GetTypeFromHandle;
@@ -195,8 +194,7 @@ namespace Jurassic
             JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));
             
-            RegExp_Construct1 = GetInstanceMethod(typeof(Jurassic.Library.RegExpConstructor), "Construct", typeof(string), typeof(string));
-            RegExp_Construct2 = GetInstanceMethod(typeof(Jurassic.Library.RegExpConstructor), "Construct", typeof(RegExpInstance), typeof(string));
+            RegExp_Construct = GetInstanceMethod(typeof(Jurassic.Library.RegExpConstructor), "Construct", typeof(object), typeof(string));
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
             UserDefinedFunction_Constructor = GetConstructor(typeof(UserDefinedFunction), typeof(ObjectInstance),
