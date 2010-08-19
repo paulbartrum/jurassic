@@ -616,6 +616,9 @@ namespace UnitTests
                     TestUtils.Evaluate("JSON.stringify('onetwothree'.split(/(et)?(wo)?/, 5))"));
             }
 
+            // Spec violation but de-facto standard: undefined is converted to 'undefined'.
+            Assert.AreEqual(2, TestUtils.Evaluate("'teundefinedst'.split(undefined).length"));
+
             // length
             Assert.AreEqual(2, TestUtils.Evaluate("''.split.length"));
 
