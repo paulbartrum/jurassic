@@ -108,6 +108,10 @@ namespace UnitTests
             // Line terminators are not allowed in regexps - even if the line terminator is escaped.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("/\u000A/"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("/\\\u000A/"));
+
+            // Unexpected end of input.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("/"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("/\\"));
         }
 
         [TestMethod]

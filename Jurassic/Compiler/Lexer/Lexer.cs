@@ -699,14 +699,15 @@ namespace Jurassic.Compiler
             bool insideCharacterClass = false;
             while (true)
             {
+                // Read the next character.
                 int c = ReadNextChar();
+
+                // Check for special cases.
                 if (c == '/' && insideCharacterClass == false)
                     break;
-                if (c == -1)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in regular expression literal.", this.lineNumber, this.Source.Path);
-                if (c == '\\')
+                else if (c == '\\')
                 {
-                    // Escape sequence.
+                    // Escape sequence.  Escaped characters are never special.
                     body.Append((char)c);
                     c = ReadNextChar();
                 }
@@ -714,8 +715,16 @@ namespace Jurassic.Compiler
                     insideCharacterClass = true;
                 else if (c == ']')
                     insideCharacterClass = false;
+                
+                // Note: a line terminator or EOF is not allowed in a regular expression, even if
+                // it is escaped with a backslash.  Therefore, these checks have to come after the
+                // checks above.
                 if (IsLineTerminator(c))
                     throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected line terminator in regular expression literal.", this.lineNumber, this.Source.Path);
+                else if (c == -1)
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in regular expression literal.", this.lineNumber, this.Source.Path);
+
+                // Append the character to the regular expression.
                 body.Append((char)c);
             }
 
