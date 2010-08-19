@@ -95,25 +95,25 @@ namespace Jurassic
             this.errorConstructor.InstancePrototype.PopulateFunctions();
 
             // Add them as JavaScript-accessible properties of the global instance.
-            this.globalObject["Array"] = this.arrayConstructor;
-            this.globalObject["Boolean"] = this.booleanConstructor;
-            this.globalObject["Date"] = this.dateConstructor;
-            this.globalObject["Function"] = this.functionConstructor;
-            this.globalObject["JSON"] = this.jsonObject;
-            this.globalObject["Math"] = this.mathObject;
-            this.globalObject["Number"] = this.numberConstructor;
-            this.globalObject["Object"] = this.objectConstructor;
-            this.globalObject["RegExp"] = this.regExpConstructor;
-            this.globalObject["String"] = this.stringConstructor;
+            this.globalObject.FastSetProperty("Array", this.arrayConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("Boolean", this.booleanConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("Date", this.dateConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("Function", this.functionConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("JSON", this.jsonObject, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("Math", this.mathObject, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("Number", this.numberConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("Object", this.objectConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("RegExp", this.regExpConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("String", this.stringConstructor, PropertyAttributes.NonEnumerable);
 
             // And the errors.
-            this.globalObject["Error"] = this.errorConstructor;
-            this.globalObject["RangeError"] = this.rangeErrorConstructor;
-            this.globalObject["TypeError"] = this.typeErrorConstructor;
-            this.globalObject["SyntaxError"] = this.syntaxErrorConstructor;
-            this.globalObject["URIError"] = this.uriErrorConstructor;
-            this.globalObject["EvalError"] = this.evalErrorConstructor;
-            this.globalObject["ReferenceError"] = this.referenceErrorConstructor;
+            this.globalObject.FastSetProperty("Error", this.errorConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("RangeError", this.rangeErrorConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("TypeError", this.typeErrorConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("SyntaxError", this.syntaxErrorConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("URIError", this.uriErrorConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("EvalError", this.evalErrorConstructor, PropertyAttributes.NonEnumerable);
+            this.globalObject.FastSetProperty("ReferenceError", this.referenceErrorConstructor, PropertyAttributes.NonEnumerable);
         }
 
 

@@ -33,6 +33,25 @@ namespace UnitTests
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "NaN"));
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "undefined"));
 
+            // Built-in objects should be writable and configurable but not enumerable.
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Array"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Boolean"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Date"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Error"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "EvalError"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Function"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "JSON"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Math"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Number"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Object"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "RangeError"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "ReferenceError"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "RegExp"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "String"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "SyntaxError"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "TypeError"));
+            Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "URIError"));
+
             // Functions are writable and configurable.
             Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "decodeURI"));
 
@@ -228,6 +247,7 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("parseFloat('0xff')"));
             Assert.AreEqual(0, TestUtils.Evaluate("parseFloat('0zff')"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("parseFloat('infinity')"));
+            Assert.AreEqual(-1.1, TestUtils.Evaluate("parseFloat('\u205F -1.1')"));
         }
 
         [TestMethod]

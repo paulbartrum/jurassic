@@ -704,8 +704,6 @@ namespace Jurassic.Compiler
                     break;
                 if (c == -1)
                     throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in regular expression literal.", this.lineNumber, this.Source.Path);
-                if (IsLineTerminator(c))
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected line terminator in regular expression literal.", this.lineNumber, this.Source.Path);
                 if (c == '\\')
                 {
                     // Escape sequence.
@@ -716,6 +714,8 @@ namespace Jurassic.Compiler
                     insideCharacterClass = true;
                 else if (c == ']')
                     insideCharacterClass = false;
+                if (IsLineTerminator(c))
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected line terminator in regular expression literal.", this.lineNumber, this.Source.Path);
                 body.Append((char)c);
             }
 

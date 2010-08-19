@@ -65,6 +65,10 @@ namespace UnitTests
         [TestMethod]
         public void Construction()
         {
+            // new RegExp()
+            Assert.AreEqual("", TestUtils.Evaluate("new RegExp().source"));
+            Assert.AreEqual("", TestUtils.Evaluate("new RegExp(undefined).source"));
+
             // new RegExp(pattern)
             TestUtils.Evaluate("var x = new RegExp('abc')");
             Assert.AreEqual("abc", TestUtils.Evaluate("x.source"));
