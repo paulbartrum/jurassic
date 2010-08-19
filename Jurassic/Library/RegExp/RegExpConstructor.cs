@@ -28,68 +28,64 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Called when the RegExp object is invoked like a function e.g. RegExp('abc', 'g').
-        /// Creates a new regular expression instance.
+        /// Called when the RegExp object is invoked like a function e.g. RegExp('abc', 'g') or
+        /// RegExp(/abc/).  If a string is passed as the first parameter it creates a new regular
+        /// expression instance.  Otherwise, if a regular expression is passed it returns the given
+        /// regular expression verbatim.
         /// </summary>
-        /// <param name="pattern"> The regular expression pattern. </param>
-        /// <param name="flags"> Available flags, which may be combined, are:
-        /// g (global search for all occurrences of pattern)
-        /// i (ignore case)
-        /// m (multiline search)</param>
-        [JSCallFunction(Flags = FunctionBinderFlags.Preferred)]
-        public RegExpInstance Call(string pattern, string flags = null)
-        {
-            return new RegExpInstance(this.InstancePrototype, pattern, flags);
-        }
-
-        /// <summary>
-        /// Called when the RegExp object is invoked like a function e.g. RegExp(/abc/).
-        /// Returns the given regular expression verbatim.
-        /// </summary>
-        /// <param name="regExp"> The regular expression. </param>
+        /// <param name="patternOrRegExp"> A regular expression pattern or a regular expression. </param>
         /// <param name="flags"> Available flags, which may be combined, are:
         /// g (global search for all occurrences of pattern)
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSCallFunction]
-        public RegExpInstance Call(RegExpInstance regExp, string flags = null)
+        public RegExpInstance Call(object patternOrRegExp, string flags = null)
         {
-            if (flags != null)
-                throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
-            return regExp;
+            if (patternOrRegExp is RegExpInstance)
+            {
+                // RegExp(/abc/)
+                if (flags != null)
+                    throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
+                return (RegExpInstance)patternOrRegExp;
+            }
+            else
+            {
+                // RegExp('abc', 'g')
+                var pattern = string.Empty;
+                if (TypeUtilities.IsUndefined(patternOrRegExp) == false)
+                    pattern = TypeConverter.ToString(patternOrRegExp);
+                return new RegExpInstance(this.InstancePrototype, pattern, flags);
+            }
         }
 
         /// <summary>
         /// Called when the new keyword is used on the RegExp object e.g. new RegExp(/abc/).
         /// Creates a new regular expression instance.
         /// </summary>
-        /// <param name="pattern"> The regular expression pattern. </param>
-        /// <param name="flags"> Available flags, which may be combined, are:
-        /// g (global search for all occurrences of pattern)
-        /// i (ignore case)
-        /// m (multiline search)</param>
-        [JSConstructorFunction(Flags = FunctionBinderFlags.Preferred)]
-        public RegExpInstance Construct(string pattern, string flags = null)
-        {
-            return new RegExpInstance(this.InstancePrototype, pattern, flags);
-        }
-
-        /// <summary>
-        /// Called when the new keyword is used on the RegExp object e.g. new RegExp(/abc/).
-        /// Returns a new regular expression with the same pattern and flags as the given regular
-        /// expression.
-        /// </summary>
-        /// <param name="regExp"> The regular expression to clone. </param>
+        /// <param name="patternOrRegExp"> The regular expression pattern, or a regular expression
+        /// to clone. </param>
         /// <param name="flags"> Available flags, which may be combined, are:
         /// g (global search for all occurrences of pattern)
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSConstructorFunction]
-        public RegExpInstance Construct(RegExpInstance regExp, string flags = null)
+        public RegExpInstance Construct(object patternOrRegExp, string flags = null)
         {
-            if (flags != null)
-                throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
-            return new RegExpInstance(this.InstancePrototype, regExp);
+            if (patternOrRegExp is RegExpInstance)
+            {
+                // new RegExp(regExp, flags)
+                if (flags != null)
+                    throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
+                return new RegExpInstance(this.InstancePrototype, (RegExpInstance)patternOrRegExp);
+            }
+            else
+            {
+                // new RegExp(pattern, flags)
+                var pattern = string.Empty;
+                if (TypeUtilities.IsUndefined(patternOrRegExp) == false)
+                    pattern = TypeConverter.ToString(patternOrRegExp);
+                return new RegExpInstance(this.InstancePrototype, pattern, flags);
+            }
         }
     }
 }

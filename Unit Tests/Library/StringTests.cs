@@ -478,8 +478,6 @@ namespace UnitTests
             Assert.AreEqual(7, TestUtils.Evaluate("'A long string for testing'.search(/st/)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'A long string for testing'.search(/nein/g)"));
             Assert.AreEqual(7, TestUtils.Evaluate("'A long string for testing'.search(/st/g)"));
-            Assert.AreEqual(0, TestUtils.Evaluate("''.search()"));
-            Assert.AreEqual(0, TestUtils.Evaluate("'--undefined--'.search()"));
 
             // Make sure lastIndex is not modified.
             TestUtils.Evaluate("var regex = /lo|st/");
@@ -492,6 +490,12 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("'A long string for testing'.search(regex)"));
             if (TestUtils.Engine != JSEngine.JScript)
                 Assert.AreEqual(15, TestUtils.Evaluate("regex.lastIndex"));
+
+            // Passing undefined to is equivalent to passing an empty string.
+            Assert.AreEqual(0, TestUtils.Evaluate("''.search('')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("''.search()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("'--undefined--'.search()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("''.search(undefined)"));
 
             // length
             if (TestUtils.Engine != JSEngine.JScript)

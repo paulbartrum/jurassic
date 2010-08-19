@@ -88,7 +88,7 @@ namespace Jurassic.Compiler
                 generator.Call(ReflectionHelpers.ScriptEngine_RegExp);
                 generator.LoadString(((RegularExpressionLiteral)this.Value).Pattern);
                 generator.LoadString(((RegularExpressionLiteral)this.Value).Flags);
-                generator.Call(ReflectionHelpers.RegExp_Construct1);
+                generator.Call(ReflectionHelpers.RegExp_Construct);
                 generator.Duplicate();
                 generator.StoreVariable(sharedRegExpVariable);
 
@@ -101,7 +101,7 @@ namespace Jurassic.Compiler
                 generator.Call(ReflectionHelpers.ScriptEngine_RegExp);
                 generator.LoadVariable(sharedRegExpVariable);
                 generator.LoadNull();
-                generator.Call(ReflectionHelpers.RegExp_Construct2);
+                generator.Call(ReflectionHelpers.RegExp_Construct);
 
                 // }
                 generator.DefineLabelPosition(label2);
