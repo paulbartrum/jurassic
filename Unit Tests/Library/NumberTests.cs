@@ -37,6 +37,9 @@ namespace UnitTests
             Assert.AreEqual(5.1, TestUtils.Evaluate("Number(5.1)"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number(NaN)"));
             Assert.AreEqual(123, TestUtils.Evaluate("Number('123')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Number('')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Number(' ')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Number('\u00A0')"));
 
             // toString and valueOf.
             Assert.AreEqual("function Number() { [native code] }", TestUtils.Evaluate("Number.toString()"));
@@ -105,6 +108,7 @@ namespace UnitTests
             Assert.AreEqual("77.13", TestUtils.Evaluate("77.1274.toFixed(2)"));
             Assert.AreEqual("77.00", TestUtils.Evaluate("77 .toFixed(2)"));
             Assert.AreEqual("0.1", TestUtils.Evaluate("(0.09).toFixed(1)"));
+            Assert.AreEqual("-1", TestUtils.Evaluate("(-0.7).toFixed()"));
 
             // Negative tests.
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("num.toFixed(-1)"));

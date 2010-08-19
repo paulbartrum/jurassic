@@ -478,6 +478,8 @@ namespace UnitTests
             Assert.AreEqual(7, TestUtils.Evaluate("'A long string for testing'.search(/st/)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'A long string for testing'.search(/nein/g)"));
             Assert.AreEqual(7, TestUtils.Evaluate("'A long string for testing'.search(/st/g)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("''.search()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("'--undefined--'.search()"));
 
             // Make sure lastIndex is not modified.
             TestUtils.Evaluate("var regex = /lo|st/");
@@ -679,6 +681,7 @@ namespace UnitTests
             Assert.AreEqual("A long string for t", TestUtils.Evaluate("'A long string for testing'.substring(19, -40)"));
             Assert.AreEqual("in", TestUtils.Evaluate("'A long string for testing'.substring(12, 10)"));
             Assert.AreEqual("ing for testing", TestUtils.Evaluate("'A long string for testing'.substring(40, 10)"));
+            Assert.AreEqual("foo", TestUtils.Evaluate("'foo'.substring(0, undefined)"));
 
             // length
             Assert.AreEqual(2, TestUtils.Evaluate("''.substring.length"));
