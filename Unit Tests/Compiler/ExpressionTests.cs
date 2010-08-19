@@ -191,6 +191,8 @@ namespace UnitTests
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("'10' / null"));
             Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("'-10' / null"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("0 / 0"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("10 / 0"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("-10 / 0"));
 
             // Objects
             Assert.AreEqual(2, TestUtils.Evaluate("new Number(12) / new Number(6)"));
@@ -362,14 +364,14 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("NaN == NaN"));
 
             // Doug Crockford's truth table.
-            Assert.AreEqual(false, TestUtils.Evaluate( "''        ==   '0'           "));
-            Assert.AreEqual(true,  TestUtils.Evaluate( "0         ==   ''            "));
-            Assert.AreEqual(true,  TestUtils.Evaluate( "0         ==   '0'           "));
-            Assert.AreEqual(false, TestUtils.Evaluate( "false     ==   'false'       "));
-            Assert.AreEqual(true,  TestUtils.Evaluate( "false     ==   '0'           "));
-            Assert.AreEqual(false, TestUtils.Evaluate( "false     ==   undefined     "));
-            Assert.AreEqual(true,  TestUtils.Evaluate( "false     ==   null          "));
-            Assert.AreEqual(true,  TestUtils.Evaluate( "null      ==   undefined     "));
+            Assert.AreEqual(false, TestUtils.Evaluate("''         ==   '0'           "));
+            Assert.AreEqual(true,  TestUtils.Evaluate("0          ==   ''            "));
+            Assert.AreEqual(true,  TestUtils.Evaluate("0          ==   '0'           "));
+            Assert.AreEqual(false, TestUtils.Evaluate("false      ==   'false'       "));
+            Assert.AreEqual(true,  TestUtils.Evaluate("false      ==   '0'           "));
+            Assert.AreEqual(false, TestUtils.Evaluate("false      ==   undefined     "));
+            Assert.AreEqual(false, TestUtils.Evaluate("false      ==   null          "));
+            Assert.AreEqual(true,  TestUtils.Evaluate("null       ==   undefined     "));
             Assert.AreEqual(true,  TestUtils.Evaluate(@"' \t\r\n' ==   0             "));
 
             // Variables
