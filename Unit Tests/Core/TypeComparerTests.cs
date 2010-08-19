@@ -86,6 +86,7 @@ namespace UnitTests
             Assert.AreEqual(true,  TypeComparer.Equals(0, 0.0));
             Assert.AreEqual(true,  TypeComparer.Equals(5, 5.0));
             Assert.AreEqual(false, TypeComparer.Equals(double.NaN, double.NaN));
+            Assert.AreEqual(false, TypeComparer.Equals(double.NaN, engine.Number.Construct(double.NaN)));
 
             // String.
             Assert.AreEqual(false, TypeComparer.Equals("5.5", Undefined.Value));
