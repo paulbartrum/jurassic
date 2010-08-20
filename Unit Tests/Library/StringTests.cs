@@ -416,22 +416,18 @@ namespace UnitTests
         [TestMethod]
         public void replace()
         {
-            // String to string replace (should replace only the first match).
+            // replace(string, string)
             Assert.AreEqual("A long string for testing", TestUtils.Evaluate("'A long string for testing'.replace('ew', 'ah!')"));
             Assert.AreEqual("A long ew!ring for testing", TestUtils.Evaluate("'A long string for testing'.replace('st', 'ew!')"));
             Assert.AreEqual("TA short string", TestUtils.Evaluate("'A short string'.replace('', 'T')"));
-
-            // Non-global regex replacement (replaces the first match).
+            
+            // replace(regExp, string)
             Assert.AreEqual("A ew!ng string for testing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/, 'ew!')"));
-
-            // Global regex replacement (replaces all matches).
             Assert.AreEqual("A ew!ng ew!ring for teew!ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, 'ew!')"));
             Assert.AreEqual("[{ ]@ ], ]@ ] }]", TestUtils.Evaluate(@"
                 '[{ \""tag\"": ""titillation"", \""popularity\"": 4294967296 }]'.
                 replace(/""[^""\\\n\r]*""|true|false|null|-?\d+(?:\.\d*)?(:?[eE][+\-]?\d+)?/g, ']').
                 replace(/:/g, '@')"));
-
-            // Replacement patterns.
             Assert.AreEqual("A $ng $ring for te$ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, '$$')"));
             Assert.AreEqual("A <lo>ng <st>ring for te<st>ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, '<$&>')"));
             Assert.AreEqual("A short <A short >ring", TestUtils.Evaluate("'A short string'.replace(/lo|st/g, '<$`>')"));
@@ -439,7 +435,7 @@ namespace UnitTests
             Assert.AreEqual("A l  $3 l0ng  t $3 0ring for te t $3 0ing", TestUtils.Evaluate("'A long string for testing'.replace(/(l)o|s(t)/g, '$1 $2 $3 $10')"));
             Assert.AreEqual("$1-$11,$1-$22", TestUtils.Evaluate(@"'$1,$2'.replace(/(\$(\d))/g, '$$1-$1$2')"));
 
-            // Replacement functions.
+            // replace(regExp, function)
             Assert.AreEqual("A aort aring", TestUtils.Evaluate("'A short string'.replace(/(s)h|s(t)/g, function() { return 'a'; })"));
             TestUtils.Evaluate(@"var parameterValues = []");
             TestUtils.Evaluate("'A short string'.replace(/(s)h|s(t)/g, function() { parameterValues.push(arguments); })");
@@ -457,6 +453,11 @@ namespace UnitTests
             Assert.AreEqual("t", TestUtils.Evaluate("parameterValues[1][2]"));
             Assert.AreEqual(8, TestUtils.Evaluate("parameterValues[1][3]"));
             Assert.AreEqual("A short string", TestUtils.Evaluate("parameterValues[1][4]"));
+
+            // replace(string, function)
+            Assert.AreEqual("A short string", TestUtils.Evaluate("'A short string'.replace('test', function() { return 'a'; })"));
+            Assert.AreEqual("A ahort string", TestUtils.Evaluate("'A short string'.replace('s', function() { return 'a'; })"));
+            Assert.AreEqual("A long string", TestUtils.Evaluate("'A short string'.replace('short', function() { return 'long'; })"));
 
             // length
             Assert.AreEqual(2, TestUtils.Evaluate("''.replace.length"));

@@ -289,15 +289,20 @@ namespace Jurassic.Library
         /// <returns> A copy of this string with text replaced. </returns>
         public static string Replace(string thisObject, string substr, FunctionInstance replaceFunction)
         {
-            var result = new System.Text.StringBuilder();
-            int position = 0;
-            while (position < thisObject.Length)
-            {
-                int newPosition = thisObject.IndexOf(substr);
-                result.Append(thisObject.Substring(position, newPosition - position));
-                result.Append(replaceFunction.CallLateBound(replaceFunction.Engine.Global, substr, newPosition, thisObject).ToString());
-                position = newPosition + substr.Length;
-            }
+            // Find the first occurrance of substr.
+            int start = thisObject.IndexOf(substr);
+            if (start == -1)
+                return thisObject;
+            int end = start + substr.Length;
+
+            // Get the replacement text from the provided function.
+            var replaceText = TypeConverter.ToString(replaceFunction.CallLateBound(replaceFunction.Engine.Global, substr, start, thisObject));
+
+            // Replace only the first match.
+            var result = new System.Text.StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
+            result.Append(thisObject, 0, start);
+            result.Append(replaceText);
+            result.Append(thisObject, end, thisObject.Length - end);
             return result.ToString();
         }
 
