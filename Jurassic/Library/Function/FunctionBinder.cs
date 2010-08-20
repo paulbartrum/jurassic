@@ -917,7 +917,9 @@ namespace Jurassic.Library
             if ((targetParameter.Attributes & ParameterAttributes.HasDefault) != ParameterAttributes.None)
             {
                 // Emit the default value.
-                if (targetParameter.DefaultValue is int)
+                if (targetParameter.DefaultValue is bool)
+                    il.Emit(OpCodes.Ldc_I4, ((bool)targetParameter.DefaultValue) ? 1 : 0);
+                else if (targetParameter.DefaultValue is int)
                     il.Emit(OpCodes.Ldc_I4, (int)targetParameter.DefaultValue);
                 else if (targetParameter.DefaultValue is double)
                     il.Emit(OpCodes.Ldc_R8, (double)targetParameter.DefaultValue);
