@@ -748,6 +748,10 @@ namespace Jurassic.Library
                 return false;
             }
 
+            // To avoid running out of memory, restrict the number of properties.
+            if (this.schema.PropertyCount == 4096)
+                throw new JavaScriptException(this.engine, "Error", "Maximum number of named properties reached.");
+
             // Do not store nulls - null represents a non-existant value.
             value = value ?? Undefined.Value;
 
