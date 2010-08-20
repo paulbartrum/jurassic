@@ -133,7 +133,7 @@ namespace Jurassic.Compiler
 
 
 
-        //     FUNCTION OPTIMIZATION
+        //     DEBUGGING
         //_________________________________________________________________________________________
 
         /// <summary>
@@ -157,7 +157,6 @@ namespace Jurassic.Compiler
             get;
             set;
         }
-
 
 
         //     VARIABLES
@@ -201,6 +200,31 @@ namespace Jurassic.Compiler
                 this.regularExpressionVariables.Add(literal, variable);
             }
             return variable;
+        }
+
+
+        //     RETURN SUPPORT
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets or sets the label the return statement should jump to (with the return value on
+        /// top of the stack).  Will be <c>null</c> if code is being generated outside a function
+        /// context.
+        /// </summary>
+        public ILLabel ReturnTarget
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the variable that holds the return value for the function.  Will be
+        /// <c>null</c> if code is being generated outside a function context.
+        /// </summary>
+        public ILLocalVariable ReturnVariable
+        {
+            get;
+            set;
         }
 
 

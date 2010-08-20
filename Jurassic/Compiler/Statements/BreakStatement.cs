@@ -36,7 +36,9 @@ namespace Jurassic.Compiler
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Emit an unconditional branch.
-            generator.Branch(optimizationInfo.GetBreakTarget(this.Label));
+            // Note: the break statement might be branching from inside a try { } block to outside.
+            // The BR instruction is not allowed in this circumstance.
+            generator.Leave(optimizationInfo.GetBreakTarget(this.Label));
         }
 
         /// <summary>

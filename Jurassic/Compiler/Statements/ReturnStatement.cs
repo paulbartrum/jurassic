@@ -34,17 +34,22 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Emit the return value.
             if (this.Value == null)
-            {
                 EmitHelpers.EmitUndefined(generator);
-                generator.Return();
-            }
             else
             {
                 this.Value.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToAny(generator, this.Value.ResultType);
-                generator.Return();
             }
+
+            // Store the return value in a variable.
+            generator.StoreVariable(optimizationInfo.ReturnVariable);
+
+            // Branch to the end of the function.  Note: the return statement might be branching
+            // from inside a try { } block to outside.  The BR instruction is not allowed in this
+            // circumstance, so we use LEAVE instead.
+            generator.Leave(optimizationInfo.ReturnTarget);
         }
 
         /// <summary>

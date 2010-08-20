@@ -254,6 +254,9 @@ namespace UnitTests
 
             // Cannot declare a function inside a catch block.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("try { throw 6; } catch (e) { function foo() { return 2; } foo() }"));
+
+            // Try jumping out of the catch block.
+            Assert.AreEqual(9, TestUtils.Evaluate("var i = 0; while(i<10){ i ++; try { throw '10'; } catch (e) { continue; } }"));
         }
 
         [TestMethod]
