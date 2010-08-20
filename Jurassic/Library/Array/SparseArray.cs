@@ -81,6 +81,10 @@ namespace Jurassic.Library
             }
         }
 
+        /// <summary>
+        /// Deletes (sets to <c>null</c>) an array element.
+        /// </summary>
+        /// <param name="index"> The index of the array element to delete. </param>
         public void Delete(uint index)
         {
             if ((index & NodeInverseMask) == this.recentStart)
@@ -99,11 +103,59 @@ namespace Jurassic.Library
             return;
         }
 
-        public void DeleteRange(uint index, uint length)
+        /// <summary>
+        /// Deletes (sets to <c>null</c>) a range of array elements.
+        /// </summary>
+        /// <param name="start"> The index of the first array element to delete. </param>
+        /// <param name="length"> The number of array elements to delete. </param>
+        public void DeleteRange(uint start, uint length)
         {
-            for (uint i = index; i < index + length; i++)
+            if (this.root == null)
+                return;
+            DeleteRange(start, length, null, this.root, 0, this.depth);
+        }
+
+        /// <summary>
+        /// Deletes (sets to <c>null</c>) a range of array elements.
+        /// </summary>
+        /// <param name="start"> The index of the first array element to delete. </param>
+        /// <param name="length"> The number of array elements to delete. </param>
+        /// <param name="parentNode"> The parent node of the node to delete from.  Can be <c>null</c>. </param>
+        /// <param name="node"> The node to delete from. </param>
+        /// <param name="nodeIndex"> The index of the node, in the parent node's array. </param>
+        /// <param name="nodeDepth"> The depth of the tree, treating <paramref name="node"/> as the root. </param>
+        private void DeleteRange(uint start, uint length, Node parentNode, Node node, int nodeIndex, int nodeDepth)
+        {
+            uint nodeLength = (NodeShift * nodeDepth) >= 32 ? uint.MaxValue : 1u << NodeShift * nodeDepth;
+            uint nodeStart = nodeLength * (uint)nodeIndex;
+            if (parentNode != null && (nodeStart >= start + length || nodeStart + nodeLength <= start))
             {
-                Delete(i);
+                // Delete the entire node.
+                parentNode.array[nodeIndex] = null;
+                return;
+            }
+
+            if (nodeDepth == 1)
+            {
+                // The node is a leaf node.
+                for (int i = 0; i < NodeSize; i++)
+                {
+                    uint index = (uint)(nodeStart + i);
+                    if (index >= start && index < start + length)
+                        node.array[i] = null;
+                }
+            }
+            else
+            {
+                // The node is a branch node.
+                for (int i = 0; i < NodeSize; i++)
+                {
+                    var element = node.array[i] as Node;
+                    if (element != null)
+                    {
+                        DeleteRange(start, length, node, element, i, nodeDepth - 1);
+                    }
+                }
             }
         }
 
