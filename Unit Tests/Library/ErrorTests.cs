@@ -38,7 +38,7 @@ namespace UnitTests
             Assert.AreEqual("RangeError", TestUtils.Evaluate("Object.getPrototypeOf(new RangeError('test')).toString()"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf(new RangeError('test')) === RangeError.prototype"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf(new RangeError('test')).hasOwnProperty('name')"));
-            Assert.AreEqual(false, TestUtils.Evaluate("Object.getPrototypeOf(new RangeError('test')).hasOwnProperty('message')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf(new RangeError('test')).hasOwnProperty('message')"));
             Assert.AreEqual(false, TestUtils.Evaluate("Object.getPrototypeOf(new RangeError('test')).hasOwnProperty('stack')"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf(new RangeError('test')).constructor === RangeError"));
 

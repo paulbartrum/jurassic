@@ -19,7 +19,7 @@ namespace Jurassic.Library
         //     INITIALIZATION
         //_________________________________________________________________________________________
 
-                /// <summary>
+        /// <summary>
         /// Creates a new instance of a built-in constructor function.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -94,7 +94,7 @@ namespace Jurassic.Library
         /// delegate for the function name. </param>
         /// <param name="length"> The "typical" number of arguments expected by the function.  Pass
         /// <c>-1</c> to use the number of arguments expected by the delegate. </param>
-        public ClrFunction(ObjectInstance prototype, Delegate delegateToCall, string name = null, int length = -1)
+        internal ClrFunction(ObjectInstance prototype, Delegate delegateToCall, string name = null, int length = -1)
             : base(prototype)
         {
             // Initialize the [[Call]] method.
@@ -104,8 +104,8 @@ namespace Jurassic.Library
             // Add function properties.
             this.FastSetProperty("name", name != null ? name : binderMethod.Name);
             this.FastSetProperty("length", length >= 0 ? length : binderMethod.ParameterCount);
-            this.FastSetProperty("prototype", this.Engine.Object.Construct());
-            this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
+            //this.FastSetProperty("prototype", this.Engine.Object.Construct());
+            //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Jurassic.Library
         /// the same name). </param>
         /// <param name="length"> The "typical" number of arguments expected by the function.  Pass
         /// <c>-1</c> to use the maximum of arguments expected by any of the provided methods. </param>
-        public ClrFunction(ObjectInstance prototype, IEnumerable<FunctionBinderMethod> methods, string name = null, int length = -1)
+        internal ClrFunction(ObjectInstance prototype, IEnumerable<FunctionBinderMethod> methods, string name = null, int length = -1)
             : base(prototype)
         {
             this.callBinder = new FunctionBinder(methods);
@@ -136,8 +136,8 @@ namespace Jurassic.Library
             // Add function properties.
             this.FastSetProperty("name", name);
             this.FastSetProperty("length", length >= 0 ? length : methods.Max(bm => bm.ParameterCount));
-            this.FastSetProperty("prototype", this.Engine.Object.Construct());
-            this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
+            //this.FastSetProperty("prototype", this.Engine.Object.Construct());
+            //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
         
@@ -164,7 +164,7 @@ namespace Jurassic.Library
         public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {
             if (this.constructBinder == null)
-                return this.Engine.Object.Construct();
+                throw new JavaScriptException(this.Engine, "TypeError", "Objects cannot be constructed from built-in functions");
             return (ObjectInstance)this.constructBinder.Call(this.Engine, this, argumentValues);
         }
 

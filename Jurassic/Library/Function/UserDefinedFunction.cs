@@ -100,16 +100,12 @@ namespace Jurassic.Library
             // Add function properties.
             this.FastSetProperty("name", name);
             this.FastSetProperty("length", argumentNames.Count);
+
+            // The empty function doesn't have an instance prototype.
             if (hasInstancePrototype == true)
             {
                 this.FastSetProperty("prototype", this.Engine.Object.Construct(), PropertyAttributes.Writable);
                 this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
-            }
-            else
-            {
-                // The empty function doesn't have an instance prototype.
-                // i.e. Object.getPrototypeOf(Function).prototype === null
-                this.FastSetProperty("prototype", Null.Value, PropertyAttributes.Sealed);
             }
         }
 
