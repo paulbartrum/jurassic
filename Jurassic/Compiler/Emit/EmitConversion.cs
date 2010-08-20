@@ -411,10 +411,7 @@ namespace Jurassic.Compiler
             {
                 case PrimitiveType.Undefined:
                 case PrimitiveType.Null:
-                    // Converting from undefined or null throws an exception.
-                    // TODO: should throw the error at runtime.
-                    throw new InvalidOperationException("Cannot convert null or undefined to an object.");
-
+                    // Converting from undefined or null always throws an exception.
                 case PrimitiveType.Bool:
                 case PrimitiveType.Int32:
                 case PrimitiveType.UInt32:
