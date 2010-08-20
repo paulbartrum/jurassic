@@ -21,6 +21,8 @@ namespace Jurassic
         {
             if (obj == null || obj == Undefined.Value)
                 return "undefined";
+            if (obj == Null.Value)
+                return "object";
             if (obj is bool)
                 return "boolean";
             if (obj is double || obj is int)

@@ -1148,6 +1148,7 @@ namespace UnitTests
         {
             Assert.AreEqual("undefined", TestUtils.Evaluate("typeof abcdefg"));
             Assert.AreEqual("undefined", TestUtils.Evaluate("typeof undefined"));
+            Assert.AreEqual("object", TestUtils.Evaluate("typeof null"));
             Assert.AreEqual("undefined", TestUtils.Evaluate("typeof Math.abcdefg"));
             Assert.AreEqual("boolean", TestUtils.Evaluate("typeof true"));
             Assert.AreEqual("number", TestUtils.Evaluate("typeof 1"));
