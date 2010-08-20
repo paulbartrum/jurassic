@@ -55,6 +55,7 @@
     <Compile Include="IETestCenter\IETestCenter.cs" />
     <Compile Include="Library\ArrayTests.cs" />
     <Compile Include="Core\FunctionBinderTests.cs" />
+    <Compile Include="Library\BooleanTests.cs" />
     <Compile Include="Library\JSONTests.cs" />
     <Compile Include="Library\FunctionTests.cs" />
     <Compile Include="Core\TypeConverterTests.cs" />
