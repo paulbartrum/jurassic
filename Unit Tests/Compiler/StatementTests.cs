@@ -187,6 +187,15 @@ namespace UnitTests
             Assert.AreEqual(10, TestUtils.Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } x.b"));
             Assert.AreEqual(5, TestUtils.Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } Object.getPrototypeOf(x).b"));
 
+            // With inside a function.
+            Assert.AreEqual(1, TestUtils.Evaluate("function foo() { with ({ a: 1 }) { return a; } } foo()"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; function foo() { with (x) { return a; } } foo()"));
+            Assert.AreEqual(2, TestUtils.Evaluate("x = { a: 1 }; function foo() { with (x) { a = 2; } } foo(); x.a"));
+            Assert.AreEqual(2, TestUtils.Evaluate("x = { a: 1 }; var foo = function() { with (x) { a = 2; } }; foo(); x.a"));
+            Assert.AreEqual(2, TestUtils.Evaluate("x = { a: 1 }; y = 2; function foo() { with (x) { return y; } } foo()"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; y = 2; function foo() { with (x) { y = a; } } foo(); y"));
+            Assert.AreEqual(1, TestUtils.Evaluate(@"var x = { eval: 1 }; var f = function(){ with(x){ return st_eval = eval; } }; f();"));
+  
             // With statements are syntax errors in strict mode.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; with (x) { }"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"eval(""'use strict'; var o = {}; with (o) {}"")"));
