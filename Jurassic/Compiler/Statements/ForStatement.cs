@@ -27,10 +27,10 @@ namespace Jurassic.Compiler
         {
             var result = new System.Text.StringBuilder();
             result.Append(new string('\t', indentLevel));
-            result.AppendFormat("for ({0} {1}; {2})",
-                this.InitStatement.ToString(0),
-                this.Condition,
-                this.Increment);
+            result.AppendFormat("for ({0} {1} {2})",
+                this.InitStatement == null ? ";" : this.InitStatement.ToString(0),
+                this.ConditionStatement == null ? ";" : this.ConditionStatement.ToString(),
+                this.IncrementStatement == null ? string.Empty : this.IncrementStatement.ToString());
             result.AppendLine();
             result.Append(this.Body.ToString(indentLevel + 1));
             return result.ToString();
