@@ -115,10 +115,19 @@ namespace Jurassic.Library
 
                 if (this.dense != null)
                 {
-                    // Resize the array.
-                    ResizeDenseArray(this.length);
-                    if (this.length > previousLength)
-                        this.denseMayContainHoles = true;
+                    if (this.length < previousLength + 10)
+                    {
+                        // Resize the array.
+                        ResizeDenseArray(this.length);
+                        if (this.length > previousLength)
+                            this.denseMayContainHoles = true;
+                    }
+                    else
+                    {
+                        // Switch to a sparse array.
+                        this.sparse = SparseArray.FromDenseArray(this.dense);
+                        this.dense = null;
+                    }
                 }
                 else
                 {
