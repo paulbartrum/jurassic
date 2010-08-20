@@ -909,17 +909,18 @@ namespace UnitTests
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("new (String('five'))"));
 
             // Precedence tests.
-            if (TestUtils.Engine != JSEngine.JScript)
-                Assert.AreEqual("[object Object]", TestUtils.Evaluate("(new Function.valueOf()).toString()"));
+            Assert.AreEqual("[object Object]", TestUtils.Evaluate("x = {}; x.f = function() { }; (new x.f()).toString()"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("(new Function.valueOf)()"));  // new (Function.valueOf) is not a function.
             Assert.AreEqual("function anonymous() {\n\n}", TestUtils.Evaluate("(new (Function.valueOf())).toString()"));
             Assert.AreEqual("function anonymous() {\n\n}", TestUtils.Evaluate("((new Function).valueOf()).toString()"));
-            if (TestUtils.Engine != JSEngine.JScript)
-                Assert.AreEqual("[object Object]", TestUtils.Evaluate("(new (Function.valueOf)()).toString()"));
+            Assert.AreEqual("[object Object]", TestUtils.Evaluate("x = {}; x.f = function() { }; (new (x.f)()).toString()"));
 
             // New user-defined function.
             Assert.AreEqual(5, TestUtils.Evaluate("function f() { this.a = 5; return 2; }; a = new f(); a.a"));
             Assert.AreEqual(true, TestUtils.Evaluate("function f() { this.a = 5; return 2; }; a = new f(); Object.getPrototypeOf(a) === f.prototype"));
+
+            // Built-in functions cannot be constructed.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("new Function.valueOf()"));
         }
 
         [TestMethod]

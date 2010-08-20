@@ -324,7 +324,7 @@ namespace Jurassic.Library
                 }
                 parameters[match.Groups.Count] = match.Index;
                 parameters[match.Groups.Count + 1] = input;
-                return replaceFunction.CallLateBound(this.Engine.Global, parameters).ToString();
+                return TypeConverter.ToString(replaceFunction.CallLateBound(this.Engine.Global, parameters));
             });
         }
 

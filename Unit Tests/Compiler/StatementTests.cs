@@ -263,6 +263,7 @@ namespace UnitTests
         public void Function()
         {
             Assert.AreEqual(6, TestUtils.Evaluate("function f(a, b, c) { return a + b + c; } f(1, 2, 3)"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f(a, b, c) { c = a + b; } f(1, 2, 3)"));
 
             // Multiple variable definitions.
             Assert.AreEqual(5, TestUtils.Evaluate("var a = 5; function a() { return 6 }; a"));

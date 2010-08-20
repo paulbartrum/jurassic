@@ -54,8 +54,7 @@ namespace UnitTests
                 Assert.AreEqual(PropertyAttributes.Writable, TestUtils.EvaluateAccessibility("new Function()", "prototype"));
 
                 // prototype of empty function.
-                Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf(Function).prototype === null"));
-                Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("Object.getPrototypeOf(Function)", "prototype"));
+                Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf(Function).prototype === undefined"));
 
                 // [[Prototype]]
                 Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf(new Function()) === Function.prototype"));
@@ -64,9 +63,10 @@ namespace UnitTests
                 Assert.AreEqual(true, TestUtils.Evaluate("Object.getPrototypeOf((function() {}).prototype) === Object.prototype"));
             }
 
-            // prototype of built-in function.
-            Assert.AreEqual(true, TestUtils.Evaluate("Math.sin.prototype !== Math.cos.prototype"));
-            Assert.AreEqual(true, TestUtils.Evaluate("Math.toString.prototype !== Object.prototype"));
+            // prototype of built-in functions should be undefined.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Math.sin.prototype"));
+
+            // prototype of new functions should be a new object.
             Assert.AreEqual(true, TestUtils.Evaluate("Function('a+b').prototype !== Object.prototype"));
             Assert.AreEqual("object", TestUtils.Evaluate("typeof(Function('a+b').prototype)"));
 
