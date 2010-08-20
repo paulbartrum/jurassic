@@ -1335,7 +1335,28 @@ namespace Jurassic.Compiler
         /// Gets or sets a mapping from token -> operator.  There can be at most two operators per
         /// token (the prefix version and the infix/postfix version).
         /// </summary>
-        private static Dictionary<OperatorKey, Operator> operatorLookup;
+        private static Lazy<Dictionary<OperatorKey, Operator>> operatorLookup = new Lazy<Dictionary<OperatorKey,Operator>>(InitializeOperatorLookup);
+
+        /// <summary>
+        /// Initializes the token -> operator mapping dictionary.
+        /// </summary>
+        /// <returns> The token -> operator mapping dictionary. </returns>
+        private static Dictionary<OperatorKey, Operator> InitializeOperatorLookup()
+        {
+            var operatorLookup = new Dictionary<OperatorKey, Operator>(55);
+            foreach (var @operator in Operator.AllOperators)
+            {
+                operatorLookup.Add(new OperatorKey() { Token = @operator.Token, PostfixOrInfix = @operator.HasLHSOperand }, @operator);
+                if (@operator.SecondaryToken != null)
+                {
+                    // Note: the secondary token for the grouping operator and function call operator ')' is a duplicate.
+                    operatorLookup[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = @operator.HasRHSOperand }] = @operator;
+                    if (@operator.InnerOperandIsOptional == true)
+                        operatorLookup[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = false }] = @operator;
+                }
+            }
+            return operatorLookup;
+        }
 
         /// <summary>
         /// Finds a operator given a token and an indication whether the prefix or infix/postfix
@@ -1347,24 +1368,8 @@ namespace Jurassic.Compiler
         /// <returns> An Operator instance, or <c>null</c> if the operator could not be found. </returns>
         private static Operator OperatorFromToken(Token token, bool postfixOrInfix)
         {
-            if (operatorLookup == null)
-            {
-                operatorLookup = new Dictionary<OperatorKey, Operator>(55);
-                foreach (var @operator in Operator.AllOperators)
-                {
-                    operatorLookup.Add(new OperatorKey() { Token = @operator.Token, PostfixOrInfix = @operator.HasLHSOperand }, @operator);
-                    if (@operator.SecondaryToken != null)
-                    {
-                        // Note: the secondary token for the grouping operator and function call operator ')' is a duplicate.
-                        operatorLookup[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = @operator.HasRHSOperand }] = @operator;
-                        if (@operator.InnerOperandIsOptional == true)
-                            operatorLookup[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = false }] = @operator;
-                    }
-                }
-            }
-
             Operator result;
-            if (operatorLookup.TryGetValue(new OperatorKey() { Token = token, PostfixOrInfix = postfixOrInfix }, out result) == false)
+            if (operatorLookup.Value.TryGetValue(new OperatorKey() { Token = token, PostfixOrInfix = postfixOrInfix }, out result) == false)
                 return null;
             return result;
         }
