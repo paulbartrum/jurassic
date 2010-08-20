@@ -122,7 +122,7 @@ namespace Jurassic.Compiler
         /// <param name="name"> The name of the variable. </param>
         /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
         /// function declarations (not function expressions). </param>
-        internal override void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope, SourceCodeSpan debugInfo)
+        internal override void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope)
         {
             // Variables can be added to a declarative scope using eval().  When this happens the
             // values array needs to be resized.  That check happens here.
@@ -132,12 +132,12 @@ namespace Jurassic.Compiler
             // The normal case is to delegate to the Scope class.
             if (this.preventExtensions == false)
             {
-                base.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
+                base.DeclareVariableOrFunction(name, valueAtTopOfScope);
                 return;
             }
 
             // Variables cannot be declared in this scope - try the parent scope.
-            this.ParentScope.DeclareVariableOrFunction(name, valueAtTopOfScope, debugInfo);
+            this.ParentScope.DeclareVariableOrFunction(name, valueAtTopOfScope);
         }
 
         /// <summary>

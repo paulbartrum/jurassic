@@ -312,7 +312,7 @@ namespace Jurassic.Compiler
                 generator.Duplicate();
                 var endOfIf2 = generator.CreateLabel();
                 generator.BranchIfNotNull(endOfIf2);
-                EmitHelpers.EmitThrow(generator, "EvalError", "Internal error: incorrect runtime scope type");
+                EmitHelpers.EmitThrow(generator, "EvalError", string.Format("Internal error: incorrect runtime scope type (expected {0})", scope.GetType().Name));
                 generator.DefineLabelPosition(endOfIf2);
 
                 // scope = scope.ParentScope

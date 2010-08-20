@@ -87,7 +87,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the position of the next token.
+        /// Gets the position just after the last character of the previously consumed token.
         /// </summary>
         public SourceCodePosition PositionBeforeWhitespace
         {
@@ -95,7 +95,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the position of the next token.
+        /// Gets the position of the first character of the next token.
         /// </summary>
         public SourceCodePosition PositionAfterWhitespace
         {
@@ -1137,7 +1137,7 @@ namespace Jurassic.Compiler
             var expression = ParseFunction(FunctionType.Declaration);
 
             // Add the function to the scope.
-            this.currentScope.DeclareFunction(expression.Context.Name, expression, null);
+            this.currentScope.DeclareFunction(expression.Context.Name, expression);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1221,6 +1221,9 @@ namespace Jurassic.Compiler
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
 
+            // Record the start of the function body.
+            var startPosition = this.PositionBeforeWhitespace;
+
             // Read the start brace.
             this.Expect(PunctuatorToken.LeftBrace);
 
@@ -1238,22 +1241,30 @@ namespace Jurassic.Compiler
             this.nextToken = functionParser.nextToken;
             this.lexer.ExpressionStateCallback = () => this.expressionState;
 
+            SourceCodePosition endPosition;
             if (functionType == FunctionType.Expression)
             {
                 // The end token '}' will be consumed by the parent function.
                 if (this.nextToken != PunctuatorToken.RightBrace)
                     throw new JavaScriptException(this.engine, "SyntaxError", "Expected '}'", this.LineNumber, this.SourcePath);
+
+                // Record the end of the function body.
+                endPosition = new SourceCodePosition(this.PositionAfterWhitespace.Line, this.PositionAfterWhitespace.Column + 1);
             }
             else
             {
                 // Consume the '}'.
                 this.Expect(PunctuatorToken.RightBrace);
+
+                // Record the end of the function body.
+                endPosition = new SourceCodePosition(this.PositionAfterWhitespace.Line, this.PositionAfterWhitespace.Column + 1);
             }
 
             // Create a new function expression.
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
-            var context = new FunctionMethodGenerator(this.engine, scope, functionName, argumentNames, body, this.SourcePath, options);
+            var context = new FunctionMethodGenerator(this.engine, scope, functionName, argumentNames, body,
+                this.SourcePath, options);
             context.Optimizations = functionParser.methodOptimizationHints;
             return new FunctionExpression(context);
         }
