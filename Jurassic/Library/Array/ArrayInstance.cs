@@ -255,7 +255,7 @@ namespace Jurassic.Library
                 else
                 {
                     // The index is out of range - either enlarge the array or switch to sparse.
-                    if (index < this.dense.Length * 2 + 10)
+                    if (index < this.dense.Length + 10)
                     {
                         // Enlarge the dense array.
                         ResizeDenseArray((uint)(this.dense.Length * 2 + 10));
@@ -1426,74 +1426,44 @@ namespace Jurassic.Library
         /// <param name="end"> The last index in the range. </param>
         private static void QuickSort(ObjectInstance array, Comparison<object> comparer, uint start, uint end)
         {
-            do
+            if (end - start < 30)
             {
-                uint low = start;
-                uint high = end;
+                // Insertion sort is faster than quick sort for small arrays.
+                InsertionSort(array, comparer, start, end);
+            }
 
-                // Median of three.
-                uint median = low + (high - low) / 2;
-                SwapIfGreater(array, comparer, low, median);
-                SwapIfGreater(array, comparer, low, high);
-                SwapIfGreater(array, comparer, median, high);
+            // Choose a random pivot.
+            uint pivotIndex = start + (uint)(MathObject.Random() * (end - start));
 
-                object y = array[median];
-                do
+            // Get the pivot value.
+            object pivotValue = array[pivotIndex];
+
+            // Send the pivot to the back.
+            Swap(array, pivotIndex, end);
+
+            // Sweep all the low values to the front of the array and the high values to the back
+            // of the array.  This version of quicksort never gets into an infinite loop even if
+            // the comparer function is not consistent.
+            uint newPivotIndex = start;
+            for (uint i = start; i < end; i++)
+            {
+                if (comparer(array[i], pivotValue) <= 0)
                 {
-                    while (comparer(array[low], y) < 0)
-                        low++;
-                    while (comparer(y, array[high]) < 0)
-                        high--;
-                    
-                    if (low >= high)
-                    {
-                        // if low == high then the swap is not needed, however we cannot rely on
-                        // comparison at the end of the loop to exit - high might be 4294967295
-                        // (zero minus one when using unsigned arithmetic).
-                        if (low == high)
-                        {
-                            low++;
-                            high--;
-                        }
-                        break;
-                    }
-
-                    object temp = array[low];
-                    array[low] = array[high];
-                    array[high] = temp;
-
-                    low++;
-                    high--;
-                } while (low <= high);
-
-                // Because we are using unsigned integers for array indices, high can wrap
-                // to uint.MaxValue.
-                if (high == uint.MaxValue)
-                    break;
-
-                if (high - start <= end - low)
-                {
-                    if (start < high)
-                    {
-                        if (high - start < 30)
-                            InsertionSort(array, comparer, start, high);
-                        else
-                            QuickSort(array, comparer, start, high);
-                    }
-                    start = low;
+                    Swap(array, i, newPivotIndex);
+                    newPivotIndex++;
                 }
-                else
-                {
-                    if (low < end)
-                    {
-                        if (end - low < 30)
-                            InsertionSort(array, comparer, low, end);
-                        else
-                            QuickSort(array, comparer, low, end);
-                    }
-                    end = high;
-                }
-            } while (start < end);
+            }
+
+            // Swap the pivot back to where it belongs.
+            Swap(array, end, newPivotIndex);
+
+            // Quick sort the array to the left of the pivot.
+            if (newPivotIndex > start)
+                QuickSort(array, comparer, start, newPivotIndex - 1);
+
+            // Quick sort the array to the right of the pivot.
+            if (newPivotIndex < end)
+                QuickSort(array, comparer, newPivotIndex + 1, end);
         }
 
         /// <summary>
@@ -1526,23 +1496,16 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Swaps the elements at two locations in the array, if the first element is greater than
-        /// the second element.
+        /// Swaps the elements at two locations in the array.
         /// </summary>
         /// <param name="array"> The array object. </param>
-        /// <param name="comparer"> A comparison function. </param>
         /// <param name="index1"> The location of the first element. </param>
         /// <param name="index2"> The location of the second element. </param>
-        private static void SwapIfGreater(ObjectInstance array, Comparison<object> comparer, uint index1, uint index2)
+        private static void Swap(ObjectInstance array, uint index1, uint index2)
         {
-            if (index1 == index2)
-                return;
-            if (comparer(array[index1], array[index2]) > 0)
-            {
-                object obj2 = array[index1];
-                array[index1] = array[index2];
-                array[index2] = obj2;
-            }
+            object temp = array[index1];
+            array[index1] = array[index2];
+            array[index2] = temp;
         }
     }
 }

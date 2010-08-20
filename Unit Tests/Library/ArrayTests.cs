@@ -497,6 +497,11 @@ namespace UnitTests
             Assert.AreEqual(21, TestUtils.Evaluate("array[3]"));
 
             // Try sorting some small arrays.
+            TestUtils.Evaluate("var array = ['a', 'c', 'b'].sort()");
+            Assert.AreEqual("a", TestUtils.Evaluate("array[0]"));
+            Assert.AreEqual("b", TestUtils.Evaluate("array[1]"));
+            Assert.AreEqual("c", TestUtils.Evaluate("array[2]"));
+            Assert.AreEqual(3, TestUtils.Evaluate("array.length"));
             TestUtils.Evaluate("var array = ['a', 'b'].sort()");
             Assert.AreEqual("a", TestUtils.Evaluate("array[0]"));
             Assert.AreEqual("b", TestUtils.Evaluate("array[1]"));
@@ -510,6 +515,17 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("array.length"));
             TestUtils.Evaluate("var array = [].sort()");
             Assert.AreEqual(0, TestUtils.Evaluate("array.length"));
+
+            // Ensure an inconsistant sort routine doesn't cause an infinite loop.
+            Assert.AreEqual(0, TestUtils.Evaluate("array.length"));
+            TestUtils.Evaluate(@"
+                var badCompareFunction = function(x,y) {
+                  if (x === undefined) return -1; 
+                  if (y === undefined) return 1;
+                  return 0;
+                }");
+            TestUtils.Evaluate(@"var x = new Array(2); x[1] = 1; x.sort(badCompareFunction);");
+            TestUtils.Evaluate(@"var x = new Array(2); x[0] = 1; x.sort(badCompareFunction);");
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.sort.length"));
