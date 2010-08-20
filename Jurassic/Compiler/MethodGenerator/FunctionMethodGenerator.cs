@@ -190,6 +190,10 @@ namespace Jurassic.Compiler
             // Make function optimization information available to all code generation methods.
             optimizationInfo.FunctionOptimizationInfo = this.Optimizations;
 
+            // Set up information needed by the return statement.
+            optimizationInfo.ReturnTarget = generator.CreateLabel();
+            optimizationInfo.ReturnVariable = generator.DeclareVariable(typeof(object));
+
             // Create a new scope.
             this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
             
@@ -292,8 +296,11 @@ namespace Jurassic.Compiler
             // Generate code for the body of the function.
             this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);
 
-            // Return undefined if control gets to the end of the function.
-            EmitHelpers.EmitUndefined(generator);
+            // Define the return target - this is where the return statement jumps to.
+            generator.DefineLabelPosition(optimizationInfo.ReturnTarget);
+
+            // Load the return value.
+            generator.LoadVariable(optimizationInfo.ReturnVariable);
         }
 
         /// <summary>
