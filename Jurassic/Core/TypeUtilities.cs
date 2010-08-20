@@ -127,13 +127,16 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Determines if the given type is a supported JavaScript primitive type.
+        /// Determines if the given value is a supported JavaScript primitive.
         /// </summary>
-        /// <param name="type"> The type to test. </param>
-        /// <returns> <c>true</c> if the given type is a supported JavaScript primitive type;
+        /// <param name="value"> The value to test. </param>
+        /// <returns> <c>true</c> if the given value is a supported JavaScript primitive;
         /// <c>false</c> otherwise. </returns>
-        internal static bool IsPrimitiveType(Type type)
+        internal static bool IsPrimitive(object value)
         {
+            if (value == null)
+                return true;
+            var type = value.GetType();
             return type == typeof(bool) || type == typeof(int) || type == typeof(double) ||
                 type == typeof(string) || type == typeof(Null) || type == typeof(Undefined);
         }

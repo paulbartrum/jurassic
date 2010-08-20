@@ -810,7 +810,7 @@ namespace Jurassic.Library
                 if (TryCallMemberFunction(out valueOfResult, "valueOf") == true)
                 {
                     // Return value must be primitive.
-                    if (valueOfResult is double || TypeUtilities.IsPrimitiveType(valueOfResult.GetType()) == true)
+                    if (valueOfResult is double || TypeUtilities.IsPrimitive(valueOfResult) == true)
                         return valueOfResult;
                 }
 
@@ -819,7 +819,7 @@ namespace Jurassic.Library
                 if (TryCallMemberFunction(out toStringResult, "toString") == true)
                 {
                     // Return value must be primitive.
-                    if (toStringResult is string || TypeUtilities.IsPrimitiveType(toStringResult.GetType()) == true)
+                    if (toStringResult is string || TypeUtilities.IsPrimitive(toStringResult) == true)
                         return toStringResult;
                 }
 
@@ -832,7 +832,7 @@ namespace Jurassic.Library
                 if (TryCallMemberFunction(out toStringResult, "toString") == true)
                 {
                     // Return value must be primitive.
-                    if (toStringResult is string || TypeUtilities.IsPrimitiveType(toStringResult.GetType()) == true)
+                    if (toStringResult is string || TypeUtilities.IsPrimitive(toStringResult) == true)
                         return toStringResult;
                 }
 
@@ -841,7 +841,7 @@ namespace Jurassic.Library
                 if (TryCallMemberFunction(out valueOfResult, "valueOf") == true)
                 {
                     // Return value must be primitive.
-                    if (valueOfResult is double || TypeUtilities.IsPrimitiveType(valueOfResult.GetType()) == true)
+                    if (valueOfResult is double || TypeUtilities.IsPrimitive(valueOfResult) == true)
                         return valueOfResult;
                 }
 
