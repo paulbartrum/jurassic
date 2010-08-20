@@ -32,7 +32,16 @@ namespace Jurassic.Library
         {
             if (pattern == null)
                 throw new ArgumentNullException("pattern");
-            this.value = new Regex(pattern, ParseFlags(flags));
+
+            try
+            {
+                this.value = new Regex(pattern, ParseFlags(flags));
+            }
+            catch (ArgumentException ex)
+            {
+                // Wrap the exception so that it can be caught within javascript code.
+                throw new JavaScriptException(this.Engine, "SyntaxError", "Invalid regular expression - " + ex.Message);
+            }
 
             // Initialize the javascript properties.
             this.FastSetProperty("source", pattern);
