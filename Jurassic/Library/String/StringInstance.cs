@@ -170,7 +170,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "indexOf", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
         public static int IndexOf(string thisObject, string substring, int startIndex = 0)
         {
-            startIndex = Math.Min(Math.Max(startIndex, 0), thisObject.Length - 1);
+            startIndex = Math.Min(Math.Max(startIndex, 0), thisObject.Length);
             return thisObject.IndexOf(substring, startIndex, StringComparison.Ordinal);
         }
 
@@ -188,7 +188,13 @@ namespace Jurassic.Library
             // Limit startIndex to the length of the string.  This must be done first otherwise
             // when startIndex = MaxValue it wraps around to negative.
             startIndex = Math.Min(startIndex, thisObject.Length - 1);
-            startIndex = Math.Min(Math.Max(startIndex + substring.Length - 1, 0), thisObject.Length - 1);
+            startIndex = Math.Min(startIndex + substring.Length - 1, thisObject.Length - 1);
+            if (startIndex < 0)
+            {
+                if (thisObject == string.Empty && substring == string.Empty)
+                    return 0;
+                return -1;
+            }
             return thisObject.LastIndexOf(substring, startIndex, StringComparison.Ordinal);
         }
 
@@ -267,7 +273,7 @@ namespace Jurassic.Library
         public static string Replace(string thisObject, string substr, string replaceText)
         {
             // Find the first occurrance of substr.
-            int start = thisObject.IndexOf(substr);
+            int start = thisObject.IndexOf(substr, StringComparison.Ordinal);
             if (start == -1)
                 return thisObject;
             int end = start + substr.Length;
@@ -290,7 +296,7 @@ namespace Jurassic.Library
         public static string Replace(string thisObject, string substr, FunctionInstance replaceFunction)
         {
             // Find the first occurrance of substr.
-            int start = thisObject.IndexOf(substr);
+            int start = thisObject.IndexOf(substr, StringComparison.Ordinal);
             if (start == -1)
                 return thisObject;
             int end = start + substr.Length;
@@ -338,7 +344,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "search", Flags = FunctionBinderFlags.HasThisObject | FunctionBinderFlags.Preferred)]
         public static int Search(string thisObject, string substr = "")
         {
-            return thisObject.IndexOf(substr);
+            return thisObject.IndexOf(substr, StringComparison.Ordinal);
         }
 
         /// <summary>

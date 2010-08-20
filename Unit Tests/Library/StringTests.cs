@@ -229,6 +229,9 @@ namespace UnitTests
             Assert.AreEqual(3, TestUtils.Evaluate("'onetwothree'.indexOf('two', -400)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.indexOf('two', 400)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.indexOf('no')"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.indexOf('e', 400)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("''.indexOf('no')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("''.indexOf('')"));
 
             // length
             if (TestUtils.Engine != JSEngine.JScript)
@@ -263,6 +266,9 @@ namespace UnitTests
             Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.lastIndexOf('two', -400)"));
             Assert.AreEqual(6, TestUtils.Evaluate("'onetwothree'.lastIndexOf('three')"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.lastIndexOf('no')"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.lastIndexOf('o', -400)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("''.lastIndexOf('no')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("''.lastIndexOf('')"));
 
             // length
             if (TestUtils.Engine != JSEngine.JScript)
