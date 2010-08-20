@@ -42,7 +42,14 @@ namespace Jurassic.Library
         /// </summary>
         public ObjectInstance InstancePrototype
         {
-            get { return this["prototype"] as ObjectInstance; }
+            get
+            {
+                // See 13.2.2
+                var prototype = this["prototype"] as ObjectInstance;
+                if (prototype == null)
+                    return this.Engine.Object.InstancePrototype;
+                return prototype;
+            }
         }
 
         /// <summary>
