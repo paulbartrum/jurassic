@@ -556,6 +556,8 @@ namespace Jurassic.Compiler
                     if (c1 == 0x0D && c2 == 0x0A)   // CRLF
                         c1 = c2 = ReadNextChar();
                 }
+                else if (c2 == -1)
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in multi-line comment.", this.lineNumber, this.Source.Path);
 
                 // Look for */ combination.
                 if (c1 == '*' && c2 == '/')
