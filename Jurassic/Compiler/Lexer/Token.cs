@@ -16,6 +16,22 @@ namespace Jurassic.Compiler
             get;
         }
 
+        /// <summary>
+        /// Converts the token to the string suitable for embedding in an error message.
+        /// </summary>
+        /// <param name="token"> The token to convert.  Can be <c>null</c>. </param>
+        /// <returns> A string suitable for embedding in an error message. </returns>
+        public static string ToText(Token token)
+        {
+            if (token == null)
+                return "end of input";
+            return string.Format("'{0}'", token.Text);
+        }
+
+        /// <summary>
+        /// Converts the token to a string representation.
+        /// </summary>
+        /// <returns> A textual representation of the object. </returns>
         public override string ToString()
         {
             return string.Format("{0} [{1}]", this.Text, this.GetType().Name);
