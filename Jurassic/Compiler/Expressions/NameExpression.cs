@@ -106,7 +106,10 @@ namespace Jurassic.Compiler
                         if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
                         {
                             // Check the variable exists: if (scope.HasValue(variableName) == true) {
-                            EmitHelpers.LoadScope(generator);
+                            if (scopeVariable == null)
+                                EmitHelpers.LoadScope(generator);
+                            else
+                                generator.LoadVariable(scopeVariable);
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.LoadString(this.Name);
                             generator.Call(ReflectionHelpers.Scope_HasValue);
@@ -114,7 +117,10 @@ namespace Jurassic.Compiler
                             generator.BranchIfFalse(hasValueClause);
 
                             // Load the value of the variable.
-                            EmitHelpers.LoadScope(generator);
+                            if (scopeVariable == null)
+                                EmitHelpers.LoadScope(generator);
+                            else
+                                generator.LoadVariable(scopeVariable);
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.LoadString(this.Name);
                             generator.Call(ReflectionHelpers.Scope_GetValue);
@@ -225,7 +231,10 @@ namespace Jurassic.Compiler
                         if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
                         {
                             // Check the variable exists: if (scope.HasValue(variableName) == true) {
-                            EmitHelpers.LoadScope(generator);
+                            if (scopeVariable == null)
+                                EmitHelpers.LoadScope(generator);
+                            else
+                                generator.LoadVariable(scopeVariable);
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.LoadString(this.Name);
                             generator.Call(ReflectionHelpers.Scope_HasValue);
@@ -233,7 +242,10 @@ namespace Jurassic.Compiler
                             generator.BranchIfFalse(hasValueClause);
 
                             // Set the value of the variable.
-                            EmitHelpers.LoadScope(generator);
+                            if (scopeVariable == null)
+                                EmitHelpers.LoadScope(generator);
+                            else
+                                generator.LoadVariable(scopeVariable);
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.LoadString(this.Name);
                             generator.LoadVariable(valueVariable);
@@ -339,7 +351,7 @@ namespace Jurassic.Compiler
                         if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
                         {
                             // Check the variable exists: if (scope.HasValue(variableName) == true) {
-                            EmitHelpers.LoadScope(generator);
+                            generator.LoadVariable(scopeVariable);
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.LoadString(this.Name);
                             generator.Call(ReflectionHelpers.Scope_HasValue);
@@ -347,7 +359,7 @@ namespace Jurassic.Compiler
                             generator.BranchIfFalse(hasValueClause);
 
                             // If the variable does exist, return true.
-                            EmitHelpers.LoadScope(generator);
+                            generator.LoadVariable(scopeVariable);
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.LoadString(this.Name);
                             generator.Call(ReflectionHelpers.Scope_Delete);
