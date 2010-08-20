@@ -69,6 +69,10 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("Math.toString.prototype !== Object.prototype"));
             Assert.AreEqual(true, TestUtils.Evaluate("Function('a+b').prototype !== Object.prototype"));
             Assert.AreEqual("object", TestUtils.Evaluate("typeof(Function('a+b').prototype)"));
+
+            // The prototype property becomes the prototype of new objects (as long as the prototype property is an object).
+            Assert.AreEqual(true, TestUtils.Evaluate("f = function() { }; x = {}; f.prototype = x; Object.getPrototypeOf(new f()) === x"));
+            Assert.AreEqual(true, TestUtils.Evaluate("f = function() { }; x = 5; f.prototype = x; Object.getPrototypeOf(new f()) === Object.prototype"));
         }
 
         [TestMethod]
