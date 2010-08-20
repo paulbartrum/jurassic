@@ -1016,6 +1016,8 @@ namespace UnitTests
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "TypeError" : "ReferenceError", TestUtils.EvaluateExceptionType("abcdefghij"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5.toString"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("qwerty345.prop"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("null.prop"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("undefined.prop"));
         }
 
         [TestMethod]
