@@ -191,7 +191,7 @@ namespace Jurassic.Compiler
             if (this.nextToken == token)
                 Consume();
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected '{0}' but found '{1}'", token.Text, this.nextToken.Text), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected '{0}' but found {1}", token.Text, Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace Jurassic.Compiler
             }
             else
             {
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected identifier but found '{0}'", this.nextToken.Text), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected identifier but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
             }
         }
 
@@ -254,7 +254,7 @@ namespace Jurassic.Compiler
                     return;
 
                 // Otherwise, throw an error.
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected ';' but found '{0}'", this.nextToken.Text), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected ';' but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
             }
         }
 
@@ -689,7 +689,7 @@ namespace Jurassic.Compiler
                         break;
                     }
                     else if (this.nextToken != PunctuatorToken.Comma)
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token '{0}'", this.nextToken.Text), 1, "");
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0}", Token.ToText(this.nextToken)), 1, "");
 
                     // Read past the comma token.
                     this.Expect(PunctuatorToken.Comma);
@@ -1403,7 +1403,7 @@ namespace Jurassic.Compiler
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                             break;
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected operator but found '{0}'", this.nextToken.Text), this.LineNumber, this.SourcePath);
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected operator but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
                     // New in ECMAScript 5 is the ability to use keywords as property names.
@@ -1475,7 +1475,7 @@ namespace Jurassic.Compiler
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && (this.consumedLineTerminator == true || this.nextToken == PunctuatorToken.RightBrace))
                             break;
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token '{0}' in expression.", this.nextToken.Text), this.LineNumber, this.SourcePath);
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0} in expression.", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
                     // There are four possibilities:
@@ -1621,7 +1621,7 @@ namespace Jurassic.Compiler
                 }
                 else
                 {
-                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token '{0}' in expression", this.nextToken.Text), this.LineNumber, this.SourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0} in expression", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                 }
 
                 // Read the next token.
@@ -1630,7 +1630,7 @@ namespace Jurassic.Compiler
 
             // Empty expressions are invalid.
             if (root == null)
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected an expression but found '{0}' instead", this.nextToken.Text), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Resolve all the unbound operators into real operators.
             return root;
@@ -1807,7 +1807,7 @@ namespace Jurassic.Compiler
                 {
                     object literalValue = ((LiteralToken)this.nextToken).Value;
                     if ((literalValue is string || literalValue is double || literalValue is int) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found '{0}'", this.nextToken.Text), 1, "");
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), 1, "");
                     propertyName = ((LiteralToken)this.nextToken).Value.ToString();
                 }
                 wasIdentifier = false;
@@ -1825,7 +1825,7 @@ namespace Jurassic.Compiler
                 wasIdentifier = false;
             }
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found '{0}'", this.nextToken.Text), 1, "");
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), 1, "");
 
             // Consume the token.
             this.Consume();
