@@ -221,6 +221,8 @@ namespace Jurassic.Library
         {
             if (radix < 2 || radix > 36)
                 throw new JavaScriptException(this.Engine, "RangeError", "The radix must be between 2 and 36, inclusive.");
+            if (radix == 10)
+                return NumberToString(this.value);
             return NumberToString(this.value, radix);
         }
 
@@ -290,25 +292,23 @@ namespace Jurassic.Library
         private static void OutputDigits(double value, int e, System.Text.StringBuilder result)
         {
             bool decimalPointOutput = false;
-            double factor = Math.Pow(10, -e);
             double residual = 0;
-            int sigFigsOutput = 0;
+            int sigFigsOutput = 0, insignificantZerosOutput = 0;
             if (e >= 0)
             {
-                // output e + 1 decimal digits (but at most 16).
-                sigFigsOutput = Math.Min(e + 1, 16);
+                // output e + 1 decimal digits (but at most 17).
+                sigFigsOutput = Math.Min(e + 1, 17);
                 for (int i = 0; i < sigFigsOutput; i++)
                 {
-                    int digit = (int)(value * factor - residual);
+                    int digit = (int)(value * Math.Pow(10, i - e) - residual);
                     result.Append((char)('0' + digit));
-                    factor *= 10.0;
                     residual = (residual + digit) * 10;
                 }
 
                 // output any more digits as zeros.
-                if (e - 15 > 0)
+                if (e > 16)
                 {
-                    result.Append('0', e - 15);
+                    result.Append('0', e - 16);
                     sigFigsOutput = e + 1;
                 }
             }
@@ -319,16 +319,24 @@ namespace Jurassic.Library
                 result.Append('.');
                 result.Append('0', -e - 1);
                 decimalPointOutput = true;
+                insignificantZerosOutput = -e - 1;
             }
 
             int zeroCount = 0;
             for (int i = 0; i < 16 - sigFigsOutput; i++)
             {
                 int digit;
-                if (i < 14 - e)
-                    digit = (int)(value * factor - residual);
+                if (i < 16 - sigFigsOutput - 1)
+                {
+                    // Calculate the next digit.
+                    digit = (int)(value * Math.Pow(10, insignificantZerosOutput + i + 1) - residual);
+                }
                 else
-                    digit = (int)Math.Round(value * factor - residual);
+                {
+                    // Round the last digit.
+                    digit = (int)Math.Round(value * Math.Pow(10, insignificantZerosOutput + i + 1) - residual);
+                }
+
                 if (digit <= 0)
                 {
                     // Keep a count of pent-up zeros.
@@ -349,7 +357,7 @@ namespace Jurassic.Library
                     // Output the digit.
                     result.Append((char)('0' + digit));
                 }
-                factor *= 10.0;
+                //factor *= 10.0;
                 residual = (residual + digit) * 10;
             }
         }
@@ -360,17 +368,12 @@ namespace Jurassic.Library
         /// <param name="value"> The value to convert. </param>
         /// <param name="radix"> Specifies a radix for converting numeric values to strings. </param>
         /// <returns> The textual representation of the number. </returns>
-        internal static string NumberToString(double value, int radix = 10)
+        internal static string NumberToString(double value, int radix)
         {
-            // Check for common case: base 10.
-            if (radix == 10)
-                return NumberToString(value);
-
             // Handle NaN.
             if (double.IsNaN(value))
                 return "NaN";
 
-            // This is an unusual base.
             var result = new System.Text.StringBuilder(10);
 
             // Handle negative numbers.
