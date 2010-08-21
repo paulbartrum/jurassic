@@ -104,13 +104,18 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.Equals("5.5", engine.Object.Construct()));
             Assert.AreEqual(true,  TypeComparer.Equals("5.5", engine.Number.Construct(5.5)));
             Assert.AreEqual(true,  TypeComparer.Equals("5.5", engine.String.Construct("5.5")));
+            Assert.AreEqual(true,  TypeComparer.Equals("", engine.String.Construct()));
+            Assert.AreEqual(true,  TypeComparer.Equals("", engine.String.Construct("")));
 
             // Object.
             var temp = engine.Object.Construct();
             Assert.AreEqual(true, TypeComparer.Equals(temp, temp));
             Assert.AreEqual(false, TypeComparer.Equals(engine.Object.Construct(), engine.Object.Construct()));
             Assert.AreEqual(false, TypeComparer.Equals(engine.Number.Construct(5.5), engine.Number.Construct(5.5)));
+            Assert.AreEqual(true, TypeComparer.Equals(engine.Number.Construct(5.5), 5.5));
             Assert.AreEqual(false, TypeComparer.Equals(engine.String.Construct("5.5"), engine.String.Construct("5.5")));
+            Assert.AreEqual(true, TypeComparer.Equals(engine.String.Construct("5.5"), 5.5));
+            Assert.AreEqual(true, TypeComparer.Equals(engine.String.Construct(""), ""));
         }
 
         [TestMethod]
