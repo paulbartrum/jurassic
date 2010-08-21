@@ -230,6 +230,9 @@ namespace UnitTests
                 Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.max('bob')"));
                 Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.max('bob', 'dick', 'harry')"));
             }
+
+            // length
+            Assert.AreEqual(2, TestUtils.Evaluate("Math.max.length"));
         }
 
         [TestMethod]
@@ -254,6 +257,9 @@ namespace UnitTests
                 Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.min('bob')"));
                 Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.min('bob', 'dick', 'harry')"));
             }
+
+            // length
+            Assert.AreEqual(2, TestUtils.Evaluate("Math.min.length"));
         }
 
         [TestMethod]
