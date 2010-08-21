@@ -248,32 +248,6 @@ namespace Jurassic.Compiler
                 //reader.Accept(visitor);
                 //string il = writer.ToString();
 
-                //// set the entry point for the application and save it
-                //assemblyBuilder.Save(System.IO.Path.GetFileName(filePath));
-
-                //// Copy this DLL there as well.
-                //var assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                //System.IO.File.Copy(assemblyPath, System.IO.Path.Combine(System.IO.Path.GetDirectoryName(filePath), System.IO.Path.GetFileName(assemblyPath)), true);
-
-                //var startInfo = new System.Diagnostics.ProcessStartInfo();
-                //startInfo.FileName = @"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools\x64\PEVerify.exe";
-                //startInfo.Arguments = string.Format("\"{0}\" /nologo /verbose /unique", filePath);
-                //startInfo.CreateNoWindow = true;
-                //startInfo.RedirectStandardOutput = true;
-                //startInfo.UseShellExecute = false;
-                //var verifyProcess = System.Diagnostics.Process.Start(startInfo);
-                //string output = verifyProcess.StandardOutput.ReadToEnd();
-
-                //if (verifyProcess.ExitCode != 0)
-                //{
-                //    throw new InvalidOperationException(output);
-                //}
-                //else
-                //{
-                //    //System.Diagnostics.Process.Start(@"C:\Program Files\Reflector\Reflector.exe", string.Format("\"{0}\" /select:JavaScriptClass", filePath));
-                //    //Environment.Exit(0);
-                //}
-
                 this.CompiledDelegate = Delegate.CreateDelegate(GetDelegate(), this.GeneratedMethod);
             }
         }
