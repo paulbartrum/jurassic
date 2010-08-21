@@ -259,10 +259,12 @@ namespace Jurassic.Library
 
             if (e >= -6 && e <= 20)
             {
+                // Fixed-point notation.
                 OutputDigits(value, e, result);
             }
             else
             {
+                // Scientific notation.
                 value *= Math.Pow(10, -e);
                 value += 0.0000000000000001;
                 OutputDigits(value, 0, result);
@@ -273,45 +275,17 @@ namespace Jurassic.Library
             }
 
             return result.ToString();
-
-            //if (n >= k && n <= 21)
-            //{
-            //    // The number is an integer.
-            //    result.Append(value.ToString("f0", CultureInfo.InvariantCulture));
-            //    return result.ToString();
-            //}
-
-            //if (n > 0 && n <= 21)
-            //{
-            //    // The number is an floating point number greater than zero.
-            //    result.Append(value.ToString("f" + (k - n).ToString(), CultureInfo.InvariantCulture));
-            //    return result.ToString();
-            //}
-
-            //if (n > -6 && n <= 0)
-            //{
-            //    // The number is an floating point number between zero and one.
-            //    result.Append(value.ToString("f" + (k - n).ToString(), CultureInfo.InvariantCulture));
-            //    return result.ToString();
-            //}
-
-            //// The number is expressed in scientific notation.
-            //result.Append(value.ToString("f" + (k - 1).ToString(), CultureInfo.InvariantCulture));
-            //result.Append('e');
-            //if (n >= 1)
-            //    result.Append('+');
-            //result.Append(n - 1);
-            //return result.ToString();
         }
 
         /// <summary>
-        /// Outputs the numeric representation of the given value to the given string builder.
+        /// Outputs the fixed-point representation of the given value to the given string builder.
         /// </summary>
         /// <param name="value"> The value to convert. </param>
         /// <param name="e"> The floor of the base 10 logarithm of the number. </param>
         /// <param name="result"> The string builder to hold the result. </param>
         /// <remarks>
-        /// The number must be positive, non-zero, non-infinite, non-NaN.
+        /// The number must be positive, non-zero, non-infinite, non-NaN.  This method is similar
+        /// to ToString("f") but has better precision.
         /// </remarks>
         private static void OutputDigits(double value, int e, System.Text.StringBuilder result)
         {

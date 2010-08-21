@@ -207,6 +207,7 @@ namespace UnitTests
             Assert.AreEqual("10000000000000000000", TestUtils.Evaluate("1e19.toString()"));
             Assert.AreEqual("100000000000000000000", TestUtils.Evaluate("1e20.toString()"));
             Assert.AreEqual("1e+21", TestUtils.Evaluate("1e21.toString()"));
+            Assert.AreEqual("1e+21", TestUtils.Evaluate("999999999999999999999 .toString()"));
             Assert.AreEqual("Infinity", TestUtils.Evaluate("Infinity.toString()"));
             Assert.AreEqual("-Infinity", TestUtils.Evaluate("(-Infinity).toString()"));
             Assert.AreEqual("NaN", TestUtils.Evaluate("NaN.toString()"));
