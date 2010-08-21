@@ -154,6 +154,27 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Gets or sets the value of an array-indexed property.
+        /// </summary>
+        /// <param name="index"> The index of the property to retrieve. </param>
+        /// <returns> The property value, or <c>null</c> if the property doesn't exist. </returns>
+        public object this[int index]
+        {
+            get
+            {
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException("index");
+                return GetPropertyValue((uint)index);
+            }
+            set
+            {
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException("index");
+                SetPropertyValue((uint)index, value, false);
+            }
+        }
+
+        /// <summary>
         /// Gets an enumerable list of every property name and value associated with this object.
         /// </summary>
         public virtual IEnumerable<PropertyNameAndValue> Properties

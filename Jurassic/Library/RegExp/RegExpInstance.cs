@@ -244,8 +244,9 @@ namespace Jurassic.Library
             object[] array = new object[match.Groups.Count];
             for (int i = 0; i < match.Groups.Count; i++)
             {
-                array[i] = match.Groups[i].Value;
-                if (match.Groups[i].Value == string.Empty)
+                var group = match.Groups[i];
+                array[i] = group.Value;
+                if (group.Captures.Count == 0)
                     array[i] = Undefined.Value;
             }
             var result = this.Engine.Array.New(array);
@@ -352,10 +353,9 @@ namespace Jurassic.Library
         /// <param name="input"> The string to split. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public ArrayInstance Split(string input, int limit = int.MaxValue)
+        public ArrayInstance Split(string input, uint limit = uint.MaxValue)
         {
-            // Constrain limit to a positive number.
-            limit = Math.Max(0, limit);
+            // Return an empty array if limit = 0.
             if (limit == 0)
                 return this.Engine.Array.New(new object[0]);
 
@@ -377,6 +377,8 @@ namespace Jurassic.Library
 
                 // Add the match results to the array.
                 results.Add(input.Substring(startIndex, match.Index - startIndex));
+                if (results.Count >= limit)
+                    return this.Engine.Array.New(results.ToArray());
                 startIndex = match.Index + match.Length;
                 for (int i = 1; i < match.Groups.Count; i++)
                 {
