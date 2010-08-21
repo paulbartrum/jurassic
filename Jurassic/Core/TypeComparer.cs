@@ -53,7 +53,7 @@ namespace Jurassic
                 return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.String));
             if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsNumeric(y))
                 return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number), y);
-            if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsString(x))
+            if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsString(y))
                 return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.String), y);
 
             return false;
