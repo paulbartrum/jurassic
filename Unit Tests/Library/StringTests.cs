@@ -409,6 +409,10 @@ namespace UnitTests
             Assert.AreEqual("", TestUtils.Evaluate("result[1]"));
             Assert.AreEqual("", TestUtils.Evaluate("result[2]"));
 
+            // Passing undefined is equivalent to passing an empty string.
+            Assert.AreEqual(1, TestUtils.Evaluate("''.match().length"));
+            Assert.AreEqual("", TestUtils.Evaluate("''.match()[0]"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("''.match.length"));
 
@@ -582,6 +586,8 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("result.length"));
             Assert.AreEqual("5", TestUtils.Evaluate("result[0]"));
             Assert.AreEqual("", TestUtils.Evaluate("result[1]"));
+            TestUtils.Evaluate("var result = '5,,7'.split(',', -1)");
+            Assert.AreEqual(3, TestUtils.Evaluate("result.length"));
 
             // Regex splits.
             TestUtils.Evaluate(@"var result = 'A long string for testing'.split(/lo|st/)");
@@ -590,6 +596,11 @@ namespace UnitTests
             Assert.AreEqual("ng ", TestUtils.Evaluate("result[1]"));
             Assert.AreEqual("ring for te", TestUtils.Evaluate("result[2]"));
             Assert.AreEqual("ing", TestUtils.Evaluate("result[3]"));
+
+            // Regex split (with limit).
+            TestUtils.Evaluate(@"var result = 'A long string for testing'.split(/i/, 1)");
+            Assert.AreEqual(1, TestUtils.Evaluate("result.length"));
+            Assert.AreEqual("A long str", TestUtils.Evaluate("result[0]"));
 
             // Regex splits with subgroups.
             if (TestUtils.Engine != JSEngine.JScript)
@@ -628,6 +639,10 @@ namespace UnitTests
 
             // Spec violation but de-facto standard: undefined is converted to 'undefined'.
             Assert.AreEqual(2, TestUtils.Evaluate("'teundefinedst'.split(undefined).length"));
+
+            // Splitting by an empty string splits the string into individual characters.
+            Assert.AreEqual("a,b,c", TestUtils.Evaluate("'abc'.split('').toString()"));
+            Assert.AreEqual("a,b,c", TestUtils.Evaluate("'abc'.split(new RegExp()).toString()"));
 
             // length
             Assert.AreEqual(2, TestUtils.Evaluate("''.split.length"));

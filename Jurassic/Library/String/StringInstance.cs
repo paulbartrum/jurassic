@@ -217,9 +217,9 @@ namespace Jurassic.Library
         /// <param name="substr"> The substring to search for. </param>
         /// <returns> An array containing the matched strings. </returns>
         [JSFunction(Name = "match", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject | FunctionBinderFlags.Preferred)]
-        public static object Match(ScriptEngine engine, string thisObject, string substr)
+        public static object Match(ScriptEngine engine, string thisObject, string substr = "")
         {
-            return Match(thisObject, engine.RegExp.Construct(substr));
+            return engine.RegExp.Construct(substr).Match(thisObject);
         }
 
         /// <summary>
@@ -389,14 +389,18 @@ namespace Jurassic.Library
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
         [JSFunction(Name = "split", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, int limit = int.MaxValue)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, object limit)
         {
-            // Note: automatic binding will call the string version if the limit parameter is
-            // not an integer, which is wrong.
+            // Limit defaults to unlimited.  Note the ToUint32() conversion.
+            uint limitInt = uint.MaxValue;
+            if (TypeUtilities.IsUndefined(limit) == false)
+                limitInt = TypeConverter.ToUint32(limit);
+
+            // Call separate methods, depending on whether the separator is a regular expression.
             if (separator is RegExpInstance)
-                return Split(thisObject, (RegExpInstance)separator, limit);
+                return Split(thisObject, (RegExpInstance)separator, limitInt);
             else
-                return Split(engine, thisObject, TypeConverter.ToString(separator), limit);
+                return Split(engine, thisObject, TypeConverter.ToString(separator), limitInt);
         }
 
         /// <summary>
@@ -405,7 +409,7 @@ namespace Jurassic.Library
         /// <param name="regExp"> A regular expression that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, int limit = int.MaxValue)
+        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, uint limit = uint.MaxValue)
         {
             return regExp.Split(thisObject, limit);
         }
@@ -416,13 +420,19 @@ namespace Jurassic.Library
         /// <param name="separator"> A string that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, string separator, int limit = int.MaxValue)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, string separator, uint limit = uint.MaxValue)
         {
             if (string.IsNullOrEmpty(separator))
-                return engine.Array.New(new object[] { thisObject });
+            {
+                // If the separator is empty, split the string into individual characters.
+                var result = engine.Array.New();
+                for (int i = 0; i < thisObject.Length; i ++)
+                    result[i] = thisObject[i].ToString();
+                return result;
+            }
             var splitStrings = thisObject.Split(new string[] { separator }, StringSplitOptions.None);
             if (limit < splitStrings.Length)
-                splitStrings = splitStrings.Take(limit).ToArray();
+                splitStrings = splitStrings.Take((int)limit).ToArray();
             return engine.Array.New(splitStrings);
         }
 
