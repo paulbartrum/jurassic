@@ -231,7 +231,7 @@ namespace Jurassic.Library
         /// <returns> The largest of zero or more numbers.  If no arguments are provided, the
         /// return value is equal to NEGATIVE_INFINITY.  If any of the arguments cannot be
         /// converted to a number, the return value is NaN. </returns>
-        [JSFunction(Name = "max")]
+        [JSFunction(Name = "max", Length = 2)]
         public static double Max(params double[] numbers)
         {
             double result = double.NegativeInfinity;
@@ -248,7 +248,7 @@ namespace Jurassic.Library
         /// <returns> The smallest of zero or more numbers.  If no arguments are provided, the
         /// return value is equal to NEGATIVE_INFINITY.  If any of the arguments cannot be
         /// converted to a number, the return value is NaN. </returns>
-        [JSFunction(Name = "min")]
+        [JSFunction(Name = "min", Length = 2)]
         public static double Min(params double[] numbers)
         {
             double result = double.PositiveInfinity;
