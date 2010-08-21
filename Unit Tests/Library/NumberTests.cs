@@ -190,9 +190,25 @@ namespace UnitTests
         [TestMethod]
         public void toString()
         {
-            TestUtils.Evaluate("var num=77.1274");
-            Assert.AreEqual("77.1274", TestUtils.Evaluate("num.toString()"));
+            Assert.AreEqual("12345", TestUtils.Evaluate("12345 .toString()"));
+            Assert.AreEqual("-77", TestUtils.Evaluate("(-77).toString()"));
+            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toString()"));
+            Assert.AreEqual("77.001", TestUtils.Evaluate("77.001.toString()"));
+            Assert.AreEqual("77.12345678901235", TestUtils.Evaluate("77.1234567890123456789.toString()"));
+            Assert.AreEqual("7.123456789012346", TestUtils.Evaluate("7.1234567890123456789.toString()"));
+            Assert.AreEqual("0.000005", TestUtils.Evaluate("5e-6.toString()"));
+            Assert.AreEqual("0.000001", TestUtils.Evaluate("1e-6.toString()"));
+            Assert.AreEqual("5e-7", TestUtils.Evaluate("5e-7.toString()"));
+            Assert.AreEqual("1e-7", TestUtils.Evaluate("1e-7.toString()"));
+            Assert.AreEqual("1000000000000000", TestUtils.Evaluate("1e15.toString()"));
+            Assert.AreEqual("10000000000000000", TestUtils.Evaluate("1e16.toString()"));
+            Assert.AreEqual("100000000000000000", TestUtils.Evaluate("1e17.toString()"));
+            Assert.AreEqual("1000000000000000000", TestUtils.Evaluate("1e18.toString()"));
+            Assert.AreEqual("10000000000000000000", TestUtils.Evaluate("1e19.toString()"));
+            Assert.AreEqual("100000000000000000000", TestUtils.Evaluate("1e20.toString()"));
+            Assert.AreEqual("1e+21", TestUtils.Evaluate("1e21.toString()"));
             Assert.AreEqual("Infinity", TestUtils.Evaluate("Infinity.toString()"));
+            Assert.AreEqual("-Infinity", TestUtils.Evaluate("(-Infinity).toString()"));
             Assert.AreEqual("NaN", TestUtils.Evaluate("NaN.toString()"));
             
             // Radix which is not 10.

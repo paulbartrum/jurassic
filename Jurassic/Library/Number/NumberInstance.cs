@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 
 namespace Jurassic.Library
 {
@@ -175,7 +175,7 @@ namespace Jurassic.Library
             if (e < -6 || e >= p)
             {
                 value *= Math.Pow(10, 1 - p);
-                result.Append(value.ToString("f" + (p - 1).ToString()));
+                result.Append(value.ToString("f" + (p - 1).ToString(), CultureInfo.InvariantCulture));
                 result.Append('e');
                 if (e >= 0)
                 {
@@ -193,7 +193,7 @@ namespace Jurassic.Library
                 result.Append('0');
                 result.Append('.');
                 result.Append('0', -(e + 1));
-                result.Append(value.ToString("f0"));
+                result.Append(value.ToString("f0", CultureInfo.InvariantCulture));
                 return result.ToString();
             }
             else if (e == p - 1)
@@ -206,7 +206,7 @@ namespace Jurassic.Library
             {
                 // This is a fractional number.
                 value *= Math.Pow(10, e - p + 1);
-                result.Append(value.ToString("f" + (p - e - 1).ToString()));
+                result.Append(value.ToString("f" + (p - e - 1).ToString(), CultureInfo.InvariantCulture));
                 return result.ToString();
             }
         }
@@ -221,18 +221,183 @@ namespace Jurassic.Library
         {
             if (radix < 2 || radix > 36)
                 throw new JavaScriptException(this.Engine, "RangeError", "The radix must be between 2 and 36, inclusive.");
+            return NumberToString(this.value, radix);
+        }
 
+        /// <summary>
+        /// Returns the textual representation of a number in base 10.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        internal static string NumberToString(double value)
+        {
+            // Handle NaN.
+            if (double.IsNaN(value))
+                return "NaN";
+
+            // Handle zero.
+            if (value == 0.0)
+                return "0";
+
+            var result = new System.Text.StringBuilder(10);
+
+            // Handle negative numbers.
+            if (value < 0)
+            {
+                value = -value;
+                result.Append('-');
+            }
+
+            // Handle infinity.
+            if (double.IsPositiveInfinity(value))
+            {
+                result.Append("Infinity");
+                return result.ToString();
+            }
+
+            // Calculate the base 10 logarithm of the number.
+            int e = (int)Math.Floor(Math.Log10(value));
+
+            if (e >= -6 && e <= 20)
+            {
+                OutputDigits(value, e, result);
+            }
+            else
+            {
+                value *= Math.Pow(10, -e);
+                value += 0.0000000000000001;
+                OutputDigits(value, 0, result);
+                result.Append('e');
+                if (e > 0)
+                    result.Append('+');
+                result.Append(e);
+            }
+
+            return result.ToString();
+
+            //if (n >= k && n <= 21)
+            //{
+            //    // The number is an integer.
+            //    result.Append(value.ToString("f0", CultureInfo.InvariantCulture));
+            //    return result.ToString();
+            //}
+
+            //if (n > 0 && n <= 21)
+            //{
+            //    // The number is an floating point number greater than zero.
+            //    result.Append(value.ToString("f" + (k - n).ToString(), CultureInfo.InvariantCulture));
+            //    return result.ToString();
+            //}
+
+            //if (n > -6 && n <= 0)
+            //{
+            //    // The number is an floating point number between zero and one.
+            //    result.Append(value.ToString("f" + (k - n).ToString(), CultureInfo.InvariantCulture));
+            //    return result.ToString();
+            //}
+
+            //// The number is expressed in scientific notation.
+            //result.Append(value.ToString("f" + (k - 1).ToString(), CultureInfo.InvariantCulture));
+            //result.Append('e');
+            //if (n >= 1)
+            //    result.Append('+');
+            //result.Append(n - 1);
+            //return result.ToString();
+        }
+
+        /// <summary>
+        /// Outputs the numeric representation of the given value to the given string builder.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="e"> The floor of the base 10 logarithm of the number. </param>
+        /// <param name="result"> The string builder to hold the result. </param>
+        /// <remarks>
+        /// The number must be positive, non-zero, non-infinite, non-NaN.
+        /// </remarks>
+        private static void OutputDigits(double value, int e, System.Text.StringBuilder result)
+        {
+            bool decimalPointOutput = false;
+            double factor = Math.Pow(10, -e);
+            double residual = 0;
+            int sigFigsOutput = 0;
+            if (e >= 0)
+            {
+                // output e + 1 decimal digits (but at most 16).
+                sigFigsOutput = Math.Min(e + 1, 16);
+                for (int i = 0; i < sigFigsOutput; i++)
+                {
+                    int digit = (int)(value * factor - residual);
+                    result.Append((char)('0' + digit));
+                    factor *= 10.0;
+                    residual = (residual + digit) * 10;
+                }
+
+                // output any more digits as zeros.
+                if (e - 15 > 0)
+                {
+                    result.Append('0', e - 15);
+                    sigFigsOutput = e + 1;
+                }
+            }
+            else
+            {
+                // Ouput zeros.
+                result.Append('0');
+                result.Append('.');
+                result.Append('0', -e - 1);
+                decimalPointOutput = true;
+            }
+
+            int zeroCount = 0;
+            for (int i = 0; i < 16 - sigFigsOutput; i++)
+            {
+                int digit;
+                if (i < 14 - e)
+                    digit = (int)(value * factor - residual);
+                else
+                    digit = (int)Math.Round(value * factor - residual);
+                if (digit <= 0)
+                {
+                    // Keep a count of pent-up zeros.
+                    zeroCount++;
+                }
+                else
+                {
+                    // Output the decimal place if this is the first non-zero digit.
+                    if (decimalPointOutput == false)
+                        result.Append('.');
+                    decimalPointOutput = true;
+
+                    // Output any pent-up zeros.
+                    if (zeroCount > 0)
+                        result.Append('0', zeroCount);
+                    zeroCount = 0;
+
+                    // Output the digit.
+                    result.Append((char)('0' + digit));
+                }
+                factor *= 10.0;
+                residual = (residual + digit) * 10;
+            }
+        }
+
+        /// <summary>
+        /// Returns the textual representation of a number.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="radix"> Specifies a radix for converting numeric values to strings. </param>
+        /// <returns> The textual representation of the number. </returns>
+        internal static string NumberToString(double value, int radix = 10)
+        {
             // Check for common case: base 10.
             if (radix == 10)
-                return this.value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-            // Unusual base.
-            double value = this.value;
-            var result = new System.Text.StringBuilder(10);
+                return NumberToString(value);
 
             // Handle NaN.
             if (double.IsNaN(value))
                 return "NaN";
+
+            // This is an unusual base.
+            var result = new System.Text.StringBuilder(10);
 
             // Handle negative numbers.
             if (value < 0)
@@ -248,7 +413,7 @@ namespace Jurassic.Library
                 return result.ToString();
             }
 
-            // Keep track of how many significant digits we have outputted.
+            // Keep track of how many significant digits we have output.
             bool significantDigitsEncountered = false;
             int significantFigures = 0;
 

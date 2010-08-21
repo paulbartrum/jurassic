@@ -22,6 +22,9 @@ namespace UnitTests
             Assert.AreEqual("undefined", TestUtils.Evaluate("String(undefined)"));
             Assert.AreEqual("null", TestUtils.Evaluate("String(null)"));
             Assert.AreEqual("5.1", TestUtils.Evaluate("String(5.1)"));
+            Assert.AreEqual("510000", TestUtils.Evaluate("String(5.1e5)"));
+            Assert.AreEqual("100000000000000000000", TestUtils.Evaluate("String(100000000000000000000)"));
+            Assert.AreEqual("1e+21", TestUtils.Evaluate("String(1000000000000000000000)"));
             Assert.AreEqual("NaN", TestUtils.Evaluate("String(NaN)"));
             Assert.AreEqual("", TestUtils.Evaluate("String('')"));
             Assert.AreEqual("deadline", TestUtils.Evaluate("String('deadline')"));

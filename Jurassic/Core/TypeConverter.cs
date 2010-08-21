@@ -124,7 +124,7 @@ namespace Jurassic
             if (value is int)
                 return ((int)value).ToString();
             if (value is double)
-                return ((double)value).ToString();
+                return NumberInstance.NumberToString((double)value);
             if (value is string)
                 return (string)value;
             if (value is ConcatenatedString)
