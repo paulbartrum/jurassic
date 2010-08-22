@@ -796,14 +796,32 @@ namespace Jurassic.Compiler
             }
 
             // Read the flags.
-            var flags = new StringBuilder();
+            var flags = new StringBuilder(3);
             while (true)
             {
                 int c = this.reader.Peek();
-                if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z'))
+                if (IsIdentifierChar(c) == false || c == -1)
                     break;
-                ReadNextChar();
-                flags.Append((char)c);
+
+                if (c == '\\')
+                {
+                    // Unicode escape sequence.
+                    ReadNextChar();
+                    if (ReadNextChar() != 'u')
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
+                    c = ReadHexEscapeSequence(4);
+                    if (IsIdentifierChar(c) == false)
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                    flags.Append((char)c);
+                }
+                else
+                {
+                    // Add the character we peeked at to the flags.
+                    flags.Append((char)c);
+
+                    // Advance the input stream.
+                    ReadNextChar();
+                }
             }
 
             // Create a new literal token.
