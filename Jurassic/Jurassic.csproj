@@ -154,7 +154,7 @@
     <Compile Include="Compiler\Expressions\UnaryExpression.cs" />
     <Compile Include="Compiler\Expressions\Expression.cs" />
     <Compile Include="Compiler\Expressions\OperatorExpression.cs" />
-    <Compile Include="Compiler\Expressions\Operator.cs" />
+    <Compile Include="Compiler\Parser\Operator.cs" />
     <Compile Include="Compiler\Parser\Parser.cs" />
     <Compile Include="Core\TypeComparer.cs" />
     <Compile Include="Core\Null.cs" />

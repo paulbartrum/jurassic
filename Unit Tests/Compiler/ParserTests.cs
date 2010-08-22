@@ -44,5 +44,17 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("y"));
         }
 
+        [TestMethod]
+        public void Operators()
+        {
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("++"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("*"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5 *"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("!"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("! * 5"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("("));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(1"));
+        }
+
     }
 }

@@ -1651,12 +1651,39 @@ namespace Jurassic.Compiler
             if (root == null)
                 throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
+            // Check the AST is valid.
+            CheckASTValidity(root);
+
             // A literal is the next valid expression token.
             this.expressionState = ParserExpressionState.Literal;
             this.lexer.ParserExpressionState = expressionState;
 
             // Resolve all the unbound operators into real operators.
             return root;
+        }
+
+        /// <summary>
+        /// Checks the given AST is valid.
+        /// </summary>
+        /// <param name="root"> The root of the AST. </param>
+        private void CheckASTValidity(Expression root)
+        {
+            if (root is OperatorExpression)
+            {
+                var expression = (OperatorExpression)root;
+
+                // Check the operator expression has the right number of operands.
+                if (expression.Operator.IsValidNumberOfOperands(expression.OperandCount) == false)
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Wrong number of operands", this.LineNumber, this.SourcePath);
+
+                // Check the operator expression is closed.
+                if (expression.Operator.SecondaryToken != null && expression.SecondTokenEncountered == false)
+                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Missing closing token '{0}'", expression.Operator.SecondaryToken.Text), this.LineNumber, this.SourcePath);
+
+                // Check the child nodes.
+                for (int i = 0; i < expression.OperandCount; i++)
+                    CheckASTValidity(expression.GetRawOperand(i));
+            }
         }
 
         /// <summary>
