@@ -300,12 +300,31 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("parseInt('0z11', 10)"));
             Assert.AreEqual(0, TestUtils.Evaluate("parseInt('0z11')"));
 
-            // Octal parsing was removed from ES5.
-            Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? 9 : 11, TestUtils.Evaluate("parseInt('011')"));
-            Assert.AreEqual(11, TestUtils.Evaluate("parseInt('011', 10)"));
-
             // Radix uses ToInt32() so has weird wrapping issues.
             Assert.AreEqual(19, TestUtils.Evaluate("parseInt('23', 4294967304)"));
+
+            // Octal parsing (only works in compatibility mode).
+            TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
+            try
+            {
+                Assert.AreEqual(9, TestUtils.Evaluate("parseInt('011')"));
+                Assert.AreEqual(0, TestUtils.Evaluate("parseInt('08')"));
+                Assert.AreEqual(1, TestUtils.Evaluate("parseInt('018')"));
+                Assert.AreEqual(11, TestUtils.Evaluate("parseInt('011', 10)"));
+            }
+            finally
+            {
+                TestUtils.CompatibilityMode = CompatibilityMode.Latest;
+            }
+
+            // Octal parsing was removed from ES5.
+            if (TestUtils.Engine != JSEngine.JScript)
+            {
+                Assert.AreEqual(11, TestUtils.Evaluate("parseInt('011')"));
+                Assert.AreEqual(8, TestUtils.Evaluate("parseInt('08')"));
+                Assert.AreEqual(18, TestUtils.Evaluate("parseInt('018')"));
+                Assert.AreEqual(11, TestUtils.Evaluate("parseInt('011', 10)"));
+            }
         }
 
         [TestMethod]

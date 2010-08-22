@@ -131,6 +131,16 @@ namespace Jurassic
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value that indicates whether the script engine should run in
+        /// compatibility mode.
+        /// </summary>
+        public CompatibilityMode CompatibilityMode
+        {
+            get;
+            set;
+        }
+
 
 
         //     GLOBAL BUILT-IN OBJECTS

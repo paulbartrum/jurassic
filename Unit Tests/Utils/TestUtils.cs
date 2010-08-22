@@ -25,6 +25,12 @@ namespace UnitTests
             get { return JSEngine.Jurassic; }
         }
 
+        public static Jurassic.CompatibilityMode CompatibilityMode
+        {
+            get { InitializeJurassic(); return jurassicScriptEngine.CompatibilityMode; }
+            set { InitializeJurassic(); jurassicScriptEngine.CompatibilityMode = value; }
+        }
+
         public static object Evaluate(string script)
         {
             object result;
@@ -40,13 +46,7 @@ namespace UnitTests
             }
             else
             {
-                if (jurassicScriptEngine == null)
-                {
-                    jurassicScriptEngine = new Jurassic.ScriptEngine();
-#if !DEBUG
-                    jurassicScriptEngine.EnableDebugging = true;
-#endif
-                }
+                InitializeJurassic();
                 result = jurassicScriptEngine.Evaluate(script);
             }
             if (result is double)
@@ -56,6 +56,17 @@ namespace UnitTests
                     return (int)numericResult;
             }
             return result;
+        }
+
+        private static void InitializeJurassic()
+        {
+            if (jurassicScriptEngine == null)
+            {
+                jurassicScriptEngine = new Jurassic.ScriptEngine();
+#if !DEBUG
+                jurassicScriptEngine.EnableDebugging = true;
+#endif
+            }
         }
 
         public static object EvaluateExceptionType(string script)

@@ -186,7 +186,7 @@ namespace Jurassic.Compiler
                 // Unicode escape sequence.
                 if (ReadNextChar() != 'u')
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
-                firstChar = ReadHexNumber(4);
+                firstChar = ReadHexEscapeSequence(4);
                 if (IsIdentifierChar(firstChar) == false)
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
             }
@@ -205,7 +205,7 @@ namespace Jurassic.Compiler
                     ReadNextChar();
                     if (ReadNextChar() != 'u')
                         throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
-                    c = ReadHexNumber(4);
+                    c = ReadHexEscapeSequence(4);
                     if (IsIdentifierChar(c) == false)
                         throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
                     name.Append((char)c);
@@ -221,7 +221,7 @@ namespace Jurassic.Compiler
             }
 
             // Check if the identifier is actually a keyword, boolean literal, or null literal.
-            return KeywordToken.FromString(name.ToString(), this.StrictMode);
+            return KeywordToken.FromString(name.ToString(), this.engine.CompatibilityMode, this.StrictMode);
         }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace Jurassic.Compiler
                     // Hex number.
                     ReadNextChar();
 
-                    // Read numeric digits 0-9, a-z or A-Z.
+                    // Read numeric digits 0-9, a-f or A-F.
                     result = 0;
                     while (true)
                     {
@@ -300,8 +300,27 @@ namespace Jurassic.Compiler
                 }
                 else if (c >= '0' && c <= '9')
                 {
-                    // Octal number.
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not supported.", this.lineNumber, this.Source.Path);
+                    // Octal number (only supported in ECMAScript 3 compatibility mode).
+                    if (this.engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not supported.", this.lineNumber, this.Source.Path);
+                    
+                    // Read numeric digits 0-7.
+                    result = 0;
+                    while (true)
+                    {
+                        c = this.reader.Peek();
+                        if (c >= '0' && c <= '7')
+                            result = result * 8 + c - '0';
+                        else if (c == '8' || c == '9')
+                            throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal constant.", this.lineNumber, this.Source.Path);
+                        else
+                            break;
+                        ReadNextChar();
+                    }
+
+                    if (result == (double)(int)result)
+                        return new LiteralToken((int)result);
+                    return new LiteralToken(result);
                 }
             }
 
@@ -464,18 +483,19 @@ namespace Jurassic.Compiler
                                 break;
                             case 'x':
                                 // ASCII escape.
-                                contents.Append(ReadHexNumber(2));
+                                contents.Append(ReadHexEscapeSequence(2));
                                 break;
                             case 'u':
                                 // Unicode escape.
-                                contents.Append(ReadHexNumber(4));
+                                contents.Append(ReadHexEscapeSequence(4));
                                 break;
                             case '0':
                                 // Null character or octal escape sequence.
-                                contents.Append((char)0);
                                 c = this.reader.Peek();
                                 if (c >= '0' && c <= '9')
-                                    throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are not supported.", this.lineNumber, this.Source.Path);
+                                    contents.Append(ReadOctalEscapeSequence());
+                                else
+                                    contents.Append((char)0);
                                 break;
                             default:
                                 contents.Append((char)c);
@@ -497,7 +517,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <returns> The character corresponding to the escape sequence, or the content that was read
         /// from the input if a valid hex number was not read. </returns>
-        private char ReadHexNumber(int digitCount)
+        private char ReadHexEscapeSequence(int digitCount)
         {
             var contents = new StringBuilder(digitCount);
             for (int i = 0; i < digitCount; i++)
@@ -508,6 +528,32 @@ namespace Jurassic.Compiler
                     throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
             }
             return (char)int.Parse(contents.ToString(), System.Globalization.NumberStyles.HexNumber);
+        }
+
+        /// <summary>
+        /// Reads an octal number turns it into a single-byte character.
+        /// </summary>
+        /// <returns> The character corresponding to the escape sequence. </returns>
+        private char ReadOctalEscapeSequence()
+        {
+            // Octal escape sequences are only supported in ECMAScript 3 compatibility mode.
+            if (this.engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
+                throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are not supported.", this.lineNumber, this.Source.Path);
+
+            int numericValue = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                int c = this.reader.Peek();
+                if (c < '0' || c > '9')
+                    break;
+                if (c == '8' || c == '9')
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal escape sequence.", this.lineNumber, this.Source.Path);
+                numericValue = numericValue * 8 + (c - '0');
+                ReadNextChar();
+                if (numericValue * 8 > 255)
+                    break;
+            }
+            return (char)numericValue;
         }
 
         /// <summary>
