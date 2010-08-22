@@ -57,7 +57,7 @@ namespace Jurassic.Compiler
         public readonly static KeywordToken While = new KeywordToken("while");
         public readonly static KeywordToken With = new KeywordToken("with");
 
-        // Reserved words.
+        // ECMAScript 5 reserved words.
         public readonly static KeywordToken Class = new KeywordToken("class");
         public readonly static KeywordToken Const = new KeywordToken("const");
         public readonly static KeywordToken Enum = new KeywordToken("enum");
@@ -77,82 +77,170 @@ namespace Jurassic.Compiler
         public readonly static KeywordToken Static = new KeywordToken("static");
         public readonly static KeywordToken Yield = new KeywordToken("yield");
 
+        // ECMAScript 3 reserved words.
+        public readonly static KeywordToken Abstract = new KeywordToken("abstract");
+        public readonly static KeywordToken Boolean = new KeywordToken("boolean");
+        public readonly static KeywordToken Byte = new KeywordToken("byte");
+        public readonly static KeywordToken Char = new KeywordToken("char");
+        public readonly static KeywordToken Double = new KeywordToken("double");
+        public readonly static KeywordToken Final = new KeywordToken("final");
+        public readonly static KeywordToken Float = new KeywordToken("float");
+        public readonly static KeywordToken Goto = new KeywordToken("goto");
+        public readonly static KeywordToken Int = new KeywordToken("int");
+        public readonly static KeywordToken Long = new KeywordToken("long");
+        public readonly static KeywordToken Native = new KeywordToken("native");
+        public readonly static KeywordToken Short = new KeywordToken("short");
+        public readonly static KeywordToken Synchronized = new KeywordToken("synchronized");
+        public readonly static KeywordToken Throws = new KeywordToken("throws");
+        public readonly static KeywordToken Transient = new KeywordToken("transient");
+        public readonly static KeywordToken Volatile = new KeywordToken("volatile");
 
-        // Mapping from text -> keyword.
-        private readonly static Dictionary<string, Token> lookupTable = new Dictionary<string, Token>()
+        // Base keywords.
+        private readonly static Token[] keywords = new Token[]
         {
-            { "break",		Break },
-            { "case",		Case },
-            { "catch",		Catch },
-            { "continue",	Continue },
-            { "debugger",	Debugger },
-            { "default",	Default },
-            { "delete",		Delete },
-            { "do",		    Do },
-            { "else",		Else },
-            { "finally",	Finally },
-            { "for",		For },
-            { "function",	Function },
-            { "if",		    If },
-            { "in",		    In },
-            { "instanceof",	InstanceOf },
-            { "new",		New },
-            { "return",		Return },
-            { "switch",		Switch },
-            { "this",		This },
-            { "throw",		Throw },
-            { "try",		Try },
-            { "typeof",		Typeof },
-            { "var",		Var },
-            { "void",		Void },
-            { "while",		While },
-            { "with",		With },
-
-            // Reserved words.
-            { "class",		Class },
-            { "const",		Const },
-            { "enum",		Enum },
-            { "export",		Export },
-            { "extends",	Extends },
-            { "import",		Import },
-            { "super",      Super },
+            Break,
+            Case,
+            Catch,
+            Continue,
+            Debugger,
+            Default,
+            Delete,
+            Do,
+            Else,
+            Finally,
+            For,
+            Function,
+            If,
+            In,
+            InstanceOf,
+            New,
+            Return,
+            Switch,
+            This,
+            Throw,
+            Try,
+            Typeof,
+            Var,
+            Void,
+            While,
+            With,
 
             // Literal keywords.
-            { "true",		LiteralToken.True },
-            { "false",		LiteralToken.False },
-            { "null",		LiteralToken.Null },
+            LiteralToken.True,
+            LiteralToken.False,
+            LiteralToken.Null,
+
+            // Reserved keywords.
+            Class,
+            Const,
+            Enum,
+            Export,
+            Extends,
+            Import,
+            Super,
         };
 
-        // Mapping from text -> keyword (strict mode).
-        private readonly static Dictionary<string, Token> strictModeLookupTable = new Dictionary<string, Token>()
+        // Reserved words (in strict mode).
+        private readonly static Token[] strictModeReservedWords = new Token[]
         {
-            { "implements",	Implements },
-            { "interface",	Interface },
-            { "let",		Let },
-            { "package",	Package },
-            { "private",	Private },
-            { "protected",	Protected },
-            { "public",		Public },
-            { "static",		Static },
-            { "yield",		Yield },
+            Implements,
+            Interface,
+            Let,
+            Package,
+            Private,
+            Protected,
+            Public,
+            Static,
+            Yield,
         };
+
+        // Reserved words (in ECMAScript 3).
+        private readonly static Token[] ecmaScript3ReservedWords = new Token[]
+        {
+            Abstract,
+            Boolean,
+            Byte,
+            Char,
+            Double,
+            Final,
+            Float,
+            Goto,
+            Implements,
+            Int,
+            Interface,
+            Long,
+            Native,
+            Package,
+            Private,
+            Protected,
+            Public,
+            Short,
+            Static,
+            Synchronized,
+            Throws,
+            Transient,
+            Volatile,
+        };
+
+        // The actual lookup tables are the result of combining two of the lists above.
+        private static Dictionary<string, Token> ecmaScript5LookupTable;
+        private static Dictionary<string, Token> ecmaScript3LookupTable;
+        private static Dictionary<string, Token> strictModeLookupTable;
 
         /// <summary>
         /// Creates a token from the given string.
         /// </summary>
         /// <param name="text"> The text. </param>
+        /// <param name="compatibilityMode"> The script engine compatibility mode. </param>
         /// <param name="strictMode"> <c>true</c> if the lexer is operating in strict mode;
         /// <c>false</c> otherwise. </param>
         /// <returns> The token corresponding to the given string, or <c>null</c> if the string
         /// does not represent a valid token. </returns>
-        public static Token FromString(string text, bool strictMode)
+        public static Token FromString(string text, CompatibilityMode compatibilityMode, bool strictMode)
         {
+            // Determine the lookup table to use.
+            Dictionary<string, Token> lookupTable;
+            if (compatibilityMode == CompatibilityMode.ECMAScript3)
+            {
+                // Initialize the ECMAScript 3 lookup table, if it hasn't already been intialized.
+                System.Threading.LazyInitializer.EnsureInitialized(ref ecmaScript3LookupTable, () => InitializeLookupTable(ecmaScript3ReservedWords));
+                lookupTable = ecmaScript3LookupTable;
+            }
+            else if (strictMode == false)
+            {
+                // Initialize the ECMAScript 5 lookup table, if it hasn't already been intialized.
+                System.Threading.LazyInitializer.EnsureInitialized(ref ecmaScript5LookupTable, () => InitializeLookupTable(new Token[0]));
+                lookupTable = ecmaScript5LookupTable;
+            }
+            else
+            {
+                // Initialize the strict mode lookup table, if it hasn't already been intialized.
+                System.Threading.LazyInitializer.EnsureInitialized(ref strictModeLookupTable, () => InitializeLookupTable(strictModeReservedWords));
+                lookupTable = strictModeLookupTable;
+            }
+
+            // Look up the keyword in the lookup table.
             Token result;
             if (lookupTable.TryGetValue(text, out result) == true)
                 return result;
-            if (strictMode == true && strictModeLookupTable.TryGetValue(text, out result) == true)
-                return result;
+
+            // If the text wasn't found, it is an identifier instead.
             return new IdentifierToken(text);
+        }
+
+        /// <summary>
+        /// Initializes a lookup table by combining the base list with a second list of keywords.
+        /// </summary>
+        /// <param name="additionalKeywords"> A list of additional keywords. </param>
+        /// <returns> A lookup table. </returns>
+        private static Dictionary<string, Token> InitializeLookupTable(Token[] additionalKeywords)
+        {
+            var result = new Dictionary<string, Token>(keywords.Length + additionalKeywords.Length);
+            foreach (var token in keywords)
+                result.Add(token.Text, token);
+            foreach (var token in additionalKeywords)
+                result.Add(token.Text, token);
+            return result;
         }
 
         /// <summary>

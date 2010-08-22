@@ -149,18 +149,57 @@ namespace UnitTests
         [TestMethod]
         public void OctalNumbers()
         {
-            // Octal numbers and escape sequences are not supported.
+            // Octal numbers and escape sequences are not supported in ECMAScript 5 mode.
             Assert.AreEqual(0, TestUtils.Evaluate("0"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("05"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("011"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0123456701234567"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("09"));
+
+            // But they are supported in compatibility mode.
+            TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
+            try
+            {
+                Assert.AreEqual(0, TestUtils.Evaluate("0"));
+                Assert.AreEqual(5, TestUtils.Evaluate("05"));
+                Assert.AreEqual(9, TestUtils.Evaluate("011"));
+                Assert.AreEqual(5744368105847.0, TestUtils.Evaluate("0123456701234567"));
+                Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("09"));
+            }
+            finally
+            {
+                TestUtils.CompatibilityMode = CompatibilityMode.Latest;
+            }
         }
 
         [TestMethod]
         public void OctalEscapeSequence()
         {
+            // Octal escape sequences are not supported in ECMAScript 5 mode.
             Assert.AreEqual("\0", TestUtils.Evaluate("'\\0'"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\05'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\05a'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\011'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0377'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0400'"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\09'"));
+
+            // But they are supported in compatibility mode.
+            TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
+            try
+            {
+                Assert.AreEqual("\0", TestUtils.Evaluate("'\\0'"));
+                Assert.AreEqual("\u0005", TestUtils.Evaluate("'\\05'"));
+                Assert.AreEqual("\u0005Z", TestUtils.Evaluate("'\\05Z'"));
+                Assert.AreEqual("\u0009", TestUtils.Evaluate("'\\011'"));
+                Assert.AreEqual("\u00FF", TestUtils.Evaluate("'\\0377'"));
+                Assert.AreEqual("\u00200", TestUtils.Evaluate("'\\0400'"));
+                Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\09'"));
+            }
+            finally
+            {
+                TestUtils.CompatibilityMode = CompatibilityMode.Latest;
+            }
         }
 
         [TestMethod]

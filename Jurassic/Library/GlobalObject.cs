@@ -205,6 +205,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Parses the given string and returns the equivalent integer value. 
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to parse. </param>
         /// <param name="dblRadix"> The numeric base to use for parsing.  The default is to use base 10
         /// except when the input string starts with '0x' or '0X' in which case base 16 is used
@@ -212,8 +213,8 @@ namespace Jurassic.Library
         /// <returns> The equivalent integer value of the given string. </returns>
         /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
         /// character, at which point parsing stops.  No error is returned in this case. </remarks>
-        [JSFunction(Name = "parseInt")]
-        public static double ParseInt(string input, double dblRadix = 0)
+        [JSFunction(Name = "parseInt", Flags = FunctionBinderFlags.HasEngineParameter)]
+        public static double ParseInt(ScriptEngine engine, string input, double dblRadix = 0)
         {
             // Check for a valid radix.
             // Note: this is the only function that uses TypeConverter.ToInt32() for parameter
@@ -259,10 +260,18 @@ namespace Jurassic.Library
                     reader.Read();
                     result = 0;     // Note: required for parsing "0z11" correctly (when radix = 0).
 
-                    if (reader.Peek() == 'x' || reader.Peek() == 'X')
+                    int c = reader.Peek();
+                    if (c == 'x' || c == 'X')
                     {
+                        // Hex number.
                         reader.Read();
                         radix = 16;
+                    }
+
+                    if (c >= '0' && c <= '9' && engine.CompatibilityMode == CompatibilityMode.ECMAScript3)
+                    {
+                        // Octal number.
+                        radix = 8;
                     }
                 }
             }

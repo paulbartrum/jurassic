@@ -104,6 +104,7 @@
     <Compile Include="Compiler\Statements\ForStatement.cs" />
     <Compile Include="Compiler\Statements\Statement.cs" />
     <Compile Include="Compiler\Debugging\SourceCodeSpan.cs" />
+    <Compile Include="Core\CompatibilityMode.cs" />
     <Compile Include="Core\ConcatenatedString.cs" />
     <Compile Include="Core\ScriptEngine.cs" />
     <Compile Include="Core\ScriptSource\StringScriptSource.cs" />
