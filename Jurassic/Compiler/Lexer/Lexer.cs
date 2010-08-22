@@ -266,6 +266,7 @@ namespace Jurassic.Compiler
         private Token ReadNumericLiteral(int firstChar)
         {
             double result;
+            int digitsRead = 0;
 
             // If the number starts with '0x' or '0X' then the number should be parsed as a hex
             // number.
@@ -291,9 +292,12 @@ namespace Jurassic.Compiler
                             result = result * 16 + c - 'A' + 10;
                         else
                             break;
+                        digitsRead++;
                         ReadNextChar();
                     }
 
+                    if (digitsRead == 0)
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal constant.", this.lineNumber, this.Source.Path);
                     if (result == (double)(int)result)
                         return new LiteralToken((int)result);
                     return new LiteralToken(result);
@@ -325,7 +329,7 @@ namespace Jurassic.Compiler
             }
 
             // Read the integer component.
-            int digitsRead;
+            double exponentBase10 = 0;
             if (firstChar == '.')
                 result = double.NaN;
             else
@@ -351,8 +355,9 @@ namespace Jurassic.Compiler
                 // '5.' should return 5.0.
                 if (digitsRead > 0)
                 {
-                    // Apply the fractional component.
-                    result += fraction / System.Math.Pow(10, digitsRead);
+                    // Apply the fractional component but keep the number an integer for accuracy.
+                    exponentBase10 = -digitsRead;
+                    result = result * System.Math.Pow(10, -exponentBase10) + fraction;
                 }
             }
 
@@ -373,18 +378,18 @@ namespace Jurassic.Compiler
                 }
 
                 // Read the exponent.
-                double exponent = ReadInteger(0.0, out digitsRead) * exponentSign;
+                exponentBase10 += ReadInteger(0.0, out digitsRead) * exponentSign;
 
                 // Check a number was actually provided.
                 if (double.IsNaN(result) == true || digitsRead == 0)
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
-
-                // Apply the exponent.
-                if (exponent >= 0)
-                    result *= System.Math.Pow(10, exponent);
-                else
-                    result /= System.Math.Pow(10, -exponent);
             }
+
+            // Apply the exponent.  For accuracy, multiply or divide by an integer.
+            if (exponentBase10 > 0.0)
+                result *= System.Math.Pow(10, exponentBase10);
+            else if (exponentBase10 < 0.0)
+                result /= System.Math.Pow(10, -exponentBase10);
 
             if (result == (double)(int)result)
                 return new LiteralToken((int)result);

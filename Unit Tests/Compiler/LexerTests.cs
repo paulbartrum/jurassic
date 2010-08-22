@@ -98,11 +98,14 @@ namespace UnitTests
             Assert.AreEqual(0.5, TestUtils.Evaluate(".5"));
             Assert.AreEqual(50, TestUtils.Evaluate(".5e2"));
             Assert.AreEqual(5, TestUtils.Evaluate("5."));
+            Assert.AreEqual(0.07, TestUtils.Evaluate(".7e-1"));
+            Assert.AreEqual(0.11, TestUtils.Evaluate("1.1e-1"));
             Assert.AreEqual(244837814094590.0, TestUtils.Evaluate("0xdeadbeefcafe"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5.e"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5e"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5e+"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5e.5"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0x"));
         }
 
         [TestMethod]
