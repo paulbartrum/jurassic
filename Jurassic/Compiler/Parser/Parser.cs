@@ -1399,10 +1399,6 @@ namespace Jurassic.Compiler
             // The active operator, i.e. the one last encountered.
             OperatorExpression unboundOperator = null;
 
-            // Literals are always valid at the start of an expression.
-            this.expressionState = ParserExpressionState.Literal;
-            this.lexer.ParserExpressionState = expressionState;
-
             while (this.nextToken != null)
             {
                 if (this.nextToken is LiteralToken ||
@@ -1495,6 +1491,11 @@ namespace Jurassic.Compiler
                             break;
                         throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0} in expression.", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
+
+                    // Post-fix increment and decrement cannot have a line terminator in between
+                    // the operator and the operand.
+                    if (this.consumedLineTerminator == true && (newOperator == Operator.PostIncrement || newOperator == Operator.PostDecrement))
+                        break;
 
                     // There are four possibilities:
                     // 1. The token is the second of a two-part operator (for example, the ':' in a
@@ -1649,6 +1650,10 @@ namespace Jurassic.Compiler
             // Empty expressions are invalid.
             if (root == null)
                 throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+
+            // A literal is the next valid expression token.
+            this.expressionState = ParserExpressionState.Literal;
+            this.lexer.ParserExpressionState = expressionState;
 
             // Resolve all the unbound operators into real operators.
             return root;
