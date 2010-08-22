@@ -66,7 +66,7 @@ namespace Jurassic.Compiler
         public readonly static KeywordToken Import = new KeywordToken("import");
         public readonly static KeywordToken Super = new KeywordToken("super");
 
-        // Strict reserved words.
+        // Strict-mode reserved words.
         public readonly static KeywordToken Implements = new KeywordToken("implements");
         public readonly static KeywordToken Interface = new KeywordToken("interface");
         public readonly static KeywordToken Let = new KeywordToken("let");
@@ -117,7 +117,15 @@ namespace Jurassic.Compiler
             { "import",		Import },
             { "super",      Super },
 
-            // Strict reserved words.
+            // Literal keywords.
+            { "true",		LiteralToken.True },
+            { "false",		LiteralToken.False },
+            { "null",		LiteralToken.Null },
+        };
+
+        // Mapping from text -> keyword (strict mode).
+        private readonly static Dictionary<string, Token> strictModeLookupTable = new Dictionary<string, Token>()
+        {
             { "implements",	Implements },
             { "interface",	Interface },
             { "let",		Let },
@@ -127,25 +135,24 @@ namespace Jurassic.Compiler
             { "public",		Public },
             { "static",		Static },
             { "yield",		Yield },
-
-            // Literal keywords.
-            { "true",		LiteralToken.True },
-            { "false",		LiteralToken.False },
-            { "null",		LiteralToken.Null },
         };
 
         /// <summary>
         /// Creates a token from the given string.
         /// </summary>
         /// <param name="text"> The text. </param>
+        /// <param name="strictMode"> <c>true</c> if the lexer is operating in strict mode;
+        /// <c>false</c> otherwise. </param>
         /// <returns> The token corresponding to the given string, or <c>null</c> if the string
         /// does not represent a valid token. </returns>
-        public static Token FromString(string text)
+        public static Token FromString(string text, bool strictMode)
         {
             Token result;
-            if (lookupTable.TryGetValue(text, out result) == false)
-                return new IdentifierToken(text);
-            return result;
+            if (lookupTable.TryGetValue(text, out result) == true)
+                return result;
+            if (strictMode == true && strictModeLookupTable.TryGetValue(text, out result) == true)
+                return result;
+            return new IdentifierToken(text);
         }
 
         /// <summary>

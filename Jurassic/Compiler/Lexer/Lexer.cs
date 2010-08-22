@@ -9,22 +9,22 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents the current expression state of the parser.
     /// </summary>
-    internal enum ExpressionState
+    internal enum ParserExpressionState
     {
         /// <summary>
         /// Indicates the context is not known.  The lexer will guess.
         /// </summary>
-        UnknownContext,
+        Unknown,
 
         /// <summary>
         /// Indicates the next token can be a literal.
         /// </summary>
-        LiteralContext,
+        Literal,
 
         /// <summary>
         /// Indicates the next token can be an operator.
         /// </summary>
-        OperatorContext,
+        Operator,
     }
 
     /// <summary>
@@ -84,7 +84,16 @@ namespace Jurassic.Compiler
         /// an operator is valid as the next token.  This is only required to disambiguate the
         /// slash symbol (/) which can be a division operator or a regular expression literal.
         /// </summary>
-        public Func<ExpressionState> ExpressionStateCallback
+        public ParserExpressionState ParserExpressionState
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value that indicates whether the lexer should operate in strict mode.
+        /// </summary>
+        public bool StrictMode
         {
             get;
             set;
@@ -212,7 +221,7 @@ namespace Jurassic.Compiler
             }
 
             // Check if the identifier is actually a keyword, boolean literal, or null literal.
-            return KeywordToken.FromString(name.ToString());
+            return KeywordToken.FromString(name.ToString(), this.StrictMode);
         }
 
         /// <summary>
@@ -638,20 +647,15 @@ namespace Jurassic.Compiler
             {
                 // Divide or regular expression.
 
-                // Get the current parser context.
-                var parserContext = ExpressionState.UnknownContext;
-                if (this.ExpressionStateCallback != null)
-                    parserContext = this.ExpressionStateCallback();
-
                 // Determine from the context whether the token is a regular expression
                 // or a division operator.
                 bool isDivisionOperator;
-                switch (parserContext)
+                switch (this.ParserExpressionState)
                 {
-                    case ExpressionState.LiteralContext:
+                    case ParserExpressionState.Literal:
                         isDivisionOperator = false;
                         break;
-                    case ExpressionState.OperatorContext:
+                    case ParserExpressionState.Operator:
                         isDivisionOperator = true;
                         break;
                     default:

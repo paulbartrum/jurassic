@@ -15,13 +15,14 @@ namespace Jurassic.Compiler
         private SourceCodePosition positionBeforeWhitespace, positionAfterWhitespace;
         private Token nextToken;
         private bool consumedLineTerminator;
-        private ExpressionState expressionState;
+        private ParserExpressionState expressionState;
         private Scope currentScope;
         private MethodOptimizationHints methodOptimizationHints;
         private List<string> labelsForCurrentStatement = new List<string>();
         private Token endToken;
         private CompilerOptions options;
         private bool insideFunction;
+        private bool strictMode;
 
 
 
@@ -46,7 +47,7 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException("initialScope");
             this.engine = engine;
             this.lexer = lexer;
-            this.lexer.ExpressionStateCallback = () => this.expressionState;
+            this.lexer.ParserExpressionState = ParserExpressionState.Literal;
             this.currentScope = initialScope;
             this.methodOptimizationHints = new MethodOptimizationHints();
             this.insideFunction = insideFunction;
@@ -64,7 +65,6 @@ namespace Jurassic.Compiler
         private static Parser CreateFunctionBodyParser(Parser parser, Scope scope)
         {
             var result = (Parser)parser.MemberwiseClone();
-            result.lexer.ExpressionStateCallback = () => result.expressionState;
             result.currentScope = scope;
             result.methodOptimizationHints = new MethodOptimizationHints();
             result.insideFunction = true;
@@ -124,8 +124,12 @@ namespace Jurassic.Compiler
         /// </summary>
         public bool StrictMode
         {
-            get;
-            set;
+            get { return this.strictMode; }
+            set
+            {
+                this.strictMode = value;
+                this.lexer.StrictMode = value;
+            }
         }
 
         /// <summary>
@@ -164,9 +168,10 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="expressionState"> Indicates whether the next token can be a literal or an
         /// operator. </param>
-        private void Consume(ExpressionState expressionState = ExpressionState.LiteralContext)
+        private void Consume(ParserExpressionState expressionState = ParserExpressionState.Literal)
         {
             this.expressionState = expressionState;
+            this.lexer.ParserExpressionState = expressionState;
             this.consumedLineTerminator = false;
             this.positionBeforeWhitespace = new SourceCodePosition(this.lexer.LineNumber, this.lexer.ColumnNumber);
             this.positionAfterWhitespace = this.positionBeforeWhitespace;
@@ -279,26 +284,33 @@ namespace Jurassic.Compiler
                     break;
 
                 // A directive must start with a string literal token.  Record it now so that the
-                // escape sequence and line continuation information is not lost.  (Directives
-                // cannot have escape sequences or line continuations).
+                // escape sequence and line continuation information is not lost.
                 var directiveToken = this.nextToken as StringLiteralToken;
                 if (directiveToken == null)
                     break;
 
-                // Parse the statement - this reads past the semi-colon and any whitespace.
-                var possibleDirectiveStatement = ParseSourceStatement();
-                result.Statements.Add(possibleDirectiveStatement);
+                // Directives cannot have escape sequences or line continuations.
+                if (directiveToken.EscapeSequenceCount != 0 || directiveToken.LineContinuationCount != 0)
+                    break;
 
-                // In order for the statement to be part of the directive prologue, it must have
-                // the following tree structure: ExpressionStatement -> LiteralExpression -> string
-                if ((possibleDirectiveStatement is ExpressionStatement) == false)
+                // If the statement starts with a string literal, it must be an expression.
+                var expression = ParseExpression(PunctuatorToken.Semicolon);
+
+                // The statement must be added to the AST so that eval("'test'") works.
+                result.Statements.Add(new ExpressionStatement(this.labelsForCurrentStatement, expression));
+
+                // In order for the expression to be part of the directive prologue, it must
+                // consist solely of a string literal.
+                if ((expression is LiteralExpression) == false)
                     break;
-                if ((((ExpressionStatement)possibleDirectiveStatement).Expression is LiteralExpression) == false)
-                    break;
-                if ((((LiteralExpression)((ExpressionStatement)possibleDirectiveStatement).Expression).Value is string) == false)
-                    break;
-                if (directiveToken.Value == "use strict" && directiveToken.EscapeSequenceCount == 0 && directiveToken.LineContinuationCount == 0)
+
+                // Strict mode directive.
+                if (directiveToken.Value == "use strict")
                     this.StrictMode = true;
+
+                // Read the end of the statement.  This must happen last so that the lexer has a
+                // chance to act on the strict mode flag.
+                ExpectEndOfStatement();
             }
 
             // Call the directive prologue callback.
@@ -714,7 +726,7 @@ namespace Jurassic.Compiler
                     var initializationExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In);
 
                     // Record debug info for the expression.
-                    initializationStatement = new ExpressionStatement(this.labelsForCurrentStatement, initializationExpression);
+                    initializationStatement = new ExpressionStatement(initializationExpression);
                     initializationStatement.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                     if (this.nextToken == KeywordToken.In)
@@ -1239,7 +1251,7 @@ namespace Jurassic.Compiler
 
             // Transfer state back from the function parser.
             this.nextToken = functionParser.nextToken;
-            this.lexer.ExpressionStateCallback = () => this.expressionState;
+            this.lexer.StrictMode = this.StrictMode;
 
             SourceCodePosition endPosition;
             if (functionType == FunctionType.Expression)
@@ -1303,7 +1315,7 @@ namespace Jurassic.Compiler
                 this.ExpectEndOfStatement();
 
                 // Create a new expression statement.
-                var result = new ExpressionStatement(this.labelsForCurrentStatement, expression) { ContributesToEvalResult = true };
+                var result = new ExpressionStatement(this.labelsForCurrentStatement, expression);
 
                 // Record the portion of the source document that will be highlighted when debugging.
                 result.DebugInfo = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
@@ -1388,7 +1400,8 @@ namespace Jurassic.Compiler
             OperatorExpression unboundOperator = null;
 
             // Literals are always valid at the start of an expression.
-            this.expressionState = ExpressionState.LiteralContext;
+            this.expressionState = ParserExpressionState.Literal;
+            this.lexer.ParserExpressionState = expressionState;
 
             while (this.nextToken != null)
             {
@@ -1397,13 +1410,13 @@ namespace Jurassic.Compiler
                     this.nextToken == KeywordToken.Function ||
                     this.nextToken == KeywordToken.This ||
                     this.nextToken == PunctuatorToken.LeftBrace ||
-                    (this.nextToken == PunctuatorToken.LeftBracket && this.expressionState == ExpressionState.LiteralContext) ||
-                    (this.nextToken is KeywordToken && unboundOperator != null && unboundOperator.OperatorType == OperatorType.MemberAccess && this.expressionState == ExpressionState.LiteralContext))
+                    (this.nextToken == PunctuatorToken.LeftBracket && this.expressionState == ParserExpressionState.Literal) ||
+                    (this.nextToken is KeywordToken && unboundOperator != null && unboundOperator.OperatorType == OperatorType.MemberAccess && this.expressionState == ParserExpressionState.Literal))
                 {
                     // If a literal was found where an operator was expected, insert a semi-colon
                     // automatically (if this would fix the error and a line terminator was
                     // encountered) or throw an error.
-                    if (this.expressionState != ExpressionState.LiteralContext)
+                    if (this.expressionState != ParserExpressionState.Literal)
                     {
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
@@ -1415,7 +1428,7 @@ namespace Jurassic.Compiler
                     if ((this.nextToken is KeywordToken || (this.nextToken is LiteralToken && ((LiteralToken)this.nextToken).IsKeyword == true)) &&
                         unboundOperator != null &&
                         unboundOperator.OperatorType == OperatorType.MemberAccess &&
-                        this.expressionState == ExpressionState.LiteralContext)
+                        this.expressionState == ParserExpressionState.Literal)
                     {
                         this.nextToken = new IdentifierToken(this.nextToken.Text);
                     }
@@ -1469,7 +1482,7 @@ namespace Jurassic.Compiler
                 else if (this.nextToken is PunctuatorToken || this.nextToken is KeywordToken)
                 {
                     // The token is an operator (o1).
-                    Operator newOperator = OperatorFromToken(this.nextToken, postfixOrInfix: this.expressionState == ExpressionState.OperatorContext);
+                    Operator newOperator = OperatorFromToken(this.nextToken, postfixOrInfix: this.expressionState == ParserExpressionState.Operator);
 
                     // Make sure the token is actually an operator and not just a random keyword.
                     if (newOperator == null)
@@ -1630,7 +1643,7 @@ namespace Jurassic.Compiler
                 }
 
                 // Read the next token.
-                this.Consume(root != null && (unboundOperator == null || unboundOperator.AcceptingOperands == false) ? ExpressionState.OperatorContext : ExpressionState.LiteralContext);
+                this.Consume(root != null && (unboundOperator == null || unboundOperator.AcceptingOperands == false) ? ParserExpressionState.Operator : ParserExpressionState.Literal);
             }
 
             // Empty expressions are invalid.

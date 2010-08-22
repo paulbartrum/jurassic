@@ -10,16 +10,21 @@ namespace Jurassic.Compiler
     internal class ExpressionStatement : Statement
     {
         /// <summary>
-        /// Creates a new ExpressionStatement instance.
+        /// Creates a new ExpressionStatement instance.  By default, this expression does not
+        /// contribute to the result of an eval().
         /// </summary>
         /// <param name="expression"> The underlying expression. </param>
         public ExpressionStatement(Expression expression)
-            : this(null, expression)
+            : base(null)
         {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+            this.Expression = expression;
         }
 
         /// <summary>
-        /// Creates a new ExpressionStatement instance.
+        /// Creates a new ExpressionStatement instance.  By default, this expression does
+        /// contribute to the result of an eval().
         /// </summary>
         /// <param name="labels"> The labels that are associated with this statement. </param>
         /// <param name="expression"> The underlying expression. </param>
@@ -29,6 +34,7 @@ namespace Jurassic.Compiler
             if (expression == null)
                 throw new ArgumentNullException("expression");
             this.Expression = expression;
+            this.ContributesToEvalResult = true;
         }
 
         /// <summary>

@@ -47,6 +47,38 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("false"));
             Assert.AreEqual(true, TestUtils.Evaluate("true"));
             Assert.AreEqual(Null.Value, TestUtils.Evaluate("null"));
+
+            // Reserved words.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("class = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("enum = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("extends = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("super = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("const = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("export = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("import = 1"));
+
+            // Future reserved words.
+            Assert.AreEqual(1, TestUtils.Evaluate("implements = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("let = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("private = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("public = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("yield = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("interface = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("package = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("protected = 1"));
+            Assert.AreEqual(1, TestUtils.Evaluate("static = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; implements = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; let = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; private = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; public = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; yield = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; interface = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; package = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; protected = 1"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; static = 1"));
+
+            Assert.AreEqual(Null.Value, TestUtils.Evaluate("null"));
+            Assert.AreEqual(Null.Value, TestUtils.Evaluate("null"));
         }
 
         [TestMethod]
