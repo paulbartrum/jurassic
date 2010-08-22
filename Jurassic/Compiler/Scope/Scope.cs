@@ -18,6 +18,7 @@ namespace Jurassic.Compiler
             public int Index;
             public string Name;
             public FunctionExpression ValueAtTopOfScope;
+            public bool Initialized;
         }
 
         /// <summary>
@@ -222,6 +223,10 @@ namespace Jurassic.Compiler
             // Initialize the declared variables and functions.
             foreach (var variable in this.variables.Values)
             {
+                // When a scope is reused, i.e. with an eval(), do not reinitialize the variables.
+                if (variable.Initialized == true)
+                    continue;
+
                 if (variable.ValueAtTopOfScope == null)
                 {
                     // Emit a variable declaration (this is only needed for object scopes).
@@ -239,6 +244,9 @@ namespace Jurassic.Compiler
                     var functionDeclaration = new NameExpression(this, variable.Name);
                     functionDeclaration.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);
                 }
+
+                // Indicate the variable has been initialized.
+                variable.Initialized = true;
             }
         }
     }
