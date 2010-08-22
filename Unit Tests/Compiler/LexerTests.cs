@@ -124,6 +124,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'te\r\nst'"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'test\""));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("\"test'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"'te\1st'"));
         }
 
         [TestMethod]
