@@ -480,7 +480,7 @@ namespace Jurassic.Compiler
                 result.Declarations.Add(declaration);
 
                 // Check if we are at the end of the statement.
-                if (this.AtValidEndOfStatement() == true)
+                if (this.AtValidEndOfStatement() == true && this.nextToken != PunctuatorToken.Comma)
                     break;
 
                 // Read past the comma token.
