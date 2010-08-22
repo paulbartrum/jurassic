@@ -195,7 +195,7 @@ namespace UnitTests
             Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toString()"));
             Assert.AreEqual("77.001", TestUtils.Evaluate("77.001.toString()"));
             Assert.AreEqual("77.12345678901235", TestUtils.Evaluate("77.1234567890123456789.toString()"));
-            Assert.AreEqual("7.123456789012346", TestUtils.Evaluate("7.1234567890123456789.toString()"));
+            Assert.AreEqual("7.123456789012345", TestUtils.Evaluate("7.1234567890123456789.toString()"));
             Assert.AreEqual("0.000005", TestUtils.Evaluate("5e-6.toString()"));
             Assert.AreEqual("0.000001", TestUtils.Evaluate("1e-6.toString()"));
             Assert.AreEqual("5e-7", TestUtils.Evaluate("5e-7.toString()"));
