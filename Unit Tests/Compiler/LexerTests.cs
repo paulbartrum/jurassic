@@ -141,6 +141,9 @@ namespace UnitTests
             // The closing bracket can be escaped.
             Assert.AreEqual(@"[\]/]", TestUtils.Evaluate(@"/[\]/]/i.source"));
 
+            // Escape sequences are allowed in the flags part.
+            Assert.AreEqual("/abc/g", TestUtils.Evaluate("(/abc/\u0067).toString()"));
+
             // Line terminators are not allowed in regexps - even if the line terminator is escaped.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("/\u000A/"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("/\\\u000A/"));
