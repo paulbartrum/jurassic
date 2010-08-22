@@ -170,6 +170,9 @@ namespace UnitTests
             Assert.AreEqual(5, TestUtils.Evaluate("(function() { var a = 5; return eval('a'); })()"));
             Assert.AreEqual(6, TestUtils.Evaluate("(function() { var a = 5; eval('a = 6'); return a; })()"));
 
+            // Variables should not be reinitialized.
+            Assert.AreEqual(0, TestUtils.Evaluate("var x = 0; eval('var x'); x"));
+
             // Eval() can introduce new variables into a function scope.
             Assert.AreEqual(5, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); return b; })()"));
             Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); b = 4; })(); b;"));
