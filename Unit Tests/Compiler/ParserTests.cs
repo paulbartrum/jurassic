@@ -18,7 +18,6 @@ namespace UnitTests
         [TestMethod]
         public void AutomaticSemicolonInsertion()
         {
-            // Automatic semi-colon insertion.
             Assert.AreEqual(6, TestUtils.Evaluate("x = 1 + \r\n 5"));
             Assert.AreEqual("11,2", TestUtils.Evaluate("x = 1 + \r\n [1, 2]"));
 
@@ -30,6 +29,19 @@ namespace UnitTests
             TestUtils.Evaluate("var x = 5\r\nfunction f() { }");
 
             TestUtils.Evaluate("x = { a: 1 }; y = x.a \r\n var b;");
+
+            // Check post-increment operator.
+            Assert.AreEqual(0, TestUtils.Evaluate("var x = 0, y = 0; x ++ \n y"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x"));
+            Assert.AreEqual(0, TestUtils.Evaluate("y"));
+
+            // Check pre-increment operator.
+            Assert.AreEqual(1, TestUtils.Evaluate("var x = 0, y = 0; x \n ++ y"));
+            Assert.AreEqual(0, TestUtils.Evaluate("x"));
+            Assert.AreEqual(1, TestUtils.Evaluate("y"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var x = 0, y = 0; x \n ++ \n y"));
+            Assert.AreEqual(0, TestUtils.Evaluate("x"));
+            Assert.AreEqual(1, TestUtils.Evaluate("y"));
         }
 
     }
