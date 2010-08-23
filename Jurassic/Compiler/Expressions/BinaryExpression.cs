@@ -335,12 +335,14 @@ namespace Jurassic.Compiler
                 //EmitConversion.ToConcatenatedString(generator, leftType);
 
                 // Convert the operand to a string.
+                EmitConversion.ToPrimitive(generator, leftType, PrimitiveTypeHint.None);
                 EmitConversion.ToString(generator, leftType);
 
                 // Load the right-hand side onto the stack.
                 this.Right.GenerateCode(generator, optimizationInfo);
 
                 // Convert the operand to a string.
+                EmitConversion.ToPrimitive(generator, rightType, PrimitiveTypeHint.None);
                 EmitConversion.ToString(generator, rightType);
 
                 // Concatenate the two strings.

@@ -435,6 +435,43 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Pops the value on the stack, converts it to a primitive value, then pushes the result
+        /// onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="fromType"> The type to convert from. </param>
+        /// <param name="preferredType"> Specifies whether toString() or valueOf() should be
+        /// preferred when converting to a primitive. </param>
+        public static void ToPrimitive(ILGenerator generator, PrimitiveType fromType, PrimitiveTypeHint preferredType)
+        {
+            switch (fromType)
+            {
+                case PrimitiveType.Undefined:
+                case PrimitiveType.Null:
+                case PrimitiveType.Bool:
+                case PrimitiveType.String:
+                case PrimitiveType.ConcatenatedString:
+                case PrimitiveType.Int32:
+                case PrimitiveType.UInt32:
+                case PrimitiveType.Number:
+                    // These are primitives already.
+                    break;
+
+                case PrimitiveType.Any:
+                case PrimitiveType.Object:
+                    // Otherwise, fall back to calling TypeConverter.ToPrimitive()
+                    if (PrimitiveTypeUtilities.IsValueType(fromType))
+                        generator.Box(fromType);
+                    generator.LoadInt32((int)preferredType);
+                    generator.Call(ReflectionHelpers.TypeConverter_ToPrimitive);
+                    break;
+
+                default:
+                    throw new NotImplementedException(string.Format("Unsupported primitive type: {0}", fromType));
+            }
+        }
+
+        /// <summary>
         /// Pops the value on the stack, converts it to an object, then pushes the result onto the
         /// stack.
         /// </summary>

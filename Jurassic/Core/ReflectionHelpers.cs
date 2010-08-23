@@ -22,6 +22,7 @@ namespace Jurassic
         internal static MethodInfo TypeConverter_ToInteger;
         internal static MethodInfo TypeConverter_ToInt32;
         internal static MethodInfo TypeConverter_ToUint32;
+        internal static MethodInfo TypeConverter_ToPrimitive;
 
         internal static MethodInfo TypeComparer_Equals;
         internal static MethodInfo TypeComparer_StrictEquals;
@@ -122,6 +123,7 @@ namespace Jurassic
             TypeConverter_ToInteger = GetStaticMethod(typeof(TypeConverter), "ToInteger", typeof(object));
             TypeConverter_ToInt32 = GetStaticMethod(typeof(TypeConverter), "ToInt32", typeof(object));
             TypeConverter_ToUint32 = GetStaticMethod(typeof(TypeConverter), "ToUint32", typeof(object));
+            TypeConverter_ToPrimitive = GetStaticMethod(typeof(TypeConverter), "ToPrimitive", typeof(object), typeof(PrimitiveTypeHint));
 
             TypeComparer_Equals = GetStaticMethod(typeof(TypeComparer), "Equals", typeof(object), typeof(object));
             TypeComparer_StrictEquals = GetStaticMethod(typeof(TypeComparer), "StrictEquals", typeof(object), typeof(object));
