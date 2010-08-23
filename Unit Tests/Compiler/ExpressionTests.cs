@@ -111,6 +111,8 @@ namespace UnitTests
             Assert.AreEqual(11, TestUtils.Evaluate("new Number(5) + new Number(6)"));
             Assert.AreEqual("test6", TestUtils.Evaluate("'test' + new Number(6)"));
             Assert.AreEqual("5test", TestUtils.Evaluate("new Number(5) + 'test'"));
+            Assert.AreEqual("1", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + ''"));
+            Assert.AreEqual("10", TestUtils.Evaluate("({valueOf: function() {return '1'}, toString: function() {return 0}}) + 0"));
 
             // Variables
             Assert.AreEqual(35, TestUtils.Evaluate("x = 15; x + 20"));
@@ -526,6 +528,12 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("x = 0.3; y = 0.5; x < y"));
             Assert.AreEqual(false, TestUtils.Evaluate("x = 0.4; y = 0.4; x < y"));
             Assert.AreEqual(false, TestUtils.Evaluate("x = 0.5; y = 0.3; x < y"));
+
+            // Objects
+            Assert.AreEqual(false, TestUtils.Evaluate("0 < {valueOf: function() {return -2}, toString: function() {return '2'}}"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'0' < {valueOf: function() {return -2}, toString: function() {return '2'}}"));
+            Assert.AreEqual(true, TestUtils.Evaluate("({valueOf: function() {return -2}, toString: function() {return '2'}}) < 0"));
+            Assert.AreEqual(true, TestUtils.Evaluate("({valueOf: function() {return -2}, toString: function() {return '2'}}) < '0'"));
         }
 
         [TestMethod]

@@ -167,11 +167,13 @@ namespace Jurassic
         /// Converts any JavaScript value to a primitive value.
         /// </summary>
         /// <param name="value"> The value to convert. </param>
+        /// <param name="preferredType"> Specifies whether toString() or valueOf() should be
+        /// preferred when converting to a primitive. </param>
         /// <returns> A primitive (non-object) value. </returns>
-        public static object ToPrimitive(object value, PrimitiveTypeHint typeHint)
+        public static object ToPrimitive(object value, PrimitiveTypeHint preferredType)
         {
             if (value is ObjectInstance)
-                return ((ObjectInstance)value).GetPrimitiveValue(typeHint);
+                return ((ObjectInstance)value).GetPrimitiveValue(preferredType);
             else
                 return value;
         }
