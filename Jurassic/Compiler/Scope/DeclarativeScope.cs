@@ -8,11 +8,6 @@ namespace Jurassic.Compiler
     /// </summary>
     public class DeclarativeScope : Scope
     {
-        // Variables declared at compile-time cannot be deleted but variables that are declared at
-        // runtime (i.e. inside a eval() statement are mutable and can be deleted.  This values
-        // indicates which values are immutable and which are mutable.
-        private int immutableCount;
-
         // Catch scopes behave like other scopes except variables cannot be declared inside them -
         // they always only have a single variable (the catch variable).
         private bool preventExtensions;
@@ -91,7 +86,6 @@ namespace Jurassic.Compiler
             foreach (string variableName in declaredVariableNames)
                 result.DeclareVariable(variableName);
             result.values = new object[declaredVariableNames.Length];
-            result.immutableCount = declaredVariableNames.Length;
             return result;
         }
 
@@ -120,9 +114,13 @@ namespace Jurassic.Compiler
         /// of the given expression.
         /// </summary>
         /// <param name="name"> The name of the variable. </param>
-        /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
-        /// function declarations (not function expressions). </param>
-        internal override void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope)
+        /// <param name="valueAtTopOfScope"> The value of the variable at the top of the scope. </param>
+        /// <param name="writable"> <c>true</c> if the variable can be modified; <c>false</c>
+        /// otherwise. </param>
+        /// <param name="deletable"> <c>true</c> if the variable can be deleted; <c>false</c>
+        /// otherwise. </param>
+        /// <returns> A reference to the variable that was declared. </returns>
+        internal override DeclaredVariable DeclareVariable(string name, Expression valueAtTopOfScope = null, bool writable = true, bool deletable = false)
         {
             // Variables can be added to a declarative scope using eval().  When this happens the
             // values array needs to be resized.  That check happens here.
@@ -131,13 +129,10 @@ namespace Jurassic.Compiler
 
             // The normal case is to delegate to the Scope class.
             if (this.preventExtensions == false)
-            {
-                base.DeclareVariableOrFunction(name, valueAtTopOfScope);
-                return;
-            }
+                return base.DeclareVariable(name, valueAtTopOfScope, writable, deletable);
 
             // Variables cannot be declared in this scope - try the parent scope.
-            this.ParentScope.DeclareVariableOrFunction(name, valueAtTopOfScope);
+            return this.ParentScope.DeclareVariable(name, valueAtTopOfScope, writable, deletable);
         }
 
         /// <summary>
@@ -163,10 +158,10 @@ namespace Jurassic.Compiler
         {
             if (this.Values == null)
                 throw new InvalidOperationException("This method can only be used when the DeclarativeScope is created using CreateRuntimeScope().");
-            int index = GetDeclaredVariableIndex(variableName);
-            if (index < 0)
+            var variable = GetDeclaredVariable(variableName);
+            if (variable == null)
                 return null;
-            return this.Values[index];
+            return this.Values[variable.Index];
         }
 
         /// <summary>
@@ -180,13 +175,20 @@ namespace Jurassic.Compiler
         {
             if (this.Values == null)
                 throw new InvalidOperationException("This method can only be used when the DeclarativeScope is created using CreateRuntimeScope().");
-            int index = GetDeclaredVariableIndex(variableName);
-            if (index < 0)
-            {
-                this.DeclareVariable(variableName);
-                index = GetDeclaredVariableIndex(variableName);
-            }
-            this.Values[index] = value;
+            
+            // Get information on the variable.
+            var variable = GetDeclaredVariable(variableName);
+
+            // If the variable doesn't exist, create it.
+            if (variable == null)
+                variable = this.DeclareVariable(variableName);
+
+            // Check the variable is writable.
+            if (variable.Writable == false)
+                return;
+
+            // Set the value.
+            this.Values[variable.Index] = value;
         }
 
         /// <summary>
@@ -197,17 +199,18 @@ namespace Jurassic.Compiler
         {
             if (this.Values == null)
                 throw new InvalidOperationException("This method can only be used when the DeclarativeScope is created using CreateRuntimeScope().");
-            int index = GetDeclaredVariableIndex(variableName);
+            var variable = GetDeclaredVariable(variableName);
 
             // Delete returns true if the variable doesn't exist.
-            if (index < 0)
+            if (variable == null)
                 return true;
 
-            // Variables that are known at compile-time are immutable.
-            if (index < this.immutableCount)
+            // Check if the variable is deletable.
+            if (variable.Deletable == false)
                 return false;
 
-            // This variable was declared in an eval() statement - remove the variable from the scope.
+            // This variable can be deleted (it was declared in an eval()), remove the variable
+            // from the scope.
             RemovedDeclaredVariable(variableName);
             return true;
         }

@@ -21,7 +21,7 @@ namespace Jurassic.Compiler
         private List<string> labelsForCurrentStatement = new List<string>();
         private Token endToken;
         private CompilerOptions options;
-        private bool insideFunction;
+        private CodeContext context;
         private bool strictMode;
 
 
@@ -35,9 +35,9 @@ namespace Jurassic.Compiler
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="lexer"> The lexical analyser that provides the tokens. </param>
         /// <param name="initialScope"> The initial variable scope. </param>
-        /// <param name="insideFunction"> <c>true</c> if the code is a method body. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public Parser(ScriptEngine engine, Lexer lexer, Scope initialScope, bool insideFunction, CompilerOptions options)
+        /// <param name="context"> The context of the code (global, function or eval). </param>
+        public Parser(ScriptEngine engine, Lexer lexer, Scope initialScope, CompilerOptions options, CodeContext context)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
@@ -50,8 +50,8 @@ namespace Jurassic.Compiler
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
             this.currentScope = initialScope;
             this.methodOptimizationHints = new MethodOptimizationHints();
-            this.insideFunction = insideFunction;
             this.options = options;
+            this.context = context;
             this.StrictMode = options.ForceStrictMode;
             this.Consume();
         }
@@ -67,7 +67,7 @@ namespace Jurassic.Compiler
             var result = (Parser)parser.MemberwiseClone();
             result.currentScope = scope;
             result.methodOptimizationHints = new MethodOptimizationHints();
-            result.insideFunction = true;
+            result.context = CodeContext.Function;
             result.endToken = PunctuatorToken.RightBrace;
             result.DirectivePrologueProcessedCallback = null;
             return result;
@@ -461,7 +461,9 @@ namespace Jurassic.Compiler
                 ValidateVariableName(declaration.VariableName);
 
                 // Add the variable to the current function's list of local variables.
-                this.currentScope.DeclareVariable(declaration.VariableName);
+                this.currentScope.DeclareVariable(declaration.VariableName,
+                    this.context == CodeContext.Function ? null : new LiteralExpression(Undefined.Value),
+                    writable: true, deletable: this.context == CodeContext.Eval);
 
                 // The next token is either an equals sign (=), a semi-colon or a comma.
                 if (this.nextToken == PunctuatorToken.Assignment)
@@ -668,7 +670,9 @@ namespace Jurassic.Compiler
                     ValidateVariableName(declaration.VariableName);
 
                     // Add the variable to the current function's list of local variables.
-                    this.currentScope.DeclareVariable(declaration.VariableName);
+                    this.currentScope.DeclareVariable(declaration.VariableName,
+                        this.context == CodeContext.Function ? null : new LiteralExpression(Undefined.Value),
+                        writable: true, deletable: this.context == CodeContext.Eval);
 
                     // The next token is either an equals sign (=), a semi-colon, a comma, or the "in" keyword.
                     if (this.nextToken == PunctuatorToken.Assignment)
@@ -876,7 +880,7 @@ namespace Jurassic.Compiler
         /// <returns> A return statement. </returns>
         private ReturnStatement ParseReturn()
         {
-            if (this.insideFunction == false)
+            if (this.context != CodeContext.Function)
                 throw new JavaScriptException(this.engine, "SyntaxError", "Return statements are only allowed inside functions");
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
@@ -1149,7 +1153,7 @@ namespace Jurassic.Compiler
             var expression = ParseFunction(FunctionType.Declaration);
 
             // Add the function to the scope.
-            this.currentScope.DeclareFunction(expression.Context.Name, expression);
+            this.currentScope.DeclareVariable(expression.Context.Name, expression, writable: true, deletable: this.context == CodeContext.Eval);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.

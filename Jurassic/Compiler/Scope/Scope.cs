@@ -13,12 +13,14 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Represents a variable declared in a scope.
         /// </summary>
-        private class DeclaredVariable
+        internal class DeclaredVariable
         {
             public int Index;
             public string Name;
-            public FunctionExpression ValueAtTopOfScope;
+            public Expression ValueAtTopOfScope;
             public bool Initialized;
+            public bool Writable;
+            public bool Deletable;
         }
 
         /// <summary>
@@ -83,14 +85,14 @@ namespace Jurassic.Compiler
         /// <param name="variableName"> The name of the variable. </param>
         /// <returns> The index of the given variable, or <c>-1</c> if the variable doesn't exist
         /// in the scope. </returns>
-        internal int GetDeclaredVariableIndex(string variableName)
+        internal DeclaredVariable GetDeclaredVariable(string variableName)
         {
             if (variableName == null)
                 throw new ArgumentNullException("variableName");
             DeclaredVariable variable;
             if (this.variables.TryGetValue(variableName, out variable) == false)
-                return -1;
-            return variable.Index;
+                return null;
+            return variable;
         }
 
         /// <summary>
@@ -105,13 +107,37 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Declares a variable in this scope.  The variable will be set to "undefined" at the top
-        /// of the scope.
+        /// Declares a variable or function in this scope.  This will be initialized with the value
+        /// of the given expression.
         /// </summary>
         /// <param name="name"> The name of the variable. </param>
-        internal void DeclareVariable(string name)
+        /// <param name="valueAtTopOfScope"> The value of the variable at the top of the scope.
+        /// Can be <c>null</c> to indicate the variable does not need initializing. </param>
+        /// <param name="writable"> <c>true</c> if the variable can be modified; <c>false</c>
+        /// otherwise.  Defaults to <c>true</c>. </param>
+        /// <param name="deletable"> <c>true</c> if the variable can be deleted; <c>false</c>
+        /// otherwise.  Defaults to <c>true</c>. </param>
+        /// <returns> A reference to the variable that was declared. </returns>
+        internal virtual DeclaredVariable DeclareVariable(string name, Expression valueAtTopOfScope = null, bool writable = true, bool deletable = false)
         {
-            DeclareVariableOrFunction(name, null);
+            if (name == null)
+                throw new ArgumentNullException("name");
+            DeclaredVariable variable;
+            this.variables.TryGetValue(name, out variable);
+            if (variable == null)
+            {
+                // This is a local variable that has not been declared before.
+                variable = new DeclaredVariable() { Index = this.variables.Count, Name = name, Writable = writable, Deletable = deletable };
+                this.variables.Add(name, variable);
+            }
+
+            // Set the initial value, if one was provided.
+            if (valueAtTopOfScope != null)
+            {
+                variable.ValueAtTopOfScope = valueAtTopOfScope;
+            }
+
+            return variable;
         }
 
         /// <summary>
@@ -121,60 +147,6 @@ namespace Jurassic.Compiler
         internal void RemovedDeclaredVariable(string name)
         {
             this.variables.Remove(name);
-        }
-
-        /// <summary>
-        /// Declares a function in this scope.  This will be initialized with the value of the
-        /// given expression.
-        /// </summary>
-        /// <param name="name"> The name of the variable. </param>
-        /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
-        /// function declarations (not function expressions). </param>
-        internal void DeclareFunction(string name, FunctionExpression valueAtTopOfScope)
-        {
-            if (valueAtTopOfScope == null)
-                throw new ArgumentNullException("valueAtTopOfScope");
-            DeclareVariableOrFunction(name, valueAtTopOfScope);
-        }
-
-        /// <summary>
-        /// Declares a variable or function in this scope.  This will be initialized with the value
-        /// of the given expression.
-        /// </summary>
-        /// <param name="name"> The name of the variable. </param>
-        /// <param name="valueAtTopOfScope"> The value at the top of the scope.  Only used by
-        /// function declarations (not function expressions). </param>
-        internal virtual void DeclareVariableOrFunction(string name, FunctionExpression valueAtTopOfScope)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-            DeclaredVariable variable;
-            this.variables.TryGetValue(name, out variable);
-            if (variable == null)
-            {
-                // This is a local variable that has not been declared before.
-                variable = new DeclaredVariable() { Index = this.variables.Count, Name = name };
-                this.variables.Add(name, variable);
-            }
-
-            // Set the initial value, if one was provided.
-            if (valueAtTopOfScope != null)
-            {
-                variable.ValueAtTopOfScope = valueAtTopOfScope;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value that indicates whether any functions have been declared in this scope.
-        /// </summary>
-        /// <returns> <c>true</c> if one or more functions have been declared in this scope;
-        /// <c>false</c> otherwise. </returns>
-        internal bool ContainsFunctionDeclarations()
-        {
-            foreach (var variable in this.variables.Values)
-                if (variable.ValueAtTopOfScope != null)
-                    return true;
-            return false;
         }
 
         /// <summary>
@@ -218,7 +190,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        internal void GenerateDeclarations(ILGenerator generator, OptimizationInfo optimizationInfo)
+        internal virtual void GenerateDeclarations(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Initialize the declared variables and functions.
             foreach (var variable in this.variables.Values)
@@ -227,26 +199,40 @@ namespace Jurassic.Compiler
                 if (variable.Initialized == true)
                     continue;
 
-                if (variable.ValueAtTopOfScope == null)
+                if (variable.ValueAtTopOfScope != null)
                 {
-                    // Emit a variable declaration (this is only needed for object scopes).
+                    // Emit the initialization code.
                     if (this is ObjectScope)
                     {
-                        EmitHelpers.EmitUndefined(generator);
-                        var variableDeclaration = new NameExpression(this, variable.Name);
-                        variableDeclaration.GenerateSet(generator, optimizationInfo, PrimitiveType.Undefined, false);
-                    }
-                }
-                else
-                {
-                    // Emit a function declaration.
-                    variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
-                    var functionDeclaration = new NameExpression(this, variable.Name);
-                    functionDeclaration.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);
-                }
+                        // Determine the property attributes.
+                        var attributes = Library.PropertyAttributes.Enumerable;
+                        if (variable.Writable == true)
+                            attributes |= Library.PropertyAttributes.Writable;
+                        if (variable.Deletable == true)
+                            attributes |= Library.PropertyAttributes.Configurable;
 
-                // Indicate the variable has been initialized.
-                variable.Initialized = true;
+                        // bool DefineProperty(string propertyName, PropertyDescriptor descriptor, bool throwOnError)
+                        EmitHelpers.LoadScope(generator);
+                        generator.CastClass(typeof(ObjectScope));
+                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
+                        generator.LoadString(variable.Name);
+                        variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
+                        generator.LoadInt32((int)attributes);
+                        generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor2);
+                        generator.LoadBoolean(false);
+                        generator.Call(ReflectionHelpers.ObjectInstance_DefineProperty);
+                        generator.Pop();
+                    }
+                    else
+                    {
+                        variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
+                        var name = new NameExpression(this, variable.Name);
+                        name.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);
+                    }
+
+                    // Mark the variable as having been initialized.
+                    variable.Initialized = true;
+                }
             }
         }
     }

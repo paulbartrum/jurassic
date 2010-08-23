@@ -1105,10 +1105,11 @@ namespace UnitTests
             // Delete non-configurable property.
             Assert.AreEqual(false, TestUtils.Evaluate("delete Number.prototype"));
 
-            // Delete global variable.
-            Assert.AreEqual(true, TestUtils.Evaluate("abcdefg = 1; delete abcdefg"));
-            Assert.AreEqual(false, TestUtils.Evaluate("abcdefg = 1; delete abcdefg; this.hasOwnProperty('abcdefg')"));
-            Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "TypeError" : "ReferenceError", TestUtils.EvaluateExceptionType("x = 5; delete x; x"));
+            // Deleting a global variable fails.
+            TestUtils.Execute("var delete_test_1 = 1; var delete_test_2 = delete delete_test_1;");
+            Assert.AreEqual(1, TestUtils.Evaluate("delete_test_1"));
+            Assert.AreEqual(false, TestUtils.Evaluate("delete_test_2"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(this, 'delete_test_1').configurable"));
 
             // Deleting function variables fails.
             Assert.AreEqual(false, TestUtils.Evaluate("(function f(a) { return delete a; })(1)"));
@@ -1129,7 +1130,13 @@ namespace UnitTests
             // Delete from a parent scope.
             Assert.AreEqual(false, TestUtils.Evaluate("a = 5; function f() { delete a } f(); this.hasOwnProperty('a')"));
 
+            // Deleting variables defined within an eval statement inside a global scope succeeds.
+            Assert.AreEqual(true, TestUtils.Evaluate("abcdefg = 1; delete abcdefg"));
+            Assert.AreEqual(false, TestUtils.Evaluate("abcdefg = 1; delete abcdefg; this.hasOwnProperty('abcdefg')"));
+            Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "TypeError" : "ReferenceError", TestUtils.EvaluateExceptionType("x = 5; delete x; x"));
+
             // Deleting variables defined within an eval statement inside a function scope succeeds.
+            Assert.AreEqual(true, TestUtils.Evaluate("(function() { var a = 5; return eval('var b = a; delete b'); })()"));
             Assert.AreEqual(true, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); return delete b; })()"));
             Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); delete b; })(); b;"));
             Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); delete b; return b; })()"));

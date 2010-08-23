@@ -103,7 +103,8 @@ namespace Jurassic
         internal static ConstructorInfo UserDefinedFunction_Constructor;
         internal static ConstructorInfo FunctionDelegate_Constructor;
         internal static ConstructorInfo Arguments_Constructor;
-        internal static ConstructorInfo PropertyDescriptor_Constructor;
+        internal static ConstructorInfo PropertyDescriptor_Constructor2;
+        internal static ConstructorInfo PropertyDescriptor_Constructor3;
 
         internal static FieldInfo Undefined_Value;
         internal static FieldInfo Null_Value;
@@ -204,7 +205,8 @@ namespace Jurassic
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
             FunctionDelegate_Constructor = GetConstructor(typeof(Library.FunctionDelegate), typeof(object), typeof(IntPtr));
             Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
-            PropertyDescriptor_Constructor = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
+            PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(Library.PropertyAttributes));
+            PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

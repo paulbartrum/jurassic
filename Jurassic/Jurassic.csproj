@@ -51,6 +51,7 @@
     <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
     <Compile Include="Compiler\Lexer\RegularExpressionLiteral.cs" />
     <Compile Include="Compiler\MethodGenerator\CompilerOptions.cs" />
+    <Compile Include="Compiler\MethodGenerator\CodeContext.cs" />
     <Compile Include="Compiler\MethodGenerator\EvalMethodGenerator.cs" />
     <Compile Include="Compiler\MethodGenerator\FunctionMethodGenerator.cs" />
     <Compile Include="Compiler\MethodGenerator\GlobalMethodGenerator.cs" />

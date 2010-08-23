@@ -111,6 +111,11 @@ namespace Jurassic.Compiler
                 // Null.
                 EmitHelpers.EmitNull(generator);
             }
+            else if (this.Value == Undefined.Value)
+            {
+                // Undefined.
+                EmitHelpers.EmitUndefined(generator);
+            }
             else if (this.Value is List<Expression>)
             {
                 // Construct an array literal.
@@ -202,7 +207,7 @@ namespace Jurassic.Compiler
                         else
                             generator.LoadNull();
                         generator.LoadInt32((int)Library.PropertyAttributes.FullAccess);
-                        generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor);
+                        generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor3);
                         generator.LoadBoolean(false);
                         generator.Call(ReflectionHelpers.ObjectInstance_DefineProperty);
                         generator.Pop();
@@ -211,10 +216,8 @@ namespace Jurassic.Compiler
                         throw new InvalidOperationException("Invalid property value type in object literal.");
                 }
             }
-            else if (PrimitiveTypeUtilities.ToPrimitiveType(this.Value.GetType()) != PrimitiveType.Undefined)
-                throw new NotImplementedException("TODO: literal values should be actual RegExps, ArrayInstances, etc.");
             else
-                throw new NotImplementedException();
+                throw new NotImplementedException("Unknown literal type.");
         }
 
         /// <summary>
