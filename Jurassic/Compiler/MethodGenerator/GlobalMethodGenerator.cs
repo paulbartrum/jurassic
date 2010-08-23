@@ -51,7 +51,7 @@ namespace Jurassic.Compiler
         public override void Parse()
         {
             var lexer = new Lexer(this.Engine, this.Source);
-            var parser = new Parser(this.Engine, lexer, this.InitialScope, false, this.Options);
+            var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Global);
             this.AbstractSyntaxTree = parser.Parse();
             this.StrictMode = parser.StrictMode;
         }

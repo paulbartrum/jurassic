@@ -58,6 +58,17 @@ namespace UnitTests
             return result;
         }
 
+        public static void Execute(string script)
+        {
+            if (Engine == JSEngine.JScript)
+                throw new NotImplementedException();
+            else
+            {
+                InitializeJurassic();
+                jurassicScriptEngine.Execute(script);
+            }
+        }
+
         private static void InitializeJurassic()
         {
             if (jurassicScriptEngine == null)

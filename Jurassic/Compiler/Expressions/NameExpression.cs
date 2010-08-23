@@ -84,9 +84,8 @@ namespace Jurassic.Compiler
             {
                 if (scope is DeclarativeScope)
                 {
-                    // Get the index of the variable in the Values array.
-                    int variableIndex = ((DeclarativeScope)scope).GetDeclaredVariableIndex(this.Name);
-                    if (variableIndex >= 0)
+                    var variable = scope.GetDeclaredVariable(this.Name);
+                    if (variable != null)
                     {
                         // scope.Values[index]
                         if (scopeVariable == null)
@@ -95,7 +94,7 @@ namespace Jurassic.Compiler
                             generator.LoadVariable(scopeVariable);
                         generator.CastClass(typeof(DeclarativeScope));
                         generator.Call(ReflectionHelpers.DeclarativeScope_Values);
-                        generator.LoadInt32(variableIndex);
+                        generator.LoadInt32(variable.Index);
                         generator.LoadArrayElement(typeof(object));
                         break;
                     }
@@ -209,19 +208,22 @@ namespace Jurassic.Compiler
                 if (scope is DeclarativeScope)
                 {
                     // Get the index of the variable in the Values array.
-                    int variableIndex = ((DeclarativeScope)scope).GetDeclaredVariableIndex(this.Name);
-                    if (variableIndex >= 0)
+                    var variable = scope.GetDeclaredVariable(this.Name);
+                    if (variable != null)
                     {
-                        // scope.Values[index] = value
-                        if (scopeVariable == null)
-                            EmitHelpers.LoadScope(generator);
-                        else
-                            generator.LoadVariable(scopeVariable);
-                        generator.CastClass(typeof(DeclarativeScope));
-                        generator.Call(ReflectionHelpers.DeclarativeScope_Values);
-                        generator.LoadInt32(variableIndex);
-                        generator.LoadVariable(valueVariable);
-                        generator.StoreArrayElement(typeof(object));
+                        if (variable.Writable == true)
+                        {
+                            // scope.Values[index] = value
+                            if (scopeVariable == null)
+                                EmitHelpers.LoadScope(generator);
+                            else
+                                generator.LoadVariable(scopeVariable);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.Call(ReflectionHelpers.DeclarativeScope_Values);
+                            generator.LoadInt32(variable.Index);
+                            generator.LoadVariable(valueVariable);
+                            generator.StoreArrayElement(typeof(object));
+                        }
                         break;
                     }
                     else
@@ -337,11 +339,24 @@ namespace Jurassic.Compiler
             {
                 if (scope is DeclarativeScope)
                 {
-                    // delete on a DeclarativeScope throws an exception in strict more or does nothing otherwise.
-                    if (scope.HasDeclaredVariable(this.Name))
+                    var variable = scope.GetDeclaredVariable(this.Name);
+                    if (variable != null)
                     {
-                        // The variable exists in the declarative scope and is immutable - return false.
-                        generator.LoadBoolean(false);
+                        // The variable is known at compile-time.
+                        if (variable.Deletable == false)
+                        {
+                            // The variable cannot be deleted - return false.
+                            generator.LoadBoolean(false);
+                        }
+                        else
+                        {
+                            // The variable can be deleted (it was declared inside an eval()).
+                            // Delete the variable.
+                            generator.LoadVariable(scopeVariable);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.LoadString(this.Name);
+                            generator.Call(ReflectionHelpers.Scope_Delete);
+                        }
                         break;
                     }
                     else
@@ -460,8 +475,6 @@ namespace Jurassic.Compiler
             {
                 if (scope is DeclarativeScope)
                 {
-                    // delete on a DeclarativeScope throws an exception in strict more or does nothing otherwise.
-                    int variableIndex = ((DeclarativeScope)scope).GetDeclaredVariableIndex(this.Name);
                     if (scope.HasDeclaredVariable(this.Name))
                     {
                         // The variable exists but declarative scopes always produce undefined for
