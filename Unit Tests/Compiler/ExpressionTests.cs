@@ -1017,6 +1017,12 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("'toString' in new String()"));
             Assert.AreEqual(true, TestUtils.Evaluate("var x = 'atan2', y = Math; x in y"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'toString' in 5"));
+
+            // Check order of evaluation - should be left to right.
+            Assert.AreEqual("x", TestUtils.Evaluate(@"
+                var x = function () { throw 'x'; };
+                var y = function () { throw 'y'; };
+                try { x() in y(); } catch (e) { e }"));
         }
 
         [TestMethod]
