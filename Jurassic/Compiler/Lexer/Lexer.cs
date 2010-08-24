@@ -329,7 +329,7 @@ namespace Jurassic.Compiler
             }
 
             // Read the integer component.
-            double exponentBase10 = 0;
+            int exponentBase10 = 0;
             if (firstChar == '.')
                 result = double.NaN;
             else
@@ -357,7 +357,8 @@ namespace Jurassic.Compiler
                 {
                     // Apply the fractional component but keep the number an integer for accuracy.
                     exponentBase10 = -digitsRead;
-                    result = result * System.Math.Pow(10, -exponentBase10) + fraction;
+                    result = MathHelpers.MulPow10(result, -exponentBase10);
+                    result += fraction;
                 }
             }
 
@@ -367,29 +368,26 @@ namespace Jurassic.Compiler
                 reader.Read();
 
                 // Read the sign of the exponent.
-                double exponentSign = 1.0;
+                int exponentSign = 1;
                 int c = this.reader.Peek();
                 if (c == '+')
                     ReadNextChar();
                 else if (c == '-')
                 {
                     ReadNextChar();
-                    exponentSign = -1.0;
+                    exponentSign = -1;
                 }
 
                 // Read the exponent.
-                exponentBase10 += ReadInteger(0.0, out digitsRead) * exponentSign;
+                exponentBase10 += MathHelpers.ClampToInt32(ReadInteger(0.0, out digitsRead)) * exponentSign;
 
                 // Check a number was actually provided.
                 if (double.IsNaN(result) == true || digitsRead == 0)
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
             }
 
-            // Apply the exponent.  For accuracy, multiply or divide by an integer.
-            if (exponentBase10 > 0.0)
-                result *= System.Math.Pow(10, exponentBase10);
-            else if (exponentBase10 < 0.0)
-                result /= System.Math.Pow(10, -exponentBase10);
+            // Apply the exponent.
+            result = MathHelpers.MulPow10(result, exponentBase10);
 
             if (result == (double)(int)result)
                 return new LiteralToken((int)result);

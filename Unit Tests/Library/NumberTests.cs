@@ -191,6 +191,10 @@ namespace UnitTests
         public void toString()
         {
             Assert.AreEqual("12345", TestUtils.Evaluate("12345 .toString()"));
+            Assert.AreEqual("1234567890123456800", TestUtils.Evaluate("1234567890123456789 .toString()"));
+            Assert.AreEqual("2234567890123456800", TestUtils.Evaluate("2234567890123456789 .toString()"));
+            Assert.AreEqual("3234567890123457000", TestUtils.Evaluate("3234567890123456789 .toString()"));
+            Assert.AreEqual("4234567890123457000", TestUtils.Evaluate("4234567890123456789 .toString()"));
             Assert.AreEqual("-77", TestUtils.Evaluate("(-77).toString()"));
             Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toString()"));
             Assert.AreEqual("77.001", TestUtils.Evaluate("77.001.toString()"));
@@ -212,6 +216,8 @@ namespace UnitTests
             Assert.AreEqual("Infinity", TestUtils.Evaluate("Infinity.toString()"));
             Assert.AreEqual("-Infinity", TestUtils.Evaluate("(-Infinity).toString()"));
             Assert.AreEqual("NaN", TestUtils.Evaluate("NaN.toString()"));
+            Assert.AreEqual("1.7976931348623157e+308", TestUtils.Evaluate("Number.MAX_VALUE.toString()"));
+            Assert.AreEqual("5e-324", TestUtils.Evaluate("Number.MIN_VALUE.toString()"));
             
             // Radix which is not 10.
             Assert.AreEqual("115", TestUtils.Evaluate("77 .toString(8)"));

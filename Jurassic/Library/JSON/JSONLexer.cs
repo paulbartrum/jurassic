@@ -161,7 +161,7 @@ namespace Jurassic.Library
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
 
                 // Apply the fractional component.
-                result += fraction / System.Math.Pow(10, digitsRead);
+                result += MathHelpers.MulPow10(fraction, -digitsRead);
             }
 
             if (reader.Peek() == 'e' || reader.Peek() == 'E')
@@ -195,10 +195,7 @@ namespace Jurassic.Library
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
 
                 // Apply the exponent.
-                if (exponent >= 0)
-                    result *= System.Math.Pow(10, exponent);
-                else
-                    result /= System.Math.Pow(10, -exponent);
+                result = MathHelpers.MulPow10(result, MathHelpers.ClampToInt32(exponent));
             }
 
             return new LiteralToken(result * sign);

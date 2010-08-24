@@ -168,13 +168,13 @@ namespace Jurassic.Library
             // 10 ^ (p – 1) ≤ n < 10 ^ p
             // n x 10 ^ (e - p + 1) - value = 0
             // n = value / (10 ^ (e - p + 1))
-            int e = (int)Math.Floor(Math.Log10(value));
-            value = Math.Round(value * Math.Pow(10, p - e - 1), MidpointRounding.AwayFromZero);
+            int e = MathHelpers.FloorLog10(value);
+            value = Math.Round(MathHelpers.MulPow10(value, p - e - 1), MidpointRounding.AwayFromZero);
 
             // If the absolute value of the exponent is large enough, add a 'e+xx' part.
             if (e < -6 || e >= p)
             {
-                value *= Math.Pow(10, 1 - p);
+                value = MathHelpers.MulPow10(value, 1 - p);
                 result.Append(value.ToString("f" + (p - 1).ToString(), CultureInfo.InvariantCulture));
                 result.Append('e');
                 if (e >= 0)
@@ -205,7 +205,7 @@ namespace Jurassic.Library
             else
             {
                 // This is a fractional number.
-                value *= Math.Pow(10, e - p + 1);
+                value = MathHelpers.MulPow10(value, e - p + 1);
                 result.Append(value.ToString("f" + (p - e - 1).ToString(), CultureInfo.InvariantCulture));
                 return result.ToString();
             }
@@ -225,6 +225,21 @@ namespace Jurassic.Library
                 return NumberToString(this.value);
             return NumberToString(this.value, radix);
         }
+
+        /// <summary>
+        /// Returns the primitive value of the specified object.
+        /// </summary>
+        /// <returns> The primitive value of the specified object. </returns>
+        [JSFunction(Name = "valueOf")]
+        public new double ValueOf()
+        {
+            return this.value;
+        }
+
+
+
+        //     INTERNAL HELPER METHODS
+        //_________________________________________________________________________________________
 
         /// <summary>
         /// Returns the textual representation of a number in base 10.
@@ -257,19 +272,29 @@ namespace Jurassic.Library
             }
 
             // Calculate the base 10 logarithm of the number.
-            int e = (int)Math.Floor(Math.Log10(value));
+            int e = MathHelpers.FloorLog10(value);
 
             if (e >= -6 && e <= 20)
             {
                 // Fixed-point notation.
-                OutputDigits(value, e, result);
+                OutputDigits(result, value, e, 16);
             }
             else
             {
                 // Scientific notation.
-                value *= Math.Pow(10, -e);
-                value += 0.0000000000000001;
-                OutputDigits(value, 0, result);
+                if (e >= -308)
+                {
+                    value = MathHelpers.MulPow10(value, -e);
+                    value += 0.0000000000000001;
+                    OutputDigits(result, value, 0, 16);
+                }
+                else
+                {
+                    // Handle denormalized numbers.
+                    value = MathHelpers.MulPow10(value, 308);
+                    value = MathHelpers.MulPow10(value, -308-e);
+                    OutputDigits(result, value, 0, 325 + e);
+                }
                 result.Append('e');
                 if (e > 0)
                     result.Append('+');
@@ -277,89 +302,6 @@ namespace Jurassic.Library
             }
 
             return result.ToString();
-        }
-
-        /// <summary>
-        /// Outputs the fixed-point representation of the given value to the given string builder.
-        /// </summary>
-        /// <param name="value"> The value to convert. </param>
-        /// <param name="e"> The floor of the base 10 logarithm of the number. </param>
-        /// <param name="result"> The string builder to hold the result. </param>
-        /// <remarks>
-        /// The number must be positive, non-zero, non-infinite, non-NaN.  This method is similar
-        /// to ToString("f") but has better precision.
-        /// </remarks>
-        private static void OutputDigits(double value, int e, System.Text.StringBuilder result)
-        {
-            bool decimalPointOutput = false;
-            double residual = 0;
-            int sigFigsOutput = 0, insignificantZerosOutput = 0;
-            if (e >= 0)
-            {
-                // output e + 1 decimal digits (but at most 17).
-                sigFigsOutput = Math.Min(e + 1, 17);
-                for (int i = 0; i < sigFigsOutput; i++)
-                {
-                    int digit = (int)(value * Math.Pow(10, i - e) - residual);
-                    result.Append((char)('0' + digit));
-                    residual = (residual + digit) * 10;
-                }
-
-                // output any more digits as zeros.
-                if (e > 16)
-                {
-                    result.Append('0', e - 16);
-                    sigFigsOutput = e + 1;
-                }
-            }
-            else
-            {
-                // Ouput zeros.
-                result.Append('0');
-                result.Append('.');
-                result.Append('0', -e - 1);
-                decimalPointOutput = true;
-                insignificantZerosOutput = -e - 1;
-            }
-
-            int zeroCount = 0;
-            for (int i = 0; i < 16 - sigFigsOutput; i++)
-            {
-                int digit;
-                if (i < 16 - sigFigsOutput - 1)
-                {
-                    // Calculate the next digit.
-                    digit = (int)(value * Math.Pow(10, insignificantZerosOutput + i + 1) - residual);
-                }
-                else
-                {
-                    // Round the last digit.
-                    digit = (int)Math.Round(value * Math.Pow(10, insignificantZerosOutput + i + 1) - residual);
-                }
-
-                if (digit <= 0)
-                {
-                    // Keep a count of pent-up zeros.
-                    zeroCount++;
-                }
-                else
-                {
-                    // Output the decimal place if this is the first non-zero digit.
-                    if (decimalPointOutput == false)
-                        result.Append('.');
-                    decimalPointOutput = true;
-
-                    // Output any pent-up zeros.
-                    if (zeroCount > 0)
-                        result.Append('0', zeroCount);
-                    zeroCount = 0;
-
-                    // Output the digit.
-                    result.Append((char)('0' + digit));
-                }
-                //factor *= 10.0;
-                residual = (residual + digit) * 10;
-            }
         }
 
         /// <summary>
@@ -437,14 +379,94 @@ namespace Jurassic.Library
             return result.ToString();
         }
 
+
+
+        //     PRIVATE HELPER METHODS
+        //_________________________________________________________________________________________
+
         /// <summary>
-        /// Returns the primitive value of the specified object.
+        /// Outputs the fixed-point representation of the given value to the given string builder.
         /// </summary>
-        /// <returns> The primitive value of the specified object. </returns>
-        [JSFunction(Name = "valueOf")]
-        public new double ValueOf()
+        /// <param name="result"> The string builder to hold the result. </param>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="e"> The floor of the base 10 logarithm of the number. </param>
+        /// <remarks>
+        /// The number must be positive, non-zero, non-infinite, non-NaN.  This method is similar
+        /// to ToString("f") but has better precision.
+        /// </remarks>
+        private static void OutputDigits(System.Text.StringBuilder result, double value, int e, int maxSignificantFigures)
         {
-            return this.value;
+            bool decimalPointOutput = false;
+            double residual = 0;
+            int sigFigsOutput = 0, insignificantZerosOutput = 0;
+
+            if (e >= 0)
+            {
+                // output e + 1 decimal digits (but at most 17).
+                for (int i = 0; i < Math.Min(e + 1, maxSignificantFigures); i++)
+                {
+                    // Calculate the next digit (round the last digit).
+                    int digit = (int)(MathHelpers.MulPow10(value, i - e) - residual);
+                    result.Append((char)('0' + digit));
+                    residual = (residual + digit) * 10;
+                    sigFigsOutput++;
+                }
+
+                // output any more digits as zeros.
+                if (e + 1 > sigFigsOutput)
+                {
+                    result.Append('0', (e + 1) - sigFigsOutput);
+                    sigFigsOutput = e + 1;
+                }
+
+                // Remove the integral part of the number for more accuracy.
+                //value -= Math.Floor(value);
+                //residual = 0;
+            }
+            else
+            {
+                // Ouput zeros.
+                result.Append('0');
+                result.Append('.');
+                result.Append('0', -e - 1);
+                decimalPointOutput = true;
+                insignificantZerosOutput = -e - 1;
+            }
+
+            int zeroCount = 0;
+            for (int i = 0; i < maxSignificantFigures - sigFigsOutput; i++)
+            {
+                // Calculate the next digit (round the last digit).
+                int digit;
+                if (i < (maxSignificantFigures - sigFigsOutput) - 1)
+                    digit = (int)(MathHelpers.MulPow10(value, insignificantZerosOutput + i + 1) - residual);
+                else
+                    digit = (int)Math.Round(MathHelpers.MulPow10(value, insignificantZerosOutput + i + 1) - residual);
+
+                if (digit <= 0)
+                {
+                    // Keep a count of pent-up zeros.
+                    zeroCount++;
+                    digit = 0;
+                }
+                else
+                {
+                    // Output the decimal place if this is the first non-zero digit.
+                    if (decimalPointOutput == false)
+                        result.Append('.');
+                    decimalPointOutput = true;
+
+                    // Output any pent-up zeros.
+                    if (zeroCount > 0)
+                        result.Append('0', zeroCount);
+                    zeroCount = 0;
+
+                    // Output the digit.
+                    result.Append((char)('0' + digit));
+                }
+                //factor *= 10.0;
+                residual = (residual + digit) * 10;
+            }
         }
     }
 }
