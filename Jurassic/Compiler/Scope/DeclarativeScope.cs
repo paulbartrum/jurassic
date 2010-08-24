@@ -85,7 +85,7 @@ namespace Jurassic.Compiler
             var result = new DeclarativeScope(parentScope, declaredVariableNames.Length);
             foreach (string variableName in declaredVariableNames)
                 result.DeclareVariable(variableName);
-            result.values = new object[declaredVariableNames.Length];
+            result.values = new object[result.DeclaredVariableCount];
             return result;
         }
 

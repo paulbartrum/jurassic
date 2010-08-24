@@ -271,6 +271,17 @@ namespace Jurassic.Compiler
             var endOfArguments = generator.CreateLabel();
             for (int i = 0; i < this.ArgumentNames.Count; i ++)
             {
+                // Check if a duplicate argument name exists.
+                bool duplicate = false;
+                for (int j = i + 1; j < this.ArgumentNames.Count; j ++)
+                    if (this.ArgumentNames[i] == this.ArgumentNames[j])
+                    {
+                        duplicate = true;
+                        break;
+                    }
+                if (duplicate == true)
+                    continue;
+
                 // Check if an array element exists.
                 EmitHelpers.LoadArgumentsArray(generator);
                 generator.LoadArrayLength();

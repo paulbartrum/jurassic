@@ -134,7 +134,9 @@ namespace Jurassic.Compiler
             // Set the initial value, if one was provided.
             if (valueAtTopOfScope != null)
             {
-                variable.ValueAtTopOfScope = valueAtTopOfScope;
+                // Function expressions override literals.
+                if ((valueAtTopOfScope is LiteralExpression && variable.ValueAtTopOfScope is FunctionExpression) == false)
+                    variable.ValueAtTopOfScope = valueAtTopOfScope;
             }
 
             return variable;
