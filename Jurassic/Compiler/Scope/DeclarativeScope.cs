@@ -8,10 +8,6 @@ namespace Jurassic.Compiler
     /// </summary>
     public class DeclarativeScope : Scope
     {
-        // Catch scopes behave like other scopes except variables cannot be declared inside them -
-        // they always only have a single variable (the catch variable).
-        private bool preventExtensions;
-
         // An array of values - one element for each variable declared in the scope.
         private object[] values;
 
@@ -54,7 +50,7 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException("catchVariableName");
             var result = new DeclarativeScope(parentScope, 0);
             result.DeclareVariable(catchVariableName);
-            result.preventExtensions = true;    // Only the catch variable can be declared in this scope.
+            result.CanDeclareVariables = false;    // Only the catch variable can be declared in this scope.
             return result;
         }
 
@@ -127,12 +123,8 @@ namespace Jurassic.Compiler
             if (this.values != null && this.DeclaredVariableCount >= this.Values.Length)
                 Array.Resize(ref this.values, this.DeclaredVariableCount + 10);
 
-            // The normal case is to delegate to the Scope class.
-            if (this.preventExtensions == false)
-                return base.DeclareVariable(name, valueAtTopOfScope, writable, deletable);
-
-            // Variables cannot be declared in this scope - try the parent scope.
-            return this.ParentScope.DeclareVariable(name, valueAtTopOfScope, writable, deletable);
+            // Delegate to the Scope class.
+            return base.DeclareVariable(name, valueAtTopOfScope, writable, deletable);
         }
 
         /// <summary>

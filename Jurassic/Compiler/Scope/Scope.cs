@@ -8,6 +8,7 @@ namespace Jurassic.Compiler
     /// </summary>
     public abstract class Scope
     {
+        // A dictionary containing the variables declared in this scope.
         private Dictionary<string, DeclaredVariable> variables;
 
         /// <summary>
@@ -43,6 +44,7 @@ namespace Jurassic.Compiler
         {
             this.ParentScope = parentScope;
             this.variables = new Dictionary<string, DeclaredVariable>(declaredVariableCount);
+            this.CanDeclareVariables = true;
         }
 
         /// <summary>
@@ -52,6 +54,15 @@ namespace Jurassic.Compiler
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether variables can be declared within the scope.
+        /// </summary>
+        public bool CanDeclareVariables
+        {
+            get;
+            protected set;
         }
 
         /// <summary>
@@ -122,6 +133,15 @@ namespace Jurassic.Compiler
         {
             if (name == null)
                 throw new ArgumentNullException("name");
+
+            // If variables cannot be declared in the scope, try the parent scope instead.
+            if (this.CanDeclareVariables == false)
+            {
+                if (this.ParentScope == null)
+                    throw new InvalidOperationException("Invalid scope chain.");
+                return this.ParentScope.DeclareVariable(name, valueAtTopOfScope, writable, deletable);
+            }
+
             DeclaredVariable variable;
             this.variables.TryGetValue(name, out variable);
             if (variable == null)

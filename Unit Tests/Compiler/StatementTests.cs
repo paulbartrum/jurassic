@@ -182,6 +182,7 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("a = 0; x = { a: 234 }; with (x) { var a = 5; } a"));
             Assert.AreEqual(5, TestUtils.Evaluate("b = 0; x = { a: 234 }; with (x) { var b = 5; } b"));
             Assert.AreEqual(4, TestUtils.Evaluate("foo = {x: 4}; with (foo) { var x; x }"));
+            Assert.AreEqual(1123, TestUtils.Evaluate("with ({}) { var with_unique_1 = 1123; } with_unique_1"));
 
             // With and prototype chains.
             Assert.AreEqual(10, TestUtils.Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } x.b"));
