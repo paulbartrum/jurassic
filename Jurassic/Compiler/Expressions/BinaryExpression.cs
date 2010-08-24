@@ -475,11 +475,9 @@ namespace Jurassic.Compiler
                         break;
                 }
             }
-            else if ((leftType != PrimitiveType.Any && leftType != PrimitiveType.Object)
-                || (rightType != PrimitiveType.Any && rightType != PrimitiveType.Object))
+            else if (PrimitiveTypeUtilities.IsNumeric(leftType) || PrimitiveTypeUtilities.IsNumeric(rightType))
             {
-                // At least one of the operands is not a string (or something that can be converted
-                // to a string).
+                // At least one of the operands is a number.
 
                 // Load the left hand side operand onto the stack.
                 this.Left.GenerateCode(generator, optimizationInfo);
