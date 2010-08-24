@@ -77,8 +77,13 @@ namespace Jurassic
         /// <returns> An enumerator that iteratively returns property names. </returns>
         public static IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
         {
-            if (obj == null || obj == Undefined.Value || obj == Null.Value)
-                return new string[0];
+            if (IsUndefined(obj) == true || obj == Null.Value)
+            {
+                // Attempting to enumerate null or undefined results in a TypeError in ECMAScript
+                // 3, but no error in ECMAScript 5.
+                if (engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
+                    return new string[0];
+            }
             var obj2 = TypeConverter.ToObject(engine, obj);
             var names = new List<string>();
             do
