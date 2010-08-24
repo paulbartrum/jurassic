@@ -535,6 +535,12 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("({valueOf: function() {return -2}, toString: function() {return '2'}}) < 0"));
             Assert.AreEqual(true, TestUtils.Evaluate("({valueOf: function() {return -2}, toString: function() {return '2'}}) < '0'"));
             Assert.AreEqual(false, TestUtils.Evaluate("var object = {valueOf: function() {return '-2'}, toString: function() {return 2}}; object < '-1'"));
+
+            // Check order of evaluation - should be left to right.
+            Assert.AreEqual("x", TestUtils.Evaluate(@"
+                var x = { valueOf: function () { throw 'x'; } };
+                var y = { valueOf: function () { throw 'y'; } };
+                try { x < y; } catch (e) { e }"));
         }
 
         [TestMethod]
@@ -559,6 +565,12 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("x = 0.3; y = 0.5; x <= y"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = 0.4; y = 0.4; x <= y"));
             Assert.AreEqual(false, TestUtils.Evaluate("x = 0.5; y = 0.3; x <= y"));
+
+            // Check order of evaluation - should be left to right.
+            Assert.AreEqual("x", TestUtils.Evaluate(@"
+                var x = { valueOf: function () { throw 'x'; } };
+                var y = { valueOf: function () { throw 'y'; } };
+                try { x <= y; } catch (e) { e }"));
         }
 
         [TestMethod]
@@ -583,6 +595,12 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("x = 0.3; y = 0.5; x > y"));
             Assert.AreEqual(false, TestUtils.Evaluate("x = 0.4; y = 0.4; x > y"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = 0.5; y = 0.3; x > y"));
+
+            // Check order of evaluation - should be left to right.
+            Assert.AreEqual("x", TestUtils.Evaluate(@"
+                var x = { valueOf: function () { throw 'x'; } };
+                var y = { valueOf: function () { throw 'y'; } };
+                try { x >= y; } catch (e) { e }"));
         }
 
         [TestMethod]
@@ -607,6 +625,12 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("x = 0.3; y = 0.5; x >= y"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = 0.4; y = 0.4; x >= y"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = 0.5; y = 0.3; x >= y"));
+
+            // Check order of evaluation - should be left to right.
+            Assert.AreEqual("x", TestUtils.Evaluate(@"
+                var x = { valueOf: function () { throw 'x'; } };
+                var y = { valueOf: function () { throw 'y'; } };
+                try { x >= y; } catch (e) { e }"));
         }
 
         [TestMethod]
