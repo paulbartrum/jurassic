@@ -534,6 +534,7 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("'0' < {valueOf: function() {return -2}, toString: function() {return '2'}}"));
             Assert.AreEqual(true, TestUtils.Evaluate("({valueOf: function() {return -2}, toString: function() {return '2'}}) < 0"));
             Assert.AreEqual(true, TestUtils.Evaluate("({valueOf: function() {return -2}, toString: function() {return '2'}}) < '0'"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var object = {valueOf: function() {return '-2'}, toString: function() {return 2}}; object < '-1'"));
         }
 
         [TestMethod]
