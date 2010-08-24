@@ -1164,7 +1164,8 @@ namespace Jurassic.Compiler
         {
             Declaration,
             Expression,
-            GetterOrSetter,
+            Getter,
+            Setter,
         }
 
         /// <summary>
@@ -1174,7 +1175,7 @@ namespace Jurassic.Compiler
         /// <returns> A function expression. </returns>
         private FunctionExpression ParseFunction(FunctionType functionType)
         {
-            if (functionType != FunctionType.GetterOrSetter)
+            if (functionType != FunctionType.Getter && functionType != FunctionType.Setter)
             {
                 // Consume the function keyword.
                 this.Expect(KeywordToken.Function);
@@ -1192,7 +1193,7 @@ namespace Jurassic.Compiler
                 if (this.nextToken is IdentifierToken)
                     functionName = this.ExpectIdentifier();
             }
-            else if (functionType == FunctionType.GetterOrSetter)
+            else if (functionType == FunctionType.Getter || functionType == FunctionType.Setter)
             {
                 // Getters and setters can have any name that is allowed of a property.
                 bool wasIdentifier;
@@ -1231,8 +1232,16 @@ namespace Jurassic.Compiler
                 else if (this.nextToken == PunctuatorToken.RightParenthesis)
                     break;
                 else
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Expected ',' or ')'", 1, "1");
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Expected ',' or ')'", this.LineNumber, this.SourcePath);
             }
+
+            // Getters must have zero arguments.
+            if (functionType == FunctionType.Getter && argumentNames.Count != 0)
+                throw new JavaScriptException(this.engine, "SyntaxError", "Getters cannot have arguments", this.LineNumber, this.SourcePath);
+
+            // Setters must have one argument.
+            if (functionType == FunctionType.Setter && argumentNames.Count != 1)
+                throw new JavaScriptException(this.engine, "SyntaxError", "Setters must have a single argument", this.LineNumber, this.SourcePath);
 
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -1761,7 +1770,7 @@ namespace Jurassic.Compiler
                 if (this.nextToken != PunctuatorToken.Colon && mightBeGetOrSet == true && (propertyName == "get" || propertyName == "set"))
                 {
                     // Parse the function name and body.
-                    var function = ParseFunction(FunctionType.GetterOrSetter);
+                    var function = ParseFunction(propertyName == "get" ? FunctionType.Getter : FunctionType.Setter);
 
                     // Get the function name.
                     var getOrSet = propertyName;
