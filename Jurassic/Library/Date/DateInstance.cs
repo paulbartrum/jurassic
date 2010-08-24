@@ -39,7 +39,7 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="value"> The number of milliseconds since January 1, 1970, 00:00:00 UTC. </param>
         public DateInstance(ObjectInstance prototype, double value)
-            : this(prototype, ToDateTime(value))
+            : this(prototype, ToDateTime(Math.Truncate(value)))
         {
         }
 
