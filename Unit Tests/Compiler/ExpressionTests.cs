@@ -1078,6 +1078,8 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {set f(value) { this.a = value; }}; x.f"));
             Assert.AreEqual(2, TestUtils.Evaluate("x = {get: 2}; x.get"));
             Assert.AreEqual(3, TestUtils.Evaluate("x = {set: 3}; x.set"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {get 'f'() { return 1; }}; x.f = 5; x.f"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {get 0() { return 1; }}; x[0] = 5; x[0]"));
 
             // Errors
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("{a: 1, b: 2}"));
@@ -1088,8 +1090,10 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {a: 1, set a(value) { }}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {get a() { return 2 }, a: 1}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set a(value) { }, a: 1}"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set a() { }, a: 1}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {'get' f() { return 1; }}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {get f(a) { return 1; }}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set f() { return 1; }}"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {set f(a, b) { return 1; }}"));
 
             // Strict mode: defining a property more than once fails.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {a: 1, a: 2};"));
