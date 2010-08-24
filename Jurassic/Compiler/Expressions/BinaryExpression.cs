@@ -613,7 +613,15 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         private void GenerateInstanceOf(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // Emit the right-hand side expression first.
+            // Emit the left-hand side expression and convert it to an object.
+            this.Left.GenerateCode(generator, optimizationInfo);
+            EmitConversion.ToAny(generator, this.Left.ResultType);
+
+            // Store the left-hand side expression in a temporary variable.
+            var temp = generator.CreateTemporaryVariable(typeof(object));
+            generator.StoreVariable(temp);
+
+            // Emit the right-hand side expression.
             this.Right.GenerateCode(generator, optimizationInfo);
             EmitConversion.ToAny(generator, this.Right.ResultType);
 
@@ -642,12 +650,14 @@ namespace Jurassic.Compiler
             generator.DefineLabelPosition(endOfTypeCheck);
             generator.ReleaseTemporaryVariable(rightValue);
 
-            // Emit the left-hand side expression and convert it to an object.
-            this.Left.GenerateCode(generator, optimizationInfo);
-            EmitConversion.ToAny(generator, this.Left.ResultType);
+            // Load the left-hand side expression from the temporary variable.
+            generator.LoadVariable(temp);
 
             // Call FunctionInstance.HasInstance(object)
             generator.Call(ReflectionHelpers.FunctionInstance_HasInstance);
+
+            // Allow the temporary variable to be reused.
+            generator.ReleaseTemporaryVariable(temp);
         }
 
         /// <summary>

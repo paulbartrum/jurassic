@@ -995,6 +995,12 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("new Number(5) instanceof Number"));
             Assert.AreEqual(true, TestUtils.Evaluate("new Number(5) instanceof Object"));
             Assert.AreEqual(false, TestUtils.Evaluate("new Number(5) instanceof String"));
+
+            // Check order of evaluation - should be left to right.
+            Assert.AreEqual("x", TestUtils.Evaluate(@"
+                var x = function () { throw 'x'; };
+                var y = function () { throw 'y'; };
+                try { x() instanceof y(); } catch (e) { e }"));
         }
 
         [TestMethod]
