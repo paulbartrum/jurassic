@@ -297,6 +297,9 @@ namespace UnitTests
             Assert.AreEqual(5, TestUtils.Evaluate("(function f(a) { arguments = 5; return arguments })(5)"));
             Assert.AreEqual("[object Arguments]", TestUtils.Evaluate("function arguments() { return arguments } arguments().toString()"));
 
+            // Duplicate argument names.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f1(x, a, b, x){ return x; } f1(1, 2)"));
+
             // Strict mode: the name "eval" is not allowed in strict mode.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function eval(){}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function test(eval){}"));
