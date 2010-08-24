@@ -29,7 +29,7 @@ namespace Jurassic.Compiler
         {
             if (parentScope == null)
                 throw new ArgumentException("With scopes must have a parent scope.");
-            return new ObjectScope(parentScope) { ScopeObjectExpression = scopeObject, ProvidesImplicitThisValue = true };
+            return new ObjectScope(parentScope) { ScopeObjectExpression = scopeObject, ProvidesImplicitThisValue = true, CanDeclareVariables = false };
         }
 
         ///// <summary>
