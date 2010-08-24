@@ -60,13 +60,19 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.Equals(false, double.NaN));
             Assert.AreEqual(true,  TypeComparer.Equals(false, ""));
             Assert.AreEqual(true,  TypeComparer.Equals(false, " "));
+            Assert.AreEqual(true,  TypeComparer.Equals(false, "0"));
+            Assert.AreEqual(false, TypeComparer.Equals(false, "1"));
             Assert.AreEqual(false, TypeComparer.Equals(false, "5.5"));
+            Assert.AreEqual(false, TypeComparer.Equals(false, "false"));
+            Assert.AreEqual(false, TypeComparer.Equals(false, "true"));
             Assert.AreEqual(false, TypeComparer.Equals(false, "foo"));
             Assert.AreEqual(false, TypeComparer.Equals(false, engine.Object.Construct()));
             Assert.AreEqual(true,  TypeComparer.Equals(false, engine.Boolean.Construct(false)));
             Assert.AreEqual(false, TypeComparer.Equals(false, engine.Boolean.Construct(true)));
             Assert.AreEqual(true,  TypeComparer.Equals(false, engine.Number.Construct(0)));
             Assert.AreEqual(false, TypeComparer.Equals(false, engine.Number.Construct(1)));
+            Assert.AreEqual(false, TypeComparer.Equals(true, "0"));
+            Assert.AreEqual(true,  TypeComparer.Equals(true, "1"));
 
             // Number.
             Assert.AreEqual(false, TypeComparer.Equals(5.5, Undefined.Value));
@@ -104,18 +110,28 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.Equals("5.5", engine.Object.Construct()));
             Assert.AreEqual(true,  TypeComparer.Equals("5.5", engine.Number.Construct(5.5)));
             Assert.AreEqual(true,  TypeComparer.Equals("5.5", engine.String.Construct("5.5")));
+            Assert.AreEqual(true,  TypeComparer.Equals("0", engine.Boolean.Construct(false)));
+            Assert.AreEqual(true,  TypeComparer.Equals("1", engine.Boolean.Construct(true)));
             Assert.AreEqual(true,  TypeComparer.Equals("", engine.String.Construct()));
             Assert.AreEqual(true,  TypeComparer.Equals("", engine.String.Construct("")));
 
             // Object.
             var temp = engine.Object.Construct();
-            Assert.AreEqual(true, TypeComparer.Equals(temp, temp));
+            Assert.AreEqual(true,  TypeComparer.Equals(temp, temp));
+            Assert.AreEqual(true,  TypeComparer.Equals(engine.Boolean.Construct(false), "0"));
+            Assert.AreEqual(false, TypeComparer.Equals(engine.Boolean.Construct(false), "1"));
+            Assert.AreEqual(false, TypeComparer.Equals(engine.Boolean.Construct(true), "0"));
+            Assert.AreEqual(true,  TypeComparer.Equals(engine.Boolean.Construct(true), "1"));
+            Assert.AreEqual(false, TypeComparer.Equals(engine.Boolean.Construct(false), "false"));
+            Assert.AreEqual(false, TypeComparer.Equals(engine.Boolean.Construct(false), "true"));
+            Assert.AreEqual(false, TypeComparer.Equals(engine.Boolean.Construct(true), "false"));
+            Assert.AreEqual(false, TypeComparer.Equals(engine.Boolean.Construct(true), "true"));
             Assert.AreEqual(false, TypeComparer.Equals(engine.Object.Construct(), engine.Object.Construct()));
             Assert.AreEqual(false, TypeComparer.Equals(engine.Number.Construct(5.5), engine.Number.Construct(5.5)));
-            Assert.AreEqual(true, TypeComparer.Equals(engine.Number.Construct(5.5), 5.5));
+            Assert.AreEqual(true,  TypeComparer.Equals(engine.Number.Construct(5.5), 5.5));
             Assert.AreEqual(false, TypeComparer.Equals(engine.String.Construct("5.5"), engine.String.Construct("5.5")));
-            Assert.AreEqual(true, TypeComparer.Equals(engine.String.Construct("5.5"), 5.5));
-            Assert.AreEqual(true, TypeComparer.Equals(engine.String.Construct(""), ""));
+            Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct("5.5"), 5.5));
+            Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct(""), ""));
         }
 
         [TestMethod]

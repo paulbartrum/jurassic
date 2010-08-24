@@ -48,13 +48,13 @@ namespace Jurassic
 
             // false == new Boolean(false), 1.5 == new Number(1.5)
             if (TypeUtilities.IsNumeric(x) && y is Jurassic.Library.ObjectInstance)
-                return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number));
+                return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.None));
             if (TypeUtilities.IsString(x) && y is Jurassic.Library.ObjectInstance)
-                return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.String));
+                return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.None));
             if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsNumeric(y))
-                return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number), y);
+                return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.None), y);
             if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsString(y))
-                return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.String), y);
+                return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.None), y);
 
             return false;
         }
