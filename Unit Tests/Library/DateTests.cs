@@ -26,6 +26,8 @@ namespace UnitTests
             Assert.AreEqual(100, TestUtils.Evaluate("new Date(100).valueOf()"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(NaN).valueOf()"));
             Assert.AreEqual(1, TestUtils.Evaluate("new Date(true).valueOf()"));
+            Assert.AreEqual(6, TestUtils.Evaluate("new Date(6.6).valueOf()"));
+            Assert.AreEqual(-6, TestUtils.Evaluate("new Date(-6.6).valueOf()"));
 
             // new Date(dateStr)
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5)), TestUtils.Evaluate("new Date('5 Jan 2010').valueOf()"));
