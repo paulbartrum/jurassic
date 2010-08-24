@@ -78,12 +78,7 @@ namespace Jurassic
         public static IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
         {
             if (IsUndefined(obj) == true || obj == Null.Value)
-            {
-                // Attempting to enumerate null or undefined results in a TypeError in ECMAScript
-                // 3, but no error in ECMAScript 5.
-                if (engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
-                    return new string[0];
-            }
+                return new string[0];
             var obj2 = TypeConverter.ToObject(engine, obj);
             var names = new List<string>();
             do

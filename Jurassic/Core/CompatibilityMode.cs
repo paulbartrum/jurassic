@@ -17,7 +17,6 @@
         /// 1. The list of keywords is much longer (for example, 'abstract' is a keyword).
         /// 2. Octal literals and octal escape sequences are supported.
         /// 3. parseInt() parses octal numbers without requiring an explicit radix.
-        /// 4. for-in on undefined or null results in a TypeError exception.
         /// </summary>
         ECMAScript3,
     }
