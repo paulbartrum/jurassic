@@ -107,6 +107,7 @@
     <Compile Include="Compiler\Debugging\SourceCodeSpan.cs" />
     <Compile Include="Core\CompatibilityMode.cs" />
     <Compile Include="Core\ConcatenatedString.cs" />
+    <Compile Include="Core\MathHelpers.cs" />
     <Compile Include="Core\ScriptEngine.cs" />
     <Compile Include="Core\ScriptSource\StringScriptSource.cs" />
     <Compile Include="Core\ScriptSource\FileScriptSource.cs" />

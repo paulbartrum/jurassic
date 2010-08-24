@@ -238,6 +238,9 @@ namespace UnitTests
             Assert.AreEqual(11, TestUtils.Evaluate("parseFloat('011')"));
             Assert.AreEqual(11, TestUtils.Evaluate("parseFloat(' 11')"));
             Assert.AreEqual(0.5, TestUtils.Evaluate("parseFloat('.5')"));
+            Assert.AreEqual(0.1, TestUtils.Evaluate("parseFloat('.1')"));
+            Assert.AreEqual(0.01, TestUtils.Evaluate("parseFloat('.01')"));
+            Assert.AreEqual(0.07, TestUtils.Evaluate("parseFloat('.7e-1')"));
             Assert.AreEqual(-0.5, TestUtils.Evaluate("parseFloat('-.5')"));
             Assert.AreEqual(5, TestUtils.Evaluate("parseFloat('5e')"));
             Assert.AreEqual(5, TestUtils.Evaluate("parseFloat('5.e')"));

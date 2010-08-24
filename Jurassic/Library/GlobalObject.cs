@@ -436,8 +436,11 @@ namespace Jurassic.Library
                 }
             }
 
+            int digitsRead;
+            int exponent = 0;
+
             // Read numeric digits 0-9.
-            result = ReadInteger(reader);
+            result = ReadInteger(reader, out digitsRead);
             
             // If ReadInteger couldn't read any digits, and we read a zero earlier, set the result
             // to zero.
@@ -450,7 +453,7 @@ namespace Jurassic.Library
                 reader.Read();
 
                 // Read the fractional component.
-                double fraction = ReadInteger(reader);
+                double fraction = ReadInteger(reader, out digitsRead);
 
                 // Apply the fractional component.
                 if (double.IsNaN(fraction) == false)
@@ -458,7 +461,8 @@ namespace Jurassic.Library
                     // parseFloat('.5') should return 0.5.
                     if (double.IsNaN(result) == true)
                         result = 0;
-                    result += fraction / System.Math.Pow(10, System.Math.Ceiling(System.Math.Log10(fraction + 1)));
+                    result = MathHelpers.MulPow10(result, digitsRead) + fraction;
+                    exponent = -digitsRead;
                 }
             }
 
@@ -471,17 +475,15 @@ namespace Jurassic.Library
                 double exponentSign = ReadSign(reader);
 
                 // Read the exponent.
-                double exponent = ReadInteger(reader) * exponentSign;
+                double exponentDbl = ReadInteger(reader, out digitsRead) * exponentSign;
 
-                // Apply the exponent.
-                if (double.IsNaN(exponent) == false)
-                {
-                    if (exponent >= 0)
-                        result *= System.Math.Pow(10, exponent);
-                    else
-                        result /= System.Math.Pow(10, -exponent);
-                }
+                // Adjust the exponent.
+                if (digitsRead > 0)
+                    exponent += MathHelpers.ClampToInt32(exponentDbl);
             }
+
+            // Apply the exponent.
+            result = MathHelpers.MulPow10(result, exponent);
 
             // Infinity or -Infinity are also valid.
             string restOfString = reader.ReadToEnd();
@@ -657,11 +659,13 @@ namespace Jurassic.Library
         /// Reads an integer value using the given reader.
         /// </summary>
         /// <param name="reader"> The reader to read characters from. </param>
+        /// <param name="digitsRead"> Upon returning, contains the number of digits that were read. </param>
         /// <returns> The numeric value, or <c>double.NaN</c> if no number was present. </returns>
-        private static double ReadInteger(System.IO.StringReader reader)
+        private static double ReadInteger(System.IO.StringReader reader, out int digitsRead)
         {
             // If the input is empty, then return NaN.
             double result = double.NaN;
+            digitsRead = 0;
 
             while (true)
             {
@@ -669,6 +673,7 @@ namespace Jurassic.Library
                 if (c < '0' || c > '9')
                     break;
                 reader.Read();
+                digitsRead++;
                 if (double.IsNaN(result))
                     result = c - '0';
                 else
