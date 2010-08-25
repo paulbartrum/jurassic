@@ -122,6 +122,8 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: break test; x"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: { break test; x = 5 } x"));
             Assert.AreEqual(6, TestUtils.Evaluate("x = 6; test: with (x) { break test; 5 }"));
+            Assert.AreEqual(6, TestUtils.Evaluate("x = 6; test: with (x) { break test; 5 }"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var j = 0; lbl: for(var i in {p1: 1, p2: 1}){ j ++; break lbl; } j"));
 
             // Duplicate nested labels are not allowed.
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("label: { } label: { }"));
