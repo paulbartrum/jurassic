@@ -267,6 +267,8 @@ namespace UnitTests
             Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; } catch (e) { j = 0; } finally { j ++; continue; } j = 0; } j"));
             Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { throw 5; } catch (e) { j ++; continue; } finally { j ++ } j = 0; } j"));
             Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { throw 5; } catch (e) { j ++; } finally { j ++; continue; } j = 0; } j"));
+            Assert.AreEqual(4, TestUtils.Evaluate("var j = 0; try { for (var i = 0; i < 3; i ++) { j ++; continue; j ++; } } finally { j ++; } j"));
+            Assert.AreEqual(4, TestUtils.Evaluate("var j = 0; try { j ++ } finally { for (var i = 0; i < 3; i ++) { j ++; continue; j ++; } } j"));
         }
 
         [TestMethod]

@@ -77,6 +77,11 @@ namespace Jurassic.Compiler
             // or return statements appear inside of a finally block.  To work around this, when
             // inside a finally block these instructions throw an exception instead.
 
+            // Setting the InsideTryCatchOrFinally flag converts BR instructions into LEAVE
+            // instructions.
+            var nestedTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
+            optimizationInfo.InsideTryCatchOrFinally = true;
+
             // Finally requires two exception nested blocks.
             if (this.FinallyBlock != null)
                 generator.BeginExceptionBlock();
@@ -121,6 +126,8 @@ namespace Jurassic.Compiler
                 generator.BeginFinallyBlock();
 
                 var branches = new List<ILLabel>();
+                var previousStackSize = optimizationInfo.LongJumpStackSizeThreshold;
+                optimizationInfo.LongJumpStackSizeThreshold = optimizationInfo.BreakOrContinueStackSize;
                 var previousCallback = optimizationInfo.LongJumpCallback;
                 optimizationInfo.LongJumpCallback = (generator2, label) =>
                     {
@@ -164,12 +171,16 @@ namespace Jurassic.Compiler
                     }
                 }
 
-                // Restore the previous callback (in case of nested finally blocks).
+                // Reset the state we clobbered.
+                optimizationInfo.LongJumpStackSizeThreshold = previousStackSize;
                 optimizationInfo.LongJumpCallback = previousCallback;
             }
 
             // End the exception block.
             generator.EndExceptionBlock();
+
+            // Reset the InsideTryCatchOrFinally flag.
+            optimizationInfo.InsideTryCatchOrFinally = nestedTryCatchOrFinally;
         }
 
         /// <summary>
