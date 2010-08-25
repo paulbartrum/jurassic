@@ -239,7 +239,7 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the function name into the scope.
-            if (string.IsNullOrEmpty(this.Name) == false)
+            if (string.IsNullOrEmpty(this.Name) == false && this.ArgumentNames.Contains(this.Name) == false)
             {
                 EmitHelpers.LoadFunction(generator);
                 var functionName = new NameExpression(this.InitialScope, this.Name);
@@ -247,7 +247,7 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the arguments object into the scope.
-            if (this.Optimizations != null && this.Optimizations.HasArguments == true)
+            if (this.Optimizations != null && this.Optimizations.HasArguments == true && this.ArgumentNames.Contains("arguments") == false)
             {
                 // prototype
                 EmitHelpers.LoadScriptEngine(generator);
