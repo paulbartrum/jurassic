@@ -19,6 +19,6 @@ if (parseInt("\u2029\u2029-1") !== parseInt("-1")) {
 }
 
 //CHECK#3
-if (isNaN(parseInt("\2029")) !== true) {
+if (isNaN(parseInt("\u2029")) !== true) {
   $ERROR('#3: parseInt("\\u2029") === Not-a-Number. Actual: ' + (parseInt("\u2029")));
 }
