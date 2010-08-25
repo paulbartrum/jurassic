@@ -73,8 +73,6 @@ namespace Jurassic
                 return ((double)value) != 0 && double.IsNaN((double)value) == false;
             if (value is string)
                 return ((string)value).Length > 0;
-            if (value is ConcatenatedString)
-                return ((ConcatenatedString)value).Length > 0;
             if (value is ObjectInstance)
                 return true;
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a boolean.", value.GetType()), "value");
@@ -101,8 +99,6 @@ namespace Jurassic
                 return (bool)value ? 1 : 0;
             if (value is string)
                 return GlobalObject.ParseNumber((string)value, allowHexPrefix: true, allowTrailingJunk: false, returnZeroIfEmpty: true);
-            if (value is ConcatenatedString)
-                return GlobalObject.ParseNumber(((ConcatenatedString)value).ToString(), allowHexPrefix: true, allowTrailingJunk: false, returnZeroIfEmpty: true);
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), "value");
@@ -127,8 +123,6 @@ namespace Jurassic
                 return NumberInstance.NumberToString((double)value);
             if (value is string)
                 return (string)value;
-            if (value is ConcatenatedString)
-                return ((ConcatenatedString)value).ToString();
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), "value");
@@ -158,8 +152,6 @@ namespace Jurassic
                 return engine.Number.Construct((double)value);
             if (value is string)
                 return engine.String.Construct((string)value);
-            if (value is ConcatenatedString)
-                return engine.String.Construct(((ConcatenatedString)value).ToString());
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), "value");
         }
 

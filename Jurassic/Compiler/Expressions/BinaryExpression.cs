@@ -61,9 +61,7 @@ namespace Jurassic.Compiler
                         {
                             var lhs = this.Left.ResultType;
                             var rhs = this.Right.ResultType;
-                            if (lhs == PrimitiveType.String || lhs == PrimitiveType.ConcatenatedString ||
-                                rhs == PrimitiveType.String || rhs == PrimitiveType.ConcatenatedString)
-                                //return PrimitiveType.ConcatenatedString;
+                            if (lhs == PrimitiveType.String || rhs == PrimitiveType.String)
                                 return PrimitiveType.String;
                             if (lhs == PrimitiveType.Any || lhs == PrimitiveType.Object ||
                                 rhs == PrimitiveType.Any || rhs == PrimitiveType.Object)

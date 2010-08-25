@@ -18,7 +18,6 @@ namespace Jurassic.Compiler
         Int32,              // System.Int32
         UInt32,             // System.UInt32
         String,             // System.String
-        ConcatenatedString, // Jurassic.ConcatenatedString
         Object,             // Jurassic.Library.ObjectInstance
     }
 }

@@ -90,12 +90,8 @@ namespace Jurassic
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
 
-            if ((x is string || x is ConcatenatedString) && (y is string || y is ConcatenatedString))
+            if (x is string && y is string)
             {
-                if (x is ConcatenatedString)
-                    x = ((ConcatenatedString)x).ToString();
-                if (y is ConcatenatedString)
-                    y = ((ConcatenatedString)y).ToString();
                 return string.CompareOrdinal((string)x, (string)y) < 0;
             }
             else
@@ -116,12 +112,8 @@ namespace Jurassic
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
 
-            if ((x is string || x is ConcatenatedString) && (y is string || y is ConcatenatedString))
+            if (x is string && y is string)
             {
-                if (x is ConcatenatedString)
-                    x = ((ConcatenatedString)x).ToString();
-                if (y is ConcatenatedString)
-                    y = ((ConcatenatedString)y).ToString();
                 return string.CompareOrdinal((string)x, (string)y) <= 0;
             }
             else
@@ -142,12 +134,8 @@ namespace Jurassic
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
 
-            if ((x is string || x is ConcatenatedString) && (y is string || y is ConcatenatedString))
+            if (x is string && y is string)
             {
-                if (x is ConcatenatedString)
-                    x = ((ConcatenatedString)x).ToString();
-                if (y is ConcatenatedString)
-                    y = ((ConcatenatedString)y).ToString();
                 return string.CompareOrdinal((string)x, (string)y) > 0;
             }
             else
@@ -168,12 +156,8 @@ namespace Jurassic
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
 
-            if ((x is string || x is ConcatenatedString) && (y is string || y is ConcatenatedString))
+            if (x is string && y is string)
             {
-                if (x is ConcatenatedString)
-                    x = ((ConcatenatedString)x).ToString();
-                if (y is ConcatenatedString)
-                    y = ((ConcatenatedString)y).ToString();
                 return string.CompareOrdinal((string)x, (string)y) >= 0;
             }
             else
