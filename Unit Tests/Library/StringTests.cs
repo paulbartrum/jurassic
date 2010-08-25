@@ -242,6 +242,7 @@ namespace UnitTests
 
             // indexOf is generic.
             Assert.AreEqual(2, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.indexOf; x.f('123')"));
+            Assert.AreEqual(8, TestUtils.Evaluate("x = new Date(0); x.f = ''.indexOf; x.getTimezoneOffset() > 0 ? x.f('31') : x.f('01')"));
 
             // Undefined and null are not allowed as the "this" object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.indexOf.call(undefined)"));
