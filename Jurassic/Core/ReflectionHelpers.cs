@@ -178,7 +178,7 @@ namespace Jurassic
             ScriptEngine_RegExp = GetInstanceMethod(typeof(ScriptEngine), "get_RegExp");
             ScriptEngine_Array = GetInstanceMethod(typeof(ScriptEngine), "get_Array");
             ScriptEngine_Object = GetInstanceMethod(typeof(ScriptEngine), "get_Object");
-            Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(ScriptEngine), typeof(string), typeof(Scope), typeof(object), typeof(bool));
+            Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(ScriptEngine), typeof(object), typeof(Scope), typeof(object), typeof(bool));
 
             String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
