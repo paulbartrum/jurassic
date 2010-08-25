@@ -13,6 +13,20 @@ namespace UnitTests
     public class ErrorTests
     {
         [TestMethod]
+        public void Constructor()
+        {
+            // Construct
+            Assert.AreEqual("test", TestUtils.Evaluate("new Error('test').message"));
+            Assert.AreEqual("", TestUtils.Evaluate("new Error().message"));
+            Assert.AreEqual("", TestUtils.Evaluate("new Error(undefined).message"));
+
+            // Call
+            Assert.AreEqual("test", TestUtils.Evaluate("Error('test').message"));
+            Assert.AreEqual("", TestUtils.Evaluate("Error().message"));
+            Assert.AreEqual("", TestUtils.Evaluate("Error(undefined).message"));
+        }
+
+        [TestMethod]
         public void PrototypeChain()
         {
             // JScript doesn't support Error.stack or Object.getPrototypeOf.
