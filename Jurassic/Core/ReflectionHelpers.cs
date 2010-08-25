@@ -110,6 +110,9 @@ namespace Jurassic
         internal static FieldInfo Undefined_Value;
         internal static FieldInfo Null_Value;
 
+        internal static ConstructorInfo LongJumpException_Constructor;
+        internal static MethodInfo LongJumpException_RouteID;
+
         /// <summary>
         /// Initializes static members of this class.
         /// </summary>
@@ -212,6 +215,9 @@ namespace Jurassic
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");
+
+            LongJumpException_Constructor = GetConstructor(typeof(LongJumpException), typeof(int));
+            LongJumpException_RouteID = GetInstanceMethod(typeof(LongJumpException), "get_RouteID");
 
 #if DEBUG
             // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus

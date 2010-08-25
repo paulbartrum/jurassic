@@ -345,6 +345,50 @@ namespace Jurassic.Compiler
                 throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Undefined label '{0}'", labelName));
             }
         }
+
+
+
+        //     FINALLY SUPPORT
+        //_________________________________________________________________________________________
+
+        ///// <summary>
+        ///// Gets or sets a value that indicates whether code generation is occurring within a
+        ///// finally block.
+        ///// </summary>
+        //public bool InsideFinally
+        //{
+        //    get;
+        //    set;
+        //}
+
+        /// <summary>
+        /// Gets or sets a delegate that is called when EmitLongJump() is called.
+        /// </summary>
+        public Action<ILGenerator, ILLabel> LongJumpCallback
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Emits code to branch between statements, even if code generation is within a finally
+        /// block (where unconditional branches are not allowed).
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="targetLabel"> The label to jump to. </param>
+        public void EmitLongJump(ILGenerator generator, ILLabel targetLabel)
+        {
+            if (this.LongJumpCallback == null)
+            {
+                // Code generation is not inside a finally block.
+                generator.Leave(targetLabel);
+            }
+            else
+            {
+                // Code generation is inside a finally block - call the callback to emit the jump.
+                this.LongJumpCallback(generator, targetLabel);
+            }
+        }
     }
 
 }

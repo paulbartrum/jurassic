@@ -71,10 +71,15 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // Create a temporary variable to store the exception and set it to null.
-            var exception = generator.CreateTemporaryVariable(typeof(JavaScriptException));
-            generator.LoadNull();
-            generator.StoreVariable(exception);
+            // Unlike in .NET, in javascript there are no restrictions on what can appear inside
+            // try, catch and finally blocks.  The one restriction which causes problems is the
+            // inability to jump out of .NET finally blocks.  This is required when break, continue
+            // or return statements appear inside of a finally block.  To work around this, when
+            // inside a finally block these instructions throw an exception instead.
+
+            // Finally requires two exception nested blocks.
+            if (this.FinallyBlock != null)
+                generator.BeginExceptionBlock();
 
             // Begin the exception block.
             generator.BeginExceptionBlock();
@@ -82,38 +87,22 @@ namespace Jurassic.Compiler
             // Generate code for the try block.
             this.TryBlock.GenerateCode(generator, optimizationInfo);
 
-            // Generate a catch block, but do not generate any user code inside the catch block!
-            // This is because code inside a catch block has numerous restrictions that javascript
-            // does not have.  For example, in javascript a return statement is allowed within
-            // catch and finally blocks, but the CLR does not allow this.  Therefore we have to
-            // simulate the catch and finally blocks.
-
-            // Store the exception in the temporary variable.
-            // The exception is on the top of the stack.
-            generator.BeginCatchBlock(typeof(JavaScriptException));
-            generator.StoreVariable(exception);
-            generator.EndExceptionBlock();
-
             // Generate code for the catch block.
             if (this.CatchBlock != null)
             {
-                // if (exception != null)
-                var endOfCatch = generator.CreateLabel();
-                generator.LoadVariable(exception);
-                generator.LoadNull();
-                generator.BranchIfEqual(endOfCatch);
+                // Begin a catch block.  The exception is on the top of the stack.
+                generator.BeginCatchBlock(typeof(JavaScriptException));
 
                 // Create a new DeclarativeScope.
                 this.CatchScope.GenerateScopeCreation(generator, optimizationInfo);
 
-                // Make sure the scope is reverted even if an exception is thrown.
-                generator.BeginExceptionBlock();
-
                 // Store the error object in the variable provided.
-                generator.LoadVariable(exception);
                 generator.Call(ReflectionHelpers.JavaScriptException_ErrorObject);
                 var catchVariable = new NameExpression(this.CatchScope, this.CatchVariableName);
                 catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+
+                // Make sure the scope is reverted even if an exception is thrown.
+                generator.BeginExceptionBlock();
 
                 // Emit code for the statements within the catch block.
                 this.CatchBlock.GenerateCode(generator, optimizationInfo);
@@ -124,36 +113,63 @@ namespace Jurassic.Compiler
                 generator.Call(ReflectionHelpers.Scope_ParentScope);
                 EmitHelpers.StoreScope(generator);
                 generator.EndExceptionBlock();
-
-                // Branch here if no exception was thrown.
-                generator.DefineLabelPosition(endOfCatch);
             }
 
             // Generate code for the finally block.
             if (this.FinallyBlock != null)
             {
+                generator.BeginFinallyBlock();
+
+                var branches = new List<ILLabel>();
+                var previousCallback = optimizationInfo.LongJumpCallback;
+                optimizationInfo.LongJumpCallback = (generator2, label) =>
+                    {
+                        // It is not possible to branch out of a finally block - therefore instead of
+                        // generating LEAVE instructions we throw an exception then catch it to transfer
+                        // control out of the finally block.
+                        generator2.LoadInt32(branches.Count);
+                        generator2.NewObject(ReflectionHelpers.LongJumpException_Constructor);
+                        generator2.Throw();
+
+                        // Record any branches that are made within the finally code.
+                        branches.Add(label);
+                    };
+
+                // Emit code for the finally block.
                 this.FinallyBlock.GenerateCode(generator, optimizationInfo);
+
+                // End the main exception block.
+                generator.EndExceptionBlock();
+
+                // Begin a catch block to catch any LongJumpExceptions. The exception object is on
+                // the top of the stack.
+                generator.BeginCatchBlock(typeof(LongJumpException));
+
+                if (branches.Count > 0)
+                {
+                    // switch (exception.RouteID)
+                    // {
+                    //    case 0: goto label1;
+                    //    case 1: goto label2;
+                    // }
+                    ILLabel[] switchLabels = new ILLabel[branches.Count];
+                    for (int i = 0; i < branches.Count; i++)
+                        switchLabels[i] = generator.CreateLabel();
+                    generator.Call(ReflectionHelpers.LongJumpException_RouteID);
+                    generator.Switch(switchLabels);
+                    for (int i = 0; i < branches.Count; i++)
+                    {
+                        generator.DefineLabelPosition(switchLabels[i]);
+                        generator.Leave(branches[i]);
+                    }
+                }
+
+                // Restore the previous callback (in case of nested finally blocks).
+                optimizationInfo.LongJumpCallback = previousCallback;
             }
 
-            // Generate code to rethrow the exception if no catch block was present.
-            if (this.CatchBlock == null)
-            {
-                // if (exception != null)
-                var endOfCatch2 = generator.CreateLabel();
-                generator.LoadVariable(exception);
-                generator.LoadNull();
-                generator.BranchIfEqual(endOfCatch2);
-
-                // Rethrow the exception.
-                generator.LoadVariable(exception);
-                generator.Throw();
-
-                // Branch here if no exception was thrown.
-                generator.DefineLabelPosition(endOfCatch2);
-            }
-
-            // We no longer need the temporary variable.
-            generator.ReleaseTemporaryVariable(exception);
+            // End the exception block.
+            generator.EndExceptionBlock();
         }
 
         /// <summary>
