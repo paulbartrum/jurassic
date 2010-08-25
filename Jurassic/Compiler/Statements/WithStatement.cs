@@ -49,8 +49,16 @@ namespace Jurassic.Compiler
             // Make sure the scope is reverted even if an exception is thrown.
             generator.BeginExceptionBlock();
 
+            // Setting the InsideTryCatchOrFinally flag converts BR instructions into LEAVE
+            // instructions so that the finally block is executed correctly.
+            var previousInsideTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
+            optimizationInfo.InsideTryCatchOrFinally = true;
+
             // Generate code for the body statements.
             this.Body.GenerateCode(generator, optimizationInfo);
+
+            // Reset the InsideTryCatchOrFinally flag.
+            optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
 
             // Revert the scope.
             generator.BeginFinallyBlock();
