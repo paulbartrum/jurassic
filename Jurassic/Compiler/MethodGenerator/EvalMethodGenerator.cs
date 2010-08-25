@@ -58,6 +58,7 @@ namespace Jurassic.Compiler
 
             this.StrictMode = parser.StrictMode;
             this.InitialScope = parser.Scope;
+            this.MethodOptimizationHints = parser.MethodOptimizationHints;
         }
 
         /// <summary>
