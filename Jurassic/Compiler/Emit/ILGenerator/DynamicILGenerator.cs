@@ -960,8 +960,13 @@ namespace Jurassic.Compiler
             if (labels == null)
                 throw new ArgumentNullException("labels");
 
-            // Calculate the position of the start of the next instruction.
-            int startOfNextInstruction = this.offset + 1 + 4 + labels.Length * 4;
+            // Calculate the size of the instruction and the position of the start of the next instruction.
+            int instructionSize = 1 + 4 + labels.Length * 4;
+            int startOfNextInstruction = this.offset + instructionSize;
+
+            // Enlarge the array if necessary.
+            if (this.offset + instructionSize >= this.bytes.Length)
+                EnlargeArray(instructionSize);
 
             // switch = 45
             Emit1ByteOpCode(0x45, 1, 0);
