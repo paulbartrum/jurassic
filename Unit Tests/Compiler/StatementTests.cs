@@ -219,6 +219,12 @@ namespace UnitTests
             Assert.AreEqual(8, TestUtils.Evaluate("x = 5; switch (x) { case 4: 6; case 5: 7; default: 8 }"));
             Assert.AreEqual(1, TestUtils.Evaluate("switch (5) { default: 3; case 4: 1 }"));
             Assert.AreEqual(5, TestUtils.Evaluate("(function(x) { switch (x) { case 8: return 4; case 9: return 5; default: return 7 } })(9)"));
+
+            // If there identical clauses, pick the first that matches.
+            Assert.AreEqual(1, TestUtils.Evaluate("x = 5; switch (x) { case 5: 1; break; case 5: 2; }"));
+
+            // Multiple default clauses are not allowed.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = 5; switch (x) { default: 6; default: 7 }"));
         }
 
         [TestMethod]
