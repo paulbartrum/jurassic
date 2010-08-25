@@ -138,7 +138,7 @@ namespace Jurassic.Library
         {
             if (typeHint == PrimitiveTypeHint.None)
                 return base.GetPrimitiveValue(PrimitiveTypeHint.String);
-            return base.GetPrimitiveValue(PrimitiveTypeHint.Number);
+            return base.GetPrimitiveValue(typeHint);
         }
         
 

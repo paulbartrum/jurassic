@@ -104,8 +104,8 @@ namespace UnitTests
             Assert.AreEqual("",                 TypeConverter.ToString(""));
             Assert.AreEqual("false",            TypeConverter.ToString(engine.Boolean.Construct(false)));
             Assert.AreEqual("true",             TypeConverter.ToString(engine.Boolean.Construct(true)));
-            Assert.AreEqual("0",                TypeConverter.ToString(engine.Date.Construct(0.0)));
-            Assert.AreEqual("NaN",              TypeConverter.ToString(engine.Date.Construct(double.NaN)));
+            Assert.AreEqual("Thu Jan 01 1970 13:00:00 GMT+1300 (New Zealand Daylight Time)", TypeConverter.ToString(engine.Date.Construct(0.0)));   // Note: time-zone specific.
+            Assert.AreEqual("Invalid Date",     TypeConverter.ToString(engine.Date.Construct(double.NaN)));
             Assert.AreEqual("0",                TypeConverter.ToString(engine.Number.Construct(0.0)));
             Assert.AreEqual("1",                TypeConverter.ToString(engine.Number.Construct(1.0)));
             Assert.AreEqual("[object Object]",  TypeConverter.ToString(engine.Object.Construct()));
