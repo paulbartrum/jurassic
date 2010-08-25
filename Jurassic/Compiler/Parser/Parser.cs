@@ -978,6 +978,7 @@ namespace Jurassic.Compiler
             // Consume the start brace ({).
             this.Expect(PunctuatorToken.LeftBrace);
 
+            SwitchCase defaultClause = null;
             while (true)
             {
                 if (this.nextToken == KeywordToken.Case)
@@ -1002,7 +1003,11 @@ namespace Jurassic.Compiler
                 }
                 else if (this.nextToken == KeywordToken.Default)
                 {
-                    var defaultClause = new SwitchCase();
+                    // Make sure this is the only default clause.
+                    if (defaultClause != null)
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Only one default clause is allowed.", this.LineNumber, this.SourcePath);
+
+                    defaultClause = new SwitchCase();
 
                     // Read the case keyword.
                     this.Expect(KeywordToken.Default);
