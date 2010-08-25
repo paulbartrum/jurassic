@@ -1147,6 +1147,12 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("x = {a: 1, b: 2}; delete(x.a)"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {a: 1, b: 2}; delete x.a; x.a"));
 
+            // Delete property (alternate syntax).
+            Assert.AreEqual(true, TestUtils.Evaluate("x = {a: 1, b: 2}; delete x['a']"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {a: 1, b: 2}; delete x['a']; x.a"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = {a: 1, b: 2}; y = 'a'; delete x[y]"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {a: 1, b: 2}; y = 'a'; delete x[y]; x.a"));
+
             // Delete does not operate against the prototype chain.
             Assert.AreEqual(true, TestUtils.Evaluate("x = Object.create({a: 1}); delete x.a"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = Object.create({a: 1}); delete x.a; x.a"));

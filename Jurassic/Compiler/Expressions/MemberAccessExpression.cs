@@ -318,7 +318,7 @@ namespace Jurassic.Compiler
 
             // Load the property name and convert to a string.
             var rhs = this.GetOperand(1);
-            if (rhs is NameExpression)
+            if (this.OperatorType == OperatorType.MemberAccess && rhs is NameExpression)
                 generator.LoadString((rhs as NameExpression).Name);
             else
             {
