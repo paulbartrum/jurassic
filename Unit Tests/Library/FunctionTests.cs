@@ -124,7 +124,7 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = { y: function f() { } }; x.y.displayName"));
             Assert.AreEqual("y", TestUtils.Evaluate("x = { y: function() { } }; x.y.displayName"));
             Assert.AreEqual("get f", TestUtils.Evaluate("x = { get f() { } }; Object.getOwnPropertyDescriptor(x, 'f').get.displayName"));
-            Assert.AreEqual("set f", TestUtils.Evaluate("x = { set f() { } }; Object.getOwnPropertyDescriptor(x, 'f').set.displayName"));
+            Assert.AreEqual("set f", TestUtils.Evaluate("x = { set f(value) { } }; Object.getOwnPropertyDescriptor(x, 'f').set.displayName"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("new Function('').displayName"));
         }
 
