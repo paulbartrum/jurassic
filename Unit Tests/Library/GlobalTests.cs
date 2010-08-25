@@ -28,10 +28,23 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("NaN"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("undefined"));
 
-            // These properties are not enumerable, not configurable and not writable (they were writable in ECMAScript 3 however).
+            // In ECMAScript 5 these properties are not enumerable, not configurable and not writable.
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "Infinity"));
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "NaN"));
             Assert.AreEqual(PropertyAttributes.Sealed, TestUtils.EvaluateAccessibility("this", "undefined"));
+
+            // In ECMAScript 5 these properties are not enumerable, not configurable and writable.
+            TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
+            try
+            {
+                Assert.AreEqual(PropertyAttributes.Writable, TestUtils.EvaluateAccessibility("this", "Infinity"));
+                Assert.AreEqual(PropertyAttributes.Writable, TestUtils.EvaluateAccessibility("this", "NaN"));
+                Assert.AreEqual(PropertyAttributes.Writable, TestUtils.EvaluateAccessibility("this", "undefined"));
+            }
+            finally
+            {
+                TestUtils.CompatibilityMode = CompatibilityMode.Latest;
+            }
 
             // Built-in objects should be writable and configurable but not enumerable.
             Assert.AreEqual(PropertyAttributes.NonEnumerable, TestUtils.EvaluateAccessibility("this", "Array"));
