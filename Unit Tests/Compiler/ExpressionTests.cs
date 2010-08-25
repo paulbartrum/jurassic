@@ -754,6 +754,7 @@ namespace UnitTests
             Assert.AreEqual(3, TestUtils.Evaluate("var x = 1, y = 2, z = 3; x, y, z"));
             Assert.AreEqual(3, TestUtils.Evaluate("var x = [1, 2, 3]; x[0], x[1], x[2]"));
             Assert.AreEqual(3, TestUtils.Evaluate("Object((1, 2, 3)).valueOf()"));
+            Assert.AreEqual(3, TestUtils.Evaluate("Object((1, 2, 3), 4, 5, 6).valueOf()"));
         }
 
         [TestMethod]
