@@ -176,7 +176,6 @@ namespace Jurassic.Compiler
                 GenerateArgumentsArray(generator, optimizationInfo);
                 generator.LoadInt32(0);
                 generator.LoadArrayElement(typeof(object));
-                EmitConversion.ToString(generator, PrimitiveType.Any);
             }
 
             // scope

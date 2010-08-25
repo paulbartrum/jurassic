@@ -128,14 +128,16 @@ namespace Jurassic.Library
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
         [JSFunction(Name = "eval", Flags = FunctionBinderFlags.HasEngineParameter)]
-        public static object Eval(ScriptEngine engine, string code)
+        public static object Eval(ScriptEngine engine, object code)
         {
+            if (TypeUtilities.IsString(code) == false)
+                return code;
             var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
-                engine,                             // The script engine.
-                engine.CreateGlobalScope(),         // The scope to run the code in.
-                new StringScriptSource(code),       // The source code to execute.
-                new Compiler.CompilerOptions(),     // Options.
-                engine.Global);                     // The value of the "this" keyword.
+                engine,                                                 // The script engine.
+                engine.CreateGlobalScope(),                             // The scope to run the code in.
+                new StringScriptSource(TypeConverter.ToString(code)),   // The source code to execute.
+                new Compiler.CompilerOptions(),                         // Options.
+                engine.Global);                                         // The value of the "this" keyword.
             return evalGen.Execute();
         }
 
@@ -150,20 +152,20 @@ namespace Jurassic.Library
         /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        public static object Eval(ScriptEngine engine, string code, Compiler.Scope scope, object thisObject, bool strictMode)
+        public static object Eval(ScriptEngine engine, object code, Compiler.Scope scope, object thisObject, bool strictMode)
         {
             if (scope == null)
                 throw new ArgumentNullException("scope");
-            if (code == null)
-                return Undefined.Value;
+            if (TypeUtilities.IsString(code) == false)
+                return code;
 
             var options = new Compiler.CompilerOptions() { ForceStrictMode = strictMode };
             var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
-                engine,                             // The script engine.
-                scope,                              // The scope to run the code in.
-                new StringScriptSource(code),       // The source code to execute.
-                options,                            // Options.
-                thisObject);                        // The value of the "this" keyword.
+                engine,                                                 // The script engine.
+                scope,                                                  // The scope to run the code in.
+                new StringScriptSource(TypeConverter.ToString(code)),   // The source code to execute.
+                options,                                                // Options.
+                thisObject);                                            // The value of the "this" keyword.
             return evalGen.Execute();
         }
 

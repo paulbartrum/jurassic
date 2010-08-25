@@ -177,6 +177,9 @@ namespace UnitTests
         public void eval()
         {
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("eval()"));
+            Assert.AreEqual(5, TestUtils.Evaluate("eval(5)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = {}; eval(x) === x;"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = {}; e = eval; e(x) === x;"));
             Assert.AreEqual(1, TestUtils.Evaluate("eval('Math.abs(-1)')"));
 
             // The lexical environment does not change inside an eval if it is a direct call.
