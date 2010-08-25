@@ -128,7 +128,7 @@ namespace Jurassic.Compiler
             {
                 // One or more arguments.
                 IList<Expression> arguments;
-                var argumentsOperand = this.GetOperand(1);
+                var argumentsOperand = this.GetRawOperand(1);
                 if (argumentsOperand is ListExpression)
                 {
                     // Multiple parameters were passed to the function.
