@@ -19,6 +19,7 @@ namespace Performance
         {
             manager = new ScriptEngineManager(@"..\..\..\Performance\Files\v8\", (engine) =>
             {
+                engine.CompatibilityMode = Jurassic.CompatibilityMode.ECMAScript3;
 
                 // Replace the default random number generator with a deterministic one.
                 engine.Math["random"] = engine.Evaluate(@"
@@ -49,7 +50,7 @@ namespace Performance
         [TestMethod]
         public void crypto()
         {
-            manager.RunTest("crypto.js", 0);
+            manager.RunTest("crypto.js", 6184.8);
         }
 
         [TestMethod]
@@ -61,7 +62,7 @@ namespace Performance
         [TestMethod]
         public void earley_boyer()
         {
-            manager.RunTest("earley-boyer.js", 0);
+            manager.RunTest("earley-boyer.js", 27067);
         }
 
         [TestMethod]
