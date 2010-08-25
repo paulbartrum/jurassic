@@ -71,21 +71,32 @@ namespace UnitTests
             Assert.AreEqual(11, TestUtils.Evaluate("y = 1; for (var x = 1; x < 5; x ++) { y = y + x } y"));
             Assert.AreEqual(11, TestUtils.Evaluate("for (var x = 1, y = 1; x < 5; x ++) { y = y + x } y"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("for (var x + 1; x < 5; x ++) { }"));
+        }
 
+        [TestMethod]
+        public void ForIn()
+        {
             // for (x in <expression>)
             Assert.AreEqual("ab", TestUtils.Evaluate("y = ''; for (x in {a: 1, b: 2}) { y += x } y"));
             Assert.AreEqual("1", TestUtils.Evaluate("y = 0; for (x in [7, 5]) { y = x } y"));
             Assert.AreEqual(0, TestUtils.Evaluate("x = 0; for (x in null) { x = 1 } x"));
             Assert.AreEqual(0, TestUtils.Evaluate("x = 0; for (x in undefined) { x = 1 } x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("for (5 in [1, 2]) {}"));
-            Assert.AreEqual("atest", TestUtils.Evaluate("Object.prototype.test = 19; y = ''; for (x in {a: 5}) { y += x } delete Object.prototype.test; y"));
 
             // for (var x in <expression>)
             Assert.AreEqual("1", TestUtils.Evaluate("y = 0; for (var x in [7, 5]) { y = x } y"));
             Assert.AreEqual("01234", TestUtils.Evaluate("y = ''; for (var x in 'hello') { y += x } y"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("for (var 5 in [1, 2])"));
 
-            // Modify an object while enumerating it should return the keys as they were originally.
+            // All properties in the prototype chain should be enumerated, but the same property
+            // name is never enumerated twice.  Properties in the prototype chain with the same
+            // name are shadowed and therefore are not enumerated.
+            Assert.AreEqual("b,c", TestUtils.Evaluate("y = []; for (var x in Object.create({a:1, b:2, c:3}, {a:{value:4}, b:{value:5, enumerable:true}})) { y.push(x) } y.toString()"));
+
+            // Properties are not enumerated if they have been deleted.
+            Assert.AreEqual("a,b", TestUtils.Evaluate("y = []; z = {a:1, b:2, c:3}; for (var x in z) { y.push(x); delete z.c; } y.toString()"));
+
+            // Adding a property while enumerating it should return the keys as they were originally.
             Assert.AreEqual("bc", TestUtils.Evaluate("var a = {b: 2, c: 3}; var keys = ''; for (var x in a) { a.d = 5; keys += x; }"));
 
             // Strict mode: the name "eval" is not allowed in strict mode.
