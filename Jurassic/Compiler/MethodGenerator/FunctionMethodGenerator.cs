@@ -114,15 +114,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets or sets function optimization information.
-        /// </summary>
-        public MethodOptimizationHints Optimizations
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets a name for the generated method.
         /// </summary>
         /// <returns> A name for the generated method. </returns>
@@ -166,6 +157,7 @@ namespace Jurassic.Compiler
             var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function);
             this.AbstractSyntaxTree = parser.Parse();
             this.StrictMode = parser.StrictMode;
+            this.MethodOptimizationHints = parser.MethodOptimizationHints;
         }
 
         /// <summary>
@@ -186,9 +178,6 @@ namespace Jurassic.Compiler
         protected override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Method signature: object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments)
-
-            // Make function optimization information available to all code generation methods.
-            optimizationInfo.FunctionOptimizationInfo = this.Optimizations;
 
             // Set up information needed by the return statement.
             optimizationInfo.ReturnTarget = generator.CreateLabel();
@@ -247,7 +236,7 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the arguments object into the scope.
-            if (this.Optimizations != null && this.Optimizations.HasArguments == true && this.ArgumentNames.Contains("arguments") == false)
+            if (this.MethodOptimizationHints.HasArguments == true && this.ArgumentNames.Contains("arguments") == false)
             {
                 // prototype
                 EmitHelpers.LoadScriptEngine(generator);

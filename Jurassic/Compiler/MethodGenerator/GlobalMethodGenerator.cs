@@ -54,6 +54,7 @@ namespace Jurassic.Compiler
             var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Global);
             this.AbstractSyntaxTree = parser.Parse();
             this.StrictMode = parser.StrictMode;
+            this.MethodOptimizationHints = parser.MethodOptimizationHints;
         }
 
         /// <summary>

@@ -87,6 +87,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets or sets optimization information.
+        /// </summary>
+        public MethodOptimizationHints MethodOptimizationHints
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets the emitted method.  This will be <c>null</c> until GenerateCode() is called.
         /// </summary>
         public System.Reflection.MethodInfo GeneratedMethod
@@ -166,6 +175,7 @@ namespace Jurassic.Compiler
             // Initialize global code-gen information.
             var optimizationInfo = new OptimizationInfo(this.Engine);
             optimizationInfo.StrictMode = this.StrictMode;
+            optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
 
             if (this.Options.EnableDebugging == false)
             {

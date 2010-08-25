@@ -142,6 +142,15 @@ namespace Jurassic.Compiler
             set;
         }
 
+        /// <summary>
+        /// Gets optimization information about the code that was parsed (Parse() must be called
+        /// first).
+        /// </summary>
+        public MethodOptimizationHints MethodOptimizationHints
+        {
+            get { return this.methodOptimizationHints; }
+        }
+
 
 
         //     VARIABLES
@@ -1295,7 +1304,7 @@ namespace Jurassic.Compiler
             options.ForceStrictMode = functionParser.StrictMode;
             var context = new FunctionMethodGenerator(this.engine, scope, functionName, argumentNames, body,
                 this.SourcePath, options);
-            context.Optimizations = functionParser.methodOptimizationHints;
+            context.MethodOptimizationHints = functionParser.methodOptimizationHints;
             return new FunctionExpression(context);
         }
 

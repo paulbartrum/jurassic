@@ -102,7 +102,7 @@ namespace Jurassic.Compiler
                     {
                         // The variable was not defined at compile time, but may have been
                         // introduced by an eval() statement.
-                        if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
+                        if (optimizationInfo.MethodOptimizationHints.HasEval == true)
                         {
                             // Check the variable exists: if (scope.HasValue(variableName) == true) {
                             if (scopeVariable == null)
@@ -230,7 +230,7 @@ namespace Jurassic.Compiler
                     {
                         // The variable was not defined at compile time, but may have been
                         // introduced by an eval() statement.
-                        if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
+                        if (optimizationInfo.MethodOptimizationHints.HasEval == true)
                         {
                             // Check the variable exists: if (scope.HasValue(variableName) == true) {
                             if (scopeVariable == null)
@@ -363,7 +363,7 @@ namespace Jurassic.Compiler
                     {
                         // The variable was not defined at compile time, but may have been
                         // introduced by an eval() statement.
-                        if (optimizationInfo.FunctionOptimizationInfo == null || optimizationInfo.FunctionOptimizationInfo.HasEval == true)
+                        if (optimizationInfo.MethodOptimizationHints.HasEval == true)
                         {
                             // Check the variable exists: if (scope.HasValue(variableName) == true) {
                             generator.LoadVariable(scopeVariable);
