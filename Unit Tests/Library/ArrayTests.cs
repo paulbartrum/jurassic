@@ -395,27 +395,29 @@ namespace UnitTests
         [TestMethod]
         public void slice()
         {
-            TestUtils.Evaluate("var x = [1, 2, 3, 4]");
-            TestUtils.Evaluate("var y = x.slice(0, 2)");
+            TestUtils.Evaluate("var y = [1, 2, 3, 4].slice(0, 2)");
             Assert.AreEqual(1, TestUtils.Evaluate("y[0]"));
             Assert.AreEqual(2, TestUtils.Evaluate("y[1]"));
             Assert.AreEqual(2, TestUtils.Evaluate("y.length"));
 
-            TestUtils.Evaluate("var y = x.slice(1)");
+            TestUtils.Evaluate("var y = [1, 2, 3, 4].slice(1)");
             Assert.AreEqual(2, TestUtils.Evaluate("y[0]"));
             Assert.AreEqual(3, TestUtils.Evaluate("y[1]"));
             Assert.AreEqual(4, TestUtils.Evaluate("y[2]"));
             Assert.AreEqual(3, TestUtils.Evaluate("y.length"));
 
-            TestUtils.Evaluate("var y = x.slice(-10, 10)");
+            TestUtils.Evaluate("var y = [1, 2, 3, 4].slice(-2, 10)");
+            Assert.AreEqual(3, TestUtils.Evaluate("y[0]"));
+            Assert.AreEqual(4, TestUtils.Evaluate("y[1]"));
+            Assert.AreEqual(2, TestUtils.Evaluate("y.length"));
+
+            TestUtils.Evaluate("var y = [1, 2, 3, 4].slice(0, -2)");
             Assert.AreEqual(1, TestUtils.Evaluate("y[0]"));
             Assert.AreEqual(2, TestUtils.Evaluate("y[1]"));
-            Assert.AreEqual(3, TestUtils.Evaluate("y[2]"));
-            Assert.AreEqual(4, TestUtils.Evaluate("y[3]"));
-            Assert.AreEqual(4, TestUtils.Evaluate("y.length"));
+            Assert.AreEqual(2, TestUtils.Evaluate("y.length"));
 
             // Should return a copy of the array.
-            TestUtils.Evaluate("var y = x.slice(2, 3)");
+            TestUtils.Evaluate("var x = [1, 2, 3, 4]; var y = x.slice(2, 3)");
             TestUtils.Evaluate("y[0] = 5");
             Assert.AreEqual(1, TestUtils.Evaluate("x[0]"));
             Assert.AreEqual(2, TestUtils.Evaluate("x[1]"));
@@ -424,8 +426,7 @@ namespace UnitTests
             Assert.AreEqual(4, TestUtils.Evaluate("x.length"));
 
             // Check behavior with undefined.
-            TestUtils.Evaluate("var x = [1, 2, undefined]");
-            TestUtils.Evaluate("var y = x.slice(2, 3)");
+            TestUtils.Evaluate("var y = [1, 2, undefined].slice(2, 3)");
             Assert.AreEqual("undefined", TestUtils.Evaluate("typeof(y[0])"));
             Assert.AreEqual(1, TestUtils.Evaluate("y.length"));
             if (TestUtils.Engine != JSEngine.JScript)   // JScript bug.
