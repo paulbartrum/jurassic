@@ -27,7 +27,7 @@ namespace Jurassic
                 return "boolean";
             if (obj is double || obj is int)
                 return "number";
-            if (obj is string || obj is ConcatenatedString)
+            if (obj is string)
                 return "string";
             if (obj is FunctionInstance)
                 return "function";
@@ -117,24 +117,8 @@ namespace Jurassic
             var leftPrimitive = TypeConverter.ToPrimitive(left, PrimitiveTypeHint.None);
             var rightPrimitive = TypeConverter.ToPrimitive(right, PrimitiveTypeHint.None);
             
-            if (leftPrimitive is string || leftPrimitive is ConcatenatedString || rightPrimitive is string || rightPrimitive is ConcatenatedString)
+            if (leftPrimitive is string || rightPrimitive is string)
             {
-                // Convert the left-hand side to a concatenated string.
-                //ConcatenatedString leftConcatenatedString;
-                //if (leftPrimitive is string)
-                //    leftConcatenatedString = new ConcatenatedString((string)leftPrimitive);
-                //else if (leftPrimitive is ConcatenatedString)
-                //    leftConcatenatedString = (ConcatenatedString)leftPrimitive;
-                //else
-                //    leftConcatenatedString = new ConcatenatedString(TypeConverter.ToString(leftPrimitive));
-
-                //// Append the right-hand side to the concatenated string.
-                //if (rightPrimitive is string)
-                //    return leftConcatenatedString.Append((string)rightPrimitive);
-                //else if (leftPrimitive is ConcatenatedString)
-                //    return leftConcatenatedString.Append((ConcatenatedString)rightPrimitive);
-                //else
-                //    return leftConcatenatedString.Append(TypeConverter.ToString(rightPrimitive));
                 return string.Concat(TypeConverter.ToString(leftPrimitive), TypeConverter.ToString(rightPrimitive));
             }
 

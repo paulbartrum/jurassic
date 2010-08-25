@@ -54,12 +54,6 @@ namespace Jurassic
         internal static MethodInfo String_CompareOrdinal;
         internal static MethodInfo String_Format;
 
-        internal static ConstructorInfo ConcatenatedString_Constructor;
-        internal static MethodInfo ConcatenatedString_Append_String;
-        internal static MethodInfo ConcatenatedString_Append_ConcatenatedString;
-        internal static MethodInfo ConcatenatedString_Length;
-        internal static MethodInfo ConcatenatedString_ToString;
-
         internal static MethodInfo IEnumerable_GetEnumerator;
         internal static MethodInfo IEnumerator_MoveNext;
         internal static MethodInfo IEnumerator_Current;
@@ -184,12 +178,6 @@ namespace Jurassic
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
             String_CompareOrdinal = GetStaticMethod(typeof(string), "CompareOrdinal", typeof(string), typeof(string));
             String_Format = GetStaticMethod(typeof(string), "Format", typeof(string), typeof(object[]));
-
-            ConcatenatedString_Constructor = GetConstructor(typeof(ConcatenatedString), typeof(string));
-            ConcatenatedString_Append_String = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(string));
-            ConcatenatedString_Append_ConcatenatedString = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(ConcatenatedString));
-            ConcatenatedString_Length = GetInstanceMethod(typeof(ConcatenatedString), "get_Length");
-            ConcatenatedString_ToString = GetInstanceMethod(typeof(ConcatenatedString), "ToString");
 
             JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ScriptEngine), typeof(string), typeof(string));
             JavaScriptException_Constructor_Object = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string));
