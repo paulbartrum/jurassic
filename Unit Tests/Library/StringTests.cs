@@ -271,6 +271,7 @@ namespace UnitTests
             Assert.AreEqual(6, TestUtils.Evaluate("'onetwothree'.lastIndexOf('three')"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.lastIndexOf('no')"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'onetwothree'.lastIndexOf('o', -400)"));
+            Assert.AreEqual(3, TestUtils.Evaluate("'onetwothree'.lastIndexOf('two', NaN)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("''.lastIndexOf('no')"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.lastIndexOf('')"));
 

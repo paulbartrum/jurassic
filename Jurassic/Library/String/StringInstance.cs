@@ -177,25 +177,27 @@ namespace Jurassic.Library
         
 
         /// <summary>
-        /// Returns the index within the calling String object of the last occurrence of the specified value, or -1 if not found.
+        /// Returns the index within the calling String object of the specified value, searching
+        /// backwards from the end of the string.
         /// </summary>
         /// <param name="substring"> The substring to search for. </param>
-        /// <param name="startIndex"></param>
-        /// <returns></returns>
+        /// <param name="startIndex"> The index of the character to start searching. </param>
+        /// <returns> The index of the substring, or <c>-1</c> if not found. </returns>
         [JSFunction(Name = "lastIndexOf", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
-        public static int LastIndexOf(string thisObject, string substring, int startIndex = int.MaxValue)
+        public static int LastIndexOf(string thisObject, string substring, double startIndex = double.NaN)
         {
             // Limit startIndex to the length of the string.  This must be done first otherwise
             // when startIndex = MaxValue it wraps around to negative.
-            startIndex = Math.Min(startIndex, thisObject.Length - 1);
-            startIndex = Math.Min(startIndex + substring.Length - 1, thisObject.Length - 1);
-            if (startIndex < 0)
+            int startIndex2 = double.IsNaN(startIndex) ? int.MaxValue : TypeConverter.ToInteger(startIndex);
+            startIndex2 = Math.Min(startIndex2, thisObject.Length - 1);
+            startIndex2 = Math.Min(startIndex2 + substring.Length - 1, thisObject.Length - 1);
+            if (startIndex2 < 0)
             {
                 if (thisObject == string.Empty && substring == string.Empty)
                     return 0;
                 return -1;
             }
-            return thisObject.LastIndexOf(substring, startIndex, StringComparison.Ordinal);
+            return thisObject.LastIndexOf(substring, startIndex2, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -389,18 +391,18 @@ namespace Jurassic.Library
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
         [JSFunction(Name = "split", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, object limit)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, double limit = uint.MaxValue)
         {
             // Limit defaults to unlimited.  Note the ToUint32() conversion.
-            uint limitInt = uint.MaxValue;
+            uint limit2 = uint.MaxValue;
             if (TypeUtilities.IsUndefined(limit) == false)
-                limitInt = TypeConverter.ToUint32(limit);
+                limit2 = TypeConverter.ToUint32(limit);
 
             // Call separate methods, depending on whether the separator is a regular expression.
             if (separator is RegExpInstance)
-                return Split(thisObject, (RegExpInstance)separator, limitInt);
+                return Split(thisObject, (RegExpInstance)separator, limit2);
             else
-                return Split(engine, thisObject, TypeConverter.ToString(separator), limitInt);
+                return Split(engine, thisObject, TypeConverter.ToString(separator), limit2);
         }
 
         /// <summary>
