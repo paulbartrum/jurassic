@@ -762,7 +762,7 @@ namespace Jurassic.Library
             if (start < 0)
                 start += (int)arrayLength;
             if (end < 0)
-                end += (int)arrayLength + 1;
+                end += (int)arrayLength;
             if (end <= start)
                 return thisObj.Engine.Array.New(new object[0]);
             start = Math.Min(Math.Max(start, 0), (int)arrayLength);
