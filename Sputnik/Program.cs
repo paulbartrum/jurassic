@@ -30,24 +30,41 @@ namespace Sputnik
                 "S7.8.4_A7.4_T2",       // Asserts "\U" should throw, which is wrong.
                 "S7.9_A9_T3",           // "do { } while (false) true" is not valid, even though all the browsers think it is.
                 "S7.9_A9_T4",           // "do { } while (false) true" is not valid, even though all the browsers think it is.
+                "S12.6.4_A14_T1",       // Assumes that function f() {}.prototype is enumerable (it isn't).
             };
 
             // Create an array of "won't fix" tests.
             var wontFixTests = new string[]
             {
+                "S9.9_A1",              // Asserts that for (var x in undefined) throws a TypeError (not implemented by browsers, changed in ECMAScript 5).
+                "S9.9_A2",              // Asserts that for (var x in undefined) throws a TypeError (not implemented by browsers, changed in ECMAScript 5).
                 "S11.1.5_A4.1",         // Asserts that keywords are not allowed in object literals (they are in ECMAScript 5).
                 "S11.1.5_A4.2",         // Asserts that keywords are not allowed in object literals (they are in ECMAScript 5).
                 "S11.8.2_A2.3_T1",      // Asserts relational operator should evaluate right-to-left (spec bug fixed in ECMAScript 5).
                 "S11.8.3_A2.3_T1",      // Asserts relational operator should evaluate right-to-left (spec bug fixed in ECMAScript 5).
+                "S12.10_A3.3_T4",       // Declares a function inside a try block.
+                "S12.10_A3.3_T5",       // Declares a function inside a try block.
+                "S12.7_A3",             // Declares a function inside a do-while block.
+                "S12.7_A4_T1",          // Declares a function inside a do-while block.
+                "S12.7_A4_T2",          // Declares a function inside a do-while block.
+                "S12.7_A4_T3",          // Declares a function inside a do-while block.
+                "S12.8_A3",             // Declares a function inside a do-while block.
+                "S12.8_A4_T1",          // Declares a function inside a do-while block.
+                "S12.8_A4_T2",          // Declares a function inside a do-while block.
+                "S12.8_A4_T3",          // Declares a function inside a do-while block.
+                "S13.2.2_A17_T1",       // Declares a function inside a with block.
+                "S15.1.2.1_A3.3_T3",    // Declares a function inside a try block.
+                "S15.3.4.2_A1_T1",      // Assumes (function() { }).toString() can be compiled using eval().
+                "S15.3.4.3_A6_T4",      // Asserts that apply throws a TypeError if the second argument is not an array.  This was changed in ECMAScript 5.
             };
 
-            //ExecuteTest(@"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\07_Lexical_Conventions\7.5_Tokens\7.5.3_Future_Reserved_Words\S7.5.3_A1.1.js", includes);
+            //ExecuteTest(@"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\15_Native_ECMA_Script_Objects\15.3_Function_Objects\15.3.4_Properties_of_the_Function_Prototype_Object\15.3.4.3_Function.prototype.apply\S15.3.4.3_A7_T3.js", includes);
             //return;
 
             // Determine all the file paths to execute.
             List<string> scriptPaths = new List<string>();
             //EnumerateScripts(scriptPaths, @"..\..\tests");
-            EnumerateScripts(scriptPaths, @"..\..\tests\Conformance\12_Statement");
+            EnumerateScripts(scriptPaths, @"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\15_Native_ECMA_Script_Objects\15.5_String_Objects");
 
             // Execute all the tests in parallel.
             //System.Threading.Tasks.Parallel.ForEach(scriptPaths, path => ExecuteTest(path, libSourceStr));
