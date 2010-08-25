@@ -143,7 +143,7 @@ namespace Jurassic.Library
         /// properties: configurable, writable, enumerable, value, get and set. </param>
         /// <returns> The object with the property. </returns>
         [JSFunction(Name = "defineProperty")]
-        public static ObjectInstance DefineProperty([JSDoNotConvert] ObjectInstance obj, string propertyName, ObjectInstance attributes)
+        public static ObjectInstance DefineProperty([JSDoNotConvert] ObjectInstance obj, string propertyName, [JSDoNotConvert] ObjectInstance attributes)
         {
             var defaults = obj.GetOwnPropertyDescriptor(propertyName);
             if (defaults.IsAccessor == false)
@@ -164,7 +164,12 @@ namespace Jurassic.Library
         {
             foreach (var property in properties.Properties)
                 if (property.IsEnumerable == true)
-                    DefineProperty(obj, property.Name, TypeConverter.ToObject(obj.Engine, property.Value));
+                {
+                    var descriptor = property.Value;
+                    if ((descriptor is ObjectInstance) == false)
+                        throw new JavaScriptException(obj.Engine, "TypeError", "Invalid property descriptor");
+                    DefineProperty(obj, property.Name, TypeConverter.ToObject(obj.Engine, descriptor as ObjectInstance));
+                }
             return obj;
         }
 

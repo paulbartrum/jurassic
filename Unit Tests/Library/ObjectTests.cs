@@ -347,6 +347,11 @@ namespace UnitTests
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperty(true, {})"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperty(5, {})"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperty('test', {})"));
+
+            // Property descriptors must be objects.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperty({}, 'a', 5)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperty({}, 'a', undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperty({}, 'a', null)"));
         }
 
         [TestMethod]
@@ -367,6 +372,11 @@ namespace UnitTests
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperties(true, {})"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperties(5, {})"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperties('test', {})"));
+
+            // Property descriptors must be objects.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperties({}, { a: 1 })"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperties({}, { a: undefined })"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.defineProperties({}, { a: null })"));
         }
 
         [TestMethod]
