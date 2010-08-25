@@ -346,25 +346,68 @@ namespace Jurassic.Compiler
             }
         }
 
+        /// <summary>
+        /// Gets the number of available break or continue targets.  Used to support break or
+        /// continue statements within finally blocks.
+        /// </summary>
+        public int BreakOrContinueStackSize
+        {
+            get { return this.breakOrContinueStack.Count; }
+        }
+
+        /// <summary>
+        /// Searches for the given label in the break/continue stack.
+        /// </summary>
+        /// <param name="label"></param>
+        /// <returns> The depth of the label in the stack.  Zero indicates the bottom of the stack.
+        /// <c>-1</c> is returned if the label was not found. </returns>
+        private int GetBreakOrContinueLabelDepth(ILLabel label)
+        {
+            if (label == null)
+                throw new ArgumentNullException("label");
+
+            int depth = this.breakOrContinueStack.Count - 1;
+            foreach (var info in this.breakOrContinueStack)
+            {
+                if (info.BreakTarget == label)
+                    return depth;
+                if (info.ContinueTarget == label)
+                    return depth;
+                depth --;
+            }
+            return -1;
+        }
+
 
 
         //     FINALLY SUPPORT
         //_________________________________________________________________________________________
 
-        ///// <summary>
-        ///// Gets or sets a value that indicates whether code generation is occurring within a
-        ///// finally block.
-        ///// </summary>
-        //public bool InsideFinally
-        //{
-        //    get;
-        //    set;
-        //}
+        /// <summary>
+        /// Gets or sets a value that indicates whether code generation is occurring within a
+        /// try, catch or finally block.
+        /// </summary>
+        public bool InsideTryCatchOrFinally
+        {
+            get;
+            set;
+        }
 
         /// <summary>
-        /// Gets or sets a delegate that is called when EmitLongJump() is called.
+        /// Gets or sets a delegate that is called when EmitLongJump() is called and the target
+        /// label is outside the LongJumpStackSizeThreshold.
         /// </summary>
         public Action<ILGenerator, ILLabel> LongJumpCallback
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the depth of the break/continue stack at the start of the finally
+        /// statement.
+        /// </summary>
+        public int LongJumpStackSizeThreshold
         {
             get;
             set;
@@ -381,12 +424,30 @@ namespace Jurassic.Compiler
             if (this.LongJumpCallback == null)
             {
                 // Code generation is not inside a finally block.
-                generator.Leave(targetLabel);
+                if (this.InsideTryCatchOrFinally == true)
+                    generator.Leave(targetLabel);
+                else
+                    generator.Branch(targetLabel);
             }
             else
             {
-                // Code generation is inside a finally block - call the callback to emit the jump.
-                this.LongJumpCallback(generator, targetLabel);
+                // The long jump is occurring within a finally block.
+                // Check if the target is inside or outside the finally block.
+                int depth = this.GetBreakOrContinueLabelDepth(targetLabel);
+                if (depth < this.LongJumpStackSizeThreshold)
+                {
+                    // The target label is outside the finally block.  Call the callback to emit
+                    // the jump.
+                    this.LongJumpCallback(generator, targetLabel);
+                }
+                else
+                {
+                    // The target label is inside the finally block.
+                    if (this.InsideTryCatchOrFinally == true)
+                        generator.Leave(targetLabel);
+                    else
+                        generator.Branch(targetLabel);
+                }
             }
         }
     }
