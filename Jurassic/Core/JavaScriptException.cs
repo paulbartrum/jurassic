@@ -131,11 +131,28 @@ namespace Jurassic
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
-            var errorPropertyInfo = typeof(ScriptEngine).GetProperty(name);
-            if (errorPropertyInfo == null)
-                throw new ArgumentException(string.Format("No error named '{0}' could be found.", name), "name");
-            var errorConstructor = (Library.FunctionInstance)errorPropertyInfo.GetValue(engine, null);
-            return (Library.ErrorInstance)errorConstructor.ConstructLateBound(message);
+
+            // Get the constructor corresponding to the error name.
+            Library.ErrorConstructor constructor;
+            if (name == "Error")
+                constructor = engine.Error;
+            else if (name == "RangeError")
+                constructor = engine.Error;
+            else if (name == "TypeError")
+                constructor = engine.Error;
+            else if (name == "SyntaxError")
+                constructor = engine.Error;
+            else if (name == "URIError")
+                constructor = engine.Error;
+            else if (name == "EvalError")
+                constructor = engine.Error;
+            else if (name == "ReferenceError")
+                constructor = engine.Error;
+            else
+                throw new ArgumentException(string.Format("Unrecognised error type '{0}'.", name), "name");
+
+            // Create an error instance.
+            return (Library.ErrorInstance)constructor.ConstructLateBound(message);
         }
     }
 }
