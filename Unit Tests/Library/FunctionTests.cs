@@ -18,6 +18,7 @@ namespace UnitTests
         public void Constructor()
         {
             // Constructor
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("f = new Function('', ''); f()"));
             Assert.AreEqual(4, TestUtils.Evaluate("f = new Function('a', 'b', 'return a+b'); f(1, 3)"));
             Assert.AreEqual(4, TestUtils.Evaluate("f = new Function('a,b', 'return a+b'); f(1, 3)"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('a, ,b', 'return a+b')"));
