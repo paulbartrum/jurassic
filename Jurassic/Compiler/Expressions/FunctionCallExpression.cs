@@ -34,6 +34,29 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Used to implement function calls without evaluating the left operand twice.
+        /// </summary>
+        private class TemporaryVariableExpression : Expression
+        {
+            private ILLocalVariable variable;
+
+            public TemporaryVariableExpression(ILLocalVariable variable)
+            {
+                this.variable = variable;
+            }
+
+            public override PrimitiveType ResultType
+            {
+                get { return PrimitiveType.Any; }
+            }
+
+            protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+            {
+                generator.LoadVariable(this.variable);
+            }
+        }
+
+        /// <summary>
         /// Generates CIL for the expression.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
@@ -48,8 +71,31 @@ namespace Jurassic.Compiler
             }
 
             // Emit the function instance first.
-            this.Target.GenerateCode(generator, optimizationInfo);
-            EmitConversion.ToAny(generator, this.Target.ResultType);
+            ILLocalVariable targetBase = null;
+            if (this.Target is MemberAccessExpression)
+            {
+                // The function is a member access expression (e.g. "Math.cos()").
+
+                // Evaluate the left part of the member access expression.
+                var baseExpression = ((MemberAccessExpression)this.Target).Base;
+                baseExpression.GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToAny(generator, baseExpression.ResultType);
+                targetBase = generator.CreateTemporaryVariable(typeof(object));
+                generator.StoreVariable(targetBase);
+
+                // Evaluate the right part of the member access expression.
+                var memberAccessExpression = new MemberAccessExpression(((MemberAccessExpression)this.Target).Operator);
+                memberAccessExpression.Push(new TemporaryVariableExpression(targetBase));
+                memberAccessExpression.Push(((MemberAccessExpression)this.Target).GetOperand(1));
+                memberAccessExpression.GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToAny(generator, this.Target.ResultType);
+            }
+            else
+            {
+                // Something else (e.g. "eval()").
+                this.Target.GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToAny(generator, this.Target.ResultType);
+            }
 
             // Check the object really is a function - if not, throw an exception.
             generator.IsInstance(typeof(Library.FunctionInstance));
@@ -91,9 +137,10 @@ namespace Jurassic.Compiler
             {
                 // 2. The function is a member access expression (e.g. "Math.cos()").
                 //    In this case this = Math.
-                var baseExpression = ((MemberAccessExpression)this.Target).Base;
-                baseExpression.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToAny(generator, baseExpression.ResultType);
+                //var baseExpression = ((MemberAccessExpression)this.Target).Base;
+                //baseExpression.GenerateCode(generator, optimizationInfo);
+                //EmitConversion.ToAny(generator, baseExpression.ResultType);
+                generator.LoadVariable(targetBase);
             }
             else
             {
@@ -107,6 +154,10 @@ namespace Jurassic.Compiler
 
             // Call FunctionInstance.CallLateBound(thisValue, argumentValues)
             generator.Call(ReflectionHelpers.FunctionInstance_CallLateBound);
+
+            // Allow reuse of the temporary variable.
+            if (targetBase != null)
+                generator.ReleaseTemporaryVariable(targetBase);
         }
 
         /// <summary>

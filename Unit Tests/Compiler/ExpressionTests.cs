@@ -934,6 +934,9 @@ namespace UnitTests
             // Passing a function in an argument.
             Assert.AreEqual(3, TestUtils.Evaluate("function a(b) { return b + 2; } function c(func) { return func(1); } c(a)"));
 
+            // Arguments should only be evaluated once.
+            Assert.AreEqual(1, TestUtils.Evaluate("var i = 0; Function({ toString: function() { return ++i } }).apply(null); i"));
+
             // In compatibility mode, undefined and null are converted to objects.
             TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
             try
