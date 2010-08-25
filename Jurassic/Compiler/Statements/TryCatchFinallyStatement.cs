@@ -78,8 +78,8 @@ namespace Jurassic.Compiler
             // inside a finally block these instructions throw an exception instead.
 
             // Setting the InsideTryCatchOrFinally flag converts BR instructions into LEAVE
-            // instructions.
-            var nestedTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
+            // instructions so that the finally block is executed correctly.
+            var previousInsideTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
             optimizationInfo.InsideTryCatchOrFinally = true;
 
             // Finally requires two exception nested blocks.
@@ -180,7 +180,7 @@ namespace Jurassic.Compiler
             generator.EndExceptionBlock();
 
             // Reset the InsideTryCatchOrFinally flag.
-            optimizationInfo.InsideTryCatchOrFinally = nestedTryCatchOrFinally;
+            optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
         }
 
         /// <summary>
