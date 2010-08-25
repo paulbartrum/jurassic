@@ -134,9 +134,13 @@ namespace Jurassic.Library
             var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
 
             // Run the function, with the new object as the "this" keyword.
-            CallLateBound(newObject, argumentValues);
+            var result = CallLateBound(newObject, argumentValues);
 
-            // Return the new object.
+            // Return the result of the function if it is an object.
+            if (result is ObjectInstance)
+                return (ObjectInstance)result;
+
+            // Otherwise, return the new object.
             return newObject;
         }
 

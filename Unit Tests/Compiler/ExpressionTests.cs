@@ -952,6 +952,9 @@ namespace UnitTests
             Assert.AreEqual(5, TestUtils.Evaluate("function f() { this.a = 5; return 2; }; a = new f(); a.a"));
             Assert.AreEqual(true, TestUtils.Evaluate("function f() { this.a = 5; return 2; }; a = new f(); Object.getPrototypeOf(a) === f.prototype"));
 
+            // Returning an object returns that as the new object.
+            Assert.AreEqual(6, TestUtils.Evaluate("function f() { this.a = 5; return { a: 6 }; }; x = new f(); x.a"));
+
             // Built-in functions cannot be constructed.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("new Function.valueOf()"));
         }
