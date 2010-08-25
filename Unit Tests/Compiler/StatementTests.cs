@@ -241,8 +241,10 @@ namespace UnitTests
             Assert.AreEqual(6, TestUtils.Evaluate("try { } catch (e) { e } finally { 6 }"));
             Assert.AreEqual(6, TestUtils.Evaluate("try { throw 5 } catch (e) { e } finally { 6 }"));
             Assert.AreEqual(6, TestUtils.Evaluate("try { try { throw 5 } finally { 6 } } catch (e) { }"));
+            Assert.AreEqual(6, TestUtils.Evaluate("var x = 0; try { try { throw 4; } catch (e) { throw 5; } finally { x = 6; } } catch (e) { } x"));
 
-            // Exceptions can be swallowed using finally.
+            // Return is valid within catch and finally blocks.
+            Assert.AreEqual(6, TestUtils.Evaluate("function f() { try { throw 5 } catch (e) { return 6 } } f()"));
             Assert.AreEqual(6, TestUtils.Evaluate("function f() { try { throw 5 } finally { return 6 } } f()"));
 
             // Catch creates a new scope - but only for the exception variable.
@@ -256,8 +258,15 @@ namespace UnitTests
             // Cannot declare a function inside a catch block.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("try { throw 6; } catch (e) { function foo() { return 2; } foo() }"));
 
-            // Try jumping out of the catch block.
-            Assert.AreEqual(9, TestUtils.Evaluate("var i = 0; while(i<10){ i ++; try { throw '10'; } catch (e) { continue; } }"));
+            // Try using continue within try, catch and finally blocks.
+            Assert.AreEqual(3, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; continue; } catch (e) { j = 0; } j = 0; } j"));
+            Assert.AreEqual(3, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { throw 5; } catch (e) { j ++; continue; } j = 0; } j"));
+            Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; continue; } finally { j ++; } j = 0; } j"));
+            Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; } finally { j ++; continue; } j = 0; } j"));
+            Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; continue; } catch (e) { j = 0; } finally { j ++ } j = 0; } j"));
+            Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; } catch (e) { j = 0; } finally { j ++; continue; } j = 0; } j"));
+            Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { throw 5; } catch (e) { j ++; continue; } finally { j ++ } j = 0; } j"));
+            Assert.AreEqual(6, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { throw 5; } catch (e) { j ++; } finally { j ++; continue; } j = 0; } j"));
         }
 
         [TestMethod]

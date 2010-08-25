@@ -204,6 +204,18 @@ namespace Jurassic.Compiler
             this.generator.Emit(OpCodes.Ret);
         }
 
+        /// <summary>
+        /// Creates a jump table.  A value is popped from the stack - this value indicates the
+        /// index of the label in the <paramref name="labels"/> array to jump to.
+        /// </summary>
+        /// <param name="labels"> A array of labels. </param>
+        public override void Switch(ILLabel[] labels)
+        {
+            if (labels == null)
+                throw new ArgumentNullException("labels");
+            this.generator.Emit(OpCodes.Switch, Array.ConvertAll(labels, label => ((ReflectionEmitILLabel)label).UnderlyingLabel));
+        }
+
 
 
         //     LOCAL VARIABLES AND ARGUMENTS
@@ -791,7 +803,37 @@ namespace Jurassic.Compiler
         /// <param name="type"> The element type. </param>
         public override void LoadArrayElement(Type type)
         {
-            this.generator.Emit(OpCodes.Ldelem, type);
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                    this.generator.Emit(OpCodes.Ldelem_I1);
+                    break;
+                case TypeCode.UInt16:
+                case TypeCode.Int16:
+                    this.generator.Emit(OpCodes.Ldelem_I2);
+                    break;
+                case TypeCode.UInt32:
+                case TypeCode.Int32:
+                    this.generator.Emit(OpCodes.Ldelem_I4);
+                    break;
+                case TypeCode.UInt64:
+                case TypeCode.Int64:
+                    this.generator.Emit(OpCodes.Ldelem_I8);
+                    break;
+                case TypeCode.Single:
+                    this.generator.Emit(OpCodes.Ldelem_R4);
+                    break;
+                case TypeCode.Double:
+                    this.generator.Emit(OpCodes.Ldelem_R8);
+                    break;
+                default:
+                    if (type.IsClass == true)
+                        this.generator.Emit(OpCodes.Ldelem_Ref);
+                    else
+                        this.generator.Emit(OpCodes.Ldelem, type);
+                    break;
+            }
         }
 
         /// <summary>
@@ -800,7 +842,37 @@ namespace Jurassic.Compiler
         /// <param name="type"> The element type. </param>
         public override void StoreArrayElement(Type type)
         {
-            this.generator.Emit(OpCodes.Stelem, type);
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                    this.generator.Emit(OpCodes.Stelem_I1);
+                    break;
+                case TypeCode.UInt16:
+                case TypeCode.Int16:
+                    this.generator.Emit(OpCodes.Stelem_I2);
+                    break;
+                case TypeCode.UInt32:
+                case TypeCode.Int32:
+                    this.generator.Emit(OpCodes.Stelem_I4);
+                    break;
+                case TypeCode.UInt64:
+                case TypeCode.Int64:
+                    this.generator.Emit(OpCodes.Stelem_I8);
+                    break;
+                case TypeCode.Single:
+                    this.generator.Emit(OpCodes.Stelem_R4);
+                    break;
+                case TypeCode.Double:
+                    this.generator.Emit(OpCodes.Stelem_R8);
+                    break;
+                default:
+                    if (type.IsClass == true)
+                        this.generator.Emit(OpCodes.Stelem_Ref);
+                    else
+                        this.generator.Emit(OpCodes.Stelem, type);
+                    break;
+            }
         }
 
         /// <summary>

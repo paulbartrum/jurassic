@@ -27,6 +27,9 @@ namespace Jurassic.Compiler
             this.ILGenerator = generator;
             this.Identifier = identifier;
             this.ILOffset = -1;
+#if !DEBUG
+            this.EvaluationStackSize = -1;
+#endif
         }
 
         /// <summary>
@@ -56,6 +59,8 @@ namespace Jurassic.Compiler
             set;
         }
 
+#if DEBUG
+
         /// <summary>
         /// Gets or sets a copy of the evaluation stack at the branch point.
         /// </summary>
@@ -64,6 +69,19 @@ namespace Jurassic.Compiler
             get;
             set;
         }
+
+#else
+
+        /// <summary>
+        /// Gets or sets the size of the evaluation stack at the branch point.
+        /// </summary>
+        public int EvaluationStackSize
+        {
+            get;
+            set;
+        }
+
+#endif
     }
 
     /// <summary>

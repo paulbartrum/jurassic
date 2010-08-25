@@ -41,9 +41,10 @@ namespace Jurassic.Compiler
 
         private struct Fixup
         {
-            public int Position;            // The IL offset to fix up.
-            public int Length;              // The length of the fix up, in bytes.
-            public DynamicILLabel Label;    // The label that is being jumped to.
+            public int Position;                // The IL offset to fix up.
+            public int Length;                  // The length of the fix up, in bytes.
+            public int StartOfNextInstruction;  // The IL offset of the start of the next instruction.
+            public DynamicILLabel Label;        // The label that is being jumped to.
         }
         private List<Fixup> fixups;
 
@@ -132,7 +133,12 @@ namespace Jurassic.Compiler
 
             if (this.exceptionRegions != null && this.exceptionRegions.Count > 0)
             {
-                var exceptionBytes = new byte[4 + 24 * this.exceptionRegions.Count];
+                // Count the number of exception clauses.
+                int clauseCount = 0;
+                foreach (var exceptionRegion in this.exceptionRegions)
+                    clauseCount += exceptionRegion.Clauses.Count;
+
+                var exceptionBytes = new byte[4 + 24 * clauseCount];
                 var writer = new System.IO.BinaryWriter(new System.IO.MemoryStream(exceptionBytes));
 
                 // 4-byte header, see Partition II, section 25.4.5.
@@ -149,26 +155,26 @@ namespace Jurassic.Compiler
                         switch (clause.Type)
                         {
                             case ExceptionClauseType.Catch:
-                                writer.Write(0);                        // Flags
+                                writer.Write(0);                                // Flags
                                 break;
                             case ExceptionClauseType.Filter:
-                                writer.Write(1);                        // Flags
+                                writer.Write(1);                                // Flags
                                 break;
                             case ExceptionClauseType.Finally:
-                                writer.Write(2);                        // Flags
+                                writer.Write(2);                                // Flags
                                 break;
                             case ExceptionClauseType.Fault:
-                                writer.Write(4);                        // Flags
+                                writer.Write(4);                                // Flags
                                 break;
                         }
-                        writer.Write(exceptionRegion.Start);            // TryOffset
-                        writer.Write(exceptionRegion.TryLength);        // TryLength
-                        writer.Write(clause.ILStart);                   // HandlerOffset
-                        writer.Write(clause.ILLength);                  // HandlerLength
+                        writer.Write(exceptionRegion.Start);                    // TryOffset
+                        writer.Write(clause.ILStart - exceptionRegion.Start);   // TryLength
+                        writer.Write(clause.ILStart);                           // HandlerOffset
+                        writer.Write(clause.ILLength);                          // HandlerLength
                         if (clause.Type == ExceptionClauseType.Catch)
-                            writer.Write(clause.CatchToken);            // ClassToken
+                            writer.Write(clause.CatchToken);                    // ClassToken
                         else if (clause.Type == ExceptionClauseType.Filter)
-                            writer.Write(clause.FilterHandlerStart);    // FilterOffset
+                            writer.Write(clause.FilterHandlerStart);            // FilterOffset
                         else
                             writer.Write(0);
                     }
@@ -697,19 +703,19 @@ namespace Jurassic.Compiler
                 }
             }
 #else
-            if (label2.EvaluationStack != null)
+            if (label2.EvaluationStackSize >= 0)
             {
                 if (this.stackIsIndeterminate == false)
                 {
                     // Check the number of items matches.
-                    if ((int)label2.EvaluationStack != this.stackSize)
+                    if (label2.EvaluationStackSize != this.stackSize)
                         throw new InvalidOperationException(string.Format("Stack size mismatch from a previous branch.  Expected {0} items but found {1} items.",
-                            (int)label2.EvaluationStack, this.stackSize));
+                            label2.EvaluationStackSize, this.stackSize));
                 }
                 else
                 {
                     // Replace the evaluation stack with the one from the label.
-                    this.stackSize = (int)label2.EvaluationStack;
+                    this.stackSize = label2.EvaluationStackSize;
                     this.stackIsIndeterminate = false;
                 }
             }
@@ -729,10 +735,12 @@ namespace Jurassic.Compiler
                     throw new InvalidOperationException("Undefined label.");
 
                 // Jump offsets are relative to the next instruction.
-                jumpOffset -= fix.Position + fix.Length;
+                jumpOffset -= fix.StartOfNextInstruction;
 
                 // Patch the jump offset;
                 var position = fix.Position;
+                if (fix.Length != 4)
+                    throw new NotImplementedException("Short jumps are not supported.");
                 this.bytes[position++] = (byte)jumpOffset;
                 this.bytes[position++] = (byte)(jumpOffset >> 8);
                 this.bytes[position++] = (byte)(jumpOffset >> 16);
@@ -750,27 +758,45 @@ namespace Jurassic.Compiler
         /// <param name="popType"> The type of operand to pop from the stack. </param>
         private void BranchCore(ILLabel label, byte opCode, int popCount, VESType popType)
         {
+            // Emit the branch opcode.
+            Emit1ByteOpCode(opCode, popCount, 0);
+
+            // The instruction pops zero or more values from the stack and pushes none.
+            for (int i = 0; i < popCount; i++)
+                PopStackOperands(popType);
+
+            // Emit the label.
+            EmitLabel(label, this.offset + 4);
+        }
+
+        /// <summary>
+        /// Emits a single label.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        /// <param name="startOfNextInstruction"> The IL offset of the start of the next instruction. </param>
+        private void EmitLabel(ILLabel label, int startOfNextInstruction)
+        {
             if (label as DynamicILLabel == null)
                 throw new ArgumentNullException("label");
             var label2 = (DynamicILLabel)label;
             if (label2.ILGenerator != this)
                 throw new ArgumentException("The label wasn't created by this generator.", "label");
 
+            // Enlarge the array if necessary.
+            if (this.offset + 4 >= this.bytes.Length)
+                EnlargeArray(4);
+
             if (label2.ILOffset >= 0)
             {
                 // The label is defined.
-                Emit1ByteOpCodeInt32(opCode, popCount, 0, label2.ILOffset - this.offset - 5);
+                EmitInt32(label2.ILOffset - startOfNextInstruction);
             }
             else
             {
                 // The label is not defined.  Add a fix up.
-                Emit1ByteOpCodeInt32(opCode, popCount, 0, 0);
-                this.fixups.Add(new Fixup() { Position = this.offset - 4, Length = 4, Label = label2 });
+                EmitInt32(0);
+                this.fixups.Add(new Fixup() { Position = this.offset - 4, Length = 4, StartOfNextInstruction = startOfNextInstruction, Label = label2 });
             }
-
-            // The instruction pops zero or more values from the stack and pushes none.
-            for (int i = 0; i < popCount; i++)
-                PopStackOperands(popType);
 
 #if DEBUG
             if (label2.EvaluationStack == null)
@@ -792,17 +818,17 @@ namespace Jurassic.Compiler
                             string.Join(", ", previousStack), string.Join(", ", currentStack)));
             }
 #else
-            if (label2.EvaluationStack == null)
+            if (label2.EvaluationStackSize < 0)
             {
                 // Record the number of items on the evaluation stack.
-                label2.EvaluationStack = this.stackSize;
+                label2.EvaluationStackSize = this.stackSize;
             }
             else
             {
                 // Check the number of items matches.
-                if ((int)label2.EvaluationStack != this.stackSize)
+                if (label2.EvaluationStackSize != this.stackSize)
                     throw new InvalidOperationException(string.Format("Stack size mismatch from a previous branch.  Expected {0} items but was {1} items.",
-                        (int)label2.EvaluationStack, this.stackSize));
+                        label2.EvaluationStackSize, this.stackSize));
             }
 #endif
         }
@@ -922,6 +948,30 @@ namespace Jurassic.Compiler
                 if (this.stackSize != 0)
                     throw new InvalidOperationException(string.Format("The evaluation stack should be empty.  Types still on stack: {0}.", string.Join(", ", this.operands)));
             }
+        }
+
+        /// <summary>
+        /// Creates a jump table.  A value is popped from the stack - this value indicates the
+        /// index of the label in the <paramref name="labels"/> array to jump to.
+        /// </summary>
+        /// <param name="labels"> A array of labels. </param>
+        public override void Switch(ILLabel[] labels)
+        {
+            if (labels == null)
+                throw new ArgumentNullException("labels");
+
+            // Calculate the position of the start of the next instruction.
+            int startOfNextInstruction = this.offset + 1 + 4 + labels.Length * 4;
+
+            // switch = 45
+            Emit1ByteOpCode(0x45, 1, 0);
+
+            // Emit the number of labels.
+            EmitInt32(labels.Length);
+
+            // Emit the labels.
+            foreach (var label in labels)
+                EmitLabel(label, startOfNextInstruction);
         }
 
 
@@ -1852,7 +1902,7 @@ namespace Jurassic.Compiler
                     Emit1ByteOpCode(0x99, 2, 1);
                     break;
                 default:
-                    if (type == typeof(object))
+                    if (type.IsClass == true)
                         Emit1ByteOpCode(0x9A, 2, 1);
                     else
                     {
@@ -1900,7 +1950,7 @@ namespace Jurassic.Compiler
                     Emit1ByteOpCode(0xA1, 3, 0);
                     break;
                 default:
-                    if (type == typeof(object))
+                    if (type.IsClass == true)
                         Emit1ByteOpCode(0xA2, 3, 0);
                     else
                     {

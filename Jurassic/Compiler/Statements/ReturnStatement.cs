@@ -47,9 +47,8 @@ namespace Jurassic.Compiler
             generator.StoreVariable(optimizationInfo.ReturnVariable);
 
             // Branch to the end of the function.  Note: the return statement might be branching
-            // from inside a try { } block to outside.  The BR instruction is not allowed in this
-            // circumstance, so we use LEAVE instead.
-            generator.Leave(optimizationInfo.ReturnTarget);
+            // from inside a try { } or finally { } block to outside.  EmitLongJump() handles this.
+            optimizationInfo.EmitLongJump(generator, optimizationInfo.ReturnTarget);
         }
 
         /// <summary>

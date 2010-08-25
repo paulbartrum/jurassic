@@ -172,6 +172,13 @@ namespace Jurassic.Compiler
         /// </summary>
         public abstract void Return();
 
+        /// <summary>
+        /// Creates a jump table.  A value is popped from the stack - this value indicates the
+        /// index of the label in the <paramref name="labels"/> array to jump to.
+        /// </summary>
+        /// <param name="labels"> A array of labels. </param>
+        public abstract void Switch(ILLabel[] labels);
+
 
 
         //     LOCAL VARIABLES AND ARGUMENTS
