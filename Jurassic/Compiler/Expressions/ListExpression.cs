@@ -28,8 +28,8 @@ namespace Jurassic.Compiler
                 Expression leftHandSide = this;
                 while (leftHandSide is ListExpression)
                 {
-                    result.Add(((ListExpression)leftHandSide).GetOperand(1));
-                    leftHandSide = ((ListExpression)leftHandSide).GetOperand(0);
+                    result.Add(((ListExpression)leftHandSide).GetRawOperand(1));
+                    leftHandSide = ((ListExpression)leftHandSide).GetRawOperand(0);
                 }
                 result.Add(leftHandSide);
                 result.Reverse();
