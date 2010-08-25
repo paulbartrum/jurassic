@@ -53,40 +53,21 @@ namespace Jurassic.Library
 
         /// <summary>
         /// Called when the Error object is invoked like a function, e.g. var x = Error("oh no").
-        /// Creates a new derived error instance with no message.
-        /// </summary>
-        [JSCallFunction]
-        public ErrorInstance Call()
-        {
-            return new ErrorInstance(this.InstancePrototype, null, null, true);
-        }
-
-        /// <summary>
-        /// Called when the Error object is invoked like a function, e.g. var x = Error("oh no").
         /// Creates a new derived error instance with the given message.
         /// </summary>
         /// <param name="message"> A description of the error. </param>
         [JSCallFunction]
-        public ErrorInstance Call(string message)
+        public ErrorInstance Call(string message = "")
         {
             return new ErrorInstance(this.InstancePrototype, null, message, true);
         }
 
         /// <summary>
-        /// Creates a new derived error instance with no message.
-        /// </summary>
-        [JSConstructorFunction]
-        public ErrorInstance Construct()
-        {
-            return new ErrorInstance(this.InstancePrototype, null, null, true);
-        }
-
-        /// <summary>
         /// Creates a new derived error instance with the given message.
         /// </summary>
         /// <param name="message"> A description of the error. </param>
         [JSConstructorFunction]
-        public ErrorInstance Construct(string message)
+        public ErrorInstance Construct(string message = "")
         {
             return new ErrorInstance(this.InstancePrototype, null, message, true);
         }
