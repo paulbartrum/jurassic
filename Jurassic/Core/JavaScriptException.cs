@@ -137,17 +137,17 @@ namespace Jurassic
             if (name == "Error")
                 constructor = engine.Error;
             else if (name == "RangeError")
-                constructor = engine.Error;
+                constructor = engine.RangeError;
             else if (name == "TypeError")
-                constructor = engine.Error;
+                constructor = engine.TypeError;
             else if (name == "SyntaxError")
-                constructor = engine.Error;
+                constructor = engine.SyntaxError;
             else if (name == "URIError")
-                constructor = engine.Error;
+                constructor = engine.URIError;
             else if (name == "EvalError")
-                constructor = engine.Error;
+                constructor = engine.EvalError;
             else if (name == "ReferenceError")
-                constructor = engine.Error;
+                constructor = engine.ReferenceError;
             else
                 throw new ArgumentException(string.Format("Unrecognised error type '{0}'.", name), "name");
 
