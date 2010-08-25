@@ -9,6 +9,9 @@ namespace Jurassic
     /// </summary>
     public class ScriptEngine
     {
+        // Compatibility mode.
+        private CompatibilityMode compatibilityMode;
+
         // The initial hidden class schema.
         private HiddenClassSchema emptySchema;
 
@@ -137,8 +140,19 @@ namespace Jurassic
         /// </summary>
         public CompatibilityMode CompatibilityMode
         {
-            get;
-            set;
+            get { return this.compatibilityMode; }
+            set
+            {
+                this.compatibilityMode = value;
+
+                // Infinity, NaN and undefined are writable in ECMAScript 3 and read-only in ECMAScript 5.
+                var attributes = PropertyAttributes.Sealed;
+                if (this.CompatibilityMode == CompatibilityMode.ECMAScript3)
+                    attributes = PropertyAttributes.Writable;
+                this.Global.FastSetProperty("Infinity", double.PositiveInfinity, attributes, overwriteAttributes: true);
+                this.Global.FastSetProperty("NaN", double.NaN, attributes, overwriteAttributes: true);
+                this.Global.FastSetProperty("undefined", Undefined.Value, attributes, overwriteAttributes: true);
+            }
         }
 
 
