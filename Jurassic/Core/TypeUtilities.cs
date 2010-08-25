@@ -78,17 +78,32 @@ namespace Jurassic
         public static IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
         {
             if (IsUndefined(obj) == true || obj == Null.Value)
-                return new string[0];
+                yield break;
             var obj2 = TypeConverter.ToObject(engine, obj);
-            var names = new List<string>();
+            var names = new HashSet<string>();
             do
             {
                 foreach (var property in obj2.Properties)
-                    if (property.IsEnumerable == true)
+                {
+                    // Check whether the property is shadowed.
+                    if (names.Contains(property.Name) == false)
+                    {
+                        // Only return enumerable properties.
+                        if (property.IsEnumerable == true)
+                        {
+                            // Make sure the property still exists.
+                            if (obj2.HasProperty(property.Name) == true)
+                            {
+                                yield return property.Name;
+                            }
+                        }
+                        
+                        // Record the name so we can check if it was shadowed.
                         names.Add(property.Name);
+                    }
+                }
                 obj2 = obj2.Prototype;
             } while (obj2 != null);
-            return names;
         }
 
         /// <summary>
