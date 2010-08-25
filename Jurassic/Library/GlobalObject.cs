@@ -22,9 +22,20 @@ namespace Jurassic.Library
             : base(prototype)
         {
             // Add the global constants.
-            this.FastSetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed);
-            this.FastSetProperty("NaN", double.NaN, PropertyAttributes.Sealed);
-            this.FastSetProperty("undefined", Undefined.Value, PropertyAttributes.Sealed);
+            if (this.Engine.CompatibilityMode == CompatibilityMode.ECMAScript3)
+            {
+                // Infinity, NaN and undefined were writable in ECMAScript 3.
+                this.FastSetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Writable);
+                this.FastSetProperty("NaN", double.NaN, PropertyAttributes.Writable);
+                this.FastSetProperty("undefined", Undefined.Value, PropertyAttributes.Writable);
+            }
+            else
+            {
+                // Infinity, NaN and undefined are read-only in ECMAScript 5.
+                this.FastSetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed);
+                this.FastSetProperty("NaN", double.NaN, PropertyAttributes.Sealed);
+                this.FastSetProperty("undefined", Undefined.Value, PropertyAttributes.Sealed);
+            }
         }
 
 
