@@ -192,6 +192,8 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0377'"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0400'"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\09'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0444'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\44'"));
 
             // But they are supported in compatibility mode.
             TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
@@ -201,8 +203,10 @@ namespace UnitTests
                 Assert.AreEqual("\u0005", TestUtils.Evaluate("'\\05'"));
                 Assert.AreEqual("\u0005Z", TestUtils.Evaluate("'\\05Z'"));
                 Assert.AreEqual("\u0009", TestUtils.Evaluate("'\\011'"));
-                Assert.AreEqual("\u00FF", TestUtils.Evaluate("'\\0377'"));
+                Assert.AreEqual("\u001F7", TestUtils.Evaluate("'\\0377'"));
                 Assert.AreEqual("\u00200", TestUtils.Evaluate("'\\0400'"));
+                Assert.AreEqual("$4", TestUtils.Evaluate("'\\0444'"));
+                Assert.AreEqual("$", TestUtils.Evaluate("'\\44'"));
                 Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\09'"));
             }
             finally

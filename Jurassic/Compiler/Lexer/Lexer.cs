@@ -496,7 +496,7 @@ namespace Jurassic.Compiler
                                 // Null character or octal escape sequence.
                                 c = this.reader.Peek();
                                 if (c >= '0' && c <= '9')
-                                    contents.Append(ReadOctalEscapeSequence());
+                                    contents.Append(ReadOctalEscapeSequence(0));
                                 else
                                     contents.Append((char)0);
                                 break;
@@ -507,9 +507,12 @@ namespace Jurassic.Compiler
                             case '5':
                             case '6':
                             case '7':
+                                // Octal escape sequence.
+                                contents.Append(ReadOctalEscapeSequence(c - '0'));
+                                break;
                             case '8':
                             case '9':
-                                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence.", this.lineNumber, this.Source.Path);
+                                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal escape sequence.", this.lineNumber, this.Source.Path);
                             default:
                                 contents.Append((char)c);
                                 break;
@@ -546,15 +549,16 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Reads an octal number turns it into a single-byte character.
         /// </summary>
+        /// <param name="firstDigit"> The value of the first digit. </param>
         /// <returns> The character corresponding to the escape sequence. </returns>
-        private char ReadOctalEscapeSequence()
+        private char ReadOctalEscapeSequence(int firstDigit)
         {
             // Octal escape sequences are only supported in ECMAScript 3 compatibility mode.
             if (this.engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
                 throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are not supported.", this.lineNumber, this.Source.Path);
 
-            int numericValue = 0;
-            for (int i = 0; i < 3; i++)
+            int numericValue = firstDigit;
+            for (int i = 0; i < 2; i++)
             {
                 int c = this.reader.Peek();
                 if (c < '0' || c > '9')
