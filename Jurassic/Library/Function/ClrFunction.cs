@@ -153,6 +153,14 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] arguments)
         {
+            if (this.Engine.CompatibilityMode == CompatibilityMode.ECMAScript3)
+            {
+                // Convert null or undefined to the global object.
+                if (TypeUtilities.IsUndefined(thisObject) == true || thisObject == Null.Value)
+                    thisObject = this.Engine.Global;
+                else
+                    thisObject = TypeConverter.ToObject(this.Engine, thisObject);
+            }
             return this.callBinder.Call(this.Engine, bindThis == true ? this : thisObject, arguments);
         }
 
