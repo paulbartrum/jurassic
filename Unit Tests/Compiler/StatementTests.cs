@@ -323,8 +323,10 @@ namespace UnitTests
 
             // Argument names override the function name and 'arguments'.
             Assert.AreEqual(5, TestUtils.Evaluate("(function test(test) { return test; })(5)"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("(function test(test) { return test; })()"));
             Assert.AreEqual(5, TestUtils.Evaluate("function test(test) { return test; } test(5)"));
             Assert.AreEqual(5, TestUtils.Evaluate("(function f(arguments) { return arguments })(5)"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("(function f(arguments) { return arguments })()"));
             Assert.AreEqual(5, TestUtils.Evaluate("(function f(a) { arguments = 5; return arguments })(5)"));
             Assert.AreEqual("[object Arguments]", TestUtils.Evaluate("function arguments() { return arguments } arguments().toString()"));
 
