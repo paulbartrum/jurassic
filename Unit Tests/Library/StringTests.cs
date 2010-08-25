@@ -449,6 +449,8 @@ namespace UnitTests
             Assert.AreEqual("$1-$11,$1-$22", TestUtils.Evaluate(@"'$1,$2'.replace(/(\$(\d))/g, '$$1-$1$2')"));
 
             // replace(regExp, function)
+            Assert.AreEqual("blah def34", TestUtils.Evaluate("'abc12 def34'.replace(/([a-z]+)([0-9]+)/, function() { return 'blah' })"));
+            Assert.AreEqual("12abc def34", TestUtils.Evaluate("'abc12 def34'.replace(/([a-z]+)([0-9]+)/, function() { return arguments[2] + arguments[1] })"));
             Assert.AreEqual("A aort aring", TestUtils.Evaluate("'A short string'.replace(/(s)h|s(t)/g, function() { return 'a'; })"));
             TestUtils.Evaluate(@"var parameterValues = []");
             TestUtils.Evaluate("'A short string'.replace(/(s)h|s(t)/g, function() { parameterValues.push(arguments); })");
