@@ -781,7 +781,7 @@ namespace Jurassic.Library
             this.schema = this.schema.AddProperty(propertyName, attributes);
 
             // Check if the value array needs to be resized.
-            int propertyIndex = this.schema.PropertyCount - 1;
+            int propertyIndex = this.schema.NextValueIndex - 1;
             if (propertyIndex >= this.InlinePropertyValues.Length)
                 Array.Resize(ref this.propertyValues, this.InlinePropertyValues.Length * 2);
 
