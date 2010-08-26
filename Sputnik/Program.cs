@@ -56,6 +56,8 @@ namespace Sputnik
                 "S15.1.2.1_A3.3_T3",    // Declares a function inside a try block.
                 "S15.3.4.2_A1_T1",      // Assumes (function() { }).toString() can be compiled using eval().
                 "S15.3.4.3_A6_T4",      // Asserts that apply throws a TypeError if the second argument is not an array.  This was changed in ECMAScript 5.
+                "S15.11.1.1_A1_T1",     // Assumes that Error().message doesn't exist (spec bug fixed in ECMAScript 5).
+                "S15.11.2.1_A1_T1",     // Assumes that Error().message doesn't exist (spec bug fixed in ECMAScript 5).
             };
 
             //ExecuteTest(@"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\15_Native_ECMA_Script_Objects\15.3_Function_Objects\15.3.4_Properties_of_the_Function_Prototype_Object\15.3.4.3_Function.prototype.apply\S15.3.4.3_A7_T3.js", includes);
@@ -63,8 +65,8 @@ namespace Sputnik
 
             // Determine all the file paths to execute.
             List<string> scriptPaths = new List<string>();
-            //EnumerateScripts(scriptPaths, @"..\..\tests");
-            EnumerateScripts(scriptPaths, @"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\15_Native_ECMA_Script_Objects\15.5_String_Objects");
+            EnumerateScripts(scriptPaths, @"..\..\tests");
+            //EnumerateScripts(scriptPaths, @"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\15_Native_ECMA_Script_Objects\15.4_Array_Objects");
 
             // Execute all the tests in parallel.
             //System.Threading.Tasks.Parallel.ForEach(scriptPaths, path => ExecuteTest(path, libSourceStr));
