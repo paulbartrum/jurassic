@@ -339,6 +339,28 @@ namespace UnitTests
             Assert.AreEqual(5, TestUtils.Evaluate("x[1]"));
             Assert.AreEqual(2, TestUtils.Evaluate("x.length"));
 
+            // reverse is generic.
+            TestUtils.Evaluate("var obj = { }"); // 0: true, 2: Infinity, 4: undefined, 5: undefined, 8: 'NaN', 9: '-1' };");
+            TestUtils.Evaluate("obj.length = 10;");
+            TestUtils.Evaluate("obj.reverse = Array.prototype.reverse;");
+            TestUtils.Evaluate("obj[0] = true;");
+            TestUtils.Evaluate("obj[2] = Infinity;");
+            TestUtils.Evaluate("obj[4] = undefined;");
+            TestUtils.Evaluate("obj[5] = undefined;");
+            TestUtils.Evaluate("obj[8] = 'NaN';");
+            TestUtils.Evaluate("obj[9] = '-1';");
+            Assert.AreEqual(true, TestUtils.Evaluate("obj.reverse() === obj"));
+            Assert.AreEqual("-1",                       TestUtils.Evaluate("obj[0]"));
+            Assert.AreEqual("NaN",                      TestUtils.Evaluate("obj[1]"));
+            Assert.AreEqual(Undefined.Value,            TestUtils.Evaluate("obj[2]"));
+            Assert.AreEqual(Undefined.Value,            TestUtils.Evaluate("obj[3]"));
+            Assert.AreEqual(Undefined.Value,            TestUtils.Evaluate("obj[4]"));
+            Assert.AreEqual(Undefined.Value,            TestUtils.Evaluate("obj[5]"));
+            Assert.AreEqual(Undefined.Value,            TestUtils.Evaluate("obj[6]"));
+            Assert.AreEqual(double.PositiveInfinity,    TestUtils.Evaluate("obj[7]"));
+            Assert.AreEqual(Undefined.Value,            TestUtils.Evaluate("obj[8]"));
+            Assert.AreEqual(true,                       TestUtils.Evaluate("obj[9]"));
+
             // length
             Assert.AreEqual(0, TestUtils.Evaluate("Array.prototype.reverse.length"));
         }
