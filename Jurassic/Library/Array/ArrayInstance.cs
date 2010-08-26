@@ -115,18 +115,27 @@ namespace Jurassic.Library
 
                 if (this.dense != null)
                 {
-                    if (this.length < previousLength + 10)
+                    if (this.length < this.dense.Length / 2 && this.dense.Length > 100)
                     {
-                        // Resize the array.
-                        ResizeDenseArray(this.length);
-                        if (this.length > previousLength)
-                            this.denseMayContainHoles = true;
+                        // Shrink the array.
+                        ResizeDenseArray(this.length + 10);
                     }
-                    else
+                    else if (this.length > this.dense.Length + 10)
                     {
                         // Switch to a sparse array.
                         this.sparse = SparseArray.FromDenseArray(this.dense);
                         this.dense = null;
+                    }
+                    else if (this.length > this.dense.Length)
+                    {
+                        // Enlarge the array.
+                        ResizeDenseArray(this.length + 10);
+                        this.denseMayContainHoles = true;
+                    }
+                    else if (this.length > previousLength)
+                    {
+                        // Increasing the length property creates an array with holes.
+                        this.denseMayContainHoles = true;
                     }
                 }
                 else
@@ -853,10 +862,14 @@ namespace Jurassic.Library
             {
                 for (int i = start + items.Length; i < newLength; i++)
                     thisObj[(uint)i] = thisObj[(uint)(i - offset)];
+                
+                // Delete the trailing elements.
+                for (int i = newLength; i < arrayLength; i++)
+                    thisObj.Delete((uint)i, true);
             }
             else
             {
-                for (int i = newLength; i > start + items.Length; i--)
+                for (int i = newLength - 1; i >= start + items.Length; i--)
                     thisObj[(uint)i] = thisObj[(uint)(i - offset)];
             }
             SetLength(thisObj, (uint)newLength);
