@@ -210,95 +210,24 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to parse. </param>
-        /// <param name="dblRadix"> The numeric base to use for parsing.  The default is to use base 10
-        /// except when the input string starts with '0x' or '0X' in which case base 16 is used
-        /// instead. </param>
+        /// <param name="radix"> The numeric base to use for parsing.  Pass zero to use base 10
+        /// except when the input string starts with '0' in which case base 16 or base 8 are used
+        /// instead (base 8 is only supported in compatibility mode). </param>
         /// <returns> The equivalent integer value of the given string. </returns>
         /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
         /// character, at which point parsing stops.  No error is returned in this case. </remarks>
         [JSFunction(Name = "parseInt", Flags = FunctionBinderFlags.HasEngineParameter)]
-        public static double ParseInt(ScriptEngine engine, string input, double dblRadix = 0)
+        public static double ParseInt(ScriptEngine engine, string input, double radix = 0)
         {
             // Check for a valid radix.
             // Note: this is the only function that uses TypeConverter.ToInt32() for parameter
             // conversion (as opposed to the normal method which is TypeConverter.ToInteger() so
             // the radix parameter must be converted to an integer in code.
-            int radix = TypeConverter.ToInt32(dblRadix);
-            if (radix < 0 || radix == 1 || radix > 36)
+            int radix2 = TypeConverter.ToInt32(radix);
+            if (radix2 < 0 || radix2 == 1 || radix2 > 36)
                 return double.NaN;
 
-            var reader = new System.IO.StringReader(input);
-            
-            // Skip whitespace and line terminators.
-            while (IsWhiteSpaceOrLineTerminator(reader.Peek()))
-                reader.Read();
-
-            // Determine the sign.
-            double sign = 1;
-            if (reader.Peek() == '+')
-            {
-                reader.Read();
-            }
-            else if (reader.Peek() == '-')
-            {
-                sign = -1;
-                reader.Read();
-            }
-
-            // Hex prefix should be stripped if the radix is 0, undefined or 16.
-            bool stripPrefix = radix == 0 || radix == 16;
-
-            // Default radix is 10.
-            if (radix == 0)
-                radix = 10;
-
-            // If the input is empty, then return NaN.
-            double result = double.NaN;
-
-            // Skip past the prefix, if there is one.
-            if (stripPrefix == true)
-            {
-                if (reader.Peek() == '0')
-                {
-                    reader.Read();
-                    result = 0;     // Note: required for parsing "0z11" correctly (when radix = 0).
-
-                    int c = reader.Peek();
-                    if (c == 'x' || c == 'X')
-                    {
-                        // Hex number.
-                        reader.Read();
-                        radix = 16;
-                    }
-
-                    if (c >= '0' && c <= '9' && engine.CompatibilityMode == CompatibilityMode.ECMAScript3)
-                    {
-                        // Octal number.
-                        radix = 8;
-                    }
-                }
-            }
-
-            // Read numeric digits 0-9, a-z or A-Z.
-            while (true)
-            {
-                int numericValue = -1;
-                int c = reader.Read();
-                if (c >= '0' && c <= '9')
-                    numericValue = c - '0';
-                if (c >= 'a' && c <= 'z')
-                    numericValue = c - 'a' + 10;
-                if (c >= 'A' && c <= 'Z')
-                    numericValue = c - 'A' + 10;
-                if (numericValue == -1 || numericValue >= radix)
-                    break;
-                if (double.IsNaN(result))
-                    result = numericValue;
-                else
-                    result = result * radix + numericValue;
-            }
-
-            return result * sign;
+            return NumberParser.ParseInt(input, radix2, engine.CompatibilityMode == CompatibilityMode.ECMAScript3);
         }
 
         /// <summary>

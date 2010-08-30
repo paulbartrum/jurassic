@@ -280,6 +280,18 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("parseInt('1')"));
             Assert.AreEqual(123, TestUtils.Evaluate("parseInt('123')"));
             Assert.AreEqual(65, TestUtils.Evaluate("parseInt('65')"));
+            Assert.AreEqual(987654, TestUtils.Evaluate("parseInt('987654')"));
+            Assert.AreEqual(10000000, TestUtils.Evaluate("parseInt('10000000')"));
+            Assert.AreEqual(10000001, TestUtils.Evaluate("parseInt('10000001')"));
+            Assert.AreEqual(987654321, TestUtils.Evaluate("parseInt('987654321')"));
+            Assert.AreEqual(9876543212d, TestUtils.Evaluate("parseInt('9876543212')"));
+            Assert.AreEqual(987654321234d, TestUtils.Evaluate("parseInt('987654321234')"));
+            Assert.AreEqual(-987654321234d, TestUtils.Evaluate("parseInt('-987654321234')"));
+            Assert.AreEqual(9876543212345d, TestUtils.Evaluate("parseInt('9876543212345')"));
+            Assert.AreEqual(98765432123456d, TestUtils.Evaluate("parseInt('98765432123456')"));
+            Assert.AreEqual(987654321234567d, TestUtils.Evaluate("parseInt('987654321234567')"));
+            Assert.AreEqual(9876543212345678d, TestUtils.Evaluate("parseInt('9876543212345678')"));
+            Assert.AreEqual(98765432123456789d, TestUtils.Evaluate("parseInt('98765432123456789')"));
 
             // Sign.
             Assert.AreEqual(-123, TestUtils.Evaluate("parseInt('-123')"));
@@ -295,6 +307,7 @@ namespace UnitTests
 
             // Hex prefix should be respected.
             Assert.AreEqual(17, TestUtils.Evaluate("parseInt('0x11')"));
+            Assert.AreEqual(1.512366075204171e+36, TestUtils.Evaluate("parseInt('0x123456789abcdef0123456789abcdef')"));
             
             // Bases.
             Assert.AreEqual(17, TestUtils.Evaluate("parseInt('0x11', 16)"));
@@ -302,6 +315,7 @@ namespace UnitTests
             Assert.AreEqual(17, TestUtils.Evaluate("parseInt('11', 16)"));
             Assert.AreEqual(2748, TestUtils.Evaluate("parseInt('abc', 16)"));
             Assert.AreEqual(3, TestUtils.Evaluate("parseInt('11', 2)"));
+            Assert.AreEqual(81985529216486900.0, TestUtils.Evaluate("parseInt('123456789abcdef', 16)"));
 
             // Base out of range.
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("parseInt('11', 1)"));
