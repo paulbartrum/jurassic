@@ -451,7 +451,7 @@ namespace Jurassic
             // Numbers with lots of digits require the use of arbitrary precision arithmetic to
             // determine the correct answer.
             if (digitCount > maxDigits)
-                return RefineEstimate(result, radix, 0, bigResult);
+                return RefineEstimate(result, radix, 0, bigResult) * sign;
 
             return result * sign;
         }

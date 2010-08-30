@@ -292,6 +292,7 @@ namespace UnitTests
             Assert.AreEqual(987654321234567d, TestUtils.Evaluate("parseInt('987654321234567')"));
             Assert.AreEqual(9876543212345678d, TestUtils.Evaluate("parseInt('9876543212345678')"));
             Assert.AreEqual(98765432123456789d, TestUtils.Evaluate("parseInt('98765432123456789')"));
+            Assert.AreEqual(-98765432123456789d, TestUtils.Evaluate("parseInt('-98765432123456789')"));
 
             // Sign.
             Assert.AreEqual(-123, TestUtils.Evaluate("parseInt('-123')"));
