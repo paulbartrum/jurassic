@@ -133,72 +133,38 @@ namespace Jurassic.Library
         /// <returns> A numeric literal token. </returns>
         private Token ReadNumericLiteral(int firstChar)
         {
-            double result;
-
-            // The number may start with a negation.
-            double sign = firstChar == '-' ? -1.0 : 1.0;
-
-            // Read the integer component.
-            int digitsRead;
-            result = ReadInteger(firstChar == '-' ? 0 : firstChar - '0', out digitsRead);
-
-            // If the first character is '0' then a period must be the next character.
-            if (firstChar == '0' && digitsRead != 0)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
-
-            // If the first character is '-' then a digit must be the next character.
-            if (firstChar == '-' && digitsRead == 0)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
-
-            if (this.reader.Peek() == '.')
+            // The number may start with a minus sign.
+            bool negative = false;
+            if (firstChar == '-')
             {
-                // Skip past the '.'.
-                this.reader.Read();
+                negative = true;
+                firstChar = this.reader.Read();
 
-                // Read the fractional component.
-                double fraction = ReadInteger(0.0, out digitsRead);
-                if (digitsRead == 0)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
-
-                // Apply the fractional component.
-                result += MathHelpers.MulPow10(fraction, -digitsRead);
-            }
-
-            if (reader.Peek() == 'e' || reader.Peek() == 'E')
-            {
-                // Skip past the 'e'.
-                reader.Read();
-
-                // Read the sign of the exponent.
-                double exponentSign = 1.0;
-                int c = this.reader.Peek();
-                if (c == '+')
-                    this.reader.Read();
-                else if (c == '-')
-                {
-                    this.reader.Read();
-                    exponentSign = -1.0;
-                }
-
-                // 5e05 is invalid.  To detect this error we record the first digit.
-                firstChar = this.reader.Peek();
-
-                // Read the exponent.
-                double exponent = ReadInteger(0.0, out digitsRead) * exponentSign;
-
-                // Check a number was actually provided.
-                if (digitsRead == 0)
+                // If the first character is '-' then a digit must be the next character.
+                if (firstChar < '0' || firstChar > '9')
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.");
-
-                // If the first character of the exponent is '0' then a period must be the next character.
-                if (firstChar == '0' && digitsRead > 1)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
-
-                // Apply the exponent.
-                result = MathHelpers.MulPow10(result, MathHelpers.ClampToInt32(exponent));
             }
 
-            return new LiteralToken(result * sign);
+            NumberParser.ParseCoreStatus status;
+            double result = NumberParser.ParseCore(this.reader, (char)firstChar, out status);
+
+            // Handle various error cases.
+            switch (status)
+            {
+                case NumberParser.ParseCoreStatus.NoDigits:
+                case NumberParser.ParseCoreStatus.NoExponent:
+                case NumberParser.ParseCoreStatus.NoFraction:
+                case NumberParser.ParseCoreStatus.ExponentHasLeadingZero:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.");
+                case NumberParser.ParseCoreStatus.HexLiteral:
+                case NumberParser.ParseCoreStatus.InvalidHexLiteral:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Hexidecimal literals are not supported in JSON.");
+                case NumberParser.ParseCoreStatus.OctalLiteral:
+                case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Octal literals are not supported in JSON.");
+            }
+
+            return new LiteralToken(negative ? -result : result);
         }
 
         /// <summary>

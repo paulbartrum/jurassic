@@ -127,6 +127,9 @@ namespace UnitTests
             Assert.AreEqual(1.0,                        TypeConverter.ToNumber(1.0));
             Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber(double.NaN));
             Assert.AreEqual(0.0,                        TypeConverter.ToNumber(""));
+            Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("a"));
+            Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("+"));
+            Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("-"));
             Assert.AreEqual(1.0,                        TypeConverter.ToNumber("1.0"));
             Assert.AreEqual(1.0,                        TypeConverter.ToNumber("1"));
             Assert.AreEqual(1.0,                        TypeConverter.ToNumber("+1.0"));
@@ -154,8 +157,10 @@ namespace UnitTests
             Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("10.0z"));
             Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("Infinityz"));
             Assert.AreEqual(10.0,                       TypeConverter.ToNumber("10."));
-            Assert.AreEqual(10.0,                       TypeConverter.ToNumber("10e"));
-            Assert.AreEqual(10.0,                       TypeConverter.ToNumber("10e+"));
+            Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("10e"));
+            Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("10e+"));
+            Assert.AreEqual(double.NaN,                 TypeConverter.ToNumber("0x"));
+            Assert.AreEqual(11.0,                       TypeConverter.ToNumber("011"));
             Assert.AreEqual(0.0,                        TypeConverter.ToNumber(engine.Boolean.Construct(false)));
             Assert.AreEqual(1.0,                        TypeConverter.ToNumber(engine.Boolean.Construct(true)));
             Assert.AreEqual(0.0,                        TypeConverter.ToNumber(engine.Date.Construct(0.0)));
