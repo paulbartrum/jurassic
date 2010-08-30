@@ -98,7 +98,7 @@ namespace Jurassic
             if (value is bool)
                 return (bool)value ? 1 : 0;
             if (value is string)
-                return GlobalObject.ParseNumber((string)value, allowHexPrefix: true, allowTrailingJunk: false, returnZeroIfEmpty: true);
+                return NumberParser.CoerceToNumber((string)value);
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), "value");

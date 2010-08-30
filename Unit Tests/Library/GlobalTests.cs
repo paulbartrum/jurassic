@@ -266,7 +266,9 @@ namespace UnitTests
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("parseFloat('Infinity')"));
             Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("parseFloat('-Infinity')"));
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("parseFloat(' Infinity')"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("parseFloat('InfinityZ')"));
             Assert.AreEqual(0, TestUtils.Evaluate("parseFloat('0xff')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("parseFloat('0x')"));
             Assert.AreEqual(0, TestUtils.Evaluate("parseFloat('0zff')"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("parseFloat('infinity')"));
             Assert.AreEqual(-1.1, TestUtils.Evaluate("parseFloat('\u205F -1.1')"));
@@ -344,6 +346,10 @@ namespace UnitTests
                 Assert.AreEqual(18, TestUtils.Evaluate("parseInt('018')"));
                 Assert.AreEqual(11, TestUtils.Evaluate("parseInt('011', 10)"));
             }
+
+            // Large numbers.
+            Assert.AreEqual(9214843084008499.0, TestUtils.Evaluate("parseInt('9214843084008499')"));
+            Assert.AreEqual(18014398509481993.0, TestUtils.Evaluate("parseInt('18014398509481993')"));
         }
 
         [TestMethod]

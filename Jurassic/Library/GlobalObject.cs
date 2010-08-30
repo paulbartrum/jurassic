@@ -202,7 +202,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "parseFloat")]
         public static double ParseFloat(string input)
         {
-            return ParseNumber(input, allowHexPrefix: false, allowTrailingJunk: true, returnZeroIfEmpty: false);
+            return NumberParser.ParseFloat(input);
         }
 
         /// <summary>
@@ -351,160 +351,6 @@ namespace Jurassic.Library
                     result.Append(c);
             }
             return result.ToString();
-        }
-
-
-
-        //     INTERNAL HELPER METHODS
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Converts a string to a number.
-        /// </summary>
-        /// <param name="input"> The string to convert. </param>
-        /// <param name="allowHexPrefix"> Indicates whether to allow and honour a leading hex
-        /// prefix ("0x"). </param>
-        /// <param name="allowTrailingJunk"> If <c>true</c>, indicates that the function should
-        /// return a partial result if there are invalid characters found at the end of the string.
-        /// Otherwise, this method returns NaN upon encountering invalid characters. </param>
-        /// <param name="returnZeroIfEmpty"> If <c>true</c>, indicates that the function should
-        /// return zero if the string is empty or solely consists of whitespace.  Otherwise, NaN
-        /// is returned. </param>
-        /// <returns> The result of parsing the string as a number. </returns>
-        internal static double ParseNumber(string input, bool allowHexPrefix, bool allowTrailingJunk, bool returnZeroIfEmpty)
-        {
-            var reader = new System.IO.StringReader(input);
-
-            // Skip whitespace and line terminators.
-            while (IsWhiteSpaceOrLineTerminator(reader.Peek()))
-                reader.Read();
-
-            // Type conversion returns zero for an empty string.
-            if (returnZeroIfEmpty == true && reader.Peek() == -1)
-                return 0.0;
-
-            // Determine the sign.
-            double sign = ReadSign(reader);
-
-            double result;
-            bool leadingZeroSwallowed = false;
-            if (allowHexPrefix == true)
-            {
-                // If the number starts with '0x' or '0X' then the number should be parsed as a hex
-                // number.
-                if (reader.Peek() == '0')
-                {
-                    // Read past the zero.
-                    reader.Read();
-                    leadingZeroSwallowed = true;     // Note: required for parsing "0z11" correctly (when radix = 0).
-
-                    if (reader.Peek() == 'x' || reader.Peek() == 'X')
-                    {
-                        // Read past the 'x'.
-                        reader.Read();
-
-                        // Read numeric digits 0-9, a-z or A-Z.
-                        result = 0;
-                        while (true)
-                        {
-                            int numericValue = -1;
-                            int c = reader.Read();
-                            if (c >= '0' && c <= '9')
-                                numericValue = c - '0';
-                            if (c >= 'a' && c <= 'z')
-                                numericValue = c - 'a' + 10;
-                            if (c >= 'A' && c <= 'Z')
-                                numericValue = c - 'A' + 10;
-                            if (numericValue == -1 || numericValue >= 16)
-                            {
-                                // We may have found some trailing junk.
-                                if (c != -1 && IsWhiteSpaceOrLineTerminator(c) == false && allowTrailingJunk == false)
-                                    return double.NaN;
-                                break;
-                            }
-                            result = result * 16 + numericValue;
-                        }
-
-                        // Skip whitespace and line terminators.
-                        while (IsWhiteSpaceOrLineTerminator(reader.Peek()))
-                            reader.Read();
-
-                        // We may have found some trailing junk.
-                        if (reader.Peek() != -1 && allowTrailingJunk == false)
-                            return double.NaN;
-
-                        // Otherwise, return the result.
-                        return result * sign;
-                    }
-                }
-            }
-
-            int digitsRead;
-            int exponent = 0;
-
-            // Read numeric digits 0-9.
-            result = ReadInteger(reader, out digitsRead);
-            
-            // If ReadInteger couldn't read any digits, and we read a zero earlier, set the result
-            // to zero.
-            if (leadingZeroSwallowed == true && double.IsNaN(result) == true)
-                result = 0;
-
-            if (reader.Peek() == '.')
-            {
-                // Skip past the '.'.
-                reader.Read();
-
-                // Read the fractional component.
-                double fraction = ReadInteger(reader, out digitsRead);
-
-                // Apply the fractional component.
-                if (double.IsNaN(fraction) == false)
-                {
-                    // parseFloat('.5') should return 0.5.
-                    if (double.IsNaN(result) == true)
-                        result = 0;
-                    result = MathHelpers.MulPow10(result, digitsRead) + fraction;
-                    exponent = -digitsRead;
-                }
-            }
-
-            if (reader.Peek() == 'e' || reader.Peek() == 'E')
-            {
-                // Skip past the 'e'.
-                reader.Read();
-
-                // Read the sign of the exponent.
-                double exponentSign = ReadSign(reader);
-
-                // Read the exponent.
-                double exponentDbl = ReadInteger(reader, out digitsRead) * exponentSign;
-
-                // Adjust the exponent.
-                if (digitsRead > 0)
-                    exponent += MathHelpers.ClampToInt32(exponentDbl);
-            }
-
-            // Apply the exponent.
-            result = MathHelpers.MulPow10(result, exponent);
-
-            // Infinity or -Infinity are also valid.
-            string restOfString = reader.ReadToEnd();
-            if (double.IsNaN(result) == true && restOfString.StartsWith("Infinity") == true)
-            {
-                result = double.PositiveInfinity;
-                restOfString = restOfString.Substring("Infinity".Length);
-            }
-
-            if (allowTrailingJunk == false)
-            {
-                // Check the end of the string for junk.
-                for (int i = 0; i < restOfString.Length; i++)
-                    if (IsWhiteSpaceOrLineTerminator(restOfString[i]) == false)
-                        return double.NaN;
-            }
-
-            return result * sign;
         }
 
 
@@ -684,23 +530,6 @@ namespace Jurassic.Library
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Reads a sign character using the given reader.
-        /// </summary>
-        /// <param name="reader"> The reader to read characters from. </param>
-        /// <returns> <c>-1</c> if a negative sign was present, <c>+1</c> otherwise. </returns>
-        private static double ReadSign(System.IO.StringReader reader)
-        {
-            if (reader.Peek() == '+')
-                reader.Read();
-            else if (reader.Peek() == '-')
-            {
-                reader.Read();
-                return -1.0;
-            }
-            return 1.0;
         }
 
         /// <summary>

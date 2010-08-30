@@ -265,130 +265,29 @@ namespace Jurassic.Compiler
         /// <returns> A numeric literal token. </returns>
         private Token ReadNumericLiteral(int firstChar)
         {
-            double result;
-            int digitsRead = 0;
+            NumberParser.ParseCoreStatus status;
+            double result = NumberParser.ParseCore(this.reader, (char)firstChar, out status);
 
-            // If the number starts with '0x' or '0X' then the number should be parsed as a hex
-            // number.
-            if (firstChar == '0')
+            // Handle various error cases.
+            switch (status)
             {
-                // Read the next char - should be 'x' or 'X' if this is a hex number (could be just '0').
-                int c = this.reader.Peek();
-                if (c == 'x' || c == 'X')
-                {
-                    // Hex number.
-                    ReadNextChar();
-
-                    // Read numeric digits 0-9, a-f or A-F.
-                    result = 0;
-                    while (true)
-                    {
-                        c = this.reader.Peek();
-                        if (c >= '0' && c <= '9')
-                            result = result * 16 + c - '0';
-                        else if (c >= 'a' && c <= 'f')
-                            result = result * 16 + c - 'a' + 10;
-                        else if (c >= 'A' && c <= 'F')
-                            result = result * 16 + c - 'A' + 10;
-                        else
-                            break;
-                        digitsRead++;
-                        ReadNextChar();
-                    }
-
-                    if (digitsRead == 0)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal constant.", this.lineNumber, this.Source.Path);
-                    if (result == (double)(int)result)
-                        return new LiteralToken((int)result);
-                    return new LiteralToken(result);
-                }
-                else if (c >= '0' && c <= '9')
-                {
-                    // Octal number (only supported in ECMAScript 3 compatibility mode).
+                case NumberParser.ParseCoreStatus.NoDigits:
+                    // If the number consists solely of a period, return that as a token.
+                    return PunctuatorToken.Dot;
+                case NumberParser.ParseCoreStatus.NoExponent:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
+                case NumberParser.ParseCoreStatus.InvalidHexLiteral:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal constant.", this.lineNumber, this.Source.Path);
+                case NumberParser.ParseCoreStatus.OctalLiteral:
+                    // Octal number are only supported in ECMAScript 3 compatibility mode.
                     if (this.engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
                         throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not supported.", this.lineNumber, this.Source.Path);
-                    
-                    // Read numeric digits 0-7.
-                    result = 0;
-                    while (true)
-                    {
-                        c = this.reader.Peek();
-                        if (c >= '0' && c <= '7')
-                            result = result * 8 + c - '0';
-                        else if (c == '8' || c == '9')
-                            throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal constant.", this.lineNumber, this.Source.Path);
-                        else
-                            break;
-                        ReadNextChar();
-                    }
-
-                    if (result == (double)(int)result)
-                        return new LiteralToken((int)result);
-                    return new LiteralToken(result);
-                }
+                    break;
+                case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal constant.", this.lineNumber, this.Source.Path);
             }
 
-            // Read the integer component.
-            int exponentBase10 = 0;
-            if (firstChar == '.')
-                result = double.NaN;
-            else
-                result = ReadInteger(firstChar - '0', out digitsRead);
-
-            if (firstChar == '.' || this.reader.Peek() == '.')
-            {
-                // Skip past the '.'.
-                if (firstChar != '.')
-                    ReadNextChar();
-
-                // Read the fractional component.
-                double fraction = ReadInteger(0.0, out digitsRead);
-
-                // Check a number was actually provided.
-                if (double.IsNaN(result) == true && digitsRead == 0)
-                    return PunctuatorToken.Dot;
-
-                // '.5' should return 0.5.
-                if (double.IsNaN(result) == true)
-                    result = 0;
-
-                // '5.' should return 5.0.
-                if (digitsRead > 0)
-                {
-                    // Apply the fractional component but keep the number an integer for accuracy.
-                    exponentBase10 = -digitsRead;
-                    result = MathHelpers.MulPow10(result, -exponentBase10);
-                    result += fraction;
-                }
-            }
-
-            if (reader.Peek() == 'e' || reader.Peek() == 'E')
-            {
-                // Skip past the 'e'.
-                reader.Read();
-
-                // Read the sign of the exponent.
-                int exponentSign = 1;
-                int c = this.reader.Peek();
-                if (c == '+')
-                    ReadNextChar();
-                else if (c == '-')
-                {
-                    ReadNextChar();
-                    exponentSign = -1;
-                }
-
-                // Read the exponent.
-                exponentBase10 += MathHelpers.ClampToInt32(ReadInteger(0.0, out digitsRead)) * exponentSign;
-
-                // Check a number was actually provided.
-                if (double.IsNaN(result) == true || digitsRead == 0)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
-            }
-
-            // Apply the exponent.
-            result = MathHelpers.MulPow10(result, exponentBase10);
-
+            // Return the result as an integer if possible, otherwise return it as a double.
             if (result == (double)(int)result)
                 return new LiteralToken((int)result);
             return new LiteralToken(result);
