@@ -93,8 +93,14 @@ namespace UnitTests
             Assert.AreEqual(10000000, TestUtils.Evaluate("10000000"));
             Assert.AreEqual(10000001, TestUtils.Evaluate("10000001"));
             Assert.AreEqual(987654321, TestUtils.Evaluate("987654321"));
+            Assert.AreEqual(9876543212d, TestUtils.Evaluate("9876543212"));
             Assert.AreEqual(987654321234d, TestUtils.Evaluate("987654321234"));
             Assert.AreEqual(-987654321234d, TestUtils.Evaluate("-987654321234"));
+            Assert.AreEqual(9876543212345d, TestUtils.Evaluate("9876543212345"));
+            Assert.AreEqual(98765432123456d, TestUtils.Evaluate("98765432123456"));
+            Assert.AreEqual(987654321234567d, TestUtils.Evaluate("987654321234567"));
+            Assert.AreEqual(9876543212345678d, TestUtils.Evaluate("9876543212345678"));
+            Assert.AreEqual(98765432123456789d, TestUtils.Evaluate("98765432123456789"));
             Assert.AreEqual(0.1, TestUtils.Evaluate("0.1"));
             Assert.AreEqual(0.123, TestUtils.Evaluate("0.123"));
             Assert.AreEqual(0.345, TestUtils.Evaluate("34.5E-2"));

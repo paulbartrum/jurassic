@@ -348,80 +348,112 @@ namespace Jurassic
                 result /= Math.Pow(10, -exponentBase10 - 308);
             }
 
+            // Numbers with 16 or more digits require the use of arbitrary precision arithmetic to
+            // determine the correct answer.
             if (totalDigits >= 16)
-            {
-                // Numbers with 16 digits or more are tricky because rounding error can cause the
-                // result to be out by one or more ULPs (units in the last place).
-                // The algorithm is as follows:
-                // 1.  Use the initially calculated result as an estimate.
-                // 2.  Create a second estimate by modifying the estimate by one ULP.
-                // 3.  Calculate the actual value of both estimates to precision X (using arbitrary
-                //     precision arithmetic).
-                // 4.  If they are both above the desired value then decrease the estimates by 1
-                //     ULP and goto step 3.
-                // 5.  If they are both below the desired value then increase up the estimates by
-                //     1 ULP and goto step 3.
-                // 6.  One estimate must now be above the desired value and one below.
-                // 7.  If one is estimate is clearly closer to the desired value than the other,
-                //     then return that estimate.
-                // 8.  Increase the precision by 32 bits.
-                // 9.  If the precision is less than or equal to 160 bits goto step 3.
-                // 10. Assume that the estimates are equally close to the desired value; return the
-                //     value with the least significant bit equal to 0.
-                int direction = 1;
-                int precision = 0;
-
-                // Calculate the candidate value by modifying the last bit.
-                double result2 = AddUlps(result, direction);
-
-                while (precision <= 160)
-                {
-                    // Scale the candidate values to a big integer.
-                    var actual1 = DoubleToScaledInteger(result, exponentBase10, precision);
-                    var actual2 = DoubleToScaledInteger(result2, exponentBase10, precision);
-
-                    // Calculate the differences between the candidate values and the desired value.
-                    var baseline = desired3 << precision;
-                    var diff1 = actual1 - baseline;
-                    var diff2 = actual2 - baseline;
-
-                    if (diff1.Sign == direction && diff2.Sign == direction)
-                    {
-                        // We're going the wrong way!
-                        direction = -direction;
-                        result2 = AddUlps(result, direction);
-                    }
-                    else if (diff1.Sign == -direction && diff2.Sign == -direction)
-                    {
-                        // Going the right way, but need to go further.
-                        result = result2;
-                        result2 = AddUlps(result, direction);
-                    }
-                    else
-                    {
-                        // Found two values that bracket the actual value.
-                        // If one candidate value is closer to the actual value by at least 2 (one
-                        // doesn't cut it because of the integer division) then use that value.
-                        diff1 = BigInteger.Abs(diff1);
-                        diff2 = BigInteger.Abs(diff2);
-                        if (diff1 < diff2 - 1)
-                            return result;
-                        if (diff2 < diff1 - 1)
-                            return result2;
-
-                        // Not enough precision to determine the correct answer, or it's a halfway case.
-                        // Increase the precision.
-                        precision += 32;
-                    }
-                }
-
-                // Even with heaps of precision there is no clear winner.
-                // Assume this is a halfway case: choose the floating-point value with its least
-                // significant bit equal to 0.
-                return (BitConverter.DoubleToInt64Bits(result) & 1) == 0 ? result : result2;
-            }
+                return RefineEstimate(result, 10, exponentBase10, desired3);
 
             return result;
+        }
+
+        /// <summary>
+        /// Converts a string to an integer (used by parseInt).
+        /// </summary>
+        /// <param name="radix"> The numeric base to use for parsing.  Pass zero to use base 10
+        /// except when the input string starts with '0' in which case base 16 or base 8 are used
+        /// instead. </param>
+        /// <param name="allowOctal"> <c>true</c> if numbers with a leading zero should be parsed
+        /// as octal numbers. </param>
+        /// <returns> The result of parsing the string as a integer. </returns>
+        internal static double ParseInt(string input, int radix, bool allowOctal)
+        {
+            var reader = new System.IO.StringReader(input);
+            int digitCount = 0;
+
+            // Skip whitespace and line terminators.
+            while (IsWhiteSpaceOrLineTerminator(reader.Peek()))
+                reader.Read();
+
+            // Determine the sign.
+            double sign = 1;
+            if (reader.Peek() == '+')
+            {
+                reader.Read();
+            }
+            else if (reader.Peek() == '-')
+            {
+                sign = -1;
+                reader.Read();
+            }
+
+            // Hex prefix should be stripped if the radix is 0, undefined or 16.
+            bool stripPrefix = radix == 0 || radix == 16;
+
+            // Default radix is 10.
+            if (radix == 0)
+                radix = 10;
+
+            // Skip past the prefix, if there is one.
+            if (stripPrefix == true)
+            {
+                if (reader.Peek() == '0')
+                {
+                    reader.Read();
+                    digitCount = 1;     // Note: required for parsing "0z11" correctly (when radix = 0).
+
+                    int c = reader.Peek();
+                    if (c == 'x' || c == 'X')
+                    {
+                        // Hex number.
+                        reader.Read();
+                        radix = 16;
+                    }
+
+                    if (c >= '0' && c <= '9' && allowOctal == true)
+                    {
+                        // Octal number.
+                        radix = 8;
+                    }
+                }
+            }
+
+            // Calculate the maximum number of digits before arbitrary precision arithmetic is
+            // required.
+            int maxDigits = (int)Math.Floor(53 / Math.Log(radix, 2));
+
+            // Read numeric digits 0-9, a-z or A-Z.
+            double result = 0;
+            BigInteger bigResult = BigInteger.Zero;
+            while (true)
+            {
+                int numericValue = -1;
+                int c = reader.Read();
+                if (c >= '0' && c <= '9')
+                    numericValue = c - '0';
+                if (c >= 'a' && c <= 'z')
+                    numericValue = c - 'a' + 10;
+                if (c >= 'A' && c <= 'Z')
+                    numericValue = c - 'A' + 10;
+                if (numericValue == -1 || numericValue >= radix)
+                    break;
+                if (digitCount == maxDigits)
+                    bigResult = (BigInteger)result;
+                result = result * radix + numericValue;
+                if (digitCount >= maxDigits)
+                    bigResult = bigResult * radix + numericValue;
+                digitCount++;
+            }
+
+            // If the input is empty, then return NaN.
+            if (digitCount == 0)
+                return double.NaN;
+
+            // Numbers with lots of digits require the use of arbitrary precision arithmetic to
+            // determine the correct answer.
+            if (digitCount > maxDigits)
+                return RefineEstimate(result, radix, 0, bigResult);
+
+            return result * sign;
         }
 
         /// <summary>
@@ -492,6 +524,89 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Modifies the initial estimate until the closest double-precision number to the desired
+        /// value is found.
+        /// </summary>
+        /// <param name="initialEstimate">  </param>
+        /// <param name="radix">  </param>
+        /// <param name="exponent">  </param>
+        /// <param name="desiredValue">  </param>
+        /// <returns></returns>
+        private static double RefineEstimate(double initialEstimate, int radix, int exponent, BigInteger desiredValue)
+        {
+            // Numbers with 16 digits or more are tricky because rounding error can cause the
+            // result to be out by one or more ULPs (units in the last place).
+            // The algorithm is as follows:
+            // 1.  Use the initially calculated result as an estimate.
+            // 2.  Create a second estimate by modifying the estimate by one ULP.
+            // 3.  Calculate the actual value of both estimates to precision X (using arbitrary
+            //     precision arithmetic).
+            // 4.  If they are both above the desired value then decrease the estimates by 1
+            //     ULP and goto step 3.
+            // 5.  If they are both below the desired value then increase up the estimates by
+            //     1 ULP and goto step 3.
+            // 6.  One estimate must now be above the desired value and one below.
+            // 7.  If one is estimate is clearly closer to the desired value than the other,
+            //     then return that estimate.
+            // 8.  Increase the precision by 32 bits.
+            // 9.  If the precision is less than or equal to 160 bits goto step 3.
+            // 10. Assume that the estimates are equally close to the desired value; return the
+            //     value with the least significant bit equal to 0.
+            int direction = 1;
+            int precision = 32;
+
+            // Calculate the candidate value by modifying the last bit.
+            double result = initialEstimate;
+            double result2 = AddUlps(result, direction);
+
+            while (precision <= 160)
+            {
+                // Scale the candidate values to a big integer.
+                var actual1 = ConvertDoubleToScaledInteger(result, radix, exponent, precision);
+                var actual2 = ConvertDoubleToScaledInteger(result2, radix, exponent, precision);
+
+                // Calculate the differences between the candidate values and the desired value.
+                var baseline = desiredValue << precision;
+                var diff1 = actual1 - baseline;
+                var diff2 = actual2 - baseline;
+
+                if (diff1.Sign == direction && diff2.Sign == direction)
+                {
+                    // We're going the wrong way!
+                    direction = -direction;
+                    result2 = AddUlps(result, direction);
+                }
+                else if (diff1.Sign == -direction && diff2.Sign == -direction)
+                {
+                    // Going the right way, but need to go further.
+                    result = result2;
+                    result2 = AddUlps(result, direction);
+                }
+                else
+                {
+                    // Found two values that bracket the actual value.
+                    // If one candidate value is closer to the actual value by at least 2 (one
+                    // doesn't cut it because of the integer division) then use that value.
+                    diff1 = BigInteger.Abs(diff1);
+                    diff2 = BigInteger.Abs(diff2);
+                    if (diff1 < diff2 - 1)
+                        return result;
+                    if (diff2 < diff1 - 1)
+                        return result2;
+
+                    // Not enough precision to determine the correct answer, or it's a halfway case.
+                    // Increase the precision.
+                    precision += 32;
+                }
+            }
+
+            // Even with heaps of precision there is no clear winner.
+            // Assume this is a halfway case: choose the floating-point value with its least
+            // significant bit equal to 0.
+            return (BitConverter.DoubleToInt64Bits(result) & 1) == 0 ? result : result2;
+        }
+
+        /// <summary>
         /// Adds ULPs (units in the last place) to the given double-precision number.
         /// </summary>
         /// <param name="value"> The value to modify. </param>
@@ -512,7 +627,7 @@ namespace Jurassic
         /// <param name="base10Exponent"> Specifies the power-of-ten scale factor. </param>
         /// <param name="extraPrecision"> The number of extra bits of precision. </param>
         /// <returns> A BigInteger containing the scaled integer. </returns>
-        private static BigInteger DoubleToScaledInteger(double value, int base10Exponent, int extraPrecision)
+        private static BigInteger ConvertDoubleToScaledInteger(double value, int radix, int exponent, int extraPrecision)
         {
             long bits = BitConverter.DoubleToInt64Bits(value);
 
@@ -541,16 +656,15 @@ namespace Jurassic
             // Scale the result to increase the precision.
             result <<= extraPrecision;
 
-            if (base10Exponent < 0)
-                result *= BigInteger.Pow(10, -base10Exponent);
-
+            // Scale the result using the given radix and exponent.
+            if (exponent < 0)
+                result *= BigInteger.Pow(radix, -exponent);
             if (base2Exponent > 0)
                 result *= BigInteger.Pow(2, base2Exponent);
             else
                 result /= BigInteger.Pow(2, -base2Exponent);
-
-            if (base10Exponent > 0)
-                result /= BigInteger.Pow(10, base10Exponent);
+            if (exponent > 0)
+                result /= BigInteger.Pow(radix, exponent);
 
             return result;
         }
