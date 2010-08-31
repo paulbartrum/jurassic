@@ -351,7 +351,7 @@ namespace Jurassic
             // Numbers with 16 or more digits require the use of arbitrary precision arithmetic to
             // determine the correct answer.
             if (totalDigits >= 16)
-                return RefineEstimate(result, 10, exponentBase10, desired3);
+                return RefineEstimate(result, exponentBase10, desired3);
 
             return result;
         }
@@ -451,7 +451,7 @@ namespace Jurassic
             // Numbers with lots of digits require the use of arbitrary precision arithmetic to
             // determine the correct answer.
             if (digitCount > maxDigits)
-                return RefineEstimate(result, radix, 0, bigResult) * sign;
+                return RefineEstimate(result, 0, bigResult) * sign;
 
             return result * sign;
         }
@@ -527,12 +527,14 @@ namespace Jurassic
         /// Modifies the initial estimate until the closest double-precision number to the desired
         /// value is found.
         /// </summary>
-        /// <param name="initialEstimate">  </param>
-        /// <param name="radix">  </param>
-        /// <param name="exponent">  </param>
-        /// <param name="desiredValue">  </param>
-        /// <returns></returns>
-        private static double RefineEstimate(double initialEstimate, int radix, int exponent, BigInteger desiredValue)
+        /// <param name="initialEstimate"> The initial estimate.  Assumed to be very close to the
+        /// result. </param>
+        /// <param name="base10Exponent"> The power-of-ten scale factor. </param>
+        /// <param name="desiredValue"> The desired value, already scaled using the power-of-ten
+        /// scale factor. </param>
+        /// <returns> The closest double-precision number to the desired value.  If there are two
+        /// such values, the one with the least significant bit set to zero is returned. </returns>
+        private static double RefineEstimate(double initialEstimate, int base10Exponent, BigInteger desiredValue)
         {
             // Numbers with 16 digits or more are tricky because rounding error can cause the
             // result to be out by one or more ULPs (units in the last place).
@@ -562,8 +564,8 @@ namespace Jurassic
             while (precision <= 160)
             {
                 // Scale the candidate values to a big integer.
-                var actual1 = ConvertDoubleToScaledInteger(result, radix, exponent, precision);
-                var actual2 = ConvertDoubleToScaledInteger(result2, radix, exponent, precision);
+                var actual1 = ConvertDoubleToScaledInteger(result, base10Exponent, precision);
+                var actual2 = ConvertDoubleToScaledInteger(result2, base10Exponent, precision);
 
                 // Calculate the differences between the candidate values and the desired value.
                 var baseline = desiredValue << precision;
@@ -627,7 +629,7 @@ namespace Jurassic
         /// <param name="base10Exponent"> Specifies the power-of-ten scale factor. </param>
         /// <param name="extraPrecision"> The number of extra bits of precision. </param>
         /// <returns> A BigInteger containing the scaled integer. </returns>
-        private static BigInteger ConvertDoubleToScaledInteger(double value, int radix, int exponent, int extraPrecision)
+        private static BigInteger ConvertDoubleToScaledInteger(double value, int base10Exponent, int extraPrecision)
         {
             long bits = BitConverter.DoubleToInt64Bits(value);
 
@@ -657,14 +659,14 @@ namespace Jurassic
             result <<= extraPrecision;
 
             // Scale the result using the given radix and exponent.
-            if (exponent < 0)
-                result *= BigInteger.Pow(radix, -exponent);
+            if (base10Exponent < 0)
+                result *= BigInteger.Pow(10, -base10Exponent);
             if (base2Exponent > 0)
                 result *= BigInteger.Pow(2, base2Exponent);
-            else
+            else if (base2Exponent < 0)
                 result /= BigInteger.Pow(2, -base2Exponent);
-            if (exponent > 0)
-                result /= BigInteger.Pow(radix, exponent);
+            if (base10Exponent > 0)
+                result /= BigInteger.Pow(10, base10Exponent);
 
             return result;
         }
