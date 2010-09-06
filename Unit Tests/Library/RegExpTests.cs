@@ -102,6 +102,11 @@ namespace UnitTests
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "RegExpError" : "TypeError",
                 TestUtils.EvaluateExceptionType("new RegExp(new RegExp('abc', 'g'), 'i')"));
             Assert.AreEqual("abc", TestUtils.Evaluate("new RegExp(/abc/, undefined).source"));
+
+            // Flags must be known and unique.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("new RegExp('abc', 'gg')"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("new RegExp('abc', 'igi')"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("new RegExp('abc', 'a')"));
         }
 
         [TestMethod]
