@@ -120,7 +120,7 @@ namespace Jurassic
             if (value is int)
                 return ((int)value).ToString();
             if (value is double)
-                return NumberInstance.NumberToString((double)value);
+                return NumberFormatter.ToString((double)value, 10, NumberFormatter.Style.Regular);
             if (value is string)
                 return (string)value;
             if (value is ObjectInstance)
