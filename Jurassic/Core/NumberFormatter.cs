@@ -17,7 +17,7 @@ namespace Jurassic
             /// <summary>
             /// Specifies that the shortest number that accurately represents the number should be
             /// displayed.  Scientific notation is used if the exponent is less than -6 or greater
-            /// than 20.  The precision parameter has no semantic meaning.
+            /// than twenty.  The precision parameter has no semantic meaning.
             /// </summary>
             Regular,
 
@@ -29,9 +29,9 @@ namespace Jurassic
             Precision,
 
             /// <summary>
-            /// Specifies that numbers should never be displayed in scientific notation.  The
-            /// precision parameter specifies the number of figures to display after the decimal
-            /// point.
+            /// Specifies that a fixed number of digits should be displayed after the decimal place
+            /// (specified by the precision parameter).  Scientific notation is used if the
+            /// exponent is greater than twenty.
             /// </summary>
             Fixed,
             
@@ -104,6 +104,10 @@ namespace Jurassic
                 exponent = (int)Math.Floor(Math.Log10(value));
             else
                 exponent = (int)Math.Floor(Math.Log(value, radix));
+
+            // toFixed acts like toString() if the exponent is >= 21.
+            if (style == Style.Fixed && exponent >= 21)
+                style = Style.Regular;
 
             // Calculate the number of significant digits.
             // We add 5 so that there is enough precision to distinguish halfway numbers.
