@@ -108,6 +108,7 @@
     <Compile Include="Compiler\Statements\Statement.cs" />
     <Compile Include="Compiler\Debugging\SourceCodeSpan.cs" />
     <Compile Include="Core\CompatibilityMode.cs" />
+    <Compile Include="Core\NumberFormatter.cs" />
     <Compile Include="Core\MathHelpers.cs" />
     <Compile Include="Core\NumberParser.cs" />
     <Compile Include="Core\ScriptEngine.cs" />
