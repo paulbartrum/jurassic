@@ -123,6 +123,8 @@ namespace UnitTests
             Assert.AreEqual("0.0", TestUtils.Evaluate("0.03.toFixed(1)"));
             Assert.AreEqual("-1", TestUtils.Evaluate("(-0.7).toFixed()"));
             Assert.AreEqual("1000000000000000", TestUtils.Evaluate("1e+15.toFixed()"));
+            Assert.AreEqual("1e+21", TestUtils.Evaluate("1e21.toFixed()"));
+            Assert.AreEqual("1e+21", TestUtils.Evaluate("1e21.toFixed(15)"));
             Assert.AreEqual("1000000000000000.00000000000000000000", TestUtils.Evaluate("1e+15.toFixed(20)"));
             Assert.AreEqual("0", TestUtils.Evaluate("1e-15.toFixed()"));
             Assert.AreEqual("0.00000000000000100000", TestUtils.Evaluate("1e-15.toFixed(20)"));
