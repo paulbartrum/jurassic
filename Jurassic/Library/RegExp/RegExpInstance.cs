@@ -425,14 +425,35 @@ namespace Jurassic.Library
         {
             var options = RegexOptions.ECMAScript;
             this.globalSearch = false;
-            if (string.IsNullOrEmpty(flags) == false)
+
+            if (flags != null)
             {
-                if (flags.Contains('g'))
-                    this.globalSearch = true;
-                if (flags.Contains('i'))
-                    options |= RegexOptions.IgnoreCase;
-                if (flags.Contains('m'))
-                    options |= RegexOptions.Multiline;
+                for (int i = 0; i < flags.Length; i++)
+                {
+                    char flag = flags[i];
+                    if (flag == 'g')
+                    {
+                        if (this.globalSearch == true)
+                            throw new JavaScriptException(this.Engine, "SyntaxError", "The 'g' flag cannot be specified twice");
+                        this.globalSearch = true;
+                    }
+                    else if (flag == 'i')
+                    {
+                        if ((options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase)
+                            throw new JavaScriptException(this.Engine, "SyntaxError", "The 'i' flag cannot be specified twice");
+                        options |= RegexOptions.IgnoreCase;
+                    }
+                    else if (flag == 'm')
+                    {
+                        if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
+                            throw new JavaScriptException(this.Engine, "SyntaxError", "The 'm' flag cannot be specified twice");
+                        options |= RegexOptions.Multiline;
+                    }
+                    else
+                    {
+                        throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Unknown flag '{0}'", flag));
+                    }
+                }
             }
             return options;
         }
