@@ -454,7 +454,7 @@ namespace Jurassic.Compiler
         {
             // Octal escape sequences are only supported in ECMAScript 3 compatibility mode.
             if (this.engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are not supported.", this.lineNumber, this.Source.Path);
+                throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are only supported in ECMAScript 3 compatibility mode.", this.lineNumber, this.Source.Path);
 
             int numericValue = firstDigit;
             for (int i = 0; i < 2; i++)
