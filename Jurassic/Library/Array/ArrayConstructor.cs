@@ -77,9 +77,9 @@ namespace Jurassic.Library
                 if (elements[0] is double)
                 {
                     double length = (double)elements[0];
-                    if (length < 0 || length > uint.MaxValue)
-                        throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
                     uint length32 = TypeConverter.ToUint32(length);
+                    if (length != (double)length32)
+                        throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
                     return new ArrayInstance(this.InstancePrototype, length32, length32);
                 }
                 else if (elements[0] is int)
