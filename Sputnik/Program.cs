@@ -31,11 +31,25 @@ namespace Sputnik
                 "S7.9_A9_T3",           // "do { } while (false) true" is not valid, even though all the browsers think it is.
                 "S7.9_A9_T4",           // "do { } while (false) true" is not valid, even though all the browsers think it is.
                 "S12.6.4_A14_T1",       // Assumes that function f() {}.prototype is enumerable (it isn't).
+
+                // Implementation_Diagnostics
+                "S8.4_D2.2",            // Asserts "test"[-1] should throw but it should return undefined.
+                "S11.4.3_D1.2",         // Asserts that typeof RegExp should return "object" (it should be "function").
+                "S12.6.4_D1",           // Newly added properties are not guarenteed to be included in enumeration.
+                "S13.2_D1.2",           // Implementations are not required to join identical function instances.
+                "S15.5.4.11_D1.1_T1",   // Asserts that String.prototype.replace() should fail if two arguments aren't supplied.
+                "S15.5.4.11_D1.1_T2",   // Asserts that String.prototype.replace() should fail if two arguments aren't supplied.
+                "S15.5.4.11_D1.1_T3",   // Asserts that String.prototype.replace() should fail if two arguments aren't supplied.
+                "S15.5.4.11_D1.1_T4",   // Asserts that String.prototype.replace() should fail if two arguments aren't supplied.
+                "S15.7.4.5_A1.2_D02",   // Asserts that toFixed(20.1) should fail, but it shouldn't.
+                "S15.7.4.5_D1.2_T01",   // Asserts that toFixed(20.1) should fail, but it shouldn't.
             };
 
             // Create an array of "won't fix" tests.
             var wontFixTests = new string[]
             {
+                "S7.8.4_A4.3_T1",       // Forbids octal escape sequence in strings (only enabled in compatibility mode).
+                "S7.8.4_A4.3_T2",       // Forbids octal escape sequence in strings (only enabled in compatibility mode).
                 "S9.9_A1",              // Asserts that for (var x in undefined) throws a TypeError (not implemented by browsers, changed in ECMAScript 5).
                 "S9.9_A2",              // Asserts that for (var x in undefined) throws a TypeError (not implemented by browsers, changed in ECMAScript 5).
                 "S11.1.5_A4.1",         // Asserts that keywords are not allowed in object literals (they are in ECMAScript 5).
@@ -52,21 +66,41 @@ namespace Sputnik
                 "S12.8_A4_T1",          // Declares a function inside a do-while block.
                 "S12.8_A4_T2",          // Declares a function inside a do-while block.
                 "S12.8_A4_T3",          // Declares a function inside a do-while block.
-                "S13.2.2_A17_T1",       // Declares a function inside a with block.
+                "S13.2.2_A17_T1",       // Declares a function inside various structures.
                 "S15.1.2.1_A3.3_T3",    // Declares a function inside a try block.
                 "S15.3.4.2_A1_T1",      // Assumes (function() { }).toString() can be compiled using eval().
                 "S15.3.4.3_A6_T4",      // Asserts that apply throws a TypeError if the second argument is not an array.  This was changed in ECMAScript 5.
+                "S15.10.6_A2",          // Asserts that Object.prototype.toString.call(/abc/) === '[object Object]'.  This was changed in ECMAScript 5.
                 "S15.11.1.1_A1_T1",     // Assumes that Error().message doesn't exist (spec bug fixed in ECMAScript 5).
                 "S15.11.2.1_A1_T1",     // Assumes that Error().message doesn't exist (spec bug fixed in ECMAScript 5).
+
+                // Implementation_Diagnostics
+                "S13.2.2_D20_T2",       // Declares a function inside various structures.
+                "S13.2.2_D20_T3",       // Declares a function inside various structures.
+                "S13.2.2_D20_T4",       // Declares a function inside various structures.
+                "S13.2.2_D20_T5",       // Declares a function inside various structures.
+                "S13.2.2_D20_T6",       // Declares a function inside various structures.
+                "S13.2.2_D20_T7",       // Declares a function inside various structures.
+                "S13.2.2_D20_T8",       // Declares a function inside various structures.
+                "S13_D1_T1",            // Declares a function inside various structures.
+                "S14_D1_T1",            // Declares a function inside various structures.
+                "S14_D4_T1",            // Declares a function inside various structures.
+                "S14_D4_T2",            // Declares a function inside various structures.
+                "S14_D4_T3",            // Declares a function inside various structures.
+                "S14_D1_T1",            // Declares a function inside various structures.
+                "S14_D6_T1",            // Declares a function inside various structures.
+                "S14_D6_T2",            // Declares a function inside various structures.
+                "S14_D7",               // Declares a function inside various structures.
+                "S15.1.2.2_D1.2",       // Forbids octal values in parseInt.  This is a de-facto standard (only enabled in compatibility mode).
             };
 
-            //ExecuteTest(@"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\15_Native_ECMA_Script_Objects\15.3_Function_Objects\15.3.4_Properties_of_the_Function_Prototype_Object\15.3.4.3_Function.prototype.apply\S15.3.4.3_A7_T3.js", includes);
+            //ExecuteTest(@"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Implementation_Diagnostics\S8.8_D1.2.js", includes);
             //return;
 
             // Determine all the file paths to execute.
             List<string> scriptPaths = new List<string>();
-            EnumerateScripts(scriptPaths, @"..\..\tests");
-            //EnumerateScripts(scriptPaths, @"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance\15_Native_ECMA_Script_Objects\15.4_Array_Objects");
+            //EnumerateScripts(scriptPaths, @"..\..\tests");
+            EnumerateScripts(scriptPaths, @"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Sputnik\tests\Conformance");
 
             // Execute all the tests in parallel.
             //System.Threading.Tasks.Parallel.ForEach(scriptPaths, path => ExecuteTest(path, libSourceStr));
