@@ -49,6 +49,10 @@ namespace Jurassic.Library
         //     JAVASCRIPT FUNCTIONS
         //_________________________________________________________________________________________
 
+        private static bool[] decodeURIReservedSet;
+        private static bool[] decodeURIComponentReservedSet;
+        private static bool[] encodeURIUnescapedSet;
+        private static bool[] encodeURIComponentUnescapedSet;
 
         /// <summary>
         /// Decodes a string that was encoded with the encodeURI function.
@@ -58,7 +62,9 @@ namespace Jurassic.Library
         [JSFunction(Name = "decodeURI", Flags = FunctionBinderFlags.HasEngineParameter)]
         public static string DecodeURI(ScriptEngine engine, string input)
         {
-            return Decode(engine, input, ";/?:@&=+$,#");
+            System.Threading.LazyInitializer.EnsureInitialized(ref decodeURIReservedSet,
+                () => CreateCharacterSetLookupTable(";/?:@&=+$,#"));
+            return Decode(engine, input, decodeURIReservedSet);
         }
 
         /// <summary>
@@ -70,7 +76,9 @@ namespace Jurassic.Library
         [JSFunction(Name = "decodeURIComponent", Flags = FunctionBinderFlags.HasEngineParameter)]
         public static string DecodeURIComponent(ScriptEngine engine, string input)
         {
-            return Decode(engine, input, "");
+            System.Threading.LazyInitializer.EnsureInitialized(ref decodeURIComponentReservedSet,
+                () => CreateCharacterSetLookupTable(""));
+            return Decode(engine, input, decodeURIComponentReservedSet);
         }
 
         /// <summary>
@@ -82,7 +90,9 @@ namespace Jurassic.Library
         [JSFunction(Name = "encodeURI", Flags = FunctionBinderFlags.HasEngineParameter)]
         public static string EncodeURI(ScriptEngine engine, string input)
         {
-            return Encode(engine, input, ";/?:@&=+$,-_.!~*'()#");
+            System.Threading.LazyInitializer.EnsureInitialized(ref encodeURIUnescapedSet,
+                () => CreateCharacterSetLookupTable(";/?:@&=+$,-_.!~*'()#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"));
+            return Encode(engine, input, encodeURIUnescapedSet);
         }
 
         /// <summary>
@@ -94,7 +104,9 @@ namespace Jurassic.Library
         [JSFunction(Name = "encodeURIComponent", Flags = FunctionBinderFlags.HasEngineParameter)]
         public static string EncodeURIComponent(ScriptEngine engine, string input)
         {
-            return Encode(engine, input, "-_.!~*'()");
+            System.Threading.LazyInitializer.EnsureInitialized(ref encodeURIComponentUnescapedSet,
+                () => CreateCharacterSetLookupTable("-_.!~*'()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"));
+            return Encode(engine, input, encodeURIComponentUnescapedSet);
         }
 
         /// <summary>
@@ -251,28 +263,25 @@ namespace Jurassic.Library
                     if (input[i + 1] == 'u')
                     {
                         // 4 digit escape sequence %uXXXX.
-                        // Make sure the string is long enough and has valid hex digits.
-                        if (i >= input.Length - 5 ||
-                            IsHexDigit(input[i + 2]) == false || IsHexDigit(input[i + 3]) == false ||
-                            IsHexDigit(input[i + 4]) == false || IsHexDigit(input[i + 5]) == false)
+                        int value = ParseHexNumber(input, i + 2, 4);
+                        if (value < 0)
                         {
                             result.Append('%');
                             continue;
                         }
-                        result.Append((char)int.Parse(input.Substring(i + 2, 4), System.Globalization.NumberStyles.HexNumber));
+                        result.Append((char)value);
                         i += 5;
                     }
                     else
                     {
                         // 2 digit escape sequence %XX.
-                        // Make sure the string is long enough and has valid hex digits.
-                        if (i >= input.Length - 2 ||
-                            IsHexDigit(input[i + 1]) == false || IsHexDigit(input[i + 2]) == false)
+                        int value = ParseHexNumber(input, i + 1, 2);
+                        if (value < 0)
                         {
                             result.Append('%');
                             continue;
                         }
-                        result.Append((char)int.Parse(input.Substring(i + 1, 2), System.Globalization.NumberStyles.HexNumber));
+                        result.Append((char)value);
                         i += 2;
                     }
                 }
@@ -295,7 +304,7 @@ namespace Jurassic.Library
         /// <param name="unescapedSet"> A string containing the set of characters that should not
         /// be escaped.  Alphanumeric characters should not be included. </param>
         /// <returns> A copy of the given string with the escape sequences decoded. </returns>
-        private static string Decode(ScriptEngine engine, string input, string reservedSet)
+        private static string Decode(ScriptEngine engine, string input, bool[] reservedSet)
         {
             var result = new StringBuilder(input.Length);
             for (int i = 0; i < input.Length; i++)
@@ -305,19 +314,17 @@ namespace Jurassic.Library
                 {
                     // 2 digit escape sequence %XX.
 
-                    // Make sure the string is long enough and the next two digits are valid hex digits.
-                    if (i >= input.Length - 2 || IsHexDigit(input[i + 1]) == false || IsHexDigit(input[i + 2]) == false)
-                        throw new JavaScriptException(engine, "URIError", "URI malformed");
-
                     // Decode the %XX encoding.
-                    int utf8Byte = int.Parse(input.Substring(i + 1, 2), System.Globalization.NumberStyles.HexNumber);
+                    int utf8Byte = ParseHexNumber(input, i + 1, 2);
+                    if (utf8Byte < 0)
+                        throw new JavaScriptException(engine, "URIError", "URI malformed");
                     i += 2;
 
                     // If the high bit is not set, then this is a single byte ASCII character.
                     if ((utf8Byte & 0x80) == 0)
                     {
                         // Decode only if the character is not reserved.
-                        if (reservedSet.Contains((char)utf8Byte))
+                        if (reservedSet[utf8Byte] == true)
                         {
                             // Leave the escape sequence as is.
                             result.Append(input.Substring(i - 2, 3));
@@ -356,12 +363,10 @@ namespace Jurassic.Library
                             if (i >= input.Length - 1 || input[++i] != '%')
                                 throw new JavaScriptException(engine, "URIError", "URI malformed");
 
-                            // Make sure the string is long enough and the next two digits are valid hex digits.
-                            if (i >= input.Length - 2 || IsHexDigit(input[i + 1]) == false || IsHexDigit(input[i + 2]) == false)
-                                throw new JavaScriptException(engine, "URIError", "URI malformed");
-
                             // Decode the %XX encoding.
-                            utf8Byte = int.Parse(input.Substring(i + 1, 2), System.Globalization.NumberStyles.HexNumber);
+                            utf8Byte = ParseHexNumber(input, i + 1, 2);
+                            if (utf8Byte < 0)
+                                throw new JavaScriptException(engine, "URIError", "URI malformed");
 
                             // Top two bits must be 10 (i.e. byte must be 10XXXXXX in binary).
                             if ((utf8Byte & 0xC0) != 0x80)
@@ -389,10 +394,10 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to encode. </param>
-        /// <param name="unescapedSet"> A string containing the set of characters that should not
-        /// be escaped.  Alphanumeric characters should not be included. </param>
+        /// <param name="unescapedSet"> An array containing the set of characters that should not
+        /// be escaped. </param>
         /// <returns> A copy of the given URI with the special characters encoded. </returns>
-        private static string Encode(ScriptEngine engine, string input, string unescapedSet)
+        private static string Encode(ScriptEngine engine, string input, bool[] unescapedSet)
         {
             var result = new StringBuilder(input.Length);
             for (int i = 0; i < input.Length; i++)
@@ -411,8 +416,7 @@ namespace Jurassic.Library
                 // Detect if the code point is a surrogate pair.
                 bool isSurrogatePair = c >= 0x10000;
 
-                if (isSurrogatePair == false && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-                    (c >= '0' && c <= '9') || unescapedSet.Contains((char)c)))
+                if (c < 128 && unescapedSet[c] == true)
                 {
                     // Character should not be escaped.
                     result.Append((char)c);
@@ -475,13 +479,50 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Determines if the given character is a hexidecimal digit (0-9, a-z, A-Z).
+        /// Parses a hexidecimal number from within a string.
         /// </summary>
-        /// <param name="c"> The unicode code point for the character. </param>
-        /// <returns> <c>true</c> if the character is a hexidecimal digit; <c>false</c> otherwise. </returns>
-        private static bool IsHexDigit(char c)
+        /// <param name="input"> The string containing the hexidecimal number. </param>
+        /// <param name="start"> The start index of the hexidecimal number. </param>
+        /// <param name="length"> The number of characters in the hexidecimal number. </param>
+        /// <returns> The numeric value of the hexidecimal number, or <c>-1</c> if the number
+        /// is not valid. </returns>
+        private static int ParseHexNumber(string input, int start, int length)
         {
-            return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
+            if (start + length > input.Length)
+                return -1;
+            int result = 0;
+            for (int i = start; i < start + length; i++)
+            {
+                result *= 0x10;
+                char c = input[i];
+                if (c >= '0' && c <= '9')
+                    result += c - '0';
+                else if (c >= 'A' && c <= 'F')
+                    result += c - 'A' + 10;
+                else if (c >= 'a' && c <= 'f')
+                    result += c - 'a' + 10;
+                else
+                    return -1;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a 128 entry lookup table for the characters in the given string.
+        /// </summary>
+        /// <param name="characters"> The characters to include in the set. </param>
+        /// <returns> An array containing <c>true</c> for each character in the set. </returns>
+        private static bool[] CreateCharacterSetLookupTable(string characters)
+        {
+            var result = new bool[128];
+            for (int i = 0; i < characters.Length; i ++)
+            {
+                char c = characters[i];
+                if (c >= 128)
+                    throw new ArgumentException("Characters must be ASCII.", "characters");
+                result[c] = true;
+            }
+            return result;
         }
     }
 }
