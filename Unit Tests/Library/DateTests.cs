@@ -95,6 +95,20 @@ namespace UnitTests
                 Assert.AreEqual("function Date() { [native code] }", TestUtils.Evaluate("Date.toString()"));
             Assert.AreEqual(true, TestUtils.Evaluate("Date.valueOf() === Date"));
 
+            // Undefined dates.
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(undefined).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, undefined).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, 1, undefined).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(undefined, 1, 1).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, 1, 2, undefined).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, 1, 2, 1, undefined).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, 1, 2, 1, 1, undefined).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, 1, 2, 1, 1, 1, undefined).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(NaN).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, 1, NaN).valueOf()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("new Date(2010, 1, 2, NaN).valueOf()"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 2, 1, 1, 1, 1)), TestUtils.Evaluate("new Date(2010, 1, 2, 1, 1, 1, 1, undefined).valueOf()"));
+
             // length
             Assert.AreEqual(7, TestUtils.Evaluate("Date.length"));
         }
