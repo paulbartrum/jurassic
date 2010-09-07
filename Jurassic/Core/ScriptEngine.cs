@@ -391,7 +391,10 @@ namespace Jurassic
             // Execute
             if (this.ExecutionStarted != null)
                 this.ExecutionStarted(this, EventArgs.Empty);
-            return methodGen.Execute();
+            var result = methodGen.Execute();
+
+            // Normalize the result (convert null to Undefined, double to int, etc).
+            return TypeUtilities.NormalizeValue(result);
         }
 
         /// <summary>
@@ -543,7 +546,7 @@ namespace Jurassic
         {
             if (variableName == null)
                 throw new ArgumentNullException("variableName");
-            return this.Global.GetPropertyValue(variableName);
+            return TypeUtilities.NormalizeValue(this.Global.GetPropertyValue(variableName));
         }
 
         /// <summary>
@@ -560,7 +563,7 @@ namespace Jurassic
         {
             if (variableName == null)
                 throw new ArgumentNullException("variableName");
-            return TypeConverter.ConvertTo<T>(this, this.Global.GetPropertyValue(variableName));
+            return TypeConverter.ConvertTo<T>(this, TypeUtilities.NormalizeValue(this.Global.GetPropertyValue(variableName)));
         }
 
         /// <summary>
