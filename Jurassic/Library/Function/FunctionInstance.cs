@@ -83,6 +83,7 @@ namespace Jurassic.Library
         public int Length
         {
             get { return TypeConverter.ToInteger(this["length"]); }
+            protected set { this.FastSetProperty("length", value); }
         }
 
 
