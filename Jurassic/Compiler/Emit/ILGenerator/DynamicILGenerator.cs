@@ -27,7 +27,9 @@ namespace Jurassic.Compiler
             Object = 16,
             ManagedPointer = 32,
         }
+#pragma warning disable 0649
         private Stack<VESType> operands;
+#pragma warning restore 0649
         private bool stackIsIndeterminate;
 
         // All of the local variables defined within this method.
