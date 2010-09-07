@@ -69,6 +69,24 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Converts the given value into a standard .NET type, suitable for returning from an API.
+        /// </summary>
+        /// <param name="obj"> The value to normalize. </param>
+        /// <returns> The value as a standard .NET type. </returns>
+        internal static object NormalizeValue(object obj)
+        {
+            if (obj == null)
+                return Undefined.Value;
+            if (obj is double)
+            {
+                var numericResult = (double)obj;
+                if ((double)((int)numericResult) == numericResult)
+                    return (int)numericResult;
+            }
+            return obj;
+        }
+
+        /// <summary>
         /// Enumerates the names of the enumerable properties on the given object, including
         /// properties defined on the object's prototype.  Used by the for-in statement.
         /// </summary>

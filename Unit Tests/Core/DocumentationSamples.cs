@@ -16,7 +16,7 @@ namespace UnitTests
         public void EvaluateExpression1()
         {
             var engine = new Jurassic.ScriptEngine();
-            Assert.AreEqual(52.0, engine.Evaluate("5 * 10 + 2"));
+            Assert.AreEqual(52, engine.Evaluate("5 * 10 + 2"));
         }
 
         [TestMethod]

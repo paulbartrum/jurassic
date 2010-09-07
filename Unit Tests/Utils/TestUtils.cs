@@ -49,12 +49,6 @@ namespace UnitTests
                 InitializeJurassic();
                 result = jurassicScriptEngine.Evaluate(script);
             }
-            if (result is double)
-            {
-                var numericResult = (double)result;
-                if ((double)((int)numericResult) == numericResult)
-                    return (int)numericResult;
-            }
             return result;
         }
 
