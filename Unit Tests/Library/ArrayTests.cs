@@ -33,6 +33,8 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("new Array(5).hasOwnProperty(0)"));
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(-1)"));
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(4294967296)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(1.5)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(NaN)"));
 
             // Array([item0, [item1 [, ... ]]])
             Assert.AreEqual(0, TestUtils.Evaluate("Array().length"));
@@ -136,7 +138,7 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.hasOwnProperty(2)"));
             Assert.AreEqual("1,2", TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.toString()"));
 
-            // Check very large length.
+            // Check that a length > 2^31 is reported correctly.
             Assert.AreEqual(4294967295.0, TestUtils.Evaluate("new Array(4294967295).length"));
 
             // The length property is virtual, but it should behave as though it was a real property.
