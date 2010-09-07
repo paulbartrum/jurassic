@@ -1695,9 +1695,18 @@ namespace Jurassic.Compiler
         /// <param name="root"> The root of the AST. </param>
         private void CheckASTValidity(Expression root)
         {
-            if (root is OperatorExpression)
+            // Push the root expression onto a stack.
+            Stack<Expression> stack = new Stack<Expression>();
+            stack.Push(root);
+
+            while (stack.Count > 0)
             {
-                var expression = (OperatorExpression)root;
+                // Pop the next expression from the stack.
+                var expression = stack.Pop() as OperatorExpression;
+                
+                // Only operator expressions are checked for validity.
+                if (expression == null)
+                    continue;
 
                 // Check the operator expression has the right number of operands.
                 if (expression.Operator.IsValidNumberOfOperands(expression.OperandCount) == false)
@@ -1709,7 +1718,7 @@ namespace Jurassic.Compiler
 
                 // Check the child nodes.
                 for (int i = 0; i < expression.OperandCount; i++)
-                    CheckASTValidity(expression.GetRawOperand(i));
+                    stack.Push(expression.GetRawOperand(i));
             }
         }
 
