@@ -425,7 +425,7 @@ namespace Jurassic.Library
                         return ((PropertyAccessorValue)value).GetValue(this);
 
                     // Otherwise, the property is the "magic" length property.
-                    return (int)((ArrayInstance)prototypeObject).Length;
+                    return (double)((ArrayInstance)prototypeObject).Length;
                 }
 
                 // Traverse the prototype chain.

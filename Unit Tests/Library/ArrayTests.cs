@@ -136,6 +136,9 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.hasOwnProperty(2)"));
             Assert.AreEqual("1,2", TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.toString()"));
 
+            // Check very large length.
+            Assert.AreEqual(4294967295.0, TestUtils.Evaluate("new Array(4294967295).length"));
+
             // The length property is virtual, but it should behave as though it was a real property.
             Assert.AreEqual(0, TestUtils.Evaluate("length = 0; with (Object.create(['one', 'two', 'three'])) { length = 5 } length"));
         }
