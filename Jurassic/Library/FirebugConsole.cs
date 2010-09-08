@@ -166,8 +166,7 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Tests that an expression is true. If not, it will write a message to the console and =
-        /// throw an exception.
+        /// Tests that an expression is true. If not, it will write a message to the console.
         /// </summary>
         /// <param name="expression"> The expression to test. </param>
         /// <param name="items"> The items to format. </param>
@@ -177,9 +176,9 @@ namespace Jurassic.Library
             if (expression == false)
             {
                 if (items.Length > 0)
-                    throw new JavaScriptException(string.Format("Assertion failed: {0}", Format(items)), -1, null);
+                    Error(string.Format("Assertion failed: {0}", Format(items)));
                 else
-                    throw new JavaScriptException("Assertion failed", -1, null);
+                    Error("Assertion failed");
             }
         }
 
