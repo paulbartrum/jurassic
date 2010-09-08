@@ -806,11 +806,41 @@ namespace Jurassic.Library
                 return thisObj;
 
             // Create a comparer delegate.
-            Comparison<object> comparer;
+            Func<object, object, double> comparer;
             if (comparisonFunction == null)
-                comparer = (a, b) => string.Compare(TypeConverter.ToString(a), TypeConverter.ToString(b), StringComparison.Ordinal);
+                comparer = (a, b) =>
+                {
+                    if (a == null && b == null)
+                        return 0f;
+                    if (a == null)
+                        return 1f;
+                    if (b == null)
+                        return -1f;
+                    if (a == Undefined.Value && b == Undefined.Value)
+                        return 0f;
+                    if (a == Undefined.Value)
+                        return 1f;
+                    if (b == Undefined.Value)
+                        return -1f;
+                    return string.Compare(TypeConverter.ToString(a), TypeConverter.ToString(b), StringComparison.Ordinal);
+                };
             else
-                comparer = (a, b) => TypeConverter.ToInt32(comparisonFunction.CallLateBound(thisObj.Engine.Global, a, b));
+                comparer = (a, b) =>
+                {
+                    if (a == null && b == null)
+                        return 0f;
+                    if (a == null)
+                        return 1f;
+                    if (b == null)
+                        return -1f;
+                    if (a == Undefined.Value && b == Undefined.Value)
+                        return 0f;
+                    if (a == Undefined.Value)
+                        return 1f;
+                    if (b == Undefined.Value)
+                        return -1f;
+                    return TypeConverter.ToNumber(comparisonFunction.CallLateBound(thisObj.Engine.Global, a, b));
+                }; 
 
             try
             {
@@ -1446,12 +1476,13 @@ namespace Jurassic.Library
         /// <param name="comparer"> A comparison function. </param>
         /// <param name="start"> The first index in the range. </param>
         /// <param name="end"> The last index in the range. </param>
-        private static void QuickSort(ObjectInstance array, Comparison<object> comparer, uint start, uint end)
+        private static void QuickSort(ObjectInstance array, Func<object, object, double> comparer, uint start, uint end)
         {
             if (end - start < 30)
             {
                 // Insertion sort is faster than quick sort for small arrays.
                 InsertionSort(array, comparer, start, end);
+                return;
             }
 
             // Choose a random pivot.
@@ -1469,7 +1500,7 @@ namespace Jurassic.Library
             uint newPivotIndex = start;
             for (uint i = start; i < end; i++)
             {
-                if (comparer(array[i], pivotValue) <= 0)
+                if (comparer(array[i], pivotValue) <= 0.0)
                 {
                     Swap(array, i, newPivotIndex);
                     newPivotIndex++;
@@ -1495,7 +1526,7 @@ namespace Jurassic.Library
         /// <param name="comparer"> A comparison function. </param>
         /// <param name="start"> The first index in the range. </param>
         /// <param name="end"> The last index in the range. </param>
-        private static void InsertionSort(ObjectInstance array, Comparison<object> comparer, uint start, uint end)
+        private static void InsertionSort(ObjectInstance array, Func<object, object, double> comparer, uint start, uint end)
         {
             for (uint i = start + 1; i <= end; i++)
             {
@@ -1507,7 +1538,7 @@ namespace Jurassic.Library
                 // Normally the for loop above would continue until j < start but since we are
                 // using uint it doesn't work when start == 0.  Therefore the for loop stops one
                 // short of start then the extra loop iteration runs below.
-                if (j == start && comparer(array[j], value) > 0)
+                if (j == start && comparer(array[j], value) > 0.0)
                 {
                     array[j + 1] = array[j];
                     j--;
