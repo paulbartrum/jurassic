@@ -37,7 +37,7 @@ namespace REPL
                     else
                         Console.ForegroundColor = ConsoleColor.White;
                     Console.Write("-> ");
-                    Console.WriteLine(ToString(result));
+                    Console.WriteLine(Jurassic.TypeConverter.ToString(result));
                     Console.ForegroundColor = original;
                 }
                 catch (Exception ex)
@@ -45,13 +45,6 @@ namespace REPL
                     console.Error(ex.Message);
                 }
             }
-        }
-
-        public static string ToString(object obj)
-        {
-            if (obj is bool)
-                return ((bool)obj) == false ? "false" : "true";
-            return obj.ToString();
         }
     }
 }
