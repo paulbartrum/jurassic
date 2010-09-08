@@ -287,7 +287,7 @@ namespace Jurassic.Compiler
                 generator.Duplicate();
                 var endOfIf1 = generator.CreateLabel();
                 generator.BranchIfNotNull(endOfIf1);
-                EmitHelpers.EmitThrow(generator, "EvalError", "Internal error: runtime scope chain is too short");
+                EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too short");
                 generator.DefineLabelPosition(endOfIf1);
 
                 // if ((scope is DeclarativeScope/ObjectScope) == false)
@@ -296,7 +296,7 @@ namespace Jurassic.Compiler
                 generator.Duplicate();
                 var endOfIf2 = generator.CreateLabel();
                 generator.BranchIfNotNull(endOfIf2);
-                EmitHelpers.EmitThrow(generator, "EvalError", string.Format("Internal error: incorrect runtime scope type (expected {0})", scope.GetType().Name));
+                EmitHelpers.EmitThrow(generator, "Error", string.Format("Internal error: incorrect runtime scope type (expected {0})", scope.GetType().Name));
                 generator.DefineLabelPosition(endOfIf2);
 
                 // scope = scope.ParentScope
@@ -308,7 +308,7 @@ namespace Jurassic.Compiler
             //   throw new JavaScriptException()
             var endOfIf3 = generator.CreateLabel();
             generator.BranchIfNull(endOfIf3);
-            EmitHelpers.EmitThrow(generator, "EvalError", "Internal error: runtime scope chain is too long");
+            EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too long");
             generator.DefineLabelPosition(endOfIf3);
         }
 
