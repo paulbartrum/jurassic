@@ -322,38 +322,48 @@ namespace Jurassic.Library
                 // Load the "this" parameter passed by the client.
                 il.Emit(OpCodes.Ldarg_1);
 
-                if (binderMethod.ThisType != typeof(object))
+                bool inheritsFromObjectInstance = typeof(ObjectInstance).IsAssignableFrom(binderMethod.ThisType);
+                if (binderMethod.ThisType.IsClass == true && inheritsFromObjectInstance == false &&
+                    binderMethod.ThisType != typeof(string) && binderMethod.ThisType != typeof(object))
                 {
-                    // If the target "this" object type is not of type object, throw an error if
-                    // the value is undefined or null.
-                    il.Emit(OpCodes.Dup);
-                    var temp = il.DeclareLocal(typeof(object));
-                    il.Emit(OpCodes.Stloc_S, temp);
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldloc_S, temp);
-                    il.Emit(OpCodes.Ldstr, binderMethod.Name);
-                    il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject, null);
+                    // If the "this" object is an unsupported class, pass it through unmodified.
+                    il.Emit(OpCodes.Castclass, binderMethod.ThisType);
                 }
-
-                // Convert to the target type.
-                EmitConversion(il, typeof(object), binderMethod.ThisType);
-
-                if (binderMethod.ThisType != typeof(ObjectInstance) && typeof(ObjectInstance).IsAssignableFrom(binderMethod.ThisType))
+                else
                 {
-                    // EmitConversionToObjectInstance can emit null if the toType is derived from ObjectInstance.
-                    // Therefore, if the value emitted is null it means that the "thisObject" is a type derived
-                    // from ObjectInstance (e.g. FunctionInstance) and the value provided is a different type
-                    // (e.g. ArrayInstance).  In this case, throw an exception explaining that the function is
-                    // not generic.
-                    var endOfThrowLabel = il.DefineLabel();
-                    il.Emit(OpCodes.Dup);
-                    il.Emit(OpCodes.Brtrue_S, endOfThrowLabel);
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldstr, "TypeError");
-                    il.Emit(OpCodes.Ldstr, string.Format("The method '{0}' is not generic", binderMethod.Name));
-                    il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
-                    il.Emit(OpCodes.Throw);
-                    il.MarkLabel(endOfThrowLabel);
+                    if (binderMethod.ThisType != typeof(object))
+                    {
+                        // If the target "this" object type is not of type object, throw an error if
+                        // the value is undefined or null.
+                        il.Emit(OpCodes.Dup);
+                        var temp = il.DeclareLocal(typeof(object));
+                        il.Emit(OpCodes.Stloc_S, temp);
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldloc_S, temp);
+                        il.Emit(OpCodes.Ldstr, binderMethod.Name);
+                        il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject, null);
+                    }
+
+                    // Convert to the target type.
+                    EmitConversion(il, typeof(object), binderMethod.ThisType);
+
+                    if (binderMethod.ThisType != typeof(ObjectInstance) && inheritsFromObjectInstance == true)
+                    {
+                        // EmitConversionToObjectInstance can emit null if the toType is derived from ObjectInstance.
+                        // Therefore, if the value emitted is null it means that the "thisObject" is a type derived
+                        // from ObjectInstance (e.g. FunctionInstance) and the value provided is a different type
+                        // (e.g. ArrayInstance).  In this case, throw an exception explaining that the function is
+                        // not generic.
+                        var endOfThrowLabel = il.DefineLabel();
+                        il.Emit(OpCodes.Dup);
+                        il.Emit(OpCodes.Brtrue_S, endOfThrowLabel);
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldstr, "TypeError");
+                        il.Emit(OpCodes.Ldstr, string.Format("The method '{0}' is not generic", binderMethod.Name));
+                        il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
+                        il.Emit(OpCodes.Throw);
+                        il.MarkLabel(endOfThrowLabel);
+                    }
                 }
             }
 

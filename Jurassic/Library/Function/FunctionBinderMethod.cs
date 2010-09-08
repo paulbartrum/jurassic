@@ -57,8 +57,6 @@ namespace Jurassic.Library
             else if (method.IsStatic == false)
             {
                 this.ThisType = method.DeclaringType;
-                if (typeof(ObjectInstance).IsAssignableFrom(this.ThisType) == false)
-                    throw new InvalidOperationException(string.Format("Instance methods must be declared in a type deriving from {0}.", typeof(ObjectInstance).Name));
             }
 
             // Calculate the min and max parameter count.
