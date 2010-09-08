@@ -653,6 +653,9 @@ namespace Jurassic.Library
         /// <param name="item"> The item to append to the array. </param>
         public int Push(object item)
         {
+            if (this.length == uint.MaxValue)
+                throw new JavaScriptException(this.Engine, "RangeError", "The array is too long");
+
             if (this.dense != null)
             {
                 // Check if we need to enlarge the array.
