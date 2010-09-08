@@ -44,10 +44,20 @@ namespace Jurassic.Library
         {
         }
 
-        public static SparseArray FromDenseArray(object[] array)
+        /// <summary>
+        /// Creates a sparse array from the given dense array.
+        /// </summary>
+        /// <param name="array"> The array to copy items from. </param>
+        /// <param name="length"> The number of items to copy. </param>
+        /// <returns> A new sparse array containing the items from the given array. </returns>
+        public static SparseArray FromDenseArray(object[] array, int length)
         {
+            if (array == null)
+                throw new ArgumentNullException("array");
+            if (length > array.Length)
+                throw new ArgumentOutOfRangeException("length");
             var result = new SparseArray();
-            result.CopyTo(array, 0, array.Length);
+            result.CopyTo(array, 0, length);
             return result;
         }
 
