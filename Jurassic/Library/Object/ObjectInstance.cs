@@ -601,9 +601,10 @@ namespace Jurassic.Library
                 {
                     // Otherwise, the property is the "magic" length property.
                     double length = TypeConverter.ToNumber(value);
-                    if (length < 0 || length > uint.MaxValue)
+                    uint lengthUint32 = TypeConverter.ToUint32(length);
+                    if (length != (double)lengthUint32)
                         throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
-                    ((ArrayInstance)this).Length = TypeConverter.ToUint32(length);
+                    ((ArrayInstance)this).Length = lengthUint32;
                 }
                 return true;
             }

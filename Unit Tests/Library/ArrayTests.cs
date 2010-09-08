@@ -143,6 +143,11 @@ namespace UnitTests
 
             // The length property is virtual, but it should behave as though it was a real property.
             Assert.AreEqual(0, TestUtils.Evaluate("length = 0; with (Object.create(['one', 'two', 'three'])) { length = 5 } length"));
+
+            // Must be an integer >= 0 and <= uint.MaxValue
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("x = []; x.length = -1"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("x = []; x.length = NaN"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("x = []; x.length = 4294967296"));
         }
 
         [TestMethod]
