@@ -17,19 +17,19 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <param name="flags"> Flags that modify the binding process. </param>
-        public FunctionBinderMethod(MethodInfo method, FunctionBinderFlags flags = FunctionBinderFlags.None)
+        public FunctionBinderMethod(MethodInfo method, JSFunctionFlags flags = JSFunctionFlags.None)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
             this.Method = method;
             this.Flags = flags;
-            this.Preferred = (flags & FunctionBinderFlags.Preferred) != 0;
-            this.HasEngineParameter = (flags & FunctionBinderFlags.HasEngineParameter) != 0;
+            this.Preferred = (flags & JSFunctionFlags.Preferred) != 0;
+            this.HasEngineParameter = (flags & JSFunctionFlags.HasEngineParameter) != 0;
             if (this.HasEngineParameter == true && method.IsStatic == false)
-                throw new InvalidOperationException(string.Format("The {0} flag cannot be used on the instance method '{1}'.", FunctionBinderFlags.HasEngineParameter, method.Name));
-            this.HasExplicitThisParameter = (flags & FunctionBinderFlags.HasThisObject) != 0;
+                throw new InvalidOperationException(string.Format("The {0} flag cannot be used on the instance method '{1}'.", JSFunctionFlags.HasEngineParameter, method.Name));
+            this.HasExplicitThisParameter = (flags & JSFunctionFlags.HasThisObject) != 0;
             if (this.HasExplicitThisParameter == true && method.IsStatic == false)
-                throw new InvalidOperationException(string.Format("The {0} flag cannot be used on the instance method '{1}'.", FunctionBinderFlags.HasThisObject, method.Name));
+                throw new InvalidOperationException(string.Format("The {0} flag cannot be used on the instance method '{1}'.", JSFunctionFlags.HasThisObject, method.Name));
 
             var parameters = method.GetParameters();
 
@@ -126,7 +126,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the flags that were passed to the constructor.
         /// </summary>
-        public FunctionBinderFlags Flags
+        public JSFunctionFlags Flags
         {
             get;
             private set;

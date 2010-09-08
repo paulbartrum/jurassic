@@ -817,7 +817,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="key"> Unused. </param>
         /// <returns> The date as a serializable string. </returns>
-        [JSFunction(Name = "toJSON", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "toJSON", Flags = JSFunctionFlags.HasThisObject)]
         public static object ToJSON(ObjectInstance thisObject, string key)
         {
             var number = TypeConverter.ToPrimitive(thisObject, PrimitiveTypeHint.Number);

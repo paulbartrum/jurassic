@@ -59,7 +59,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The associated script engine. </param>
         /// <returns> The string, as it was before encoding. </returns>
-        [JSFunction(Name = "decodeURI", Flags = FunctionBinderFlags.HasEngineParameter)]
+        [JSFunction(Name = "decodeURI", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string DecodeURI(ScriptEngine engine, string input)
         {
             System.Threading.LazyInitializer.EnsureInitialized(ref decodeURIReservedSet,
@@ -73,7 +73,7 @@ namespace Jurassic.Library
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to decode. </param>
         /// <returns> The string, as it was before encoding. </returns>
-        [JSFunction(Name = "decodeURIComponent", Flags = FunctionBinderFlags.HasEngineParameter)]
+        [JSFunction(Name = "decodeURIComponent", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string DecodeURIComponent(ScriptEngine engine, string input)
         {
             System.Threading.LazyInitializer.EnsureInitialized(ref decodeURIComponentReservedSet,
@@ -87,7 +87,7 @@ namespace Jurassic.Library
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to encode. </param>
         /// <returns> A copy of the given URI with the special characters encoded. </returns>
-        [JSFunction(Name = "encodeURI", Flags = FunctionBinderFlags.HasEngineParameter)]
+        [JSFunction(Name = "encodeURI", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string EncodeURI(ScriptEngine engine, string input)
         {
             System.Threading.LazyInitializer.EnsureInitialized(ref encodeURIUnescapedSet,
@@ -101,7 +101,7 @@ namespace Jurassic.Library
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to encode. </param>
         /// <returns> A copy of the given URI with the special characters encoded. </returns>
-        [JSFunction(Name = "encodeURIComponent", Flags = FunctionBinderFlags.HasEngineParameter)]
+        [JSFunction(Name = "encodeURIComponent", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string EncodeURIComponent(ScriptEngine engine, string input)
         {
             System.Threading.LazyInitializer.EnsureInitialized(ref encodeURIComponentUnescapedSet,
@@ -139,7 +139,7 @@ namespace Jurassic.Library
         /// <param name="code"> The source code to evaluate. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        [JSFunction(Name = "eval", Flags = FunctionBinderFlags.HasEngineParameter)]
+        [JSFunction(Name = "eval", Flags = JSFunctionFlags.HasEngineParameter)]
         public static object Eval(ScriptEngine engine, object code)
         {
             if (TypeUtilities.IsString(code) == false)
@@ -228,7 +228,7 @@ namespace Jurassic.Library
         /// <returns> The equivalent integer value of the given string. </returns>
         /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
         /// character, at which point parsing stops.  No error is returned in this case. </remarks>
-        [JSFunction(Name = "parseInt", Flags = FunctionBinderFlags.HasEngineParameter)]
+        [JSFunction(Name = "parseInt", Flags = JSFunctionFlags.HasEngineParameter)]
         public static double ParseInt(ScriptEngine engine, string input, double radix = 0)
         {
             // Check for a valid radix.
