@@ -518,11 +518,16 @@ namespace UnitTests
             Assert.AreEqual(4, TestUtils.Evaluate("array[3]"));
 
             // Unless you use a custom comparer function.
-            TestUtils.Evaluate("var array = [1, 21, 4, 11].sort(function(a,b) { return a-b; })");
+            TestUtils.Evaluate("var array = [1, 21, 4, 11, 5, 3].sort(function(a,b) { return a-b; })");
             Assert.AreEqual(1, TestUtils.Evaluate("array[0]"));
-            Assert.AreEqual(4, TestUtils.Evaluate("array[1]"));
-            Assert.AreEqual(11, TestUtils.Evaluate("array[2]"));
-            Assert.AreEqual(21, TestUtils.Evaluate("array[3]"));
+            Assert.AreEqual(3, TestUtils.Evaluate("array[1]"));
+            Assert.AreEqual(4, TestUtils.Evaluate("array[2]"));
+            Assert.AreEqual(5, TestUtils.Evaluate("array[3]"));
+            Assert.AreEqual(11, TestUtils.Evaluate("array[4]"));
+            Assert.AreEqual(21, TestUtils.Evaluate("array[5]"));
+
+            // The comparison function doesn't have to return integers.
+            Assert.AreEqual("0.1,0.2,0.4,0.5,0.6,0.7", TestUtils.Evaluate("[0.7, 0.1, 0.5, 0.4, 0.6, 0.2].sort(function(a,b) { return a-b; }).toString()"));
 
             // Try sorting some small arrays.
             TestUtils.Evaluate("var array = ['a', 'c', 'b'].sort()");
@@ -554,6 +559,31 @@ namespace UnitTests
                 }");
             TestUtils.Evaluate(@"var x = new Array(2); x[1] = 1; x.sort(badCompareFunction);");
             TestUtils.Evaluate(@"var x = new Array(2); x[0] = 1; x.sort(badCompareFunction);");
+
+            // The comparer function is not called for elements that are undefined.
+            TestUtils.Evaluate(@"
+                var myComparefn = function(x,y) {
+                  if (x === undefined) return -1; 
+                  if (y === undefined) return 1;
+                  return 0;
+                }
+                var x = new Array(2);
+                x[1] = 1; 
+                x.sort(myComparefn);");
+            Assert.AreEqual(2, TestUtils.Evaluate(@"x.length"));
+            Assert.AreEqual(1, TestUtils.Evaluate(@"x[0]"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate(@"x[1]"));
+            TestUtils.Evaluate(@"
+                var myComparefn = function(x,y) {
+                  if (x === undefined) return -1; 
+                  if (y === undefined) return 1;
+                  return 0;
+                }
+                var x = [undefined, 1];
+                x.sort(myComparefn);");
+            Assert.AreEqual(2, TestUtils.Evaluate(@"x.length"));
+            Assert.AreEqual(1, TestUtils.Evaluate(@"x[0]"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate(@"x[1]"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.sort.length"));
