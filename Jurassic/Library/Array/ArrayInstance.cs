@@ -35,6 +35,8 @@ namespace Jurassic.Library
         internal ArrayInstance(ObjectInstance prototype, uint length, uint capacity)
             : base(prototype)
         {
+            if (length > capacity)
+                throw new ArgumentOutOfRangeException("length", "length must be less than or equal to capacity.");
             if (length <= 1000)
             {
                 this.dense = new object[(int)capacity];
@@ -118,29 +120,32 @@ namespace Jurassic.Library
                     if (this.length < this.dense.Length / 2 && this.dense.Length > 100)
                     {
                         // Shrink the array.
-                        ResizeDenseArray(this.length + 10);
+                        ResizeDenseArray(this.length + 10, this.length);
                     }
                     else if (this.length > this.dense.Length + 10)
                     {
                         // Switch to a sparse array.
-                        this.sparse = SparseArray.FromDenseArray(this.dense);
+                        this.sparse = SparseArray.FromDenseArray(this.dense, (int)previousLength);
                         this.dense = null;
                     }
                     else if (this.length > this.dense.Length)
                     {
                         // Enlarge the array.
-                        ResizeDenseArray(this.length + 10);
+                        ResizeDenseArray(this.length + 10, previousLength);
                         this.denseMayContainHoles = true;
                     }
                     else if (this.length > previousLength)
                     {
                         // Increasing the length property creates an array with holes.
                         this.denseMayContainHoles = true;
+
+                        // Remove all the elements with indices >= length.
+                        Array.Clear(this.dense, (int)previousLength, (int)(this.length - previousLength));
                     }
                 }
                 else
                 {
-                    // Remove all the elements with indices > length.
+                    // Remove all the elements with indices >= length.
                     if (this.length < previousLength)
                         this.sparse.DeleteRange(this.length, previousLength - this.length);
                 }
@@ -276,7 +281,7 @@ namespace Jurassic.Library
                     if (index < this.dense.Length + 10)
                     {
                         // Enlarge the dense array.
-                        ResizeDenseArray((uint)(this.dense.Length * 2 + 10));
+                        ResizeDenseArray((uint)(this.dense.Length * 2 + 10), this.length);
 
                         // Set the value.
                         this.dense[index] = value;
@@ -285,7 +290,7 @@ namespace Jurassic.Library
                     else
                     {
                         // Switch to a sparse array.
-                        this.sparse = SparseArray.FromDenseArray(this.dense);
+                        this.sparse = SparseArray.FromDenseArray(this.dense, (int)this.length);
                         this.dense = null;
                         this.sparse[index] = value;
                     }
@@ -454,6 +459,13 @@ namespace Jurassic.Library
                         // Add the items in the array to the end of the resulting array.
                         var array = (ArrayInstance)item;
                         Array.Copy(array.dense, 0, result, index, (int)array.Length);
+                        if (array.denseMayContainHoles == true && array.Prototype != null)
+                        {
+                            // Populate holes from the prototype.
+                            for (uint i = 0; i < array.length; i++)
+                                if (array.dense[i] == null)
+                                    result[index + i] = array.Prototype.GetPropertyValue(i);
+                        }
                         index += (int)array.Length;
                     }
                     else
@@ -479,9 +491,27 @@ namespace Jurassic.Library
                         // Add the items in the array to the end of the resulting array.
                         var array = (ArrayInstance)item;
                         if (array.dense != null)
+                        {
                             result.CopyTo(array.dense, (uint)index, (int)array.Length);
+                            if (array.Prototype != null)
+                            {
+                                // Populate holes from the prototype.
+                                for (uint i = 0; i < array.length; i++)
+                                    if (array.dense[i] == null)
+                                        result[(uint)index + i] = array.Prototype.GetPropertyValue(i);
+                            }
+                        }
                         else
+                        {
                             result.CopyTo(array.sparse, (uint)index);
+                            if (array.Prototype != null)
+                            {
+                                // Populate holes from the prototype.
+                                for (uint i = 0; i < array.Length; i++)
+                                    if (array.sparse[i] == null)
+                                        result[(uint)index + i] = array.Prototype.GetPropertyValue(i);
+                            }
+                        }
                         index += (int)array.Length;
                     }
                     else
@@ -591,12 +621,16 @@ namespace Jurassic.Library
                 // Get the last value.
                 var result = this.dense[this.length];
 
+                // If the element does not exist in this array, it may exist in the prototype.
+                if (result == null && this.Prototype != null)
+                    result = this.Prototype.GetPropertyValue(this.length);
+
                 // Delete it from the array.
                 this.dense[this.length] = null;
 
                 // Check if the array should be shrunk.
                 if (this.length < this.dense.Length / 2 && this.length > 10)
-                    ResizeDenseArray((uint)(this.dense.Length / 2 + 10));
+                    ResizeDenseArray((uint)(this.dense.Length / 2 + 10), this.length);
 
                 // Return the last value.
                 return result;
@@ -605,6 +639,10 @@ namespace Jurassic.Library
             {
                 // Get the last value.
                 var result = this.sparse[this.length];
+
+                // If the element does not exist in this array, it may exist in the prototype.
+                if (result == null && this.Prototype != null)
+                    result = this.Prototype.GetPropertyValue(this.length);
 
                 // Delete it from the array.
                 this.sparse.Delete(this.length);
@@ -620,7 +658,7 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="items"> The items to append to the array. </param>
         [JSFunction(Name = "push", Flags = FunctionBinderFlags.HasThisObject)]
-        public static int Push(ObjectInstance thisObj, params object[] items)
+        public static double Push(ObjectInstance thisObj, params object[] items)
         {
             // If the "this" object is an array, use the fast version of this method.
             if (thisObj is ArrayInstance && items.Length == 1)
@@ -629,9 +667,20 @@ namespace Jurassic.Library
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
-            // This method only supports strings of length up to 2^31-1.
             if (arrayLength > uint.MaxValue - items.Length)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+            {
+                // Even though attempting to push more items than can fit in the array raises an
+                // error, the items are still pushed correctly (but the length is stuck at the
+                // maximum).
+                double arrayLength2 = arrayLength;
+                for (int i = 0; i < items.Length; i++)
+                {
+                    // Append the new item to the array.
+                    thisObj.SetPropertyValue((arrayLength2++).ToString(), items[i], true);
+                }
+                SetLength(thisObj, uint.MaxValue);
+                throw new JavaScriptException(thisObj.Engine, "RangeError", "Invalid array length");
+            }
 
             // For each item to append.
             for (int i = 0; i < items.Length; i++)
@@ -644,7 +693,7 @@ namespace Jurassic.Library
             SetLength(thisObj, arrayLength);
 
             // Return the new length.
-            return (int)arrayLength;
+            return (double)arrayLength;
         }
 
         /// <summary>
@@ -654,13 +703,19 @@ namespace Jurassic.Library
         public int Push(object item)
         {
             if (this.length == uint.MaxValue)
-                throw new JavaScriptException(this.Engine, "RangeError", "The array is too long");
+            {
+                // Even though attempting to push more items than can fit in the array raises an
+                // error, the items are still pushed correctly (but the length is stuck at the
+                // maximum).
+                SetPropertyValue(this.length.ToString(), item, false);
+                throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
+            }
 
             if (this.dense != null)
             {
                 // Check if we need to enlarge the array.
                 if (this.length == this.dense.Length)
-                    ResizeDenseArray(this.length * 2 + 10);
+                    ResizeDenseArray(this.length * 2 + 10, this.length);
 
                 // Append the new item to the array.
                 this.dense[this.length++] = item;
@@ -935,14 +990,14 @@ namespace Jurassic.Library
                 if (array.denseMayContainHoles == true && array.Prototype != null)
                 {
                     // Find all the holes and populate them from the prototype.
-                    for (int i = 0; i < array.length; i++)
+                    for (uint i = 0; i < array.length; i++)
                         if (array.dense[i] == null)
-                            array.dense[i] = array.Prototype.GetPropertyValue((uint)i);
+                            array.dense[i] = array.Prototype.GetPropertyValue(i);
                 }
 
                 // Allocate some more space if required.
                 if (array.length + items.Length > array.dense.Length)
-                    array.ResizeDenseArray((uint)Math.Max(array.dense.Length * 2 + 10, array.length + items.Length * 10));
+                    array.ResizeDenseArray((uint)Math.Max(array.dense.Length * 2 + 10, array.length + items.Length * 10), array.length);
 
                 // Shift all the items up.
                 Array.Copy(array.dense, 0, array.dense, items.Length, array.length);
@@ -1457,18 +1512,22 @@ namespace Jurassic.Library
         private static void SetLength(ObjectInstance thisObj, uint value)
         {
             if (thisObj is ArrayInstance)
-                ((ArrayInstance)thisObj).length = value;
-            thisObj.SetPropertyValue("length", (double)value, true);
+                ((ArrayInstance)thisObj).Length = value;
+            else
+                thisObj.SetPropertyValue("length", (double)value, true);
         }
 
         /// <summary>
         /// Enlarges the size of the dense array.
         /// </summary>
         /// <param name="newCapacity"> The new capacity of the array. </param>
-        private void ResizeDenseArray(uint newCapacity)
+        /// <param name="length"> The valid number of items in the array. </param>
+        private void ResizeDenseArray(uint newCapacity, uint length)
         {
+            if (newCapacity < length)
+                throw new InvalidOperationException("Cannot resize smaller than the length property.");
             var resizedArray = new object[(int)newCapacity];
-            Array.Copy(this.dense, resizedArray, Math.Min(this.dense.Length, (int)newCapacity));
+            Array.Copy(this.dense, resizedArray, (int)length);
             this.dense = resizedArray;
         }
 

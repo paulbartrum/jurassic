@@ -137,6 +137,7 @@ namespace UnitTests
             Assert.AreEqual("1,2", TestUtils.Evaluate("var x = [1, 2, 3]; x.length = 2; x.toString()"));
             Assert.AreEqual(false, TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.hasOwnProperty(2)"));
             Assert.AreEqual("1,2", TestUtils.Evaluate("var x = [1, 2, 3]; x[100] = 1; x.length = 2; x.toString()"));
+            Assert.AreEqual("1,2,", TestUtils.Evaluate("var x = [1, 2, 3]; x.length = 2; x.length = 3; x.toString()"));
 
             // Check that a length > 2^31 is reported correctly.
             Assert.AreEqual(4294967295.0, TestUtils.Evaluate("new Array(4294967295).length"));
@@ -221,10 +222,30 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("x[0]"));
             Assert.AreEqual(3, TestUtils.Evaluate("y[0]"));
 
+            // Try concat with a sparse array.
+            TestUtils.Evaluate("var x = [1, 2]; x = x.concat(new Array(2000))");
+            Assert.AreEqual(2002, TestUtils.Evaluate("x.length"));
+
             // concat is generic.
             TestUtils.Evaluate("var x = new Number(5);");
             TestUtils.Evaluate("x.concat = Array.prototype.concat");
             Assert.AreEqual("5,6", TestUtils.Evaluate("x.concat(6).toString()"));
+
+            // concat() can retrieve array items from the prototype.
+            TestUtils.Evaluate("Array.prototype[1] = 1");
+            try
+            {
+                Assert.AreEqual(false, TestUtils.Evaluate("x = [0]; x.length = 2; x.hasOwnProperty(1)"));
+                Assert.AreEqual("0,1", TestUtils.Evaluate("x = [0]; x.length = 2; x.concat().toString()"));
+                Assert.AreEqual(false, TestUtils.Evaluate("x = [0]; x.length = 2; x.concat(); x.hasOwnProperty(1)"));
+                Assert.AreEqual(true, TestUtils.Evaluate("x = [0]; x.length = 2; x = x.concat(); x.hasOwnProperty(1)"));
+                Assert.AreEqual(1, TestUtils.Evaluate("x = new Array(2000); x = x.concat(); x[1]"));
+                Assert.AreEqual(true, TestUtils.Evaluate("x = new Array(2000); x = x.concat(); x.hasOwnProperty(1)"));
+            }
+            finally
+            {
+                TestUtils.Evaluate("delete Array.prototype[1]");
+            }
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.concat.length"));
@@ -270,6 +291,17 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("x.length"));
             Assert.AreEqual("undefined", TestUtils.Evaluate("typeof(x[1])"));
 
+            // pop() can retrieve array items from the prototype.
+            TestUtils.Evaluate("Array.prototype[1] = 1");
+            try
+            {
+                Assert.AreEqual(1, TestUtils.Evaluate("x = [0]; x.length = 2; x.pop();"));
+            }
+            finally
+            {
+                TestUtils.Evaluate("delete Array.prototype[1]");
+            }
+
             // length
             Assert.AreEqual(0, TestUtils.Evaluate("Array.prototype.pop.length"));
         }
@@ -299,6 +331,13 @@ namespace UnitTests
             Assert.AreEqual(3, TestUtils.Evaluate("x.push(7)"));
             Assert.AreEqual(7, TestUtils.Evaluate("x[2]"));
             Assert.AreEqual(3, TestUtils.Evaluate("x.length"));
+
+            // push with very large arrays.
+            Assert.AreEqual(1, TestUtils.Evaluate("x = []; x.length = 4294967295; try { x.push(1); } catch (e) { } x[4294967295]"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = []; x.length = 4294967294; try { x.push(1, 2, 3); } catch (e) { } x[4294967294]"));
+            Assert.AreEqual(2, TestUtils.Evaluate("x = []; x.length = 4294967294; try { x.push(1, 2, 3); } catch (e) { } x[4294967295]"));
+            Assert.AreEqual(3, TestUtils.Evaluate("x = []; x.length = 4294967294; try { x.push(1, 2, 3); } catch (e) { } x[4294967296]"));
+            Assert.AreEqual(4294967295.0, TestUtils.Evaluate("x = []; x.length = 4294967294; try { x.push(1, 2, 3); } catch (e) { } x.length"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.push.length"));
