@@ -421,7 +421,7 @@ namespace Jurassic.Library
         /// <param name="items"> Any number of items to append. </param>
         /// <returns> A new array consisting of the values of this array plus any number of
         /// additional items. </returns>
-        [JSFunction(Name = "concat", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "concat", Flags = JSFunctionFlags.HasThisObject)]
         public static ArrayInstance Concat(ObjectInstance thisObj, params object[] items)
         {
             // Create a new items array with the thisObject at the beginning.
@@ -534,7 +534,7 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="separator"> The string to use as a separator. </param>
         /// <returns> A string that consists of the element values separated by the separator string. </returns>
-        [JSFunction(Name = "join", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "join", Flags = JSFunctionFlags.HasThisObject)]
         public static string Join(ObjectInstance thisObj, string separator = ",")
         {
             // Get the length of the array.
@@ -570,7 +570,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array to operate on. </param>
         /// <returns> The last element from the array. </returns>
-        [JSFunction(Name = "pop", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "pop", Flags = JSFunctionFlags.HasThisObject)]
         public static object Pop(ObjectInstance thisObj)
         {
             // If the "this" object is an array, use the fast version of this method.
@@ -657,7 +657,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="items"> The items to append to the array. </param>
-        [JSFunction(Name = "push", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "push", Flags = JSFunctionFlags.HasThisObject)]
         public static double Push(ObjectInstance thisObj, params object[] items)
         {
             // If the "this" object is an array, use the fast version of this method.
@@ -735,7 +735,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> The array that is being operated on. </returns>
-        [JSFunction(Name = "reverse", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "reverse", Flags = JSFunctionFlags.HasThisObject)]
         public static ObjectInstance Reverse(ObjectInstance thisObj)
         {
             // Get the length of the array.
@@ -768,7 +768,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> The first element in the array. </returns>
-        [JSFunction(Name = "shift", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "shift", Flags = JSFunctionFlags.HasThisObject)]
         public static object Shift(ObjectInstance thisObj)
         {
             // Get the length of the array.
@@ -815,7 +815,7 @@ namespace Jurassic.Library
         /// <paramref name="end"/> is less than or equal to <paramref name="start"/> then an empty
         /// array is returned. </param>
         /// <returns> A section of an array. </returns>
-        [JSFunction(Name = "slice", Flags = FunctionBinderFlags.HasThisObject, Length = 2)]
+        [JSFunction(Name = "slice", Flags = JSFunctionFlags.HasThisObject, Length = 2)]
         public static ArrayInstance Slice(ObjectInstance thisObj, int start, int end = int.MaxValue)
         {
             // Get the length of the array.
@@ -853,7 +853,7 @@ namespace Jurassic.Library
         /// less than the second argument, zero if the arguments are equal or a number greater than
         /// zero if the first argument is greater than Defaults to an ascending ASCII ordering. </param>
         /// <returns> The array that was sorted. </returns>
-        [JSFunction(Name = "sort", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "sort", Flags = JSFunctionFlags.HasThisObject)]
         public static ObjectInstance Sort(ObjectInstance thisObj, FunctionInstance comparisonFunction = null)
         {
             // Get the length of the array.
@@ -921,7 +921,7 @@ namespace Jurassic.Library
         /// <param name="deleteCount"> The number of elements to delete. </param>
         /// <param name="items"> The items to insert. </param>
         /// <returns> An array containing the deleted elements, if any. </returns>
-        [JSFunction(Name = "splice", Flags = FunctionBinderFlags.HasThisObject, Length = 2)]
+        [JSFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject, Length = 2)]
         public static ArrayInstance Splice(ObjectInstance thisObj, int start, int deleteCount, params object[] items)
         {
             // Get the length of the array.
@@ -976,7 +976,7 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="items"> The items to prepend. </param>
         /// <returns> The new length of the array. </returns>
-        [JSFunction(Name = "unshift", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "unshift", Flags = JSFunctionFlags.HasThisObject)]
         public static uint Unshift(ObjectInstance thisObj, params object[] items)
         {
             // If the "this" object is an array and the array is dense, use the fast version of this method.
@@ -1040,7 +1040,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> A locale-specific string representing this object. </returns>
-        [JSFunction(Name = "toLocaleString", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "toLocaleString", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToLocaleString(ObjectInstance thisObj)
         {
             // Get the length of the array.
@@ -1086,7 +1086,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> A string representing this object. </returns>
-        [JSFunction(Name = "toString", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToString(ObjectInstance thisObj)
         {
             // Try calling thisObj.join().
@@ -1112,7 +1112,7 @@ namespace Jurassic.Library
         /// <param name="fromIndex"> The array index to start searching. </param>
         /// <returns> The index of the given search element in the array, or <c>-1</c> if the
         /// element wasn't found. </returns>
-        [JSFunction(Name = "indexOf", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "indexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static int IndexOf(ObjectInstance thisObj, object searchElement, int fromIndex = 0)
         {
             // Get the length of the array.
@@ -1149,7 +1149,7 @@ namespace Jurassic.Library
         /// <param name="fromIndex"> The array index to start searching. </param>
         /// <returns> The index of the given search element in the array, or <c>-1</c> if the
         /// element wasn't found. </returns>
-        [JSFunction(Name = "lastIndexOf", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static int LastIndexOf(ObjectInstance thisObj, object searchElement, int fromIndex = int.MaxValue)
         {
             // Get the length of the array.
@@ -1189,7 +1189,7 @@ namespace Jurassic.Library
         /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
         /// <returns> <c>true</c> if every element of the array matches criteria defined by the
         /// given user-defined function; <c>false</c> otherwise. </returns>
-        [JSFunction(Name = "every", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "every", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static bool Every(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // Get the length of the array.
@@ -1227,7 +1227,7 @@ namespace Jurassic.Library
         /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
         /// <returns> <c>true</c> if at least one element of the array matches criteria defined by
         /// the given user-defined function; <c>false</c> otherwise. </returns>
-        [JSFunction(Name = "some", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "some", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static bool Some(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // Get the length of the array.
@@ -1261,7 +1261,7 @@ namespace Jurassic.Library
         /// array.  This function is called with three arguments: the value of the element, the
         /// index of the element, and the array that is being operated on. </param>
         /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        [JSFunction(Name = "forEach", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "forEach", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static void ForEach(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // Get the length of the array.
@@ -1297,7 +1297,7 @@ namespace Jurassic.Library
         /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
         /// <returns> A new array with the results of calling the given function on every element
         /// in the array. </returns>
-        [JSFunction(Name = "map", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "map", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static ArrayInstance Map(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // Get the length of the array.
@@ -1340,7 +1340,7 @@ namespace Jurassic.Library
         /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
         /// <returns> A copy of this array but with only those elements which produce <c>true</c>
         /// when passed to the provided function. </returns>
-        [JSFunction(Name = "filter", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "filter", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static ArrayInstance Filter(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // Get the length of the array.
@@ -1384,7 +1384,7 @@ namespace Jurassic.Library
         /// <param name="initialValue"> The initial accumulated value. </param>
         /// <returns> The accumulated value returned from the last invocation of the callback
         /// function. </returns>
-        [JSFunction(Name = "reduce", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "reduce", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static object Reduce(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
             // Get the length of the array.
@@ -1442,7 +1442,7 @@ namespace Jurassic.Library
         /// <param name="initialValue"> The initial accumulated value. </param>
         /// <returns> The accumulated value returned from the last invocation of the callback
         /// function. </returns>
-        [JSFunction(Name = "reduceRight", Flags = FunctionBinderFlags.HasThisObject, Length = 1)]
+        [JSFunction(Name = "reduceRight", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static object ReduceRight(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
             // Get the length of the array.

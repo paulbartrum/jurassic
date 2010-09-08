@@ -962,7 +962,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if a property with the given name exists on this object,
         /// <c>false</c> otherwise. </returns>
         /// <remarks> Objects in the prototype chain are not considered. </remarks>
-        [JSFunction(Name = "hasOwnProperty", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "hasOwnProperty", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static bool HasOwnProperty(ScriptEngine engine, object thisObject, string propertyName)
         {
             TypeUtilities.VerifyThisObject(engine, thisObject, "hasOwnProperty");
@@ -976,7 +976,7 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if this object is in the prototype chain of the given object;
         /// <c>false</c> otherwise. </returns>
-        [JSFunction(Name = "isPrototypeOf", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "isPrototypeOf", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static bool IsPrototypeOf(ScriptEngine engine, object thisObject, object obj)
         {
             if ((obj is ObjectInstance) == false)
@@ -1001,7 +1001,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if a property with the given name exists on this object and is
         /// enumerable, <c>false</c> otherwise. </returns>
         /// <remarks> Objects in the prototype chain are not considered. </remarks>
-        [JSFunction(Name = "propertyIsEnumerable", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "propertyIsEnumerable", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static bool PropertyIsEnumerable(ScriptEngine engine, object thisObject, string propertyName)
         {
             TypeUtilities.VerifyThisObject(engine, thisObject, "propertyIsEnumerable");
@@ -1034,7 +1034,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword. </param>
         /// <returns> A string representing the current object. </returns>
-        [JSFunction(Name = "toString", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "toString", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static string ToStringJS(ScriptEngine engine, object thisObject)
         {
             if (thisObject == null || thisObject == Undefined.Value)

@@ -3,7 +3,7 @@
 namespace Jurassic.Library
 {
     [Flags]
-    public enum FunctionBinderFlags
+    public enum JSFunctionFlags
     {
         /// <summary>
         /// No flags were specified.
