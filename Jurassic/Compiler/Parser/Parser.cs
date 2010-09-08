@@ -714,7 +714,7 @@ namespace Jurassic.Compiler
                         break;
                     }
                     else if (this.nextToken != PunctuatorToken.Comma)
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0}", Token.ToText(this.nextToken)), 1, "");
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
                     // Read past the comma token.
                     this.Expect(PunctuatorToken.Comma);
@@ -746,7 +746,7 @@ namespace Jurassic.Compiler
                     {
                         // This is a for-in statement.
                         if ((initializationExpression is IReferenceExpression) == false)
-                            throw new JavaScriptException(this.engine, "ReferenceError", "Invalid left-hand side in for-in", 1, "");
+                            throw new JavaScriptException(this.engine, "ReferenceError", "Invalid left-hand side in for-in", this.LineNumber, this.SourcePath);
                         forInReference = (IReferenceExpression)initializationExpression;
                     }
                 }
@@ -890,7 +890,7 @@ namespace Jurassic.Compiler
         private ReturnStatement ParseReturn()
         {
             if (this.context != CodeContext.Function)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Return statements are only allowed inside functions");
+                throw new JavaScriptException(this.engine, "SyntaxError", "Return statements are only allowed inside functions", this.LineNumber, this.SourcePath);
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
 
@@ -923,7 +923,7 @@ namespace Jurassic.Compiler
         {
             // This statement is not allowed in strict mode.
             if (this.StrictMode == true)
-                throw new JavaScriptException(this.engine, "SyntaxError", "The with statement is not supported in strict mode");
+                throw new JavaScriptException(this.engine, "SyntaxError", "The with statement is not supported in strict mode", this.LineNumber, this.SourcePath);
 
             var result = new WithStatement(this.labelsForCurrentStatement);
 
@@ -1064,7 +1064,7 @@ namespace Jurassic.Compiler
 
             // A line terminator is not allowed here.
             if (this.consumedLineTerminator == true)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Illegal newline after throw", 1, "");
+                throw new JavaScriptException(this.engine, "SyntaxError", "Illegal newline after throw", this.LineNumber, this.SourcePath);
 
             // Parse the expression to throw.
             result.Value = ParseExpression(PunctuatorToken.Semicolon);
@@ -1129,7 +1129,7 @@ namespace Jurassic.Compiler
 
             // There must be a catch or finally block.
             if (result.CatchBlock == null && result.FinallyBlock == null)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Missing catch or finally after try");
+                throw new JavaScriptException(this.engine, "SyntaxError", "Missing catch or finally after try", this.LineNumber, this.SourcePath);
 
             return result;
         }
@@ -1811,9 +1811,9 @@ namespace Jurassic.Compiler
                             // Add to the existing property.
                             var existingAccessor = existingValue as ObjectLiteralAccessor;
                             if (existingAccessor == null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter", propertyName));
+                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter", propertyName), this.LineNumber, this.SourcePath);
                             if (existingAccessor.Getter != null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have multiple getters", propertyName));
+                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have multiple getters", propertyName), this.LineNumber, this.SourcePath);
                             existingAccessor.Getter = function;
                         }
                     }
@@ -1829,9 +1829,9 @@ namespace Jurassic.Compiler
                             // Add to the existing property.
                             var existingAccessor = existingValue as ObjectLiteralAccessor;
                             if (existingAccessor == null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a setter", propertyName));
+                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a setter", propertyName), this.LineNumber, this.SourcePath);
                             if (existingAccessor.Setter != null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have multiple setters", propertyName));
+                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have multiple setters", propertyName), this.LineNumber, this.SourcePath);
                             existingAccessor.Setter = function;
                         }
                     }
@@ -1851,9 +1851,9 @@ namespace Jurassic.Compiler
                     if (properties.TryGetValue(propertyName, out existingValue) == true)
                     {
                         if (existingValue is ObjectLiteralAccessor)
-                            throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter/setter", propertyName), 1, "");
+                            throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter/setter", propertyName), this.LineNumber, this.SourcePath);
                         if (this.StrictMode == true)
-                            throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' already has a value", propertyName), 1, "");
+                            throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' already has a value", propertyName), this.LineNumber, this.SourcePath);
                     }
 
                     // Add the property setter to the list.
@@ -1893,7 +1893,7 @@ namespace Jurassic.Compiler
                 {
                     object literalValue = ((LiteralToken)this.nextToken).Value;
                     if ((literalValue is string || literalValue is double || literalValue is int) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), 1, "");
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     propertyName = ((LiteralToken)this.nextToken).Value.ToString();
                 }
                 wasIdentifier = false;
@@ -1911,7 +1911,7 @@ namespace Jurassic.Compiler
                 wasIdentifier = false;
             }
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), 1, "");
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Consume the token.
             this.Consume();
