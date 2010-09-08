@@ -38,7 +38,7 @@ namespace Jurassic
             : base(string.Format("{0}: {1}", name, message))
         {
             this.ErrorObject = CreateError(engine, name, message);
-            this.LineNumber = -1;
+            this.LineNumber = 0;
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Jurassic
             : base(string.Format("{0}: {1}", name, message), innerException)
         {
             this.ErrorObject = CreateError(engine, name, message);
-            this.LineNumber = -1;
+            this.LineNumber = 0;
         }
 
         /// <summary>
@@ -98,7 +98,8 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Gets the line number in the source file the error occurred on.
+        /// Gets the line number in the source file the error occurred on.  Can be <c>0</c> if no
+        /// line number information is available.
         /// </summary>
         public int LineNumber
         {
@@ -107,7 +108,8 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Gets the path or URL of the source file.  Can be <c>null</c>.
+        /// Gets the path or URL of the source file.  Can be <c>null</c> if no source information
+        /// is available.
         /// </summary>
         public string SourcePath
         {
