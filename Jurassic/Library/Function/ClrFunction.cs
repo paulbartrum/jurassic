@@ -11,7 +11,7 @@ namespace Jurassic.Library
     /// </summary>
     public class ClrFunction : FunctionInstance
     {
-        bool bindThis;
+        object thisBinding;
         private FunctionBinder callBinder;
         private FunctionBinder constructBinder;
 
@@ -34,7 +34,7 @@ namespace Jurassic.Library
                 throw new ArgumentNullException("instancePrototype");
 
             // This is a constructor so ignore the "this" parameter when the function is called.
-            bindThis = true;
+            thisBinding = this;
 
             // Search through every method in this type looking for [JSFunction] attributes.
             var callBinderMethods = new List<FunctionBinderMethod>(1);
@@ -101,6 +101,9 @@ namespace Jurassic.Library
             var binderMethod = new FunctionBinderMethod(delegateToCall.Method);
             this.callBinder = new FunctionBinder(new FunctionBinderMethod(delegateToCall.Method));
 
+            // If the delegate has a class instance, use that to call the method.
+            this.thisBinding = delegateToCall.Target;
+
             // Add function properties.
             this.FastSetProperty("name", name != null ? name : binderMethod.Name);
             this.FastSetProperty("length", length >= 0 ? length : binderMethod.ParameterCount);
@@ -161,7 +164,7 @@ namespace Jurassic.Library
                 else
                     thisObject = TypeConverter.ToObject(this.Engine, thisObject);
             }
-            return this.callBinder.Call(this.Engine, bindThis == true ? this : thisObject, arguments);
+            return this.callBinder.Call(this.Engine, thisBinding != null ? thisBinding : thisObject, arguments);
         }
 
         /// <summary>
