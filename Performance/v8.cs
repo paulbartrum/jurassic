@@ -19,8 +19,6 @@ namespace Performance
         {
             manager = new ScriptEngineManager(@"..\..\..\Performance\Files\v8\", (engine) =>
             {
-                engine.CompatibilityMode = Jurassic.CompatibilityMode.ECMAScript3;
-
                 // Replace the default random number generator with a deterministic one.
                 engine.Math["random"] = engine.Evaluate(@"
                     (function() {
@@ -50,7 +48,7 @@ namespace Performance
         [TestMethod]
         public void crypto()
         {
-            manager.RunTest("crypto.js", 6184.8);
+            manager.RunTest("crypto.js", 27308.3);
         }
 
         [TestMethod]
@@ -62,7 +60,16 @@ namespace Performance
         [TestMethod]
         public void earley_boyer()
         {
-            manager.RunTest("earley-boyer.js", 27067);
+            // Test uses octal escape sequences.
+            manager.ScriptEngine.CompatibilityMode = Jurassic.CompatibilityMode.ECMAScript3;
+            try
+            {
+                manager.RunTest("earley-boyer.js", 27067);
+            }
+            finally
+            {
+                manager.ScriptEngine.CompatibilityMode = Jurassic.CompatibilityMode.Latest;
+            }
         }
 
         [TestMethod]
@@ -89,6 +96,11 @@ namespace Performance
             manager.RunTest(@"splay.js", 6873);
         }
 
+        [TestMethod]
+        public void RunAll()
+        {
+            manager.RunAllTests(67780.6);
+        }
     }
 
 }
