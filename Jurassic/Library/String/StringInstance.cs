@@ -218,21 +218,19 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="substr"> The substring to search for. </param>
         /// <returns> An array containing the matched strings. </returns>
-        [JSFunction(Name = "match", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject | JSFunctionFlags.Preferred)]
-        public static object Match(ScriptEngine engine, string thisObject, string substr = "")
+        [JSFunction(Name = "match", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        public static object Match(ScriptEngine engine, string thisObject, object substrOrRegExp)
         {
-            return engine.RegExp.Construct(substr).Match(thisObject);
-        }
+            if (substrOrRegExp is RegExpInstance)
+                // substrOrRegExp is a regular expression.
+                return ((RegExpInstance)substrOrRegExp).Match(thisObject);
 
-        /// <summary>
-        /// Finds all regular expression matches within this string.
-        /// </summary>
-        /// <param name="regExp"> The regular expression to search for. </param>
-        /// <returns> An array containing the matched strings. </returns>
-        [JSFunction(Name = "match", Flags = JSFunctionFlags.HasThisObject)]
-        public static object Match(string thisObject, RegExpInstance regExp)
-        {
-            return regExp.Match(thisObject);
+            if (TypeUtilities.IsUndefined(substrOrRegExp))
+                // substrOrRegExp is undefined.
+                return engine.RegExp.Construct("").Match(thisObject);
+
+            // substrOrRegExp is a string (or convertible to a string).
+            return engine.RegExp.Construct(TypeConverter.ToString(substrOrRegExp)).Match(thisObject);
         }
 
         /// <summary>
@@ -341,23 +339,21 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns the position of the first substring match.
         /// </summary>
-        /// <param name="regExp"> The string to search for. </param>
-        /// <returns> The character position of the first match, or -1 if no match was found. </returns>
-        [JSFunction(Name = "search", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.Preferred)]
-        public static int Search(string thisObject, string substr = "")
-        {
-            return thisObject.IndexOf(substr, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Returns the position of the first substring match in a regular expression search.
-        /// </summary>
-        /// <param name="regExp"> The regular expression to search for. </param>
+        /// <param name="substrOrRegExp"> The string or regular expression to search for. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
         [JSFunction(Name = "search", Flags = JSFunctionFlags.HasThisObject)]
-        public static int Search(string thisObject, RegExpInstance regExp)
+        public static int Search(string thisObject, object substrOrRegExp)
         {
-            return regExp.Search(thisObject);
+            if (substrOrRegExp is RegExpInstance)
+                // substrOrRegExp is a regular expression.
+                return ((RegExpInstance)substrOrRegExp).Search(thisObject);
+            
+            if (TypeUtilities.IsUndefined(substrOrRegExp))
+                // substrOrRegExp is undefined.
+                return 0;
+
+            // substrOrRegExp is a string (or convertible to a string).
+            return thisObject.IndexOf(TypeConverter.ToString(substrOrRegExp), StringComparison.Ordinal);
         }
 
         /// <summary>

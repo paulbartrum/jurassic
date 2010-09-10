@@ -14,12 +14,7 @@ namespace Jurassic.Library
     /// </summary>
     internal class FunctionBinder
     {
-        private struct FunctionBinderBucket
-        {
-            public FunctionBinderMethod PreferredMethod;
-            public FunctionBinderMethod[] OtherMethods;
-        }
-        private FunctionBinderBucket[] buckets;
+        private FunctionBinderMethod[] buckets;
         
         internal const int MaximumSupportedParameterCount = 8;
 
@@ -46,62 +41,50 @@ namespace Jurassic.Library
                 throw new ArgumentException("At least one method must be supplied.", "targetMethods");
 
             // Split the methods by the number of parameters they take.
-            this.buckets = new FunctionBinderBucket[MaximumSupportedParameterCount + 1];
+            this.buckets = new FunctionBinderMethod[MaximumSupportedParameterCount + 1];
             for (int argumentCount = 0; argumentCount < this.buckets.Length; argumentCount++)
             {
                 // Find all the methods that have the right number of parameters.
                 FunctionBinderMethod preferred = null;
-                List<FunctionBinderMethod> other = new List<FunctionBinderMethod>();
                 foreach (var method in targetMethods)
                 {
                     if (argumentCount >= method.MinParameterCount && argumentCount <= method.MaxParameterCount)
                     {
-                        if (method.Preferred == true && preferred != null)
-                            throw new ArgumentException(string.Format("Multiple ambiguous preferred methods detected: {0} and {1}.", method, preferred), "targetMethods");
-                        if (method.Preferred == true)
-                            preferred = method;
-                        else
-                            other.Add(method);
+                        if (preferred != null)
+                            throw new ArgumentException(string.Format("Multiple ambiguous methods detected: {0} and {1}.", method, preferred), "targetMethods");
+                        preferred = method;
                     }
                 }
-                if (preferred == null && other.Count > 1)
-                    throw new ArgumentException(string.Format("Multiple ambiguous non-preferred methods detected: {0}.", string.Join(", ", other)), "targetMethods");
-                if (preferred == null && other.Count == 1)
-                {
-                    preferred = other[0];
-                    other.RemoveAt(0);
-                }
-                this.buckets[argumentCount].PreferredMethod = preferred;
-                this.buckets[argumentCount].OtherMethods = other.Count == 0 ? null : other.ToArray();
+                this.buckets[argumentCount] = preferred;
             }
 
             // If a bucket has no methods, search all previous buckets, then all search forward.
             for (int argumentCount = 0; argumentCount < this.buckets.Length; argumentCount++)
             {
-                if (this.buckets[argumentCount].PreferredMethod != null)
+                if (this.buckets[argumentCount] != null)
                     continue;
 
                 // Search previous buckets.
                 for (int i = argumentCount - 1; i >= 0; i --)
-                    if (this.buckets[i].PreferredMethod != null)
+                    if (this.buckets[i] != null)
                     {
-                        this.buckets[argumentCount].PreferredMethod = this.buckets[i].PreferredMethod;
+                        this.buckets[argumentCount] = this.buckets[i];
                         break;
                     }
 
                 // If that didn't work, search forward.
-                if (this.buckets[argumentCount].PreferredMethod == null)
+                if (this.buckets[argumentCount] == null)
                 {
                     for (int i = argumentCount + 1; i < this.buckets.Length; i++)
-                        if (this.buckets[i].PreferredMethod != null)
+                        if (this.buckets[i] != null)
                         {
-                            this.buckets[argumentCount].PreferredMethod = this.buckets[i].PreferredMethod;
+                            this.buckets[argumentCount] = this.buckets[i];
                             break;
                         }
                 }
 
                 // If that still didn't work, then we have a problem.
-                if (this.buckets[argumentCount].PreferredMethod == null)
+                if (this.buckets[argumentCount] == null)
                     throw new InvalidOperationException("No preferred method could be found.");
             }
         }
@@ -191,7 +174,7 @@ namespace Jurassic.Library
                 return result;
 
             // Find the method to call.
-            var targetMethod = FindBestMatchMethod(argumentTypes);
+            var targetMethod = this.buckets[Math.Min(argumentTypes.Length, this.buckets.Length - 1)];
 
             // Create a binding method.
             var dynamicMethod = CreateSingleMethodBinder(argumentTypes, targetMethod);
@@ -200,40 +183,6 @@ namespace Jurassic.Library
             this.delegateCache.Add(argumentTypes, dynamicMethod);
 
             return dynamicMethod;
-        }
-
-        /// <summary>
-        /// Selects a method based on the given argument types.
-        /// </summary>
-        /// <param name="argumentTypes"> An array of types corresponding to the arguments passed by
-        /// the caller. </param>
-        /// <returns> The selected method. </returns>
-        private FunctionBinderMethod FindBestMatchMethod(Type[] argumentTypes)
-        {
-            var bucket = this.buckets[Math.Min(argumentTypes.Length, this.buckets.Length - 1)];
-
-            // If there is only one candidate method, use that.
-            if (bucket.OtherMethods == null)
-                return bucket.PreferredMethod;
-
-            // Search the other objects to see if the argument types match exactly.
-            foreach (var binderMethod in bucket.OtherMethods)
-            {
-                var parameterTypes = binderMethod.Method.GetParameters();
-                int indexOffset = (binderMethod.HasEngineParameter ? 1 : 0) + (binderMethod.HasExplicitThisParameter ? 1 : 0);
-                var useThisMethod = true;
-                for (int i = 0; i < Math.Min(argumentTypes.Length, parameterTypes.Length - indexOffset); i++)
-                    if (parameterTypes[i + indexOffset].ParameterType != argumentTypes[i])
-                    {
-                        useThisMethod = false;
-                        break;
-                    }
-                if (useThisMethod == true)
-                    return binderMethod;
-            }
-
-            // A perfect match was not found, return the preferred match.
-            return bucket.PreferredMethod;
         }
 
         ///// <summary>
