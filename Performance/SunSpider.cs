@@ -176,6 +176,11 @@ namespace Performance
             manager.RunTest(@"string-validate-input.js", 5343.1);   // 4500-6000
         }
 
+        [TestMethod]
+        public void RunAll()
+        {
+            manager.RunAllTests(74683);
+        }
     }
 
 }
