@@ -23,7 +23,6 @@ namespace Jurassic.Library
                 throw new ArgumentNullException("method");
             this.Method = method;
             this.Flags = flags;
-            this.Preferred = (flags & JSFunctionFlags.Preferred) != 0;
             this.HasEngineParameter = (flags & JSFunctionFlags.HasEngineParameter) != 0;
             if (this.HasEngineParameter == true && method.IsStatic == false)
                 throw new InvalidOperationException(string.Format("The {0} flag cannot be used on the instance method '{1}'.", JSFunctionFlags.HasEngineParameter, method.Name));
@@ -136,16 +135,6 @@ namespace Jurassic.Library
         public string Name
         {
             get { return this.Method.Name; }
-        }
-
-        /// <summary>
-        /// Gets a value that indicates that this method is preferred when there are multiple
-        /// methods to choose from.
-        /// </summary>
-        public bool Preferred
-        {
-            get;
-            private set;
         }
 
         /// <summary>
