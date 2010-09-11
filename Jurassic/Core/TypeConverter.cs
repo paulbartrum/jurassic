@@ -104,6 +104,11 @@ namespace Jurassic
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), "value");
         }
 
+        // Single-item cache.
+        private static object cacheLock = new object();
+        private static double cacheValue;
+        private static string cacheResult = "0";
+
         /// <summary>
         /// Converts any JavaScript value to a primitive string value.
         /// </summary>
@@ -120,7 +125,26 @@ namespace Jurassic
             if (value is int)
                 return ((int)value).ToString();
             if (value is double)
-                return NumberFormatter.ToString((double)value, 10, NumberFormatter.Style.Regular);
+            {
+                // Check if the value is in the cache.
+                lock (cacheLock)
+                {
+                    if ((double)value == cacheValue)
+                        return cacheResult;
+                    cacheValue = (double)value;
+                }
+
+                // Convert the number to a string.
+                var result = NumberFormatter.ToString(cacheValue, 10, NumberFormatter.Style.Regular);
+
+                // Cache the result.
+                lock (cacheLock)
+                {
+                    cacheResult = result;
+                }
+
+                return result;
+            }
             if (value is string)
                 return (string)value;
             if (value is ObjectInstance)
