@@ -43,14 +43,6 @@ namespace Jurassic
             Exponential,
         }
 
-        // Single-item cache.
-        private static object cacheLock = new object();
-        private static double cacheValue;
-        private static int cacheRadix;
-        private static Style cacheStyle;
-        private static int cachePrecision;
-        private static string cacheResult;
-
         /// <summary>
         /// Converts a number to a string.
         /// </summary>
@@ -66,14 +58,6 @@ namespace Jurassic
         /// </param>
         internal static string ToString(double value, int radix, Style style, int precision = 0)
         {
-            // Check to see if the parameters are the same as the last call to this method.
-            // If so, return the cached result.
-            lock (cacheLock)
-            {
-                if (value == cacheValue && radix == cacheRadix && style == cacheStyle && precision == cachePrecision)
-                    return cacheResult;
-            }
-
             // Handle NaN.
             if (double.IsNaN(value))
                 return "NaN";
@@ -297,17 +281,7 @@ namespace Jurassic
                 result.Append(exponent);
             }
 
-            // Store the method parameters and the result in case the next call is the same.
-            lock (cacheLock)
-            {
-                cacheValue = value;
-                cacheRadix = radix;
-                cacheStyle = style;
-                cachePrecision = precision;
-                cacheResult = result.ToString();
-            }
-
-            return cacheResult;
+            return result.ToString();
         }
 
 
