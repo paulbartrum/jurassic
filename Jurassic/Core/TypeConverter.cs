@@ -127,19 +127,20 @@ namespace Jurassic
             if (value is double)
             {
                 // Check if the value is in the cache.
+                double doubleValue = (double)value;
                 lock (cacheLock)
                 {
-                    if ((double)value == cacheValue)
+                    if (doubleValue == cacheValue)
                         return cacheResult;
-                    cacheValue = (double)value;
                 }
 
                 // Convert the number to a string.
-                var result = NumberFormatter.ToString(cacheValue, 10, NumberFormatter.Style.Regular);
+                var result = NumberFormatter.ToString(doubleValue, 10, NumberFormatter.Style.Regular);
 
                 // Cache the result.
                 lock (cacheLock)
                 {
+                    cacheValue = doubleValue;
                     cacheResult = result;
                 }
 
