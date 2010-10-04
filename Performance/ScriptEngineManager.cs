@@ -131,7 +131,7 @@ namespace Performance
             var timer = System.Diagnostics.Stopwatch.StartNew();
             foreach (string path in Directory.EnumerateFiles(this.currentDir))
                 RunTest(path, 0, false);
-            Assert.Inconclusive(string.Format("{0}ms, was 24471ms", timer.ElapsedMilliseconds));
+            Assert.Inconclusive(string.Format("{0}ms, was {1}ms", timer.ElapsedMilliseconds, previousTime));
         }
     }
 
