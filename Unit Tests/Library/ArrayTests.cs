@@ -907,6 +907,11 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("array.every(function(value, index, array) { return this == 0 }, 0)"));
             Assert.AreEqual(false, TestUtils.Evaluate("array.every(function(value, index, array) { return this == 1 }, 0)"));
 
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].every(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].every(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].every({})"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.every.length"));
         }
@@ -925,6 +930,11 @@ namespace UnitTests
             Assert.AreEqual(true, TestUtils.Evaluate("array.some(function(value, index, array) { return this == 0 }, 0)"));
             Assert.AreEqual(false, TestUtils.Evaluate("array.some(function(value, index, array) { return this == 1 }, 0)"));
 
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].some(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].some(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].some({})"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.some.length"));
         }
@@ -939,6 +949,11 @@ namespace UnitTests
             Assert.AreEqual("2,3,4", TestUtils.Evaluate("array = [1, 2, 3]; array.forEach(function(value, index, array) { array[index] = value + 1 }); array.toString()"));
             Assert.AreEqual("2,3,4", TestUtils.Evaluate("array = [1, 2, 3]; array.forEach(function(value, index, array) { this[index] = value + 1 }, array); array.toString()"));
 
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].forEach(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].forEach(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].forEach({})"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.forEach.length"));
         }
@@ -951,6 +966,11 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual("2,3,4", TestUtils.Evaluate("[1, 2, 3].map(function(value, index, array) { return value + 1; }).toString()"));
+
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].map(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].map(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].map({})"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.map.length"));
@@ -965,6 +985,11 @@ namespace UnitTests
 
             Assert.AreEqual("2,3", TestUtils.Evaluate("[1, 2, 3].filter(function(value, index, array) { return value > 1; }).toString()"));
 
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].filter(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].filter(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].filter({})"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.filter.length"));
         }
@@ -977,6 +1002,17 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual(6, TestUtils.Evaluate("[1, 2, 3].reduce(function(accum, value, index, array) { return accum + value; })"));
+            Assert.AreEqual(4, TestUtils.Evaluate("[1, 2, 3].reduce(function(accum, value, index, array) { return accum + index; })"));
+            Assert.AreEqual(6, TestUtils.Evaluate("[1, 2, 3].reduce(function(accum, value, index, array) { return accum + array[index]; })"));
+            Assert.AreEqual("1,2", TestUtils.Evaluate("indices = []; [1, 2, 3].reduce(function(accum, value, index, array) { indices.push(index); }); indices.toString()"));
+            
+            // this should be undefined in the callback function.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("t = 0; [1, 2, 3].reduce(function(a, b, c, d) { 'use strict'; t = this; }); t"));
+
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].reduce(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].reduce(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].reduce({})"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.reduce.length"));
@@ -990,6 +1026,17 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual(6, TestUtils.Evaluate("[1, 2, 3].reduceRight(function(accum, value, index, array) { return accum + value; })"));
+            Assert.AreEqual(4, TestUtils.Evaluate("[1, 2, 3].reduceRight(function(accum, value, index, array) { return accum + index; })"));
+            Assert.AreEqual(6, TestUtils.Evaluate("[1, 2, 3].reduceRight(function(accum, value, index, array) { return accum + array[index]; })"));
+            Assert.AreEqual("1,0", TestUtils.Evaluate("indices = []; [1, 2, 3].reduceRight(function(accum, value, index, array) { indices.push(index); }); indices.toString()"));
+
+            // this should be undefined in the callback function.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("t = 0; [1, 2, 3].reduceRight(function(a, b, c, d) { 'use strict'; t = this; }); t"));
+
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].reduceRight(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].reduceRight(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].reduceRight({})"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.reduceRight.length"));
