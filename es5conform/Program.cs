@@ -26,6 +26,9 @@ namespace Sputnik
                 "15.12.2-0-3",          // precondition does not return true - http://es5conform.codeplex.com/workitem/28581
                 "15.12.3-0-3",          // precondition does not return true - http://es5conform.codeplex.com/workitem/28581
                 "15.2.3.3-4-188",       // assumes Function.prototype.name does not exist - http://es5conform.codeplex.com/workitem/28594
+                "11.4.1-5-1-s",         // assumes delete var produces ReferenceError - http://es5conform.codeplex.com/workitem/29084
+                "11.4.1-5-2-s",         // assumes delete var produces ReferenceError - http://es5conform.codeplex.com/workitem/29084
+                "11.4.1-5-3-s",         // assumes delete var produces ReferenceError - http://es5conform.codeplex.com/workitem/29084
             };
 
             // Create an array of "won't fix" tests.
@@ -178,17 +181,44 @@ namespace Sputnik
             {
                 // Execute the test file.
                 engine.ExecuteFile(path, System.Text.Encoding.Default);
-                TestSucceeded(path);
+
+                // Run each test that was registered inside the file.
+                foreach (var registeredTest in harness.RegisteredTests)
+                {
+                    // Run the precondition first, if there is one.
+                    object result;
+                    if (registeredTest.HasProperty("precondition"))
+                    {
+                        result = registeredTest.CallMemberFunction("precondition");
+                        if (TypeComparer.StrictEquals(result, true) == false)
+                        {
+                            TestFailed(path, string.Format("Precondition for test '{0}' returned {1} (should return true)", registeredTest["id"], result));
+                            return;
+                        }
+                    }
+
+                    // Run the actual test.
+                    result = registeredTest.CallMemberFunction("test");
+                    if (TypeComparer.Equals(result, true) == false)
+                    {
+                        TestFailed(path, string.Format("Test '{0}' ({1}) returned {2} (should return true)", registeredTest["id"], registeredTest["description"], result));
+                        return;
+                    }
+                }
+
             }
             catch (JavaScriptException ex)
             {
                 TestFailed(path, ex.Message);
+                return;
             }
             catch (Exception ex)
             {
                 TestFailed(path, ex.Message);
                 throw;
             }
+
+            TestSucceeded(path);
         }
 
         public static void StartTest(string path)
