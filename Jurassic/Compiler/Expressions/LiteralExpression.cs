@@ -280,6 +280,10 @@ namespace Jurassic.Compiler
             if (this.Value is RegularExpressionLiteral)
                 return this.Value.ToString();
 
+            // String literal.
+            if (this.Value is string)
+                return Library.StringInstance.Quote((string)this.Value);
+
             // Everything else.
             return TypeConverter.ToString(this.Value);
         }
