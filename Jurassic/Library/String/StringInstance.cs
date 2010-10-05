@@ -234,6 +234,29 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Wraps the string in double quotes (").  Any existing double quotes in the string are
+        /// escaped using the backslash character.
+        /// </summary>
+        /// <param name="thisObject"> The string to wrap. </param>
+        /// <returns> The input string wrapped with double quotes and with existing double quotes
+        /// escaped. </returns>
+        [JSFunction(Name = "quote", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        public static string Quote(string thisObject)
+        {
+            var result = new System.Text.StringBuilder(thisObject.Length + 2);
+            result.Append('"');
+            for (int i = 0; i < thisObject.Length; i++)
+            {
+                char c = thisObject[i];
+                if (c == '"')
+                    result.Append('\\');
+                result.Append(c);
+            }
+            result.Append('"');
+            return result.ToString();
+        }
+
+        /// <summary>
         /// Substitutes the given string or regular expression with the given text or the result
         /// of a replacement function.
         /// </summary>
