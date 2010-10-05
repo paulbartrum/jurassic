@@ -429,6 +429,14 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void quote()
+        {
+            Assert.AreEqual(@"""test""", TestUtils.Evaluate(@"'test'.quote()"));
+            Assert.AreEqual(@"""te\""st""", TestUtils.Evaluate(@"'te""st'.quote()"));
+            Assert.AreEqual(@"""te'st""", TestUtils.Evaluate(@"""te'st"".quote()"));
+        }
+
+        [TestMethod]
         public void replace()
         {
             // replace(string, string)
