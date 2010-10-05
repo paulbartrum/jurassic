@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace Jurassic
 {
@@ -82,10 +81,10 @@ namespace Jurassic
                 }
             }
 
-            var result = new System.Text.StringBuilder(10);
+            var result = new System.Text.StringBuilder(18);
 
             // Handle negative numbers.
-            if (value < 0)
+            if (value < 0.0)
             {
                 value = -value;
                 result.Append('-');
@@ -98,55 +97,105 @@ namespace Jurassic
                 return result.ToString();
             }
 
+            // Extract the base-2 exponent.
+            var bits = new DoubleBits() { DoubleValue = value };
+            int base2Exponent = (int)(bits.LongValue >> MantissaExplicitBits);
+
+            // Extract the mantissa.
+            long mantissa = bits.LongValue & MantissaMask;
+
+            // Correct the base-2 exponent.
+            if (base2Exponent == 0)
+            {
+                // This is a denormalized number.
+                base2Exponent = base2Exponent - ExponentBias - MantissaExplicitBits + 1;
+            }
+            else
+            {
+                // This is a normal number.
+                base2Exponent = base2Exponent - ExponentBias - MantissaExplicitBits;
+
+                // Add the implicit bit.
+                mantissa |= MantissaImplicitBit;
+            }
+
+            // Remove any trailing zeros.
+            int trailingZeroBits = CountTrailingZeroBits((ulong)mantissa);
+            mantissa >>= trailingZeroBits;
+            base2Exponent += trailingZeroBits;
+
             // Calculate the logarithm of the number.
             int exponent;
             if (radix == 10)
+            {
                 exponent = (int)Math.Floor(Math.Log10(value));
+
+                // We need to calculate k = floor(log10(x)).
+                // log(x)	~=~ log(1.5) + (x-1.5)/1.5 (taylor series approximation)
+                // log10(x) ~=~ log(1.5) / log(10) + (x - 1.5) / (1.5 * log(10))
+                // d = x * 2^l (1 <= x < 2)
+                // log10(d) = l * log10(2) + log10(x)
+                // log10(d) ~=~ l * log10(2)           + (x - 1.5) * (1 / (1.5 * log(10)))  + log(1.5) / log(10)
+                // log10(d) ~=~ l * 0.301029995663981  + (x - 1.5) * 0.289529654602168      + 0.1760912590558
+                // The last term (0.1760912590558) is rounded so that k = floor(log10(x)) or
+                // k = floor(log10(x)) + 1 (i.e. it's the exact value or one higher).
+
+
+                //double log10;
+                //if ((int)(bits.LongValue >> MantissaExplicitBits) == 0)
+                //{
+                //    // The number is denormalized.
+                //    int mantissaShift = CountLeadingZeroBits((ulong)mantissa) - (64 - MantissaImplicitBits);
+                //    bits.LongValue = (mantissa << mantissaShift) & MantissaMask |
+                //        ((long)ExponentBias << MantissaExplicitBits);
+
+                //    // Calculate an overestimate of log-10 of the value.
+                //    log10 = (bits.DoubleValue - 1.5) * 0.289529654602168 + 0.1760912590558 +
+                //        (base2Exponent - mantissaShift) * 0.301029995663981;
+                //}
+                //else
+                //{
+                //    // Set the base-2 exponent to biased zero.
+                //    bits.LongValue = (bits.LongValue & ~ExponentMask) | ((long)ExponentBias << MantissaExplicitBits);
+
+                //    // Calculate an overestimate of log-10 of the value.
+                //    log10 = (bits.DoubleValue - 1.5) * 0.289529654602168 + 0.1760912590558 + base2Exponent * 0.301029995663981;
+                //}
+
+                //// (int)Math.Floor(log10)
+                //exponent = (int)log10;
+                //if (log10 < 0 && log10 != exponent)
+                //    exponent--;
+
+                //if (exponent >= 0 && exponent < tens.Length)
+                //{
+                //    if (value < tens[exponent])
+                //        exponent--;
+                //}
+            }
             else
                 exponent = (int)Math.Floor(Math.Log(value, radix));
+
+            if (radix == 10 && style == Style.Regular)
+            {
+                // Do we have a small integer?
+                if (base2Exponent >= 0 && exponent <= 14)
+                {
+                    // Yes.
+                    for (int i = exponent; i >= 0; i--)
+                    {
+                        double scaleFactor = tens[i];
+                        int digit = (int)(value / scaleFactor);
+                        result.Append((char)(digit + '0'));
+                        value -= digit * scaleFactor;
+                    }
+                    return result.ToString();
+                }
+            }
 
             // toFixed acts like toString() if the exponent is >= 21.
             if (style == Style.Fixed && exponent >= 21)
                 style = Style.Regular;
-
-            // Calculate the number of significant digits.
-            // We add 5 so that there is enough precision to distinguish halfway numbers.
-            int significantDigits = radix == 10 ? 22 : (int)Math.Floor(53 / Math.Log(radix, 2)) + 7;
-
-            // Calculate the number of integral digits, or if negative, the number of zeros after
-            // the decimal point.
-            int integralDigits = exponent + 1;
-
-            // Scale the value so it is a 22 digit (for base 10) integer.
-            var integerValue = ConvertDoubleToScaledInteger(value, radix, significantDigits - integralDigits);
-
-            // Calculate the error.
-            BigInteger errorDelta;
-            switch (style)
-            {
-                case Style.Regular:
-                    errorDelta = ConvertDoubleToScaledInteger(CalculateError(value), radix, significantDigits - integralDigits) >> 1;
-                    break;
-                case Style.Precision:
-                    errorDelta = BigInteger.Pow(radix, significantDigits - precision) >> 1;
-                    break;
-                case Style.Fixed:
-                    errorDelta = BigInteger.Pow(radix, Math.Max(0, significantDigits - integralDigits - precision)) >> 1;
-                    break;
-                case Style.Exponential:
-                    if (precision < 0)
-                        errorDelta = ConvertDoubleToScaledInteger(CalculateError(value), radix, significantDigits - integralDigits) >> 1;
-                    else
-                        errorDelta = BigInteger.Pow(radix, significantDigits - precision - 1) >> 1;
-                    break;
-                default:
-                    throw new ArgumentException("Unknown formatting style.", "style");
-            }
-
-            // Shrink the error in the case where ties are resolved towards the value with the 
-            // least significant bit set to zero.
-            if ((BitConverter.DoubleToInt64Bits(value) & 1) == 1)
-                errorDelta--;
 
             // Calculate the exponent thresholds.
             int lowExponentThreshold = int.MinValue;
@@ -162,11 +211,23 @@ namespace Jurassic
             if (style == Style.Exponential)
                 highExponentThreshold = 0;
 
+            // Calculate the number of bits per digit.
+            double bitsPerDigit = radix == 10 ? 3.322 : Math.Log(radix, 2);
+
+            // Calculate the maximum number of digits to output.
+            // We add 7 so that there is enough precision to distinguish halfway numbers.
+            int maxDigitsToOutput = radix == 10 ? 22 : (int)Math.Floor(53 / bitsPerDigit) + 7;
+
+            // Calculate the number of integral digits, or if negative, the number of zeros after
+            // the decimal point.
+            int integralDigits = exponent + 1;
+
             // toFixed with a low precision causes rounding.
             if (style == Style.Fixed && precision <= -integralDigits)
             {
                 int diff = (-integralDigits) - (precision - 1);
-                significantDigits += diff;
+                maxDigitsToOutput += diff;
+                exponent += diff;
                 integralDigits += diff;
             }
 
@@ -183,24 +244,76 @@ namespace Jurassic
                 }
             }
 
+            // We need to calculate the integers "scaledValue" and "divisor" such that:
+            // value = scaledValue / divisor * 10 ^ exponent
+            // 1 <= scaledValue / divisor < 10
+
+            BigInteger scaledValue = new BigInteger(mantissa);
+            BigInteger divisor = BigInteger.One;
+            BigInteger multiplier = BigInteger.One;
+            if (exponent > 0)
+            {
+                // Number is >= 10.
+                divisor = BigInteger.Multiply(divisor, BigInteger.Pow(radix, exponent));
+            }
+            else if (exponent < 0)
+            {
+                // Number is < 1.
+                multiplier = BigInteger.Pow(radix, -exponent);
+                scaledValue = BigInteger.Multiply(scaledValue, multiplier);
+            }
+
+            // Scale the divisor so it is 74 bits ((21 digits + 1 digit for rounding) * approx 3.322 bits per digit).
+            int powerOfTwoScaleFactor = (radix == 10 ? 74 : (int)Math.Ceiling(maxDigitsToOutput * bitsPerDigit)) - divisor.BitCount;
+            divisor = BigInteger.LeftShift(divisor, powerOfTwoScaleFactor);
+            scaledValue = BigInteger.LeftShift(scaledValue, powerOfTwoScaleFactor + base2Exponent);
+
+            // Calculate the error.
+            BigInteger errorDelta = BigInteger.Zero;
+            switch (style)
+            {
+                case Style.Regular:
+                    errorDelta = ScaleToInteger(CalculateError(value), multiplier, powerOfTwoScaleFactor - 1);
+                    break;
+                case Style.Precision:
+                    errorDelta = ScalePower(radix, integralDigits - precision, multiplier, powerOfTwoScaleFactor - 1);
+                    break;
+                case Style.Fixed:
+                    errorDelta = ScalePower(radix, -precision, multiplier, powerOfTwoScaleFactor - 1);
+                    break;
+                case Style.Exponential:
+                    if (precision < 0)
+                        errorDelta = ScaleToInteger(CalculateError(value), multiplier, powerOfTwoScaleFactor - 1);
+                    else
+                        errorDelta = ScalePower(radix, integralDigits - precision - 1, multiplier, powerOfTwoScaleFactor - 1);
+                    break;
+                default:
+                    throw new ArgumentException("Unknown formatting style.", "style");
+            }
+
+            // Shrink the error in the case where ties are resolved towards the value with the 
+            // least significant bit set to zero.
+            if ((BitConverter.DoubleToInt64Bits(value) & 1) == 1)
+                errorDelta.InPlaceDecrement();
+
+            // Cache half the divisor.
+            BigInteger halfDivisor = BigInteger.RightShift(divisor, 1);
+
             // Output the digits.
             int zeroCount = 0;
-            BigInteger digits = BigInteger.Zero;
             int digitsOutput = 0;
             bool rounded = false, scientificNotation = false;
-            for (; digitsOutput < significantDigits && rounded == false; digitsOutput++)
+            for (; digitsOutput < maxDigitsToOutput && rounded == false; digitsOutput++)
             {
                 // Calculate the next digit.
-                var scaleFactor = BigInteger.Pow(radix, significantDigits - 1 - digitsOutput);
-                var digit = (int)(integerValue / scaleFactor);
-                integerValue -= digit * scaleFactor;
+                var digit = (int)BigInteger.Quorem(ref scaledValue, divisor);
 
-                if (integerValue <= errorDelta && integerValue < (scaleFactor >> 1))
+                if (BigInteger.Compare(scaledValue, errorDelta) <= 0 && BigInteger.Compare(scaledValue, halfDivisor) < 0)
                 {
                     // Round down.
                     rounded = true;
                 }
-                else if (scaleFactor - integerValue <= errorDelta)
+                else if (BigInteger.Compare(BigInteger.Subtract(divisor, scaledValue), errorDelta) <= 0)
                 {
                     // Round up.
                     rounded = true;
@@ -209,6 +322,7 @@ namespace Jurassic
                     {
                         digit = 1;
                         exponent++;
+                        integralDigits++;
                     }
                 }
 
@@ -242,6 +356,9 @@ namespace Jurassic
                 // up to cross the threshold).
                 if (digitsOutput == 0 && (exponent <= lowExponentThreshold || exponent >= highExponentThreshold))
                     scientificNotation = true;
+
+                scaledValue = BigInteger.MultiplyAdd(scaledValue, radix, 0);
+                errorDelta = BigInteger.MultiplyAdd(errorDelta, radix, 0);
             }
 
             // Add any extra zeros on the end, if necessary.
@@ -286,13 +403,50 @@ namespace Jurassic
 
 
 
+        //     CONSTANTS
+        //_________________________________________________________________________________________
+
+
+        private readonly static int[] powersOfFive = { 5, 25, 125 };
+
+        // IEEE 754 double-precision constants.
+        private const int MantissaExplicitBits = 52;
+        private const int MantissaImplicitBits = 53;
+        private const long MantissaMask = 0xFFFFFFFFFFFFF;
+        private const long MantissaImplicitBit = 1L << MantissaExplicitBits;
+        private const int ExponentBias = 1023;
+        private const long ExponentMask = 0x7FF0000000000000;
+        private const int ExponentDenormal = -1023;
+        private const int ExponentSpecial = 1024;
+
+        // Powers of ten.
+        private readonly static double[] tens = new double[]
+        {
+		    1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9,
+		    1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
+		    1e20, 1e21, 1e22
+        };
+
+
+
         //     PRIVATE HELPER METHODS
         //_________________________________________________________________________________________
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
+        private struct DoubleBits
+        {
+            [System.Runtime.InteropServices.FieldOffset(0)]
+            public double DoubleValue;
+
+            [System.Runtime.InteropServices.FieldOffset(0)]
+            public long LongValue;
+        }
 
         /// <summary>
         /// Calculates the minimum increment that creates a number distinct from the value that was
         /// provided.  The error for the number is plus or minus half the result of this method
-        /// (note that the number returned may be so small that halfing it produces zero).
+        /// (note that the number returned by this method may be so small that dividing it by two
+        /// produces zero).
         /// </summary>
         /// <param name="value"> The number to calculate an error value for. </param>
         /// <returns> The minimum increment that creates a number distinct from the value that was
@@ -317,13 +471,14 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Scales the given double-precision number using the given scale factor.
+        /// Scales the given double-precision number by multiplying and then shifting it.
         /// </summary>
         /// <param name="value"> The value to scale. </param>
-        /// <param name="radix"> The base of the scale factor. </param>
-        /// <param name="exponent"> The exponent of the scale factor. </param>
-        /// <returns> A BigInteger containing the scaled integer. </returns>
-        private static BigInteger ConvertDoubleToScaledInteger(double value, int radix, int exponent)
+        /// <param name="multiplier"> The multiplier. </param>
+        /// <param name="shift"> The power of two scale factor. </param>
+        /// <returns> A BigInteger containing the result of multiplying <paramref name="value"/> by
+        /// <paramref name="multiplier"/> and then shifting left by <paramref name="shift"/> bits. </returns>
+        private static BigInteger ScaleToInteger(double value, BigInteger multiplier, int shift)
         {
             long bits = BitConverter.DoubleToInt64Bits(value);
 
@@ -348,27 +503,124 @@ namespace Jurassic
                 mantissa = -mantissa;
 
             var result = new BigInteger(mantissa);
-
-            // Scale the result using the given radix and exponent.
-            if (exponent > 0)
-                result *= BigInteger.Pow(radix, exponent);
-            if (base2Exponent > 0)
-                result *= BigInteger.Pow(2, base2Exponent);
-            else if (base2Exponent < 0)
-            {
-                // Rounded divide.
-                var divisor = BigInteger.Pow(2, -base2Exponent);
-                result = (result + (divisor >> 1)) / divisor;
-            }
-            if (exponent < 0)
-            {
-                // Rounded divide.
-                var divisor = BigInteger.Pow(radix, -exponent);
-                result = (result + (divisor >> 1)) / divisor;
-            }
-
+            result = BigInteger.Multiply(result, multiplier);
+            shift += base2Exponent;
+            result = BigInteger.LeftShift(result, shift);
             return result;
         }
+
+        private static BigInteger ScalePower(int radix, int exponent, BigInteger multiplier, int shift)
+        {
+            var result = BigInteger.One;
+            result = BigInteger.Multiply(result, multiplier);
+            if (exponent > 0)
+                result = BigInteger.Multiply(result, BigInteger.Pow(radix, exponent));
+            result = BigInteger.LeftShift(result, shift);
+            if (exponent < 0)
+                result = BigInteger.Divide(result, BigInteger.Pow(radix, -exponent));
+            return result;
+        }
+
+        /// <summary>
+        /// Counts the number of leading zero bits in the given 64-bit value.
+        /// </summary>
+        /// <param name="value"> The 64-bit value. </param>
+        /// <returns> The number of leading zero bits in the given 64-bit value. </returns>
+        private static int CountLeadingZeroBits(ulong value)
+        {
+            int k = 0;
+
+            if ((value & 0xFFFFFFFF00000000) == 0)
+            {
+                k = 32;
+                value <<= 32;
+            }
+            if ((value & 0xFFFF000000000000) == 0)
+            {
+                k += 16;
+                value <<= 16;
+            }
+            if ((value & 0xFF00000000000000) == 0)
+            {
+                k += 8;
+                value <<= 8;
+            }
+            if ((value & 0xF000000000000000) == 0)
+            {
+                k += 4;
+                value <<= 4;
+            }
+            if ((value & 0xC000000000000000) == 0)
+            {
+                k += 2;
+                value <<= 2;
+            }
+            if ((value & 0x8000000000000000) == 0)
+            {
+                k++;
+                if ((value & 0x4000000000000000) == 0)
+                    return 64;
+            }
+            return k;
+        }
+
+        /// <summary>
+        /// Counts the number of trailing zero bits in the given 64-bit value.
+        /// </summary>
+        /// <param name="value"> The 64-bit value. </param>
+        /// <returns> The number of trailing zero bits in the given 64-bit value. </returns>
+        private static int CountTrailingZeroBits(ulong value)
+        {
+            int k = 0;
+            if ((value & 7) != 0)
+            {
+                if ((value & 1) != 0)
+                    return 0;
+                if ((value & 2) != 0)
+                {
+                    value >>= 1;
+                    return 1;
+                }
+                value >>= 2;
+                return 2;
+            }
+            k = 0;
+            if ((value & 0xFFFFFFFF) == 0)
+            {
+                k = 32;
+                value >>= 32;
+            }
+            if ((value & 0xFFFF) == 0)
+            {
+                k += 16;
+                value >>= 16;
+            }
+            if ((value & 0xFF) == 0)
+            {
+                k += 8;
+                value >>= 8;
+            }
+            if ((value & 0xF) == 0)
+            {
+                k += 4;
+                value >>= 4;
+            }
+            if ((value & 0x3) == 0)
+            {
+                k += 2;
+                value >>= 2;
+            }
+            if ((value & 1) == 0)
+            {
+                k++;
+                value >>= 1;
+                if (value == 0)
+                    return 32;
+            }
+            return k;
+        }
+
+
     }
 
 }
