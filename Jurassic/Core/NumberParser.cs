@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
 
 namespace Jurassic
 {
@@ -200,7 +199,7 @@ namespace Jurassic
             // digits, desired3 holds the rest.
             int desired1 = 0;
             int desired2 = 0;
-            BigInteger desired3 = BigInteger.Zero;
+            var desired3 = System.Numerics.BigInteger.Zero;
 
             // Indicates the base-10 scale factor of the output e.g. the result is
             // desired x 10^exponentBase10.
@@ -330,7 +329,7 @@ namespace Jurassic
                 desired3 = (long)desired1 * integerPowersOfTen[Math.Min(totalDigits - 9, 9)] + desired2;
                 if (totalDigits > 18)
                 {
-                    desired3 *= BigInteger.Pow(10, totalDigits - 18);
+                    desired3 *= System.Numerics.BigInteger.Pow(10, totalDigits - 18);
                     desired3 += temp;
                 }
                 result = (double)desired3;
@@ -423,7 +422,7 @@ namespace Jurassic
 
             // Read numeric digits 0-9, a-z or A-Z.
             double result = 0;
-            BigInteger bigResult = BigInteger.Zero;
+            var bigResult = System.Numerics.BigInteger.Zero;
             while (true)
             {
                 int numericValue = -1;
@@ -437,7 +436,7 @@ namespace Jurassic
                 if (numericValue == -1 || numericValue >= radix)
                     break;
                 if (digitCount == maxDigits)
-                    bigResult = (BigInteger)result;
+                    bigResult = (System.Numerics.BigInteger)result;
                 result = result * radix + numericValue;
                 if (digitCount >= maxDigits)
                     bigResult = bigResult * radix + numericValue;
@@ -534,7 +533,7 @@ namespace Jurassic
         /// scale factor. </param>
         /// <returns> The closest double-precision number to the desired value.  If there are two
         /// such values, the one with the least significant bit set to zero is returned. </returns>
-        private static double RefineEstimate(double initialEstimate, int base10Exponent, BigInteger desiredValue)
+        private static double RefineEstimate(double initialEstimate, int base10Exponent, System.Numerics.BigInteger desiredValue)
         {
             // Numbers with 16 digits or more are tricky because rounding error can cause the
             // result to be out by one or more ULPs (units in the last place).
@@ -589,8 +588,8 @@ namespace Jurassic
                     // Found two values that bracket the actual value.
                     // If one candidate value is closer to the actual value by at least 2 (one
                     // doesn't cut it because of the integer division) then use that value.
-                    diff1 = BigInteger.Abs(diff1);
-                    diff2 = BigInteger.Abs(diff2);
+                    diff1 = System.Numerics.BigInteger.Abs(diff1);
+                    diff2 = System.Numerics.BigInteger.Abs(diff2);
                     if (diff1 < diff2 - 1)
                         return result;
                     if (diff2 < diff1 - 1)
@@ -629,7 +628,7 @@ namespace Jurassic
         /// <param name="base10Exponent"> Specifies the power-of-ten scale factor. </param>
         /// <param name="extraPrecision"> The number of extra bits of precision. </param>
         /// <returns> A BigInteger containing the scaled integer. </returns>
-        private static BigInteger ConvertDoubleToScaledInteger(double value, int base10Exponent, int extraPrecision)
+        private static System.Numerics.BigInteger ConvertDoubleToScaledInteger(double value, int base10Exponent, int extraPrecision)
         {
             long bits = BitConverter.DoubleToInt64Bits(value);
 
@@ -653,20 +652,20 @@ namespace Jurassic
             if (bits < 0)
                 mantissa = -mantissa;
 
-            var result = new BigInteger(mantissa);
+            var result = new System.Numerics.BigInteger(mantissa);
 
             // Scale the result to increase the precision.
             result <<= extraPrecision;
 
             // Scale the result using the given radix and exponent.
             if (base10Exponent < 0)
-                result *= BigInteger.Pow(10, -base10Exponent);
+                result *= System.Numerics.BigInteger.Pow(10, -base10Exponent);
             if (base2Exponent > 0)
-                result *= BigInteger.Pow(2, base2Exponent);
+                result *= System.Numerics.BigInteger.Pow(2, base2Exponent);
             else if (base2Exponent < 0)
-                result /= BigInteger.Pow(2, -base2Exponent);
+                result /= System.Numerics.BigInteger.Pow(2, -base2Exponent);
             if (base10Exponent > 0)
-                result /= BigInteger.Pow(10, base10Exponent);
+                result /= System.Numerics.BigInteger.Pow(10, base10Exponent);
 
             return result;
         }
