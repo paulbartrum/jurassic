@@ -29,6 +29,8 @@ namespace Sputnik
                 "11.4.1-5-1-s",         // assumes delete var produces ReferenceError - http://es5conform.codeplex.com/workitem/29084
                 "11.4.1-5-2-s",         // assumes delete var produces ReferenceError - http://es5conform.codeplex.com/workitem/29084
                 "11.4.1-5-3-s",         // assumes delete var produces ReferenceError - http://es5conform.codeplex.com/workitem/29084
+                "15.4.4.21-9-c-ii-4-s", // asserts null should be passed to the callback function - http://es5conform.codeplex.com/workitem/29085
+                "15.4.4.22-9-c-ii-4-s", // asserts null should be passed to the callback function - http://es5conform.codeplex.com/workitem/29085
             };
 
             // Create an array of "won't fix" tests.
