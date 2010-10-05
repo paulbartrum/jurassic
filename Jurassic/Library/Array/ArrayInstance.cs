@@ -1192,6 +1192,10 @@ namespace Jurassic.Library
         [JSFunction(Name = "every", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static bool Every(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
@@ -1230,6 +1234,10 @@ namespace Jurassic.Library
         [JSFunction(Name = "some", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static bool Some(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
@@ -1264,6 +1272,10 @@ namespace Jurassic.Library
         [JSFunction(Name = "forEach", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static void ForEach(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
@@ -1300,6 +1312,10 @@ namespace Jurassic.Library
         [JSFunction(Name = "map", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static ArrayInstance Map(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
@@ -1343,6 +1359,10 @@ namespace Jurassic.Library
         [JSFunction(Name = "filter", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static ArrayInstance Filter(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
@@ -1387,6 +1407,10 @@ namespace Jurassic.Library
         [JSFunction(Name = "reduce", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static object Reduce(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
@@ -1422,7 +1446,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    accumulatedValue = callbackFunction.CallLateBound(null, accumulatedValue, elementValue, i, thisObj);
+                    accumulatedValue = callbackFunction.CallLateBound(Undefined.Value, accumulatedValue, elementValue, i, thisObj);
                 }
             }
 
@@ -1445,6 +1469,10 @@ namespace Jurassic.Library
         [JSFunction(Name = "reduceRight", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static object ReduceRight(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
@@ -1480,7 +1508,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    accumulatedValue = callbackFunction.CallLateBound(null, accumulatedValue, elementValue, i, thisObj);
+                    accumulatedValue = callbackFunction.CallLateBound(Undefined.Value, accumulatedValue, elementValue, i, thisObj);
                 }
             }
 
