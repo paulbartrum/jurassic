@@ -90,6 +90,7 @@ namespace UnitTests
             Assert.AreEqual("7.7e+1", TestUtils.Evaluate("77 .toExponential()"));
             Assert.AreEqual("5e-16", TestUtils.Evaluate("5e-16.toExponential()"));
             Assert.AreEqual("5.000e-16", TestUtils.Evaluate("5e-16.toExponential(3)"));
+            Assert.AreEqual("1e+1", TestUtils.Evaluate("9.9.toExponential(0)"));
             Assert.AreEqual("1.2345678901234568e+18", TestUtils.Evaluate("1234567890123456789 .toExponential()"));
             Assert.AreEqual("1.23456789012345676800e+18", TestUtils.Evaluate("1234567890123456789 .toExponential(20)"));
             Assert.AreEqual("5e-324", TestUtils.Evaluate("Number.MIN_VALUE.toExponential()"));
@@ -120,6 +121,7 @@ namespace UnitTests
             Assert.AreEqual("77.13", TestUtils.Evaluate("77.1274.toFixed(2)"));
             Assert.AreEqual("77.00", TestUtils.Evaluate("77 .toFixed(2)"));
             Assert.AreEqual("0.1", TestUtils.Evaluate("0.09.toFixed(1)"));
+            Assert.AreEqual("0.2", TestUtils.Evaluate("0.19.toFixed(1)"));
             Assert.AreEqual("0.0", TestUtils.Evaluate("0.03.toFixed(1)"));
             Assert.AreEqual("-1", TestUtils.Evaluate("(-0.7).toFixed()"));
             Assert.AreEqual("1000000000000000", TestUtils.Evaluate("1e+15.toFixed()"));
@@ -192,6 +194,10 @@ namespace UnitTests
             Assert.AreEqual("6e+1", TestUtils.Evaluate("(55).toPrecision(1)"));
             Assert.AreEqual("-55", TestUtils.Evaluate("(-55).toPrecision(2)"));
             Assert.AreEqual("-6e+1", TestUtils.Evaluate("(-55).toPrecision(1)"));
+            Assert.AreEqual("1e+1", TestUtils.Evaluate("9.59.toPrecision(1)"));
+            Assert.AreEqual("9.6", TestUtils.Evaluate("9.59.toPrecision(2)"));
+            Assert.AreEqual("9.9", TestUtils.Evaluate("9.95.toPrecision(2)"));
+            Assert.AreEqual("10", TestUtils.Evaluate("9.96.toPrecision(2)"));
             Assert.AreEqual("-6e+20", TestUtils.Evaluate("(-555555555555555555555).toPrecision(1)"));
             Assert.AreEqual("-6e+21", TestUtils.Evaluate("(-5555555555555555555555).toPrecision(1)"));
             Assert.AreEqual("18014398509482012.0000", TestUtils.Evaluate("18014398509482012 .toPrecision(21)"));
