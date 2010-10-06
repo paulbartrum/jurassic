@@ -332,15 +332,22 @@ namespace UnitTests
 
             // Duplicate argument names.
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f1(x, a, b, x){ return x; } f1(1, 2)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("f = new Function('a', 'a', 'return true'); f()"));
 
             // Strict mode: the name "eval" is not allowed in strict mode.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function eval(){}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function test(eval){}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function(eval){}"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; new Function('eval', '')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'use strict'; f = new Function('eval', 'return true'); f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function eval(){ 'use strict'; }"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function test(eval){ 'use strict'; }"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function(eval){ 'use strict'; }"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('eval', \"'use strict'; return true\"); f()"));
 
             // Strict mode: argument names cannot be identical.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg, arg) { })()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(arg, arg) { 'use strict' })()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('arg', 'arg', \"'use strict'; return true\"); f()"));
         }
 
     }
