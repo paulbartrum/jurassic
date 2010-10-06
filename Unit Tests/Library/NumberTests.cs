@@ -163,7 +163,6 @@ namespace UnitTests
         [TestMethod]
         public void toPrecision()
         {
-            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toPrecision()"));
             Assert.AreEqual("8e+1", TestUtils.Evaluate("77.1274.toPrecision(1)"));
             Assert.AreEqual("77", TestUtils.Evaluate("77.1274.toPrecision(2)"));
             Assert.AreEqual("77.13", TestUtils.Evaluate("77.1274.toPrecision(4)"));
@@ -177,7 +176,6 @@ namespace UnitTests
             Assert.AreEqual("77.12739999999999441", TestUtils.Evaluate("77.1274.toPrecision(19)"));
             Assert.AreEqual("77.127399999999994407", TestUtils.Evaluate("77.1274.toPrecision(20)"));
             Assert.AreEqual("77.1273999999999944066", TestUtils.Evaluate("77.1274.toPrecision(21)"));
-            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toPrecision(undefined)"));
             Assert.AreEqual("0.0000012", TestUtils.Evaluate("0.00000123.toPrecision(2)"));
             Assert.AreEqual("1.2e-7", TestUtils.Evaluate("0.000000123.toPrecision(2)"));
             Assert.AreEqual("0.00000123000000000000008198", TestUtils.Evaluate("0.00000123.toPrecision(21)"));
@@ -205,6 +203,10 @@ namespace UnitTests
             Assert.AreEqual("0.100000000000000005551", TestUtils.Evaluate("0.1.toPrecision(21)"));
             Assert.AreEqual("4.9e-324", TestUtils.Evaluate("Number.MIN_VALUE.toPrecision(2)"));
             Assert.AreEqual("4.94065645841246544177e-324", TestUtils.Evaluate("Number.MIN_VALUE.toPrecision(21)"));
+
+            // If the precision argument is undefined, it is the same as toString().
+            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toPrecision()"));
+            Assert.AreEqual("77.1274", TestUtils.Evaluate("77.1274.toPrecision(undefined)"));
 
             // NaN & infinity
             Assert.AreEqual("NaN", TestUtils.Evaluate("Number.NaN.toPrecision()"));
