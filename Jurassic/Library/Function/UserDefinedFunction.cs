@@ -34,7 +34,7 @@ namespace Jurassic.Library
             context.GenerateCode();
 
             // Create a new user defined function.
-            Init(name, argumentNames, this.Engine.CreateGlobalScope(), (FunctionDelegate)context.CompiledDelegate, true);
+            Init(name, argumentNames, this.Engine.CreateGlobalScope(), (FunctionDelegate)context.CompiledDelegate, context.StrictMode, true);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Jurassic.Library
         public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body)
             : base(prototype)
         {
-            Init(name, argumentNames, parentScope, body, true);
+            Init(name, argumentNames, parentScope, body, true, true);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             var body = new FunctionDelegate((engine, scope, functionObject, thisObject, argumentValues) => Undefined.Value);
-            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), body, false);
+            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), body, true, false);
         }
 
         /// <summary>
@@ -81,9 +81,10 @@ namespace Jurassic.Library
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="parentScope"> The scope at the point the function is declared. </param>
         /// <param name="body"> A delegate which represents the body of the function. </param>
+        /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
         /// <param name="hasInstancePrototype"> <c>true</c> if the function should have a valid
         /// "prototype" property; <c>false</c> if the "prototype" property should be <c>null</c>. </param>
-        private void Init(string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body, bool hasInstancePrototype)
+        private void Init(string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body, bool strictMode, bool hasInstancePrototype)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -96,6 +97,7 @@ namespace Jurassic.Library
             this.ArgumentNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(argumentNames);
             this.body = body;
             this.ParentScope = parentScope;
+            this.StrictMode = strictMode;
 
             // Add function properties.
             this.FastSetProperty("name", name);
