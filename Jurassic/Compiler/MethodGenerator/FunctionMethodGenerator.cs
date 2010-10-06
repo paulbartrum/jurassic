@@ -150,14 +150,36 @@ namespace Jurassic.Compiler
             if (this.BodyRoot != null)
             {
                 this.AbstractSyntaxTree = this.BodyRoot;
-                return;
+            }
+            else
+            {
+                var lexer = new Lexer(this.Engine, this.Source);
+                var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function);
+                this.AbstractSyntaxTree = parser.Parse();
+                this.StrictMode = parser.StrictMode;
+                this.MethodOptimizationHints = parser.MethodOptimizationHints;
             }
 
-            var lexer = new Lexer(this.Engine, this.Source);
-            var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function);
-            this.AbstractSyntaxTree = parser.Parse();
-            this.StrictMode = parser.StrictMode;
-            this.MethodOptimizationHints = parser.MethodOptimizationHints;
+            if (this.StrictMode == true)
+            {
+                // If the function body is strict mode, then the function name cannot be 'eval' or 'arguments'.
+                if (this.Name == "arguments" || this.Name == "eval")
+                    throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Functions cannot be named '{0}' in strict mode.", this.Name));
+
+                // If the function body is strict mode, then the argument names cannot be 'eval' or 'arguments'.
+                foreach (var argumentName in this.ArgumentNames)
+                    if (argumentName == "arguments" || argumentName == "eval")
+                        throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Arguments cannot be named '{0}' in strict mode.", argumentName));
+
+                // If the function body is strict mode, then the argument names cannot be duplicates.
+                var duplicateCheck = new HashSet<string>();
+                foreach (var argumentName in this.ArgumentNames)
+                {
+                    if (duplicateCheck.Contains(argumentName) == true)
+                        throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Duplicate argument name '{0}' is not allowed in strict mode.", argumentName));
+                    duplicateCheck.Add(argumentName);
+                }
+            }
         }
 
         /// <summary>
