@@ -45,10 +45,11 @@ namespace Jurassic.Library
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="parentScope"> The scope at the point the function is declared. </param>
         /// <param name="body"> A delegate which represents the body of the function. </param>
-        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body)
+        /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
+        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body, bool strictMode)
             : base(prototype)
         {
-            Init(name, argumentNames, parentScope, body, true, true);
+            Init(name, argumentNames, parentScope, body, strictMode, true);
         }
 
         /// <summary>
