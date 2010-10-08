@@ -66,9 +66,9 @@ namespace Jurassic.Library
                     this.mappedArguments[i] = true;
 
                     // Define a getter and setter so that the property value reflects that of the argument.
-                    var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter);
+                    var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter, true);
                     getter.SetPropertyValue("argumentIndex", i, false);
-                    var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter);
+                    var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter, true);
                     setter.SetPropertyValue("argumentIndex", i, false);
                     this.DefineProperty(i.ToString(), new PropertyDescriptor(getter, setter, PropertyAttributes.FullAccess), false);
                 }

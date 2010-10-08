@@ -74,7 +74,10 @@ namespace Jurassic.Compiler
             generator.LoadMethodPointer(this.Context.GeneratedMethod);
             generator.NewObject(ReflectionHelpers.FunctionDelegate_Constructor);
 
-            // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body)
+            // strictMode
+            generator.LoadBoolean(this.Context.StrictMode);
+
+            // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body, bool strictMode)
             generator.NewObject(ReflectionHelpers.UserDefinedFunction_Constructor);
         }
 
