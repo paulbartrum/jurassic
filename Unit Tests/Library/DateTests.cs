@@ -80,14 +80,14 @@ namespace UnitTests
             {
                 // Date() returns the current date as a string - this test assumes the running time is less than 1s.
                 var str = (string)TestUtils.Evaluate("Date()");
-                var formatString = "ddd MMM dd yyyy HH:mm:ss 'GMT+1200 (New Zealand Standard Time)'";
-                Assert.IsTrue(str == DateTime.Now.ToString(formatString) || str == DateTime.Now.AddSeconds(1).ToString(formatString),
+                var formatString = "ddd MMM dd yyyy HH:mm:ss";
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
                     string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString), str));
 
                 // Any arguments provided are ignored.
                 str = (string)TestUtils.Evaluate("Date(2009)");
-                Assert.IsTrue(str == DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss 'GMT+1200 (New Zealand Standard Time)'") ||
-                    str == DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss 'GMT+1200 (New Zealand Standard Time)'"));
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss")) ||
+                    str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss")));
             }
 
             // toString and valueOf.
