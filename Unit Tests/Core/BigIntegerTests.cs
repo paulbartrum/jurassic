@@ -165,12 +165,35 @@ namespace UnitTests
                 for (int j = 0; j < baseValues.Length; j++)
                 {
                     var expected = System.Numerics.BigInteger.Log(System.Numerics.BigInteger.Parse(significantNumbers[i]), baseValues[j]);
-                    var actual = Jurassic.BigInteger.Log(Jurassic.BigInteger.Parse(significantNumbers[i]), baseValues[j]);
+                    var actual = BigInteger.Log(Jurassic.BigInteger.Parse(significantNumbers[i]), baseValues[j]);
                     Assert.AreEqual(expected, actual, string.Format("Computing Log({0}, {1})", significantNumbers[i], baseValues[j]));
                 }
             }
         }
 
+        [TestMethod]
+        public void FromDouble()
+        {
+            for (int i = 0; i < significantNumbers.Length; i++)
+            {
+                var expected = new System.Numerics.BigInteger(double.Parse(significantNumbers[i]));
+                var actual = BigInteger.FromDouble(double.Parse(significantNumbers[i]));
+                Assert.AreEqual(expected, Convert(actual), string.Format("Computing FromDouble({0})", significantNumbers[i]));
+            }
+        }
+
+        [TestMethod]
+        public void ToDouble()
+        {
+            for (int i = 0; i < significantNumbers.Length; i++)
+            {
+                var expected = (double)System.Numerics.BigInteger.Parse(significantNumbers[i]);
+                var actual = Jurassic.BigInteger.Parse(significantNumbers[i]).ToDouble();
+                Assert.AreEqual(expected, actual, string.Format("Computing ToDouble({0})", significantNumbers[i]));
+            }
+        }
+
+        // Helper method.
         private System.Numerics.BigInteger Convert(Jurassic.BigInteger value)
         {
             var result = System.Numerics.BigInteger.Zero;

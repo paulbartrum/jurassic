@@ -353,10 +353,12 @@ namespace Jurassic
         /// <returns></returns>
         public static BigInteger MultiplyAdd(BigInteger b, int m, int a)
         {
-            if (m < 0)
+            if (m <= 0)
                 throw new ArgumentOutOfRangeException("m");
             if (a < 0)
                 throw new ArgumentOutOfRangeException("a");
+            if (b.sign == 0)
+                return new BigInteger(a);
             uint[] outputBits = new uint[b.wordCount + 1];
             int outputWordCount = b.wordCount;
             uint carry = (uint)a;
@@ -371,7 +373,7 @@ namespace Jurassic
                 outputBits[outputWordCount] = carry;
                 outputWordCount++;
             }
-            return new BigInteger(outputBits, outputWordCount, b.Sign * Math.Sign(m));
+            return new BigInteger(outputBits, outputWordCount, 1);
         }
 
         private readonly static int[] powersOfFive = { 5, 25, 125 };
@@ -456,11 +458,11 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Checks if the value can be passed to Quorum().
+        /// Modifies the given values so they are suitable for passing to Quorem.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static void SetUpQuorum(ref BigInteger dividend, ref BigInteger divisor)
+        /// <param name="dividend"> The number that will be divided. </param>
+        /// <param name="divisor"> The number to divide by. </param>
+        public static void SetupQuorum(ref BigInteger dividend, ref BigInteger divisor)
         {
             var leadingZeroCount = CountLeadingZeroBits(divisor.bits[divisor.wordCount - 1]);
             if (leadingZeroCount < 4 || leadingZeroCount > 28)
@@ -471,79 +473,73 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Calculates b / S, then sets b to the remainder.
+        /// Modifies the given values so they are suitable for passing to Quorem.
         /// </summary>
-        /// <param name="b"></param>
-        /// <param name="S"></param>
-        /// <returns> The integer that results from dividing b by S. </returns>
-        public static int Quorem(ref BigInteger b, BigInteger S)
+        /// <param name="dividend"> The number that will be divided. </param>
+        /// <param name="divisor"> The number to divide by. </param>
+        /// <param name="other"> Another value involved in the division. </param>
+        public static void SetupQuorum(ref BigInteger dividend, ref BigInteger divisor, ref BigInteger other)
         {
-            int n = S.wordCount;
-            if (b.wordCount > n)
+            var leadingZeroCount = CountLeadingZeroBits(divisor.bits[divisor.wordCount - 1]);
+            if (leadingZeroCount < 4 || leadingZeroCount > 28)
+            {
+                dividend = BigInteger.LeftShift(dividend, 8);
+                divisor = BigInteger.LeftShift(divisor, 8);
+                other = BigInteger.LeftShift(other, 8);
+            }
+        }
+
+        /// <summary>
+        /// Calculates the integer result of dividing <paramref name="dividend"/> by
+        /// <paramref name="divisor"/> then sets <paramref name="dividend"/> to the remainder.
+        /// </summary>
+        /// <param name="dividend"> The number that will be divided. </param>
+        /// <param name="divisor"> The number to divide by. </param>
+        /// <returns> The integer that results from dividing <paramref name="dividend"/> by
+        /// <paramref name="divisor"/>. </returns>
+        public static int Quorem(ref BigInteger dividend, BigInteger divisor)
+        {
+            int n = divisor.wordCount;
+            if (dividend.wordCount > n)
                 throw new ArgumentException("b is too large");
-            if (b.wordCount < n)
+            if (dividend.wordCount < n)
                 return 0;
-            uint q = b.bits[b.wordCount - 1] / (S.bits[S.wordCount - 1] + 1);	/* ensure q <= true quotient */
+            uint q = dividend.bits[dividend.wordCount - 1] / (divisor.bits[divisor.wordCount - 1] + 1);	/* ensure q <= true quotient */
 
             if (q != 0)
             {
                 ulong borrow = 0;
                 ulong carry = 0;
-                for (int i = 0; i < S.wordCount; i++)
+                for (int i = 0; i < divisor.wordCount; i++)
                 {
-                    ulong ys = S.bits[i] * (ulong)q + carry;
+                    ulong ys = divisor.bits[i] * (ulong)q + carry;
                     carry = ys >> 32;
-                    ulong y = b.bits[i] - (ys & 0xFFFFFFFF) - borrow;
+                    ulong y = dividend.bits[i] - (ys & 0xFFFFFFFF) - borrow;
                     borrow = y >> 32 & 1;
-                    b.bits[i] = (uint)y;
+                    dividend.bits[i] = (uint)y;
                 }
-                while (b.wordCount > 1 && b.bits[b.wordCount - 1] == 0)
-                    b.wordCount--;
+                while (dividend.wordCount > 1 && dividend.bits[dividend.wordCount - 1] == 0)
+                    dividend.wordCount--;
             }
-            if (Compare(b, S) >= 0)
+            if (Compare(dividend, divisor) >= 0)
             {
                 q++;
                 ulong borrow = 0;
                 ulong carry = 0;
-                for (int i = 0; i < S.wordCount; i++)
+                for (int i = 0; i < divisor.wordCount; i++)
                 {
-                    ulong ys = S.bits[i] + carry;
+                    ulong ys = divisor.bits[i] + carry;
                     carry = ys >> 32;
-                    ulong y = b.bits[i] - (ys & 0xFFFFFFFF) - borrow;
+                    ulong y = dividend.bits[i] - (ys & 0xFFFFFFFF) - borrow;
                     borrow = y >> 32 & 1;
-                    b.bits[i] = (uint)y;
+                    dividend.bits[i] = (uint)y;
                 }
-                while (b.wordCount > 1 && b.bits[b.wordCount - 1] == 0)
-                    b.wordCount--;
+                while (dividend.wordCount > 1 && dividend.bits[dividend.wordCount - 1] == 0)
+                    dividend.wordCount--;
             }
-            if (b.wordCount == 1 && b.bits[0] == 0)
-                b.sign = 0;
+            if (dividend.wordCount == 1 && dividend.bits[0] == 0)
+                dividend.sign = 0;
             return (int)q;
-        }
-        
-        // TODO: remove this and the dependency on System.Numerics.
-        public static BigInteger Divide(BigInteger a, BigInteger b)
-        {
-            var tempA = System.Numerics.BigInteger.Zero;
-            for (int i = a.wordCount - 1; i >= 0; i--)
-            {
-                tempA <<= 32;
-                tempA += a.bits[i];
-            }
-
-            var tempB = System.Numerics.BigInteger.Zero;
-            for (int i = b.wordCount - 1; i >= 0; i--)
-            {
-                tempB <<= 32;
-                tempB += b.bits[i];
-            }
-
-            var result = tempA / tempB;
-            byte[] bytes = result.ToByteArray();
-
-            uint[] outputBits = new uint[(bytes.Length + 3) / 4];
-            Buffer.BlockCopy(bytes, 0, outputBits, 0, bytes.Length);
-            return new BigInteger(outputBits, outputBits.Length, 1);
         }
 
         /// <summary>
@@ -790,7 +786,7 @@ namespace Jurassic
             var divisor = Pow(10, log10);
             
             // Adjust the values so that Quorum works.
-            SetUpQuorum(ref value, ref divisor);
+            SetupQuorum(ref value, ref divisor);
 
             // Check for overestimate of log10.
             if (BigInteger.Compare(divisor, value) > 0)
@@ -811,6 +807,70 @@ namespace Jurassic
                 value = BigInteger.MultiplyAdd(value, 10, 0);
             }
             return result.ToString();
+        }
+
+        /// <summary>
+        /// Returns a new instance BigInteger structure from a 64-bit double precision floating
+        /// point value.
+        /// </summary>
+        /// <param name="value"> A 64-bit double precision floating point value. </param>
+        /// <returns> The corresponding BigInteger value. </returns>
+        public static BigInteger FromDouble(double value)
+        {
+            long bits = BitConverter.DoubleToInt64Bits(value);
+
+            // Extract the base-2 exponent.
+            var base2Exponent = (int)((bits & 0x7FF0000000000000) >> 52) - 1023;
+
+            // Extract the mantissa.
+            long mantissa = bits & 0xFFFFFFFFFFFFF;
+            if (base2Exponent > -1023)
+            {
+                mantissa |= 0x10000000000000;
+                base2Exponent -= 52;
+            }
+            else
+            {
+                // Denormals.
+                base2Exponent -= 51;
+            }
+
+            // Extract the sign bit.
+            if (bits < 0)
+                mantissa = -mantissa;
+
+            return BigInteger.LeftShift(new BigInteger(mantissa), base2Exponent);
+        }
+
+        /// <summary>
+        /// Returns a new instance BigInteger structure from a 64-bit double precision floating
+        /// point value.
+        /// </summary>
+        /// <param name="value"> A 64-bit double precision floating point value. </param>
+        /// <returns> The corresponding BigInteger value. </returns>
+        public double ToDouble()
+        {
+            // Special case: zero.
+            if (this.wordCount == 1 && this.bits[0] == 0)
+                return 0.0;
+
+            // Get the number of bits in the BigInteger.
+            var bitCount = this.BitCount;
+
+            // The top 53 bits can be packed into the double (the top-most bit is implied).
+            var temp = BigInteger.RightShift(this, bitCount - 53);
+            ulong doubleBits = (((ulong)temp.bits[1] << 32) | temp.bits[0]) & 0xFFFFFFFFFFFFF;
+
+            // Base-2 exponent is however much we shifted, plus 52 (because the decimal point is
+            // effectively at the 52nd bit), plus 1023 (the bias).
+            doubleBits |= (ulong)(bitCount - 53 + 52 + 1023) << 52;
+
+            // Handle the sign bit.
+            if (this.sign == -1)
+                doubleBits |= (ulong)1 << 63;
+
+            // Convert the bit representation to a double.
+            return BitConverter.Int64BitsToDouble((long)doubleBits);
         }
 
         /// <summary>
