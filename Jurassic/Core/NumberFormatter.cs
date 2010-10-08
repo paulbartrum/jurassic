@@ -270,25 +270,43 @@ namespace Jurassic
 
             // Calculate the error.
             BigInteger errorDelta = BigInteger.Zero;
+            int errorPowerOfTen = int.MinValue;
             switch (style)
             {
                 case Style.Regular:
                     errorDelta = ScaleToInteger(CalculateError(value), multiplier, powerOfTwoScaleFactor - 1);
                     break;
                 case Style.Precision:
-                    errorDelta = ScalePower(radix, integralDigits - precision, multiplier, powerOfTwoScaleFactor - 1);
+                    errorPowerOfTen = integralDigits - precision;
                     break;
                 case Style.Fixed:
-                    errorDelta = ScalePower(radix, -precision, multiplier, powerOfTwoScaleFactor - 1);
+                    errorPowerOfTen = -precision;
                     break;
                 case Style.Exponential:
                     if (precision < 0)
                         errorDelta = ScaleToInteger(CalculateError(value), multiplier, powerOfTwoScaleFactor - 1);
                     else
-                        errorDelta = ScalePower(radix, integralDigits - precision - 1, multiplier, powerOfTwoScaleFactor - 1);
+                        errorPowerOfTen = integralDigits - precision - 1;
                     break;
                 default:
                     throw new ArgumentException("Unknown formatting style.", "style");
+            }
+            if (errorPowerOfTen != int.MinValue)
+            {
+                errorDelta = multiplier;
+                if (errorPowerOfTen > 0)
+                    errorDelta = BigInteger.Multiply(errorDelta, BigInteger.Pow(radix, errorPowerOfTen));
+                errorDelta = BigInteger.LeftShift(errorDelta, powerOfTwoScaleFactor - 1);
+                if (errorPowerOfTen < 0)
+                {
+                    // We would normally divide by the power of 10 here, but division is extremely
+                    // slow so we multiply everything else instead.
+                    //errorDelta = BigInteger.Divide(errorDelta, BigInteger.Pow(radix, -errorPowerOfTen));
+                    var errorPowerOfTenMultiplier = BigInteger.Pow(radix, -errorPowerOfTen);
+                    scaledValue = BigInteger.Multiply(scaledValue, errorPowerOfTenMultiplier);
+                    divisor = BigInteger.Multiply(divisor, errorPowerOfTenMultiplier);
+                    BigInteger.SetupQuorum(ref scaledValue, ref divisor, ref errorDelta);
+                }
             }
 
             // Shrink the error in the case where ties are resolved towards the value with the 
@@ -506,18 +524,6 @@ namespace Jurassic
             result = BigInteger.Multiply(result, multiplier);
             shift += base2Exponent;
             result = BigInteger.LeftShift(result, shift);
-            return result;
-        }
-
-        private static BigInteger ScalePower(int radix, int exponent, BigInteger multiplier, int shift)
-        {
-            var result = BigInteger.One;
-            result = BigInteger.Multiply(result, multiplier);
-            if (exponent > 0)
-                result = BigInteger.Multiply(result, BigInteger.Pow(radix, exponent));
-            result = BigInteger.LeftShift(result, shift);
-            if (exponent < 0)
-                result = BigInteger.Divide(result, BigInteger.Pow(radix, -exponent));
             return result;
         }
 

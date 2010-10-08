@@ -199,7 +199,7 @@ namespace Jurassic
             // digits, desired3 holds the rest.
             int desired1 = 0;
             int desired2 = 0;
-            var desired3 = System.Numerics.BigInteger.Zero;
+            var desired3 = BigInteger.Zero;
 
             // Indicates the base-10 scale factor of the output e.g. the result is
             // desired x 10^exponentBase10.
@@ -222,7 +222,7 @@ namespace Jurassic
                     else if (totalDigits < 18)
                         desired2 = desired2 * 10 + (c - '0');
                     else
-                        desired3 = desired3 * 10 + (c - '0');
+                        desired3 = BigInteger.MultiplyAdd(desired3, 10, c - '0');
                     totalDigits++;
                 }
             }
@@ -247,7 +247,7 @@ namespace Jurassic
                     else if (totalDigits < 18)
                         desired2 = desired2 * 10 + (c - '0');
                     else
-                        desired3 = desired3 * 10 + (c - '0');
+                        desired3 = BigInteger.MultiplyAdd(desired3, 10, c - '0');
                     totalDigits++;
                     fractionalDigits++;
                     exponentBase10--;
@@ -326,13 +326,13 @@ namespace Jurassic
                 // Combine desired1, desired2 and desired3 to produce an integer representing the
                 // final result.
                 var temp = desired3;
-                desired3 = (long)desired1 * integerPowersOfTen[Math.Min(totalDigits - 9, 9)] + desired2;
+                desired3 = new BigInteger((long)desired1 * integerPowersOfTen[Math.Min(totalDigits - 9, 9)] + desired2);
                 if (totalDigits > 18)
                 {
-                    desired3 *= System.Numerics.BigInteger.Pow(10, totalDigits - 18);
-                    desired3 += temp;
+                    desired3 = BigInteger.Multiply(desired3, BigInteger.Pow(10, totalDigits - 18));
+                    desired3 = BigInteger.Add(desired3, temp);
                 }
-                result = (double)desired3;
+                result = desired3.ToDouble();
             }
 
             // Apply the base-10 exponent.
@@ -422,7 +422,7 @@ namespace Jurassic
 
             // Read numeric digits 0-9, a-z or A-Z.
             double result = 0;
-            var bigResult = System.Numerics.BigInteger.Zero;
+            var bigResult = BigInteger.Zero;
             while (true)
             {
                 int numericValue = -1;
@@ -436,10 +436,10 @@ namespace Jurassic
                 if (numericValue == -1 || numericValue >= radix)
                     break;
                 if (digitCount == maxDigits)
-                    bigResult = (System.Numerics.BigInteger)result;
+                    bigResult = BigInteger.FromDouble(result);
                 result = result * radix + numericValue;
                 if (digitCount >= maxDigits)
-                    bigResult = bigResult * radix + numericValue;
+                    bigResult = BigInteger.MultiplyAdd(bigResult, radix, numericValue);
                 digitCount++;
             }
 
@@ -533,7 +533,7 @@ namespace Jurassic
         /// scale factor. </param>
         /// <returns> The closest double-precision number to the desired value.  If there are two
         /// such values, the one with the least significant bit set to zero is returned. </returns>
-        private static double RefineEstimate(double initialEstimate, int base10Exponent, System.Numerics.BigInteger desiredValue)
+        private static double RefineEstimate(double initialEstimate, int base10Exponent, BigInteger desiredValue)
         {
             // Numbers with 16 digits or more are tricky because rounding error can cause the
             // result to be out by one or more ULPs (units in the last place).
@@ -553,23 +553,32 @@ namespace Jurassic
             // 9.  If the precision is less than or equal to 160 bits goto step 3.
             // 10. Assume that the estimates are equally close to the desired value; return the
             //     value with the least significant bit equal to 0.
-            int direction = 1;
+            int direction = double.IsPositiveInfinity(initialEstimate) ? -1 : 1;
             int precision = 32;
 
             // Calculate the candidate value by modifying the last bit.
             double result = initialEstimate;
             double result2 = AddUlps(result, direction);
 
+            // Figure out our multiplier.  Either base10Exponent is positive, in which case we
+            // multiply actual1 and actual2, or it's negative, in which case we multiply
+            // desiredValue.
+            BigInteger multiplier = BigInteger.One;
+            if (base10Exponent < 0)
+                multiplier = BigInteger.Pow(10, -base10Exponent);
+            else if (base10Exponent > 0)
+                desiredValue = BigInteger.Multiply(desiredValue, BigInteger.Pow(10, base10Exponent));
+
             while (precision <= 160)
             {
                 // Scale the candidate values to a big integer.
-                var actual1 = ConvertDoubleToScaledInteger(result, base10Exponent, precision);
-                var actual2 = ConvertDoubleToScaledInteger(result2, base10Exponent, precision);
+                var actual1 = ScaleToInteger(result, multiplier, precision);
+                var actual2 = ScaleToInteger(result2, multiplier, precision);
 
                 // Calculate the differences between the candidate values and the desired value.
-                var baseline = desiredValue << precision;
-                var diff1 = actual1 - baseline;
-                var diff2 = actual2 - baseline;
+                var baseline = BigInteger.LeftShift(desiredValue, precision);
+                var diff1 = BigInteger.Subtract(actual1, baseline);
+                var diff2 = BigInteger.Subtract(actual2, baseline);
 
                 if (diff1.Sign == direction && diff2.Sign == direction)
                 {
@@ -588,17 +597,25 @@ namespace Jurassic
                     // Found two values that bracket the actual value.
                     // If one candidate value is closer to the actual value by at least 2 (one
                     // doesn't cut it because of the integer division) then use that value.
-                    diff1 = System.Numerics.BigInteger.Abs(diff1);
-                    diff2 = System.Numerics.BigInteger.Abs(diff2);
-                    if (diff1 < diff2 - 1)
+                    diff1 = BigInteger.Abs(diff1);
+                    var diff1MinusOne = diff1;
+                    diff1MinusOne.InPlaceDecrement();
+                    diff2 = BigInteger.Abs(diff2);
+                    var diff2MinusOne = diff2;
+                    diff2MinusOne.InPlaceDecrement();
+                    if (BigInteger.Compare(diff1, diff2MinusOne) < 0)
                         return result;
-                    if (diff2 < diff1 - 1)
+                    if (BigInteger.Compare(diff2, diff1MinusOne) < 0)
                         return result2;
 
                     // Not enough precision to determine the correct answer, or it's a halfway case.
                     // Increase the precision.
                     precision += 32;
                 }
+
+                // If result2 is NaN then we have gone too far.
+                if (double.IsNaN(result2) == true)
+                    return result;
             }
 
             // Even with heaps of precision there is no clear winner.
@@ -621,14 +638,14 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Scales the given double-precision number using the given power-of-ten scale factor.
-        /// The calculation can be performed with any number of bits of precision.
+        /// Scales the given double-precision number by multiplying and then shifting it.
         /// </summary>
         /// <param name="value"> The value to scale. </param>
-        /// <param name="base10Exponent"> Specifies the power-of-ten scale factor. </param>
-        /// <param name="extraPrecision"> The number of extra bits of precision. </param>
-        /// <returns> A BigInteger containing the scaled integer. </returns>
-        private static System.Numerics.BigInteger ConvertDoubleToScaledInteger(double value, int base10Exponent, int extraPrecision)
+        /// <param name="multiplier"> The multiplier. </param>
+        /// <param name="shift"> The power of two scale factor. </param>
+        /// <returns> A BigInteger containing the result of multiplying <paramref name="value"/> by
+        /// <paramref name="multiplier"/> and then shifting left by <paramref name="shift"/> bits. </returns>
+        private static BigInteger ScaleToInteger(double value, BigInteger multiplier, int shift)
         {
             long bits = BitConverter.DoubleToInt64Bits(value);
 
@@ -652,21 +669,10 @@ namespace Jurassic
             if (bits < 0)
                 mantissa = -mantissa;
 
-            var result = new System.Numerics.BigInteger(mantissa);
-
-            // Scale the result to increase the precision.
-            result <<= extraPrecision;
-
-            // Scale the result using the given radix and exponent.
-            if (base10Exponent < 0)
-                result *= System.Numerics.BigInteger.Pow(10, -base10Exponent);
-            if (base2Exponent > 0)
-                result *= System.Numerics.BigInteger.Pow(2, base2Exponent);
-            else if (base2Exponent < 0)
-                result /= System.Numerics.BigInteger.Pow(2, -base2Exponent);
-            if (base10Exponent > 0)
-                result /= System.Numerics.BigInteger.Pow(10, base10Exponent);
-
+            var result = new BigInteger(mantissa);
+            result = BigInteger.Multiply(result, multiplier);
+            shift += base2Exponent;
+            result = BigInteger.LeftShift(result, shift);
             return result;
         }
     }
