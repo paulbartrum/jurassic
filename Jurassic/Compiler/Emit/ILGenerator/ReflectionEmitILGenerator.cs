@@ -8,19 +8,17 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class ReflectionEmitILGenerator : ILGenerator
     {
-        private System.Reflection.Emit.MethodBuilder method;
         private System.Reflection.Emit.ILGenerator generator;
 
         /// <summary>
         /// Creates a new ReflectionEmitILGenerator instance.
         /// </summary>
-        /// <param name="method"> The MethodBuilder for the method that is being constructed. </param>
-        public ReflectionEmitILGenerator(System.Reflection.Emit.MethodBuilder method)
+        /// <param name="generator"> The ILGenerator that is used to output the IL. </param>
+        public ReflectionEmitILGenerator(System.Reflection.Emit.ILGenerator generator)
         {
-            if (method == null)
-                throw new ArgumentNullException("method");
-            this.method = method;
-            this.generator = method.GetILGenerator();
+            if (generator == null)
+                throw new ArgumentNullException("generator");
+            this.generator = generator;
         }
 
 
