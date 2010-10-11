@@ -598,14 +598,10 @@ namespace Jurassic
                     // If one candidate value is closer to the actual value by at least 2 (one
                     // doesn't cut it because of the integer division) then use that value.
                     diff1 = BigInteger.Abs(diff1);
-                    var diff1MinusOne = diff1;
-                    diff1MinusOne.InPlaceDecrement();
                     diff2 = BigInteger.Abs(diff2);
-                    var diff2MinusOne = diff2;
-                    diff2MinusOne.InPlaceDecrement();
-                    if (BigInteger.Compare(diff1, diff2MinusOne) < 0)
+                    if (BigInteger.Compare(diff1, BigInteger.Subtract(diff2, BigInteger.One)) < 0)
                         return result;
-                    if (BigInteger.Compare(diff2, diff1MinusOne) < 0)
+                    if (BigInteger.Compare(diff2, BigInteger.Subtract(diff1, BigInteger.One)) < 0)
                         return result2;
 
                     // Not enough precision to determine the correct answer, or it's a halfway case.
