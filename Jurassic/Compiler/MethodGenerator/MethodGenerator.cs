@@ -234,7 +234,7 @@ namespace Jurassic.Compiler
                     typeof(object), GetParameterTypes());
 
                 // Generate the IL for the method.
-                var generator = new ReflectionEmitILGenerator(methodBuilder);
+                var generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
                 if (this.Source.Path != null)
                 {
                     // Initialize the debugging information.
