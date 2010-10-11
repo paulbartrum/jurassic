@@ -16,6 +16,7 @@ namespace Jurassic.Compiler
         private Token nextToken;
         private bool consumedLineTerminator;
         private ParserExpressionState expressionState;
+        private Scope initialScope;
         private Scope currentScope;
         private MethodOptimizationHints methodOptimizationHints;
         private List<string> labelsForCurrentStatement = new List<string>();
@@ -48,7 +49,7 @@ namespace Jurassic.Compiler
             this.engine = engine;
             this.lexer = lexer;
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
-            this.currentScope = initialScope;
+            this.currentScope = this.initialScope = initialScope;
             this.methodOptimizationHints = new MethodOptimizationHints();
             this.options = options;
             this.context = context;
@@ -65,7 +66,7 @@ namespace Jurassic.Compiler
         private static Parser CreateFunctionBodyParser(Parser parser, Scope scope)
         {
             var result = (Parser)parser.MemberwiseClone();
-            result.currentScope = scope;
+            result.currentScope = result.initialScope = scope;
             result.methodOptimizationHints = new MethodOptimizationHints();
             result.context = CodeContext.Function;
             result.endToken = PunctuatorToken.RightBrace;
@@ -334,21 +335,10 @@ namespace Jurassic.Compiler
                     break;
 
                 // Parse a single statement.
-                result.Statements.Add(ParseSourceStatement());
+                result.Statements.Add(ParseStatement());
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Parses any statement.
-        /// </summary>
-        /// <returns> An expression that represents the statement. </returns>
-        private Statement ParseSourceStatement()
-        {
-            if (this.nextToken == KeywordToken.Function)
-                return ParseFunctionDeclaration();
-            return ParseStatement();
         }
 
         /// <summary>
@@ -410,7 +400,7 @@ namespace Jurassic.Compiler
             if (this.nextToken == KeywordToken.Debugger)
                 return ParseDebugger();
             if (this.nextToken == KeywordToken.Function)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Functions must be declared in a top-level context", this.LineNumber, this.SourcePath);
+                return ParseFunctionDeclaration();
             if (this.nextToken == null)
                 throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input", this.LineNumber, this.SourcePath);
 
@@ -1164,10 +1154,10 @@ namespace Jurassic.Compiler
         private Statement ParseFunctionDeclaration()
         {
             // Parse the function declaration.
-            var expression = ParseFunction(FunctionType.Declaration);
+            var expression = ParseFunction(FunctionType.Declaration, this.initialScope);
 
-            // Add the function to the scope.
-            this.currentScope.DeclareVariable(expression.Context.Name, expression, writable: true, deletable: this.context == CodeContext.Eval);
+            // Add the function to the top-level scope.
+            this.initialScope.DeclareVariable(expression.Context.Name, expression, writable: true, deletable: this.context == CodeContext.Eval);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1186,8 +1176,9 @@ namespace Jurassic.Compiler
         /// Parses a function declaration or a function expression.
         /// </summary>
         /// <param name="functionType"> The type of function to parse. </param>
+        /// <param name="parentScope"> The parent scope for the function. </param>
         /// <returns> A function expression. </returns>
-        private FunctionExpression ParseFunction(FunctionType functionType)
+        private FunctionExpression ParseFunction(FunctionType functionType, Scope parentScope)
         {
             if (functionType != FunctionType.Getter && functionType != FunctionType.Setter)
             {
@@ -1270,7 +1261,7 @@ namespace Jurassic.Compiler
             this.methodOptimizationHints.HasNestedFunction = true;
 
             // Create a new scope and assign variables within the function body to the scope.
-            var scope = DeclarativeScope.CreateFunctionScope(this.currentScope, functionName, argumentNames);
+            var scope = DeclarativeScope.CreateFunctionScope(parentScope, functionName, argumentNames);
 
             // Read the function body.
             var functionParser = Parser.CreateFunctionBodyParser(this, scope);
@@ -1793,7 +1784,7 @@ namespace Jurassic.Compiler
                 if (this.nextToken != PunctuatorToken.Colon && mightBeGetOrSet == true && (propertyName == "get" || propertyName == "set"))
                 {
                     // Parse the function name and body.
-                    var function = ParseFunction(propertyName == "get" ? FunctionType.Getter : FunctionType.Setter);
+                    var function = ParseFunction(propertyName == "get" ? FunctionType.Getter : FunctionType.Setter, this.currentScope);
 
                     // Get the function name.
                     var getOrSet = propertyName;
@@ -1926,7 +1917,7 @@ namespace Jurassic.Compiler
         /// <returns> A function expression. </returns>
         private FunctionExpression ParseFunctionExpression()
         {
-            return ParseFunction(FunctionType.Expression);
+            return ParseFunction(FunctionType.Expression, this.currentScope);
         }
     }
 

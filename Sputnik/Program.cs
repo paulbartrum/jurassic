@@ -39,6 +39,8 @@ namespace Sputnik
                 "S11.4.3_D1.2",         // Asserts that typeof RegExp should return "object" (it should be "function").
                 "S12.6.4_D1",           // Newly added properties are not guarenteed to be included in enumeration.
                 "S13.2_D1.2",           // Implementations are not required to join identical function instances.
+                "S13_D1_T1",            // Appears to assume that function declarations do not get moved to the top of the scope.
+                "S14_D7",               // Function declarations do not and should not respect the current scope.
                 "S15.5.4.11_D1.1_T1",   // Asserts that String.prototype.replace() should fail if two arguments aren't supplied.
                 "S15.5.4.11_D1.1_T2",   // Asserts that String.prototype.replace() should fail if two arguments aren't supplied.
                 "S15.5.4.11_D1.1_T3",   // Asserts that String.prototype.replace() should fail if two arguments aren't supplied.
@@ -61,18 +63,6 @@ namespace Sputnik
                 "S11.1.5_A4.2",         // Asserts that keywords are not allowed in object literals (they are in ECMAScript 5).
                 "S11.8.2_A2.3_T1",      // Asserts relational operator should evaluate right-to-left (spec bug fixed in ECMAScript 5).
                 "S11.8.3_A2.3_T1",      // Asserts relational operator should evaluate right-to-left (spec bug fixed in ECMAScript 5).
-                "S12.10_A3.3_T4",       // Declares a function inside a try block.
-                "S12.10_A3.3_T5",       // Declares a function inside a try block.
-                "S12.7_A3",             // Declares a function inside a do-while block.
-                "S12.7_A4_T1",          // Declares a function inside a do-while block.
-                "S12.7_A4_T2",          // Declares a function inside a do-while block.
-                "S12.7_A4_T3",          // Declares a function inside a do-while block.
-                "S12.8_A3",             // Declares a function inside a do-while block.
-                "S12.8_A4_T1",          // Declares a function inside a do-while block.
-                "S12.8_A4_T2",          // Declares a function inside a do-while block.
-                "S12.8_A4_T3",          // Declares a function inside a do-while block.
-                "S13.2.2_A17_T1",       // Declares a function inside various structures.
-                "S15.1.2.1_A3.3_T3",    // Declares a function inside a try block.
                 "S15.3.4.2_A1_T1",      // Assumes (function() { }).toString() can be compiled using eval().
                 "S15.3.4.3_A6_T4",      // Asserts that apply throws a TypeError if the second argument is not an array.  This was changed in ECMAScript 5.
                 "S15.4.4.2_A2_T1",      // Array.prototype.toString() is generic in ECMAScript 5.
@@ -106,22 +96,6 @@ namespace Sputnik
                 "S15.11.2.1_A1_T1",     // Assumes that Error().message doesn't exist (spec bug fixed in ECMAScript 5).
 
                 // Implementation_Diagnostics
-                "S13.2.2_D20_T2",       // Declares a function inside various structures.
-                "S13.2.2_D20_T3",       // Declares a function inside various structures.
-                "S13.2.2_D20_T4",       // Declares a function inside various structures.
-                "S13.2.2_D20_T5",       // Declares a function inside various structures.
-                "S13.2.2_D20_T6",       // Declares a function inside various structures.
-                "S13.2.2_D20_T7",       // Declares a function inside various structures.
-                "S13.2.2_D20_T8",       // Declares a function inside various structures.
-                "S13_D1_T1",            // Declares a function inside various structures.
-                "S14_D1_T1",            // Declares a function inside various structures.
-                "S14_D4_T1",            // Declares a function inside various structures.
-                "S14_D4_T2",            // Declares a function inside various structures.
-                "S14_D4_T3",            // Declares a function inside various structures.
-                "S14_D1_T1",            // Declares a function inside various structures.
-                "S14_D6_T1",            // Declares a function inside various structures.
-                "S14_D6_T2",            // Declares a function inside various structures.
-                "S14_D7",               // Declares a function inside various structures.
                 "S15.1.2.2_D1.2",       // Forbids octal values in parseInt.  This is a de-facto standard (only enabled in compatibility mode).
             };
 

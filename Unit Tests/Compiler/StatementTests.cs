@@ -209,6 +209,13 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("x = { a: 1 }; y = 2; function foo() { with (x) { return y; } } foo()"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = { a: 1 }; y = 2; function foo() { with (x) { y = a; } } foo(); y"));
             Assert.AreEqual(1, TestUtils.Evaluate(@"var x = { eval: 1 }; var f = function(){ with(x){ return st_eval = eval; } }; f();"));
+
+            // With and object literals.
+            Assert.AreEqual(42, TestUtils.Evaluate("delete a; x = { a: 42 }; with (x) { y = { get z() { return a; }} } y.z"));
+
+            // With and function declarations.
+            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
+            Assert.AreEqual("function", TestUtils.Evaluate("result = typeof _f; with ({a: 2}) { function _f() { return 5 } } result"));
   
             // With statements are syntax errors in strict mode.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; with (x) { }"));
