@@ -281,8 +281,8 @@ namespace UnitTests
             // Try without catch or finally is an error.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("try { }"));
 
-            // Cannot declare a function inside a catch block.
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("try { throw 6; } catch (e) { function foo() { return 2; } foo() }"));
+            // Can declare a function inside a catch block.
+            Assert.AreEqual(2, TestUtils.Evaluate("try { throw 6; } catch (e) { function foo() { return 2; } foo() }"));
 
             // Try using continue within try, catch and finally blocks.
             Assert.AreEqual(3, TestUtils.Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; continue; } catch (e) { j = 0; } j = 0; } j"));
