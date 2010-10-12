@@ -37,6 +37,11 @@ namespace Jurassic.Library
         /// <param name="elements"> The initial elements of the new array. </param>
         public ArrayInstance New(object[] elements)
         {
+            // Transform any nulls into undefined.
+            for (int i = 0; i < elements.Length; i++)
+                if (elements[i] == null)
+                    elements[i] = Undefined.Value;
+
             // Copy the array if it is not an object array (for example, if it is a string[]).
             if (elements.GetType() != typeof(object[]))
             {

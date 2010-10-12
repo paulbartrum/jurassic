@@ -856,6 +856,10 @@ namespace UnitTests
             Assert.AreEqual(-1, TestUtils.Evaluate("a.indexOf(null)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("a.indexOf(new Object())"));
 
+            // indexOf(undefined)
+            Assert.AreEqual(6, TestUtils.Evaluate("[0, false, , null, 'undefined', , undefined, 0].indexOf(undefined)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var indexOf_nullVariable; [0, indexOf_nullVariable, 0].indexOf(undefined)"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.indexOf.length"));
         }
@@ -888,6 +892,10 @@ namespace UnitTests
             Assert.AreEqual(-1, TestUtils.Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', -10)"));
             Assert.AreEqual(3, TestUtils.Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', 10)"));
             Assert.AreEqual(2, TestUtils.Evaluate("[3, 2, 1].lastIndexOf(1, undefined)"));
+
+            // lastIndexOf(undefined)
+            Assert.AreEqual(6, TestUtils.Evaluate("[0, false, , null, 'undefined', , undefined, 0].lastIndexOf(undefined)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var indexOf_nullVariable; [0, indexOf_nullVariable, 0].lastIndexOf(undefined)"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.lastIndexOf.length"));
