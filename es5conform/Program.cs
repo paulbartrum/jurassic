@@ -62,6 +62,8 @@ namespace Sputnik
                 "15.4.4.17-8-10",       // mixes up true and false - http://es5conform.codeplex.com/workitem/29144
                 "15.4.4.22-9-1",        // copy and paste error - http://es5conform.codeplex.com/workitem/29146
                 "15.4.4.22-9-7",        // deleted array should still be traversed - http://es5conform.codeplex.com/workitem/26872
+                "11.4.1-4.a-4-s",       // assumes this refers to global object - http://es5conform.codeplex.com/workitem/29151
+                "11.13.1-1-7-s",        // assumes this is undefined - http://es5conform.codeplex.com/workitem/29152
             };
 
             // Create an array of "won't fix" tests.
