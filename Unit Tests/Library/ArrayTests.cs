@@ -891,7 +891,7 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', 1)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', -10)"));
             Assert.AreEqual(3, TestUtils.Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', 10)"));
-            Assert.AreEqual(2, TestUtils.Evaluate("[3, 2, 1].lastIndexOf(1, undefined)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("[3, 2, 1].lastIndexOf(1, undefined)"));
 
             // lastIndexOf(undefined)
             Assert.AreEqual(6, TestUtils.Evaluate("[0, false, , null, 'undefined', , undefined, 0].lastIndexOf(undefined)"));

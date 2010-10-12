@@ -1142,6 +1142,21 @@ namespace Jurassic.Library
 
         /// <summary>
         /// Returns the index of the given search element in the array, searching backwards from
+        /// the end of the array.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <param name="searchElement"> The value to search for. </param>
+        /// <param name="fromIndex"> The array index to start searching. </param>
+        /// <returns> The index of the given search element in the array, or <c>-1</c> if the
+        /// element wasn't found. </returns>
+        [JSFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static int LastIndexOf(ObjectInstance thisObj, object searchElement)
+        {
+            return LastIndexOf(thisObj, searchElement, int.MaxValue);
+        }
+
+        /// <summary>
+        /// Returns the index of the given search element in the array, searching backwards from
         /// <paramref name="fromIndex"/>.
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
@@ -1150,7 +1165,7 @@ namespace Jurassic.Library
         /// <returns> The index of the given search element in the array, or <c>-1</c> if the
         /// element wasn't found. </returns>
         [JSFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static int LastIndexOf(ObjectInstance thisObj, object searchElement, int fromIndex = int.MaxValue)
+        public static int LastIndexOf(ObjectInstance thisObj, object searchElement, int fromIndex)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -1163,7 +1178,7 @@ namespace Jurassic.Library
             if (fromIndex < 0)
                 fromIndex += (int)arrayLength;
 
-            for (int i = Math.Min((int)arrayLength - 1, fromIndex); i >= 0; i --)
+            for (int i = Math.Min((int)arrayLength - 1, fromIndex); i >= 0; i--)
             {
                 // Get the value of the array element.
                 object elementValue = thisObj[(uint)i];
