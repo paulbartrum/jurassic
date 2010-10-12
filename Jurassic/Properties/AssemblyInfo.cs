@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("Jurassic")]
 [assembly: AssemblyCopyright("Copyright © Paul Bartrum 2010")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("en-us")]
+[assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
