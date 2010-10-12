@@ -1339,7 +1339,8 @@ namespace Jurassic.Library
                 throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
 
             // Create a new array to hold the new values.
-            var resultArray = thisObj.Engine.Array.New();
+            // The length of the output array is always equal to the length of the input array.
+            var resultArray = new ArrayInstance(thisObj.Engine.Array.InstancePrototype, arrayLength, arrayLength);
 
             for (int i = 0; i < arrayLength; i++)
             {
@@ -1356,6 +1357,7 @@ namespace Jurassic.Library
                     resultArray[(uint)i] = result;
                 }
             }
+
             return resultArray;
         }
 

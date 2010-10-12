@@ -975,6 +975,11 @@ namespace UnitTests
 
             Assert.AreEqual("2,3,4", TestUtils.Evaluate("[1, 2, 3].map(function(value, index, array) { return value + 1; }).toString()"));
 
+            // What if elements are deleted by the callback?
+            Assert.AreEqual("0,0,,0", TestUtils.Evaluate("a = [1,2,3,4]; a.map(function() { delete a[2]; return 0; }).toString()"));
+            Assert.AreEqual(4, TestUtils.Evaluate("a = [1,2,3,4]; a.map(function() { delete a[2]; return 0; }).length"));
+            Assert.AreEqual(4, TestUtils.Evaluate("a = [1,2,3,4]; a.map(function() { delete a[3]; return 0; }).length"));
+
             // TypeError should be thrown if the callback is not a function.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].map(true)"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].map(1)"));
