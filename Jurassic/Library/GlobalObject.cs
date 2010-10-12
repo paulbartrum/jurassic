@@ -62,8 +62,12 @@ namespace Jurassic.Library
         [JSFunction(Name = "decodeURI", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string DecodeURI(ScriptEngine engine, string input)
         {
-            System.Threading.LazyInitializer.EnsureInitialized(ref decodeURIReservedSet,
-                () => CreateCharacterSetLookupTable(";/?:@&=+$,#"));
+            if (decodeURIReservedSet == null)
+            {
+                var lookupTable = CreateCharacterSetLookupTable(";/?:@&=+$,#");
+                System.Threading.Thread.MemoryBarrier();
+                decodeURIReservedSet = lookupTable;
+            }
             return Decode(engine, input, decodeURIReservedSet);
         }
 
@@ -76,8 +80,12 @@ namespace Jurassic.Library
         [JSFunction(Name = "decodeURIComponent", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string DecodeURIComponent(ScriptEngine engine, string input)
         {
-            System.Threading.LazyInitializer.EnsureInitialized(ref decodeURIComponentReservedSet,
-                () => CreateCharacterSetLookupTable(""));
+            if (decodeURIComponentReservedSet == null)
+            {
+                var lookupTable = CreateCharacterSetLookupTable("");
+                System.Threading.Thread.MemoryBarrier();
+                decodeURIComponentReservedSet = lookupTable;
+            }
             return Decode(engine, input, decodeURIComponentReservedSet);
         }
 
@@ -90,8 +98,12 @@ namespace Jurassic.Library
         [JSFunction(Name = "encodeURI", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string EncodeURI(ScriptEngine engine, string input)
         {
-            System.Threading.LazyInitializer.EnsureInitialized(ref encodeURIUnescapedSet,
-                () => CreateCharacterSetLookupTable(";/?:@&=+$,-_.!~*'()#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"));
+            if (encodeURIUnescapedSet == null)
+            {
+                var lookupTable = CreateCharacterSetLookupTable(";/?:@&=+$,-_.!~*'()#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+                System.Threading.Thread.MemoryBarrier();
+                encodeURIUnescapedSet = lookupTable;
+            }
             return Encode(engine, input, encodeURIUnescapedSet);
         }
 
@@ -104,8 +116,12 @@ namespace Jurassic.Library
         [JSFunction(Name = "encodeURIComponent", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string EncodeURIComponent(ScriptEngine engine, string input)
         {
-            System.Threading.LazyInitializer.EnsureInitialized(ref encodeURIComponentUnescapedSet,
-                () => CreateCharacterSetLookupTable("-_.!~*'()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"));
+            if (encodeURIComponentUnescapedSet == null)
+            {
+                var lookupTable = CreateCharacterSetLookupTable("-_.!~*'()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+                System.Threading.Thread.MemoryBarrier();
+                encodeURIComponentUnescapedSet = lookupTable;
+            }
             return Encode(engine, input, encodeURIComponentUnescapedSet);
         }
 
@@ -380,7 +396,7 @@ namespace Jurassic.Library
                         }
 
                         // Decode the UTF-8 sequence.
-                        result.Append(System.Text.Encoding.UTF8.GetString(utf8Bytes));
+                        result.Append(System.Text.Encoding.UTF8.GetString(utf8Bytes, 0, utf8Bytes.Length));
                     }
                 }
                 else
@@ -402,19 +418,27 @@ namespace Jurassic.Library
             var result = new StringBuilder(input.Length);
             for (int i = 0; i < input.Length; i++)
             {
-                // Get the next UTF-32 code point.  This detects invalid surrogate pairs.
-                int c;
-                try
+                // Get the next character in the string.  This might be half of a surrogate pair.
+                bool isSurrogatePair = false;
+                int c = input[i];
+                if (c >= 0xD800 && c < 0xE000)
                 {
-                    c = char.ConvertToUtf32(input, i);
-                }
-                catch (ArgumentException)
-                {
-                    throw new JavaScriptException(engine, "URIError", "URI malformed");
-                }
+                    // The character is a surrogate pair.
+                    isSurrogatePair = true;
 
-                // Detect if the code point is a surrogate pair.
-                bool isSurrogatePair = c >= 0x10000;
+                    // Compute the code point.
+                    if (c >= 0xDC00)
+                        throw new JavaScriptException(engine, "URIError", "URI malformed");
+                    if (i == input.Length - 1)
+                        throw new JavaScriptException(engine, "URIError", "URI malformed");
+                    int c2 = input[i + 1];
+                    if (c2 < 0xDC00 || c >= 0xE000)
+                        throw new JavaScriptException(engine, "URIError", "URI malformed");
+                    c = (c - 0xD800) * 0x400 + (c2 - 0xDC00) + 0x10000;
+
+                    // Surrogate pairs need to advance an extra character position.
+                    i++;
+                }
 
                 if (c < 128 && unescapedSet[c] == true)
                 {
@@ -425,14 +449,10 @@ namespace Jurassic.Library
                 {
                     // Character should be escaped.
                     byte[] utf8Bytes = new byte[4];
-                    int utf8ByteCount = System.Text.Encoding.UTF8.GetBytes(input, i, isSurrogatePair ? 2 : 1, utf8Bytes, 0);
+                    int utf8ByteCount = System.Text.Encoding.UTF8.GetBytes(input, isSurrogatePair ? i - 1 : i, isSurrogatePair ? 2 : 1, utf8Bytes, 0);
                     for (int j = 0; j < utf8ByteCount; j++)
                         result.AppendFormat("%{0:X2}", utf8Bytes[j]);
                 }
-
-                // Surrogate pairs need to advance an extra character position.
-                if (isSurrogatePair == true)
-                    i++;
             }
             return result.ToString();
         }

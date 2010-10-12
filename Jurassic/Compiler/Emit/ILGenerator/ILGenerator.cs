@@ -13,11 +13,6 @@ namespace Jurassic.Compiler
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the size of the method, in bytes.
-        /// </summary>
-        public abstract int CodeLength { get; }
-
-        /// <summary>
         /// Emits a return statement and finalizes the generated code.  Do not emit any more
         /// instructions after calling this method.
         /// </summary>
@@ -604,30 +599,6 @@ namespace Jurassic.Compiler
             else
                 LoadVirtualMethodPointer(method);
         }
-
-        /// <summary>
-        /// Pops the method arguments off the stack, pops a method pointer off the stack, calls the
-        /// unmanaged method indicated by the method pointer, then pushes the result to the stack (if
-        /// there was one).
-        /// </summary>
-        /// <param name="unmanagedCallingConvention"> The unmanaged calling convention. </param>
-        /// <param name="returnType"> The return type for the method to be called. </param>
-        /// <param name="parameterTypes"> The types for each parameter accepted by the method
-        /// (including the "this" parameter, if present). </param>
-        public abstract void CallIndirect(System.Runtime.InteropServices.CallingConvention unmanagedCallingConvention, Type returnType, Type[] parameterTypes);
-
-        /// <summary>
-        /// Pops the method arguments off the stack, pops a method pointer off the stack, calls the
-        /// managed method indicated by the method pointer, then pushes the result to the stack
-        /// (if there was one).
-        /// </summary>
-        /// <param name="callingConvention"> The managed calling convention. </param>
-        /// <param name="returnType"> The return type for the method to be called. </param>
-        /// <param name="parameterTypes"> The types for each parameter accepted by the method
-        /// (including the "this" parameter, if present). </param>
-        /// <param name="optionalParameterTypes"> The types for each optional parameter (only
-        /// applies to varargs calls). </param>
-        public abstract void CallIndirect(System.Reflection.CallingConventions callingConvention, Type returnType, Type[] parameterTypes, Type[] optionalParameterTypes = null);
 
 
 

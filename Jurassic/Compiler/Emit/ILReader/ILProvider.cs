@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
 
 namespace ClrTest.Reflection {
     internal interface IILProvider

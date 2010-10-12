@@ -27,14 +27,6 @@ namespace Jurassic.Compiler
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the size of the method, in bytes.
-        /// </summary>
-        public override int CodeLength
-        {
-            get { return this.generator.ILOffset; }
-        }
-
-        /// <summary>
         /// Emits a return statement and finalizes the generated code.  Do not emit any more
         /// instructions after calling this method.
         /// </summary>
@@ -211,7 +203,11 @@ namespace Jurassic.Compiler
         {
             if (labels == null)
                 throw new ArgumentNullException("labels");
-            this.generator.Emit(OpCodes.Switch, Array.ConvertAll(labels, label => ((ReflectionEmitILLabel)label).UnderlyingLabel));
+
+            var reflectionLabels = new System.Reflection.Emit.Label[labels.Length];
+            for (int i = 0; i < labels.Length; i++)
+                reflectionLabels[i] = ((ReflectionEmitILLabel)labels[i]).UnderlyingLabel;
+            this.generator.Emit(OpCodes.Switch, reflectionLabels);
         }
 
 
@@ -748,36 +744,6 @@ namespace Jurassic.Compiler
             if (method != null && method.IsStatic == true)
                 throw new ArgumentException("The given method cannot be static.", "method");
             this.generator.Emit(OpCodes.Ldvirtftn, method);
-        }
-
-        /// <summary>
-        /// Pops the method arguments off the stack, pops a method pointer off the stack, calls the
-        /// unmanaged method indicated by the method pointer, then pushes the result to the stack (if
-        /// there was one).
-        /// </summary>
-        /// <param name="unmanagedCallingConvention"> The unmanaged calling convention. </param>
-        /// <param name="returnType"> The return type for the method to be called. </param>
-        /// <param name="parameterTypes"> The types for each parameter accepted by the method
-        /// (including the "this" parameter, if present). </param>
-        public override void CallIndirect(System.Runtime.InteropServices.CallingConvention unmanagedCallingConvention, Type returnType, Type[] parameterTypes)
-        {
-            this.generator.EmitCalli(OpCodes.Calli, unmanagedCallingConvention, returnType, parameterTypes);
-        }
-
-        /// <summary>
-        /// Pops the method arguments off the stack, pops a method pointer off the stack, calls the
-        /// managed method indicated by the method pointer, then pushes the result to the stack
-        /// (if there was one).
-        /// </summary>
-        /// <param name="callingConvention"> The managed calling convention. </param>
-        /// <param name="returnType"> The return type for the method to be called. </param>
-        /// <param name="parameterTypes"> The types for each parameter accepted by the method
-        /// (including the "this" parameter, if present). </param>
-        /// <param name="optionalParameterTypes"> The types for each optional parameter (only
-        /// applies to varargs calls). </param>
-        public override void CallIndirect(System.Reflection.CallingConventions callingConvention, Type returnType, Type[] parameterTypes, Type[] optionalParameterTypes = null)
-        {
-            this.generator.EmitCalli(OpCodes.Calli, callingConvention, returnType, parameterTypes, optionalParameterTypes);
         }
 
 

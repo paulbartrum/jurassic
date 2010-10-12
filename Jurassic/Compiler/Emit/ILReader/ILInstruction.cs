@@ -2,7 +2,7 @@ using System;
 using System.Reflection.Emit;
 using System.Reflection;
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
 
 namespace ClrTest.Reflection {
     internal abstract class ILInstruction

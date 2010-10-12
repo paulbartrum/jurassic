@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics;
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
 
 namespace ClrTest.Reflection {
     internal class DynamicILInfoTokenResolver : ITokenResolver {

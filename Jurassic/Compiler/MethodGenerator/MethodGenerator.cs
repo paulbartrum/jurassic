@@ -188,7 +188,11 @@ namespace Jurassic.Compiler
                     true);                                                  // Skip visibility checks.
 
                 // Generate the IL.
+#if !SILVERLIGHT
                 var generator = new DynamicILGenerator(dynamicMethod);
+#else
+                var generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
+#endif
                 GenerateCode(generator, optimizationInfo);
                 generator.Complete();
 
@@ -198,16 +202,14 @@ namespace Jurassic.Compiler
             }
             else
             {
-                var filePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "JurassicDebug.dll");
-
                 ScriptEngine.ReflectionEmitModuleInfo reflectionEmitInfo = this.Engine.ReflectionEmitInfo;
                 if (reflectionEmitInfo == null)
                 {
                     reflectionEmitInfo = new ScriptEngine.ReflectionEmitModuleInfo();
 
                     // Create a dynamic assembly and module.
-                    reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(new System.Reflection.AssemblyName("Debug"),
-                        System.Reflection.Emit.AssemblyBuilderAccess.RunAndSave, System.IO.Path.GetDirectoryName(filePath), false, null);
+                    reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
+                        new System.Reflection.AssemblyName("Debug"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
 
                     // Mark the assembly as debuggable.  This must be done before the module is created.
                     var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetConstructor(
@@ -219,7 +221,7 @@ namespace Jurassic.Compiler
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
                     // Create a dynamic module.
-                    reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", System.IO.Path.GetFileName(filePath), true);
+                    reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", true);
 
                     this.Engine.ReflectionEmitInfo = reflectionEmitInfo;
                 }

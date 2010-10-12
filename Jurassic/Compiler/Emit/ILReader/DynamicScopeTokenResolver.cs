@@ -5,11 +5,11 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Diagnostics;
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
 
 namespace ClrTest.Reflection {
     internal class DynamicScopeTokenResolver : ITokenResolver {
-        #region Static stuffs
+#region Static stuffs
         private static PropertyInfo s_indexer;
         private static FieldInfo s_scopeFi;
 

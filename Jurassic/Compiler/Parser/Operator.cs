@@ -125,8 +125,7 @@ namespace Jurassic.Compiler
     /// </summary>
     internal sealed class Operator
     {
-        private static System.Collections.Concurrent.ConcurrentBag<Operator> allOperators =
-            new System.Collections.Concurrent.ConcurrentBag<Operator>();
+        private static List<Operator> allOperators = new List<Operator>();
 
 
 
@@ -146,7 +145,7 @@ namespace Jurassic.Compiler
         /// <param name="type"> The type of operator: this decides what algorithm to use to calculate the result. </param>
         /// <param name="secondaryToken"> The second token in the sequence. </param>
         /// <param name="rhsPrecedence"> The precedence for the secondary or tertiary operand. </param>
-        public Operator(Token token, int precedence, OperatorPlacement placement, OperatorAssociativity associativity, OperatorType type, Token secondaryToken = null, int rhsPrecedence = -1)
+        private Operator(Token token, int precedence, OperatorPlacement placement, OperatorAssociativity associativity, OperatorType type, Token secondaryToken = null, int rhsPrecedence = -1)
         {
             if (token == null)
                 throw new ArgumentNullException("token");

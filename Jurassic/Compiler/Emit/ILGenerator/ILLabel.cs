@@ -10,6 +10,8 @@ namespace Jurassic.Compiler
     {
     }
 
+#if !SILVERLIGHT
+
     /// <summary>
     /// Represents a label in IL code.
     /// </summary>
@@ -83,6 +85,8 @@ namespace Jurassic.Compiler
 
 #endif
     }
+
+#endif
 
     /// <summary>
     /// Represents a label in IL code.
