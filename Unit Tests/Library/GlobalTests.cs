@@ -272,6 +272,12 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("parseFloat('0zff')"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("parseFloat('infinity')"));
             Assert.AreEqual(-1.1, TestUtils.Evaluate("parseFloat('\u205F -1.1')"));
+
+            // Very large numbers.
+            Assert.AreEqual(18446744073709551616d, TestUtils.Evaluate("parseFloat('18446744073709551616')"));
+            Assert.AreEqual(295147905179352825856d, TestUtils.Evaluate("parseFloat('295147905179352825856')"));
+            Assert.AreEqual(4722366482869645213696d, TestUtils.Evaluate("parseFloat('4722366482869645213696')"));
+            Assert.AreEqual(75557863725914323419136d, TestUtils.Evaluate("parseFloat('75557863725914323419136')"));
         }
 
         [TestMethod]
@@ -293,6 +299,10 @@ namespace UnitTests
             Assert.AreEqual(9876543212345678d, TestUtils.Evaluate("parseInt('9876543212345678')"));
             Assert.AreEqual(98765432123456789d, TestUtils.Evaluate("parseInt('98765432123456789')"));
             Assert.AreEqual(-98765432123456789d, TestUtils.Evaluate("parseInt('-98765432123456789')"));
+            Assert.AreEqual(18446744073709551616d, TestUtils.Evaluate("parseInt('18446744073709551616')"));
+            Assert.AreEqual(295147905179352825856d, TestUtils.Evaluate("parseInt('295147905179352825856')"));
+            Assert.AreEqual(4722366482869645213696d, TestUtils.Evaluate("parseInt('4722366482869645213696')"));
+            Assert.AreEqual(75557863725914323419136d, TestUtils.Evaluate("parseInt('75557863725914323419136')"));
 
             // Sign.
             Assert.AreEqual(-123, TestUtils.Evaluate("parseInt('-123')"));
@@ -316,7 +326,17 @@ namespace UnitTests
             Assert.AreEqual(17, TestUtils.Evaluate("parseInt('11', 16)"));
             Assert.AreEqual(2748, TestUtils.Evaluate("parseInt('abc', 16)"));
             Assert.AreEqual(3, TestUtils.Evaluate("parseInt('11', 2)"));
-            Assert.AreEqual(81985529216486900.0, TestUtils.Evaluate("parseInt('123456789abcdef', 16)"));
+            Assert.AreEqual(16, TestUtils.Evaluate("parseInt('0x10')"));
+            Assert.AreEqual(4096, TestUtils.Evaluate("parseInt('0x1000')"));
+            Assert.AreEqual(1048576, TestUtils.Evaluate("parseInt('0x100000')"));
+            Assert.AreEqual(268435456, TestUtils.Evaluate("parseInt('0x10000000')"));
+            Assert.AreEqual(68719476736d, TestUtils.Evaluate("parseInt('0x1000000000')"));
+            Assert.AreEqual(17592186044416d, TestUtils.Evaluate("parseInt('0x100000000000')"));
+            Assert.AreEqual(4503599627370496d, TestUtils.Evaluate("parseInt('0x10000000000000')"));
+            Assert.AreEqual(1152921504606847000d, TestUtils.Evaluate("parseInt('0x1000000000000000')"));
+            Assert.AreEqual(295147905179352830000d, TestUtils.Evaluate("parseInt('0x100000000000000000')"));
+            Assert.AreEqual(7.555786372591432e+22, TestUtils.Evaluate("parseInt('0x10000000000000000000')"));
+            Assert.AreEqual(1.9342813113834067e+25, TestUtils.Evaluate("parseInt('0x1000000000000000000000')"));
 
             // Base out of range.
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("parseInt('11', 1)"));
