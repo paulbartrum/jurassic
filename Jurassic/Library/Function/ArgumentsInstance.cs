@@ -38,50 +38,58 @@ namespace Jurassic.Library
             this.callee = callee;
             this.scope = scope;
             this.FastSetProperty("length", argumentValues.Length, PropertyAttributes.NonEnumerable);
-            this.FastSetProperty("callee", callee, PropertyAttributes.NonEnumerable);
 
-            // Create an array mappedArguments where mappedArguments[i] = true means a mapping is
-            // maintained between arguments[i] and the corresponding variable.
-            this.mappedArguments = new bool[argumentValues.Length];
-            var mappedNames = new Dictionary<string, int>();    // maps argument name -> index
-            for (int i = 0; i < argumentValues.Length; i ++)
+            if (this.callee.StrictMode == false)
             {
-                if (i < callee.ArgumentNames.Count)
+                this.FastSetProperty("callee", callee, PropertyAttributes.NonEnumerable);
+
+
+                // Create an array mappedArguments where mappedArguments[i] = true means a mapping is
+                // maintained between arguments[i] and the corresponding variable.
+                this.mappedArguments = new bool[argumentValues.Length];
+                var mappedNames = new Dictionary<string, int>();    // maps argument name -> index
+                for (int i = 0; i < argumentValues.Length; i++)
                 {
-                    // Check if the argument name appeared previously in the argument list.
-                    int previousIndex;
-                    if (mappedNames.TryGetValue(callee.ArgumentNames[i], out previousIndex) == true)
+                    if (i < callee.ArgumentNames.Count)
                     {
-                        // The argument name has appeared before.  Remove the getter/setter.
-                        this.DefineProperty(previousIndex.ToString(), new PropertyDescriptor(argumentValues[previousIndex], PropertyAttributes.FullAccess), false);
+                        // Check if the argument name appeared previously in the argument list.
+                        int previousIndex;
+                        if (mappedNames.TryGetValue(callee.ArgumentNames[i], out previousIndex) == true)
+                        {
+                            // The argument name has appeared before.  Remove the getter/setter.
+                            this.DefineProperty(previousIndex.ToString(), new PropertyDescriptor(argumentValues[previousIndex], PropertyAttributes.FullAccess), false);
 
-                        // The argument is no longer mapped.
-                        this.mappedArguments[previousIndex] = false;
+                            // The argument is no longer mapped.
+                            this.mappedArguments[previousIndex] = false;
+                        }
+
+                        // Add the argument name and index to the hashtable.
+                        mappedNames[callee.ArgumentNames[i]] = i;
+
+                        // The argument is mapped by default.
+                        this.mappedArguments[i] = true;
+
+                        // Define a getter and setter so that the property value reflects that of the argument.
+                        var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter, true);
+                        getter.SetPropertyValue("argumentIndex", i, false);
+                        var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter, true);
+                        setter.SetPropertyValue("argumentIndex", i, false);
+                        this.DefineProperty(i.ToString(), new PropertyDescriptor(getter, setter, PropertyAttributes.FullAccess), false);
                     }
-
-                    // Add the argument name and index to the hashtable.
-                    mappedNames[callee.ArgumentNames[i]] = i;
-
-                    // The argument is mapped by default.
-                    this.mappedArguments[i] = true;
-
-                    // Define a getter and setter so that the property value reflects that of the argument.
-                    var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter, true);
-                    getter.SetPropertyValue("argumentIndex", i, false);
-                    var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter, true);
-                    setter.SetPropertyValue("argumentIndex", i, false);
-                    this.DefineProperty(i.ToString(), new PropertyDescriptor(getter, setter, PropertyAttributes.FullAccess), false);
-                }
-                else
-                {
-                    // This argument is unnamed - no mapping needs to happen.
-                    this[(uint)i] = argumentValues[i];
+                    else
+                    {
+                        // This argument is unnamed - no mapping needs to happen.
+                        this[(uint)i] = argumentValues[i];
+                    }
                 }
             }
-
-            // In strict mode, accessing caller or callee is illegal.
-            if (this.callee.StrictMode == true)
+            else
             {
+                // In strict mode, arguments items are not connected to the variables.
+                for (int i = 0; i < argumentValues.Length; i++)
+                    this[(uint)i] = argumentValues[i];
+
+                // In strict mode, accessing caller or callee is illegal.
                 var throwErrorFunction = new ThrowTypeErrorFunction(this.Engine.Function.InstancePrototype);
                 this.DefineProperty("caller", new PropertyDescriptor(throwErrorFunction, throwErrorFunction, PropertyAttributes.Sealed), false);
                 this.DefineProperty("callee", new PropertyDescriptor(throwErrorFunction, throwErrorFunction, PropertyAttributes.Sealed), false);
