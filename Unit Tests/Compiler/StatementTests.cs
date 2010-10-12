@@ -354,6 +354,8 @@ namespace UnitTests
             // Strict mode: argument names cannot be identical.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg, arg) { })()"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(arg, arg) { 'use strict' })()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f(arg, arg) { }"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f(arg, arg) { 'use strict' }"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("f = new Function('arg', 'arg', \"'use strict'; return true\"); f()"));
         }
 

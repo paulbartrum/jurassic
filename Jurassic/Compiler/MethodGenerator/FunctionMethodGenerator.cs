@@ -24,6 +24,7 @@ namespace Jurassic.Compiler
             this.Name = functionName;
             this.ArgumentNames = argumentNames;
             this.BodyRoot = body;
+            Validate();
         }
 
         /// <summary>
@@ -142,24 +143,11 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Parses the source text into an abstract syntax tree.
+        /// Checks whether the function is valid (in strict mode the function cannot be named
+        /// 'arguments' or 'eval' and the argument names cannot be duplicated).
         /// </summary>
-        /// <returns> The root node of the abstract syntax tree. </returns>
-        public override void Parse()
+        private void Validate()
         {
-            if (this.BodyRoot != null)
-            {
-                this.AbstractSyntaxTree = this.BodyRoot;
-            }
-            else
-            {
-                var lexer = new Lexer(this.Engine, this.Source);
-                var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function);
-                this.AbstractSyntaxTree = parser.Parse();
-                this.StrictMode = parser.StrictMode;
-                this.MethodOptimizationHints = parser.MethodOptimizationHints;
-            }
-
             if (this.StrictMode == true)
             {
                 // If the function body is strict mode, then the function name cannot be 'eval' or 'arguments'.
@@ -179,6 +167,27 @@ namespace Jurassic.Compiler
                         throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Duplicate argument name '{0}' is not allowed in strict mode.", argumentName));
                     duplicateCheck.Add(argumentName);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Parses the source text into an abstract syntax tree.
+        /// </summary>
+        /// <returns> The root node of the abstract syntax tree. </returns>
+        public override void Parse()
+        {
+            if (this.BodyRoot != null)
+            {
+                this.AbstractSyntaxTree = this.BodyRoot;
+            }
+            else
+            {
+                var lexer = new Lexer(this.Engine, this.Source);
+                var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function);
+                this.AbstractSyntaxTree = parser.Parse();
+                this.StrictMode = parser.StrictMode;
+                this.MethodOptimizationHints = parser.MethodOptimizationHints;
+                Validate();
             }
         }
 
