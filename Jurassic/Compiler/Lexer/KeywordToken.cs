@@ -203,19 +203,34 @@ namespace Jurassic.Compiler
             if (compatibilityMode == CompatibilityMode.ECMAScript3)
             {
                 // Initialize the ECMAScript 3 lookup table, if it hasn't already been intialized.
-                System.Threading.LazyInitializer.EnsureInitialized(ref ecmaScript3LookupTable, () => InitializeLookupTable(ecmaScript3ReservedWords));
+                if (ecmaScript3LookupTable == null)
+                {
+                    lookupTable = InitializeLookupTable(ecmaScript3ReservedWords);
+                    System.Threading.Thread.MemoryBarrier();
+                    ecmaScript3LookupTable = lookupTable;
+                }
                 lookupTable = ecmaScript3LookupTable;
             }
             else if (strictMode == false)
             {
                 // Initialize the ECMAScript 5 lookup table, if it hasn't already been intialized.
-                System.Threading.LazyInitializer.EnsureInitialized(ref ecmaScript5LookupTable, () => InitializeLookupTable(new Token[0]));
+                if (ecmaScript5LookupTable == null)
+                {
+                    lookupTable = InitializeLookupTable(new Token[0]);
+                    System.Threading.Thread.MemoryBarrier();
+                    ecmaScript5LookupTable = lookupTable;
+                }
                 lookupTable = ecmaScript5LookupTable;
             }
             else
             {
                 // Initialize the strict mode lookup table, if it hasn't already been intialized.
-                System.Threading.LazyInitializer.EnsureInitialized(ref strictModeLookupTable, () => InitializeLookupTable(strictModeReservedWords));
+                if (strictModeLookupTable == null)
+                {
+                    lookupTable = InitializeLookupTable(strictModeReservedWords);
+                    System.Threading.Thread.MemoryBarrier();
+                    strictModeLookupTable = lookupTable;
+                }
                 lookupTable = strictModeLookupTable;
             }
 

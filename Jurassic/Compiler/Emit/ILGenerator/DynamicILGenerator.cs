@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
+#if !SILVERLIGHT
+
     /// <summary>
     /// Represents a generator of CIL bytes.
     /// </summary>
@@ -107,14 +109,6 @@ namespace Jurassic.Compiler
         public byte[] CodeBytes
         {
             get { return this.bytes; }
-        }
-
-        /// <summary>
-        /// Gets the size of the method, in bytes.
-        /// </summary>
-        public override int CodeLength
-        {
-            get { return this.offset; }
         }
 
         /// <summary>
@@ -1754,99 +1748,6 @@ namespace Jurassic.Compiler
             PushStackOperand(VESType.NativeInt);
         }
 
-        /// <summary>
-        /// Pops the method arguments off the stack, pops a method pointer off the stack, calls the
-        /// unmanaged method indicated by the method pointer, then pushes the result to the stack (if
-        /// there was one).
-        /// </summary>
-        /// <param name="unmanagedCallingConvention"> The unmanaged calling convention. </param>
-        /// <param name="returnType"> The return type for the method to be called. </param>
-        /// <param name="parameterTypes"> The types for each parameter accepted by the method
-        /// (including the "this" parameter, if present). </param>
-        public override void CallIndirect(System.Runtime.InteropServices.CallingConvention unmanagedCallingConvention, Type returnType, Type[] parameterTypes)
-        {
-            if (returnType == null)
-                throw new ArgumentNullException("returnType");
-            if (parameterTypes == null)
-                throw new ArgumentNullException("parameterTypes");
-
-            // Get a token for the method signature.
-            var sigHelper = System.Reflection.Emit.SignatureHelper.GetMethodSigHelper(unmanagedCallingConvention, returnType);
-            foreach (var parameterType in parameterTypes)
-                sigHelper.AddArgument(parameterType);
-            int token = this.dynamicILInfo.GetTokenFor(sigHelper.GetSignature());
-
-            // Emit the calli instruction.
-            EmitCallIndirect(returnType, parameterTypes, token);
-        }
-
-        /// <summary>
-        /// Pops the method arguments off the stack, pops a method pointer off the stack, calls the
-        /// managed method indicated by the method pointer, then pushes the result to the stack
-        /// (if there was one).
-        /// </summary>
-        /// <param name="callingConvention"> The managed calling convention. </param>
-        /// <param name="returnType"> The return type for the method to be called. </param>
-        /// <param name="parameterTypes"> The types for each parameter accepted by the method
-        /// (including the "this" parameter, if present). </param>
-        /// <param name="optionalParameterTypes"> The types for each optional parameter (only
-        /// applies to varargs calls). </param>
-        public override void CallIndirect(System.Reflection.CallingConventions callingConvention, Type returnType, Type[] parameterTypes, Type[] optionalParameterTypes = null)
-        {
-            if (returnType == null)
-                throw new ArgumentNullException("returnType");
-            if (parameterTypes == null)
-                throw new ArgumentNullException("parameterTypes");
-            if (optionalParameterTypes != null && (callingConvention & System.Reflection.CallingConventions.VarArgs) == 0)
-                throw new ArgumentException("Optional parameters must be combined with the Varargs calling convention.", "optionalParameterTypes");
-
-            // Get a token for the method signature.
-            var sigHelper = System.Reflection.Emit.SignatureHelper.GetMethodSigHelper(callingConvention, returnType);
-            foreach (var parameterType in parameterTypes)
-                sigHelper.AddArgument(parameterType);
-            if (optionalParameterTypes != null)
-            {
-                sigHelper.AddSentinel();
-                foreach (var parameterType in optionalParameterTypes)
-                    sigHelper.AddArgument(parameterType);
-            }
-            int token = this.dynamicILInfo.GetTokenFor(sigHelper.GetSignature());
-
-            // Emit the calli instruction.
-            EmitCallIndirect(returnType, parameterTypes, token);
-        }
-
-        /// <summary>
-        /// Pops the method arguments off the stack, pops a method pointer off the stack, calls the
-        /// method indicated by the method pointer, then pushes the result to the stack (if there
-        /// was one).
-        /// </summary>
-        /// <param name="returnType"> The return type for the method to be called. </param>
-        /// <param name="parameterTypes"> The types for each parameter accepted by the method. </param>
-        /// <param name="token"> The method signature token. </param>
-        private void EmitCallIndirect(Type returnType, Type[] parameterTypes, int token)
-        {
-            // Emit the calli instruction.
-            Emit1ByteOpCodeInt32(0x29, parameterTypes.Length, returnType == typeof(void) ? 0 : 1, token);
-
-#if DEBUG
-            // Check the stack.
-            var operandTypes = new List<VESType>(parameterTypes.Length);
-            foreach (var parameterType in parameterTypes)
-            {
-                if (parameterType.IsByRef == true)
-                    operandTypes.Add(VESType.ManagedPointer);
-                else
-                    operandTypes.Add(ToVESType(parameterType));
-            }
-            PopStackOperands(operandTypes.ToArray());
-            if (returnType != typeof(void))
-                PushStackOperand(ToVESType(returnType));
-#endif
-        }
-
-
-
 
 
         //     ARRAYS
@@ -2250,7 +2151,7 @@ namespace Jurassic.Compiler
         {
             // Disassemble the IL.
             var reader = new ClrTest.Reflection.ILReader(
-                new ClrTest.Reflection.ByteArrayILProvider(this.CodeBytes, this.CodeLength),
+                new ClrTest.Reflection.ByteArrayILProvider(this.CodeBytes, this.offset),
                 new ClrTest.Reflection.DynamicILInfoTokenResolver(this.dynamicILInfo));
             var writer = new System.IO.StringWriter();
             var visitor = new ClrTest.Reflection.ReadableILStringVisitor(new ClrTest.Reflection.ReadableILStringToTextWriter(writer));
@@ -2274,5 +2175,7 @@ namespace Jurassic.Compiler
         }
 
     }
+
+#endif
 
 }

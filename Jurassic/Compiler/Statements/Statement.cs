@@ -77,7 +77,7 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public virtual void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
             // Statements must not produce or consume any values on the stack.
             int originalStackSize = 0;
             if (generator is DynamicILGenerator)
@@ -106,7 +106,7 @@ namespace Jurassic.Compiler
                 optimizationInfo.PopBreakOrContinueInfo();
             }
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
             // Check that the stack count is zero.
             if (generator is DynamicILGenerator && ((DynamicILGenerator)generator).StackSize != originalStackSize)
                 throw new InvalidOperationException("Encountered unexpected stack imbalance.");

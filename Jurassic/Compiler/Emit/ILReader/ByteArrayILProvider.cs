@@ -4,7 +4,7 @@ using System.Text;
 using System.Reflection;
 using System.Reflection.Emit;
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
 
 namespace ClrTest.Reflection {
     internal class ByteArrayILProvider : IILProvider {

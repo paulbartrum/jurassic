@@ -21,9 +21,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sputnik", "Sputnik\Sputnik.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "es5conform", "es5conform\es5conform.csproj", "{4F79A9C7-39B7-483D-9E61-121ED3E053C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JurassicSL", "JurassicSL\JurassicSL.csproj", "{55C69A46-6FB0-49DB-9A26-C0C051E58A16}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 7
+		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs01
 		SccLocalPath0 = .
@@ -45,6 +47,9 @@ Global
 		SccProjectUniqueName6 = es5conform\\es5conform.csproj
 		SccProjectName6 = es5conform
 		SccLocalPath6 = es5conform
+		SccProjectUniqueName7 = JurassicSL\\JurassicSL.csproj
+		SccProjectName7 = JurassicSL
+		SccLocalPath7 = JurassicSL
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +134,18 @@ Global
 		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x64.ActiveCfg = Release|x86
 		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x86.ActiveCfg = Release|x86
 		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x86.Build.0 = Release|x86
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Release|x64.ActiveCfg = Release|Any CPU
+		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

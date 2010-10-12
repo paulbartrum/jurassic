@@ -1000,7 +1000,7 @@ namespace Jurassic.Library
                     array.ResizeDenseArray((uint)Math.Max(array.dense.Length * 2 + 10, array.length + items.Length * 10), array.length);
 
                 // Shift all the items up.
-                Array.Copy(array.dense, 0, array.dense, items.Length, array.length);
+                Array.Copy(array.dense, 0, array.dense, items.Length, (int)array.length);
 
                 // Prepend the new items.
                 for (int i = 0; i < items.Length; i++)

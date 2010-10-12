@@ -123,10 +123,14 @@ namespace Jurassic.Library
         [JSFunction(Name = "info")]
         public void Info(params object[] items)
         {
+#if !SILVERLIGHT
             var original = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.White;
+#endif
             WriteLine(Format(items));
+#if !SILVERLIGHT
             Console.ForegroundColor = original;
+#endif
         }
 
         /// <summary>
@@ -141,10 +145,14 @@ namespace Jurassic.Library
         [JSFunction(Name = "warn")]
         public void Warn(params object[] items)
         {
+#if !SILVERLIGHT
             var original = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
+#endif
             WriteLine(Format(items));
+#if !SILVERLIGHT
             Console.ForegroundColor = original;
+#endif
         }
 
         /// <summary>
@@ -159,10 +167,14 @@ namespace Jurassic.Library
         [JSFunction(Name = "error")]
         public void Error(params object[] items)
         {
+#if !SILVERLIGHT
             var original = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
+#endif
             WriteLine(Format(items));
+#if !SILVERLIGHT
             Console.ForegroundColor = original;
+#endif
         }
 
         /// <summary>
@@ -202,6 +214,32 @@ namespace Jurassic.Library
         {
             this.CurrentIndentation = Math.Max(this.CurrentIndentation - this.IndentationDelta, 0);
         }
+
+
+#if SILVERLIGHT
+
+        // Silverlight does not have a StopWatch class.
+        private class Stopwatch
+        {
+            private int tickCount;
+
+            private Stopwatch()
+            {
+                this.tickCount = Environment.TickCount;
+            }
+
+            public static Stopwatch StartNew()
+            {
+                return new Stopwatch();
+            }
+
+            public long ElapsedMilliseconds
+            {
+                get { return Environment.TickCount - this.tickCount; }
+            }
+        }
+
+#endif
 
         /// <summary>
         /// Creates a new timer under the given name. Call console.timeEnd(name) with the same name
@@ -290,7 +328,8 @@ namespace Jurassic.Library
                             break;
                         case 'd':
                         case 'i':
-                            replacement = Math.Truncate(TypeConverter.ToNumber(items[itemsConsumed++])).ToString();
+                            var number = TypeConverter.ToNumber(items[itemsConsumed++]);
+                            replacement = (number >= 0 ? Math.Floor(number) : Math.Ceiling(number)).ToString();
                             break;
                         case 'f':
                             replacement = TypeConverter.ToNumber(items[itemsConsumed++]).ToString();

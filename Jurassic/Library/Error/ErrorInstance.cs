@@ -31,11 +31,14 @@ namespace Jurassic.Library
                 this.FastSetProperty("name", name, PropertyAttributes.FullAccess);
             if (message != null)
                 this.FastSetProperty("message", message, PropertyAttributes.FullAccess);
+
+#if !SILVERLIGHT
             if (generateStack == true)
             {
                 var stackTrace = string.Concat(this.ToStringJS(), Environment.NewLine, Environment.StackTrace);
                 this.FastSetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
             }
+#endif
         }
 
 

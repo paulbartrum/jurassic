@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
 
 namespace ClrTest.Reflection {
     internal sealed class ILReader : IEnumerable<ILInstruction>, IEnumerable
     {
-        #region Static members
+#region Static members
         static Type s_runtimeMethodInfoType = Type.GetType("System.Reflection.RuntimeMethodInfo");
         static Type s_runtimeConstructorInfoType = Type.GetType("System.Reflection.RuntimeConstructorInfo");
         
@@ -196,7 +196,7 @@ namespace ClrTest.Reflection {
             }
         }
 
-        #region read in operands
+#region read in operands
         Byte ReadByte() {
             return (Byte)m_byteArray[m_position++];
         }

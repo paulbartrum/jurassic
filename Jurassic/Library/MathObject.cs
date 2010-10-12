@@ -309,13 +309,16 @@ namespace Jurassic.Library
         [JSFunction(Name = "round")]
         public static double Round(double number)
         {
-            var integer = System.Math.Truncate(number);
-            var fraction = number - integer;
-            if (fraction >= 0.5)
-                return integer + 1;
-            if (fraction >= -0.5)
-                return integer;
-            return integer - 1;
+            if (number > 0.0)
+                return System.Math.Floor(number + 0.5);
+            if (number >= -0.5)
+            {
+                // BitConverter is used to distinguish positive and negative zero.
+                if (BitConverter.DoubleToInt64Bits(number) == 0L)
+                    return 0.0;
+                return -0.0;
+            }
+            return System.Math.Floor(number + 0.5);
         }
 
         /// <summary>

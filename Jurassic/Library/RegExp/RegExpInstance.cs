@@ -181,7 +181,9 @@ namespace Jurassic.Library
         [JSFunction(Deprecated = true, Name = "compile")]
         public void Compile(string pattern, string flags = null)
         {
+#if !SILVERLIGHT
             this.value = new Regex(pattern, ParseFlags(flags) | RegexOptions.Compiled);
+#endif
 
             // Update the javascript properties.
             this.FastSetProperty("source", pattern);

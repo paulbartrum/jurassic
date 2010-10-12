@@ -31,7 +31,7 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
             // Expressions must produce either zero or one value.
             int originalStackSize = 0;
             if (generator is DynamicILGenerator)
@@ -41,7 +41,7 @@ namespace Jurassic.Compiler
             // Generate the code.
             this.GenerateCodeCore(generator, optimizationInfo);
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
             /*if (optimizationInfo.SuppressReturnValue == true)
             {
                 // Check that the stack count did not change.
