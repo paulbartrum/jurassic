@@ -118,21 +118,23 @@ namespace Jurassic
             }
             if (left.wordCount > right.wordCount)
             {
-                outputBits[i] = (uint)((ulong)left.bits[i] + borrow);
-                borrow = 0;
-                i++;
                 for (; i < left.wordCount; i++)
-                    outputBits[i] = left.bits[i];
+                {
+                    ulong temp = (ulong)left.bits[i] + borrow;
+                    borrow = (uint)(temp >> 32);
+                    outputBits[i] = (uint)temp;
+                }
             }
             else if (left.wordCount < right.wordCount)
             {
-                outputBits[i] = (uint)((ulong)right.bits[i] + borrow);
-                borrow = 0;
-                i++;
                 for (; i < right.wordCount; i++)
-                    outputBits[i] = right.bits[i];
+                {
+                    ulong temp = (ulong)right.bits[i] + borrow;
+                    borrow = (uint)(temp >> 32);
+                    outputBits[i] = (uint)temp;
+                }
             }
-            else if (borrow != 0)
+            if (borrow != 0)
             {
                 outputBits[outputWordCount] = borrow;
                 outputWordCount++;
