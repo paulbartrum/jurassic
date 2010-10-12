@@ -54,6 +54,7 @@
     <Compile Include="Core\ScriptEngineTests.cs" />
     <Compile Include="Core\DocumentationSamples.cs" />
     <Compile Include="Core\TypeComparerTests.cs" />
+    <Compile Include="Library\ArgumentsTests.cs" />
     <Compile Include="Library\ArrayTests.cs" />
     <Compile Include="Core\FunctionBinderTests.cs" />
     <Compile Include="Library\BooleanTests.cs" />

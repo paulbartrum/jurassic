@@ -68,28 +68,61 @@ namespace UnitTests
             if (TestUtils.Engine == JSEngine.JScript)
                 Assert.Fail("JScript does not support strict mode.");
 
-            // In strict mode arguments variable is not writable and not configurable.
-            Assert.AreEqual(false, TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; arguments = 5; return arguments === 5 })(1, 2, 3)"));
-            Assert.AreEqual(false, TestUtils.Evaluate("(function(a, b, c) { 'use strict'; return delete arguments })(1, 2, 3)"));
+            // In strict mode arguments are not connected to the variables.
+            Assert.AreEqual(1, TestUtils.Evaluate("(function(a, b, c) { 'use strict'; a = 3; return arguments[0]; })(1, 2, 3)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("(function(a, b, c) { 'use strict'; arguments[0] = 5; return a; })(1, 2, 3)"));
 
-            // In strict mode callee and caller throw TypeErrors on access.
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; (function(a, b, c) { return arguments.callee })(1, 2, 3)"));
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; (function(a, b, c) { arguments.callee = 5 })(1, 2, 3)"));
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; (function(a, b, c) { return arguments.caller })(1, 2, 3)"));
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; (function(a, b, c) { arguments.caller = 5 })(1, 2, 3)"));
-
-            // Arguments cannot be redefined.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; (function(arg) { arguments = 5; })()"));
+            // In strict mode arguments variable cannot be modified.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; arguments = 5 })(1, 2, 3)"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; arguments += 5 })(1, 2, 3)"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; arguments ++ })(1, 2, 3)"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; ++ arguments })(1, 2, 3)"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; return delete arguments })(1, 2, 3)"));
 
             // Arguments and caller don't exist outside the function.
-            Assert.AreEqual("undefined", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(test.arguments); } return inner(); } test()"));
-            Assert.AreEqual("undefined", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(inner.caller); } return inner(); } test()"));
+            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(test.arguments); } return inner(); } test()"));
+            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(inner.caller); } return inner(); } test()"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ test.arguments = 5; } return inner(); } test()"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ inner.caller = 5; } return inner(); } test()"));
         }
 
         [TestMethod]
-        public void Arguments_ToString()
+        public void callee()
+        {
+            // In non-strict mode callee returns the function the arguments are connected to.
+            Assert.AreEqual(true, TestUtils.Evaluate("function f() { return arguments.callee; } f() === f"));
+
+            // In non-strict mode, callee is writable and configurable.
+            Assert.AreEqual(2, TestUtils.Evaluate("function f() { arguments.callee = 2; return arguments.callee; } f()"));
+            Assert.AreEqual(true, TestUtils.Evaluate("function f() { return delete arguments.callee; } f()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f() { delete arguments.callee; return arguments.callee; } f()"));
+
+            // In strict mode, callee throws an error.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; return arguments.callee; } f()"));
+
+            // In strict mode, callee is not writable or configurable.
+            // Note: attempting to delete a non-configurable property results in an exception in strict mode.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments.callee = 2; } f()"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; return delete arguments.callee; } f()"));
+        }
+
+        [TestMethod]
+        public void caller()
+        {
+            // In non-strict mode, caller doesn't exist.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f() { return arguments.caller; } f()"));
+
+            // In strict mode, caller throws an error.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; return arguments.caller; } f()"));
+
+            // In strict mode, callee is not writable or configurable.
+            // Note: attempting to delete a non-configurable property results in an exception in strict mode.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments.caller = 2; } f()"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; return delete arguments.caller; } f()"));
+        }
+
+        [TestMethod]
+        public void toString()
         {
             Assert.AreEqual("[object Arguments]", TestUtils.Evaluate("(function() { return arguments.toString(); })()"));
         }

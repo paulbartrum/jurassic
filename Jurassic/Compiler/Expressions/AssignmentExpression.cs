@@ -125,6 +125,15 @@ namespace Jurassic.Compiler
                 return;
             }
 
+            // The left hand side cannot be "arguments" or "eval" in strict mode.
+            if (optimizationInfo.StrictMode == true && target is NameExpression)
+            {
+                if (((NameExpression)target).Name == "eval")
+                    throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "The variable 'eval' cannot be modified in strict mode.");
+                if (((NameExpression)target).Name == "arguments")
+                    throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "The variable 'arguments' cannot be modified in strict mode.");
+            }
+
             switch (this.OperatorType)
             {
                 case OperatorType.Assignment:
