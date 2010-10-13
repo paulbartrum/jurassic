@@ -419,25 +419,23 @@ namespace Jurassic.Library
             for (int i = 0; i < input.Length; i++)
             {
                 // Get the next character in the string.  This might be half of a surrogate pair.
-                bool isSurrogatePair = false;
                 int c = input[i];
                 if (c >= 0xD800 && c < 0xE000)
                 {
                     // The character is a surrogate pair.
-                    isSurrogatePair = true;
+
+                    // Surrogate pairs need to advance an extra character position.
+                    i++;
 
                     // Compute the code point.
                     if (c >= 0xDC00)
                         throw new JavaScriptException(engine, "URIError", "URI malformed");
-                    if (i == input.Length - 1)
+                    if (i == input.Length)
                         throw new JavaScriptException(engine, "URIError", "URI malformed");
-                    int c2 = input[i + 1];
-                    if (c2 < 0xDC00 || c >= 0xE000)
+                    int c2 = input[i];
+                    if (c2 < 0xDC00 || c2 >= 0xE000)
                         throw new JavaScriptException(engine, "URIError", "URI malformed");
                     c = (c - 0xD800) * 0x400 + (c2 - 0xDC00) + 0x10000;
-
-                    // Surrogate pairs need to advance an extra character position.
-                    i++;
                 }
 
                 if (c < 128 && unescapedSet[c] == true)
@@ -448,10 +446,32 @@ namespace Jurassic.Library
                 else
                 {
                     // Character should be escaped.
-                    byte[] utf8Bytes = new byte[4];
-                    int utf8ByteCount = System.Text.Encoding.UTF8.GetBytes(input, isSurrogatePair ? i - 1 : i, isSurrogatePair ? 2 : 1, utf8Bytes, 0);
-                    for (int j = 0; j < utf8ByteCount; j++)
-                        result.AppendFormat("%{0:X2}", utf8Bytes[j]);
+                    if (c < 0x80)
+                    {
+                        // Encodes to a single byte.
+                        result.AppendFormat("%{0:X2}", c);
+                    }
+                    else if (c < 0x800)
+                    {
+                        // Encodes to two bytes.
+                        result.AppendFormat("%{0:X2}", 0xC0 | (c >> 6));
+                        result.AppendFormat("%{0:X2}", 0x80 | (c & 0x3F));
+                    }
+                    else if (c < 0x10000)
+                    {
+                        // Encodes to three bytes.
+                        result.AppendFormat("%{0:X2}", 0xE0 | (c >> 12));
+                        result.AppendFormat("%{0:X2}", 0x80 | ((c >> 6) & 0x3F));
+                        result.AppendFormat("%{0:X2}", 0x80 | (c & 0x3F));
+                    }
+                    else
+                    {
+                        // Encodes to four bytes.
+                        result.AppendFormat("%{0:X2}", 0xF0 | (c >> 18));
+                        result.AppendFormat("%{0:X2}", 0x80 | ((c >> 12) & 0x3F));
+                        result.AppendFormat("%{0:X2}", 0x80 | ((c >> 6) & 0x3F));
+                        result.AppendFormat("%{0:X2}", 0x80 | (c & 0x3F));
+                    }
                 }
             }
             return result.ToString();
