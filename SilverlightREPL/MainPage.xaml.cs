@@ -11,6 +11,7 @@ namespace SilverlightREPL
     public partial class MainPage : UserControl
     {
         private Jurassic.ScriptEngine engine;
+        private SilverlightConsoleOutput console;
         private StringBuilder source = new StringBuilder();
 
         public MainPage()
@@ -21,9 +22,10 @@ namespace SilverlightREPL
             this.engine = new Jurassic.ScriptEngine();
 
             // Register the firebug console object.
-            var console = new Jurassic.Library.FirebugConsole(engine);
-            console.CurrentIndentation = 2;
-            engine.Global["console"] = console;
+            var consoleObject = new Jurassic.Library.FirebugConsole(engine);
+            this.console = new SilverlightConsoleOutput(this.HistoryTextBox);
+            consoleObject.Output = this.console;
+            engine.Global["console"] = consoleObject;
         }
 
         private void CommandTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -37,14 +39,14 @@ namespace SilverlightREPL
                 //this.CommandTextBox.Visibility = System.Windows.Visibility.Collapsed;
 
                 // Write the text to evaluate.
-                WriteMessage(command);
+                this.console.Log(SilverlightMessageStyle.Command, command);
 
                 try
                 {
-                    var result = this.engine.Evaluate(source.ToString());
+                    var result = this.engine.Evaluate(command);
 
                     // Write the result to the console.
-                    WriteMessage(Jurassic.TypeConverter.ToString(result));
+                    this.console.Log(SilverlightMessageStyle.Result, result);
 
                     // Clear the command textbox.
                     this.CommandTextBox.Text = string.Empty;
@@ -55,7 +57,7 @@ namespace SilverlightREPL
                         this.CommandTextBox.Text += Environment.NewLine;
                     else
                     {
-                        WriteError(ex.ToString());
+                        this.console.Log(SilverlightMessageStyle.Error, ex.Message);
 
                         // Clear the command textbox.
                         this.CommandTextBox.Text = string.Empty;
@@ -67,31 +69,6 @@ namespace SilverlightREPL
                 
                 e.Handled = true;
             }
-        }
-
-        private void WriteMessage(string message)
-        {
-            WriteLine(null, Colors.Black, message);
-        }
-
-        private void WriteError(string message)
-        {
-            WriteLine(new ErrorIcon(), Colors.Red, message);
-        }
-
-        private void WriteLine(UIElement icon, Color color, string message)
-        {
-            var paragraph = new Paragraph();
-            if (icon != null)
-            {
-                var canvas = new Canvas() { Height = 12 };
-                canvas.Children.Add(icon);
-                Canvas.SetLeft(icon, -16);
-                Canvas.SetTop(icon, 2);
-                paragraph.Inlines.Add(new InlineUIContainer() { Child = canvas });
-            }
-            paragraph.Inlines.Add(new Run() { Text = message, Foreground = new SolidColorBrush(color) });
-            this.HistoryTextBox.Blocks.Add(paragraph);
         }
     }
 }

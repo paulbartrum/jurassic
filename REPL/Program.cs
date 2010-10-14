@@ -13,7 +13,6 @@ namespace REPL
 
             // Register the firebug console object.
             var console = new Jurassic.Library.FirebugConsole(engine);
-            console.CurrentIndentation = 2;
             engine.Global["console"] = console;
 
             Console.WriteLine("JavaScript console (type 'quit' to exit)");

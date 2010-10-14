@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="SilverlightREPL.MainPage"
+﻿<UserControl xmlns:my="clr-namespace:SilverlightREPL"  x:Class="SilverlightREPL.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,19 +8,17 @@
 
     <ScrollViewer>
         <StackPanel>
-            <RichTextBox Name="HistoryTextBox" IsReadOnly="True" BorderThickness="0" Padding="16,0,0,0">
+            <RichTextBox Name="HistoryTextBox" IsReadOnly="True" BorderThickness="0" Padding="16,0,0,0" Margin="0">
                 <Paragraph>Silverlight JavaScript console v2</Paragraph>
             </RichTextBox>
             
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Path Data="M6,4 L10,8 L6,12" Width="14" Height="16"
-                      Stroke="Black" StrokeThickness="2"
-                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                <TextBox Name="CommandTextBox"
+                <my:CommandIcon Foreground="Black" HorizontalAlignment="Left" />
+                <TextBox Name="CommandTextBox" Padding="0"
                     Grid.Column="1" BorderThickness="0" KeyDown="CommandTextBox_KeyDown" />
             </Grid>
         </StackPanel>

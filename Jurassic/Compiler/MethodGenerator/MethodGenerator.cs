@@ -177,6 +177,7 @@ namespace Jurassic.Compiler
             optimizationInfo.StrictMode = this.StrictMode;
             optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
 
+#if !SILVERLIGHT
             if (this.Options.EnableDebugging == false)
             {
                 // Create a new dynamic method.
@@ -209,6 +210,7 @@ namespace Jurassic.Compiler
             }
             else
             {
+#endif
                 ScriptEngine.ReflectionEmitModuleInfo reflectionEmitInfo = this.Engine.ReflectionEmitInfo;
                 if (reflectionEmitInfo == null)
                 {
@@ -268,7 +270,9 @@ namespace Jurassic.Compiler
                 //string il = writer.ToString();
 
                 this.CompiledDelegate = Delegate.CreateDelegate(GetDelegate(), this.GeneratedMethod);
+#if !SILVERLIGHT
             }
+#endif
         }
 
         /// <summary>
