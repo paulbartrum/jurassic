@@ -1365,7 +1365,7 @@ namespace Jurassic.Compiler
         /// Gets or sets a mapping from token -> operator.  There can be at most two operators per
         /// token (the prefix version and the infix/postfix version).
         /// </summary>
-        private static Lazy<Dictionary<OperatorKey, Operator>> operatorLookup = new Lazy<Dictionary<OperatorKey,Operator>>(InitializeOperatorLookup);
+        private static Dictionary<OperatorKey, Operator> operatorLookup;
 
         /// <summary>
         /// Initializes the token -> operator mapping dictionary.
@@ -1373,19 +1373,19 @@ namespace Jurassic.Compiler
         /// <returns> The token -> operator mapping dictionary. </returns>
         private static Dictionary<OperatorKey, Operator> InitializeOperatorLookup()
         {
-            var operatorLookup = new Dictionary<OperatorKey, Operator>(55);
+            var result = new Dictionary<OperatorKey, Operator>(55);
             foreach (var @operator in Operator.AllOperators)
             {
-                operatorLookup.Add(new OperatorKey() { Token = @operator.Token, PostfixOrInfix = @operator.HasLHSOperand }, @operator);
+                result.Add(new OperatorKey() { Token = @operator.Token, PostfixOrInfix = @operator.HasLHSOperand }, @operator);
                 if (@operator.SecondaryToken != null)
                 {
                     // Note: the secondary token for the grouping operator and function call operator ')' is a duplicate.
-                    operatorLookup[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = @operator.HasRHSOperand }] = @operator;
+                    result[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = @operator.HasRHSOperand }] = @operator;
                     if (@operator.InnerOperandIsOptional == true)
-                        operatorLookup[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = false }] = @operator;
+                        result[new OperatorKey() { Token = @operator.SecondaryToken, PostfixOrInfix = false }] = @operator;
                 }
             }
-            return operatorLookup;
+            return result;
         }
 
         /// <summary>
@@ -1399,7 +1399,14 @@ namespace Jurassic.Compiler
         private static Operator OperatorFromToken(Token token, bool postfixOrInfix)
         {
             Operator result;
-            if (operatorLookup.Value.TryGetValue(new OperatorKey() { Token = token, PostfixOrInfix = postfixOrInfix }, out result) == false)
+            if (operatorLookup == null)
+            {
+                // Initialize the operator lookup table.
+                var temp = InitializeOperatorLookup();
+                System.Threading.Thread.MemoryBarrier();
+                operatorLookup = temp;
+            }
+            if (operatorLookup.TryGetValue(new OperatorKey() { Token = token, PostfixOrInfix = postfixOrInfix }, out result) == false)
                 return null;
             return result;
         }

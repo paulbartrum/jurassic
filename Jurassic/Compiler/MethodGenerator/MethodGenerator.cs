@@ -328,63 +328,7 @@ namespace Jurassic.Compiler
         /// <returns> The delegate type that matches the method parameters. </returns>
         protected virtual Type GetDelegate()
         {
-            var types = GetParameterTypes();
-            Array.Resize(ref types, types.Length + 1);
-            types[types.Length - 1] = typeof(object);
-            switch (types.Length)
-            {
-                case 1:
-                    return typeof(Func<>).MakeGenericType(types);
-
-                case 2:
-                    return typeof(Func<,>).MakeGenericType(types);
-
-                case 3:
-                    return typeof(Func<,,>).MakeGenericType(types);
-
-                case 4:
-                    return typeof(Func<,,,>).MakeGenericType(types);
-
-                case 5:
-                    return typeof(Func<,,,,>).MakeGenericType(types);
-
-                case 6:
-                    return typeof(Func<,,,,,>).MakeGenericType(types);
-
-                case 7:
-                    return typeof(Func<,,,,,,>).MakeGenericType(types);
-
-                case 8:
-                    return typeof(Func<,,,,,,,>).MakeGenericType(types);
-
-                case 9:
-                    return typeof(Func<,,,,,,,,>).MakeGenericType(types);
-
-                case 10:
-                    return typeof(Func<,,,,,,,,,>).MakeGenericType(types);
-
-                case 11:
-                    return typeof(Func<,,,,,,,,,,>).MakeGenericType(types);
-
-                case 12:
-                    return typeof(Func<,,,,,,,,,,,>).MakeGenericType(types);
-
-                case 13:
-                    return typeof(Func<,,,,,,,,,,,,>).MakeGenericType(types);
-
-                case 14:
-                    return typeof(Func<,,,,,,,,,,,,,>).MakeGenericType(types);
-
-                case 15:
-                    return typeof(Func<,,,,,,,,,,,,,,>).MakeGenericType(types);
-
-                case 16:
-                    return typeof(Func<,,,,,,,,,,,,,,,>).MakeGenericType(types);
-
-                case 17:
-                    return typeof(Func<,,,,,,,,,,,,,,,,>).MakeGenericType(types);
-            }
-            throw new InvalidOperationException("Too many arguments.");
+            return typeof(Func<ScriptEngine, Scope, object, object>);
         }
     }
 

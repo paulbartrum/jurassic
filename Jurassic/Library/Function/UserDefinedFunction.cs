@@ -178,7 +178,7 @@ namespace Jurassic.Library
         /// <returns> A string representing this object. </returns>
         public override string ToString()
         {
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, string.Join(", ", this.ArgumentNames), this.Body);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.Body);
         }
     }
 }

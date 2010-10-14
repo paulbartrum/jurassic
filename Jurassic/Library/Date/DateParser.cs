@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Jurassic.Library
@@ -142,6 +141,18 @@ namespace Jurassic.Library
         /// <returns> A date. </returns>
         private static DateTime ParseUnstructured(string input)
         {
+            // Initialize the lookup tables, if necessary.
+            if (dayOfWeekNames == null)
+            {
+                var temp1 = PopulateDayOfWeekNames();
+                var temp2 = PopulateMonthNames();
+                var temp3 = PopulateTimeZones();
+                System.Threading.Thread.MemoryBarrier();
+                dayOfWeekNames = temp1;
+                monthNames = temp2;
+                timeZoneNames = temp3;
+            }
+
             // split the string into bite-sized pieces.
             var words = input.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -173,12 +184,12 @@ namespace Jurassic.Library
                     int.TryParse(word, out timeZoneOffset);
                     offsetInMinutes -= (timeZoneOffset / 100) * 60 + (timeZoneOffset % 100);
                 }
-                else if (monthNames.Value.TryGetValue(word, out numericValue) == true)
+                else if (monthNames.TryGetValue(word, out numericValue) == true)
                 {
                     // If the word is a month name, guess the word is a month.
                     month = numericValue;
                 }
-                else if (timeZoneNames.Value.TryGetValue(word, out numericValue) == true)
+                else if (timeZoneNames.TryGetValue(word, out numericValue) == true)
                 {
                     // If the word is a time zone name, the word is a zone.
                     kind = DateTimeKind.Utc;
@@ -218,7 +229,7 @@ namespace Jurassic.Library
                     if (int.TryParse(components[2], out second) == false)
                         return DateTime.MinValue;
                 }
-                else if (dayOfWeekNames.Value.Contains(word) == true)
+                else if (dayOfWeekNames.Contains(word) == true)
                 {
                     // Day of week name is ignored.
                 }
@@ -284,8 +295,7 @@ namespace Jurassic.Library
         }
 
         // A dictionary containing the names of all the days of the week.
-        private static Lazy<HashSet<string>> dayOfWeekNames =
-            new Lazy<HashSet<string>>(PopulateDayOfWeekNames, System.Threading.LazyThreadSafetyMode.PublicationOnly);
+        private static HashSet<string> dayOfWeekNames;
 
         /// <summary>
         /// Constructs a HashSet containing the names of days of the week.
@@ -309,8 +319,7 @@ namespace Jurassic.Library
 
         // A dictionary containing the names of all the months and a mapping to the number of the
         // month (1-12).
-        private static Lazy<Dictionary<string, int>> monthNames =
-            new Lazy<Dictionary<string, int>>(PopulateMonthNames, System.Threading.LazyThreadSafetyMode.PublicationOnly);
+        private static Dictionary<string, int> monthNames;
 
         /// <summary>
         /// Constructs a dictionary containing the names of all the months and a mapping to the
@@ -334,8 +343,7 @@ namespace Jurassic.Library
         }
 
         // A dictionary containing the time zone names.
-        private static Lazy<Dictionary<string, int>> timeZoneNames =
-            new Lazy<Dictionary<string, int>>(PopulateTimeZones, System.Threading.LazyThreadSafetyMode.PublicationOnly);
+        private static Dictionary<string, int> timeZoneNames;
 
         /// <summary>
         /// Constructs a dictionary containing the names of all the time zones and a mapping to the

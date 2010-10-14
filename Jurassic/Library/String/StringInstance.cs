@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Jurassic.Library
 {
@@ -151,7 +150,13 @@ namespace Jurassic.Library
         [JSFunction(Name = "concat", Flags = JSFunctionFlags.HasThisObject)]
         public static string Concat(string thisObject, params string[] strings)
         {
-            var result = new System.Text.StringBuilder(thisObject, strings.Sum(str => str.Length));
+            // Calculate the combined length of all the strings.
+            int totalLength = thisObject.Length;
+            foreach (string str in strings)
+                totalLength += str.Length;
+
+            // Append the strings together.
+            var result = new System.Text.StringBuilder(thisObject, totalLength);
             foreach (string str in strings)
                 result.Append(str);
             return result.ToString();
@@ -453,7 +458,11 @@ namespace Jurassic.Library
             }
             var splitStrings = thisObject.Split(new string[] { separator }, StringSplitOptions.None);
             if (limit < splitStrings.Length)
-                splitStrings = splitStrings.Take((int)limit).ToArray();
+            {
+                var splitStrings2 = new string[limit];
+                Array.Copy(splitStrings, splitStrings2, (int)limit);
+                splitStrings = splitStrings2;
+            }
             return engine.Array.New(splitStrings);
         }
 
