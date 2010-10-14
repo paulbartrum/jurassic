@@ -116,7 +116,9 @@
     <Compile Include="Core\ScriptSource\StringScriptSource.cs" />
     <Compile Include="Core\ScriptSource\FileScriptSource.cs" />
     <Compile Include="Core\ScriptSource\ScriptSource.cs" />
-    <Compile Include="Library\FirebugConsole.cs" />
+    <Compile Include="Library\FirebugConsole\StandardConsoleOutput.cs" />
+    <Compile Include="Library\FirebugConsole\FirebugConsole.cs" />
+    <Compile Include="Library\FirebugConsole\IFirebugConsoleOutput.cs" />
     <Compile Include="Library\Function\BoundFunction.cs" />
     <Compile Include="Library\Function\ThrowTypeErrorFunction.cs" />
     <Compile Include="Library\JSON\JSONParser.cs" />

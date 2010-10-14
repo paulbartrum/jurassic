@@ -12,9 +12,7 @@ namespace Jurassic.Library
     /// </summary>
     public class FirebugConsole : ObjectInstance
     {
-        private System.IO.TextWriter output;
-        private int currentIndentation;
-        private int indentationDelta;
+        private IFirebugConsoleOutput output;
         private Dictionary<string, Stopwatch> timers;
 
         /// <summary>
@@ -24,8 +22,7 @@ namespace Jurassic.Library
         public FirebugConsole(ScriptEngine engine)
             : base(engine.Object.InstancePrototype)
         {
-            this.Output = Console.Out;
-            this.IndentationDelta = 4;
+            this.Output = new StandardConsoleOutput();
             this.PopulateFunctions();
         }
 
@@ -35,9 +32,9 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets or sets the output stream to write text to.
+        /// Gets or sets the console to output to.
         /// </summary>
-        public System.IO.TextWriter Output
+        public IFirebugConsoleOutput Output
         {
             get { return this.output; }
             set
@@ -45,34 +42,6 @@ namespace Jurassic.Library
                 if (value == null)
                     throw new ArgumentNullException("value");
                 this.output = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the number of spaces to output before writing any text to the console.
-        /// </summary>
-        public int CurrentIndentation
-        {
-            get { return this.currentIndentation; }
-            set
-            {
-                if (value < 0 || value > 40)
-                    throw new ArgumentOutOfRangeException("value");
-                this.currentIndentation = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the number of spaces to add to the identation when group() is called.
-        /// </summary>
-        public int IndentationDelta
-        {
-            get { return this.indentationDelta; }
-            set
-            {
-                if (value < 0 || value > 40)
-                    throw new ArgumentOutOfRangeException("value");
-                this.indentationDelta = value;
             }
         }
 
@@ -93,7 +62,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "log")]
         public void Log(params object[] items)
         {
-            WriteLine(Format(items));
+            Log(FirebugConsoleMessageStyle.Regular, items);
         }
 
         /// <summary>
@@ -108,7 +77,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "debug")]
         public void Debug(params object[] items)
         {
-            WriteLine(Format(items));
+            Log(FirebugConsoleMessageStyle.Regular, items);
         }
 
         /// <summary>
@@ -123,14 +92,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "info")]
         public void Info(params object[] items)
         {
-#if !SILVERLIGHT
-            var original = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.White;
-#endif
-            WriteLine(Format(items));
-#if !SILVERLIGHT
-            Console.ForegroundColor = original;
-#endif
+            Log(FirebugConsoleMessageStyle.Information, items);
         }
 
         /// <summary>
@@ -145,14 +107,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "warn")]
         public void Warn(params object[] items)
         {
-#if !SILVERLIGHT
-            var original = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-#endif
-            WriteLine(Format(items));
-#if !SILVERLIGHT
-            Console.ForegroundColor = original;
-#endif
+            Log(FirebugConsoleMessageStyle.Warning, items);
         }
 
         /// <summary>
@@ -167,14 +122,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "error")]
         public void Error(params object[] items)
         {
-#if !SILVERLIGHT
-            var original = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-#endif
-            WriteLine(Format(items));
-#if !SILVERLIGHT
-            Console.ForegroundColor = original;
-#endif
+            Log(FirebugConsoleMessageStyle.Error, items);
         }
 
         /// <summary>
@@ -188,10 +136,25 @@ namespace Jurassic.Library
             if (expression == false)
             {
                 if (items.Length > 0)
-                    Error(string.Format("Assertion failed: {0}", Format(items)));
+                {
+                    object[] formattedItems = FormatObjects(items);
+                    object[] formattedItems2 = new object[formattedItems.Length + 1];
+                    formattedItems2[0] = "Assertion failed:";
+                    Array.Copy(formattedItems, 0, formattedItems2, 1, formattedItems.Length);
+                    Error(formattedItems2);
+                }
                 else
                     Error("Assertion failed");
             }
+        }
+
+        /// <summary>
+        /// Clears the console.
+        /// </summary>
+        [JSFunction(Name = "clear")]
+        public void Clear(params object[] items)
+        {
+            this.output.Clear();
         }
 
         /// <summary>
@@ -202,8 +165,18 @@ namespace Jurassic.Library
         [JSFunction(Name = "group")]
         public void Group(params object[] items)
         {
-            WriteLine(Format(items));
-            this.CurrentIndentation = Math.Min(this.CurrentIndentation + this.IndentationDelta, 40);
+            this.output.StartGroup(Format(items), false);
+        }
+
+        /// <summary>
+        /// Writes a message to the console and opens a nested block to indent all future messages
+        /// sent to the console.  Call console.groupEnd() to close the block.
+        /// </summary>
+        /// <param name="items"> The items to format. </param>
+        [JSFunction(Name = "groupCollapsed")]
+        public void GroupCollapsed(params object[] items)
+        {
+            this.output.StartGroup(Format(items), true);
         }
 
         /// <summary>
@@ -212,7 +185,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "groupEnd")]
         public void GroupEnd()
         {
-            this.CurrentIndentation = Math.Max(this.CurrentIndentation - this.IndentationDelta, 0);
+            this.output.EndGroup();
         }
 
 
@@ -271,9 +244,9 @@ namespace Jurassic.Library
                 return;
             var stopwatch = this.timers[name];
             if (string.IsNullOrEmpty(name))
-                WriteLine(string.Format("{0}ms", stopwatch.ElapsedMilliseconds));
+                Log(FirebugConsoleMessageStyle.Regular, string.Format("{0}ms", stopwatch.ElapsedMilliseconds));
             else
-                WriteLine(string.Format("{0}: {1}ms", name, stopwatch.ElapsedMilliseconds));
+                Log(FirebugConsoleMessageStyle.Regular, string.Format("{0}: {1}ms", name, stopwatch.ElapsedMilliseconds));
             this.timers.Remove(name);
         }
 
@@ -283,21 +256,61 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
+        /// Logs a message to the console.  The objects provided will be converted to strings then
+        /// joined together in a space separated line.  The first parameter can be a string
+        /// containing the following patterns:
+        ///  %s	 String
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
+        /// </summary>
+        /// <param name="style"> The style of the message (this determines the icon and text
+        /// color). </param>
+        /// <param name="items"> The items to format. </param>
+        private void Log(FirebugConsoleMessageStyle style, params object[] items)
+        {
+            this.output.Log(style, FormatObjects(items));
+        }
+
+        /// <summary>
         /// Formats a message.  The objects provided will be converted to strings then
         /// joined together in a space separated line.  The first parameter can be a string
         /// containing the following patterns:
         ///  %s	 String
-        ///  %d, %i	 Integer (numeric formatting is not yet supported)
-        ///  %f	 Floating point number (numeric formatting is not yet supported)
-        ///  %o	 Object hyperlink (not yet supported)
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
+        ///  %o	 Object hyperlink
         /// </summary>
         /// <param name="items"> The items to format. </param>
         /// <returns> A formatted string. </returns>
         private static string Format(object[] items)
         {
-            if (items.Length == 0)
-                return string.Empty;
             var result = new System.Text.StringBuilder();
+            items = FormatObjects(items);
+            for (int i = 0; i < items.Length; i++)
+            {
+                result.Append(' ');
+                result.Append(TypeConverter.ToString(items[i]));
+            }
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Formats a message.  The objects provided will be converted to strings then
+        /// joined together in a space separated line.  The first parameter can be a string
+        /// containing the following patterns:
+        ///  %s	 String
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
+        ///  %o	 Object hyperlink
+        /// </summary>
+        /// <param name="items"> The items to format. </param>
+        /// <returns> An array containing formatted strings interspersed with objects. </returns>
+        private static object[] FormatObjects(object[] items)
+        {
+            if (items.Length == 0)
+                return new object[0];
+            var result = new List<object>();
+            var formattedString = new System.Text.StringBuilder();
 
             // If the first item is a string, then it is assumed to be a format string.
             int itemsConsumed = 1;
@@ -314,7 +327,7 @@ namespace Jurassic.Library
                         break;
 
                     // Append the text that didn't contain a pattern to the result.
-                    result.Append(formatString, previousPatternIndex, patternIndex - previousPatternIndex);
+                    formattedString.Append(formatString, previousPatternIndex, patternIndex - previousPatternIndex);
 
                     // Extract the pattern type.
                     char patternType = formatString[patternIndex + 1];
@@ -337,45 +350,42 @@ namespace Jurassic.Library
                         case '%':
                             replacement = "%";
                             break;
+                        case 'o':
+                            replacement = string.Empty;
+                            if (formattedString.Length > 0)
+                                result.Add(formattedString.ToString());
+                            result.Add(items[itemsConsumed++]);
+                            formattedString.Remove(0, formattedString.Length);
+                            break;
                         default:
                             replacement = "%" + patternType;
                             break;
                     }
 
                     // Replace the pattern with the corresponding argument.
-                    result.Append(replacement);
+                    formattedString.Append(replacement);
 
                     // Start searching just after the end of the pattern.
                     previousPatternIndex = patternIndex + 2;
                 }
 
                 // Append the text that didn't contain a pattern to the result.
-                result.Append(formatString, previousPatternIndex, formatString.Length - previousPatternIndex);
+                formattedString.Append(formatString, previousPatternIndex, formatString.Length - previousPatternIndex);
+
+                // Add the formatted string to the resulting array.
+                if (formattedString.Length > 0)
+                    result.Add(formattedString.ToString());
+
+                // Append the items that weren't consumed to the end of the resulting array.
+                for (int i = itemsConsumed; i < items.Length; i++)
+                    result.Add(items[i]);
+                return result.ToArray();
             }
             else
             {
-                // The first item is not a string - just append it to the result.
-                result.Append(TypeConverter.ToString(items[0]));
+                // The first item is not a string - just return the objects verbatim.
+                return items;
             }
-
-            // Append the items that weren't consumed to the end of the string, separated by spaces.
-            for (int i = itemsConsumed; i < items.Length; i++)
-            {
-                result.Append(' ');
-                result.Append(TypeConverter.ToString(items[i]));
-            }
-            return result.ToString();
-        }
-
-        /// <summary>
-        /// Writes a string to the console.
-        /// </summary>
-        /// <param name="message"> The message to write to the console. </param>
-        private void WriteLine(string message)
-        {
-            if (this.CurrentIndentation > 0)
-                this.Output.Write(new string(' ', this.CurrentIndentation));
-            this.Output.WriteLine(message);
         }
     }
 }

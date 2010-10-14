@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" d:DesignHeight="16" d:DesignWidth="16">
+    mc:Ignorable="d" d:DesignHeight="12" d:DesignWidth="12">
 
     <Grid Width="12" Height="12">
         <Ellipse Width="12" Height="12" Fill="Red" Stroke="DarkRed" />

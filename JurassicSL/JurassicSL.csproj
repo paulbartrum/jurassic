@@ -369,8 +369,14 @@
     <Compile Include="..\Jurassic\Library\Error\ErrorInstance.cs">
       <Link>Library\Error\ErrorInstance.cs</Link>
     </Compile>
-    <Compile Include="..\Jurassic\Library\FirebugConsole.cs">
-      <Link>Library\FirebugConsole.cs</Link>
+    <Compile Include="..\Jurassic\Library\FirebugConsole\FirebugConsole.cs">
+      <Link>Library\FirebugConsole\FirebugConsole.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\FirebugConsole\IFirebugConsoleOutput.cs">
+      <Link>Library\FirebugConsole\IFirebugConsoleOutput.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\FirebugConsole\StandardConsoleOutput.cs">
+      <Link>Library\FirebugConsole\StandardConsoleOutput.cs</Link>
     </Compile>
     <Compile Include="..\Jurassic\Library\Function\ArgumentsInstance.cs">
       <Link>Library\Function\ArgumentsInstance.cs</Link>

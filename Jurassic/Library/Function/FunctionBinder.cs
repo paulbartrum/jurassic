@@ -216,12 +216,19 @@ namespace Jurassic.Library
         private static BinderDelegate CreateSingleMethodBinder(Type[] argumentTypes, FunctionBinderMethod binderMethod)
         {
             // Create a new dynamic method.
+#if !SILVERLIGHT
             var dm = new DynamicMethod(
                 "Binder",                                                               // Name of the generated method.
                 typeof(object),                                                         // Return type of the generated method.
                 new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },  // Parameter types of the generated method.
                 typeof(FunctionBinder),                                                 // Owner type.
                 true);                                                                  // Skip visibility checks.
+#else
+            var dm = new DynamicMethod(
+                "Binder",                                                               // Name of the generated method.
+                typeof(object),                                                         // Return type of the generated method.
+                new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) }); // Parameter types of the generated method.
+#endif
 
             // Here is what we are going to generate.
             //private static object SampleBinder(ScriptEngine engine, object thisObject, object[] arguments)
@@ -330,6 +337,8 @@ namespace Jurassic.Library
                     il.Emit(OpCodes.Ldelem_Ref);
                     if (argumentTypes[i].IsClass == false)
                         il.Emit(OpCodes.Unbox_Any, argumentTypes[i]);
+                    else
+                        il.Emit(OpCodes.Castclass, argumentTypes[i]);
 
                     if (Attribute.GetCustomAttribute(targetParameter, typeof(JSDoNotConvertAttribute)) == null)
                     {

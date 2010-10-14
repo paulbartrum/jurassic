@@ -73,20 +73,28 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ErrorIcon.xaml.cs">
+    <Compile Include="Icons\CommandIcon.xaml.cs">
+      <DependentUpon>CommandIcon.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Icons\ErrorIcon.xaml.cs">
       <DependentUpon>ErrorIcon.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SilverlightConsoleOutput.cs" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
-    <Page Include="ErrorIcon.xaml">
+    <Page Include="Icons\CommandIcon.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Icons\ErrorIcon.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
