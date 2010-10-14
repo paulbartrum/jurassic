@@ -73,8 +73,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CustomRichTextBox.cs" />
+    <Compile Include="CustomScrollViewer.cs" />
     <Compile Include="Icons\CommandIcon.xaml.cs">
       <DependentUpon>CommandIcon.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Icons\ResultIcon.xaml.cs">
+      <DependentUpon>ResultIcon.xaml</DependentUpon>
     </Compile>
     <Compile Include="Icons\ErrorIcon.xaml.cs">
       <DependentUpon>ErrorIcon.xaml</DependentUpon>
@@ -94,6 +99,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Icons\ResultIcon.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Icons\ErrorIcon.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -102,6 +111,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Resource Include="Themes\generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AppManifest.xml" />

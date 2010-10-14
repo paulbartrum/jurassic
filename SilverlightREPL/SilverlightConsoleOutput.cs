@@ -26,9 +26,22 @@ namespace SilverlightREPL
     {
         private RichTextBox richTextBox;
 
+        /// <summary>
+        /// Creates a new SilverlightConsoleOutput instance.
+        /// </summary>
+        /// <param name="richTextBox"> The RichTextBox to append text to. </param>
         public SilverlightConsoleOutput(RichTextBox richTextBox)
         {
             this.richTextBox = richTextBox;
+        }
+
+        /// <summary>
+        /// The command to be output if anything is logged to the console.
+        /// </summary>
+        public string PendingCommand
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -52,6 +65,9 @@ namespace SilverlightREPL
             Log(style, new object[] { message });
         }
 
+        public event EventHandler BeforeLog;
+        public event EventHandler AfterLog;
+
         /// <summary>
         /// Logs a message to the console.
         /// </summary>
@@ -60,6 +76,10 @@ namespace SilverlightREPL
         /// ObjectInstances. </param>
         public void Log(SilverlightMessageStyle style, object[] objects)
         {
+            // Trigger BeforeLog event.
+            if (this.BeforeLog != null)
+                BeforeLog(this, EventArgs.Empty);
+
             // Convert the objects to a string.
             var message = new System.Text.StringBuilder();
             for (int i = 0; i < objects.Length; i++)
@@ -87,7 +107,11 @@ namespace SilverlightREPL
                     icon = new CommandIcon() { Foreground = new SolidColorBrush(Colors.Gray) };
                     break;
                 case SilverlightMessageStyle.Result:
-                    color = Color.FromArgb(255, 0, 0, 210);
+                    if (objects.Length == 1 && objects[0] == Undefined.Value)
+                        color = Colors.Gray;
+                    else
+                        color = Color.FromArgb(255, 0, 0, 210);
+                    icon = new ResultIcon();
                     break;
             }
 
@@ -97,12 +121,16 @@ namespace SilverlightREPL
             {
                 var canvas = new Canvas() { Width = 0, Height = 12 };
                 canvas.Children.Add(icon);
-                Canvas.SetLeft(icon, -16);
-                Canvas.SetTop(icon, 2);
+                Canvas.SetLeft(icon, -17);
+                Canvas.SetTop(icon, 1);
                 paragraph.Inlines.Add(new InlineUIContainer() { Child = canvas });
             }
             paragraph.Inlines.Add(new Run() { Text = message.ToString(), Foreground = new SolidColorBrush(color) });
             this.richTextBox.Blocks.Add(paragraph);
+
+            // Trigger AfterLog event.
+            if (this.AfterLog != null)
+                AfterLog(this, EventArgs.Empty);
         }
 
         /// <summary>
