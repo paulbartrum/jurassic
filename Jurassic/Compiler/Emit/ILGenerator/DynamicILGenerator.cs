@@ -682,11 +682,11 @@ namespace Jurassic.Compiler
                     var currentStack = this.operands.ToArray();
                     if (previousStack.Length != currentStack.Length)
                         throw new InvalidOperationException(string.Format("Stack mismatch from a previous branch.  Expected: '{0}' but was: '{1}'",
-                            string.Join(", ", previousStack), string.Join(", ", currentStack)));
+                            StringHelpers.Join(", ", previousStack), StringHelpers.Join(", ", currentStack)));
                     for (int i = 0; i < previousStack.Length; i++)
                         if (previousStack[i] != currentStack[i])
                             throw new InvalidOperationException(string.Format("Stack mismatch from a previous branch.  Expected: '{0}' but was: '{1}'",
-                                string.Join(", ", previousStack), string.Join(", ", currentStack)));
+                                StringHelpers.Join(", ", previousStack), StringHelpers.Join(", ", currentStack)));
                 }
                 else
                 {
@@ -807,11 +807,11 @@ namespace Jurassic.Compiler
                 var currentStack = this.operands.ToArray();
                 if (previousStack.Length != currentStack.Length)
                     throw new InvalidOperationException(string.Format("Stack mismatch from a previous branch.  Expected: '{0}' but was: '{1}'",
-                        string.Join(", ", previousStack), string.Join(", ", currentStack)));
+                        StringHelpers.Join(", ", previousStack), StringHelpers.Join(", ", currentStack)));
                 for (int i = 0; i < previousStack.Length; i++)
                     if (previousStack[i] != currentStack[i])
                         throw new InvalidOperationException(string.Format("Stack mismatch from a previous branch.  Expected: '{0}' but was: '{1}'",
-                            string.Join(", ", previousStack), string.Join(", ", currentStack)));
+                            StringHelpers.Join(", ", previousStack), StringHelpers.Join(", ", currentStack)));
             }
 #else
             if (label2.EvaluationStackSize < 0)
@@ -942,7 +942,7 @@ namespace Jurassic.Compiler
                 if (popCount > 0)
                     PopStackOperands(ToVESType(this.dynamicMethod.ReturnType));
                 if (this.stackSize != 0)
-                    throw new InvalidOperationException(string.Format("The evaluation stack should be empty.  Types still on stack: {0}.", string.Join(", ", this.operands)));
+                    throw new InvalidOperationException(string.Format("The evaluation stack should be empty.  Types still on stack: {0}.", StringHelpers.Join(", ", this.operands)));
             }
         }
 

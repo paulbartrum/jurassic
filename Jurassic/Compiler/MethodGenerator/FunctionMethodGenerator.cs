@@ -341,8 +341,8 @@ namespace Jurassic.Compiler
         public override string ToString()
         {
             if (this.BodyRoot != null)
-                return string.Format("function {0}({1}) {2}", this.Name, string.Join(", ", this.ArgumentNames), this.BodyRoot);
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, string.Join(", ", this.ArgumentNames), this.BodyText);
+                return string.Format("function {0}({1}) {2}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.BodyRoot);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.BodyText);
         }
     }
 

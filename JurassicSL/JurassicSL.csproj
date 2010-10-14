@@ -300,9 +300,6 @@
     <Compile Include="..\Jurassic\Core\JavaScriptException.cs">
       <Link>Core\JavaScriptException.cs</Link>
     </Compile>
-    <Compile Include="..\Jurassic\Core\MathHelpers.cs">
-      <Link>Core\MathHelpers.cs</Link>
-    </Compile>
     <Compile Include="..\Jurassic\Core\Null.cs">
       <Link>Core\Null.cs</Link>
     </Compile>
@@ -326,6 +323,9 @@
     </Compile>
     <Compile Include="..\Jurassic\Core\ScriptSource\StringScriptSource.cs">
       <Link>Core\ScriptSource\StringScriptSource.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\StringHelpers.cs">
+      <Link>Core\StringHelpers.cs</Link>
     </Compile>
     <Compile Include="..\Jurassic\Core\TypeComparer.cs">
       <Link>Core\TypeComparer.cs</Link>
@@ -484,7 +484,7 @@
       <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
         <SilverlightProjectProperties />
       </FlavorProperties>
-      <UserProperties ProjectLinkReference="2ce5502d-8710-4be3-9d90-201d526904b3" ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" />
+      <UserProperties ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" ProjectLinkReference="2ce5502d-8710-4be3-9d90-201d526904b3" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
