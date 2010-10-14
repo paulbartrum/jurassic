@@ -180,12 +180,19 @@ namespace Jurassic.Compiler
             if (this.Options.EnableDebugging == false)
             {
                 // Create a new dynamic method.
+#if !SILVERLIGHT
                 var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
                     "Main",                                                 // Name of the generated method.
                     typeof(object),                                         // Return type of the generated method.
                     GetParameterTypes(),                                    // Parameter types of the generated method.
                     typeof(MethodGenerator),                                // Owner type.
                     true);                                                  // Skip visibility checks.
+#else
+                var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                    "Main",                                                 // Name of the generated method.
+                    typeof(object),                                         // Return type of the generated method.
+                    GetParameterTypes());                                   // Parameter types of the generated method.
+#endif
 
                 // Generate the IL.
 #if !SILVERLIGHT
