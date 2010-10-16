@@ -17,33 +17,82 @@ namespace SilverlightREPL
     /// </summary>
     public class CustomScrollViewer : ContentControl
     {
+        private ScrollBar verticalScrollBar;
+
         public CustomScrollViewer()
         {
             this.DefaultStyleKey = typeof(CustomScrollViewer);
         }
 
-        protected override Size ArrangeOverride(Size finalSize)
+        public override void OnApplyTemplate()
         {
-            return base.ArrangeOverride(finalSize);
+            base.OnApplyTemplate();
+            this.verticalScrollBar = this.GetTemplateChild("VerticalScrollBar") as ScrollBar;
         }
 
-        protected override Size MeasureOverride(Size availableSize)
+        public void ScrollToBottom()
         {
-            return base.MeasureOverride(availableSize);
-
-            //var content = this.Content as UIElement;
-            //if (content == null)
-            //    return base.MeasureOverride(availableSize);
-            //content.Measure(availableSize);
-
-            //var scrollBar = this.GetTemplateChild("VerticalScrollBar") as ScrollBar;
-            //scrollBar.ViewportSize = availableSize.Height;
-            //scrollBar.Maximum = content.DesiredSize.Height;
-            ////SetValue(ExtentHeightProperty, content.DesiredSize.Height);
-            //return new Size(
-            //    Math.Min(availableSize.Width, content.DesiredSize.Width),
-            //    Math.Min(availableSize.Height, content.DesiredSize.Height));
+            this.UpdateLayout();
+            this.verticalScrollBar.Value = this.verticalScrollBar.Maximum;
         }
+
+        //protected override Size ArrangeOverride(Size finalSize)
+        //{
+        //    //var content = this.Content as UIElement;
+        //    //if (content == null)
+        //        return base.ArrangeOverride(finalSize);
+        //    //content.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
+        //    //return finalSize;
+        //}
+
+        //protected override Size MeasureOverride(Size availableSize)
+        //{
+        //    var result = new Size();
+
+        //    var content = this.Content as UIElement;
+        //    if (content == null)
+        //        return result;
+
+        //    var presenter = this.GetTemplateChild("Presenter") as ScrollContentPresenter;
+        //    if (presenter == null)
+        //        return result;
+
+        //    var scrollBar = this.GetTemplateChild("VerticalScrollBar") as ScrollBar;
+        //    if (scrollBar == null)
+        //        return result;
+
+        //    scrollBar.ViewportSize = availableSize.Height;
+        //    scrollBar.Maximum = Math.Max(0.0, content.DesiredSize.Height - availableSize.Height);
+
+        //    presenter.SetVerticalOffset(100);
+
+        //    return result;
+
+        //    //var result = base.MeasureOverride(new Size(availableSize.Width, double.PositiveInfinity));
+
+        //    //var content = this.Content as UIElement;
+        //    //if (content == null)
+        //    //    return base.MeasureOverride(availableSize);
+        //    //////content.Measure(new Size(availableSize.Width - 18, double.PositiveInfinity));
+
+        //    //////SetValue(ExtentHeightProperty, content.DesiredSize.Height);
+        //    //////return new Size(
+        //    //////    Math.Min(availableSize.Width, content.DesiredSize.Width),
+        //    //////    Math.Min(availableSize.Height, content.DesiredSize.Height));
+        //    //return result;
+
+        //    //var child = VisualTreeHelper.GetChild(this, 0) as UIElement;
+        //    //if (child == null)
+        //    //    return new Size();
+
+        //    //child.Measure(availableSize);
+
+        //    //var scrollBar = this.GetTemplateChild("VerticalScrollBar") as ScrollBar;
+        //    //scrollBar.ViewportSize = availableSize.Height;
+        //    //scrollBar.Maximum = Math.Max(0.0, child.DesiredSize.Height - availableSize.Height);
+
+        //    //return child.DesiredSize;
+        //}
 
         public double ExtentHeight
         {

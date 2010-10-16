@@ -73,6 +73,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CustomScrollContentPresenter.cs" />
     <Compile Include="CustomRichTextBox.cs" />
     <Compile Include="CustomScrollViewer.cs" />
     <Compile Include="Icons\CommandIcon.xaml.cs">
