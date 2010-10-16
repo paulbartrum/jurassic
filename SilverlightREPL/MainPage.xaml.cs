@@ -34,18 +34,6 @@ namespace SilverlightREPL
             var consoleObject = new Jurassic.Library.FirebugConsole(engine);
             consoleObject.Output = this.console;
             engine.Global["console"] = consoleObject;
-
-            // Scroll the scroll viewer so the console output is visible.
-            //var timer = new System.Windows.Threading.DispatcherTimer();
-            //timer.Interval = TimeSpan.FromMilliseconds(10);
-            //timer.Tick += (sender2, e2) =>
-            //{
-            //    //this.ScrollViewer.UpdateLayout();
-            //    //this.UpdateLayout();
-            //    var desiredOffset = Math.Max(0, this.ScrollViewer.ExtentHeight - this.ScrollViewer.ViewportHeight);
-            //    this.ScrollViewer.ScrollToVerticalOffset(desiredOffset);
-            //};
-            //timer.Start();
         }
 
         private void CommandTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -73,6 +61,10 @@ namespace SilverlightREPL
                     {
                         // Do not write the pending command.
                         this.console.PendingCommand = null;
+
+                        // Register a callback to scroll the console to the bottom.
+                        this.CommandTextBox.TextChanged += new TextChangedEventHandler(CommandTextBox_TextChanged);
+                        
                         return;
                     }
                     else
@@ -146,6 +138,16 @@ namespace SilverlightREPL
             }
         }
 
+        void CommandTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Called just after a newline is inserted.
+            // Scroll the console to the bottom.
+            this.ScrollViewer.ScrollToBottom();
+
+            // Unregister the event handler.
+            this.CommandTextBox.TextChanged -= CommandTextBox_TextChanged;
+        }
+
         private void Console_BeforeLog(object sender, EventArgs e)
         {
             // Clear the command textbox.
@@ -163,18 +165,20 @@ namespace SilverlightREPL
         private void Console_AfterLog(object sender, EventArgs e)
         {
             // Scroll the scroll viewer so the console output is visible.
-            //this.ScrollViewer.UpdateLayout();
-            //this.ScrollViewer.ScrollToVerticalOffset(double.MaxValue);
-
-            //System.Diagnostics.Debug.WriteLine("{0}, {1}, {2}", this.ScrollViewer.VerticalOffset, this.ScrollViewer.ViewportHeight, this.ScrollViewer.ExtentHeight);
+            this.ScrollViewer.ScrollToBottom();
         }
 
-        
-
-        // Selects the command textbox if the user clicks on the history text without selecting anything.
         private void HistoryTextBox_MouseSelectionEnded(object sender, EventArgs e)
         {
+            // Selects the command textbox if the user clicks on the history text without selecting anything.
             if (this.HistoryTextBox.Selection.Start.CompareTo(this.HistoryTextBox.Selection.End) == 0)
+                this.CommandTextBox.Focus();
+        }
+
+        private void ScrollViewer_GotFocus(object sender, RoutedEventArgs e)
+        {
+            // Set focus to the command textbox when the user clicks below the command textbox.
+            if (e.OriginalSource == this.ScrollViewer)
                 this.CommandTextBox.Focus();
         }
     }

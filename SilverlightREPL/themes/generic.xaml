@@ -13,11 +13,19 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ContentPresenter Name="Content" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" />
+                        <my:CustomScrollContentPresenter
+                            x:Name="Presenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            VerticalOffset="{Binding Value, ElementName=VerticalScrollBar}" />
                         <ScrollBar
                             x:Name="VerticalScrollBar"
                             IsTabStop="False"
-                            Grid.Column="1" />
+                            Grid.Column="1"
+                            Maximum="{Binding ExtentMinusViewportHeight, ElementName=Presenter}"
+                            ViewportSize="{Binding ViewportHeight, ElementName=Presenter}"
+                            SmallChange="16"
+                            LargeChange="{Binding ViewportHeight, ElementName=Presenter}"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
