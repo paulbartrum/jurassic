@@ -86,19 +86,17 @@ namespace Jurassic.Compiler
             if (optimizationInfo.DebugDocument != null)
                 generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.TargetObjectDebugInfo);
 
-            // Emit the arguments for EnumeratePropertyNames().
+            // Call IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
             EmitHelpers.LoadScriptEngine(generator);
             this.TargetObject.GenerateCode(generator, optimizationInfo);
             EmitConversion.ToAny(generator, this.TargetObject.ResultType);
-
-            // Call EnumeratePropertyNames()
             generator.Call(ReflectionHelpers.TypeUtilities_EnumeratePropertyNames);
 
-            // Call GetEnumerator()
+            // Call IEnumerable<string>.GetEnumerator()
             generator.Call(ReflectionHelpers.IEnumerable_GetEnumerator);
 
             // Store the enumerator in a temporary variable.
-            var enumerator = generator.CreateTemporaryVariable(typeof(object));
+            var enumerator = generator.CreateTemporaryVariable(typeof(IEnumerator<string>));
             generator.StoreVariable(enumerator);
 
             var breakTarget = generator.CreateLabel();

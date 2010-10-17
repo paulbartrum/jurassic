@@ -31,11 +31,19 @@ namespace Jurassic.Library
             if (message != null)
                 this.FastSetProperty("message", message, PropertyAttributes.FullAccess);
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT            
             if (generateStack == true)
             {
-                var stackTrace = string.Concat(this.ToStringJS(), Environment.NewLine, Environment.StackTrace);
-                this.FastSetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
+                try
+                {
+                    var stackTrace = string.Concat(this.ToStringJS(), Environment.NewLine, Environment.StackTrace);
+                    this.FastSetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
+                }
+                catch (System.Security.SecurityException)
+                {
+                    // Note: Environment.StackTrace requires EnvironmentPermission (unrestricted).
+                    ScriptEngine.SetLowPrivilegeEnvironment();
+                }
             }
 #endif
         }

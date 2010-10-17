@@ -58,7 +58,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="elements"> The initial elements of the new array. </param>
         [JSCallFunction]
-        private ArrayInstance Call(params object[] elements)
+        public ArrayInstance Call(params object[] elements)
         {
             return Construct(elements);
         }
@@ -69,7 +69,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="elements"> The initial elements of the new array. </param>
         [JSConstructorFunction]
-        private ArrayInstance Construct(params object[] elements)
+        public ArrayInstance Construct(params object[] elements)
         {
             if (elements.Length == 1)
             {

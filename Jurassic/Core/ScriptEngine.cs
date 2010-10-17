@@ -155,6 +155,44 @@ namespace Jurassic
             }
         }
 
+#if !SILVERLIGHT
+
+        /// <summary>
+        /// Gets a value that indicates whether the script engine must run in a low privilege environment.
+        /// </summary>
+        internal static bool LowPrivilegeEnvironment
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Indicates that the current AppDomain is a low privilege environment.
+        /// </summary>
+        internal static void SetLowPrivilegeEnvironment()
+        {
+            LowPrivilegeEnvironment = true;
+        }
+
+#else
+
+        /// <summary>
+        /// Gets a value that indicates whether the script engine must run in a low privilege environment.
+        /// </summary>
+        internal static bool LowPrivilegeEnvironment
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Indicates that the current AppDomain is a low privilege environment.
+        /// </summary>
+        internal static void SetLowPrivilegeEnvironment()
+        {
+        }
+
+#endif
+
 
 
         //     GLOBAL BUILT-IN OBJECTS
