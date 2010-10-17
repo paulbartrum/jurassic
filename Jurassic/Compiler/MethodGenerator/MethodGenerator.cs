@@ -154,10 +154,6 @@ namespace Jurassic.Compiler
         /// </summary>
         public void Optimize()
         {
-            // Generate the abstract syntax tree if it hasn't already been generated.
-            //if (this.AbstractSyntaxTree == null)
-            //    Parse();
-            //this.AbstractSyntaxTree.Optimize();
         }
 
         /// <summary>
@@ -178,39 +174,40 @@ namespace Jurassic.Compiler
             optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
 
 #if !SILVERLIGHT
-            if (this.Options.EnableDebugging == false)
+            if (this.Options.EnableDebugging == false && ScriptEngine.LowPrivilegeEnvironment == false)
             {
-                // Create a new dynamic method.
-#if !SILVERLIGHT
-                var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                    "Main",                                                 // Name of the generated method.
-                    typeof(object),                                         // Return type of the generated method.
-                    GetParameterTypes(),                                    // Parameter types of the generated method.
-                    typeof(MethodGenerator),                                // Owner type.
-                    true);                                                  // Skip visibility checks.
-#else
-                var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                    "Main",                                                 // Name of the generated method.
-                    typeof(object),                                         // Return type of the generated method.
-                    GetParameterTypes());                                   // Parameter types of the generated method.
-#endif
+                // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
+                // FunctionExpression class.
+                try
+                {
+                    // Create a new dynamic method.
+                    var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                        "Main",                                                 // Name of the generated method.
+                        typeof(object),                                         // Return type of the generated method.
+                        GetParameterTypes(),                                    // Parameter types of the generated method.
+                        typeof(MethodGenerator),                                // Owner type.
+                        true);                                                  // Skip visibility checks.
 
-                // Generate the IL.
-#if !SILVERLIGHT
-                var generator = new DynamicILGenerator(dynamicMethod);
-#else
-                var generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
-#endif
-                GenerateCode(generator, optimizationInfo);
-                generator.Complete();
 
-                // Create a delegate from the method.
-                this.GeneratedMethod = dynamicMethod;
-                this.CompiledDelegate = dynamicMethod.CreateDelegate(GetDelegate());
+                    // Generate the IL.
+                    ILGenerator generator = new DynamicILGenerator(dynamicMethod);
+                    GenerateCode(generator, optimizationInfo);
+                    generator.Complete();
+
+                    // Create a delegate from the method.
+                    this.GeneratedMethod = dynamicMethod;
+                    this.CompiledDelegate = dynamicMethod.CreateDelegate(GetDelegate());
+                }
+                catch (System.Security.SecurityException)
+                {
+                    // A security exception indicates that we are operating with low privileges.
+                    ScriptEngine.SetLowPrivilegeEnvironment();
+                }
             }
-            else
-            {
 #endif
+            if (this.Options.EnableDebugging == true || ScriptEngine.LowPrivilegeEnvironment == true)
+            {
+                // Debugging or low trust path.
                 ScriptEngine.ReflectionEmitModuleInfo reflectionEmitInfo = this.Engine.ReflectionEmitInfo;
                 if (reflectionEmitInfo == null)
                 {
@@ -230,7 +227,7 @@ namespace Jurassic.Compiler
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
                     // Create a dynamic module.
-                    reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", true);
+                    reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
 
                     this.Engine.ReflectionEmitInfo = reflectionEmitInfo;
                 }
@@ -270,9 +267,7 @@ namespace Jurassic.Compiler
                 //string il = writer.ToString();
 
                 this.CompiledDelegate = Delegate.CreateDelegate(GetDelegate(), this.GeneratedMethod);
-#if !SILVERLIGHT
             }
-#endif
         }
 
         /// <summary>
