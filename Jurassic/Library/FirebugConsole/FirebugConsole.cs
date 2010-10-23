@@ -10,6 +10,7 @@ namespace Jurassic.Library
     /// non-standard - it is based on the Firebug console API
     /// (http://getfirebug.com/wiki/index.php/Console_API).
     /// </summary>
+    [Serializable]
     public class FirebugConsole : ObjectInstance
     {
         private IFirebugConsoleOutput output;

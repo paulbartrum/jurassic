@@ -7,6 +7,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in Math class that has mathematical constants and functions.
     /// </summary>
+    [Serializable]
     public class MathObject : ObjectInstance
     {
 

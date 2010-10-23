@@ -7,6 +7,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the information stored about a property in the class schema.
     /// </summary>
+    [Serializable]
     internal struct SchemaProperty
     {
         /// <summary>

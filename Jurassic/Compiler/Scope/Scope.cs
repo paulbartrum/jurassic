@@ -6,6 +6,7 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents an enclosing context where variables are uniquely defined.
     /// </summary>
+    [Serializable]
     public abstract class Scope
     {
         // A dictionary containing the variables declared in this scope.
@@ -14,13 +15,26 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Represents a variable declared in a scope.
         /// </summary>
+        [Serializable]
         internal class DeclaredVariable
         {
+            // The index of the variable (in the order it was added).
             public int Index;
+
+            // The name of the variable.
             public string Name;
+
+            // The initial value of the variable (used for function declarations only).
+            [NonSerialized]
             public Expression ValueAtTopOfScope;
+
+            // true if the variable has been set with the initial value.
             public bool Initialized;
+
+            // true if the variable can be modified.
             public bool Writable;
+
+            // true if the variable can be deleted.
             public bool Deletable;
         }
 

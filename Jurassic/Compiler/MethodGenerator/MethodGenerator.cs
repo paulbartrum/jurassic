@@ -178,8 +178,8 @@ namespace Jurassic.Compiler
             {
                 // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
                 // FunctionExpression class.
-                try
-                {
+                //try
+                //{
                     // Create a new dynamic method.
                     var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
                         "Main",                                                 // Name of the generated method.
@@ -187,7 +187,6 @@ namespace Jurassic.Compiler
                         GetParameterTypes(),                                    // Parameter types of the generated method.
                         typeof(MethodGenerator),                                // Owner type.
                         true);                                                  // Skip visibility checks.
-
 
                     // Generate the IL.
                     ILGenerator generator = new DynamicILGenerator(dynamicMethod);
@@ -197,12 +196,12 @@ namespace Jurassic.Compiler
                     // Create a delegate from the method.
                     this.GeneratedMethod = dynamicMethod;
                     this.CompiledDelegate = dynamicMethod.CreateDelegate(GetDelegate());
-                }
-                catch (System.Security.SecurityException)
-                {
-                    // A security exception indicates that we are operating with low privileges.
-                    ScriptEngine.SetLowPrivilegeEnvironment();
-                }
+                //}
+                //catch (System.Security.SecurityException)
+                //{
+                //    // A security exception indicates that we are operating with low privileges.
+                //    ScriptEngine.SetLowPrivilegeEnvironment();
+                //}
             }
 #endif
             if (this.Options.EnableDebugging == true || ScriptEngine.LowPrivilegeEnvironment == true)
@@ -243,7 +242,7 @@ namespace Jurassic.Compiler
 
                 // Generate the IL for the method.
                 var generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
-                if (this.Source.Path != null)
+                if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
                     // Initialize the debugging information.
                     optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, COMHelpers.LanguageType, COMHelpers.LanguageVendor, COMHelpers.DocumentType);

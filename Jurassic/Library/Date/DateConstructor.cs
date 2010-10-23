@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript Date object.
     /// </summary>
+    [Serializable]
     public class DateConstructor : ClrFunction
     {
         //     INITIALIZATION

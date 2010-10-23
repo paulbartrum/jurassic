@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in JavaScript Function object.
     /// </summary>
+    [Serializable]
     public class FunctionConstructor : ClrFunction
     {
 

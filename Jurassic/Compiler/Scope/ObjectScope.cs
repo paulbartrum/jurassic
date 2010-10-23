@@ -6,8 +6,16 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents a scope which is backed by the properties of an object.
     /// </summary>
+    [Serializable]
     public class ObjectScope : Scope
     {
+        private Library.ObjectInstance scopeObject;
+
+        [NonSerialized]
+        private Expression scopeObjectExpression;
+
+        private bool providesImplicitThisValue;
+
         /// <summary>
         /// Creates a new global object scope.
         /// </summary>
@@ -71,8 +79,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public Library.ObjectInstance ScopeObject
         {
-            get;
-            private set;
+            get { return this.scopeObject; }
+            private set { this.scopeObject = value; }
         }
 
         /// <summary>
@@ -81,8 +89,8 @@ namespace Jurassic.Compiler
         /// </summary>
         internal Expression ScopeObjectExpression
         {
-            get;
-            private set;
+            get { return this.scopeObjectExpression; }
+            private set { this.scopeObjectExpression = value; }
         }
 
         /// <summary>
@@ -91,8 +99,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public bool ProvidesImplicitThisValue
         {
-            get;
-            private set;
+            get { return this.providesImplicitThisValue; }
+            private set { this.providesImplicitThisValue = value; }
         }
 
         /// <summary>

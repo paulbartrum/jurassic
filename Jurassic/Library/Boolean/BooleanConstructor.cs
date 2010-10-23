@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript Boolean object.
     /// </summary>
+    [Serializable]
     public class BooleanConstructor : ClrFunction
     {
 

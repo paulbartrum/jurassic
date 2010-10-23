@@ -109,6 +109,7 @@
     <Compile Include="Compiler\Debugging\SourceCodeSpan.cs" />
     <Compile Include="Core\BigInteger.cs" />
     <Compile Include="Core\CompatibilityMode.cs" />
+    <Compile Include="Core\Serialization.cs" />
     <Compile Include="Core\StringHelpers.cs" />
     <Compile Include="Core\NumberFormatter.cs" />
     <Compile Include="Core\NumberParser.cs" />

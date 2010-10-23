@@ -7,7 +7,11 @@ namespace Jurassic
     /// Represents the JavaScript script engine.  This is the first object that needs to be
     /// instantiated in order to execute javascript code.
     /// </summary>
-    public class ScriptEngine
+    [Serializable]
+    public sealed class ScriptEngine
+#if !SILVERLIGHT
+        : System.Runtime.Serialization.ISerializable
+#endif
     {
         // Compatibility mode.
         private CompatibilityMode compatibilityMode;
@@ -120,6 +124,98 @@ namespace Jurassic
         }
 
 
+
+        //     SERIALIZATION
+        //_________________________________________________________________________________________
+
+#if !SILVERLIGHT
+
+        /// <summary>
+        /// Initializes a new instance of the ObjectInstance class with serialized data.
+        /// </summary>
+        /// <param name="info"> The SerializationInfo that holds the serialized object data about
+        /// the exception being thrown. </param>
+        /// <param name="context"> The StreamingContext that contains contextual information about
+        /// the source or destination. </param>
+        private ScriptEngine(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        {
+            // Set the DeserializationEnvironment to this script engine.
+            ScriptEngine.DeserializationEnvironment = this;
+
+            // Create the initial hidden class schema.  This must be done first.
+            this.emptySchema = HiddenClassSchema.CreateEmptySchema();
+
+            // Deserialize the compatibility mode.
+            this.compatibilityMode = (CompatibilityMode)info.GetInt32("compatibilityMode");
+
+            // Deserialize the ForceStrictMode flag.
+            this.ForceStrictMode = info.GetBoolean("forceStrictMode");
+
+            // Deserialize the built-in objects.
+            this.globalObject = (GlobalObject)info.GetValue("globalObject", typeof(GlobalObject));
+            this.arrayConstructor = (ArrayConstructor)info.GetValue("arrayConstructor", typeof(ArrayConstructor));
+            this.booleanConstructor = (BooleanConstructor)info.GetValue("booleanConstructor", typeof(BooleanConstructor));
+            this.dateConstructor = (DateConstructor)info.GetValue("dateConstructor", typeof(DateConstructor));
+            this.functionConstructor = (FunctionConstructor)info.GetValue("functionConstructor", typeof(FunctionConstructor));
+            this.jsonObject = (JSONObject)info.GetValue("jsonObject", typeof(JSONObject));
+            this.mathObject = (MathObject)info.GetValue("mathObject", typeof(MathObject));
+            this.numberConstructor = (NumberConstructor)info.GetValue("numberConstructor", typeof(NumberConstructor));
+            this.objectConstructor = (ObjectConstructor)info.GetValue("objectConstructor", typeof(ObjectConstructor));
+            this.regExpConstructor = (RegExpConstructor)info.GetValue("regExpConstructor", typeof(RegExpConstructor));
+            this.stringConstructor = (StringConstructor)info.GetValue("stringConstructor", typeof(StringConstructor));
+
+            // Deserialize the built-in error objects.
+            this.errorConstructor = (ErrorConstructor)info.GetValue("errorConstructor", typeof(ErrorConstructor));
+            this.rangeErrorConstructor = (ErrorConstructor)info.GetValue("rangeErrorConstructor", typeof(ErrorConstructor));
+            this.typeErrorConstructor = (ErrorConstructor)info.GetValue("typeErrorConstructor", typeof(ErrorConstructor));
+            this.syntaxErrorConstructor = (ErrorConstructor)info.GetValue("syntaxErrorConstructor", typeof(ErrorConstructor));
+            this.uriErrorConstructor = (ErrorConstructor)info.GetValue("uriErrorConstructor", typeof(ErrorConstructor));
+            this.evalErrorConstructor = (ErrorConstructor)info.GetValue("evalErrorConstructor", typeof(ErrorConstructor));
+            this.referenceErrorConstructor = (ErrorConstructor)info.GetValue("referenceErrorConstructor", typeof(ErrorConstructor));
+        }
+
+        /// <summary>
+        /// Sets the SerializationInfo with information about the exception.
+        /// </summary>
+        /// <param name="info"> The SerializationInfo that holds the serialized object data about
+        /// the exception being thrown. </param>
+        /// <param name="context"> The StreamingContext that contains contextual information about
+        /// the source or destination. </param>
+        public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        {
+            // Serialize the compatibility mode.
+            info.AddValue("compatibilityMode", (int)this.compatibilityMode);
+
+            // Serialize the ForceStrictMode flag.
+            info.AddValue("forceStrictMode", this.ForceStrictMode);
+
+            // Serialize the built-in objects.
+            info.AddValue("globalObject", this.globalObject);
+            info.AddValue("arrayConstructor", this.arrayConstructor);
+            info.AddValue("booleanConstructor", this.booleanConstructor);
+            info.AddValue("dateConstructor", this.dateConstructor);
+            info.AddValue("functionConstructor", this.functionConstructor);
+            info.AddValue("jsonObject", this.jsonObject);
+            info.AddValue("mathObject", this.mathObject);
+            info.AddValue("numberConstructor", this.numberConstructor);
+            info.AddValue("objectConstructor", this.objectConstructor);
+            info.AddValue("regExpConstructor", this.regExpConstructor);
+            info.AddValue("stringConstructor", this.stringConstructor);
+
+            // Serialize the built-in error objects.
+            info.AddValue("errorConstructor", this.errorConstructor);
+            info.AddValue("rangeErrorConstructor", this.rangeErrorConstructor);
+            info.AddValue("typeErrorConstructor", this.typeErrorConstructor);
+            info.AddValue("syntaxErrorConstructor", this.syntaxErrorConstructor);
+            info.AddValue("uriErrorConstructor", this.uriErrorConstructor);
+            info.AddValue("evalErrorConstructor", this.evalErrorConstructor);
+            info.AddValue("referenceErrorConstructor", this.referenceErrorConstructor);
+        }
+
+#endif
+
+
+
         //     PROPERTIES
         //_________________________________________________________________________________________
 
@@ -157,22 +253,37 @@ namespace Jurassic
 
 #if !SILVERLIGHT
 
+        private static object lowPrivilegeEnvironmentLock = new object();
+        private static bool lowPrivilegeEnvironmentTested = false;
+        private static bool lowPrivilegeEnvironment = false;
+
         /// <summary>
         /// Gets a value that indicates whether the script engine must run in a low privilege environment.
         /// </summary>
         internal static bool LowPrivilegeEnvironment
         {
-            get;
-            private set;
+            get
+            {
+                lock (lowPrivilegeEnvironmentLock)
+                {
+                    if (lowPrivilegeEnvironmentTested == false)
+                    {
+                        var permission = new System.Security.Permissions.SecurityPermission(
+                            System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode);
+                        lowPrivilegeEnvironment = !System.Security.SecurityManager.IsGranted(permission);
+                    }
+                }
+                return lowPrivilegeEnvironment;
+            }
         }
 
-        /// <summary>
-        /// Indicates that the current AppDomain is a low privilege environment.
-        /// </summary>
-        internal static void SetLowPrivilegeEnvironment()
-        {
-            LowPrivilegeEnvironment = true;
-        }
+        ///// <summary>
+        ///// Indicates that the current AppDomain is a low privilege environment.
+        ///// </summary>
+        //internal static void SetLowPrivilegeEnvironment()
+        //{
+        //    LowPrivilegeEnvironment = true;
+        //}
 
 #else
 
@@ -192,6 +303,19 @@ namespace Jurassic
         }
 
 #endif
+
+        [ThreadStatic]
+        private static ScriptEngine deserializationEnvironment;
+
+        /// <summary>
+        /// Gets or sets the script engine to use when deserializing objects.  This property is a
+        /// per-thread setting; it must be set on the thread that is doing the deserialization.
+        /// </summary>
+        public static ScriptEngine DeserializationEnvironment
+        {
+            get { return deserializationEnvironment; }
+            set { deserializationEnvironment = value; }
+        }
 
 
 
@@ -361,11 +485,8 @@ namespace Jurassic
         /// <summary>
         /// Gets or sets information needed by Reflection.Emit.
         /// </summary>
-        internal ReflectionEmitModuleInfo ReflectionEmitInfo
-        {
-            get;
-            set;
-        }
+        [NonSerialized]
+        internal ReflectionEmitModuleInfo ReflectionEmitInfo;
 
 
 

@@ -12,12 +12,14 @@ namespace Jurassic.Library
     /// Selects a member from a list of candidates and performs type conversion from actual
     /// argument type to formal argument type.
     /// </summary>
+    [Serializable]
     internal class FunctionBinder
     {
         private FunctionBinderMethod[] buckets;
         
         internal const int MaximumSupportedParameterCount = 8;
 
+        [NonSerialized]
         private Dictionary<Type[], BinderDelegate> delegateCache;
 
         /// <summary>
@@ -219,31 +221,10 @@ namespace Jurassic.Library
         private static BinderDelegate CreateSingleMethodBinder(Type[] argumentTypes, FunctionBinderMethod binderMethod)
         {
             // Create a new dynamic method.
-            DynamicMethod dm = null;
-            if (ScriptEngine.LowPrivilegeEnvironment == false)
-            {
-                try
-                {
-                    dm = new DynamicMethod(
-                        "Binder",                                                               // Name of the generated method.
-                        typeof(object),                                                         // Return type of the generated method.
-                        new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },  // Parameter types of the generated method.
-                        typeof(FunctionBinder),                                                 // Owner type.
-                        true);                                                                  // Skip visibility checks.
-                }
-                catch (System.Security.SecurityException)
-                {
-                    // A security exception indicates that we are operating with low privileges.
-                    ScriptEngine.SetLowPrivilegeEnvironment();
-                }
-            }
-            if (ScriptEngine.LowPrivilegeEnvironment == true)
-            {
-                dm = new DynamicMethod(
-                    "Binder",                                                               // Name of the generated method.
-                    typeof(object),                                                         // Return type of the generated method.
-                    new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) }); // Parameter types of the generated method.
-            }
+            DynamicMethod dm = new DynamicMethod(
+                "Binder",                                                               // Name of the generated method.
+                typeof(object),                                                         // Return type of the generated method.
+                new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) }); // Parameter types of the generated method.
 
             // Here is what we are going to generate.
             //private static object SampleBinder(ScriptEngine engine, object thisObject, object[] arguments)

@@ -70,7 +70,7 @@ namespace SilverlightREPL
                     else
                     {
                         // Log the error message to the console.
-                        this.console.Log(SilverlightMessageStyle.Error, ex.Message);
+                        this.console.Log(SilverlightMessageStyle.Error, ex.ToString());
                     }
                 }
 

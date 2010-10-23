@@ -99,6 +99,10 @@ namespace Sputnik
                 "S15.1.2.2_D1.2",       // Forbids octal values in parseInt.  This is a de-facto standard (only enabled in compatibility mode).
             };
 
+            // Set the DeserializationEnvironment so any JavaScriptExceptions can be serialized
+            // accross the AppDomain boundary.
+            ScriptEngine.DeserializationEnvironment = new ScriptEngine();
+
             //ExecuteTest(@"..\..\tests\Conformance\15_Native_ECMA_Script_Objects\15.1_The_Global_Object\15.1.3_URI_Handling_Function_Properties\15.1.3.1_decodeURI\S15.1.3.1_A1.10_T1.js", includes);
             //return;
 
@@ -175,13 +179,66 @@ namespace Sputnik
                 EnumerateScripts(allPaths, dirPath);
         }
 
+        private static AppDomain appDomain;
+
+        private class ScriptEngineWrapper : MarshalByRefObject
+        {
+            public ScriptEngineWrapper()
+            {
+                this.Engine = new ScriptEngine();
+                this.Engine.CompatibilityMode = CompatibilityMode.ECMAScript3;
+                //this.Engine.EnableDebugging = true;
+            }
+
+            public ScriptEngine Engine
+            {
+                get;
+                private set;
+            }
+
+            public void Execute(string code, string path)
+            {
+                if (this.Engine.EnableDebugging == true)
+                {
+                    path = Path.GetTempFileName();
+                    File.WriteAllText(path, code);
+                }
+
+                try
+                {
+
+                    this.Engine.Execute(new StringScriptSource(code, path));
+
+                }
+                finally
+                {
+                    if (this.Engine.EnableDebugging == true)
+                        System.IO.File.Delete(path);
+                }
+            }
+        }
+
         public static void ExecuteTest(string path, Dictionary<string, string> includes)
         {
             StartTest(path);
 
-            var engine = new ScriptEngine();
-            engine.CompatibilityMode = CompatibilityMode.ECMAScript3;
-            //engine.EnableDebugging = true;
+            if (appDomain == null)
+            {
+                // Create an AppDomain with limited permissions.
+                var e = new System.Security.Policy.Evidence();
+                e.AddHostEvidence(new System.Security.Policy.Zone(System.Security.SecurityZone.Internet));
+                appDomain = AppDomain.CreateDomain(
+                    "Jurassic script domain",
+                    null,
+                    new AppDomainSetup() { ApplicationBase = AppDomain.CurrentDomain.BaseDirectory },
+                    System.Security.SecurityManager.GetStandardSandbox(e));
+            }
+
+            // Create a ScriptEngine instance inside the AppDomain.
+            var engineHandle = Activator.CreateInstanceFrom(appDomain, typeof(ScriptEngineWrapper).Assembly.CodeBase, typeof(ScriptEngineWrapper).FullName);
+            var engine = (ScriptEngineWrapper)engineHandle.Unwrap();
+            if (System.Runtime.Remoting.RemotingServices.IsTransparentProxy(engine) == false)
+                throw new InvalidOperationException("Script engine not operating within the sandbox.");
 
             // Read the contents of the javascript file.
             var content = StripHeader(File.ReadAllText(path));
@@ -200,16 +257,10 @@ namespace Sputnik
             // Include framework.js by default.
             content = includes["framework.js"] + content;
 
-            if (engine.EnableDebugging == true)
-            {
-                path = Path.GetTempFileName();
-                File.WriteAllText(path, content);
-            }
-
             try
             {
                 // Execute the test file.
-                engine.Execute(new StringScriptSource(content, path));
+                engine.Execute(content, path);
 
                 if (isNegativeTest == true)
                     TestFailed(path, "Test was expected to fail");
@@ -243,7 +294,7 @@ namespace Sputnik
             //{
             //    if (Console.CursorLeft != 0)
             //        Console.WriteLine();
-            //    Console.Write("Executing {0}... ", Path.GetFileName(path));
+                Console.WriteLine("Executing {0}... ", Path.GetFileName(path));
             //}
         }
 

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Jurassic
 {
     /// <summary>
     /// Represents a wrapper for javascript error objects.
     /// </summary>
+    [Serializable]
     public class JavaScriptException : Exception
     {
 
@@ -71,6 +73,33 @@ namespace Jurassic
 
 
 
+        //     SERIALIZATION
+        //_________________________________________________________________________________________
+
+#if !SILVERLIGHT
+
+        /// <summary>
+        /// Initializes a new instance of the JavaScriptException class with serialized data.
+        /// </summary>
+        /// <param name="info"> The SerializationInfo that holds the serialized object data about
+        /// the exception being thrown. </param>
+        /// <param name="context"> The StreamingContext that contains contextual information about
+        /// the source or destination. </param>
+        protected JavaScriptException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+            // State cannot be restored here because there is no way to serialize it without
+            // falling afoul of .NET 4 security restrictions (Exception.GetObjectData is marked
+            // as SecurityCritical).  The recommended workaround is to implement the
+            // ISafeSerializationData interface, but since this library isn't targeting .NET 4
+            // that doesn't work either!  Instead, we store the state in the Data dictionary
+            // and let the Exception class serialize and deserialize everything.
+        }
+
+#endif
+
+
+
         //     .NET ACCESSOR PROPERTIES
         //_________________________________________________________________________________________
 
@@ -79,8 +108,8 @@ namespace Jurassic
         /// </summary>
         public object ErrorObject
         {
-            get;
-            private set;
+            get { return this.Data["ErrorObject"]; }
+            private set { this.Data["ErrorObject"] = value; }
         }
 
         /// <summary>
@@ -102,8 +131,8 @@ namespace Jurassic
         /// </summary>
         public int LineNumber
         {
-            get;
-            private set;
+            get { return (int)this.Data["LineNumber"]; }
+            private set { this.Data["LineNumber"] = value; }
         }
 
         /// <summary>
@@ -112,8 +141,8 @@ namespace Jurassic
         /// </summary>
         public string SourcePath
         {
-            get;
-            private set;
+            get { return (string)this.Data["SourcePath"]; }
+            private set { this.Data["SourcePath"] = value; }
         }
 
 
