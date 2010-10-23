@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript Object object.
     /// </summary>
+    [Serializable]
     public class ObjectConstructor : ClrFunction
     {
         

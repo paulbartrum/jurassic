@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Converts JSON text into a series of tokens.
     /// </summary>
-    internal class JSONLexer
+    internal sealed class JSONLexer
     {
         private ScriptEngine engine;
         private TextReader reader;

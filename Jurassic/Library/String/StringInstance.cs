@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the JavaScript string object.
     /// </summary>
+    [Serializable]
     public class StringInstance : ObjectInstance
     {
         private string value;

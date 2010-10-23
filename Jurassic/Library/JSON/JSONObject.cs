@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in JSON object.
     /// </summary>
+    [Serializable]
     public class JSONObject : ObjectInstance
     {
 

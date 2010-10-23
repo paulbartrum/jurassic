@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript Array object.
     /// </summary>
+    [Serializable]
     public class ArrayConstructor : ClrFunction
     {
 

@@ -7,8 +7,10 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a JavaScript function implemented in javascript.
     /// </summary>
+    [Serializable]
     public class UserDefinedFunction : FunctionInstance
     {
+        [NonSerialized]
         private FunctionDelegate body;
 
 
@@ -22,19 +24,26 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="name"> The name of the function. </param>
         /// <param name="argumentNames"> The names of the arguments. </param>
-        /// <param name="body"> The source code for the body of the function. </param>
-        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, string body)
+        /// <param name="bodyText"> The source code for the body of the function. </param>
+        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, string bodyText)
             : base(prototype)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (argumentNames == null)
+                throw new ArgumentNullException("argumentNames");
+            if (bodyText == null)
+                throw new ArgumentNullException("bodyText");
+
             // Set up a new function scope.
             var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), name, argumentNames);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentNames, body, new CompilerOptions());
+            var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentNames, bodyText, new CompilerOptions());
             context.GenerateCode();
 
             // Create a new user defined function.
-            Init(name, argumentNames, this.Engine.CreateGlobalScope(), (FunctionDelegate)context.CompiledDelegate, context.StrictMode, true);
+            Init(name, argumentNames, this.Engine.CreateGlobalScope(), bodyText, (FunctionDelegate)context.CompiledDelegate, context.StrictMode, true);
         }
 
         /// <summary>
@@ -44,12 +53,13 @@ namespace Jurassic.Library
         /// <param name="name"> The name of the function. </param>
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="parentScope"> The scope at the point the function is declared. </param>
+        /// <param name="bodyText"> The source code for the function body. </param>
         /// <param name="body"> A delegate which represents the body of the function. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
-        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body, bool strictMode)
+        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, FunctionDelegate body, bool strictMode)
             : base(prototype)
         {
-            Init(name, argumentNames, parentScope, body, strictMode, true);
+            Init(name, argumentNames, parentScope, bodyText, body, strictMode, true);
         }
 
         /// <summary>
@@ -72,7 +82,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             var body = new FunctionDelegate((engine, scope, functionObject, thisObject, argumentValues) => Undefined.Value);
-            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), body, true, false);
+            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), "return undefined", body, true, false);
         }
 
         /// <summary>
@@ -81,21 +91,25 @@ namespace Jurassic.Library
         /// <param name="name"> The name of the function. </param>
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="parentScope"> The scope at the point the function is declared. </param>
+        /// <param name="bodyText"> The source code for the function body. </param>
         /// <param name="body"> A delegate which represents the body of the function. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
         /// <param name="hasInstancePrototype"> <c>true</c> if the function should have a valid
         /// "prototype" property; <c>false</c> if the "prototype" property should be <c>null</c>. </param>
-        private void Init(string name, IList<string> argumentNames, Scope parentScope, FunctionDelegate body, bool strictMode, bool hasInstancePrototype)
+        private void Init(string name, IList<string> argumentNames, Scope parentScope, string bodyText, FunctionDelegate body, bool strictMode, bool hasInstancePrototype)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
             if (argumentNames == null)
                 throw new ArgumentNullException("argumentNames");
+            if (bodyText == null)
+                throw new ArgumentNullException("bodyText");
             if (body == null)
                 throw new ArgumentNullException("body");
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope");
             this.ArgumentNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(argumentNames);
+            this.BodyText = bodyText;
             this.body = body;
             this.ParentScope = parentScope;
             this.StrictMode = strictMode;
@@ -149,7 +163,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the source code for the body of the function.
         /// </summary>
-        public string Body
+        public string BodyText
         {
             get;
             private set;
@@ -168,6 +182,15 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
+            if (this.body == null)
+            {
+                // Compile the function.
+                var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), this.Name, this.ArgumentNames);
+                var functionGenerator = new FunctionMethodGenerator(this.Engine, scope, this.Name, this.ArgumentNames, this.BodyText, new CompilerOptions());
+                functionGenerator.GenerateCode();
+                this.body = (FunctionDelegate)functionGenerator.CompiledDelegate;
+            }
+
             // Call the function.
             return this.body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
         }
@@ -178,7 +201,7 @@ namespace Jurassic.Library
         /// <returns> A string representing this object. </returns>
         public override string ToString()
         {
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.Body);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.BodyText);
         }
     }
 }

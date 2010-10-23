@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an implementation of the Firebug API using the standard console.
     /// </summary>
+    [Serializable]
     internal class StandardConsoleOutput : IFirebugConsoleOutput
     {
         private int currentIndentation;

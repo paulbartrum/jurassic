@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a JavaScript function.
     /// </summary>
+    [Serializable]
     public abstract class FunctionInstance : ObjectInstance
     {
 
@@ -46,7 +47,7 @@ namespace Jurassic.Library
             {
                 // See 13.2.2
                 var prototype = this["prototype"] as ObjectInstance;
-                if (prototype == null)
+                if (prototype == null && this != this.Engine.Object)
                     return this.Engine.Object.InstancePrototype;
                 return prototype;
             }

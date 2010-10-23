@@ -71,6 +71,10 @@ namespace Sputnik
             {
             };
 
+            // Set the DeserializationEnvironment so any JavaScriptExceptions can be serialized
+            // accross the AppDomain boundary.
+            ScriptEngine.DeserializationEnvironment = new ScriptEngine();
+
             //ExecuteTest(@"");
             //return;
 
@@ -109,26 +113,56 @@ namespace Sputnik
                 EnumerateScripts(allPaths, dirPath);
         }
 
-        public class ES5Harness : ObjectInstance
+        //public class ScriptEngineWrapper : MarshalByRefObject
+        //{
+        //    private ScriptEngine scriptEngine;
+
+        //    public ScriptEngineWrapper()
+        //    {
+        //        this.scriptEngine = new ScriptEngine();
+        //    }
+
+        //    public void Execute(string script)
+        //    {
+        //        this.scriptEngine.Execute(script);
+        //        GC.Collect();
+        //    }
+        //}
+
+        private static AppDomain appDomain;
+
+        private class ScriptEngineWrapper : MarshalByRefObject
         {
-            private List<ObjectInstance> registeredTests;
-
-            public ES5Harness(ScriptEngine engine)
-                : base(engine)
+            public ScriptEngineWrapper()
             {
-                this.PopulateFunctions();
-                this.registeredTests = new List<ObjectInstance>();
+                this.Engine = new ScriptEngine();
             }
 
-            public IEnumerable<ObjectInstance> RegisteredTests
+            public ScriptEngine Engine
             {
-                get { return this.registeredTests; }
+                get;
+                private set;
             }
 
-            [JSFunction(Name = "registerTest")]
-            public void RegisterTest(ObjectInstance obj)
+            public void Execute(string code, string path)
             {
-                this.registeredTests.Add(obj);
+                if (this.Engine.EnableDebugging == true)
+                {
+                    path = Path.GetTempFileName();
+                    File.WriteAllText(path, code);
+                }
+
+                try
+                {
+
+                    this.Engine.Execute(new StringScriptSource(code, path));
+
+                }
+                finally
+                {
+                    if (this.Engine.EnableDebugging == true)
+                        System.IO.File.Delete(path);
+                }
             }
         }
 
@@ -136,29 +170,45 @@ namespace Sputnik
         {
             StartTest(path);
 
-            var engine = new ScriptEngine();
+            if (appDomain == null)
+            {
+                // Create an AppDomain with limited permissions.
+                var e = new System.Security.Policy.Evidence();
+                e.AddHostEvidence(new System.Security.Policy.Zone(System.Security.SecurityZone.Internet));
+                appDomain = AppDomain.CreateDomain(
+                    "Jurassic script domain",
+                    null,
+                    new AppDomainSetup() { ApplicationBase = AppDomain.CurrentDomain.BaseDirectory },
+                    System.Security.SecurityManager.GetStandardSandbox(e));
+            }
 
-            // Create a new ES5Harness object (used to register tests).
-            var harness = new ES5Harness(engine);
-            engine.SetGlobalValue("ES5Harness", harness);
-
-            // Create the fnExists helper function.
+            // Create a ScriptEngine instance inside the AppDomain.
+            var engineHandle = Activator.CreateInstanceFrom(appDomain, typeof(ScriptEngineWrapper).Assembly.CodeBase, typeof(ScriptEngineWrapper).FullName);
+            var engine = (ScriptEngineWrapper)engineHandle.Unwrap();
+            if (System.Runtime.Remoting.RemotingServices.IsTransparentProxy(engine) == false)
+                throw new InvalidOperationException("Script engine not operating within the sandbox.");
+            
             engine.Execute(@"
+                // Create the ES5Harness.registerTest function.
+                var _registeredTests = [];
+                ES5Harness = {};
+                ES5Harness.registerTest = function(test) { _registeredTests.push(test) };
+
+                // Create the fnExists helper function.
                 function fnExists() {
                     for (var i=0; i<arguments.length; i++) {
                         if (typeof(arguments[i]) !== ""function"") return false;
                     }
                     return true;
-                }");
+                }
 
-            // Create the fnSupportsStrict helper function.
-            engine.Execute(@"function fnSupportsStrict() { return true; }");
+                // Create the fnSupportsStrict helper function.
+                function fnSupportsStrict() { return true; }
 
-            // Create the fnGlobalObject helper function.
-            engine.Execute(@"function fnGlobalObject() { return (function () {return this}).call(null); }");
+                // Create the fnGlobalObject helper function.
+                function fnGlobalObject() { return (function () {return this}).call(null); }
 
-            // Create the compareArray, compareValues and isSubsetOf helper functions.
-            engine.Execute(@"
+                // Create the compareArray, compareValues and isSubsetOf helper functions.
                 function compareArray(aExpected, aActual) {
                   if (aActual.length != aExpected.length) {
                     return false;
@@ -207,40 +257,31 @@ namespace Sputnik
                   }
 
                   return true;
-                }");
+                }
 
-            // One test uses "window" as a synonym for the global object.
-            engine.SetGlobalValue("window", engine.Global);
+                // One test uses 'window' as a synonym for the global object.
+                window = this", null);
+
+            // Load the contents of the file.
+            var fileContents = File.ReadAllText(path, System.Text.Encoding.Default);
 
             try
             {
                 // Execute the test file.
-                engine.ExecuteFile(path, System.Text.Encoding.Default);
+                engine.Execute(fileContents, path);
 
-                // Run each test that was registered inside the file.
-                foreach (var registeredTest in harness.RegisteredTests)
-                {
-                    // Run the precondition first, if there is one.
-                    object result;
-                    if (registeredTest.HasProperty("precondition"))
+                // Execute the registered tests.
+                engine.Execute(@"
+                    for (var i = 0; i < _registeredTests.length; i ++)
                     {
-                        result = registeredTest.CallMemberFunction("precondition");
-                        if (TypeComparer.StrictEquals(result, true) == false)
+                        if (_registeredTests[i].precondition)
                         {
-                            TestFailed(path, string.Format("Precondition for test '{0}' returned {1} (should return true)", registeredTest["id"], result));
-                            return;
+                            if (_registeredTests[i].precondition() !== true)
+                                throw new Error('Precondition for test ' + _registeredTests[i].id + ' failed');
                         }
-                    }
-
-                    // Run the actual test.
-                    result = registeredTest.CallMemberFunction("test");
-                    if (TypeComparer.Equals(result, true) == false)
-                    {
-                        TestFailed(path, string.Format("Test '{0}' ({1}) returned {2} (should return true)", registeredTest["id"], registeredTest["description"], result));
-                        return;
-                    }
-                }
-
+                        if (_registeredTests[i].test() != true)
+                            throw new Error('Test ' + _registeredTests[i].id + ' failed');
+                    }", null);
             }
             catch (JavaScriptException ex)
             {
@@ -262,7 +303,7 @@ namespace Sputnik
             //{
             //    if (Console.CursorLeft != 0)
             //        Console.WriteLine();
-            //    Console.Write("Executing {0}... ", Path.GetFileName(path));
+            //    Console.WriteLine("Executing {0}... ", Path.GetFileName(path));
             //}
         }
 

@@ -24,6 +24,19 @@ namespace Jurassic.Compiler
             this.Name = functionName;
             this.ArgumentNames = argumentNames;
             this.BodyRoot = body;
+            if (body is BlockStatement)
+            {
+                var result = new System.Text.StringBuilder();
+                foreach (var statement in ((BlockStatement)body).Statements)
+                {
+                    if (result.Length > 0)
+                        result.AppendLine();
+                    result.Append(statement.ToString(1));
+                }
+                this.BodyText = result.ToString();
+            }
+            else
+                this.BodyText = body.ToString();
             Validate();
         }
 

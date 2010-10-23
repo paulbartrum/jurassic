@@ -6,6 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript RegExp object.
     /// </summary>
+    [Serializable]
     public class RegExpConstructor : ClrFunction
     {
 

@@ -7,6 +7,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the RegExp object.
     /// </summary>
+    [Serializable]
     public class RegExpInstance : ObjectInstance
     {
         private Regex value;

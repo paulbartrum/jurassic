@@ -30,6 +30,10 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 [assembly: AssemblyVersion("2.0.0.0")]
 
+// The AllowPartiallyTrustedCallersAttribute requires the assembly to be signed with a strong name
+// key.
+[assembly: System.Security.AllowPartiallyTrustedCallers]
+
 // Unit tests and performance tests need access to internal members.
 [assembly: InternalsVisibleTo("Unit Tests")]
 //[assembly: InternalsVisibleTo("Performance")]

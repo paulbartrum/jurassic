@@ -10,14 +10,32 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a single method that the function binder can call.
     /// </summary>
+    [Serializable]
     public class FunctionBinderMethod
+#if !SILVERLIGHT
+        : System.Runtime.Serialization.ISerializable
+#endif
     {
+
+        //     INITIALIZATION
+        //_________________________________________________________________________________________
+
         /// <summary>
         /// Creates a new FunctionBinderMethod instance.
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <param name="flags"> Flags that modify the binding process. </param>
         public FunctionBinderMethod(MethodInfo method, JSFunctionFlags flags = JSFunctionFlags.None)
+        {
+            Init(method, flags);
+        }
+
+        /// <summary>
+        /// Creates a new FunctionBinderMethod instance.
+        /// </summary>
+        /// <param name="method"> The method to call. </param>
+        /// <param name="flags"> Flags that modify the binding process. </param>
+        private void Init(MethodInfo method, JSFunctionFlags flags)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -110,6 +128,85 @@ namespace Jurassic.Library
                     throw new NotImplementedException(string.Format("Unsupported parameter type '{0}'.", type));
             }
         }
+
+
+
+        //     SERIALIZATION
+        //_________________________________________________________________________________________
+
+#if !SILVERLIGHT
+
+        /// <summary>
+        /// Initializes a new instance of the FunctionBinderMethod class with serialized data.
+        /// </summary>
+        /// <param name="info"> The SerializationInfo that holds the serialized object data about
+        /// the exception being thrown. </param>
+        /// <param name="context"> The StreamingContext that contains contextual information about
+        /// the source or destination. </param>
+        protected FunctionBinderMethod(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        {
+            // Get the type which declared the method.
+            var typeName = info.GetString("methodType");
+            var type = Type.GetType(typeName, true, false);
+
+            // Get the method name.
+            var methodName = info.GetString("methodName");
+
+            // Get the method attributes and convert it into binding flags.
+            var attributes = (MethodAttributes)info.GetInt32("methodAttributes");
+            BindingFlags bindingFlags = 0;
+            if ((attributes & MethodAttributes.Public) != 0)
+                bindingFlags |= BindingFlags.Public;
+            else
+                bindingFlags |= BindingFlags.NonPublic;
+            if ((attributes & MethodAttributes.Static) != 0)
+                bindingFlags |= BindingFlags.Static;
+            else
+                bindingFlags |= BindingFlags.Instance;
+
+            // Get the argument types.
+            var argumentTypeNames = (string[])info.GetValue("methodArgumentTypes", typeof(string[]));
+            var argumentTypes = new Type[argumentTypeNames.Length];
+            for (int i = 0; i < argumentTypeNames.Length; i ++)
+                argumentTypes[i] = Type.GetType(argumentTypeNames[i], true, false); 
+
+            // Resolve the above information into a method.
+            var method = type.GetMethod(methodName, bindingFlags, null, argumentTypes, null);
+
+            // Restore the flags.
+            var flags = (JSFunctionFlags)info.GetInt32("flags");
+
+            // Initialize the object.
+            Init(method, flags);
+        }
+
+        /// <summary>
+        /// Sets the SerializationInfo with information about the exception.
+        /// </summary>
+        /// <param name="info"> The SerializationInfo that holds the serialized object data about
+        /// the exception being thrown. </param>
+        /// <param name="context"> The StreamingContext that contains contextual information about
+        /// the source or destination. </param>
+        public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        {
+            // Save the object state.
+            info.AddValue("methodType", this.Method.DeclaringType.AssemblyQualifiedName);
+            info.AddValue("methodName", this.Method.Name);
+            info.AddValue("methodAttributes", this.Method.Attributes);
+            var parameters = this.Method.GetParameters();
+            var argumentTypeNames = new string[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+                argumentTypeNames[i] = parameters[i].ParameterType.AssemblyQualifiedName;
+            info.AddValue("methodArgumentTypes", argumentTypeNames);
+            info.AddValue("flags", this.Flags);
+        }
+
+#endif
+
+
+
+        //     PROPERTIES
+        //_________________________________________________________________________________________
 
         /// <summary>
         /// Gets a reference to a method.

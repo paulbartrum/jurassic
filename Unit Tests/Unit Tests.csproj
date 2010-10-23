@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\BigIntegerTests.cs" />
+    <Compile Include="Core\SerializationTests.cs" />
     <Compile Include="Core\ScriptEngineTests.cs" />
     <Compile Include="Core\DocumentationSamples.cs" />
     <Compile Include="Core\TypeComparerTests.cs" />

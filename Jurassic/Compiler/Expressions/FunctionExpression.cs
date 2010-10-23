@@ -69,6 +69,9 @@ namespace Jurassic.Compiler
             // scope
             EmitHelpers.LoadScope(generator);
 
+            // bodyText
+            generator.LoadString(this.Context.BodyText);
+
             // body
             generator.LoadNull();
             generator.LoadMethodPointer(this.Context.GeneratedMethod);

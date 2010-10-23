@@ -7,8 +7,10 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a JavaScript function that throws a type error.
     /// </summary>
-    internal class ThrowTypeErrorFunction : FunctionInstance
+    [Serializable]
+    internal sealed class ThrowTypeErrorFunction : FunctionInstance
     {
+        [NonSerialized]
         private FunctionDelegate body;
 
 
@@ -30,6 +32,30 @@ namespace Jurassic.Library
                     throw new JavaScriptException(this.Engine, "TypeError", "It is illegal to access the 'callee' or 'caller' property in strict mode");
                 });
         }
+
+
+
+        //     SERIALIZATION
+        //_________________________________________________________________________________________
+
+#if !SILVERLIGHT
+
+        /// <summary>
+        /// Runs when the entire object graph has been deserialized.
+        /// </summary>
+        /// <remarks> Derived classes must call the base class implementation. </remarks>
+        protected override void OnDeserializationCallback()
+        {
+            // Call the base class.
+            base.OnDeserializationCallback();
+
+            this.body = new FunctionDelegate((engine, scope, thisObject, functionObject, argumentValues) =>
+            {
+                throw new JavaScriptException(this.Engine, "TypeError", "It is illegal to access the 'callee' or 'caller' property in strict mode");
+            });
+        }
+
+#endif
 
 
 
