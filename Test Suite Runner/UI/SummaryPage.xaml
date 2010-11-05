@@ -5,9 +5,10 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
       FontFamily="Calibri" FontSize="16"
-      Title="Results Summary"
-      xmlns:my="clr-namespace:Test_Suite_Runner"
-      d:DataContext="{d:DesignInstance Type=my:DesignTimeSuiteRunner, IsDesignTimeCreatable=True}">
+      Title="Results Summary">
+
+    <!-- xmlns:my="clr-namespace:Test_Suite_Runner"
+      d:DataContext="{d:DesignInstance Type=my:DesignTimeSuiteRunner, IsDesignTimeCreatable=True}" -->
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>
