@@ -100,6 +100,16 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets or sets a string builder that will be appended with characters as they are read
+        /// from the input stream.
+        /// </summary>
+        public StringBuilder InputCaptureStringBuilder
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Reads the next character from the input stream.
         /// </summary>
         /// <returns> The character that was read, or <c>-1</c> if the end of the input stream has
@@ -107,7 +117,10 @@ namespace Jurassic.Compiler
         private int ReadNextChar()
         {
             this.columnNumber++;
-            return this.reader.Read();
+            int c = this.reader.Read();
+            if (this.InputCaptureStringBuilder != null && c >= 0)
+                this.InputCaptureStringBuilder.Append((char)c);
+            return c;
         }
 
         // Needed to disambiguate regular expressions.

@@ -8,6 +8,7 @@ namespace Jurassic
     /// <summary>
     /// Represents the JavaScript "null" type and provides the one and only instance of that type.
     /// </summary>
+    [Serializable]
     public sealed class Null
 #if !SILVERLIGHT
         : System.Runtime.Serialization.ISerializable

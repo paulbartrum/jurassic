@@ -1,0 +1,31 @@
+﻿<Page x:Class="Test_Suite_Runner.UI.StartPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+      FontFamily="Calibri" FontSize="16"
+      Title="Start Page">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" FontFamily="Arial Narrow" FontSize="26" Foreground="DarkBlue">Jurassic Test Suite Runner</TextBlock>
+        <Button Name="startButton" Grid.Row="1" Margin="16" FontSize="22" Click="startButton_Click">Start</Button>
+        <GroupBox Grid.Row="2" Header="Tests to run" IsEnabled="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <RadioButton Name="allTestsRadioButton" Grid.Row="0" Content="All tests" IsChecked="True" />
+                <RadioButton Name="selectedTestsRadioButton" Grid.Row="1" Content="The tests listed below:" />
+                <ListView Name="selectedTestsListView" Grid.Row="2" IsEnabled="{Binding ElementName=selectedTestsRadioButton, Path=IsChecked}" />
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Page>

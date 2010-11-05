@@ -30,7 +30,7 @@ namespace Jurassic.Compiler
             result.AppendFormat("for ({0} {1} {2})",
                 this.InitStatement == null ? ";" : this.InitStatement.ToString(0),
                 this.ConditionStatement == null ? ";" : this.ConditionStatement.ToString(),
-                this.IncrementStatement == null ? string.Empty : this.IncrementStatement.ToString());
+                this.IncrementStatement == null ? string.Empty : this.Increment.ToString());
             result.AppendLine();
             result.Append(this.Body.ToString(indentLevel + 1));
             return result.ToString();

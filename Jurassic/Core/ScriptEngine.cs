@@ -271,6 +271,7 @@ namespace Jurassic
                         var permission = new System.Security.Permissions.SecurityPermission(
                             System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode);
                         lowPrivilegeEnvironment = !System.Security.SecurityManager.IsGranted(permission);
+                        lowPrivilegeEnvironmentTested = true;
                     }
                 }
                 return lowPrivilegeEnvironment;

@@ -96,6 +96,25 @@ namespace UnitTests
             Assert.AreEqual(false, scriptEngine.Evaluate("Object.isExtensible(_obj4)"));
         }
 
+        [TestMethod]
+        public void SerializeFunction()
+        {
+            // Set up a script engine.
+            var scriptEngine = new ScriptEngine();
+            scriptEngine.Execute(@"function outer(a, b) { function inner() { return a + b; } return inner(); }");
+
+            // Attempt to serialize and then deserialize the function.
+            ScriptEngine.DeserializationEnvironment = scriptEngine;
+            var function = (FunctionInstance)Clone(scriptEngine.GetGlobalValue("outer"));
+
+            // Verify it was deserialized correctly.
+            Assert.AreEqual(11.0, function.Call(null, 5, 6));
+        }
+
+
+
+
+
         // Clone an object using serialization.
         private static object Clone(object objectToSerialize)
         {

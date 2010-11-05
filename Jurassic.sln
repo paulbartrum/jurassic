@@ -17,17 +17,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Performance", "Performance\Performance.csproj", "{C0B52B91-21C0-4669-9B2E-F33838BD7F65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sputnik", "Sputnik\Sputnik.csproj", "{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "es5conform", "es5conform\es5conform.csproj", "{4F79A9C7-39B7-483D-9E61-121ED3E053C6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JurassicSL", "JurassicSL\JurassicSL.csproj", "{55C69A46-6FB0-49DB-9A26-C0C051E58A16}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilverlightREPL", "SilverlightREPL\SilverlightREPL.csproj", "{52D6FCCC-6509-428F-B424-A0872F749970}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test Suite Runner", "Test Suite Runner\Test Suite Runner.csproj", "{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
+		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs01
 		SccLocalPath0 = .
@@ -43,18 +41,15 @@ Global
 		SccProjectUniqueName4 = Performance\\Performance.csproj
 		SccProjectName4 = Performance
 		SccLocalPath4 = Performance
-		SccProjectUniqueName5 = Sputnik\\Sputnik.csproj
-		SccProjectName5 = Sputnik
-		SccLocalPath5 = Sputnik
-		SccProjectUniqueName6 = es5conform\\es5conform.csproj
-		SccProjectName6 = es5conform
-		SccLocalPath6 = es5conform
-		SccProjectUniqueName7 = JurassicSL\\JurassicSL.csproj
-		SccProjectName7 = JurassicSL
-		SccLocalPath7 = JurassicSL
-		SccProjectUniqueName8 = SilverlightREPL\\SilverlightREPL.csproj
-		SccProjectName8 = SilverlightREPL
-		SccLocalPath8 = SilverlightREPL
+		SccProjectUniqueName5 = JurassicSL\\JurassicSL.csproj
+		SccProjectName5 = JurassicSL
+		SccLocalPath5 = JurassicSL
+		SccProjectUniqueName6 = SilverlightREPL\\SilverlightREPL.csproj
+		SccProjectName6 = SilverlightREPL
+		SccLocalPath6 = SilverlightREPL
+		SccProjectUniqueName7 = Test\u0020Suite\u0020Runner\\Test\u0020Suite\u0020Runner.csproj
+		SccProjectName7 = Test\u0020Suite\u0020Runner
+		SccLocalPath7 = Test\u0020Suite\u0020Runner
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,30 +110,6 @@ Global
 		{C0B52B91-21C0-4669-9B2E-F33838BD7F65}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C0B52B91-21C0-4669-9B2E-F33838BD7F65}.Release|x64.ActiveCfg = Release|Any CPU
 		{C0B52B91-21C0-4669-9B2E-F33838BD7F65}.Release|x86.ActiveCfg = Release|Any CPU
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Debug|x64.ActiveCfg = Debug|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Debug|x86.ActiveCfg = Debug|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Debug|x86.Build.0 = Debug|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|Any CPU.ActiveCfg = Release|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|Mixed Platforms.Build.0 = Release|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|x64.ActiveCfg = Release|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|x86.ActiveCfg = Release|x86
-		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|x86.Build.0 = Release|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|x64.ActiveCfg = Debug|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|x86.ActiveCfg = Debug|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|x86.Build.0 = Debug|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|Any CPU.ActiveCfg = Release|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|Mixed Platforms.Build.0 = Release|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x64.ActiveCfg = Release|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x86.ActiveCfg = Release|x86
-		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x86.Build.0 = Release|x86
 		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55C69A46-6FB0-49DB-9A26-C0C051E58A16}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -163,6 +134,18 @@ Global
 		{52D6FCCC-6509-428F-B424-A0872F749970}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{52D6FCCC-6509-428F-B424-A0872F749970}.Release|x64.ActiveCfg = Release|Any CPU
 		{52D6FCCC-6509-428F-B424-A0872F749970}.Release|x86.ActiveCfg = Release|Any CPU
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Debug|x64.ActiveCfg = Debug|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Debug|x86.ActiveCfg = Debug|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Debug|x86.Build.0 = Debug|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|Any CPU.ActiveCfg = Release|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|Mixed Platforms.Build.0 = Release|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|x64.ActiveCfg = Release|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|x86.ActiveCfg = Release|x86
+		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
