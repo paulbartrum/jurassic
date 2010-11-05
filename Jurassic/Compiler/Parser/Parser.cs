@@ -1254,6 +1254,11 @@ namespace Jurassic.Compiler
             // Record the start of the function body.
             var startPosition = this.PositionBeforeWhitespace;
 
+            // Since the parser reads one token in advance, start capturing the function body here.
+            var bodyTextBuilder = new System.Text.StringBuilder();
+            var originalBodyTextBuilder = this.lexer.InputCaptureStringBuilder;
+            this.lexer.InputCaptureStringBuilder = bodyTextBuilder;
+
             // Read the start brace.
             this.Expect(PunctuatorToken.LeftBrace);
 
@@ -1270,6 +1275,9 @@ namespace Jurassic.Compiler
             // Transfer state back from the function parser.
             this.nextToken = functionParser.nextToken;
             this.lexer.StrictMode = this.StrictMode;
+            this.lexer.InputCaptureStringBuilder = originalBodyTextBuilder;
+            if (originalBodyTextBuilder != null)
+                originalBodyTextBuilder.Append(bodyTextBuilder);
 
             SourceCodePosition endPosition;
             if (functionType == FunctionType.Expression)
@@ -1293,7 +1301,8 @@ namespace Jurassic.Compiler
             // Create a new function expression.
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
-            var context = new FunctionMethodGenerator(this.engine, scope, functionName, argumentNames, body,
+            var context = new FunctionMethodGenerator(this.engine, scope, functionName, argumentNames,
+                bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body,
                 this.SourcePath, options);
             context.MethodOptimizationHints = functionParser.methodOptimizationHints;
             return new FunctionExpression(context);

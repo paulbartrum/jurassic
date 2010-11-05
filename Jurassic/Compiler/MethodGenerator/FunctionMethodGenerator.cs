@@ -15,28 +15,17 @@ namespace Jurassic.Compiler
         /// <param name="scope"> The function scope. </param>
         /// <param name="name"> The name of the function. </param>
         /// <param name="argumentNames"> The names of the arguments. </param>
+        /// <param name="bodyText"> The source code of the function. </param>
         /// <param name="body"> The root of the abstract syntax tree for the body of the function. </param>
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(ScriptEngine engine, Scope scope, string functionName, IList<string> argumentNames, Statement body, string scriptPath, CompilerOptions options)
+        public FunctionMethodGenerator(ScriptEngine engine, Scope scope, string functionName, IList<string> argumentNames, string bodyText, Statement body, string scriptPath, CompilerOptions options)
             : base(engine, scope, new DummyScriptSource(scriptPath), options)
         {
             this.Name = functionName;
             this.ArgumentNames = argumentNames;
             this.BodyRoot = body;
-            if (body is BlockStatement)
-            {
-                var result = new System.Text.StringBuilder();
-                foreach (var statement in ((BlockStatement)body).Statements)
-                {
-                    if (result.Length > 0)
-                        result.AppendLine();
-                    result.Append(statement.ToString(1));
-                }
-                this.BodyText = result.ToString();
-            }
-            else
-                this.BodyText = body.ToString();
+            this.BodyText = bodyText;
             Validate();
         }
 

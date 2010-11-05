@@ -214,7 +214,7 @@ namespace Jurassic.Compiler
 
                     // Create a dynamic assembly and module.
                     reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
-                        new System.Reflection.AssemblyName("Debug"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
+                        new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
 
                     // Mark the assembly as debuggable.  This must be done before the module is created.
                     var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetConstructor(
