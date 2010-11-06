@@ -32,8 +32,12 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+        public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Generate code for the start of the statement.
+            var statementLocals = new StatementLocals();
+            GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
+
             // Emit the return value.
             if (this.Value == null)
                 EmitHelpers.EmitUndefined(generator);
@@ -49,6 +53,9 @@ namespace Jurassic.Compiler
             // Branch to the end of the function.  Note: the return statement might be branching
             // from inside a try { } or finally { } block to outside.  EmitLongJump() handles this.
             optimizationInfo.EmitLongJump(generator, optimizationInfo.ReturnTarget);
+
+            // Generate code for the end of the statement.
+            GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
         /// <summary>

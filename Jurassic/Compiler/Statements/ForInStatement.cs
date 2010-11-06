@@ -70,6 +70,10 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Generate code for the start of the statement.
+            var statementLocals = new StatementLocals() { NonDefaultBreakStatementBehavior = true, NonDefaultDebugInfoBehavior = true };
+            GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
+
             // Construct a loop expression.
             // var enumerator = TypeUtilities.EnumeratePropertyNames(rhs).GetEnumerator();
             // while (true) {
@@ -81,10 +85,6 @@ namespace Jurassic.Compiler
             //   <body statements>
             // }
             // break-target:
-
-            // Emit debugging information.
-            if (optimizationInfo.DebugDocument != null)
-                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.TargetObjectDebugInfo);
 
             // Call IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
             EmitHelpers.LoadScriptEngine(generator);
@@ -118,12 +118,15 @@ namespace Jurassic.Compiler
             this.Variable.GenerateSet(generator, optimizationInfo, PrimitiveType.String, false);
 
             // Emit the body statement(s).
-            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget, continueTarget, false);
+            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget, continueTarget, labelledOnly: false);
             this.Body.GenerateCode(generator, optimizationInfo);
             optimizationInfo.PopBreakOrContinueInfo();
 
             generator.Branch(continueTarget);
             generator.DefineLabelPosition(breakTarget);
+
+            // Generate code for the end of the statement.
+            GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
         

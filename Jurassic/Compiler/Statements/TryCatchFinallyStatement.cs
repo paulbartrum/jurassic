@@ -69,8 +69,12 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+        public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Generate code for the start of the statement.
+            var statementLocals = new StatementLocals();
+            GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
+
             // Unlike in .NET, in javascript there are no restrictions on what can appear inside
             // try, catch and finally blocks.  The one restriction which causes problems is the
             // inability to jump out of .NET finally blocks.  This is required when break, continue
@@ -181,6 +185,9 @@ namespace Jurassic.Compiler
 
             // Reset the InsideTryCatchOrFinally flag.
             optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
+
+            // Generate code for the end of the statement.
+            GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
         /// <summary>

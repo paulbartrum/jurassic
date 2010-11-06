@@ -61,8 +61,12 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+        public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Generate code for the start of the statement.
+            var statementLocals = new StatementLocals();
+            GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
+
             // Generate code for the condition and coerce to a boolean.
             this.Condition.GenerateCode(generator, optimizationInfo);
             EmitConversion.ToBool(generator, this.Condition.ResultType);
@@ -98,6 +102,9 @@ namespace Jurassic.Compiler
 
             // Define the label at the end of the if statement.
             generator.DefineLabelPosition(endOfEverything);
+
+            // Generate code for the end of the statement.
+            GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
         /// <summary>
