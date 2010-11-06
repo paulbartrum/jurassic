@@ -71,46 +71,60 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Generates CIL for the statement.
+        /// Locals needed by GenerateStartOfStatement() and GenerateEndOfStatement().
+        /// </summary>
+        public class StatementLocals
+        {
+            /// <summary>
+            /// Gets or sets a value that indicates whether the break statement will be handled
+            /// specially by the calling code - this means that GenerateStartOfStatement() and
+            /// GenerateEndOfStatement() do not have to generate code to handle the break
+            /// statement.
+            /// </summary>
+            public bool NonDefaultBreakStatementBehavior;
+
+            /// <summary>
+            /// Gets or sets a value that indicates whether the debugging information will be
+            /// handled specially by the calling code - this means that GenerateStartOfStatement()
+            /// and GenerateEndOfStatement() do not have to set this information.
+            /// </summary>
+            public bool NonDefaultDebugInfoBehavior;
+
+            /// <summary>
+            /// Gets or sets a label marking the end of the statement.
+            /// </summary>
+            public ILLabel EndOfStatement;
+
+            /// <summary>
+            /// Gets or sets the number of items on the IL stack at the start of the statement.
+            /// </summary>
+            public int OriginalStackSize;
+        }
+
+        /// <summary>
+        /// Generates CIL for the start of every statement.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        public virtual void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
+        /// <param name="locals"> Variables common to both GenerateStartOfStatement() and GenerateEndOfStatement(). </param>
+        public void GenerateStartOfStatement(ILGenerator generator, OptimizationInfo optimizationInfo, StatementLocals locals)
         {
 #if DEBUG && !SILVERLIGHT
             // Statements must not produce or consume any values on the stack.
-            int originalStackSize = 0;
             if (generator is DynamicILGenerator)
-                originalStackSize = ((DynamicILGenerator)generator).StackSize;
+                locals.OriginalStackSize = ((DynamicILGenerator)generator).StackSize;
 #endif
 
-            ILLabel endOfStatement = null;
-            if (this.HasLabels == true)
+            if (locals.NonDefaultBreakStatementBehavior == false && this.HasLabels == true)
             {
                 // Set up the information needed by the break statement.
-                endOfStatement = generator.CreateLabel();
-                optimizationInfo.PushBreakOrContinueInfo(this.Labels, endOfStatement, null, true);
+                locals.EndOfStatement = generator.CreateLabel();
+                optimizationInfo.PushBreakOrContinueInfo(this.Labels, locals.EndOfStatement, null, labelledOnly: true);
             }
 
             // Emit debugging information.
-            if (optimizationInfo.DebugDocument != null && this.DebugInfo != null)
+            if (locals.NonDefaultDebugInfoBehavior == false && optimizationInfo.DebugDocument != null && this.DebugInfo != null)
                 generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.DebugInfo);
-
-            // Generate the code.
-            this.GenerateCodeCore(generator, optimizationInfo);
-
-            if (this.HasLabels == true)
-            {
-                // Revert the information needed by the break statement.
-                generator.DefineLabelPosition(endOfStatement);
-                optimizationInfo.PopBreakOrContinueInfo();
-            }
-
-#if DEBUG && !SILVERLIGHT
-            // Check that the stack count is zero.
-            if (generator is DynamicILGenerator && ((DynamicILGenerator)generator).StackSize != originalStackSize)
-                throw new InvalidOperationException("Encountered unexpected stack imbalance.");
-#endif
         }
 
         /// <summary>
@@ -118,8 +132,28 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        protected virtual void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+        public abstract void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo);
+
+        /// <summary>
+        /// Generates CIL for the end of every statement.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        /// <param name="locals"> Variables common to both GenerateStartOfStatement() and GenerateEndOfStatement(). </param>
+        public void GenerateEndOfStatement(ILGenerator generator, OptimizationInfo optimizationInfo, StatementLocals locals)
         {
+            if (locals.NonDefaultBreakStatementBehavior == false && this.HasLabels == true)
+            {
+                // Revert the information needed by the break statement.
+                generator.DefineLabelPosition(locals.EndOfStatement);
+                optimizationInfo.PopBreakOrContinueInfo();
+            }
+
+#if DEBUG && !SILVERLIGHT
+            // Check that the stack count is zero.
+            if (generator is DynamicILGenerator && ((DynamicILGenerator)generator).StackSize != locals.OriginalStackSize)
+                throw new InvalidOperationException("Encountered unexpected stack imbalance.");
+#endif
         }
 
         /// <summary>

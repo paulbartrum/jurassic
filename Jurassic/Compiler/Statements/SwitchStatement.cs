@@ -44,9 +44,9 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // Emit debugging information.
-            if (optimizationInfo.DebugDocument != null)
-                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.DebugInfo);
+            // Generate code for the start of the statement.
+            var statementLocals = new StatementLocals() { NonDefaultBreakStatementBehavior = true };
+            GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
 
             // We need a label for each case clause and one for the default case.
             var jumpTargets = new ILLabel[this.CaseClauses.Count];
@@ -99,7 +99,7 @@ namespace Jurassic.Compiler
                 generator.DefineLabelPosition(jumpTargets[i]);
 
                 // Set up the information needed by the break statement.
-                optimizationInfo.PushBreakOrContinueInfo(this.Labels, endOfSwitch, null, false);
+                optimizationInfo.PushBreakOrContinueInfo(this.Labels, endOfSwitch, null, labelledOnly: false);
 
                 // Emit the case clause statements.
                 foreach (var statement in this.CaseClauses[i].BodyStatements)
@@ -114,6 +114,9 @@ namespace Jurassic.Compiler
 
             // Release the switch value variable for use elsewhere.
             generator.ReleaseTemporaryVariable(switchValue);
+
+            // Generate code for the end of the statement.
+            GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
         /// <summary>

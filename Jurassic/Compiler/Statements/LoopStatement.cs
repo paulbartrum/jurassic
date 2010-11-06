@@ -209,6 +209,10 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // Generate code for the start of the statement.
+            var statementLocals = new StatementLocals() { NonDefaultBreakStatementBehavior = true, NonDefaultDebugInfoBehavior = true };
+            GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
+
             // <initializer>
             // if (<condition>)
             // {
@@ -297,7 +301,7 @@ namespace Jurassic.Compiler
             }
 
             // Emit the loop body.
-            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget2, continueTarget, false);
+            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget2, continueTarget, labelledOnly: false);
             this.Body.GenerateCode(generator, optimizationInfo);
             optimizationInfo.PopBreakOrContinueInfo();
 
@@ -328,6 +332,9 @@ namespace Jurassic.Compiler
 
             // Define the end of the loop (actually just after).
             generator.DefineLabelPosition(breakTarget1);
+
+            // Generate code for the end of the statement.
+            GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
     }
 
