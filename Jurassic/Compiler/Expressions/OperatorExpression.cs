@@ -199,20 +199,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Visits every node in the expression.
-        /// </summary>
-        /// <param name="visitor"> The visitor callback. </param>
-        public override void Visit(Action<Expression> visitor)
-        {
-            // Visit this node.
-            visitor(this);
-
-            // Visit each child.
-            for (int i = 0; i < this.OperandCount; i++)
-                this.operands[i].Visit(visitor);
-        }
-
-        /// <summary>
         /// Converts the expression to a string.
         /// </summary>
         /// <returns> A string representing this expression. </returns>

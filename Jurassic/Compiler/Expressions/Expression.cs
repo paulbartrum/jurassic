@@ -16,15 +16,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Visits every node in the expression.
-        /// </summary>
-        /// <param name="visitor"> The visitor callback. </param>
-        public virtual void Visit(Action<Expression> visitor)
-        {
-            visitor(this);
-        }
-
-        /// <summary>
         /// Generates CIL for the expression.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
