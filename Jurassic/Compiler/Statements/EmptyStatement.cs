@@ -19,15 +19,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Visits every node in the statement.
-        /// </summary>
-        /// <param name="visitor"> The visitor callback. </param>
-        public override void Visit(Action<Statement> visitor)
-        {
-            visitor(this);
-        }
-
-        /// <summary>
         /// Generates CIL for the statement.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
