@@ -50,27 +50,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Visits every node in the statement.
-        /// </summary>
-        /// <param name="visitor"> The visitor callback. </param>
-        public virtual void Visit(Action<Statement> visitor)
-        {
-            visitor(this);
-        }
-
-        /// <summary>
-        /// Optimizes the expression tree.
-        /// </summary>
-        public virtual void Optimize()
-        {
-            Visit(statement =>
-                {
-                    if (statement != this)
-                        statement.Optimize();
-                });
-        }
-
-        /// <summary>
         /// Locals needed by GenerateStartOfStatement() and GenerateEndOfStatement().
         /// </summary>
         public class StatementLocals
