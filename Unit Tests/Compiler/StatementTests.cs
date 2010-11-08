@@ -228,7 +228,6 @@ namespace UnitTests
         public void Switch()
         {
             Assert.AreEqual(5, TestUtils.Evaluate("x = 5; switch (x) { }"));
-            Assert.AreEqual(6, TestUtils.Evaluate("x = 5; switch (x ++) { } x"));
             Assert.AreEqual(6, TestUtils.Evaluate("x = 5; switch (x) { case 5: 6 }"));
             Assert.AreEqual(5, TestUtils.Evaluate("x = 5; switch (x) { case 4: 6 }"));
             Assert.AreEqual(6, TestUtils.Evaluate("x = 5; switch (x) { default: 6 }"));
@@ -242,6 +241,12 @@ namespace UnitTests
 
             // If there identical clauses, pick the first that matches.
             Assert.AreEqual(1, TestUtils.Evaluate("x = 5; switch (x) { case 5: 1; break; case 5: 2; }"));
+
+            // Switch expression is evaluated first, then all the clauses.
+            Assert.AreEqual(6, TestUtils.Evaluate("x = 5; switch (x ++) { } x"));
+            Assert.AreEqual(4, TestUtils.Evaluate("x = 0; switch (x = 1) { case x = 2: x = 3; break; case x = 4: x = 5; } x"));
+            Assert.AreEqual(2, TestUtils.Evaluate("x = 0; switch (x = 1, 2) { case x = 2: break; case x = 4: x = 5; } x"));
+            Assert.AreEqual(3, TestUtils.Evaluate("x = 0; switch (x = 1, 2) { case x = 2: x = 3; break; case x = 4: x = 5; } x"));
 
             // Multiple default clauses are not allowed.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = 5; switch (x) { default: 6; default: 7 }"));
