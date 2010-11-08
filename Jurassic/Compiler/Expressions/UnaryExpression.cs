@@ -63,7 +63,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+        public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Special-case the delete operator.
             if (this.OperatorType == OperatorType.Delete)

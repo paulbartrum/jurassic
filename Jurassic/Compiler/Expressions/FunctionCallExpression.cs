@@ -50,7 +50,7 @@ namespace Jurassic.Compiler
                 get { return PrimitiveType.Any; }
             }
 
-            protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+            public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
             {
                 generator.LoadVariable(this.variable);
             }
@@ -61,7 +61,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        protected override void GenerateCodeCore(ILGenerator generator, OptimizationInfo optimizationInfo)
+        public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Check if this is a direct call to eval().
             if (this.Target is NameExpression && ((NameExpression)this.Target).Name == "eval")
