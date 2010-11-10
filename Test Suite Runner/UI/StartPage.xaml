@@ -7,25 +7,34 @@
       FontFamily="Calibri" FontSize="16"
       Title="Start Page">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" FontFamily="Arial Narrow" FontSize="26" Foreground="DarkBlue">Jurassic Test Suite Runner</TextBlock>
-        <Button Name="startButton" Grid.Row="1" Margin="16" FontSize="22" Click="startButton_Click">Start</Button>
-        <GroupBox Grid.Row="2" Header="Tests to run" IsEnabled="True">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <RadioButton Name="allTestsRadioButton" Grid.Row="0" Content="All tests" IsChecked="True" />
-                <RadioButton Name="selectedTestsRadioButton" Grid.Row="1" Content="The tests listed below:" />
-                <ListView Name="selectedTestsListView" Grid.Row="2" IsEnabled="{Binding ElementName=selectedTestsRadioButton, Path=IsChecked}" />
-            </Grid>
-        </GroupBox>
-    </Grid>
+    <StackPanel Orientation="Vertical">
+
+        <!-- Header image -->
+        <Grid>
+            <Rectangle VerticalAlignment="Top" Height="150">
+                <Rectangle.Fill>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FAFCFF" Offset="0" />
+                        <GradientStop Color="#D5EDFF" Offset="1" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Line X1="0" Y1="150.5" X2="100000" Y2="150.5" Stroke="#0094FF" StrokeThickness="2" />
+            <Image HorizontalAlignment="Center" VerticalAlignment="Top" Source="..\Assets\Header.png" Stretch="None" />
+        </Grid>
+
+        <StackPanel Orientation="Vertical">
+            <GroupBox Header="Options" Width="300" Margin="40" Padding="16">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox Content="Run with Full Trust" IsEnabled="False" IsChecked="True" />
+                    <CheckBox Content="Run with Partial Trust" IsEnabled="False" IsChecked="False" />
+                </StackPanel>
+            </GroupBox>
+
+            <Button Name="startButton" Grid.Row="1" FontSize="22" Click="startButton_Click" Content="Start Running Tests"
+                    Width="250" Style="{StaticResource GreenButton}" />
+        </StackPanel>
+
+    </StackPanel>
+
 </Page>

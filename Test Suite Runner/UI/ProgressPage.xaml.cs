@@ -39,9 +39,6 @@ namespace Test_Suite_Runner.UI
             // Create a new background worker thread.
             this.backgroundThread = new Thread(() =>
             {
-                // Enumerate the tests.
-                this.runner.EnumerateTests();
-
                 // Hook up all the events.
                 this.runner.TestSuiteStarted += (sender2, e2) => this.Dispatcher.BeginInvoke(new EventHandler<EventArgs>(OnTestSuiteStarted), sender2, e2);
                 this.runner.TestSucceeded += (sender2, e2) => this.Dispatcher.BeginInvoke(new EventHandler<TestEventArgs>(OnTestSucceeded), sender2, e2);
@@ -138,7 +135,7 @@ namespace Test_Suite_Runner.UI
         private void cancelButton_Click(object sender, RoutedEventArgs e)
         {
             StopProcessing();
-            this.NavigationService.GoBack();
+            this.NavigationService.Navigate(new StartPage());
         }
 
         /// <summary>

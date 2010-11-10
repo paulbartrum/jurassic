@@ -58,12 +58,19 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Code\DesignTimeSuiteRunner.cs" />
+    <Compile Include="UI\PleaseWait.xaml.cs">
+      <DependentUpon>PleaseWait.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\StartPage.xaml.cs">
       <DependentUpon>StartPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\SummaryPage.xaml.cs">
       <DependentUpon>SummaryPage.xaml</DependentUpon>
     </Compile>
+    <Page Include="UI\PleaseWait.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -115,6 +122,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="Assets\Header Small.pdn" />
+    <Content Include="Assets\Header.pdn" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -136,7 +145,7 @@
     <Resource Include="Assets\error12.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\application.ico" />
+    <Content Include="Assets\application.ico" />
     <None Include="es5conform\chapter07\7.8\7.8.4\7.8.4-1-s.js" />
     <None Include="es5conform\chapter08\8.7\8.7.2\8.7.2-3-1-s.js" />
     <None Include="es5conform\chapter10\10.4\10.4.2\10.4.2-1-1.js" />
@@ -6941,6 +6950,12 @@
     <Folder Include="sputnik\Conformance\15_Native_ECMA_Script_Objects\15.7_Number_Objects\15.7.4_Properties_of_the_Number_Prototype_Object\15.7.4.3_Number.prototype.toLocaleString\" />
     <Folder Include="sputnik\Conformance\15_Native_ECMA_Script_Objects\15.7_Number_Objects\15.7.4_Properties_of_the_Number_Prototype_Object\15.7.4.6_Number.prototype.toExponential\" />
     <Folder Include="sputnik\Conformance\15_Native_ECMA_Script_Objects\15.7_Number_Objects\15.7.4_Properties_of_the_Number_Prototype_Object\15.7.4.7_Number.prototype.toPrecision\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Header.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Header Small.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
