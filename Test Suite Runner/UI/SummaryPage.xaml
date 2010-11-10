@@ -12,6 +12,20 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>
+            <!-- Small header -->
+            <Grid>
+                <Rectangle VerticalAlignment="Top" Height="65">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#FAFCFF" Offset="0" />
+                            <GradientStop Color="#D5EDFF" Offset="1" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+                <Line X1="0" Y1="65.5" X2="100000" Y2="65.5" Stroke="#0094FF" StrokeThickness="2" />
+                <Image HorizontalAlignment="Center" VerticalAlignment="Top" Source="..\Assets\Header Small.png" Stretch="None" />
+            </Grid>
+
             <TextBlock FontFamily="Arial Narrow" FontSize="35" Foreground="DarkBlue">Test Suite Summary</TextBlock>
             <Grid Margin="0,20,0,20">
                 <Grid.ColumnDefinitions>

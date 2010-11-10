@@ -42,7 +42,7 @@ namespace Test_Suite_Runner.UI
         /// <param name="e"></param>
         private void startButton_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new ProgressPage(this.runner));
+            this.NavigationService.Navigate(new PleaseWaitPage(this.runner));
         }
     }
 }
