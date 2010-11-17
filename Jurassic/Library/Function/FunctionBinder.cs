@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using Jurassic;
+using Jurassic.Compiler;
 
 namespace Jurassic.Library
 {
@@ -221,26 +221,29 @@ namespace Jurassic.Library
         private static BinderDelegate CreateSingleMethodBinder(Type[] argumentTypes, FunctionBinderMethod binderMethod)
         {
             // Create a new dynamic method.
-            DynamicMethod dm;
+            System.Reflection.Emit.DynamicMethod dm;
+            ILGenerator generator;
 #if !SILVERLIGHT
             if (ScriptEngine.LowPrivilegeEnvironment == false)
             {
                 // Full trust only - skips visibility checks.
-                dm = new DynamicMethod(
+                dm = new System.Reflection.Emit.DynamicMethod(
                     "Binder",                                                               // Name of the generated method.
                     typeof(object),                                                         // Return type of the generated method.
                     new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },  // Parameter types of the generated method.
                     typeof(FunctionBinder),                                                 // Owner type.
                     true);                                                                  // Skips visibility checks.
+                generator = new DynamicILGenerator(dm);
             }
             else
             {
 #endif
                 // Partial trust / silverlight.
-                dm = new DynamicMethod(
+                dm = new System.Reflection.Emit.DynamicMethod(
                     "Binder",                                                               // Name of the generated method.
                     typeof(object),                                                         // Return type of the generated method.
                     new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) }); // Parameter types of the generated method.
+                generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
 #if !SILVERLIGHT
             }
 #endif
@@ -260,7 +263,7 @@ namespace Jurassic.Library
             //    return thisObject.targetMethod(param1, param2, param3, param4);
             //}
 
-            CreateSingleMethodBinder(argumentTypes, binderMethod, dm.GetILGenerator());
+            CreateSingleMethodBinder(argumentTypes, binderMethod, generator);
 
             // Convert the DynamicMethod to a delegate.
             return (BinderDelegate)dm.CreateDelegate(typeof(BinderDelegate));
@@ -284,21 +287,21 @@ namespace Jurassic.Library
             if (binderMethod.HasEngineParameter)
             {
                 // Load the "engine" parameter passed by the client.
-                il.Emit(OpCodes.Ldarg_0);
+                il.LoadArgument(0);
             }
 
             // Emit the "this" parameter.
             if (binderMethod.HasThisParameter)
             {
                 // Load the "this" parameter passed by the client.
-                il.Emit(OpCodes.Ldarg_1);
+                il.LoadArgument(1);
 
                 bool inheritsFromObjectInstance = typeof(ObjectInstance).IsAssignableFrom(binderMethod.ThisType);
                 if (binderMethod.ThisType.IsClass == true && inheritsFromObjectInstance == false &&
                     binderMethod.ThisType != typeof(string) && binderMethod.ThisType != typeof(object))
                 {
                     // If the "this" object is an unsupported class, pass it through unmodified.
-                    il.Emit(OpCodes.Castclass, binderMethod.ThisType);
+                    il.CastClass(binderMethod.ThisType);
                 }
                 else
                 {
@@ -306,17 +309,18 @@ namespace Jurassic.Library
                     {
                         // If the target "this" object type is not of type object, throw an error if
                         // the value is undefined or null.
-                        il.Emit(OpCodes.Dup);
-                        var temp = il.DeclareLocal(typeof(object));
-                        il.Emit(OpCodes.Stloc_S, temp);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldloc_S, temp);
-                        il.Emit(OpCodes.Ldstr, binderMethod.Name);
-                        il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject, null);
+                        il.Duplicate();
+                        var temp = il.CreateTemporaryVariable(typeof(object));
+                        il.StoreVariable(temp);
+                        il.LoadArgument(0);
+                        il.LoadVariable(temp);
+                        il.LoadString(binderMethod.Name);
+                        il.Call(ReflectionHelpers.TypeUtilities_VerifyThisObject);
+                        il.ReleaseTemporaryVariable(temp);
                     }
 
                     // Convert to the target type.
-                    EmitConversion(il, typeof(object), binderMethod.ThisType);
+                    EmitTypeConversion(il, typeof(object), binderMethod.ThisType);
 
                     if (binderMethod.ThisType != typeof(ObjectInstance) && inheritsFromObjectInstance == true)
                     {
@@ -325,15 +329,12 @@ namespace Jurassic.Library
                         // from ObjectInstance (e.g. FunctionInstance) and the value provided is a different type
                         // (e.g. ArrayInstance).  In this case, throw an exception explaining that the function is
                         // not generic.
-                        var endOfThrowLabel = il.DefineLabel();
-                        il.Emit(OpCodes.Dup);
-                        il.Emit(OpCodes.Brtrue_S, endOfThrowLabel);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldstr, "TypeError");
-                        il.Emit(OpCodes.Ldstr, string.Format("The method '{0}' is not generic", binderMethod.Name));
-                        il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
-                        il.Emit(OpCodes.Throw);
-                        il.MarkLabel(endOfThrowLabel);
+                        var endOfThrowLabel = il.CreateLabel();
+                        il.Duplicate();
+                        il.BranchIfNotNull(endOfThrowLabel);
+                        il.LoadArgument(0);
+                        EmitHelpers.EmitThrow(il, "TypeError", string.Format("The method '{0}' is not generic", binderMethod.Name));
+                        il.DefineLabelPosition(endOfThrowLabel);
                     }
                 }
             }
@@ -347,22 +348,22 @@ namespace Jurassic.Library
                 if (i < argumentTypes.Length)
                 {
                     // Load the argument onto the stack.
-                    il.Emit(OpCodes.Ldarg_2);
-                    il.Emit(OpCodes.Ldc_I4_S, (byte)i);
-                    il.Emit(OpCodes.Ldelem_Ref);
+                    il.LoadArgument(2);
+                    il.LoadInt32(i);
+                    il.LoadArrayElement(typeof(object));
                     if (argumentTypes[i].IsClass == false)
-                        il.Emit(OpCodes.Unbox_Any, argumentTypes[i]);
+                        il.Unbox(argumentTypes[i]);
 
                     if (Attribute.GetCustomAttribute(targetParameter, typeof(JSDoNotConvertAttribute)) == null)
                     {
                         if (argumentTypes[i].IsClass == true)
                         {
                             // Cast the input parameter to the input type (won't verify otherwise).
-                            il.Emit(OpCodes.Castclass, argumentTypes[i]);
+                            il.CastClass(argumentTypes[i]);
                         }
 
                         // Convert the input parameter to the correct type.
-                        EmitConversion(il, argumentTypes[i], targetParameter);
+                        EmitTypeConversion(il, argumentTypes[i], targetParameter);
                     }
                     else
                     {
@@ -370,20 +371,22 @@ namespace Jurassic.Library
                         if (targetParameter.ParameterType != typeof(ObjectInstance))
                             throw new NotImplementedException("[JSDoNotConvert] is only supported for arguments of type ObjectInstance.");
                         
-                        var endOfThrowLabel = il.DefineLabel();
+                        var endOfThrowLabel = il.CreateLabel();
                         if (argumentTypes[i].IsClass == true)
                         {
-                            il.Emit(OpCodes.Isinst, typeof(ObjectInstance));
-                            il.Emit(OpCodes.Dup);
-                            il.Emit(OpCodes.Brtrue_S, endOfThrowLabel);
+                            il.IsInstance(typeof(ObjectInstance));
+                            il.Duplicate();
+                            il.BranchIfNotNull(endOfThrowLabel);
                         }
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldstr, "TypeError");
-                        il.Emit(OpCodes.Ldstr, string.Format("The {1} parameter of {0}() must be an object", binderMethod.Name,
+                        else
+                        {
+                            // A value type obviously cannot be converted to ObjectInstance, but do
+                            // a boxing conversion to fool the stack checker.
+                            il.Box(argumentTypes[i]);
+                        }
+                        EmitHelpers.EmitThrow(il, "TypeError", string.Format("The {1} parameter of {0}() must be an object", binderMethod.Name,
                             i == 0 ? "first" : i == 1 ? "second" : i == 2 ? "third" : string.Format("{0}th", i + 1)));
-                        il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
-                        il.Emit(OpCodes.Throw);
-                        il.MarkLabel(endOfThrowLabel);
+                        il.DefineLabelPosition(endOfThrowLabel);
                     }
                 }
                 else
@@ -398,164 +401,48 @@ namespace Jurassic.Library
             {
                 // Create an array to pass to the ParamArray parameter.
                 var elementType = targetParameters[targetParameters.Length - 1].ParameterType.GetElementType();
-                il.Emit(OpCodes.Ldc_I4, Math.Max(argumentTypes.Length - initialEmitCount, 0));
-                il.Emit(OpCodes.Newarr, elementType);
+                il.LoadInt32(Math.Max(argumentTypes.Length - initialEmitCount, 0));
+                il.NewArray(elementType);
 
                 for (int i = initialEmitCount; i < argumentTypes.Length; i++)
                 {
                     // Emit the array and index.
-                    il.Emit(OpCodes.Dup);
-                    il.Emit(OpCodes.Ldc_I4_S, (byte)(i - initialEmitCount));
+                    il.Duplicate();
+                    il.LoadInt32(i - initialEmitCount);
 
                     // Extract the input parameter and do type conversion as normal.
-                    il.Emit(OpCodes.Ldarg_2);
-                    il.Emit(OpCodes.Ldc_I4_S, (byte)i);
-                    il.Emit(OpCodes.Ldelem_Ref);
+                    il.LoadArgument(2);
+                    il.LoadInt32(i);
+                    il.LoadArrayElement(typeof(object));
                     if (elementType != typeof(object))
                     {
                         // Unbox or cast to the input type.
                         if (argumentTypes[i].IsClass == false)
-                            il.Emit(OpCodes.Unbox_Any, argumentTypes[i]);
+                            il.Unbox(argumentTypes[i]);
                         else
-                            il.Emit(OpCodes.Castclass, argumentTypes[i]);
+                            il.CastClass(argumentTypes[i]);
 
                         // Convert to the target type.
-                        EmitConversion(il, argumentTypes[i], elementType);
+                        EmitTypeConversion(il, argumentTypes[i], elementType);
                     }
 
                     // Store each parameter in the array.
-                    il.Emit(OpCodes.Stelem, elementType);
+                    il.StoreArrayElement(elementType);
                 }
             }
 
             // Emit the call.
-            if (targetMethod.IsStatic == true)
-                il.Emit(OpCodes.Call, targetMethod);
-            else
-                il.Emit(OpCodes.Callvirt, targetMethod);
+            il.Call(targetMethod);
 
             // Convert the return value.
             if (targetReturnParameter.ParameterType == typeof(void))
                 EmitUndefined(il, typeof(object));
             else
-            {
-                if (targetReturnParameter.ParameterType == typeof(uint))
-                {
-                    // Convert a uint return value to a double
-                    il.Emit(OpCodes.Conv_R_Un);
-                    il.Emit(OpCodes.Conv_R8);
-                    EmitConversion(il, typeof(double), typeof(object));
-                }
-                else
-                    EmitConversion(il, targetReturnParameter.ParameterType, typeof(object));
-            }
+                EmitTypeConversion(il, targetReturnParameter.ParameterType, typeof(object));
 
             // End the IL.
-            il.Emit(OpCodes.Ret);
-
-            
+            il.Complete();
         }
-
-        ///// <summary>
-        ///// Creates a delegate with the given type that does parameter conversion as necessary
-        ///// and then calls the given delegate.
-        ///// </summary>
-        ///// <param name="resultingDelegateType"> The type of the resulting delegate. </param>
-        ///// <param name="targetDelegate"> The delegate to call. </param>
-        ///// <returns> A delegate with the given type that does parameter conversion as necessary
-        ///// and then calls the given delegate. </returns>
-        //public static Delegate Create(Type resultingDelegateType, Delegate targetDelegate)
-        //{
-        //    // Make sure a binder is actually required.
-        //    if (resultingDelegateType == targetDelegate.GetType())
-        //        return targetDelegate;
-        //    return Create(resultingDelegateType, targetDelegate.Method);
-        //}
-
-        ///// <summary>
-        ///// Creates a delegate with the given type that does parameter conversion as necessary
-        ///// and then calls the given method.
-        ///// </summary>
-        ///// <param name="resultingDelegateType"> The type of the resulting delegate. </param>
-        ///// <param name="targetMethod"> The method to call. </param>
-        ///// <returns> A delegate with the given type that does parameter conversion as necessary
-        ///// and then calls the given method. </returns>
-        //public static Delegate Create(Type resultingDelegateType, MethodInfo targetMethod)
-        //{
-        //    // Delegate types have an Invoke method containing the relevant parameters.
-        //    MethodInfo adapterInvokeMethod = resultingDelegateType.GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
-        //    if (adapterInvokeMethod == null)
-        //        throw new ArgumentException("The type parameter T must be delegate type.", "T");
-
-        //    // Get the return type and parameter types.
-        //    ParameterInfo adapterReturnParameter = adapterInvokeMethod.ReturnParameter;
-        //    ParameterInfo[] adapterParameters = adapterInvokeMethod.GetParameters();
-
-        //    // Construct an array containing the adapter parameter types.
-        //    // The first value is the delegate to call.
-        //    Type[] adapterParameterTypes = new Type[adapterParameters.Length];
-        //    for (int i = 0; i < adapterParameters.Length; i++)
-        //        adapterParameterTypes[i] = adapterParameters[i].ParameterType;
-
-        //    // Create a new dynamic method.
-        //    DynamicMethod dm = new DynamicMethod(
-        //        "Binder",                                   // Name of the generated method.
-        //        adapterReturnParameter.ParameterType,       // Return type of the generated method.
-        //        adapterParameterTypes,                      // Parameter types of the generated method.
-        //        typeof(FunctionBinder),                     // Owner type.
-        //        true);                                      // Skip visibility checks.
-
-        //    // Here is what we are going to generate.
-        //    //private static bool SampleAdapter(int a, object b, NumberInstance c)
-        //    //{
-        //    //    // Target function signature: int (bool, int, string, object).
-        //    //    bool param1;
-        //    //    int param2;
-        //    //    string param3;
-        //    //    object param4;
-        //    //    param1 = a != 0;
-        //    //    param2 = TypeConverter.ToInt32(b);
-        //    //    param3 = TypeConverter.ToString(c);
-        //    //    param4 = Undefined.Value;
-        //    //    return targetMethod(param1, param2, param3, param4) != 0;
-        //    //}
-
-        //    ILGenerator il = dm.GetILGenerator();
-
-        //    // Get information about the target method.
-        //    ParameterInfo[] targetParameters = targetMethod.GetParameters();
-        //    ParameterInfo targetReturnParameter = targetMethod.ReturnParameter;
-
-        //    // Emit the parameters to the target function.
-        //    for (int i = 0; i < targetParameters.Length; i++)
-        //    {
-        //        if (adapterParameters.Length > i)
-        //        {
-        //            il.Emit(OpCodes.Ldarg_S, i);
-        //            EmitConversion(il, adapterParameters[i].ParameterType, targetParameters[i].ParameterType);
-        //        }
-        //        else
-        //            EmitUndefined(il, targetParameters[i].ParameterType);
-        //    }
-
-        //    // Emit the call.
-        //    il.Emit(OpCodes.Call, targetMethod);
-
-        //    // Convert the return value.
-        //    if (adapterReturnParameter.ParameterType != targetReturnParameter.ParameterType)
-        //    {
-        //        if (targetReturnParameter.ParameterType == typeof(void))
-        //            EmitUndefined(il, adapterReturnParameter.ParameterType);
-        //        else
-        //            EmitConversion(il, targetReturnParameter.ParameterType, adapterReturnParameter.ParameterType);
-        //    }
-
-        //    // End the IL.
-        //    il.Emit(OpCodes.Ret);
-
-        //    // Convert the DynamicMethod to a delegate.
-        //    return dm.CreateDelegate(resultingDelegateType);
-        //}
 
         /// <summary>
         /// Pops the value on the stack, converts it from one type to another, then pushes the
@@ -564,15 +451,15 @@ namespace Jurassic.Library
         /// <param name="il"> The IL generator. </param>
         /// <param name="fromType"> The type to convert from. </param>
         /// <param name="targetParameter"> The type to convert to and the default value, if there is one. </param>
-        private static void EmitConversion(ILGenerator il, Type fromType, ParameterInfo targetParameter)
+        private static void EmitTypeConversion(ILGenerator il, Type fromType, ParameterInfo targetParameter)
         {
             if (fromType == typeof(Undefined))
             {
-                il.Emit(OpCodes.Pop);
+                il.Pop();
                 EmitUndefined(il, targetParameter);
             }
             else
-                EmitConversion(il, fromType, targetParameter.ParameterType);
+                EmitTypeConversion(il, fromType, targetParameter.ParameterType);
         }
 
         /// <summary>
@@ -582,314 +469,27 @@ namespace Jurassic.Library
         /// <param name="il"> The IL generator. </param>
         /// <param name="fromType"> The type to convert from. </param>
         /// <param name="toType"> The type to convert to. </param>
-        private static void EmitConversion(ILGenerator il, Type fromType, Type toType)
+        private static void EmitTypeConversion(ILGenerator il, Type fromType, Type toType)
         {
             // If the source type equals the destination type, then there is nothing to do.
             if (fromType == toType)
                 return;
 
             // Emit for each type of argument we support.
-            if (toType == typeof(bool))
-                EmitConversionToBool(il, fromType);
-            else if (toType == typeof(int))
-                EmitConversionToInt(il, fromType);
-            else if (toType == typeof(double))
-                EmitConversionToDouble(il, fromType);
-            else if (toType == typeof(string))
-                EmitConversionToString(il, fromType);
-            else if (toType == typeof(object))
-                EmitConversionToObject(il, fromType);
+            if (toType == typeof(int))
+                EmitConversion.ToInteger(il, PrimitiveTypeUtilities.ToPrimitiveType(fromType));
             else if (typeof(ObjectInstance).IsAssignableFrom(toType))
-                EmitConversionToObjectInstance(il, fromType, toType);
-            else
-                throw new NotSupportedException(string.Format("Cannot convert to type '{0}'.  Supported types are bool, int, double, string, object and ObjectInstance.", toType.FullName));
-        }
-
-        /// <summary>
-        /// Pops the value on the stack, converts it to a boolean, then pushes the boolean result
-        /// onto the stack.
-        /// </summary>
-        /// <param name="il"> The IL generator. </param>
-        /// <param name="fromType"> The type to convert from. </param>
-        private static void EmitConversionToBool(ILGenerator il, Type fromType)
-        {
-            if (fromType == typeof(Undefined) || fromType == typeof(Null))
             {
-                // Easy case: convert from undefined or null.
-                il.Emit(OpCodes.Pop);
-                il.Emit(OpCodes.Ldc_I4_0);
-            }
-            else if (fromType == typeof(int))
-            {
-                // Easy case: convert from int.
-                // output = input != 0
-                il.Emit(OpCodes.Ldc_I4_0);
-                il.Emit(OpCodes.Cgt_Un);
-            }
-            else if (fromType == typeof(double))
-            {
-                // Easy case: convert from double.
-                // output = input != 0 && input == input;
-
-                // input != 0
-                var temp = il.DeclareLocal(fromType);   // }
-                il.Emit(OpCodes.Stloc_S, temp);         // } Needed for return values but not for parameters (can use ldarg instead).
-                il.Emit(OpCodes.Ldloc_S, temp);         // }
-                il.Emit(OpCodes.Ldc_R8, 0.0);
-                il.Emit(OpCodes.Ceq);
-                il.Emit(OpCodes.Ldc_I4_0);
-                il.Emit(OpCodes.Ceq);
-
-                // input == input
-                il.Emit(OpCodes.Ldloc_S, temp);
-                il.Emit(OpCodes.Dup);
-                il.Emit(OpCodes.Ceq);
-
-                // &&
-                il.Emit(OpCodes.Ceq);
-            }
-            else if (fromType == typeof(string))
-            {
-                // Easy case: convert from string or StringBuilder.
-                // output = input != null && input.Length > 0
-
-                // input != null
-                var temp = il.DeclareLocal(fromType);   // }
-                il.Emit(OpCodes.Stloc_S, temp);         // } Needed for return values but not for parameters (can use ldarg instead).
-                il.Emit(OpCodes.Ldloc_S, temp);         // }
-                il.Emit(OpCodes.Ldnull);
-                il.Emit(OpCodes.Cgt_Un);
-
-                // Short circuit if input == null.
-                var shortCircuitLabel = il.DefineLabel();
-                il.Emit(OpCodes.Dup);
-                il.Emit(OpCodes.Brfalse_S, shortCircuitLabel);
-
-                // input.Length > 0
-                il.Emit(OpCodes.Pop);
-                il.Emit(OpCodes.Ldloc_S, temp);
-                il.Emit(OpCodes.Callvirt, ReflectionHelpers.String_Length);
-                il.Emit(OpCodes.Ldc_I4_0);
-                il.Emit(OpCodes.Cgt);
-
-                // Define short circuit label.
-                il.MarkLabel(shortCircuitLabel);
+                EmitConversion.Convert(il, PrimitiveTypeUtilities.ToPrimitiveType(fromType), PrimitiveType.Object);
+                if (toType != typeof(ObjectInstance))
+                {
+                    // Convert to null if the from type isn't compatible with the to type.
+                    // For example, if the target type is FunctionInstance and the from type is ArrayInstance, then pass null.
+                    il.IsInstance(toType);
+                }
             }
             else
-            {
-                // Convert from any other type: call TypeConverter.ToBoolean()
-                // output = TypeConverter.ToBoolean(input)
-                if (fromType.IsValueType == true)
-                    il.Emit(OpCodes.Box, fromType);
-                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToBoolean);
-            }
-        }
-
-        /// <summary>
-        /// Pops the value on the stack, converts it to an integer, then pushes the integer result
-        /// onto the stack.
-        /// </summary>
-        /// <param name="il"> The IL generator. </param>
-        /// <param name="fromType"> The type to convert from. </param>
-        private static void EmitConversionToInt(ILGenerator il, Type fromType)
-        {
-            if (fromType == typeof(Undefined) || fromType == typeof(Null))
-            {
-                // Easy case: convert from undefined or null.
-                il.Emit(OpCodes.Pop);
-                il.Emit(OpCodes.Ldc_I4_0);
-            }
-            else if (fromType == typeof(double))
-            {
-                // Convert from double.
-
-                // bool isPositiveInfinity = input > 2147483647.0
-                var isPositiveInfinity = il.DeclareLocal(typeof(bool));
-                il.Emit(OpCodes.Dup);
-                il.Emit(OpCodes.Ldc_R8, 2147483647.0);
-                il.Emit(OpCodes.Cgt);
-                il.Emit(OpCodes.Stloc_S, isPositiveInfinity);
-
-                // bool notNaN = input == input
-                var notNaN = il.DeclareLocal(typeof(bool));
-                il.Emit(OpCodes.Dup);
-                il.Emit(OpCodes.Dup);
-                il.Emit(OpCodes.Ceq);
-                il.Emit(OpCodes.Stloc_S, notNaN);
-
-                // input = (int)input
-                // Infinity -> -2147483648
-                // -Infinity -> -2147483648
-                // NaN -> -2147483648
-                il.Emit(OpCodes.Conv_I4);
-
-                // input = input & -((int)notNaN)
-                il.Emit(OpCodes.Ldloc_S, notNaN);
-                il.Emit(OpCodes.Neg);
-                il.Emit(OpCodes.And);
-
-                // input = input - (int)isPositiveInfinity
-                il.Emit(OpCodes.Ldloc_S, isPositiveInfinity);
-                il.Emit(OpCodes.Sub);
-            }
-            else if (fromType == typeof(bool))
-            {
-                // Easy case: convert from bool.
-                // output = (int) input
-                il.Emit(OpCodes.Conv_I4);
-            }
-            else
-            {
-                // Convert from any other type: call TypeConverter.ToInteger()
-                // output = TypeConverter.ToInteger(input)
-                if (fromType.IsValueType == true)
-                    il.Emit(OpCodes.Box, fromType);
-                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToInteger);
-            }
-        }
-
-        /// <summary>
-        /// Pops the value on the stack, converts it to a double, then pushes the double result
-        /// onto the stack.
-        /// </summary>
-        /// <param name="il"> The IL generator. </param>
-        /// <param name="fromType"> The type to convert from. </param>
-        private static void EmitConversionToDouble(ILGenerator il, Type fromType)
-        {
-            if (fromType == typeof(Undefined))
-            {
-                // Easy case: convert from undefined.
-                il.Emit(OpCodes.Pop);
-                il.Emit(OpCodes.Ldc_R8, double.NaN);
-            }
-            else if (fromType == typeof(Null))
-            {
-                // Easy case: convert from null.
-                il.Emit(OpCodes.Pop);
-                il.Emit(OpCodes.Ldc_R8, 0.0);
-            }
-            else if (fromType == typeof(bool))
-            {
-                // Easy case: convert from bool.
-                // output = (double) input
-                il.Emit(OpCodes.Conv_R8);
-            }
-            else if (fromType == typeof(int))
-            {
-                // Easy case: convert from int.
-                // output = (double) input
-                il.Emit(OpCodes.Conv_R8);
-            }
-            else
-            {
-                // Convert from any other type: call TypeConverter.ToNumber()
-                // output = TypeConverter.ToNumber(input)
-                if (fromType.IsValueType == true)
-                    il.Emit(OpCodes.Box, fromType);
-                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToNumber);
-            }
-        }
-
-        /// <summary>
-        /// Pops the value on the stack, converts it to a string, then pushes the result onto the
-        /// stack.
-        /// </summary>
-        /// <param name="il"> The IL generator. </param>
-        /// <param name="fromType"> The type to convert from. </param>
-        private static void EmitConversionToString(ILGenerator il, Type fromType)
-        {
-            //if (fromType.IsClass == true)
-            //{
-            //    // if (input == null)
-            //    //     return "null";
-            //    // else
-            //    //     return input.ToString();
-
-            //    // if (input == null)
-            //    il.Emit(OpCodes.Dup);
-            //    var afterIf = il.DefineLabel();
-            //    il.Emit(OpCodes.Brtrue_S, afterIf);
-
-            //    // return "null"
-            //    il.Emit(OpCodes.Pop);
-            //    il.Emit(OpCodes.Ldstr, "null");
-            //    var endOfBlock = il.DefineLabel();
-            //    il.Emit(OpCodes.Br_S, endOfBlock);
-
-            //    // return input.ToString()
-            //    il.MarkLabel(afterIf);
-            //    MethodInfo toStringMethod = typeof(object).GetMethod("ToString", new Type[0]);
-            //    if (toStringMethod == null)
-            //        throw new InvalidOperationException("Object.ToString does not exist.");
-            //    il.Emit(OpCodes.Callvirt, toStringMethod);
-            //    il.MarkLabel(endOfBlock);
-            //}
-            //else
-            //{
-            //    // return input.ToString()
-            //    MethodInfo toStringMethod = fromType.GetMethod("ToString", new Type[0]);
-            //    if (toStringMethod == null)
-            //        throw new InvalidOperationException(string.Format("{0}.ToString does not exist.", fromType.FullName));
-            //    il.Emit(OpCodes.Call, toStringMethod);
-            //}
-
-            // output = TypeConverter.ToString(input)
-            if (fromType.IsValueType == true)
-                il.Emit(OpCodes.Box, fromType);
-            il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToString);
-        }
-
-        /// <summary>
-        /// Pops the value on the stack, converts it to an object, then pushes the result onto the
-        /// stack.
-        /// </summary>
-        /// <param name="il"> The IL generator. </param>
-        /// <param name="fromType"> The type to convert from. </param>
-        private static void EmitConversionToObject(ILGenerator il, Type fromType)
-        {
-            // output = (object)input
-            if (fromType.IsValueType == true)
-                il.Emit(OpCodes.Box, fromType);
-        }
-
-        /// <summary>
-        /// Pops the value on the stack, converts it to an ObjectInstance, then pushes the result
-        /// onto the stack.
-        /// </summary>
-        /// <param name="il"> The IL generator. </param>
-        /// <param name="fromType"> The type to convert from. </param>
-        private static void EmitConversionToObjectInstance(ILGenerator il, Type fromType, Type toType)
-        {
-            if (fromType == typeof(bool))
-            {
-                // Easy case: convert from bool.
-                // output = Global.Boolean.Construct(input)
-                var temp = il.DeclareLocal(fromType);
-                il.Emit(OpCodes.Stloc_S, temp);
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Callvirt, ReflectionHelpers.ScriptEngine_Boolean);
-                il.Emit(OpCodes.Ldloc_S, temp);
-                il.Emit(OpCodes.Callvirt, ReflectionHelpers.Boolean_Construct);
-            }
-            else
-            {
-                // Convert from any other type: call TypeConverter.ToObject()
-                // output = TypeConverter.ToObject(engine, input)
-                var temp = il.DeclareLocal(fromType);
-                il.Emit(OpCodes.Stloc_S, temp);
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldloc_S, temp);
-                if (fromType.IsValueType == true)
-                    il.Emit(OpCodes.Box, fromType);
-                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToObject);
-            }
-
-            if (toType != typeof(ObjectInstance))
-            {
-                // Convert to null if the from type isn't compatible with the to type.
-                // For example, if the target type is FunctionInstance and the from type is ArrayInstance, then pass null.
-                il.Emit(OpCodes.Isinst, toType);
-            }
+                EmitConversion.Convert(il, PrimitiveTypeUtilities.ToPrimitiveType(fromType), PrimitiveTypeUtilities.ToPrimitiveType(toType));
         }
 
         /// <summary>
@@ -904,15 +504,15 @@ namespace Jurassic.Library
             {
                 // Emit the default value.
                 if (targetParameter.DefaultValue is bool)
-                    il.Emit(OpCodes.Ldc_I4, ((bool)targetParameter.DefaultValue) ? 1 : 0);
+                    il.LoadInt32(((bool)targetParameter.DefaultValue) ? 1 : 0);
                 else if (targetParameter.DefaultValue is int)
-                    il.Emit(OpCodes.Ldc_I4, (int)targetParameter.DefaultValue);
+                    il.LoadInt32((int)targetParameter.DefaultValue);
                 else if (targetParameter.DefaultValue is double)
-                    il.Emit(OpCodes.Ldc_R8, (double)targetParameter.DefaultValue);
+                    il.LoadDouble((double)targetParameter.DefaultValue);
                 else if (targetParameter.DefaultValue == null)
-                    il.Emit(OpCodes.Ldnull);
+                    il.LoadNull();
                 else if (targetParameter.DefaultValue is string)
-                    il.Emit(OpCodes.Ldstr, (string)targetParameter.DefaultValue);
+                    il.LoadString((string)targetParameter.DefaultValue);
                 else
                     throw new NotImplementedException(string.Format("Unsupported default value type '{1}' for parameter '{0}'.",
                         targetParameter.Name, targetParameter.DefaultValue.GetType()));
@@ -931,25 +531,8 @@ namespace Jurassic.Library
         /// <param name="toType"> The type to convert to. </param>
         private static void EmitUndefined(ILGenerator il, Type toType)
         {
-            // Emit for each type of argument we support.
-            if (toType == typeof(bool) || toType == typeof(int))
-                il.Emit(OpCodes.Ldc_I4_0);
-            else if (toType == typeof(double))
-                il.Emit(OpCodes.Ldc_R8, double.NaN);
-            else if (toType == typeof(string))
-                il.Emit(OpCodes.Ldstr, "undefined");
-            else if (toType == typeof(object))
-                il.Emit(OpCodes.Ldsfld, ReflectionHelpers.Undefined_Value);
-            else if (typeof(ObjectInstance).IsAssignableFrom(toType))
-            {
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldstr, "TypeError");
-                il.Emit(OpCodes.Ldstr, "Undefined cannot be converted to an object");
-                il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
-                il.Emit(OpCodes.Throw);
-            }
-            else
-                throw new InvalidOperationException(string.Format("Cannot convert undefined to {0}.", toType.FullName));
+            EmitHelpers.EmitUndefined(il);
+            EmitConversion.Convert(il, PrimitiveType.Undefined, PrimitiveTypeUtilities.ToPrimitiveType(toType));
         }
 
     }
