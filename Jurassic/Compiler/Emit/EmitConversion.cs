@@ -381,8 +381,15 @@ namespace Jurassic.Compiler
             switch (fromType)
             {
                 case PrimitiveType.Undefined:
+                    // Converting from undefined always throws an exception.
+                    EmitHelpers.EmitThrow(generator, "TypeError", "Undefined cannot be converted to an object");
+                    break;
+
                 case PrimitiveType.Null:
-                    // Converting from undefined or null always throws an exception.
+                    // Converting from null always throws an exception.
+                    EmitHelpers.EmitThrow(generator, "TypeError", "Null cannot be converted to an object");
+                    break;
+
                 case PrimitiveType.Bool:
                 case PrimitiveType.Int32:
                 case PrimitiveType.UInt32:

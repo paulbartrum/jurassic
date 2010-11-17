@@ -68,6 +68,8 @@ namespace Jurassic
                 return (bool)value;
             if (value is int)
                 return ((int)value) != 0;
+            if (value is uint)
+                return ((uint)value) != 0;
             if (value is double)
                 return ((double)value) != 0 && double.IsNaN((double)value) == false;
             if (value is string)
@@ -123,6 +125,8 @@ namespace Jurassic
                 return (bool)value ? "true" : "false";
             if (value is int)
                 return ((int)value).ToString();
+            if (value is uint)
+                return ((uint)value).ToString();
             if (value is double)
             {
                 // Check if the value is in the cache.
@@ -172,6 +176,8 @@ namespace Jurassic
                 return engine.Boolean.Construct((bool)value);
             if (value is int)
                 return engine.Number.Construct((int)value);
+            if (value is uint)
+                return engine.Number.Construct((uint)value);
             if (value is double)
                 return engine.Number.Construct((double)value);
             if (value is string)

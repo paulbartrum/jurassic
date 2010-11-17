@@ -453,15 +453,34 @@ namespace Jurassic.Compiler
         /// Pops a value from the stack, converts it to an object reference, then pushes it back onto
         /// the stack.
         /// </summary>
+        /// <param name="type"> The type of value to box.  This should be a value type. </param>
         public abstract void Box(Type type);
 
         /// <summary>
         /// Pops a value from the stack, converts it to an object reference, then pushes it back onto
         /// the stack.
         /// </summary>
+        /// <param name="type"> The type of value to box.  This should be a value type. </param>
         public void Box(PrimitiveType type)
         {
             Box(PrimitiveTypeUtilities.ToType(type));
+        }
+
+        /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
+        /// then pushes the value onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public abstract void Unbox(Type type);
+
+        /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
+        /// then pushes the value onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public void Unbox(PrimitiveType type)
+        {
+            Unbox(PrimitiveTypeUtilities.ToType(type));
         }
 
         /// <summary>

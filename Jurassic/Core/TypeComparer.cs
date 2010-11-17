@@ -22,8 +22,12 @@ namespace Jurassic
             y = y ?? Undefined.Value;
             if (x is int)
                 x = (double)(int)x;
+            if (x is uint)
+                x = (double)(uint)x;
             if (y is int)
                 y = (double)(int)y;
+            if (y is uint)
+                y = (double)(uint)y;
             if (x.GetType() == y.GetType())
             {
                 if (x is double && double.IsNaN((double)x) == true)
@@ -70,8 +74,12 @@ namespace Jurassic
             y = y ?? Undefined.Value;
             if (x is int)
                 x = (double)(int)x;
+            if (x is uint)
+                x = (double)(uint)x;
             if (y is int)
                 y = (double)(int)y;
+            if (y is uint)
+                y = (double)(uint)y;
             if (x is double && double.IsNaN((double)x) == true)
                 return false;
             return object.Equals(x, y);
@@ -185,8 +193,12 @@ namespace Jurassic
                 y = Undefined.Value;
             if (x is int)
                 x = (double)(int)x;
+            if (x is uint)
+                x = (double)(uint)x;
             if (y is int)
                 y = (double)(int)y;
+            if (y is uint)
+                y = (double)(uint)y;
             if (x is double && (double) x == 0.0 && y is double && (double)y == 0.0)
                 if ((1 / (double)x) != (1 / (double)y))
                     return false;

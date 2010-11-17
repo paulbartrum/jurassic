@@ -581,6 +581,20 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
+        /// then pushes the value onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public override void Unbox(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (type.IsValueType == false)
+                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
+            this.generator.Emit(OpCodes.Unbox_Any, type);
+        }
+
+        /// <summary>
         /// Pops a value from the stack, converts it to a signed integer, then pushes it back onto
         /// the stack.
         /// </summary>

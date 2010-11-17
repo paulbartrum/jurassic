@@ -76,11 +76,18 @@ namespace Jurassic
         {
             if (obj == null)
                 return Undefined.Value;
-            if (obj is double)
+            else if (obj is double)
             {
                 var numericResult = (double)obj;
                 if ((double)((int)numericResult) == numericResult)
                     return (int)numericResult;
+            }
+            else if (obj is uint)
+            {
+                var uintValue = (uint)obj;
+                if ((int)uintValue >= 0)
+                    return (int)uintValue;
+                return (double)uintValue;
             }
             return obj;
         }
