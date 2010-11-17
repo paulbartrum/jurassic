@@ -146,6 +146,7 @@ namespace Jurassic.Compiler
         }
 
 
+
         //     FUNCTION OPTIMIZATION
         //_________________________________________________________________________________________
 
@@ -157,6 +158,7 @@ namespace Jurassic.Compiler
             get;
             set;
         }
+
 
 
         //     VARIABLES
@@ -201,6 +203,7 @@ namespace Jurassic.Compiler
             }
             return variable;
         }
+
 
 
         //     RETURN SUPPORT

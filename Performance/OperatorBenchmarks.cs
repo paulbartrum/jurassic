@@ -328,7 +328,7 @@ namespace Performance
                     }
                 }
                 f()
-                ", 106.2);
+                ", 74.9);
         }
 
         [TestMethod]
@@ -346,7 +346,28 @@ namespace Performance
                     f = g;
                     g = a;
                 }
-                ", 8.5);
+                ", 38.1);
+        }
+
+        [TestMethod]
+        public void PropertyAccess()
+        {
+            TestUtils.Benchmark(@"
+                function f() {
+                    var x = { a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6 };
+                    for (var i = 0; i < 100000; i ++)
+                    {
+                        x.a = x.b;
+                        x.b = x.c;
+                        x.c = x.d;
+                        x.d = x.e;
+                        x.e = x.f;
+                        x.f = x.g;
+                        x.g = x.a;
+                    }
+                }
+                f()
+                ", 32.2);
         }
 
         [TestMethod]

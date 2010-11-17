@@ -259,19 +259,31 @@ namespace Jurassic.Library
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         public object InlineGetPropertyValue(string name, out int cachedIndex, out object cacheKey)
         {
-            //cachedIndex = this.schema.GetPropertyIndex(name);
-            //if (cachedIndex < 0)
-            //{
-            //    // The property is in the prototype or is non-existant.
-            //    cacheKey = null;
-            //    if (this.Prototype == null)
-            //        return null;
-            //    return this.Prototype.Get(name);
-            //}
-            //cacheKey = this.InlineCacheKey;
-            //return this.InlinePropertyValues[cachedIndex];
+            var propertyInfo = this.schema.GetPropertyIndexAndAttributes(name);
+            if (propertyInfo.Exists == true)
+            {
+                // The property exists; it can be cached as long as it is not an accessor property.
+                if ((propertyInfo.Attributes & (PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != 0)
+                {
+                    cachedIndex = -1;
+                    cacheKey = null;
+                    return GetPropertyValue(name);
+                }
 
-            throw new NotImplementedException();
+                // The property can be cached.
+                cachedIndex = propertyInfo.Index;
+                cacheKey = this.InlineCacheKey;
+                return this.InlinePropertyValues[cachedIndex];
+            }
+            else
+            {
+                // The property is in the prototype or is non-existent.
+                cachedIndex = -1;
+                cacheKey = null;
+                if (this.Prototype == null)
+                    return null;
+                return this.Prototype.GetPropertyValue(name);
+            }
         }
 
         /// <summary>
@@ -281,29 +293,41 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="name"> The name of the property to set. </param>
         /// <param name="value"> The desired value of the property. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set (i.e. if the property is read-only or if the object is not extensible and a new
+        /// property needs to be created). </param>
         /// <param name="cachedIndex"> Set to a zero-based index that can be used to get or set the
         /// property value in future (provided the cache key doesn't change). </param>
         /// <param name="cacheKey"> Set to a value that can be compared with the CacheKey property
         /// to determine if the cached index needs to be refreshed.  Can be set to <c>null</c> to
         /// prohibit caching. </param>
-        public void InlineSetPropertyValue(string name, object value, out int cachedIndex, out object cacheKey)
+        public void InlineSetPropertyValue(string name, object value, bool throwOnError, out int cachedIndex, out object cacheKey)
         {
-            //cachedIndex = this.schema.GetPropertyIndex(name);
-            //if (cachedIndex < 0)
-            //{
-            //    // The property is in the prototype or doesn't exist - add a new property.
-            //    this.schema = this.schema.AddProperty(name);
-            //    cachedIndex = this.schema.GetPropertyIndex(name);
-            //    if (cachedIndex >= this.InlinePropertyValues.Length)
-            //    {
-            //        // Resize the value array.
-            //        Array.Resize(ref this.propertyValues, this.InlinePropertyValues.Length * 2);
-            //    }
-            //}
-            //cacheKey = this.InlineCacheKey;
-            //this.InlinePropertyValues[cachedIndex] = value;
-
-            throw new NotImplementedException();
+            var propertyInfo = this.schema.GetPropertyIndexAndAttributes(name);
+            if (propertyInfo.Exists == true)
+            {
+                // The property exists; it can be cached as long as it is not read-only or an accessor property.
+                if ((propertyInfo.Attributes & (PropertyAttributes.Writable | PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != PropertyAttributes.Writable)
+                {
+                    cachedIndex = -1;
+                    cacheKey = null;
+                    SetPropertyValue(name, value, throwOnError);
+                }
+                else
+                {
+                    // The property can be cached.
+                    cachedIndex = propertyInfo.Index;
+                    cacheKey = this.InlineCacheKey;
+                    this.InlinePropertyValues[cachedIndex] = value;
+                }
+            }
+            else
+            {
+                // The property is in the prototype or is non-existent.
+                cachedIndex = -1;
+                cacheKey = null;
+                SetPropertyValue(name, value, throwOnError);
+            }
         }
 
         /// <summary>
@@ -317,34 +341,44 @@ namespace Jurassic.Library
         /// <param name="name"> The name of the property to set. </param>
         /// <param name="value"> The desired value of the property.  This must be a javascript
         /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set (i.e. if the property is read-only or if the object is not extensible and a new
+        /// property needs to be created). </param>
         /// <param name="cachedIndex"> Set to a zero-based index that can be used to get or set the
         /// property value in future (provided the cache key doesn't change). </param>
         /// <param name="cacheKey"> Set to a value that can be compared with the CacheKey property
         /// to determine if the cached index needs to be refreshed.  Can be set to <c>null</c> to
         /// prohibit caching. </param>
         /// <returns> <c>true</c> if the property value exists; <c>false</c> otherwise. </returns>
-        public bool InlineSetPropertyValueIfExists(string name, object value, out int index, out object cacheKey)
+        public bool InlineSetPropertyValueIfExists(string name, object value, bool throwOnError, out int cachedIndex, out object cacheKey)
         {
-            //index = this.schema.GetPropertyIndex(name);
-            //if (index < 0)
-            //{
-            //    // The property is in the prototype or is non-existant.
-            //    cacheKey = null;
-            //    if (this.Prototype == null)
-            //        return false;
-            //    if (this.Prototype.HasProperty(name) == true)
-            //    {
-            //        // TODO: fix this.
-            //        this.Prototype[name] = value;
-            //        return true;
-            //    }
-            //    return false;
-            //}
-            //cacheKey = this.InlineCacheKey;
-            //this.InlinePropertyValues[index] = value;
-            //return true;
-
-            throw new NotImplementedException();
+            var propertyInfo = this.schema.GetPropertyIndexAndAttributes(name);
+            if (propertyInfo.Exists == true)
+            {
+                // The property exists; it can be cached as long as it is not read-only or an accessor property.
+                if ((propertyInfo.Attributes & (PropertyAttributes.Writable | PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != PropertyAttributes.Writable)
+                {
+                    cachedIndex = -1;
+                    cacheKey = null;
+                    return SetPropertyValueIfExists(name, value, throwOnError);
+                }
+                else
+                {
+                    // The property can be cached.
+                    cachedIndex = propertyInfo.Index;
+                    cacheKey = this.InlineCacheKey;
+                    this.InlinePropertyValues[cachedIndex] = value;
+                    return true;
+                }
+                
+            }
+            else
+            {
+                // The property is in the prototype or is non-existent.
+                cachedIndex = -1;
+                cacheKey = null;
+                return SetPropertyValueIfExists(name, value, throwOnError);
+            }
         }
 
 
