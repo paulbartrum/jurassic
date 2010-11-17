@@ -145,9 +145,9 @@ namespace Jurassic
             ObjectInstance_InlineGetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineGetPropertyValue",
                 new Type[] { typeof(string), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
             ObjectInstance_InlineSetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineSetPropertyValue",
-                new Type[] { typeof(string), typeof(object), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
+                new Type[] { typeof(string), typeof(object), typeof(bool), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
             ObjectInstance_InlineSetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "InlineSetPropertyValueIfExists",
-                new Type[] { typeof(string), typeof(object), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
+                new Type[] { typeof(string), typeof(object), typeof(bool), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
 
             Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
             ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance));
