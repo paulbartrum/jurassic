@@ -318,7 +318,7 @@ namespace Jurassic.Library
                     // The property can be cached.
                     cachedIndex = propertyInfo.Index;
                     cacheKey = this.InlineCacheKey;
-                    this.InlinePropertyValues[cachedIndex] = value;
+                    this.InlinePropertyValues[cachedIndex] = value ?? Undefined.Value;
                 }
             }
             else
@@ -367,10 +367,10 @@ namespace Jurassic.Library
                     // The property can be cached.
                     cachedIndex = propertyInfo.Index;
                     cacheKey = this.InlineCacheKey;
-                    this.InlinePropertyValues[cachedIndex] = value;
+                    this.InlinePropertyValues[cachedIndex] = value ?? Undefined.Value;
                     return true;
                 }
-                
+
             }
             else
             {
