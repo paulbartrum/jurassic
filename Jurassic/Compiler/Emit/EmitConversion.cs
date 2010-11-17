@@ -96,8 +96,10 @@ namespace Jurassic.Compiler
 
                 case PrimitiveType.Number:
                     // Converting from a number produces true if the number is non-zero and not NaN.
-                    var temp = generator.DeclareVariable(PrimitiveTypeUtilities.ToType(fromType));
+                    var temp = generator.CreateTemporaryVariable(fromType);
                     generator.StoreVariable(temp);
+
+                    // input != 0
                     generator.LoadVariable(temp);
                     generator.LoadDouble(0.0);
                     generator.CompareEqual();
@@ -111,6 +113,9 @@ namespace Jurassic.Compiler
 
                     // &&
                     generator.CompareEqual();
+
+                    // The temporary variable is no longer needed.
+                    generator.ReleaseTemporaryVariable(temp);
                     break;
 
                 case PrimitiveType.String:
@@ -160,14 +165,14 @@ namespace Jurassic.Compiler
                     // NaN -> 0
 
                     // bool isPositiveInfinity = input > 2147483647.0
-                    var isPositiveInfinity = generator.DeclareVariable(typeof(bool));
+                    var isPositiveInfinity = generator.CreateTemporaryVariable(typeof(bool));
                     generator.Duplicate();
                     generator.LoadDouble(2147483647.0);
                     generator.CompareGreaterThan();
                     generator.StoreVariable(isPositiveInfinity);
 
                     // bool notNaN = input == input
-                    var notNaN = generator.DeclareVariable(typeof(bool));
+                    var notNaN = generator.CreateTemporaryVariable(typeof(bool));
                     generator.Duplicate();
                     generator.Duplicate();
                     generator.CompareEqual();
@@ -187,6 +192,10 @@ namespace Jurassic.Compiler
                     // input = input - (int)isPositiveInfinity
                     generator.LoadVariable(isPositiveInfinity);
                     generator.Subtract();
+
+                    // The temporary variables are no longer needed.
+                    generator.ReleaseTemporaryVariable(notNaN);
+                    generator.ReleaseTemporaryVariable(isPositiveInfinity);
                     break;
 
                 case PrimitiveType.String:
