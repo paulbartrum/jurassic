@@ -54,7 +54,7 @@ namespace Performance
         }
 
         [TestMethod]
-        public void Add()
+        public void AddNumber()
         {
             TestUtils.Benchmark(@"
                 function f() {
@@ -64,6 +64,19 @@ namespace Performance
                 }
                 f();
                 ", 121.0);
+        }
+
+        [TestMethod]
+        public void AddString()
+        {
+            TestUtils.Benchmark(@"
+                function f() {
+                    var x = '';
+                    for (var i = 0; i < 10000; i++)
+                        x = x + i
+                }
+                f();
+                ", 7.6);
         }
 
         [TestMethod]

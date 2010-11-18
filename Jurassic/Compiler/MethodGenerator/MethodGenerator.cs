@@ -124,6 +124,19 @@ namespace Jurassic.Compiler
             protected set;
         }
 
+#if DEBUG
+
+        /// <summary>
+        /// Gets the disassembled IL code for the method.
+        /// </summary>
+        public string DisassembledIL
+        {
+            get;
+            private set;
+        }
+
+#endif
+
         /// <summary>
         /// Gets a name for the generated method.
         /// </summary>
@@ -178,30 +191,28 @@ namespace Jurassic.Compiler
             {
                 // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
                 // FunctionExpression class.
-                //try
-                //{
-                    // Create a new dynamic method.
-                    var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                        "Main",                                                 // Name of the generated method.
-                        typeof(object),                                         // Return type of the generated method.
-                        GetParameterTypes(),                                    // Parameter types of the generated method.
-                        typeof(MethodGenerator),                                // Owner type.
-                        true);                                                  // Skip visibility checks.
 
-                    // Generate the IL.
-                    ILGenerator generator = new DynamicILGenerator(dynamicMethod);
-                    GenerateCode(generator, optimizationInfo);
-                    generator.Complete();
+                // Create a new dynamic method.
+                var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                    "Main",                                                 // Name of the generated method.
+                    typeof(object),                                         // Return type of the generated method.
+                    GetParameterTypes(),                                    // Parameter types of the generated method.
+                    typeof(MethodGenerator),                                // Owner type.
+                    true);                                                  // Skip visibility checks.
 
-                    // Create a delegate from the method.
-                    this.GeneratedMethod = dynamicMethod;
-                    this.CompiledDelegate = dynamicMethod.CreateDelegate(GetDelegate());
-                //}
-                //catch (System.Security.SecurityException)
-                //{
-                //    // A security exception indicates that we are operating with low privileges.
-                //    ScriptEngine.SetLowPrivilegeEnvironment();
-                //}
+                // Generate the IL.
+                ILGenerator generator = new DynamicILGenerator(dynamicMethod);
+                GenerateCode(generator, optimizationInfo);
+                generator.Complete();
+
+#if DEBUG
+                // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
+                this.DisassembledIL = generator.ToString();
+#endif
+
+                // Create a delegate from the method.
+                this.GeneratedMethod = dynamicMethod;
+                this.CompiledDelegate = dynamicMethod.CreateDelegate(GetDelegate());
             }
 #endif
             if (this.Options.EnableDebugging == true || ScriptEngine.LowPrivilegeEnvironment == true)
@@ -258,12 +269,14 @@ namespace Jurassic.Compiler
                 var type = typeBuilder.CreateType();
                 this.GeneratedMethod = type.GetMethod(this.GetMethodName());
 
-                //// Disassemble the IL.
-                //var reader = new ClrTest.Reflection.ILReader(this.GeneratedMethod);
-                //var writer = new System.IO.StringWriter();
-                //var visitor = new ClrTest.Reflection.ReadableILStringVisitor(new ClrTest.Reflection.ReadableILStringToTextWriter(writer));
-                //reader.Accept(visitor);
-                //string il = writer.ToString();
+#if DEBUG
+                // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
+                var reader = new ClrTest.Reflection.ILReader(this.GeneratedMethod);
+                var writer = new System.IO.StringWriter();
+                var visitor = new ClrTest.Reflection.ReadableILStringVisitor(new ClrTest.Reflection.ReadableILStringToTextWriter(writer));
+                reader.Accept(visitor);
+                this.DisassembledIL = writer.ToString();
+#endif
 
                 this.CompiledDelegate = Delegate.CreateDelegate(GetDelegate(), this.GeneratedMethod);
             }
@@ -283,40 +296,40 @@ namespace Jurassic.Compiler
         [System.Diagnostics.Conditional("DEBUG")]
         protected void VerifyScope(ILGenerator generator)
         {
-            // Get the top-level scope.
-            EmitHelpers.LoadScope(generator);
-            var scope = this.InitialScope;
+            //// Get the top-level scope.
+            //EmitHelpers.LoadScope(generator);
+            //var scope = this.InitialScope;
 
-            while (scope != null)
-            {
-                // if (scope == null)
-                //   throw new JavaScriptException()
-                generator.Duplicate();
-                var endOfIf1 = generator.CreateLabel();
-                generator.BranchIfNotNull(endOfIf1);
-                EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too short");
-                generator.DefineLabelPosition(endOfIf1);
+            //while (scope != null)
+            //{
+            //    // if (scope == null)
+            //    //   throw new JavaScriptException()
+            //    generator.Duplicate();
+            //    var endOfIf1 = generator.CreateLabel();
+            //    generator.BranchIfNotNull(endOfIf1);
+            //    EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too short");
+            //    generator.DefineLabelPosition(endOfIf1);
 
-                // if ((scope is DeclarativeScope/ObjectScope) == false)
-                //   throw new JavaScriptException()
-                generator.IsInstance(scope.GetType());
-                generator.Duplicate();
-                var endOfIf2 = generator.CreateLabel();
-                generator.BranchIfNotNull(endOfIf2);
-                EmitHelpers.EmitThrow(generator, "Error", string.Format("Internal error: incorrect runtime scope type (expected {0})", scope.GetType().Name));
-                generator.DefineLabelPosition(endOfIf2);
+            //    // if ((scope is DeclarativeScope/ObjectScope) == false)
+            //    //   throw new JavaScriptException()
+            //    generator.IsInstance(scope.GetType());
+            //    generator.Duplicate();
+            //    var endOfIf2 = generator.CreateLabel();
+            //    generator.BranchIfNotNull(endOfIf2);
+            //    EmitHelpers.EmitThrow(generator, "Error", string.Format("Internal error: incorrect runtime scope type (expected {0})", scope.GetType().Name));
+            //    generator.DefineLabelPosition(endOfIf2);
 
-                // scope = scope.ParentScope
-                generator.Call(ReflectionHelpers.Scope_ParentScope);
-                scope = scope.ParentScope;
-            }
+            //    // scope = scope.ParentScope
+            //    generator.Call(ReflectionHelpers.Scope_ParentScope);
+            //    scope = scope.ParentScope;
+            //}
 
-            // if (scope != null)
-            //   throw new JavaScriptException()
-            var endOfIf3 = generator.CreateLabel();
-            generator.BranchIfNull(endOfIf3);
-            EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too long");
-            generator.DefineLabelPosition(endOfIf3);
+            //// if (scope != null)
+            ////   throw new JavaScriptException()
+            //var endOfIf3 = generator.CreateLabel();
+            //generator.BranchIfNull(endOfIf3);
+            //EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too long");
+            //generator.DefineLabelPosition(endOfIf3);
         }
 
         /// <summary>
