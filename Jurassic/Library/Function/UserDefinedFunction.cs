@@ -42,6 +42,11 @@ namespace Jurassic.Library
             var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentNames, bodyText, new CompilerOptions());
             context.GenerateCode();
 
+#if DEBUG
+            // Save the disassembled IL code (in debug mode only).
+            this.disassembledIL = context.DisassembledIL;
+#endif
+
             // Create a new user defined function.
             Init(name, argumentNames, this.Engine.CreateGlobalScope(), bodyText, (FunctionDelegate)context.CompiledDelegate, context.StrictMode, true);
         }
@@ -126,6 +131,28 @@ namespace Jurassic.Library
             }
         }
 
+        /// <summary>
+        /// Compiles the function (if it hasn't already been compiled) and returns a delegate
+        /// representing the compiled function.
+        /// </summary>
+        private FunctionDelegate Compile()
+        {
+            if (this.body == null)
+            {
+                // Compile the function.
+                var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), this.Name, this.ArgumentNames);
+                var functionGenerator = new FunctionMethodGenerator(this.Engine, scope, this.Name, this.ArgumentNames, this.BodyText, new CompilerOptions());
+                functionGenerator.GenerateCode();
+                this.body = (FunctionDelegate)functionGenerator.CompiledDelegate;
+
+#if DEBUG
+                // Save the disassembled IL code (in debug mode only).
+                this.disassembledIL = functionGenerator.DisassembledIL;
+#endif
+            }
+            return this.body;
+        }
+
 
 
         //     PROPERTIES
@@ -168,6 +195,31 @@ namespace Jurassic.Library
             get;
             private set;
         }
+        
+#if DEBUG
+
+        private string disassembledIL;
+
+        /// <summary>
+        /// Gets the body of the method in the form of disassembled IL code.
+        /// </summary>
+        public string DisassembledIL
+        {
+            get
+            {
+                // Compile the function.
+                var body = Compile();
+
+                // Return the disassembled IL.
+                return this.disassembledIL;
+            }
+            set
+            {
+                this.disassembledIL = value;
+            }
+        }
+
+#endif
 
 
 
@@ -182,17 +234,11 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            if (this.body == null)
-            {
-                // Compile the function.
-                var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), this.Name, this.ArgumentNames);
-                var functionGenerator = new FunctionMethodGenerator(this.Engine, scope, this.Name, this.ArgumentNames, this.BodyText, new CompilerOptions());
-                functionGenerator.GenerateCode();
-                this.body = (FunctionDelegate)functionGenerator.CompiledDelegate;
-            }
+            // Compile the function.
+            var body = Compile();
 
             // Call the function.
-            return this.body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
+            return body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
         }
 
         /// <summary>

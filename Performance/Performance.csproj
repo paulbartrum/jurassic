@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="ArrayBenchmarks.cs" />
     <Compile Include="ConversionBenchmarks.cs" />
+    <Compile Include="CodeGenTests.cs" />
     <Compile Include="ScriptEngineManager.cs" />
     <Compile Include="v8.cs" />
     <Compile Include="OperatorBenchmarks.cs" />

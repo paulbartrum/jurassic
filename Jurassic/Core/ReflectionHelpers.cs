@@ -38,6 +38,9 @@ namespace Jurassic
         internal static MethodInfo FunctionInstance_ConstructLateBound;
         internal static MethodInfo FunctionInstance_CallLateBound;
         internal static MethodInfo FunctionInstance_InstancePrototype;
+#if DEBUG
+        internal static MethodInfo UserDefinedFunction_set_DisassembledIL;
+#endif
 
         internal static MethodInfo ScriptEngine_Global;
         internal static MethodInfo ScriptEngine_Boolean;
@@ -163,6 +166,9 @@ namespace Jurassic
             FunctionInstance_ConstructLateBound = GetInstanceMethod(typeof(FunctionInstance), "ConstructLateBound", typeof(object[]));
             FunctionInstance_CallLateBound = GetInstanceMethod(typeof(FunctionInstance), "CallLateBound", typeof(object), typeof(object[]));
             FunctionInstance_InstancePrototype = GetInstanceMethod(typeof(FunctionInstance), "get_InstancePrototype");
+#if DEBUG
+            UserDefinedFunction_set_DisassembledIL = GetInstanceMethod(typeof(UserDefinedFunction), "set_DisassembledIL", typeof(string));
+#endif
 
             ScriptEngine_Global = GetInstanceMethod(typeof(ScriptEngine), "get_Global");
             ScriptEngine_Boolean = GetInstanceMethod(typeof(ScriptEngine), "get_Boolean");
