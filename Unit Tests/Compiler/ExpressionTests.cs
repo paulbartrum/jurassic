@@ -1259,7 +1259,9 @@ namespace UnitTests
             // In ES3 functions will get the global object as the "this" value by default.
             Assert.AreEqual(true, TestUtils.Evaluate("(function(){ return this; }).call(null) === this"));
             Assert.AreEqual(true, TestUtils.Evaluate("(function(){ return this; }).call(undefined) === this"));
-            Assert.AreEqual("object", TestUtils.Evaluate("typeof (function(){ return this; }).call(5)"));
+            Assert.AreEqual(6, TestUtils.Evaluate("(function(){ return this; }).call(5) + 1"));
+            Assert.AreEqual("object", TestUtils.Evaluate("typeof((function(){ return this; }).call(5))"));
+            Assert.AreEqual(6, TestUtils.Evaluate("(function(){ return eval('this'); }).call(5) + 1"));
 
             // Check that the this parameter is passed correctly.
             Assert.AreEqual(true, TestUtils.Evaluate("x = { f: function() { return this } }; x.f() === x"));
@@ -1271,7 +1273,8 @@ namespace UnitTests
             // Strict mode: the "this" object is not coerced to an object.
             Assert.AreEqual(Null.Value, TestUtils.Evaluate("'use strict'; (function(){ return this; }).call(null)"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; (function(){ return this; }).call(undefined)"));
-            Assert.AreEqual("number", TestUtils.Evaluate("'use strict'; typeof (function(){ return this; }).call(5)"));
+            Assert.AreEqual(5, TestUtils.Evaluate("'use strict'; (function(){ return this; }).call(5)"));
+            Assert.AreEqual("number", TestUtils.Evaluate("'use strict'; typeof((function(){ return this; }).call(5))"));
         }
     }
 }
