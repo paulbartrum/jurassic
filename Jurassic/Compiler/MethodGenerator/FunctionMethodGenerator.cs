@@ -223,7 +223,7 @@ namespace Jurassic.Compiler
             VerifyScope(generator);
 
             // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
-            if (this.StrictMode == false)
+            if (this.StrictMode == false && (this.MethodOptimizationHints.HasThis == true || this.MethodOptimizationHints.HasEval == true))
             {
                 // if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
                 EmitHelpers.LoadThis(generator);

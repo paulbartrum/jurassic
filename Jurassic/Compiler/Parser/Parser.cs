@@ -1483,8 +1483,13 @@ namespace Jurassic.Compiler
                         }
                     }
                     else if (this.nextToken == KeywordToken.This)
+                    {
                         // Convert "this" to an expression.
                         terminal = new ThisExpression();
+
+                        // Add method optimization info.
+                        this.methodOptimizationHints.HasThis = true;
+                    }
                     else if (this.nextToken == PunctuatorToken.LeftBracket)
                         // Array literal.
                         terminal = ParseArrayLiteral();

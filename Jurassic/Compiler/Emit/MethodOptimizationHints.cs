@@ -38,6 +38,16 @@ namespace Jurassic.Compiler
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets a value that indicates whether the function being generated contains a reference
+        /// to the "this" keyword.
+        /// </summary>
+        public bool HasThis
+        {
+            get;
+            set;
+        }
     }
 
 }
