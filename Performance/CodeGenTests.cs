@@ -8,6 +8,8 @@ using Jurassic;
 namespace Performance
 {
 
+#if DEBUG
+
     /// <summary>
     /// Test the code-gen for short code snippets.
     /// </summary>
@@ -217,5 +219,7 @@ IL_01c3: ret
             return function.DisassembledIL;
         }
     }
+
+#endif
 
 }

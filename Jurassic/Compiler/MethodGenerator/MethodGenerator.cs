@@ -269,7 +269,7 @@ namespace Jurassic.Compiler
                 var type = typeBuilder.CreateType();
                 this.GeneratedMethod = type.GetMethod(this.GetMethodName());
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
                 // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
                 var reader = new ClrTest.Reflection.ILReader(this.GeneratedMethod);
                 var writer = new System.IO.StringWriter();

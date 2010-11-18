@@ -42,7 +42,7 @@ namespace Jurassic.Library
             var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentNames, bodyText, new CompilerOptions());
             context.GenerateCode();
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
             // Save the disassembled IL code (in debug mode only).
             this.disassembledIL = context.DisassembledIL;
 #endif
@@ -145,7 +145,7 @@ namespace Jurassic.Library
                 functionGenerator.GenerateCode();
                 this.body = (FunctionDelegate)functionGenerator.CompiledDelegate;
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
                 // Save the disassembled IL code (in debug mode only).
                 this.disassembledIL = functionGenerator.DisassembledIL;
 #endif
@@ -195,8 +195,8 @@ namespace Jurassic.Library
             get;
             private set;
         }
-        
-#if DEBUG
+
+#if DEBUG && !SILVERLIGHT
 
         private string disassembledIL;
 
