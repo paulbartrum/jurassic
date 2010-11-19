@@ -36,6 +36,14 @@ namespace Jurassic.Compiler
 
             // true if the variable can be deleted.
             public bool Deletable;
+
+            // The storage container for the variable.
+            [NonSerialized]
+            public ILLocalVariable Store;
+
+            // The statically-determined storage type for the variable.
+            [NonSerialized]
+            public PrimitiveType Type = PrimitiveType.Any;
         }
 
         /// <summary>
@@ -59,6 +67,7 @@ namespace Jurassic.Compiler
             this.ParentScope = parentScope;
             this.variables = new Dictionary<string, DeclaredVariable>(declaredVariableCount);
             this.CanDeclareVariables = true;
+            this.ExistsAtRuntime = true;
         }
 
         /// <summary>
@@ -68,6 +77,17 @@ namespace Jurassic.Compiler
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value that indicates whether the scope exists at runtime.  Defaults to
+        /// <c>true</c>; will only be false if GenerateScopeCreation() has been called and the
+        /// scope was optimized away.
+        /// </summary>
+        internal bool ExistsAtRuntime
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -102,6 +122,14 @@ namespace Jurassic.Compiler
                     names[i] = declaredVariables[i].Name;
                 return names;
             }
+        }
+
+        /// <summary>
+        /// Gets an enumerable list of the declared variables, in no particular order.
+        /// </summary>
+        internal IEnumerable<DeclaredVariable> DeclaredVariables
+        {
+            get { return this.variables.Values; }
         }
 
         /// <summary>
@@ -270,6 +298,22 @@ namespace Jurassic.Compiler
                     variable.Initialized = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Generates code that restores the parent scope as the active scope.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        internal void GenerateScopeDestruction(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            if (this.ExistsAtRuntime == false)
+                return;
+
+            // Modify the scope variable so it points at the parent scope.
+            EmitHelpers.LoadScope(generator);
+            generator.Call(ReflectionHelpers.Scope_ParentScope);
+            EmitHelpers.StoreScope(generator);
         }
     }
 

@@ -215,28 +215,47 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         internal override void GenerateScopeCreation(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // Create a new declarative scope.
-            
-            // parentScope
-            EmitHelpers.LoadScope(generator);
-
-            // declaredVariableNames
-            generator.LoadInt32(this.DeclaredVariableCount);
-            generator.NewArray(typeof(string));
-            int i = 0;
-            foreach (string variableName in this.DeclaredVariableNames)
+            // Allocate storage for each variable if the declarative scope object has been optimized away.
+            if (optimizationInfo.MethodOptimizationHints.OptimizeDeclarativeScopes == false)
             {
-                generator.Duplicate();
-                generator.LoadInt32(i ++);
-                generator.LoadString(variableName);
-                generator.StoreArrayElement(typeof(string));
+
+                // Create a new declarative scope.
+            
+                // parentScope
+                EmitHelpers.LoadScope(generator);
+
+                // declaredVariableNames
+                generator.LoadInt32(this.DeclaredVariableCount);
+                generator.NewArray(typeof(string));
+                int i = 0;
+                foreach (string variableName in this.DeclaredVariableNames)
+                {
+                    generator.Duplicate();
+                    generator.LoadInt32(i ++);
+                    generator.LoadString(variableName);
+                    generator.StoreArrayElement(typeof(string));
+                }
+
+                // DeclarativeScope.CreateRuntimeScope(parentScope, declaredVariableNames)
+                generator.Call(ReflectionHelpers.DeclarativeScope_CreateRuntimeScope);
+
+                // Save the new scope.
+                EmitHelpers.StoreScope(generator);
+
             }
+            else
+            {
 
-            // DeclarativeScope.CreateRuntimeScope(parentScope, declaredVariableNames)
-            generator.Call(ReflectionHelpers.DeclarativeScope_CreateRuntimeScope);
+                // The declarative scope can be optimized away entirely.
 
-            // Save the new scope.
-            EmitHelpers.StoreScope(generator);
+                // Allocate storage for each variable.
+                foreach (var variable in this.DeclaredVariables)
+                    variable.Store = generator.DeclareVariable(typeof(object), variable.Name);
+
+                // Indicate the scope was not created.
+                this.ExistsAtRuntime = false;
+
+            }
         }
     }
 

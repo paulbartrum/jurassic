@@ -48,6 +48,15 @@ namespace Jurassic.Compiler
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets a value that indicates whether the declarative scopes should be optimized away,
+        /// so that the scope is not even created at runtime.
+        /// </summary>
+        public bool OptimizeDeclarativeScopes
+        {
+            get { return this.HasArguments == false && this.HasEval == false && this.HasNestedFunction == false; }
+        }
     }
 
 }
