@@ -942,7 +942,13 @@ namespace Jurassic.Compiler
                 if (popCount > 0)
                     PopStackOperands(ToVESType(this.dynamicMethod.ReturnType));
                 if (this.stackSize != 0)
+                {
+#if DEBUG
                     throw new InvalidOperationException(string.Format("The evaluation stack should be empty.  Types still on stack: {0}.", StringHelpers.Join(", ", this.operands)));
+#else
+                    throw new InvalidOperationException("The evaluation stack should be empty.");
+#endif
+                }
             }
         }
 

@@ -118,9 +118,7 @@ namespace Jurassic.Compiler
 
                 // Revert the scope.
                 generator.BeginFinallyBlock();
-                EmitHelpers.LoadScope(generator);
-                generator.Call(ReflectionHelpers.Scope_ParentScope);
-                EmitHelpers.StoreScope(generator);
+                this.CatchScope.GenerateScopeDestruction(generator, optimizationInfo);
                 generator.EndExceptionBlock();
             }
 

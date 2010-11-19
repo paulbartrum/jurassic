@@ -77,6 +77,18 @@ namespace Jurassic.Compiler
         /// the name is unresolvable; <c>false</c> to output <c>null</c> instead. </param>
         public void GenerateGet(ILGenerator generator, OptimizationInfo optimizationInfo, bool throwIfUnresolvable)
         {
+            // This method generates code to retrieve the value of a variable, given the name of
+            // variable and scope in which the variable is being referenced.  The variable was
+            // not necessary declared in this scope - it might be declared in any of the parent
+            // scopes (together called a scope chain).  The general algorithm is to start at the
+            // head of the chain and search backwards until the variable is found.  There are
+            // two types of scopes: declarative scopes and object scopes.  Object scopes are hard -
+            // it cannot be known at compile time whether the variable exists or not so runtime
+            // checks have to be inserted.  Declarative scopes are easier - variables have to be
+            // declared and cannot be deleted.  There is one tricky bit: new variables can be
+            // introduced into a declarative scope at runtime by a non-strict eval() statement.
+            // Even worse, variables that were introduced by means of an eval() *can* be deleted.
+
             var scope = this.Scope;
             ILLocalVariable scopeVariable = null;
             var endOfGet = generator.CreateLabel();
@@ -84,18 +96,37 @@ namespace Jurassic.Compiler
             {
                 if (scope is DeclarativeScope)
                 {
+                    // The variable was declared in this scope.
                     var variable = scope.GetDeclaredVariable(this.Name);
+
                     if (variable != null)
                     {
-                        // scope.Values[index]
-                        if (scopeVariable == null)
-                            EmitHelpers.LoadScope(generator);
+                        if (scope.ExistsAtRuntime == false)
+                        {
+                            // The scope has been optimized away.  The value of the variable is stored
+                            // in an ILVariable.
+
+                            // A variable should have been allocated in Scope.GenerateDeclarations().
+                            if (variable.Store == null)
+                                throw new InvalidOperationException(string.Format("The variable {0} has not been initialized.", this.Name));
+
+                            // Load the value from the variable.
+                            generator.LoadVariable(variable.Store);
+                        }
                         else
-                            generator.LoadVariable(scopeVariable);
-                        generator.CastClass(typeof(DeclarativeScope));
-                        generator.Call(ReflectionHelpers.DeclarativeScope_Values);
-                        generator.LoadInt32(variable.Index);
-                        generator.LoadArrayElement(typeof(object));
+                        {
+                            // scope.Values[index]
+                            if (scopeVariable == null)
+                                EmitHelpers.LoadScope(generator);
+                            else
+                                generator.LoadVariable(scopeVariable);
+                            generator.CastClass(typeof(DeclarativeScope));
+                            generator.Call(ReflectionHelpers.DeclarativeScope_Values);
+                            generator.LoadInt32(variable.Index);
+                            generator.LoadArrayElement(typeof(object));
+                        }
+
+                        // The variable was found - no need to search any more parent scopes.
                         break;
                     }
                     else
@@ -220,8 +251,7 @@ namespace Jurassic.Compiler
                 }
 
                 // Try the parent scope.
-                scope = scope.ParentScope;
-                if (scope != null)
+                if (scope.ParentScope != null && scope.ExistsAtRuntime == true)
                 {
                     if (scopeVariable == null)
                     {
@@ -235,6 +265,7 @@ namespace Jurassic.Compiler
                     generator.Call(ReflectionHelpers.Scope_ParentScope);
                     generator.StoreVariable(scopeVariable);
                 }
+                scope = scope.ParentScope;
 
             } while (scope != null);
 
@@ -265,10 +296,9 @@ namespace Jurassic.Compiler
         /// the name is unresolvable; <c>false</c> to create a new property instead. </param>
         public void GenerateSet(ILGenerator generator, OptimizationInfo optimizationInfo, PrimitiveType valueType, bool throwIfUnresolvable)
         {
-            // Convert the value to an object and store it in a variable.
-            EmitConversion.Convert(generator, valueType, PrimitiveType.Any);
-            var valueVariable = generator.CreateTemporaryVariable(typeof(object));
-            generator.StoreVariable(valueVariable);
+            // The value is initially on the top of the stack but is stored in this variable
+            // at the last possible moment.
+            ILLocalVariable value = null;
 
             var scope = this.Scope;
             ILLocalVariable scopeVariable = null;
@@ -277,12 +307,48 @@ namespace Jurassic.Compiler
             {
                 if (scope is DeclarativeScope)
                 {
-                    // Get the index of the variable in the Values array.
+                    // Get information about the variable.
                     var variable = scope.GetDeclaredVariable(this.Name);
                     if (variable != null)
                     {
-                        if (variable.Writable == true)
+                        // The variable was declared in this scope.
+
+                        if (scope.ExistsAtRuntime == false)
                         {
+                            // The scope has been optimized away.  The value of the variable is stored
+                            // in an ILVariable.
+
+                            // A variable should have been allocated in Scope.GenerateDeclarations().
+                            if (variable.Store == null)
+                                throw new InvalidOperationException(string.Format("The variable {0} has not been initialized.", this.Name));
+
+                            if (value == null)
+                            {
+                                // The value to store is on the top of the stack - convert it to the
+                                // storage type of the variable.
+                                EmitConversion.Convert(generator, valueType, variable.Type);
+                            }
+                            else
+                            {
+                                // The value to store is in a temporary variable.
+                                generator.LoadVariable(value);
+                                EmitConversion.Convert(generator, PrimitiveType.Any, variable.Type);
+                            }
+                                
+                            // Store the value in the variable.
+                            generator.StoreVariable(variable.Store);
+                        }
+                        else if (variable.Writable == true)
+                        {
+                            if (value == null)
+                            {
+                                // The value to store is on the top of the stack - convert it to an
+                                // object and store it in a temporary variable.
+                                EmitConversion.Convert(generator, valueType, PrimitiveType.Any);
+                                value = generator.CreateTemporaryVariable(typeof(object));
+                                generator.StoreVariable(value);
+                            }
+
                             // scope.Values[index] = value
                             if (scopeVariable == null)
                                 EmitHelpers.LoadScope(generator);
@@ -291,9 +357,18 @@ namespace Jurassic.Compiler
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.Call(ReflectionHelpers.DeclarativeScope_Values);
                             generator.LoadInt32(variable.Index);
-                            generator.LoadVariable(valueVariable);
+                            generator.LoadVariable(value);
                             generator.StoreArrayElement(typeof(object));
                         }
+                        else
+                        {
+                            // The variable exists, but is read-only.
+                            // Pop the value off the stack (if it is still there).
+                            if (value == null)
+                                generator.Pop();
+                        }
+
+                        // The variable was found - no need to search any more parent scopes.
                         break;
                     }
                     else
@@ -302,6 +377,15 @@ namespace Jurassic.Compiler
                         // introduced by an eval() statement.
                         if (optimizationInfo.MethodOptimizationHints.HasEval == true)
                         {
+                            if (value == null)
+                            {
+                                // The value to store is on the top of the stack - convert it to an
+                                // object and store it in a temporary variable.
+                                EmitConversion.Convert(generator, valueType, PrimitiveType.Any);
+                                value = generator.CreateTemporaryVariable(typeof(object));
+                                generator.StoreVariable(value);
+                            }
+
                             // Check the variable exists: if (scope.HasValue(variableName) == true) {
                             if (scopeVariable == null)
                                 EmitHelpers.LoadScope(generator);
@@ -320,7 +404,7 @@ namespace Jurassic.Compiler
                                 generator.LoadVariable(scopeVariable);
                             generator.CastClass(typeof(DeclarativeScope));
                             generator.LoadString(this.Name);
-                            generator.LoadVariable(valueVariable);
+                            generator.LoadVariable(value);
                             generator.Call(ReflectionHelpers.Scope_SetValue);
                             generator.Branch(endOfSet);
 
@@ -331,8 +415,19 @@ namespace Jurassic.Compiler
                 }
                 else
                 {
+                    if (value == null)
+                    {
+                        // The value to store is on the top of the stack - convert it to an
+                        // object and store it in a temporary variable.
+                        EmitConversion.Convert(generator, valueType, PrimitiveType.Any);
+                        value = generator.CreateTemporaryVariable(typeof(object));
+                        generator.StoreVariable(value);
+                    }
+
                     if (this.Scope.ParentScope == null)
                     {
+                        // Optimization: if this is the global scope, use hidden classes to
+                        // optimize variable access.
 
                         // Global variable modification
                         // ----------------------------
@@ -370,7 +465,7 @@ namespace Jurassic.Compiler
                         // xxx = object.InlineSetPropertyValueIfExists("property", value, strictMode, out __object_property_cachedIndex, out __object_cacheKey)
                         generator.LoadVariable(objectInstance);
                         generator.LoadString(this.Name);
-                        generator.LoadVariable(valueVariable);
+                        generator.LoadVariable(value);
                         generator.LoadBoolean(optimizationInfo.StrictMode);
                         generator.LoadAddressOfVariable(cachedIndex);
                         generator.LoadAddressOfVariable(cacheKey);
@@ -398,7 +493,7 @@ namespace Jurassic.Compiler
                         generator.LoadVariable(objectInstance);
                         generator.Call(ReflectionHelpers.ObjectInstance_InlinePropertyValues);
                         generator.LoadVariable(cachedIndex);
-                        generator.LoadVariable(valueVariable);
+                        generator.LoadVariable(value);
                         generator.StoreArrayElement(typeof(object));
 
                         // End of the if statement
@@ -407,6 +502,7 @@ namespace Jurassic.Compiler
                     }
                     else
                     {
+                        // Slow route.
 
                         if (scopeVariable == null)
                             EmitHelpers.LoadScope(generator);
@@ -415,7 +511,7 @@ namespace Jurassic.Compiler
                         generator.CastClass(typeof(ObjectScope));
                         generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
                         generator.LoadString(this.Name);
-                        generator.LoadVariable(valueVariable);
+                        generator.LoadVariable(value);
                         generator.LoadBoolean(optimizationInfo.StrictMode);
 
                         if (scope.ParentScope == null && throwIfUnresolvable == false)
@@ -436,8 +532,7 @@ namespace Jurassic.Compiler
                 }
 
                 // Try the parent scope.
-                scope = scope.ParentScope;
-                if (scope != null)
+                if (scope.ParentScope != null && scope.ExistsAtRuntime == true)
                 {
                     if (scopeVariable == null)
                     {
@@ -451,15 +546,21 @@ namespace Jurassic.Compiler
                     generator.Call(ReflectionHelpers.Scope_ParentScope);
                     generator.StoreVariable(scopeVariable);
                 }
+                scope = scope.ParentScope;
 
             } while (scope != null);
+
+            // The value might be still on top of the stack.
+            if (value == null && scope == null)
+                generator.Pop();
 
             // Throw an error if the name does not exist and throwIfUnresolvable is true.
             if (scope == null && throwIfUnresolvable == true)
                 EmitHelpers.EmitThrow(generator, "ReferenceError", this.Name + " is not defined");
 
             // Release the temporary variables.
-            generator.ReleaseTemporaryVariable(valueVariable);
+            if (value != null)
+                generator.ReleaseTemporaryVariable(value);
             if (scopeVariable != null)
                 generator.ReleaseTemporaryVariable(scopeVariable);
 
@@ -565,13 +666,13 @@ namespace Jurassic.Compiler
                 }
 
                 // Try the parent scope.
-                scope = scope.ParentScope;
-                if (scope != null)
+                if (scope.ParentScope != null && scope.ExistsAtRuntime == true)
                 {
                     generator.LoadVariable(scopeVariable);
                     generator.Call(ReflectionHelpers.Scope_ParentScope);
                     generator.StoreVariable(scopeVariable);
                 }
+                scope = scope.ParentScope;
 
             } while (scope != null);
 
@@ -657,13 +758,13 @@ namespace Jurassic.Compiler
                 }
 
                 // Try the parent scope.
-                scope = scope.ParentScope;
-                if (scope != null)
+                if (scope.ParentScope != null && scope.ExistsAtRuntime == true)
                 {
                     generator.LoadVariable(scopeVariable);
                     generator.Call(ReflectionHelpers.Scope_ParentScope);
                     generator.StoreVariable(scopeVariable);
                 }
+                scope = scope.ParentScope;
 
             } while (scope != null);
 
