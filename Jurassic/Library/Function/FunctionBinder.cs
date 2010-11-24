@@ -20,7 +20,7 @@ namespace Jurassic.Library
         internal const int MaximumSupportedParameterCount = 8;
 
         [NonSerialized]
-        private Dictionary<Type[], BinderDelegate> delegateCache;
+        private BinderDelegate[] delegateCache;
 
         /// <summary>
         /// Creates a new FunctionBinder instance.
@@ -89,36 +89,9 @@ namespace Jurassic.Library
                 if (this.buckets[argumentCount] == null)
                     throw new InvalidOperationException("No preferred method could be found.");
             }
-        }
 
-        /// <summary>
-        /// Implements a comparer that compares an array of types.  Types that inherit from
-        /// ObjectInstance are considered identical.
-        /// </summary>
-        private class TypeArrayComparer : IEqualityComparer<Type[]>
-        {
-            public bool Equals(Type[] x, Type[] y)
-            {
-                if (x.Length != y.Length)
-                    return false;
-                for (int i = 0; i < x.Length; i++)
-                    if (x[i] != y[i] && (typeof(ObjectInstance).IsAssignableFrom(x[i]) == false ||
-                        typeof(ObjectInstance).IsAssignableFrom(y[i]) == false))
-                        return false;
-                return true;
-            }
-
-            public int GetHashCode(Type[] obj)
-            {
-                int total = 352654597;
-                foreach (var type in obj)
-                {
-                    int typeHash = typeof(ObjectInstance).IsAssignableFrom(type) == true ?
-                        typeof(ObjectInstance).GetHashCode() : type.GetHashCode();
-                    total = (((total << 5) + total) + (total >> 27)) ^ typeHash;
-                }
-                return total;
-            }
+            // Allocate an array containing delegates.
+            this.delegateCache = new BinderDelegate[MaximumSupportedParameterCount + 1];
         }
 
         /// <summary>
@@ -130,64 +103,36 @@ namespace Jurassic.Library
         /// <returns> The result of calling the method. </returns>
         public object Call(ScriptEngine engine, object thisObject, params object[] arguments)
         {
-            // Extract the argument types.
-            Type[] argumentTypes = GetArgumentTypes(arguments);
+            BinderDelegate delegateToCall;
 
             // Create a delegate or retrieve it from the cache.
-            var delegateToCall = CreateBinder(argumentTypes);
+            if (arguments.Length <= MaximumSupportedParameterCount)
+            {
+                delegateToCall = this.delegateCache[arguments.Length];
+                if (delegateToCall == null)
+                    delegateToCall = this.delegateCache[arguments.Length] = CreateBinder(arguments.Length);
+            }
+            else
+                delegateToCall = CreateBinder(arguments.Length);
 
             // Execute the delegate.
             return delegateToCall(engine, thisObject, arguments);
         }
 
         /// <summary>
-        /// Given an array of arguments, returns an array of types, one for each argument.
-        /// </summary>
-        /// <param name="arguments"> The arguments passed to the function. </param>
-        /// <returns> An array of types. </returns>
-        private Type[] GetArgumentTypes(object[] arguments)
-        {
-            // Possibly use Type.GetTypeArray instead?
-            Type[] argumentTypes = new Type[arguments.Length];
-            for (int i = 0; i < arguments.Length; i++)
-            {
-                if (arguments[i] == null)
-                    argumentTypes[i] = typeof(Undefined);
-                else if (arguments[i] is ObjectInstance)
-                    // Types derived from ObjectInstance are converted to ObjectInstance.
-                    argumentTypes[i] = typeof(ObjectInstance);
-                else
-                    argumentTypes[i] = arguments[i].GetType();
-            }
-            return argumentTypes;
-        }
-
-        /// <summary>
         /// Creates a delegate that does type conversion and calls the method represented by this
         /// object.
         /// </summary>
-        /// <param name="argumentTypes"> The types of the arguments that will be passed to the delegate. </param>
+        /// <param name="argumentCount"> The number of arguments that will be passed to the delegate. </param>
         /// <returns> A delegate that does type conversion and calls the method represented by this
         /// object. </returns>
-        public BinderDelegate CreateBinder(Type[] argumentTypes)
+        public BinderDelegate CreateBinder(int argumentCount)
         {
-            // Look up the delegate cache.
-            if (this.delegateCache == null)
-                this.delegateCache = new Dictionary<Type[], BinderDelegate>(2, new TypeArrayComparer());
-            BinderDelegate result;
-            if (this.delegateCache.TryGetValue(argumentTypes, out result) == true)
-                return result;
-
             // Find the method to call.
-            var targetMethod = this.buckets[Math.Min(argumentTypes.Length, this.buckets.Length - 1)];
+            var targetMethod = this.buckets[Math.Min(argumentCount, this.buckets.Length - 1)];
 
             // Create a binding method.
-            var dynamicMethod = CreateSingleMethodBinder(argumentTypes, targetMethod);
-
-            // Store the dynamic method in the cache.
-            this.delegateCache.Add(argumentTypes, dynamicMethod);
-
-            return dynamicMethod;
+            return CreateSingleMethodBinder(argumentCount, targetMethod);
         }
 
         ///// <summary>
@@ -214,11 +159,11 @@ namespace Jurassic.Library
         /// Creates a delegate with the given type that does parameter conversion as necessary
         /// and then calls the given method.
         /// </summary>
-        /// <param name="argumentTypes"> The types of the arguments that were supplied. </param>
+        /// <param name="argumentCount"> The number of arguments that were supplied. </param>
         /// <param name="binderMethod"> The method to call. </param>
         /// <returns> A delegate with the given type that does parameter conversion as necessary
         /// and then calls the given method. </returns>
-        private static BinderDelegate CreateSingleMethodBinder(Type[] argumentTypes, FunctionBinderMethod binderMethod)
+        private static BinderDelegate CreateSingleMethodBinder(int argumentCount, FunctionBinderMethod binderMethod)
         {
             // Create a new dynamic method.
             System.Reflection.Emit.DynamicMethod dm;
@@ -263,7 +208,7 @@ namespace Jurassic.Library
             //    return thisObject.targetMethod(param1, param2, param3, param4);
             //}
 
-            CreateSingleMethodBinder(argumentTypes, binderMethod, generator);
+            CreateSingleMethodBinder(argumentCount, binderMethod, generator);
 
             // Convert the DynamicMethod to a delegate.
             return (BinderDelegate)dm.CreateDelegate(typeof(BinderDelegate));
@@ -272,10 +217,10 @@ namespace Jurassic.Library
         /// <summary>
         /// Outputs IL that does parameter conversion as necessary and then calls the given method.
         /// </summary>
-        /// <param name="argumentTypes"> The types of the arguments that were supplied. </param>
+        /// <param name="argumentCount"> The number of arguments that were supplied. </param>
         /// <param name="binderMethod"> The method to call. </param>
         /// <param name="il"> The ILGenerator to output to. </param>
-        internal static void CreateSingleMethodBinder(Type[] argumentTypes, FunctionBinderMethod binderMethod, ILGenerator il)
+        internal static void CreateSingleMethodBinder(int argumentCount, FunctionBinderMethod binderMethod, ILGenerator il)
         {
 
             // Get information about the target method.
@@ -345,25 +290,17 @@ namespace Jurassic.Library
             for (int i = 0; i < initialEmitCount; i++)
             {
                 var targetParameter = targetParameters[i + offset];
-                if (i < argumentTypes.Length)
+                if (i < argumentCount)
                 {
                     // Load the argument onto the stack.
                     il.LoadArgument(2);
                     il.LoadInt32(i);
                     il.LoadArrayElement(typeof(object));
-                    if (argumentTypes[i].IsClass == false)
-                        il.Unbox(argumentTypes[i]);
 
                     if (Attribute.GetCustomAttribute(targetParameter, typeof(JSDoNotConvertAttribute)) == null)
                     {
-                        if (argumentTypes[i].IsClass == true)
-                        {
-                            // Cast the input parameter to the input type (won't verify otherwise).
-                            il.CastClass(argumentTypes[i]);
-                        }
-
                         // Convert the input parameter to the correct type.
-                        EmitTypeConversion(il, argumentTypes[i], targetParameter);
+                        EmitTypeConversion(il, typeof(object), targetParameter);
                     }
                     else
                     {
@@ -372,18 +309,9 @@ namespace Jurassic.Library
                             throw new NotImplementedException("[JSDoNotConvert] is only supported for arguments of type ObjectInstance.");
                         
                         var endOfThrowLabel = il.CreateLabel();
-                        if (argumentTypes[i].IsClass == true)
-                        {
-                            il.IsInstance(typeof(ObjectInstance));
-                            il.Duplicate();
-                            il.BranchIfNotNull(endOfThrowLabel);
-                        }
-                        else
-                        {
-                            // A value type obviously cannot be converted to ObjectInstance, but do
-                            // a boxing conversion to fool the stack checker.
-                            il.Box(argumentTypes[i]);
-                        }
+                        il.IsInstance(typeof(ObjectInstance));
+                        il.Duplicate();
+                        il.BranchIfNotNull(endOfThrowLabel);
                         EmitHelpers.EmitThrow(il, "TypeError", string.Format("The {1} parameter of {0}() must be an object", binderMethod.Name,
                             i == 0 ? "first" : i == 1 ? "second" : i == 2 ? "third" : string.Format("{0}th", i + 1)));
                         il.DefineLabelPosition(endOfThrowLabel);
@@ -401,10 +329,10 @@ namespace Jurassic.Library
             {
                 // Create an array to pass to the ParamArray parameter.
                 var elementType = targetParameters[targetParameters.Length - 1].ParameterType.GetElementType();
-                il.LoadInt32(Math.Max(argumentTypes.Length - initialEmitCount, 0));
+                il.LoadInt32(Math.Max(argumentCount - initialEmitCount, 0));
                 il.NewArray(elementType);
 
-                for (int i = initialEmitCount; i < argumentTypes.Length; i++)
+                for (int i = initialEmitCount; i < argumentCount; i++)
                 {
                     // Emit the array and index.
                     il.Duplicate();
@@ -416,14 +344,8 @@ namespace Jurassic.Library
                     il.LoadArrayElement(typeof(object));
                     if (elementType != typeof(object))
                     {
-                        // Unbox or cast to the input type.
-                        if (argumentTypes[i].IsClass == false)
-                            il.Unbox(argumentTypes[i]);
-                        else
-                            il.CastClass(argumentTypes[i]);
-
                         // Convert to the target type.
-                        EmitTypeConversion(il, argumentTypes[i], elementType);
+                        EmitTypeConversion(il, typeof(object), elementType);
                     }
 
                     // Store each parameter in the array.
@@ -436,7 +358,7 @@ namespace Jurassic.Library
 
             // Convert the return value.
             if (targetReturnParameter.ParameterType == typeof(void))
-                EmitUndefined(il, typeof(object));
+                EmitHelpers.EmitUndefined(il);
             else
                 EmitTypeConversion(il, targetReturnParameter.ParameterType, typeof(object));
 
@@ -448,18 +370,43 @@ namespace Jurassic.Library
         /// Pops the value on the stack, converts it from one type to another, then pushes the
         /// result onto the stack.  Undefined is converted to the given default value.
         /// </summary>
-        /// <param name="il"> The IL generator. </param>
+        /// <param name="generator"> The IL generator. </param>
         /// <param name="fromType"> The type to convert from. </param>
         /// <param name="targetParameter"> The type to convert to and the default value, if there is one. </param>
-        private static void EmitTypeConversion(ILGenerator il, Type fromType, ParameterInfo targetParameter)
+        private static void EmitTypeConversion(ILGenerator generator, Type fromType, ParameterInfo targetParameter)
         {
-            if (fromType == typeof(Undefined))
+            // Emit either the default value if there is one, otherwise emit "undefined".
+            if ((targetParameter.Attributes & ParameterAttributes.HasDefault) != ParameterAttributes.None)
             {
-                il.Pop();
-                EmitUndefined(il, targetParameter);
+                // Check if the input value is undefined.
+                var elseClause = generator.CreateLabel();
+                generator.Duplicate();
+                generator.BranchIfNull(elseClause);
+                generator.Duplicate();
+                generator.LoadField(ReflectionHelpers.Undefined_Value);
+                generator.CompareEqual();
+                generator.BranchIfTrue(elseClause);
+
+                // Convert as per normal.
+                EmitTypeConversion(generator, fromType, targetParameter.ParameterType);
+
+                // Jump to the end.
+                var endOfIf = generator.CreateLabel();
+                generator.Branch(endOfIf);
+                generator.DefineLabelPosition(elseClause);
+
+                // Pop the existing value and emit the default value.
+                generator.Pop();
+                EmitUndefined(generator, targetParameter);
+
+                // Define the end of the block.
+                generator.DefineLabelPosition(endOfIf);
             }
             else
-                EmitTypeConversion(il, fromType, targetParameter.ParameterType);
+            {
+                // Convert as per normal.
+                EmitTypeConversion(generator, fromType, targetParameter.ParameterType);
+            }
         }
 
         /// <summary>
@@ -520,20 +467,9 @@ namespace Jurassic.Library
             else
             {
                 // Convert Undefined to the target type and emit.
-                EmitUndefined(il, targetParameter.ParameterType);
+                EmitHelpers.EmitUndefined(il);
+                EmitTypeConversion(il, typeof(object), targetParameter.ParameterType);
             }
         }
-
-        /// <summary>
-        /// Pushes the result of converting <c>undefined</c> to the given type onto the stack.
-        /// </summary>
-        /// <param name="il"> The IL generator. </param>
-        /// <param name="toType"> The type to convert to. </param>
-        private static void EmitUndefined(ILGenerator il, Type toType)
-        {
-            EmitHelpers.EmitUndefined(il);
-            EmitConversion.Convert(il, PrimitiveType.Undefined, PrimitiveTypeUtilities.ToPrimitiveType(toType));
-        }
-
     }
 }
