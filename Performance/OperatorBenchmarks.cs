@@ -301,14 +301,23 @@ namespace Performance
         }
 
         [TestMethod]
-        public void FunctionCall()
+        public void FunctionCall1()
         {
             TestUtils.Benchmark(@"
                 function f(a, b, c) {
                 }
                 for (var i = 0; i < 10000; i++)
                     f(1, 2, 3)
-                ", 80.9);
+                ", 155);
+        }
+
+        [TestMethod]
+        public void FunctionCall2()
+        {
+            TestUtils.Benchmark(@"
+                for (var i = 0; i < 10000; i++)
+                    Math.abs(52)
+                ", 190);
         }
 
         [TestMethod]
