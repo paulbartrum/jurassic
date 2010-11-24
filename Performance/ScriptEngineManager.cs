@@ -92,9 +92,16 @@ namespace Performance
             // Read the script file.
             var script = File.ReadAllText(scriptPath);
 
+            // Initialize the script engine.
+            var scriptEngine = this.ScriptEngine;
+
+            // Run once to warm up the cache.
+            timer = System.Diagnostics.Stopwatch.StartNew();
+            scriptEngine.Execute(new Jurassic.StringScriptSource(script, scriptPath));
+
             // Execute the javascript code.
             timer = System.Diagnostics.Stopwatch.StartNew();
-            this.ScriptEngine.Execute(new Jurassic.StringScriptSource(script, scriptPath));
+            scriptEngine.Execute(new Jurassic.StringScriptSource(script, scriptPath));
             double runTime = timer.Elapsed.TotalMilliseconds;
 
             string infoString = string.Format("{0:n1}ms (parse: {1:n1}ms, compile: {2:n1}ms, optimize: {3:n1}ms, runtime: {4:n1}ms)",
