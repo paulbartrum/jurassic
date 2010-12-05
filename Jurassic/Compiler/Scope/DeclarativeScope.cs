@@ -216,7 +216,7 @@ namespace Jurassic.Compiler
         internal override void GenerateScopeCreation(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Allocate storage for each variable if the declarative scope object has been optimized away.
-            if (optimizationInfo.MethodOptimizationHints.OptimizeDeclarativeScopes == false)
+            if (optimizationInfo.OptimizeDeclarativeScopes == false)
             {
 
                 // Create a new declarative scope.

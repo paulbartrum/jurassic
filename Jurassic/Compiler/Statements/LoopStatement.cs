@@ -179,29 +179,6 @@ namespace Jurassic.Compiler
         //    });
         //}
 
-        ///// <summary>
-        ///// Adds information about a reference inside the loop.
-        ///// </summary>
-        ///// <param name="reference"> The reference. </param>
-        ///// <param name="typeHint"> The current type for the reference. </param>
-        //private void AddTypeHint(NameExpression reference, PrimitiveType typeHint)
-        //{
-        //    PrimitiveType existingHint;
-        //    if (this.typeHints.TryGetValue(reference, out existingHint) == false)
-        //    {
-        //        this.typeHints.Add(reference, typeHint);
-        //    }
-        //    else
-        //    {
-        //        if (existingHint == typeHint)
-        //            return;
-        //        if (PrimitiveTypeUtilities.IsNumeric(existingHint) == true && PrimitiveTypeUtilities.IsNumeric(existingHint) == true)
-        //            this.typeHints[reference] = PrimitiveType.Number;
-        //        else
-        //            this.typeHints[reference] = PrimitiveType.Any;
-        //    }
-        //}
-
         /// <summary>
         /// Generates CIL for the statement.
         /// </summary>
@@ -259,33 +236,38 @@ namespace Jurassic.Compiler
                 this.IncrementStatement.GenerateCode(generator, optimizationInfo);
 
             // Strengthen the variable types.
-            //List<Tuple<VariableInfo, VariableInfo>> revertVariableInfo = null;
-            //if (this.typeHints != null)
-            //{
-            //    revertVariableInfo = new List<Tuple<VariableInfo, VariableInfo>>();
-            //    foreach (var referenceAndTypeHint in typeHints)
-            //    {
-            //        var reference = referenceAndTypeHint.Key;
-            //        var typeHint = referenceAndTypeHint.Value;
+            List<KeyValuePair<Scope.DeclaredVariable, PrimitiveType>> previousVariableTypes = null;
+            if (optimizationInfo.OptimizeDeclarativeScopes == true)
+            {
+                // Keep a record of the variable types before strengthening.
+                previousVariableTypes = new List<KeyValuePair<Scope.DeclaredVariable, PrimitiveType>>();
 
-            //        var variableInfo = reference.Scope.GetVariableInfo(reference.Name);
-            //        if (variableInfo != null)
-            //        {
-            //            // Make sure we can revert the type information afterwards.
-            //            revertVariableInfo.Add(Tuple.Create(variableInfo, variableInfo.Clone()));
+                var typedVariables = FindTypedVariables();
+                foreach (var variableAndType in typedVariables)
+                {
+                    var variable = variableAndType.Key;
+                    var variableType = variableAndType.Value;
+                    if (variableType != variable.Type)
+                    {
+                        // Save the previous type so we can restore it later.
+                        var previousType = variable.Type;
+                        previousVariableTypes.Add(new KeyValuePair<Scope.DeclaredVariable, PrimitiveType>(variable, previousType));
 
-            //            // Create a new variable and store the value in it.
-            //            reference.GenerateGet(generator, optimizationInfo);
-            //            var local = generator.DeclareVariable(PrimitiveTypeUtilities.ToType(typeHint));
-            //            EmitConversion.Convert(generator, variableInfo.Type, typeHint);
-            //            generator.StoreVariable(local);
+                        // Load the existing value.
+                        var nameExpression = new NameExpression(variable.Scope, variable.Name);
+                        nameExpression.GenerateGet(generator, optimizationInfo, false);
 
-            //            // Alter the type information in the scope.
-            //            variableInfo.Type = typeHint;
-            //            variableInfo.ILVariable = local;
-            //        }
-            //    }
-            //}
+                        // Store the typed value.
+                        variable.Store = generator.DeclareVariable(variableType);
+                        variable.Type = variableType;
+                        nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
+                    }
+                }
+
+                // The variables must be reverted even in the presence of exceptions.
+                if (previousVariableTypes.Count > 0)
+                    generator.BeginExceptionBlock();
+            }
 
             // The inner loop starts here.
             var startOfLoop = generator.DefineLabelPosition();
@@ -319,22 +301,110 @@ namespace Jurassic.Compiler
             generator.DefineLabelPosition(breakTarget2);
 
             // Revert the variable types.
-            //if (revertVariableInfo != null)
-            //{
-            //    foreach (var currentAndPrevious in revertVariableInfo)
-            //    {
-            //        var current = currentAndPrevious.Item1;
-            //        var previous = currentAndPrevious.Item2;
-            //        current.Type = previous.Type;
-            //        current.ILVariable = previous.ILVariable;
-            //    }
-            //}
+            if (previousVariableTypes != null && previousVariableTypes.Count > 0)
+            {
+                // Revert the variable types within a finally block.
+                generator.BeginFinallyBlock();
+
+                foreach (var previousVariableAndType in previousVariableTypes)
+                {
+                    var variable = previousVariableAndType.Key;
+                    var variableType = previousVariableAndType.Value;
+
+                    // Load the existing value.
+                    var nameExpression = new NameExpression(variable.Scope, variable.Name);
+                    nameExpression.GenerateGet(generator, optimizationInfo, false);
+
+                    // Store the typed value.
+                    var previousType = variable.Type;
+                    variable.Store = generator.DeclareVariable(variableType);
+                    variable.Type = variableType;
+                    nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
+                }
+
+                // End the exception block.
+                generator.EndExceptionBlock();
+            }
 
             // Define the end of the loop (actually just after).
             generator.DefineLabelPosition(breakTarget1);
 
             // Generate code for the end of the statement.
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
+        }
+
+
+        /// <summary>
+        /// Finds variables that were assigned to and determines their types.
+        /// </summary>
+        /// <param name="root"> The root of the abstract syntax tree to search. </param>
+        /// <param name="variableTypes"> A dictionary containing the variables that were assigned to. </param>
+        private Dictionary<Scope.DeclaredVariable, PrimitiveType> FindTypedVariables()
+        {
+            var result = new Dictionary<Scope.DeclaredVariable,PrimitiveType>();
+            FindTypedVariables(this, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Finds variables that were assigned to and determines their types.
+        /// </summary>
+        /// <param name="root"> The root of the abstract syntax tree to search. </param>
+        /// <param name="variableTypes"> A dictionary containing the variables that were assigned to. </param>
+        private static void FindTypedVariables(AstNode root, Dictionary<Scope.DeclaredVariable, PrimitiveType> variableTypes)
+        {
+            if (root is AssignmentExpression)
+            {
+                // Found an assignment.
+                var assignment = (AssignmentExpression)root;
+                if (assignment.Target is NameExpression)
+                {
+                    // Found an assignment to a variable.
+                    var name = (NameExpression)assignment.Target;
+                    var variable = name.Scope.GetDeclaredVariable(name.Name);
+                    if (variable != null)
+                    {
+                        // The variable is in the top-most scope.
+                        // Check if the variable has been seen before.
+                        PrimitiveType existingType;
+                        if (variableTypes.TryGetValue(variable, out existingType) == false)
+                        {
+                            // This is the first time the variable has been encountered.
+                            variableTypes.Add(variable, assignment.ResultType);
+                        }
+                        else
+                        {
+                            // The variable has been seen before.
+                            variableTypes[variable] = PrimitiveTypeUtilities.GetCommonType(existingType, assignment.ResultType);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Search child nodes.
+                foreach (var node in root.ChildNodes)
+                    FindTypedVariables(node, variableTypes);
+            }
+        }
+
+        /// <summary>
+        /// Gets an enumerable list of child nodes in the abstract syntax tree.
+        /// </summary>
+        public override IEnumerable<AstNode> ChildNodes
+        {
+            get
+            {
+                if (this.InitStatement != null)
+                    yield return this.InitStatement;
+                if (this.CheckConditionAtEnd == false && this.ConditionStatement != null)
+                    yield return this.ConditionStatement;
+                yield return this.Body;
+                if (this.IncrementStatement != null)
+                    yield return this.IncrementStatement;
+                if (this.CheckConditionAtEnd == true && this.ConditionStatement != null)
+                    yield return this.ConditionStatement;
+            }
         }
     }
 

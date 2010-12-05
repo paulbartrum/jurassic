@@ -18,6 +18,9 @@ namespace Jurassic.Compiler
         [Serializable]
         internal class DeclaredVariable
         {
+            // The scope the variable was declared in.
+            public Scope Scope;
+
             // The index of the variable (in the order it was added).
             public int Index;
 
@@ -189,7 +192,7 @@ namespace Jurassic.Compiler
             if (variable == null)
             {
                 // This is a local variable that has not been declared before.
-                variable = new DeclaredVariable() { Index = this.variables.Count, Name = name, Writable = writable, Deletable = deletable };
+                variable = new DeclaredVariable() { Scope = this, Index = this.variables.Count, Name = name, Writable = writable, Deletable = deletable };
                 this.variables.Add(name, variable);
             }
 
@@ -281,6 +284,7 @@ namespace Jurassic.Compiler
                         generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
                         generator.LoadString(variable.Name);
                         variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
+                        EmitConversion.Convert(generator, variable.ValueAtTopOfScope.ResultType, PrimitiveType.Any);
                         generator.LoadInt32((int)attributes);
                         generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor2);
                         generator.LoadBoolean(false);

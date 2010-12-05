@@ -71,9 +71,6 @@ namespace Jurassic.Compiler
             // Declare a variable to store the eval result.
             optimizationInfo.EvalResult = generator.DeclareVariable(typeof(object));
 
-            // Disable optimizations.
-            optimizationInfo.MethodOptimizationHints.HasEval = true;
-
             if (this.StrictMode == true)
             {
                 // Create a new scope.

@@ -129,7 +129,24 @@ namespace Jurassic.Compiler
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
-        
+        /// <summary>
+        /// Gets an enumerable list of child nodes in the abstract syntax tree.
+        /// </summary>
+        public override IEnumerable<AstNode> ChildNodes
+        {
+            get
+            {
+                yield return this.TargetObject;
+
+                // Fake a string assignment to the target variable so it gets the correct type.
+                var fakeAssignment = new AssignmentExpression(Operator.Assignment);
+                fakeAssignment.Push((Expression)this.Variable);
+                fakeAssignment.Push(new LiteralExpression(""));
+                yield return fakeAssignment;
+
+                yield return this.Body;
+            }
+        }
 
         /// <summary>
         /// Converts the statement to a string.
