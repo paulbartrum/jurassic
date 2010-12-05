@@ -120,6 +120,23 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets an enumerable list of child nodes in the abstract syntax tree.
+        /// </summary>
+        public override IEnumerable<AstNode> ChildNodes
+        {
+            get
+            {
+                yield return this.Value;
+                foreach (var clause in this.CaseClauses)
+                {
+                    yield return clause.Value;
+                    foreach (var statement in clause.BodyStatements)
+                        yield return statement;
+                }
+            }
+        }
+
+        /// <summary>
         /// Converts the statement to a string.
         /// </summary>
         /// <param name="indentLevel"> The number of tabs to include before the statement. </param>

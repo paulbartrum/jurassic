@@ -46,7 +46,22 @@ namespace Jurassic.Compiler
         /// </summary>
         public override PrimitiveType ResultType
         {
-            get { return PrimitiveType.Any; }
+            get
+            {
+                // Typed variables are only allowed for declarative scopes that have been optimized away.
+                if (this.Scope.ExistsAtRuntime == false)
+                {
+                    var scope = this.Scope;
+                    do
+                    {
+                        var variableInfo = this.Scope.GetDeclaredVariable(this.Name);
+                        if (variableInfo != null)
+                            return variableInfo.Type;
+                        scope = scope.ParentScope;
+                    } while (scope != null && scope is DeclarativeScope && scope.ExistsAtRuntime == false);
+                }
+                return PrimitiveType.Any;
+            }
         }
 
         /// <summary>
@@ -112,6 +127,9 @@ namespace Jurassic.Compiler
 
                             // Load the value from the variable.
                             generator.LoadVariable(variable.Store);
+
+                            // Ensure that we match ResultType.
+                            EmitConversion.Convert(generator, variable.Type, this.ResultType);
                         }
                         else
                         {

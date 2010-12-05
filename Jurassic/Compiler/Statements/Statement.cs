@@ -7,7 +7,7 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents a javascript statement.
     /// </summary>
-    internal abstract class Statement
+    internal abstract class Statement : AstNode
     {
         private List<string> labels;
 
@@ -105,13 +105,6 @@ namespace Jurassic.Compiler
             if (locals.NonDefaultDebugInfoBehavior == false && optimizationInfo.DebugDocument != null && this.DebugInfo != null)
                 generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.DebugInfo);
         }
-
-        /// <summary>
-        /// Generates CIL for the statement.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        public abstract void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo);
 
         /// <summary>
         /// Generates CIL for the end of every statement.

@@ -97,6 +97,26 @@ namespace Jurassic.Compiler
         {
             return type == PrimitiveType.Bool || type == PrimitiveType.Number || type == PrimitiveType.Int32 || type == PrimitiveType.UInt32;
         }
+
+        /// <summary>
+        /// Gets a type that can hold values of both the given types.
+        /// </summary>
+        /// <param name="a"> The first of the two types to find the LCD for. </param>
+        /// <param name="b"> The second of the two types to find the LCD for. </param>
+        /// <returns> A type that can hold values of both the given types. </returns>
+        public static PrimitiveType GetCommonType(PrimitiveType a, PrimitiveType b)
+        {
+            // If the types are the same, then trivially that type will do.
+            if (a == b)
+                return a;
+
+            // If both types are numeric, return the number type.
+            if (IsNumeric(a) && IsNumeric(b))
+                return PrimitiveType.Number;
+
+            // Otherwise, fall back on the generic Any type.
+            return PrimitiveType.Any;
+        }
     }
 
 }

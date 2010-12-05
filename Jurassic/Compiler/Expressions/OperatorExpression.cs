@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -196,6 +197,18 @@ namespace Jurassic.Compiler
         public virtual int Precedence
         {
             get { return this.SecondTokenEncountered == false ? this.Operator.SecondaryPrecedence : this.Operator.TertiaryPrecedence; }
+        }
+
+        /// <summary>
+        /// Gets an enumerable list of child nodes in the abstract syntax tree.
+        /// </summary>
+        public override IEnumerable<AstNode> ChildNodes
+        {
+            get
+            {
+                for (int i = 0; i < this.OperandCount; i++)
+                    yield return this.operands[i];
+            }
         }
 
         /// <summary>
