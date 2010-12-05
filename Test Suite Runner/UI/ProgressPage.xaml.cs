@@ -46,6 +46,8 @@ namespace Test_Suite_Runner.UI
                 this.runner.TestSkipped += (sender2, e2) => this.Dispatcher.BeginInvoke(new EventHandler<TestEventArgs>(OnTestSkipped), sender2, e2);
 
                 // Start running.
+                //var test = new Test(this.runner.Suites[1], @"D:\Documents\Visual Studio 2010\Projects\Jurassic\Main\Test Suite Runner\sputnik\Conformance\15_Native_ECMA_Script_Objects\15.9_Date_Objects\15.9.3_The_Date_Constructor\S15.9.3.1_A5_T1.js");
+                //this.runner.Run(new Test[] {test});
                 this.runner.Run(null);
 
                 // Raise the complete event.
