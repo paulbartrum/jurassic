@@ -656,7 +656,7 @@ namespace UnitTests
         public void toString()
         {
             if (TestUtils.Engine != JSEngine.JScript)
-                Assert.AreEqual("Sat Apr 24 2010 23:59:57 GMT+1200 (New Zealand Standard Time)", TestUtils.Evaluate("new Date('24 Apr 2010 23:59:57').toString()"));
+                Assert.AreEqual("Sat Apr 24 2010 23:59:57 " + GetTimezoneString(DateTime.Parse("24 Apr 2010 23:59:57")), TestUtils.Evaluate("new Date('24 Apr 2010 23:59:57').toString()"));
             Assert.AreEqual("Invalid Date", TestUtils.Evaluate("new Date(NaN).toString()"));
             Assert.AreEqual(0, TestUtils.Evaluate("new Date().toString.length"));
         }
@@ -665,7 +665,7 @@ namespace UnitTests
         public void toTimeString()
         {
             if (TestUtils.Engine != JSEngine.JScript)
-                Assert.AreEqual("23:59:57 GMT+1200 (New Zealand Standard Time)", TestUtils.Evaluate("new Date('24 Apr 2010 23:59:57').toTimeString()"));
+                Assert.AreEqual("23:59:57 " + GetTimezoneString(DateTime.Parse("24 Apr 2010 23:59:57")), TestUtils.Evaluate("new Date('24 Apr 2010 23:59:57').toTimeString()"));
             Assert.AreEqual("Invalid Date", TestUtils.Evaluate("new Date(NaN).toTimeString()"));
             Assert.AreEqual(0, TestUtils.Evaluate("new Date().toTimeString.length"));
         }
@@ -698,6 +698,14 @@ namespace UnitTests
             if ((double)(int)result == result)
                 return (int)result;
             return result;
+        }
+
+        private static string GetTimezoneString(DateTime date)
+        {
+            var timeZoneInfo = TimeZoneInfo.Local;
+            var offset = timeZoneInfo.GetUtcOffset(date);
+            return string.Format("GMT+{0:d2}{1:d2} ({2})", offset.Hours, offset.Minutes,
+                timeZoneInfo.IsDaylightSavingTime(date) ? timeZoneInfo.DaylightName : timeZoneInfo.StandardName);
         }
     }
 }
