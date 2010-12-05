@@ -1196,9 +1196,9 @@ namespace Jurassic.Library
                 zoneName = timeZone.StandardName;
 
             if (hhmm < 0)
-                return string.Format("GMT{0} ({1})", hhmm, zoneName);
+                return string.Format("GMT{0:d4} ({1})", hhmm, zoneName);
             else
-                return string.Format("GMT+{0} ({1})", hhmm, zoneName);
+                return string.Format("GMT+{0:d4} ({1})", hhmm, zoneName);
         }
 
     }
