@@ -199,16 +199,31 @@ namespace Test_Suite_Runner
             var environmentJS = new System.Text.StringBuilder();
             environmentJS.AppendFormat("$LocalTZ = {0};" + Environment.NewLine, TimeZoneInfo.Local.BaseUtcOffset.TotalHours);
             var rules = TimeZoneInfo.Local.GetAdjustmentRules();
-            TimeZoneInfo.TransitionTime dstStart = rules[rules.Length - 1].DaylightTransitionStart;
-            TimeZoneInfo.TransitionTime dstEnd = rules[rules.Length - 1].DaylightTransitionEnd;
-            environmentJS.AppendFormat("$DST_start_month = {0};" + Environment.NewLine, dstStart.Month - 1);
-            environmentJS.AppendFormat("$DST_start_sunday = {0};" + Environment.NewLine, CalculateSunday(dstStart));
-            environmentJS.AppendFormat("$DST_start_hour = {0};" + Environment.NewLine, dstStart.TimeOfDay.AddSeconds(-1).Hour + 1);
-            environmentJS.AppendFormat("$DST_start_minutes = {0};" + Environment.NewLine, (dstStart.TimeOfDay.AddSeconds(-1).Minute + 1) % 60);
-            environmentJS.AppendFormat("$DST_end_month = {0};" + Environment.NewLine, dstEnd.Month - 1);
-            environmentJS.AppendFormat("$DST_end_sunday = {0};" + Environment.NewLine, CalculateSunday(dstEnd));
-            environmentJS.AppendFormat("$DST_end_hour = {0};" + Environment.NewLine, dstEnd.TimeOfDay.AddSeconds(-1).Hour + 1);
-            environmentJS.AppendFormat("$DST_end_minutes = {0};" + Environment.NewLine, (dstEnd.TimeOfDay.AddSeconds(-1).Minute + 1) % 60);
+            if (rules.Length > 0)
+            {
+                TimeZoneInfo.TransitionTime dstStart = rules[rules.Length - 1].DaylightTransitionStart;
+                TimeZoneInfo.TransitionTime dstEnd = rules[rules.Length - 1].DaylightTransitionEnd;
+                environmentJS.AppendFormat("$DST_start_month = {0};" + Environment.NewLine, dstStart.Month - 1);
+                environmentJS.AppendFormat("$DST_start_sunday = {0};" + Environment.NewLine, CalculateSunday(dstStart));
+                environmentJS.AppendFormat("$DST_start_hour = {0};" + Environment.NewLine, dstStart.TimeOfDay.AddSeconds(-1).Hour + 1);
+                environmentJS.AppendFormat("$DST_start_minutes = {0};" + Environment.NewLine, (dstStart.TimeOfDay.AddSeconds(-1).Minute + 1) % 60);
+                environmentJS.AppendFormat("$DST_end_month = {0};" + Environment.NewLine, dstEnd.Month - 1);
+                environmentJS.AppendFormat("$DST_end_sunday = {0};" + Environment.NewLine, CalculateSunday(dstEnd));
+                environmentJS.AppendFormat("$DST_end_hour = {0};" + Environment.NewLine, dstEnd.TimeOfDay.AddSeconds(-1).Hour + 1);
+                environmentJS.AppendFormat("$DST_end_minutes = {0};" + Environment.NewLine, (dstEnd.TimeOfDay.AddSeconds(-1).Minute + 1) % 60);
+            }
+            else
+            {
+                // No daylight savings.
+                environmentJS.Append("$DST_start_month = 0;" + Environment.NewLine);
+                environmentJS.Append("$DST_start_sunday = 1;" + Environment.NewLine);
+                environmentJS.Append("$DST_start_hour = 0;" + Environment.NewLine);
+                environmentJS.Append("$DST_start_minutes = 0;" + Environment.NewLine);
+                environmentJS.Append("$DST_end_month = 0;" + Environment.NewLine);
+                environmentJS.Append("$DST_end_sunday = 1;" + Environment.NewLine);
+                environmentJS.Append("$DST_end_hour = 0;" + Environment.NewLine);
+                environmentJS.Append("$DST_end_minutes = 0;" + Environment.NewLine);
+            }
             includes["environment.js"] = environmentJS.ToString();
 
             return includes;

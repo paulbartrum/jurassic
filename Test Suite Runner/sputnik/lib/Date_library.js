@@ -177,7 +177,7 @@ function DaylightSavingTA(t) {
                   +$DST_end_minutes*msPerMinute;
 
   // PSB
-  if (DST_start < DST_end)
+  if (DST_start <= DST_end)
     return t >= DST_start && t < DST_end ? msPerHour : 0;
   else
     return t >= DST_start || t < DST_end ? msPerHour : 0;

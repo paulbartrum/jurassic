@@ -163,7 +163,7 @@ namespace Test_Suite_Runner
                 AppDomain appDomain = null;
                 int recreateAppDomainAfterTestCount = this.RunInPartialTrust ? 200 : int.MaxValue;
                 int startTestIndex = 0;
-                while (startTestIndex < suite.TotalTestCount)
+                while (startTestIndex < suiteTestsToRun.Count)
                 {
                     // Unload the old AppDomain.
                     if (appDomain != null)
@@ -181,7 +181,7 @@ namespace Test_Suite_Runner
                     // Enumerate through the tests.
                     System.Threading.Tasks.Parallel.For(
                         startTestIndex,
-                        Math.Min(startTestIndex + recreateAppDomainAfterTestCount, suite.TotalTestCount),
+                        Math.Min(startTestIndex + recreateAppDomainAfterTestCount, suiteTestsToRun.Count),
                         () =>
                         {
                             // Set the DeserializationEnvironment so any JavaScriptExceptions can be serialized
