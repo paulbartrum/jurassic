@@ -129,7 +129,8 @@ namespace Jurassic.Compiler
                 yield return this.Value;
                 foreach (var clause in this.CaseClauses)
                 {
-                    yield return clause.Value;
+                    if (clause.Value != null)
+                        yield return clause.Value;
                     foreach (var statement in clause.BodyStatements)
                         yield return statement;
                 }
