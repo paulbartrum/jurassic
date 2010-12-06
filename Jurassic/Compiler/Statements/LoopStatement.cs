@@ -383,6 +383,7 @@ namespace Jurassic.Compiler
             bool conditionIsOkay = false;
             bool lessThan = true;
             if (initIsOkay == true &&
+                this.ConditionStatement != null &&
                 this.Condition is BinaryExpression &&
                 ((BinaryExpression)this.Condition).OperatorType == OperatorType.LessThan &&
                 ((BinaryExpression)this.Condition).Left is NameExpression &&
@@ -394,6 +395,7 @@ namespace Jurassic.Compiler
                 conditionIsOkay = true;
             }
             if (initIsOkay == true &&
+                this.ConditionStatement != null &&
                 this.Condition is BinaryExpression &&
                 ((BinaryExpression)this.Condition).OperatorType == OperatorType.GreaterThan &&
                 ((BinaryExpression)this.Condition).Left is NameExpression &&
@@ -409,6 +411,7 @@ namespace Jurassic.Compiler
             bool incrementIsOkay = false;
             if (conditionIsOkay == true &&
                 lessThan == true &&
+                this.IncrementStatement != null &&
                 this.Increment is AssignmentExpression &&
                 (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostIncrement ||
                 ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreIncrement) &&
@@ -420,6 +423,7 @@ namespace Jurassic.Compiler
             }
             if (conditionIsOkay == true &&
                 lessThan == false &&
+                this.IncrementStatement != null &&
                 this.Increment is AssignmentExpression &&
                 (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostDecrement ||
                 ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreDecrement) &&
