@@ -40,7 +40,7 @@ namespace Jurassic.Compiler
         /// </summary>
         public Expression InitExpression
         {
-            get { return (this.InitStatement is ExpressionStatement) == false ? null : ((ExpressionStatement)this.InitStatement).Expression; }
+            get { return (this.InitStatement is ExpressionStatement) == true ? ((ExpressionStatement)this.InitStatement).Expression : null; }
         }
 
         /// <summary>
@@ -342,7 +342,108 @@ namespace Jurassic.Compiler
         private Dictionary<Scope.DeclaredVariable, PrimitiveType> FindTypedVariables()
         {
             var result = new Dictionary<Scope.DeclaredVariable,PrimitiveType>();
-            FindTypedVariables(this, result);
+
+            // Special case for the common case of an incrementing or decrementing loop variable.
+            // The loop must be one of the following forms:
+            //     for (var i = <int>; i < <int>; i ++)
+            //     for (var i = <int>; i < <int>; ++ i)
+            //     for (var i = <int>; i > <int>; i --)
+            //     for (var i = <int>; i > <int>; -- i)
+            //     for (i = <int>; i < <int>; i ++)
+            //     for (i = <int>; i < <int>; ++ i)
+            //     for (i = <int>; i > <int>; i --)
+            //     for (i = <int>; i > <int>; -- i)
+            Scope loopVariableScope = null;
+            string loopVariableName = null;
+
+            // First, check the init statement.
+            bool initIsOkay = false;
+            if (this.InitVarStatement != null &&
+                this.InitVarStatement.Declarations.Count == 1 &&
+                this.InitVarStatement.Declarations[0].InitExpression != null &&
+                this.InitVarStatement.Declarations[0].InitExpression.ResultType == PrimitiveType.Int32)
+            {
+                // for (var i = <int>; ?; ?)
+                loopVariableScope = this.InitVarStatement.Scope;
+                loopVariableName = this.InitVarStatement.Declarations[0].VariableName;
+                initIsOkay = true;
+            }
+            if (this.InitExpression != null &&
+                this.InitExpression is AssignmentExpression &&
+                ((AssignmentExpression)this.InitExpression).ResultType == PrimitiveType.Int32 &&
+                ((AssignmentExpression)this.InitExpression).Target is NameExpression)
+            {
+                // for (i = <int>; ?; ?)
+                loopVariableScope = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Scope;
+                loopVariableName = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Name;
+                initIsOkay = true;
+            }
+
+            // Next, check the condition expression.
+            bool conditionIsOkay = false;
+            bool lessThan = true;
+            if (initIsOkay == true &&
+                this.Condition is BinaryExpression &&
+                ((BinaryExpression)this.Condition).OperatorType == OperatorType.LessThan &&
+                ((BinaryExpression)this.Condition).Left is NameExpression &&
+                ((NameExpression)((BinaryExpression)this.Condition).Left).Name == loopVariableName &&
+                ((BinaryExpression)this.Condition).Right.ResultType == PrimitiveType.Int32)
+            {
+                // for (?; i < <int>; ?)
+                lessThan = true;
+                conditionIsOkay = true;
+            }
+            if (initIsOkay == true &&
+                this.Condition is BinaryExpression &&
+                ((BinaryExpression)this.Condition).OperatorType == OperatorType.GreaterThan &&
+                ((BinaryExpression)this.Condition).Left is NameExpression &&
+                ((NameExpression)((BinaryExpression)this.Condition).Left).Name == loopVariableName &&
+                ((BinaryExpression)this.Condition).Right.ResultType == PrimitiveType.Int32)
+            {
+                // for (?; i > <int>; ?)
+                lessThan = false;
+                conditionIsOkay = true;
+            }
+
+            // Next, check the increment expression.
+            bool incrementIsOkay = false;
+            if (conditionIsOkay == true &&
+                lessThan == true &&
+                this.Increment is AssignmentExpression &&
+                (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostIncrement ||
+                ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreIncrement) &&
+                ((NameExpression)((AssignmentExpression)this.Increment).Target).Name == loopVariableName)
+            {
+                // for (?; i < <int>; i ++)
+                // for (?; i < <int>; ++ i)
+                incrementIsOkay = true;
+            }
+            if (conditionIsOkay == true &&
+                lessThan == false &&
+                this.Increment is AssignmentExpression &&
+                (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostDecrement ||
+                ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreDecrement) &&
+                ((NameExpression)((AssignmentExpression)this.Increment).Target).Name == loopVariableName)
+            {
+                // for (?; i > <int>; i --)
+                // for (?; i > <int>; -- i)
+                incrementIsOkay = true;
+            }
+
+            if (incrementIsOkay == true)
+            {
+                // The loop variable can be optimized to an integer.
+                var variable = loopVariableScope.GetDeclaredVariable(loopVariableName);
+                if (variable != null)
+                    result.Add(variable, PrimitiveType.Int32);
+                FindTypedVariables(this.Body, result);
+            }
+            else
+            {
+                // Unoptimized.
+                FindTypedVariables(this, result);
+            }
+
             return result;
         }
 
