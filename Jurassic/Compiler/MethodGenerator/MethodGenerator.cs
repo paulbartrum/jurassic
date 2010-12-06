@@ -183,6 +183,7 @@ namespace Jurassic.Compiler
 
             // Initialize global code-gen information.
             var optimizationInfo = new OptimizationInfo(this.Engine);
+            optimizationInfo.AbstractSyntaxTree = this.AbstractSyntaxTree;
             optimizationInfo.StrictMode = this.StrictMode;
             optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
 

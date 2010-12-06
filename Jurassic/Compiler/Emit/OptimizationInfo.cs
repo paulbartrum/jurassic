@@ -3,36 +3,9 @@ using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
-    /// <summary>
-    /// Represents one or more code generation optimizations.
-    /// </summary>
-    internal enum OptimizationFlags
-    {
-        None = 0,
 
-        /// <summary>
-        /// Indicates that strict mode is enabled.
-        /// </summary>
-        StrictMode = 1,
+    internal delegate void CodeGenDelegate(ILGenerator generator, OptimizationInfo optimizationInfo);
 
-        /// <summary>
-        /// Indicates the return value from an expression is not used and therefore should not be
-        /// generated.
-        /// </summary>
-        //SuppressReturnValue = 2,
-
-        /// <summary>
-        /// Indicates that object scope variable lookup and property access should be optimized
-        /// using the hidden class as the cache key.
-        /// </summary>
-        EnableInlineCaching = 4,
-
-        /// <summary>
-        /// Indicates that the types of local variables should be determined, if possible.
-        /// </summary>
-        EnableTypeAnalysis = 8,
-    }
-    
     /// <summary>
     /// Represents information about one or more code generation optimizations.
     /// </summary>
@@ -56,80 +29,23 @@ namespace Jurassic.Compiler
             private set;
         }
 
-        //private OptimizationFlags flags;
-
-        ///// <summary>
-        ///// Creates a new OptimizationInfo instance.
-        ///// </summary>
-        ///// <param name="flags"> Determines the optimizations to perform. </param>
-        //private OptimizationInfo(OptimizationFlags flags)
-        //{
-        //    this.flags = flags;
-        //}
-
-        /////// <summary>
-        /////// If <c>true</c>, indicates the return value from an expression is not used and
-        /////// therefore should not be generated.
-        /////// </summary>
-        ////public bool SuppressReturnValue
-        ////{
-        ////    get { return (this.flags & OptimizationFlags.SuppressReturnValue) != 0; }
-        ////}
-
-        ///// <summary>
-        ///// If <c>true</c>, indicates that object scope variable lookup and property access should
-        ///// be optimized using the hidden class as the cache key.
-        ///// </summary>
-        //public bool InlineCachingEnabled
-        //{
-        //    get { return (this.flags & OptimizationFlags.EnableInlineCaching) != 0; }
-        //}
+        /// <summary>
+        /// Gets or sets the root of the abstract syntax tree that is being compiled.
+        /// </summary>
+        public AstNode AbstractSyntaxTree
+        {
+            get;
+            set;
+        }
 
         /// <summary>
-        /// Gets a value that indicates whether strict mode is enabled.
+        /// Gets or sets a value that indicates whether strict mode is enabled.
         /// </summary>
-        public bool StrictMode;
-
-        ///// <summary>
-        ///// Gets a reference to an OptimizationInfo that performs no optimizations.
-        ///// </summary>
-        //public static OptimizationInfo Empty
-        //{
-        //    get { return new OptimizationInfo(OptimizationFlags.None); }
-        //}
-
-        ///// <summary>
-        ///// Clones this instance and adds one or more flags.
-        ///// </summary>
-        ///// <param name="flags"> The flags to add. </param>
-        ///// <returns> A new instance that is based on this one. </returns>
-        //public OptimizationInfo AddFlags(OptimizationFlags flags)
-        //{
-        //    var result = this.Clone();
-        //    result.flags |= flags;
-        //    return result;
-        //}
-
-        ///// <summary>
-        ///// Clones this instance and removes one or more flags.
-        ///// </summary>
-        ///// <param name="flags"> The flags to remove. </param>
-        ///// <returns> A new instance that is based on this one. </returns>
-        //public OptimizationInfo RemoveFlags(OptimizationFlags flags)
-        //{
-        //    var result = this.Clone();
-        //    result.flags &= ~flags;
-        //    return result;
-        //}
-
-        ///// <summary>
-        ///// Clones the optimization information.
-        ///// </summary>
-        ///// <returns> A clone of the optimization information. </returns>
-        //private OptimizationInfo Clone()
-        //{
-        //    return (OptimizationInfo)this.MemberwiseClone();
-        //}
+        public bool StrictMode
+        {
+            get;
+            set;
+        }
 
 
 
@@ -237,7 +153,8 @@ namespace Jurassic.Compiler
 
         /// <summary>
         /// Gets or sets the variable that holds the return value for the function.  Will be
-        /// <c>null</c> if code is being generated outside a function context.
+        /// <c>null</c> if code is being generated outside a function context or if no return
+        /// statements have been encountered.
         /// </summary>
         public ILLocalVariable ReturnVariable
         {

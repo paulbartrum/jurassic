@@ -212,10 +212,6 @@ namespace Jurassic.Compiler
         {
             // Method signature: object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments)
 
-            // Set up information needed by the return statement.
-            optimizationInfo.ReturnTarget = generator.CreateLabel();
-            optimizationInfo.ReturnVariable = generator.DeclareVariable(typeof(object));
-
             // Initialize the scope (note: the initial scope for a function is always declarative).
             this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
             
@@ -290,34 +286,37 @@ namespace Jurassic.Compiler
 
             // Transfer the argument values into the scope.
             // Note: the arguments array can be smaller than expected.
-            var endOfArguments = generator.CreateLabel();
-            for (int i = 0; i < this.ArgumentNames.Count; i ++)
+            if (this.ArgumentNames.Count > 0)
             {
-                // Check if a duplicate argument name exists.
-                bool duplicate = false;
-                for (int j = i + 1; j < this.ArgumentNames.Count; j ++)
-                    if (this.ArgumentNames[i] == this.ArgumentNames[j])
-                    {
-                        duplicate = true;
-                        break;
-                    }
-                if (duplicate == true)
-                    continue;
+                var endOfArguments = generator.CreateLabel();
+                for (int i = 0; i < this.ArgumentNames.Count; i++)
+                {
+                    // Check if a duplicate argument name exists.
+                    bool duplicate = false;
+                    for (int j = i + 1; j < this.ArgumentNames.Count; j++)
+                        if (this.ArgumentNames[i] == this.ArgumentNames[j])
+                        {
+                            duplicate = true;
+                            break;
+                        }
+                    if (duplicate == true)
+                        continue;
 
-                // Check if an array element exists.
-                EmitHelpers.LoadArgumentsArray(generator);
-                generator.LoadArrayLength();
-                generator.LoadInt32(i);
-                generator.BranchIfLessThanOrEqual(endOfArguments);
+                    // Check if an array element exists.
+                    EmitHelpers.LoadArgumentsArray(generator);
+                    generator.LoadArrayLength();
+                    generator.LoadInt32(i);
+                    generator.BranchIfLessThanOrEqual(endOfArguments);
 
-                // Store the array element in the scope.
-                EmitHelpers.LoadArgumentsArray(generator);
-                generator.LoadInt32(i);
-                generator.LoadArrayElement(typeof(object));
-                var argument = new NameExpression(this.InitialScope, this.ArgumentNames[i]);
-                argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                    // Store the array element in the scope.
+                    EmitHelpers.LoadArgumentsArray(generator);
+                    generator.LoadInt32(i);
+                    generator.LoadArrayElement(typeof(object));
+                    var argument = new NameExpression(this.InitialScope, this.ArgumentNames[i]);
+                    argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                }
+                generator.DefineLabelPosition(endOfArguments);
             }
-            generator.DefineLabelPosition(endOfArguments);
 
             // Initialize any declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
@@ -330,10 +329,18 @@ namespace Jurassic.Compiler
             this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);
 
             // Define the return target - this is where the return statement jumps to.
-            generator.DefineLabelPosition(optimizationInfo.ReturnTarget);
+            // ReturnTarget can be null if there were no return statements.
+            if (optimizationInfo.ReturnTarget != null)
+                generator.DefineLabelPosition(optimizationInfo.ReturnTarget);
 
-            // Load the return value.
-            generator.LoadVariable(optimizationInfo.ReturnVariable);
+            // Load the return value.  If the variable is null, there were no return statements.
+            if (optimizationInfo.ReturnVariable != null)
+                // Return the value stored in the variable.  Will be null if execution hits the end
+                // of the function without encountering any return statements.
+                generator.LoadVariable(optimizationInfo.ReturnVariable);
+            else
+                // There were no return statements - return null.
+                generator.LoadNull();
         }
 
         /// <summary>
