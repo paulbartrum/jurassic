@@ -47,12 +47,32 @@ namespace Jurassic.Compiler
                 EmitConversion.ToAny(generator, this.Value.ResultType);
             }
 
+            // Determine if this is the last statement in the function.
+            bool lastStatement = optimizationInfo.AbstractSyntaxTree is BlockStatement &&
+                ((BlockStatement)optimizationInfo.AbstractSyntaxTree).Statements.Count > 0 &&
+                ((BlockStatement)optimizationInfo.AbstractSyntaxTree).Statements[((BlockStatement)optimizationInfo.AbstractSyntaxTree).Statements.Count - 1] == this;
+
+            // The first return statement initializes the variable that holds the return value.
+            if (optimizationInfo.ReturnVariable == null)
+                optimizationInfo.ReturnVariable = generator.DeclareVariable(typeof(object));
+
             // Store the return value in a variable.
             generator.StoreVariable(optimizationInfo.ReturnVariable);
 
-            // Branch to the end of the function.  Note: the return statement might be branching
-            // from inside a try { } or finally { } block to outside.  EmitLongJump() handles this.
-            optimizationInfo.EmitLongJump(generator, optimizationInfo.ReturnTarget);
+            // There is no need to jump to the end of the function if this is the last statement.
+            if (lastStatement == false)
+            {
+                
+                // The first return statement that needs to branch creates the return label.  This is
+                // defined in FunctionmethodGenerator.GenerateCode() at the end of the function.
+                if (optimizationInfo.ReturnTarget == null)
+                    optimizationInfo.ReturnTarget = generator.CreateLabel();
+
+                // Branch to the end of the function.  Note: the return statement might be branching
+                // from inside a try { } or finally { } block to outside.  EmitLongJump() handles this.
+                optimizationInfo.EmitLongJump(generator, optimizationInfo.ReturnTarget);
+
+            }
 
             // Generate code for the end of the statement.
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
