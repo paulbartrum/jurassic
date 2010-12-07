@@ -95,6 +95,12 @@ namespace Jurassic.Compiler
             get { return false; }
         }
 
+        private struct RevertInfo
+        {
+            public PrimitiveType Type;
+            public ILLocalVariable Variable;
+        }
+
         /// <summary>
         /// Generates CIL for the statement.
         /// </summary>
@@ -152,11 +158,11 @@ namespace Jurassic.Compiler
                 this.IncrementStatement.GenerateCode(generator, optimizationInfo);
 
             // Strengthen the variable types.
-            List<KeyValuePair<Scope.DeclaredVariable, PrimitiveType>> previousVariableTypes = null;
+            List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>> previousVariableTypes = null;
             if (optimizationInfo.OptimizeDeclarativeScopes == true)
             {
                 // Keep a record of the variable types before strengthening.
-                previousVariableTypes = new List<KeyValuePair<Scope.DeclaredVariable, PrimitiveType>>();
+                previousVariableTypes = new List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>>();
 
                 var typedVariables = FindTypedVariables();
                 foreach (var variableAndType in typedVariables)
@@ -167,7 +173,7 @@ namespace Jurassic.Compiler
                     {
                         // Save the previous type so we can restore it later.
                         var previousType = variable.Type;
-                        previousVariableTypes.Add(new KeyValuePair<Scope.DeclaredVariable, PrimitiveType>(variable, previousType));
+                        previousVariableTypes.Add(new KeyValuePair<Scope.DeclaredVariable, RevertInfo>(variable, new RevertInfo() { Type = previousType, Variable = variable.Store }));
 
                         // Load the existing value.
                         var nameExpression = new NameExpression(variable.Scope, variable.Name);
@@ -225,7 +231,7 @@ namespace Jurassic.Compiler
                 foreach (var previousVariableAndType in previousVariableTypes)
                 {
                     var variable = previousVariableAndType.Key;
-                    var variableType = previousVariableAndType.Value;
+                    var variableRevertInfo = previousVariableAndType.Value;
 
                     // Load the existing value.
                     var nameExpression = new NameExpression(variable.Scope, variable.Name);
@@ -233,8 +239,8 @@ namespace Jurassic.Compiler
 
                     // Store the typed value.
                     var previousType = variable.Type;
-                    variable.Store = generator.DeclareVariable(variableType);
-                    variable.Type = variableType;
+                    variable.Store = variableRevertInfo.Variable;
+                    variable.Type = variableRevertInfo.Type;
                     nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
                 }
 
