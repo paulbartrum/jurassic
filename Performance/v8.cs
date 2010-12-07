@@ -96,11 +96,6 @@ namespace Performance
             manager.RunTest(@"splay.js", 6873);
         }
 
-        [TestMethod]
-        public void RunAll()
-        {
-            manager.RunAllTests(67780.6);
-        }
     }
 
 }
