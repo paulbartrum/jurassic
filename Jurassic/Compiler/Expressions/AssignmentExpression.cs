@@ -155,16 +155,16 @@ namespace Jurassic.Compiler
                     break;
 
                 case OperatorType.PostIncrement:
-                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, true, 1);
+                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, postfix: true, increment: true);
                     break;
                 case OperatorType.PostDecrement:
-                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, true, -1);
+                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, postfix: true, increment: false);
                     break;
                 case OperatorType.PreIncrement:
-                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, false, 1);
+                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, postfix: false, increment: true);
                     break;
                 case OperatorType.PreDecrement:
-                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, false, -1);
+                    GenerateIncrementOrDecrement(generator, optimizationInfo, target, postfix: false, increment: false);
                     break;
 
                 default:
@@ -188,7 +188,11 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         /// <param name="target"> The target to modify. </param>
-        private void GenerateIncrementOrDecrement(ILGenerator generator, OptimizationInfo optimizationInfo, IReferenceExpression target, bool returnOriginalValue, int increment)
+        /// <param name="postfix"> <c>true</c> if this is the postfix version of the operator;
+        /// <c>false</c> otherwise. </param>
+        /// <param name="increment"> <c>true</c> if this is the increment operator; <c>false</c> if
+        /// this is the decrement operator. </param>
+        private void GenerateIncrementOrDecrement(ILGenerator generator, OptimizationInfo optimizationInfo, IReferenceExpression target, bool postfix, bool increment)
         {
             // Note: increment and decrement can produce a number that is out of range if the
             // target is of type Int32.  The only time this should happen is for a loop variable
@@ -203,20 +207,23 @@ namespace Jurassic.Compiler
                 EmitConversion.ToNumber(generator, target.Type);
 
             // If this is PostIncrement or PostDecrement, duplicate the value so it can be produced as the return value.
-            if (returnOriginalValue == true)
+            if (postfix == true)
                 generator.Duplicate();
 
             // Load the increment constant.
             if (target.Type == PrimitiveType.Int32)
-                generator.LoadInt32(increment);
+                generator.LoadInt32(1);
             else
-                generator.LoadDouble((double)increment);
+                generator.LoadDouble(1.0);
 
-            // Add the constant to the target value.
-            generator.Add();
+            // Add or subtract the constant to the target value.
+            if (increment == true)
+                generator.Add();
+            else
+                generator.Subtract();
 
             // If this is PreIncrement or PreDecrement, duplicate the value so it can be produced as the return value.
-            if (returnOriginalValue == false)
+            if (postfix == false)
                 generator.Duplicate();
 
             // Store the value.

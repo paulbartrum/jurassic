@@ -884,7 +884,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Ends a try-catch-finally block.
+        /// Ends a try-catch-finally block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         public override void EndExceptionBlock()
         {
@@ -892,7 +892,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Begins a catch block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a catch block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         /// <param name="exceptionType"> The type of exception to handle. </param>
         public override void BeginCatchBlock(Type exceptionType)
@@ -901,7 +901,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Begins a finally block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a finally block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         public override void BeginFinallyBlock()
         {
@@ -909,7 +909,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Begins a filter block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a filter block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         public override void BeginFilterBlock()
         {
@@ -917,7 +917,7 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Begins a fault block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a fault block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         public override void BeginFaultBlock()
         {
