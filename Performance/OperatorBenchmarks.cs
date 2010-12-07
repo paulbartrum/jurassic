@@ -354,7 +354,7 @@ namespace Performance
         }
 
         [TestMethod]
-        public void GlobalVariableAccess()
+        public void GlobalVariableAccess1()
         {
             TestUtils.Benchmark(@"
                 var a = 0, b = 1, c = 2, d = 3, e = 4, f = 5, g = 6;
@@ -369,6 +369,28 @@ namespace Performance
                     g = a;
                 }
                 ", 38.1);
+        }
+
+        [TestMethod]
+        public void GlobalVariableAccess2()
+        {
+            TestUtils.Benchmark(@"
+                var a = 0, b = 1, c = 2, d = 3, e = 4, f = 5, g = 6;
+                function test()
+                {
+                    for (var i = 0; i < 100000; i ++)
+                    {
+                        a = b;
+                        b = c;
+                        c = d;
+                        d = e;
+                        e = f;
+                        f = g;
+                        g = a;
+                    }
+                }
+                test();
+                ", 45.7);
         }
 
         [TestMethod]
