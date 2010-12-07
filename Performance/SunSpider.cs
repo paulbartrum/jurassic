@@ -23,164 +23,164 @@ namespace Performance
         [TestMethod]
         public void threed_cube()
         {
-            manager.RunTest(@"3d-cube.js", 217.5);
+            manager.RunTest(@"3d-cube.js", 408);
         }
 
         [TestMethod]
         public void threed_morph()
         {
-            manager.RunTest(@"3d-morph.js", 596.1);
+            manager.RunTest(@"3d-morph.js", 205);
         }
 
         [TestMethod]
         public void threed_raytrace()
         {
-            manager.RunTest(@"3d-raytrace.js", 597.9);
+            manager.RunTest(@"3d-raytrace.js", 443);
         }
 
         [TestMethod]
         public void access_binary_trees()
         {
-            manager.RunTest(@"access-binary-trees.js", 1152.5);
+            manager.RunTest(@"access-binary-trees.js", 503);
         }
 
         [TestMethod]
         public void access_fannkuch()
         {
-            manager.RunTest(@"access-fannkuch.js", 1575.7);
+            manager.RunTest(@"access-fannkuch.js", 543);
         }
 
         [TestMethod]
         public void access_nbody()
         {
-            manager.RunTest(@"access-nbody.js", 718.9);
+            manager.RunTest(@"access-nbody.js", 218);
         }
 
         [TestMethod]
         public void access_nsieve()
         {
-            manager.RunTest(@"access-nsieve.js", 617.6);
+            manager.RunTest(@"access-nsieve.js", 357);
         }
 
         [TestMethod]
         public void bitops_3bit_bits_in_byte()
         {
-            manager.RunTest(@"bitops-3bit-bits-in-byte.js", 161.6);
+            manager.RunTest(@"bitops-3bit-bits-in-byte.js", 27);
         }
 
         [TestMethod]
         public void bitops_bits_in_byte()
         {
-            manager.RunTest(@"bitops-bits-in-byte.js", 202.9);
+            manager.RunTest(@"bitops-bits-in-byte.js", 27);
         }
 
         [TestMethod]
         public void bitops_bitwise_and()
         {
-            manager.RunTest(@"bitops-bitwise-and.js", 1082.8);
+            manager.RunTest(@"bitops-bitwise-and.js", 51);
         }
 
         [TestMethod]
         public void bitops_nsieve_bits()
         {
-            manager.RunTest(@"bitops-nsieve-bits.js", 617.9);
+            manager.RunTest(@"bitops-nsieve-bits.js", 263);
         }
 
         [TestMethod]
         public void controlflow_recursive()
         {
-            manager.RunTest(@"controlflow-recursive.js", 162.8);
+            manager.RunTest(@"controlflow-recursive.js", 41);
         }
 
         [TestMethod]
         public void crypto_aes()
         {
-            manager.RunTest(@"crypto-aes.js", 967.6);
+            manager.RunTest(@"crypto-aes.js", 434);
         }
 
         [TestMethod]
         public void crypto_md5()
         {
-            manager.RunTest(@"crypto-md5.js", 784.0);
+            manager.RunTest(@"crypto-md5.js", 311);
         }
 
         [TestMethod]
         public void crypto_sha1()
         {
-            manager.RunTest(@"crypto-sha1.js", 411.2);
+            manager.RunTest(@"crypto-sha1.js", 176);
         }
 
         [TestMethod]
         public void date_format_tofte()
         {
-            manager.RunTest(@"date-format-tofte.js", 660.3);
+            manager.RunTest(@"date-format-tofte.js", 2633);
         }
 
         [TestMethod]
         public void date_format_xparb()
         {
-            manager.RunTest(@"date-format-xparb.js", 583.3);
+            manager.RunTest(@"date-format-xparb.js", 230);
         }
 
         [TestMethod]
         public void math_cordic()
         {
-            manager.RunTest(@"math-cordic.js", 530.7);
+            manager.RunTest(@"math-cordic.js", 156);
         }
 
         [TestMethod]
         public void math_partial_sums()
         {
-            manager.RunTest(@"math-partial-sums.js", 514.6);
+            manager.RunTest(@"math-partial-sums.js", 80);
         }
 
         [TestMethod]
         public void math_spectral_norm()
         {
-            manager.RunTest(@"math-spectral-norm.js", 335.2);
+            manager.RunTest(@"math-spectral-norm.js", 134);
         }
 
         [TestMethod]
         public void regexp_dna()
         {
-            manager.RunTest(@"regexp-dna.js", 942.6);
+            manager.RunTest(@"regexp-dna.js", 730);
         }
 
         [TestMethod]
         public void string_base64()
         {
-            manager.RunTest(@"string-base64.js", 2310.8);
+            manager.RunTest(@"string-base64.js", 1085);
         }
 
         [TestMethod]
         public void string_fasta()
         {
-            manager.RunTest(@"string-fasta.js", 1005.8);
+            manager.RunTest(@"string-fasta.js", 338);
         }
 
         [TestMethod]
         public void string_tagcloud()
         {
-            manager.RunTest(@"string-tagcloud.js", 2268.3);
+            manager.RunTest(@"string-tagcloud.js", 1621);
         }
 
         [TestMethod]
         public void string_unpack_code()
         {
-            manager.RunTest(@"string-unpack-code.js", 3479.1);
+            manager.RunTest(@"string-unpack-code.js", 2902);
         }
 
         [TestMethod]
         public void string_validate_input()
         {
-            manager.RunTest(@"string-validate-input.js", 5343.1);   // 4500-6000
+            manager.RunTest(@"string-validate-input.js", 7644);
         }
 
-        [TestMethod]
-        public void RunAll()
-        {
-            manager.RunAllTests(74683);
-        }
+        //[TestMethod]
+        //public void RunAll()
+        //{
+        //    manager.RunAllTests(74683);
+        //}
     }
 
 }
