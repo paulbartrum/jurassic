@@ -282,9 +282,9 @@ namespace Jurassic.Compiler
                 // for (var i = <int>; ?; ?)
                 loopVariableScope = this.InitVarStatement.Scope;
                 loopVariableName = this.InitVarStatement.Declarations[0].VariableName;
-                initIsOkay = true;
+                initIsOkay = loopVariableScope is DeclarativeScope && loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
             }
-            if (this.InitExpression != null &&
+            else if (this.InitExpression != null &&
                 this.InitExpression is AssignmentExpression &&
                 ((AssignmentExpression)this.InitExpression).ResultType == PrimitiveType.Int32 &&
                 ((AssignmentExpression)this.InitExpression).Target is NameExpression)
@@ -292,65 +292,56 @@ namespace Jurassic.Compiler
                 // for (i = <int>; ?; ?)
                 loopVariableScope = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Scope;
                 loopVariableName = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Name;
-                initIsOkay = true;
+                initIsOkay = loopVariableScope is DeclarativeScope && loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
             }
 
             // Next, check the condition expression.
-            bool conditionIsOkay = false;
+            bool conditionAndInitIsOkay = false;
             bool lessThan = true;
             if (initIsOkay == true &&
                 this.ConditionStatement != null &&
                 this.Condition is BinaryExpression &&
-                ((BinaryExpression)this.Condition).OperatorType == OperatorType.LessThan &&
+                (((BinaryExpression)this.Condition).OperatorType == OperatorType.LessThan ||
+                ((BinaryExpression)this.Condition).OperatorType == OperatorType.GreaterThan) &&
                 ((BinaryExpression)this.Condition).Left is NameExpression &&
                 ((NameExpression)((BinaryExpression)this.Condition).Left).Name == loopVariableName &&
                 ((BinaryExpression)this.Condition).Right.ResultType == PrimitiveType.Int32)
             {
                 // for (?; i < <int>; ?)
-                lessThan = true;
-                conditionIsOkay = true;
-            }
-            if (initIsOkay == true &&
-                this.ConditionStatement != null &&
-                this.Condition is BinaryExpression &&
-                ((BinaryExpression)this.Condition).OperatorType == OperatorType.GreaterThan &&
-                ((BinaryExpression)this.Condition).Left is NameExpression &&
-                ((NameExpression)((BinaryExpression)this.Condition).Left).Name == loopVariableName &&
-                ((BinaryExpression)this.Condition).Right.ResultType == PrimitiveType.Int32)
-            {
                 // for (?; i > <int>; ?)
-                lessThan = false;
-                conditionIsOkay = true;
+                lessThan = ((BinaryExpression)this.Condition).OperatorType == OperatorType.LessThan;
+                conditionAndInitIsOkay = true;
             }
 
             // Next, check the increment expression.
-            bool incrementIsOkay = false;
-            if (conditionIsOkay == true &&
-                lessThan == true &&
-                this.IncrementStatement != null &&
-                this.Increment is AssignmentExpression &&
-                (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostIncrement ||
-                ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreIncrement) &&
-                ((NameExpression)((AssignmentExpression)this.Increment).Target).Name == loopVariableName)
+            bool everythingIsOkay = false;
+            if (conditionAndInitIsOkay == true)
             {
-                // for (?; i < <int>; i ++)
-                // for (?; i < <int>; ++ i)
-                incrementIsOkay = true;
-            }
-            if (conditionIsOkay == true &&
-                lessThan == false &&
-                this.IncrementStatement != null &&
-                this.Increment is AssignmentExpression &&
-                (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostDecrement ||
-                ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreDecrement) &&
-                ((NameExpression)((AssignmentExpression)this.Increment).Target).Name == loopVariableName)
-            {
-                // for (?; i > <int>; i --)
-                // for (?; i > <int>; -- i)
-                incrementIsOkay = true;
+                if (lessThan == true &&
+                    this.IncrementStatement != null &&
+                    this.Increment is AssignmentExpression &&
+                    (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostIncrement ||
+                    ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreIncrement) &&
+                    ((NameExpression)((AssignmentExpression)this.Increment).Target).Name == loopVariableName)
+                {
+                    // for (?; i < <int>; i ++)
+                    // for (?; i < <int>; ++ i)
+                    everythingIsOkay = true;
+                }
+                else if (lessThan == false &&
+                    this.IncrementStatement != null &&
+                    this.Increment is AssignmentExpression &&
+                    (((AssignmentExpression)this.Increment).OperatorType == OperatorType.PostDecrement ||
+                    ((AssignmentExpression)this.Increment).OperatorType == OperatorType.PreDecrement) &&
+                    ((NameExpression)((AssignmentExpression)this.Increment).Target).Name == loopVariableName)
+                {
+                    // for (?; i > <int>; i --)
+                    // for (?; i > <int>; -- i)
+                    everythingIsOkay = true;
+                }
             }
 
-            if (incrementIsOkay == true)
+            if (everythingIsOkay == true)
             {
                 // The loop variable can be optimized to an integer.
                 var variable = loopVariableScope.GetDeclaredVariable(loopVariableName);
@@ -382,21 +373,24 @@ namespace Jurassic.Compiler
                 {
                     // Found an assignment to a variable.
                     var name = (NameExpression)assignment.Target;
-                    var variable = name.Scope.GetDeclaredVariable(name.Name);
-                    if (variable != null)
+                    if (name.Scope is DeclarativeScope)
                     {
-                        // The variable is in the top-most scope.
-                        // Check if the variable has been seen before.
-                        PrimitiveType existingType;
-                        if (variableTypes.TryGetValue(variable, out existingType) == false)
+                        var variable = name.Scope.GetDeclaredVariable(name.Name);
+                        if (variable != null)
                         {
-                            // This is the first time the variable has been encountered.
-                            variableTypes.Add(variable, assignment.ResultType);
-                        }
-                        else
-                        {
-                            // The variable has been seen before.
-                            variableTypes[variable] = PrimitiveTypeUtilities.GetCommonType(existingType, assignment.ResultType);
+                            // The variable is in the top-most scope.
+                            // Check if the variable has been seen before.
+                            PrimitiveType existingType;
+                            if (variableTypes.TryGetValue(variable, out existingType) == false)
+                            {
+                                // This is the first time the variable has been encountered.
+                                variableTypes.Add(variable, assignment.ResultType);
+                            }
+                            else
+                            {
+                                // The variable has been seen before.
+                                variableTypes[variable] = PrimitiveTypeUtilities.GetCommonType(existingType, assignment.ResultType);
+                            }
                         }
                     }
                 }
