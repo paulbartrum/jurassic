@@ -2,7 +2,7 @@
 
 namespace Jurassic.Compiler
 {
-    
+
     /// <summary>
     /// Represents a variable or part of a member reference.
     /// </summary>
@@ -181,7 +181,7 @@ namespace Jurassic.Compiler
                 }
                 else
                 {
-                    if (this.Scope.ParentScope == null)
+                    if (scope.ParentScope == null)
                     {
 
                         // Global variable access
@@ -352,7 +352,7 @@ namespace Jurassic.Compiler
                                 generator.LoadVariable(value);
                                 EmitConversion.Convert(generator, PrimitiveType.Any, variable.Type);
                             }
-                                
+
                             // Store the value in the variable.
                             generator.StoreVariable(variable.Store);
                         }
@@ -442,7 +442,7 @@ namespace Jurassic.Compiler
                         generator.StoreVariable(value);
                     }
 
-                    if (this.Scope.ParentScope == null)
+                    if (scope.ParentScope == null)
                     {
                         // Optimization: if this is the global scope, use hidden classes to
                         // optimize variable access.
