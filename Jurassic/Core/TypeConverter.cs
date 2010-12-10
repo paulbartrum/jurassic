@@ -74,6 +74,8 @@ namespace Jurassic
                 return ((double)value) != 0 && double.IsNaN((double)value) == false;
             if (value is string)
                 return ((string)value).Length > 0;
+            if (value is ConcatenatedString)
+                return ((ConcatenatedString)value).Length > 0;
             if (value is ObjectInstance)
                 return true;
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a boolean.", value.GetType()), "value");
@@ -100,6 +102,8 @@ namespace Jurassic
                 return (bool)value ? 1 : 0;
             if (value is string)
                 return NumberParser.CoerceToNumber((string)value);
+            if (value is ConcatenatedString)
+                return NumberParser.CoerceToNumber(value.ToString());
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), "value");
@@ -151,9 +155,23 @@ namespace Jurassic
             }
             if (value is string)
                 return (string)value;
+            if (value is ConcatenatedString)
+                return value.ToString();
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), "value");
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to a concatenated string value.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <returns> A concatenated string value. </returns>
+        public static ConcatenatedString ToConcatenatedString(object value)
+        {
+            if (value is ConcatenatedString)
+                return (ConcatenatedString)value;
+            return new ConcatenatedString(ToString(value));
         }
 
         /// <summary>
@@ -182,6 +200,8 @@ namespace Jurassic
                 return engine.Number.Construct((double)value);
             if (value is string)
                 return engine.String.Construct((string)value);
+            if (value is ConcatenatedString)
+                return engine.String.Construct(value.ToString());
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), "value");
         }
 

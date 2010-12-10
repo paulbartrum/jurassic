@@ -32,6 +32,8 @@ namespace Jurassic.Compiler
                     return typeof(double);
                 case PrimitiveType.String:
                     return typeof(string);
+                case PrimitiveType.ConcatenatedString:
+                    return typeof(ConcatenatedString);
                 case PrimitiveType.Object:
                     return typeof(Library.ObjectInstance);
                 default:
@@ -62,6 +64,8 @@ namespace Jurassic.Compiler
                 return PrimitiveType.Number;
             if (type == typeof(string))
                 return PrimitiveType.String;
+            if (type == typeof(ConcatenatedString))
+                return PrimitiveType.ConcatenatedString;
             if (typeof(Library.ObjectInstance).IsAssignableFrom(type))
                 return PrimitiveType.Object;
             throw new NotImplementedException(string.Format("Unsupported type: {0}", type));
@@ -85,7 +89,7 @@ namespace Jurassic.Compiler
         /// otherwise. </returns>
         public static bool IsString(PrimitiveType type)
         {
-            return type == PrimitiveType.String;
+            return type == PrimitiveType.String || type == PrimitiveType.ConcatenatedString;
         }
 
         /// <summary>

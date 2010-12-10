@@ -67,16 +67,42 @@ namespace Performance
         }
 
         [TestMethod]
-        public void AddString()
+        public void AddString1()
         {
             TestUtils.Benchmark(@"
                 function f() {
                     var x = '';
-                    for (var i = 0; i < 10000; i++)
+                    for (var i = 0; i < 100000; i++)
                         x = x + i
                 }
                 f();
-                ", 7.6);
+                ", 42.4);
+        }
+
+        [TestMethod]
+        public void AddString2()
+        {
+            TestUtils.Benchmark(@"
+                function f() {
+                    var x = '';
+                    for (var i = 0; i < 100000; i++)
+                        x += i
+                }
+                f();
+                ", 42.4);
+        }
+
+        [TestMethod]
+        public void AddString3()
+        {
+            TestUtils.Benchmark(@"
+                function f() {
+                    var x = '';
+                    for (var i = 0; i < 100000; i++)
+                        x = x + '<' + i + '>'
+                }
+                f();
+                ", 34.4);
         }
 
         [TestMethod]

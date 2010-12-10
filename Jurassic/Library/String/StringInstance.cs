@@ -148,19 +148,32 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="strings"> The strings to concatenate with this string. </param>
         /// <returns> The result of combining this string with the given strings. </returns>
-        [JSFunction(Name = "concat", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Concat(string thisObject, params string[] strings)
+        [JSFunction(Name = "concat", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        public static ConcatenatedString Concat(ScriptEngine engine, object thisObject, params object[] strings)
         {
-            // Calculate the combined length of all the strings.
-            int totalLength = thisObject.Length;
-            foreach (string str in strings)
-                totalLength += str.Length;
+            if (thisObject is ConcatenatedString)
+            {
+                // Append the strings together.
+                ConcatenatedString result = (ConcatenatedString)thisObject;
+                if (strings.Length == 0)
+                    return result;
+                result = result.Concatenate(strings[0]);
+                for (int i = 1; i < strings.Length; i ++)
+                    result.Append(strings[i]);
+                return result;
+            }
+            else
+            {
+                // Convert "this" to a string.
+                TypeUtilities.VerifyThisObject(engine, thisObject, "concat");
+                var thisObject2 = TypeConverter.ToString(thisObject);
 
-            // Append the strings together.
-            var result = new System.Text.StringBuilder(thisObject, totalLength);
-            foreach (string str in strings)
-                result.Append(str);
-            return result.ToString();
+                // Append the strings together.
+                var result = new ConcatenatedString(thisObject2);
+                foreach (object str in strings)
+                    result.Append(str);
+                return result;
+            }
         }
 
         

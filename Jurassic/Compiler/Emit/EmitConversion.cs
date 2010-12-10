@@ -57,6 +57,10 @@ namespace Jurassic.Compiler
                     ToString(generator, fromType);
                     break;
 
+                case PrimitiveType.ConcatenatedString:
+                    ToConcatenatedString(generator, fromType);
+                    break;
+
                 case PrimitiveType.Object:
                     ToObject(generator, fromType);
                     break;
@@ -121,6 +125,13 @@ namespace Jurassic.Compiler
                 case PrimitiveType.String:
                     // Converting from a string produces true if the string is not empty.
                     generator.Call(ReflectionHelpers.String_Length);
+                    generator.LoadInt32(0);
+                    generator.CompareGreaterThan();
+                    break;
+
+                case PrimitiveType.ConcatenatedString:
+                    // Converting from a string produces true if the string is not empty.
+                    generator.Call(ReflectionHelpers.ConcatenatedString_Length);
                     generator.LoadInt32(0);
                     generator.CompareGreaterThan();
                     break;
@@ -199,6 +210,7 @@ namespace Jurassic.Compiler
                     break;
 
                 case PrimitiveType.String:
+                case PrimitiveType.ConcatenatedString:
                 case PrimitiveType.Any:
                 case PrimitiveType.Object:
                     // Otherwise, fall back to calling TypeConverter.ToInteger()
@@ -237,6 +249,7 @@ namespace Jurassic.Compiler
                     break;
 
                 case PrimitiveType.String:
+                case PrimitiveType.ConcatenatedString:
                 case PrimitiveType.Any:
                 case PrimitiveType.Object:
                     // Otherwise, fall back to calling TypeConverter.ToInt32()
@@ -301,6 +314,7 @@ namespace Jurassic.Compiler
                     break;
 
                 case PrimitiveType.String:
+                case PrimitiveType.ConcatenatedString:
                 case PrimitiveType.Any:
                 case PrimitiveType.Object:
                     // Otherwise, fall back to calling TypeConverter.ToNumber()
@@ -350,6 +364,10 @@ namespace Jurassic.Compiler
                     generator.DefineLabelPosition(endOfIf);
                     break;
 
+                case PrimitiveType.ConcatenatedString:
+                    generator.Call(ReflectionHelpers.ConcatenatedString_ToString);
+                    break;
+
                 case PrimitiveType.Int32:
                 case PrimitiveType.UInt32:
                 case PrimitiveType.Number:
@@ -364,6 +382,47 @@ namespace Jurassic.Compiler
                 default:
                     throw new NotImplementedException(string.Format("Unsupported primitive type: {0}", fromType));
             }
+        }
+
+        /// <summary>
+        /// Pops the value on the stack, converts it to a concatenated string, then pushes the result
+        /// onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="fromType"> The type to convert from. </param>
+        public static void ToConcatenatedString(ILGenerator generator, PrimitiveType fromType)
+        {
+            // Check that a conversion is actually necessary.
+            if (fromType == PrimitiveType.ConcatenatedString)
+                return;
+
+            switch (fromType)
+            {
+                case PrimitiveType.Undefined:
+                case PrimitiveType.Null:
+                case PrimitiveType.Bool:
+                case PrimitiveType.String:
+                    // Convert as per ToString, then create a new ConcatenatedString instance.
+                    ToString(generator, fromType);
+                    generator.NewObject(ReflectionHelpers.ConcatenatedString_Constructor_String);
+                    break;
+
+                case PrimitiveType.Int32:
+                case PrimitiveType.UInt32:
+                case PrimitiveType.Number:
+                case PrimitiveType.Any:
+                case PrimitiveType.Object:
+                    // Otherwise, fall back to calling TypeConverter.ToConcatenatedString()
+                    if (PrimitiveTypeUtilities.IsValueType(fromType))
+                        generator.Box(fromType);
+                    generator.Call(ReflectionHelpers.TypeConverter_ToConcatenatedString);
+                    break;
+
+                default:
+                    throw new NotImplementedException(string.Format("Unsupported primitive type: {0}", fromType));
+            }
+
+            
         }
 
         /// <summary>
@@ -395,6 +454,7 @@ namespace Jurassic.Compiler
                 case PrimitiveType.UInt32:
                 case PrimitiveType.Number:
                 case PrimitiveType.String:
+                case PrimitiveType.ConcatenatedString:
                 case PrimitiveType.Any:
                     // Otherwise, fall back to calling TypeConverter.ToObject()
                     ToAny(generator, fromType);
@@ -427,6 +487,7 @@ namespace Jurassic.Compiler
                 case PrimitiveType.Null:
                 case PrimitiveType.Bool:
                 case PrimitiveType.String:
+                case PrimitiveType.ConcatenatedString:
                 case PrimitiveType.Int32:
                 case PrimitiveType.UInt32:
                 case PrimitiveType.Number:

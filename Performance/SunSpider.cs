@@ -149,31 +149,31 @@ namespace Performance
         [TestMethod]
         public void string_base64()
         {
-            manager.RunTest(@"string-base64.js", 1085);
+            manager.RunTest(@"string-base64.js", 737);
         }
 
         [TestMethod]
         public void string_fasta()
         {
-            manager.RunTest(@"string-fasta.js", 338);
+            manager.RunTest(@"string-fasta.js", 335);
         }
 
         [TestMethod]
         public void string_tagcloud()
         {
-            manager.RunTest(@"string-tagcloud.js", 1621);
+            manager.RunTest(@"string-tagcloud.js", 581);
         }
 
         [TestMethod]
         public void string_unpack_code()
         {
-            manager.RunTest(@"string-unpack-code.js", 2902);
+            manager.RunTest(@"string-unpack-code.js", 2995);
         }
 
         [TestMethod]
         public void string_validate_input()
         {
-            manager.RunTest(@"string-validate-input.js", 7644);
+            manager.RunTest(@"string-validate-input.js", 377);
         }
 
         //[TestMethod]

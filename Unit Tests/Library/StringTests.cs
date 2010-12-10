@@ -186,11 +186,30 @@ namespace UnitTests
             Assert.AreEqual("onetwothree", TestUtils.Evaluate("'one'.concat('two', 'three')"));
             Assert.AreEqual("oneundefined", TestUtils.Evaluate("'one'.concat(undefined)"));
 
+            // concat does not change the original string.
+            Assert.AreEqual("onetwo", TestUtils.Evaluate("var x = 'one'; x.concat('two')"));
+            Assert.AreEqual("one", TestUtils.Evaluate("var x = 'one'; x.concat('two'); x"));
+            Assert.AreEqual("onetwo", TestUtils.Evaluate("var x = 'one'; x += 'two'; x.concat();"));
+            Assert.AreEqual("onetwothree", TestUtils.Evaluate("var x = 'one'; x += 'two'; x.concat('three');"));
+            Assert.AreEqual("onetwo", TestUtils.Evaluate("var x = 'one'; x += 'two'; x.concat('three'); x"));
+            Assert.AreEqual("onetwothreefour", TestUtils.Evaluate("var x = 'one'; x += 'two'; x.concat('three', 'four');"));
+            Assert.AreEqual("onetwo", TestUtils.Evaluate("var x = 'one'; x += 'two'; x.concat('three', 'four'); x"));
+
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("''.concat.length"));
 
             // concat is generic.
             Assert.AreEqual("6.1234300", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.concat; x.f(300)"));
+            Assert.AreEqual("first", TestUtils.Evaluate(@"
+                obj1 = { toString: function() { throw 'first' } };
+                obj2 = { toString: function() { throw 'second' } };
+                obj1.concat = String.prototype.concat;
+                try {
+                    obj1.concat(obj2);
+                }
+                catch (e) {
+                    e;
+                }"));
 
             // Undefined and null are not allowed as the "this" object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.concat.call(undefined)"));
