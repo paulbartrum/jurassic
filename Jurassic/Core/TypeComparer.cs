@@ -28,6 +28,10 @@ namespace Jurassic
                 y = (double)(int)y;
             if (y is uint)
                 y = (double)(uint)y;
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
             if (x.GetType() == y.GetType())
             {
                 if (x is double && double.IsNaN((double)x) == true)
@@ -82,6 +86,10 @@ namespace Jurassic
                 y = (double)(uint)y;
             if (x is double && double.IsNaN((double)x) == true)
                 return false;
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
             return object.Equals(x, y);
         }
 
@@ -96,6 +104,11 @@ namespace Jurassic
         {
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
+
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
 
             if (x is string && y is string)
             {
@@ -119,6 +132,11 @@ namespace Jurassic
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
 
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
+
             if (x is string && y is string)
             {
                 return string.CompareOrdinal((string)x, (string)y) <= 0;
@@ -141,6 +159,11 @@ namespace Jurassic
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
 
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
+
             if (x is string && y is string)
             {
                 return string.CompareOrdinal((string)x, (string)y) > 0;
@@ -162,6 +185,11 @@ namespace Jurassic
         {
             x = TypeConverter.ToPrimitive(x, PrimitiveTypeHint.Number);
             y = TypeConverter.ToPrimitive(y, PrimitiveTypeHint.Number);
+
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
 
             if (x is string && y is string)
             {
@@ -202,6 +230,10 @@ namespace Jurassic
             if (x is double && (double) x == 0.0 && y is double && (double)y == 0.0)
                 if ((1 / (double)x) != (1 / (double)y))
                     return false;
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
             return object.Equals(x, y);
         }
     }

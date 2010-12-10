@@ -171,9 +171,9 @@ namespace Jurassic.Library
             }
 
             // Serialize a string value.
-            if (value is string)
+            if (value is string || value is ConcatenatedString)
             {
-                QuoteString((string)value, result);
+                QuoteString(value.ToString(), result);
                 return;
             }
 

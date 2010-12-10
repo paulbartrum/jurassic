@@ -26,7 +26,7 @@ namespace Jurassic
                 return "boolean";
             if (obj is double || obj is int)
                 return "number";
-            if (obj is string)
+            if (obj is string || obj is ConcatenatedString)
                 return "string";
             if (obj is FunctionInstance)
                 return "function";
@@ -64,7 +64,7 @@ namespace Jurassic
         /// otherwise. </returns>
         internal static bool IsString(object obj)
         {
-            return obj is string;
+            return obj is string || obj is ConcatenatedString;
         }
 
         /// <summary>
@@ -89,6 +89,8 @@ namespace Jurassic
                     return (int)uintValue;
                 return (double)uintValue;
             }
+            else if (obj is ConcatenatedString)
+                obj = ((ConcatenatedString)obj).ToString();
             return obj;
         }
 
@@ -140,10 +142,14 @@ namespace Jurassic
         {
             var leftPrimitive = TypeConverter.ToPrimitive(left, PrimitiveTypeHint.None);
             var rightPrimitive = TypeConverter.ToPrimitive(right, PrimitiveTypeHint.None);
-            
-            if (leftPrimitive is string || rightPrimitive is string)
+
+            if (leftPrimitive is ConcatenatedString)
             {
-                return string.Concat(TypeConverter.ToString(leftPrimitive), TypeConverter.ToString(rightPrimitive));
+                return ((ConcatenatedString)leftPrimitive).Concatenate(rightPrimitive);
+            }
+            else if (leftPrimitive is string || rightPrimitive is string || rightPrimitive is ConcatenatedString)
+            {
+                return new ConcatenatedString(TypeConverter.ToString(leftPrimitive), TypeConverter.ToString(rightPrimitive));
             }
 
             return TypeConverter.ToNumber(leftPrimitive) + TypeConverter.ToNumber(rightPrimitive);
@@ -160,8 +166,10 @@ namespace Jurassic
             if (value == null)
                 return true;
             var type = value.GetType();
-            return type == typeof(bool) || type == typeof(int) || type == typeof(double) ||
-                type == typeof(string) || type == typeof(Null) || type == typeof(Undefined);
+            return type == typeof(bool) ||
+                type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
+                type == typeof(string) || type == typeof(ConcatenatedString) ||
+                type == typeof(Null) || type == typeof(Undefined);
         }
 
         /// <summary>

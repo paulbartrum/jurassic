@@ -14,6 +14,7 @@ namespace Jurassic
     internal static class ReflectionHelpers
     {
         internal static MethodInfo TypeConverter_ToString;
+        internal static MethodInfo TypeConverter_ToConcatenatedString;
         internal static MethodInfo TypeConverter_ToNumber;
         internal static MethodInfo TypeConverter_ToBoolean;
         internal static MethodInfo TypeConverter_ToObject;
@@ -54,6 +55,17 @@ namespace Jurassic
         internal static MethodInfo String_Length;
         internal static MethodInfo String_CompareOrdinal;
         internal static MethodInfo String_Format;
+
+        internal static ConstructorInfo ConcatenatedString_Constructor_String;
+        internal static ConstructorInfo ConcatenatedString_Constructor_String_String;
+        internal static MethodInfo ConcatenatedString_Length;
+        internal static MethodInfo ConcatenatedString_Concatenate_Object;
+        internal static MethodInfo ConcatenatedString_Concatenate_String;
+        internal static MethodInfo ConcatenatedString_Concatenate_ConcatenatedString;
+        internal static MethodInfo ConcatenatedString_Append_Object;
+        internal static MethodInfo ConcatenatedString_Append_String;
+        internal static MethodInfo ConcatenatedString_Append_ConcatenatedString;
+        internal static MethodInfo ConcatenatedString_ToString;
 
         internal static MethodInfo IEnumerable_GetEnumerator;
         internal static MethodInfo IEnumerator_MoveNext;
@@ -115,6 +127,7 @@ namespace Jurassic
         {
             // Retrieve the various MethodInfos used for type conversion.
             TypeConverter_ToString = GetStaticMethod(typeof(TypeConverter), "ToString", typeof(object));
+            TypeConverter_ToConcatenatedString = GetStaticMethod(typeof(TypeConverter), "ToConcatenatedString", typeof(object));
             TypeConverter_ToNumber = GetStaticMethod(typeof(TypeConverter), "ToNumber", typeof(object));
             TypeConverter_ToBoolean = GetStaticMethod(typeof(TypeConverter), "ToBoolean", typeof(object));
             TypeConverter_ToObject = GetStaticMethod(typeof(TypeConverter), "ToObject", typeof(ScriptEngine), typeof(object));
@@ -182,6 +195,17 @@ namespace Jurassic
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
             String_CompareOrdinal = GetStaticMethod(typeof(string), "CompareOrdinal", typeof(string), typeof(string));
             String_Format = GetStaticMethod(typeof(string), "Format", typeof(string), typeof(object[]));
+
+            ConcatenatedString_Constructor_String = GetConstructor(typeof(ConcatenatedString), typeof(string));
+            ConcatenatedString_Constructor_String_String = GetConstructor(typeof(ConcatenatedString), typeof(string), typeof(string));
+            ConcatenatedString_Length = GetInstanceMethod(typeof(ConcatenatedString), "get_Length");
+            ConcatenatedString_Concatenate_Object = GetInstanceMethod(typeof(ConcatenatedString), "Concatenate", typeof(object));
+            ConcatenatedString_Concatenate_String = GetInstanceMethod(typeof(ConcatenatedString), "Concatenate", typeof(string));
+            ConcatenatedString_Concatenate_ConcatenatedString = GetInstanceMethod(typeof(ConcatenatedString), "Concatenate", typeof(ConcatenatedString));
+            ConcatenatedString_Append_Object = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(object));
+            ConcatenatedString_Append_String = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(string));
+            ConcatenatedString_Append_ConcatenatedString = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(ConcatenatedString));
+            ConcatenatedString_ToString = GetInstanceMethod(typeof(ConcatenatedString), "ToString");
 
             JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ScriptEngine), typeof(string), typeof(string));
             JavaScriptException_Constructor_Object = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string));

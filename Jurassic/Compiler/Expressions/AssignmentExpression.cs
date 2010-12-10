@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -137,21 +138,8 @@ namespace Jurassic.Compiler
             switch (this.OperatorType)
             {
                 case OperatorType.Assignment:
-
-                    // Load the value to assign.
-                    var rhs = this.GetOperand(1);
-                    rhs.GenerateCode(generator, optimizationInfo);
-
-                    // Support the inferred function displayName property.
-                    if (rhs is FunctionExpression)
-                        ((FunctionExpression)rhs).GenerateDisplayName(generator, optimizationInfo, target.ToString(), false);
-                    
-                    // Duplicate the value so it remains on the stack afterwards.
-                    //if (optimizationInfo.SuppressReturnValue == false)
-                        generator.Duplicate();
-
-                    // Store the value.
-                    target.GenerateSet(generator, optimizationInfo, rhs.ResultType, optimizationInfo.StrictMode);
+                    // Standard assignment operator.
+                    GenerateAssignment(generator, optimizationInfo, target);
                     break;
 
                 case OperatorType.PostIncrement:
@@ -167,19 +155,40 @@ namespace Jurassic.Compiler
                     GenerateIncrementOrDecrement(generator, optimizationInfo, target, postfix: false, increment: false);
                     break;
 
+                case OperatorType.CompoundAdd:
+                    // Special case +=
+                    GenerateCompoundAddAssignment(generator, optimizationInfo, target);
+                    break;
+
                 default:
-                    // Load the value to assign.
-                    var compoundOperator = new BinaryExpression(GetCompoundBaseOperator(this.OperatorType), this.GetOperand(0), this.GetOperand(1));
-                    compoundOperator.GenerateCode(generator, optimizationInfo);
-
-                    // Duplicate the value so it remains on the stack afterwards.
-                    //if (optimizationInfo.SuppressReturnValue == false)
-                        generator.Duplicate();
-
-                    // Store the value.
-                    target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType, optimizationInfo.StrictMode);
+                    // All other compound operators.
+                    GenerateCompoundAssignment(generator, optimizationInfo, target);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Generates CIL for an assignment expression.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        /// <param name="target"> The target to modify. </param>
+        private void GenerateAssignment(ILGenerator generator, OptimizationInfo optimizationInfo, IReferenceExpression target)
+        {
+            // Load the value to assign.
+            var rhs = this.GetOperand(1);
+            rhs.GenerateCode(generator, optimizationInfo);
+
+            // Support the inferred function displayName property.
+            if (rhs is FunctionExpression)
+                ((FunctionExpression)rhs).GenerateDisplayName(generator, optimizationInfo, target.ToString(), false);
+
+            // Duplicate the value so it remains on the stack afterwards.
+            //if (optimizationInfo.SuppressReturnValue == false)
+            generator.Duplicate();
+
+            // Store the value.
+            target.GenerateSet(generator, optimizationInfo, rhs.ResultType, optimizationInfo.StrictMode);
         }
 
         /// <summary>
@@ -228,6 +237,98 @@ namespace Jurassic.Compiler
 
             // Store the value.
             target.GenerateSet(generator, optimizationInfo, target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number, optimizationInfo.StrictMode);
+        }
+
+        /// <summary>
+        /// Generates CIL for a compound assignment expression.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        /// <param name="target"> The target to modify. </param>
+        private void GenerateCompoundAddAssignment(ILGenerator generator, OptimizationInfo optimizationInfo, IReferenceExpression target)
+        {
+            //var rhs = this.GetOperand(1);
+            //if (PrimitiveTypeUtilities.IsString(rhs.ResultType) == true)
+            //{
+            //    // Load the value of the left-hand side and convert it to a concantenated string.
+            //    target.GenerateGet(generator, optimizationInfo, true);
+            //    EmitConversion.ToConcatenatedString(generator, target.Type);
+
+            //    // Transform expressions of the form "a += b + c;" into "a += b; a += c;".
+            //    List<Expression> nonAddExpressions = new List<Expression>();
+            //    Stack<Expression> expressionStack = new Stack<Expression>(1);
+            //    expressionStack.Push(rhs);
+            //    do
+            //    {
+            //        var expression = expressionStack.Pop();
+            //        if (expression is BinaryExpression && ((BinaryExpression)expression).OperatorType == OperatorType.Add)
+            //        {
+            //            expressionStack.Push(((BinaryExpression)expression).Right);
+            //            expressionStack.Push(((BinaryExpression)expression).Left);
+            //        }
+            //        else
+            //            nonAddExpressions.Add(expression);
+            //    } while (expressionStack.Count > 0);
+
+            //    foreach (var nonAddExpression in nonAddExpressions)
+            //    {
+            //        // Duplicate the ConcatenatedString instance.
+            //        generator.Duplicate();
+
+            //        nonAddExpression.GenerateCode(generator, optimizationInfo);
+            //        var rhsType = nonAddExpression.ResultType;
+            //        if (rhsType == PrimitiveType.String)
+            //        {
+            //            // Concatenate.
+            //            generator.Call(ReflectionHelpers.ConcatenatedString_Append_String);
+            //        }
+            //        else if (rhsType == PrimitiveType.ConcatenatedString)
+            //        {
+            //            // Concatenate.
+            //            generator.Call(ReflectionHelpers.ConcatenatedString_Append_ConcatenatedString);
+            //        }
+            //        else
+            //        {
+            //            // Convert the operand to an object.
+            //            EmitConversion.ToAny(generator, rhsType);
+
+            //            // Concatenate.
+            //            generator.Call(ReflectionHelpers.ConcatenatedString_Append_Object);
+            //        }
+            //    }
+
+            //    if (target.Type != PrimitiveType.ConcatenatedString)
+            //    {
+            //        // Set the original variable.
+            //        generator.Duplicate();
+            //        target.GenerateSet(generator, optimizationInfo, PrimitiveType.ConcatenatedString, optimizationInfo.StrictMode);
+            //    }
+            //}
+            //else
+            //{
+                // Do the standard compound add.
+                GenerateCompoundAssignment(generator, optimizationInfo, target);
+            //}
+        }
+
+        /// <summary>
+        /// Generates CIL for a compound assignment expression.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        /// <param name="target"> The target to modify. </param>
+        private void GenerateCompoundAssignment(ILGenerator generator, OptimizationInfo optimizationInfo, IReferenceExpression target)
+        {
+            // Load the value to assign.
+            var compoundOperator = new BinaryExpression(GetCompoundBaseOperator(this.OperatorType), this.GetOperand(0), this.GetOperand(1));
+            compoundOperator.GenerateCode(generator, optimizationInfo);
+
+            // Duplicate the value so it remains on the stack afterwards.
+            //if (optimizationInfo.SuppressReturnValue == false)
+            generator.Duplicate();
+
+            // Store the value.
+            target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType, optimizationInfo.StrictMode);
         }
     }
 

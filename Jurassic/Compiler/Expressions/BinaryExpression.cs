@@ -62,7 +62,9 @@ namespace Jurassic.Compiler
                             var lhs = this.Left.ResultType;
                             var rhs = this.Right.ResultType;
                             if (lhs == PrimitiveType.String || rhs == PrimitiveType.String)
-                                return PrimitiveType.String;
+                                return PrimitiveType.ConcatenatedString;
+                            if (lhs == PrimitiveType.ConcatenatedString || rhs == PrimitiveType.ConcatenatedString)
+                                return PrimitiveType.ConcatenatedString;
                             if (lhs == PrimitiveType.Any || lhs == PrimitiveType.Object ||
                                 rhs == PrimitiveType.Any || rhs == PrimitiveType.Object)
                                 return PrimitiveType.Any;
@@ -324,38 +326,36 @@ namespace Jurassic.Compiler
             // is a string, otherwise it adds two numbers.
             if (PrimitiveTypeUtilities.IsString(leftType) || PrimitiveTypeUtilities.IsString(rightType))
             {
-                // One or both of the operands are strings.
+                // If at least one of the operands is a string, then the add operator concatenates.
 
                 // Load the left-hand side onto the stack.
                 this.Left.GenerateCode(generator, optimizationInfo);
 
                 // Convert the operand to a concatenated string.
-                //EmitConversion.ToConcatenatedString(generator, leftType);
-
-                // Convert the operand to a string.
                 EmitConversion.ToPrimitive(generator, leftType, PrimitiveTypeHint.None);
-                EmitConversion.ToString(generator, leftType);
+                EmitConversion.ToConcatenatedString(generator, leftType);
 
                 // Load the right-hand side onto the stack.
                 this.Right.GenerateCode(generator, optimizationInfo);
 
-                // Convert the operand to a string.
-                EmitConversion.ToPrimitive(generator, rightType, PrimitiveTypeHint.None);
-                EmitConversion.ToString(generator, rightType);
+                if (rightType == PrimitiveType.String)
+                {
+                    // Concatenate the two strings.
+                    generator.Call(ReflectionHelpers.ConcatenatedString_Concatenate_String);
+                }
+                else if (rightType == PrimitiveType.ConcatenatedString)
+                {
+                    // Concatenate the two strings.
+                    generator.Call(ReflectionHelpers.ConcatenatedString_Concatenate_ConcatenatedString);
+                }
+                else
+                {
+                    // Convert the operand to an object.
+                    EmitConversion.ToAny(generator, rightType);
 
-                // Concatenate the two strings.
-                generator.Call(ReflectionHelpers.String_Concat);
-
-                //if (rightType == PrimitiveType.String)
-                //{
-                //    // Concatenate the two strings using ConcatenatedString.Append(string).
-                //    generator.Call(ReflectionHelpers.ConcatenatedString_Append_String);
-                //}
-                //else
-                //{
-                //    // Concatenate the two strings using ConcatenatedString.Append(ConcatenatedString).
-                //    generator.Call(ReflectionHelpers.ConcatenatedString_Append_ConcatenatedString);
-                //}
+                    // Concatenate the two strings.
+                    generator.Call(ReflectionHelpers.ConcatenatedString_Concatenate_Object);
+                }
             }
             else if (leftType != PrimitiveType.Any && leftType != PrimitiveType.Object &&
                 rightType != PrimitiveType.Any && rightType != PrimitiveType.Object)
