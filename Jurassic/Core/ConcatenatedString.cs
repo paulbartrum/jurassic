@@ -6,7 +6,11 @@ namespace Jurassic
 {
 
     /// <summary>
-    /// Represents a string that supports efficient concatenation.
+    /// Represents a string that supports efficient concatenation.  This class is used instead of
+    /// <see cref="System.String"/> when two strings are concatenated together using the addition
+    /// operator (+) or the concat() function.  Use of this class avoids the creation of useless
+    /// intermediary strings and by doing so speeds up string concatenation dramatically
+    /// (this change improved sunspider/string-validate-input.js by almost 20x).
     /// </summary>
     [Serializable]
     public sealed class ConcatenatedString
