@@ -1119,6 +1119,22 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("x = { a: 1 }; x['a'] = 2; x['a']"));
             Assert.AreEqual(2, TestUtils.Evaluate("x = { a: 1 }; y = 'a'; x[y] = 2; x[y]"));
 
+            // Check details of hidden class functionality.
+            Assert.AreEqual(2, TestUtils.Evaluate("x = {}; x.a = 6; x.a = 2; x.a"));
+            Assert.AreEqual(3, TestUtils.Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.a"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b"));
+            Assert.AreEqual(3, TestUtils.Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b = 4; y.a"));
+            Assert.AreEqual(4, TestUtils.Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b = 4; y.b"));
+            Assert.AreEqual(3, TestUtils.Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b = 4; delete y.b; y.a"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b = 4; delete y.b; y.b"));
+
+            // Ensure you can create at least 16384 properties.
+            Assert.AreEqual(16383, TestUtils.Evaluate(@"
+                var x = new Object();
+                for (var i = 0; i < 16384; i ++)
+                    x['prop' + i] = i;
+                x.prop16383"));
+
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "TypeError" : "ReferenceError", TestUtils.EvaluateExceptionType("abcdefghij"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5.toString"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("qwerty345.prop"));

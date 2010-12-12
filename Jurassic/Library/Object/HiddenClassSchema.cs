@@ -15,28 +15,42 @@ namespace Jurassic.Library
 
         // Transitions
         [Serializable]
-        private struct AddPropertyTransition
+        private struct TransitionInfo
         {
             public string Name;
             public PropertyAttributes Attributes;
         }
-        private Dictionary<AddPropertyTransition, HiddenClassSchema> addTransitions;
+        private Dictionary<TransitionInfo, HiddenClassSchema> addTransitions;
         private Dictionary<string, HiddenClassSchema> deleteTransitions;
-        private Dictionary<AddPropertyTransition, HiddenClassSchema> modifyTransitions;
+        private Dictionary<TransitionInfo, HiddenClassSchema> modifyTransitions;
 
         // The index of the next value.
         private int nextValueIndex;
 
+        // Used to recreate the properties dictionary if properties == null.
+        private HiddenClassSchema parent;
+        private TransitionInfo addPropertyTransitionInfo;
+
         /// <summary>
-        /// Creates a new HiddenClassSchema instance.
+        /// Creates a new HiddenClassSchema instance from a modify or delete operation.
         /// </summary>
         private HiddenClassSchema(Dictionary<string, SchemaProperty> properties, int nextValueIndex)
         {
             this.properties = properties;
-            this.addTransitions = new Dictionary<AddPropertyTransition, HiddenClassSchema>();
-            this.deleteTransitions = new Dictionary<string, HiddenClassSchema>();
-            this.modifyTransitions = new Dictionary<AddPropertyTransition, HiddenClassSchema>();
+            this.addTransitions = null;
+            this.deleteTransitions = null;
+            this.modifyTransitions = null;
             this.nextValueIndex = nextValueIndex;
+        }
+
+        /// <summary>
+        /// Creates a new HiddenClassSchema instance from an add operation.
+        /// </summary>
+        private HiddenClassSchema(Dictionary<string, SchemaProperty> properties, int nextValueIndex, HiddenClassSchema parent, TransitionInfo addPropertyTransitionInfo)
+            : this(properties, nextValueIndex)
+        {
+            this.parent = parent;
+            this.addPropertyTransitionInfo = addPropertyTransitionInfo;
         }
 
         /// <summary>
@@ -53,7 +67,12 @@ namespace Jurassic.Library
         /// </summary>
         public int PropertyCount
         {
-            get { return this.properties.Count; }
+            get
+            {
+                if (this.properties == null)
+                    this.properties = CreatePropertiesDictionary();
+                return this.properties.Count;
+            }
         }
 
         /// <summary>
@@ -71,10 +90,11 @@ namespace Jurassic.Library
         /// <returns> An enumerable collection of property names and values. </returns>
         public IEnumerable<PropertyNameAndValue> EnumeratePropertyNamesAndValues(object[] values)
         {
+            if (this.properties == null)
+                this.properties = CreatePropertiesDictionary();
+            this.parent = null;     // Prevents the properties dictionary from being stolen while an enumeration is in progress.
             foreach (var pair in this.properties)
-            {
                 yield return new PropertyNameAndValue(pair.Key, new PropertyDescriptor(values[pair.Value.Index], pair.Value.Attributes));
-            }
         }
 
         /// <summary>
@@ -85,10 +105,7 @@ namespace Jurassic.Library
         /// given name does not exist. </returns>
         public int GetPropertyIndex(string name)
         {
-            SchemaProperty propertyInfo;
-            if (this.properties.TryGetValue(name, out propertyInfo) == false)
-                return -1;
-            return propertyInfo.Index;
+            return GetPropertyIndexAndAttributes(name).Index;
         }
 
         /// <summary>
@@ -100,6 +117,8 @@ namespace Jurassic.Library
         /// given name does not exist. </returns>
         public SchemaProperty GetPropertyIndexAndAttributes(string name)
         {
+            if (this.properties == null)
+                this.properties = CreatePropertiesDictionary();
             SchemaProperty propertyInfo;
             if (this.properties.TryGetValue(name, out propertyInfo) == false)
                 return SchemaProperty.Undefined;
@@ -114,19 +133,39 @@ namespace Jurassic.Library
         /// <returns> A new schema with the extra property. </returns>
         public HiddenClassSchema AddProperty(string name, PropertyAttributes attributes = PropertyAttributes.FullAccess)
         {
+            // Package the name and attributes into a struct.
+            var transitionInfo = new TransitionInfo() { Name = name, Attributes = attributes };
+
             // Check if there is a transition to the schema already.
-            HiddenClassSchema newSchema;
-            this.addTransitions.TryGetValue(new AddPropertyTransition() { Name = name, Attributes = attributes }, out newSchema);
+            HiddenClassSchema newSchema = null;
+            if (this.addTransitions != null)
+                this.addTransitions.TryGetValue(transitionInfo, out newSchema);
 
             if (newSchema == null)
             {
-                // Create a new schema based on this one.
-                var properties = new Dictionary<string, SchemaProperty>(this.properties);
-                properties.Add(name, new SchemaProperty(this.NextValueIndex, attributes));
-                newSchema = new HiddenClassSchema(properties, this.NextValueIndex + 1);
+                if (this.parent == null)
+                {
+                    // Create a new schema based on this one.  A complete copy must be made of the properties hashtable.
+                    var properties = new Dictionary<string, SchemaProperty>(this.properties);
+                    properties.Add(name, new SchemaProperty(this.NextValueIndex, attributes));
+                    newSchema = new HiddenClassSchema(properties, this.NextValueIndex + 1, this, transitionInfo);
+                }
+                else
+                {
+                    // Create a new schema based on this one.  The properties hashtable is "given
+                    // away" so a copy does not have to be made.
+                    if (this.properties == null)
+                        this.properties = CreatePropertiesDictionary();
+                    this.properties.Add(name, new SchemaProperty(this.NextValueIndex, attributes));
+                    newSchema = new HiddenClassSchema(this.properties, this.NextValueIndex + 1, this, transitionInfo);
+                    this.properties = null;
+                }
+                
 
                 // Add a transition to the new schema.
-                this.addTransitions.Add(new AddPropertyTransition() { Name = name, Attributes = attributes }, newSchema);
+                if (this.addTransitions == null)
+                    this.addTransitions = new Dictionary<TransitionInfo, HiddenClassSchema>(1);
+                this.addTransitions.Add(transitionInfo, newSchema);
             }
 
             return newSchema;
@@ -140,18 +179,21 @@ namespace Jurassic.Library
         public HiddenClassSchema DeleteProperty(string name)
         {
             // Check if there is a transition to the schema already.
-            HiddenClassSchema newSchema;
-            this.deleteTransitions.TryGetValue(name, out newSchema);
+            HiddenClassSchema newSchema = null;
+            if (this.deleteTransitions != null)
+                this.deleteTransitions.TryGetValue(name, out newSchema);
 
             if (newSchema == null)
             {
                 // Create a new schema based on this one.
-                var properties = new Dictionary<string, SchemaProperty>(this.properties);
+                var properties = this.properties == null ? CreatePropertiesDictionary() : new Dictionary<string, SchemaProperty>(this.properties);
                 if (properties.Remove(name) == false)
                     throw new InvalidOperationException(string.Format("The property '{0}' does not exist.", name));
                 newSchema = new HiddenClassSchema(properties, this.NextValueIndex);
 
                 // Add a transition to the new schema.
+                if (this.deleteTransitions == null)
+                    this.deleteTransitions = new Dictionary<string, HiddenClassSchema>(1);
                 this.deleteTransitions.Add(name, newSchema);
             }
 
@@ -166,12 +208,20 @@ namespace Jurassic.Library
         /// <returns> A new schema with the modified property. </returns>
         public HiddenClassSchema SetPropertyAttributes(string name, PropertyAttributes attributes)
         {
+            // Package the name and attributes into a struct.
+            var transitionInfo = new TransitionInfo() { Name = name, Attributes = attributes };
+
             // Check if there is a transition to the schema already.
-            HiddenClassSchema newSchema;
-            this.modifyTransitions.TryGetValue(new AddPropertyTransition() { Name = name, Attributes = attributes }, out newSchema);
+            HiddenClassSchema newSchema = null;
+            if (this.modifyTransitions != null)
+                this.modifyTransitions.TryGetValue(transitionInfo, out newSchema);
 
             if (newSchema == null)
             {
+                // Create the properties dictionary if it hasn't already been created.
+                if (this.properties == null)
+                    this.properties = CreatePropertiesDictionary();
+
                 // Check the attributes differ from the existing attributes.
                 SchemaProperty propertyInfo;
                 if (this.properties.TryGetValue(name, out propertyInfo) == false)
@@ -185,10 +235,52 @@ namespace Jurassic.Library
                 newSchema = new HiddenClassSchema(properties, this.NextValueIndex);
 
                 // Add a transition to the new schema.
-                this.modifyTransitions.Add(new AddPropertyTransition() { Name = name, Attributes = attributes }, newSchema);
+                if (this.modifyTransitions == null)
+                    this.modifyTransitions = new Dictionary<TransitionInfo, HiddenClassSchema>(1);
+                this.modifyTransitions.Add(transitionInfo, newSchema);
             }
 
             return newSchema;
+        }
+
+        /// <summary>
+        /// Creates the properties dictionary.
+        /// </summary>
+        private Dictionary<string, SchemaProperty> CreatePropertiesDictionary()
+        {
+            // Search up the tree until a schema is found with a populated properties hashtable, 
+            // while keeping a list of the transitions.
+
+            var addTransitions = new Stack<KeyValuePair<string, SchemaProperty>>();
+            var node = this;
+            while (node != null)
+            {
+                if (node.properties == null)
+                {
+                    // The schema is the same as the parent schema except with the addition of a single
+                    // property.
+                    addTransitions.Push(new KeyValuePair<string, SchemaProperty>(
+                        node.addPropertyTransitionInfo.Name,
+                        new SchemaProperty(node.NextValueIndex - 1, node.addPropertyTransitionInfo.Attributes)));
+                }
+                else
+                {
+                    // The schema has a populated properties hashtable - we can stop here.
+                    break;
+                }
+                node = node.parent;
+            }
+            if (node == null)
+                throw new InvalidOperationException("Internal error: no route to a populated schema was found.");
+
+            // Add the properties to the hashtable in order.
+            var result = new Dictionary<string, SchemaProperty>(node.properties);
+            while (addTransitions.Count > 0)
+            {
+                var keyValuePair = addTransitions.Pop();
+                result.Add(keyValuePair.Key, keyValuePair.Value);
+            }
+            return result;
         }
     }
 
