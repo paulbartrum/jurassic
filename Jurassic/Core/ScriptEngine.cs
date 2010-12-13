@@ -852,56 +852,56 @@ namespace Jurassic
         //     EVAL SUPPORT
         //_________________________________________________________________________________________
 
-        private class EvalCacheKey
-        {
-            public string Code;
-            public Compiler.Scope Scope;
-            public bool StrictMode;
+        //private class EvalCacheKey
+        //{
+        //    public string Code;
+        //    public Compiler.Scope Scope;
+        //    public bool StrictMode;
 
-            public override int GetHashCode()
-            {
-                int bitValue = 1;
-                int hashCode = this.Code.GetHashCode();
-                var scope = this.Scope;
-                do
-                {
-                    if (scope is Compiler.DeclarativeScope)
-                        hashCode ^= bitValue;
-                    scope = scope.ParentScope;
-                    bitValue *= 2;
-                } while (scope != null);
-                if (this.StrictMode == true)
-                    hashCode ^= bitValue;
-                return hashCode;
-            }
+        //    public override int GetHashCode()
+        //    {
+        //        int bitValue = 1;
+        //        int hashCode = this.Code.GetHashCode();
+        //        var scope = this.Scope;
+        //        do
+        //        {
+        //            if (scope is Compiler.DeclarativeScope)
+        //                hashCode ^= bitValue;
+        //            scope = scope.ParentScope;
+        //            bitValue *= 2;
+        //        } while (scope != null);
+        //        if (this.StrictMode == true)
+        //            hashCode ^= bitValue;
+        //        return hashCode;
+        //    }
 
-            public override bool Equals(object obj)
-            {
-                if ((obj is EvalCacheKey) == false)
-                    return false;
-                var other = (EvalCacheKey) obj;
-                if (this.Code != other.Code ||
-                    this.StrictMode != other.StrictMode)
-                    return false;
-                var scope1 = this.Scope;
-                var scope2 = other.Scope;
-                do
-                {
-                    if (scope1.GetType() != scope2.GetType())
-                        return false;
-                    scope1 = scope1.ParentScope;
-                    scope2 = scope2.ParentScope;
-                    if (scope1 == null && scope2 != null)
-                        return false;
-                    if (scope1 != null && scope2 == null)
-                        return false;
-                } while (scope1 != null);
-                return true;
-            }
-        }
+        //    public override bool Equals(object obj)
+        //    {
+        //        if ((obj is EvalCacheKey) == false)
+        //            return false;
+        //        var other = (EvalCacheKey) obj;
+        //        if (this.Code != other.Code ||
+        //            this.StrictMode != other.StrictMode)
+        //            return false;
+        //        var scope1 = this.Scope;
+        //        var scope2 = other.Scope;
+        //        do
+        //        {
+        //            if (scope1.GetType() != scope2.GetType())
+        //                return false;
+        //            scope1 = scope1.ParentScope;
+        //            scope2 = scope2.ParentScope;
+        //            if (scope1 == null && scope2 != null)
+        //                return false;
+        //            if (scope1 != null && scope2 == null)
+        //                return false;
+        //        } while (scope1 != null);
+        //        return true;
+        //    }
+        //}
 
-        private Dictionary<EvalCacheKey, WeakReference> evalCache =
-            new Dictionary<EvalCacheKey, WeakReference>();
+        //private Dictionary<EvalCacheKey, WeakReference> evalCache =
+        //    new Dictionary<EvalCacheKey, WeakReference>();
 
         /// <summary>
         /// Evaluates the given javascript source code and returns the result.
@@ -916,20 +916,20 @@ namespace Jurassic
         internal object Eval(string code, Compiler.Scope scope, object thisObject, bool strictMode)
         {
             // Check if the cache contains the eval already.
-            var key = new EvalCacheKey() { Code = code, Scope = scope, StrictMode = strictMode };
-            WeakReference cachedEvalGenRef;
-            if (evalCache.TryGetValue(key, out cachedEvalGenRef) == true)
-            {
-                var cachedEvalGen = (Compiler.EvalMethodGenerator)cachedEvalGenRef.Target;
-                if (cachedEvalGen != null)
-                {
-                    // Replace the "this object" before running.
-                    cachedEvalGen.ThisObject = thisObject;
+            //var key = new EvalCacheKey() { Code = code, Scope = scope, StrictMode = strictMode };
+            //WeakReference cachedEvalGenRef;
+            //if (evalCache.TryGetValue(key, out cachedEvalGenRef) == true)
+            //{
+            //    var cachedEvalGen = (Compiler.EvalMethodGenerator)cachedEvalGenRef.Target;
+            //    if (cachedEvalGen != null)
+            //    {
+            //        // Replace the "this object" before running.
+            //        cachedEvalGen.ThisObject = thisObject;
 
-                    // Execute the cached code.
-                    return ((Compiler.EvalMethodGenerator)cachedEvalGen).Execute();
-                }
-            }
+            //        // Execute the cached code.
+            //        return ((Compiler.EvalMethodGenerator)cachedEvalGen).Execute();
+            //    }
+            //}
 
             // Parse the eval string into an AST.
             var options = new Compiler.CompilerOptions() { ForceStrictMode = strictMode };
@@ -941,11 +941,11 @@ namespace Jurassic
                 thisObject);                                            // The value of the "this" keyword.
 
             // Make sure the eval cache doesn't get too big.  TODO: add some sort of LRU strategy?
-            if (evalCache.Count > 100)
-                evalCache.Clear();
+            //if (evalCache.Count > 100)
+            //    evalCache.Clear();
 
-            // Add the eval method generator to the cache.
-            evalCache[key] = new WeakReference(evalGen);
+            //// Add the eval method generator to the cache.
+            //evalCache[key] = new WeakReference(evalGen);
 
             // Compile and run the eval code.
             return evalGen.Execute();
