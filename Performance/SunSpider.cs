@@ -113,7 +113,7 @@ namespace Performance
         [TestMethod]
         public void date_format_tofte()
         {
-            manager.RunTest(@"date-format-tofte.js", 2633);
+            manager.RunTest(@"date-format-tofte.js", 650);
         }
 
         [TestMethod]
@@ -155,7 +155,7 @@ namespace Performance
         [TestMethod]
         public void string_fasta()
         {
-            manager.RunTest(@"string-fasta.js", 335);
+            manager.RunTest(@"string-fasta.js", 354);
         }
 
         [TestMethod]
