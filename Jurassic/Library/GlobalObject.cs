@@ -160,13 +160,7 @@ namespace Jurassic.Library
         {
             if (TypeUtilities.IsString(code) == false)
                 return code;
-            var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
-                engine,                                                 // The script engine.
-                engine.CreateGlobalScope(),                             // The scope to run the code in.
-                new StringScriptSource(TypeConverter.ToString(code)),   // The source code to execute.
-                new Compiler.CompilerOptions(),                         // Options.
-                engine.Global);                                         // The value of the "this" keyword.
-            return evalGen.Execute();
+            return engine.Eval(TypeConverter.ToString(code), engine.CreateGlobalScope(), engine.Global, false);
         }
 
         /// <summary>
@@ -186,15 +180,7 @@ namespace Jurassic.Library
                 throw new ArgumentNullException("scope");
             if (TypeUtilities.IsString(code) == false)
                 return code;
-
-            var options = new Compiler.CompilerOptions() { ForceStrictMode = strictMode };
-            var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
-                engine,                                                 // The script engine.
-                scope,                                                  // The scope to run the code in.
-                new StringScriptSource(TypeConverter.ToString(code)),   // The source code to execute.
-                options,                                                // Options.
-                thisObject);                                            // The value of the "this" keyword.
-            return evalGen.Execute();
+            return engine.Eval(TypeConverter.ToString(code), scope, thisObject, strictMode);
         }
 
         /// <summary>

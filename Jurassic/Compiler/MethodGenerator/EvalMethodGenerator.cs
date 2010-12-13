@@ -27,7 +27,7 @@ namespace Jurassic.Compiler
         public object ThisObject
         {
             get;
-            private set;
+            set;
         }
 
         /// <summary>

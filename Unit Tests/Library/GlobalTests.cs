@@ -192,6 +192,7 @@ namespace UnitTests
             // Eval() can introduce new variables into a function scope.
             Assert.AreEqual(5, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); return b; })()"));
             Assert.AreEqual(1, TestUtils.Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); b = 4; })(); b;"));
+            Assert.AreEqual(8, TestUtils.Evaluate("(function() { eval('var b = 8'); return eval('b'); })();"));
 
             // The global lexical environment is used for a non-direct call.
             Assert.AreEqual(5, TestUtils.Evaluate("e = eval; (function() { var a = 5; e('a = 6'); return a; })()"));
@@ -203,6 +204,9 @@ namespace UnitTests
             TestUtils.Evaluate("delete a");
             Assert.AreEqual("undefined", TestUtils.Evaluate("'use strict'; eval('var a = false'); typeof a"));
             Assert.AreEqual("undefined", TestUtils.Evaluate(@"eval(""'use strict'; var a = false""); typeof a"));
+
+            // Return is not allowed.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("e = eval; (function() { var a = 5; e('return a'); })()"));
         }
 
         [TestMethod]
