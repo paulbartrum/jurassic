@@ -107,6 +107,9 @@ namespace UnitTests
             Assert.AreEqual("one", TestUtils.Evaluate("array['0']"));
             Assert.AreEqual("two", TestUtils.Evaluate("array[1]"));
             Assert.AreEqual("three", TestUtils.Evaluate("array[2]"));
+
+            // Access via a string index.
+            Assert.AreEqual("three", TestUtils.Evaluate("var array = ['one', 'two', 'three']; var x = String.fromCharCode(50); array[x]"));
         }
 
         [TestMethod]
