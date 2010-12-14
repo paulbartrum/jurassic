@@ -23,11 +23,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilverlightREPL", "Silverli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test Suite Runner", "Test Suite Runner\Test Suite Runner.csproj", "{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfilerApp", "ProfilerApp\ProfilerApp.csproj", "{017A9E9D-7038-4C9F-8381-ABB38DB67C96}"
-EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
+		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs01
 		SccLocalPath0 = .
@@ -52,9 +50,6 @@ Global
 		SccProjectUniqueName7 = Test\u0020Suite\u0020Runner\\Test\u0020Suite\u0020Runner.csproj
 		SccProjectName7 = Test\u0020Suite\u0020Runner
 		SccLocalPath7 = Test\u0020Suite\u0020Runner
-		SccProjectUniqueName8 = ProfilerApp\\ProfilerApp.csproj
-		SccProjectName8 = ProfilerApp
-		SccLocalPath8 = ProfilerApp
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,18 +146,6 @@ Global
 		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|x64.ActiveCfg = Release|x86
 		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|x86.ActiveCfg = Release|x86
 		{C9DB4001-CBB2-4CEB-8949-2A0D9E6CA5F1}.Release|x86.Build.0 = Release|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Debug|x64.ActiveCfg = Debug|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Debug|x86.ActiveCfg = Debug|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Debug|x86.Build.0 = Debug|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Release|Any CPU.ActiveCfg = Release|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Release|Mixed Platforms.Build.0 = Release|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Release|x64.ActiveCfg = Release|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Release|x86.ActiveCfg = Release|x86
-		{017A9E9D-7038-4C9F-8381-ABB38DB67C96}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
