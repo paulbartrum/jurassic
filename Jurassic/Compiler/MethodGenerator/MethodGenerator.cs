@@ -195,7 +195,7 @@ namespace Jurassic.Compiler
 
                 // Create a new dynamic method.
                 var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                    "Main",                                                 // Name of the generated method.
+                    GetMethodName(),                                        // Name of the generated method.
                     typeof(object),                                         // Return type of the generated method.
                     GetParameterTypes(),                                    // Parameter types of the generated method.
                     typeof(MethodGenerator),                                // Owner type.

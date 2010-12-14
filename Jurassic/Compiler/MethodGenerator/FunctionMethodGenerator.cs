@@ -122,7 +122,9 @@ namespace Jurassic.Compiler
         /// <returns> A name for the generated method. </returns>
         protected override string GetMethodName()
         {
-            if (string.IsNullOrEmpty(this.Name))
+            if (this.DisplayName != null)
+                return this.DisplayName;
+            else if (string.IsNullOrEmpty(this.Name))
                 return "anonymous";
             else
                 return this.Name;

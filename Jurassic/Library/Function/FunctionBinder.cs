@@ -173,11 +173,11 @@ namespace Jurassic.Library
             {
                 // Full trust only - skips visibility checks.
                 dm = new System.Reflection.Emit.DynamicMethod(
-                    "Binder",                                                               // Name of the generated method.
-                    typeof(object),                                                         // Return type of the generated method.
-                    new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },  // Parameter types of the generated method.
-                    typeof(FunctionBinder),                                                 // Owner type.
-                    true);                                                                  // Skips visibility checks.
+                    string.Format("binder_for_{0}_{1}", binderMethod.Method.DeclaringType.Name, binderMethod.Name), // Name of the generated method.
+                    typeof(object),                                                                                 // Return type of the generated method.
+                    new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },                          // Parameter types of the generated method.
+                    typeof(FunctionBinder),                                                                         // Owner type.
+                    true);                                                                                          // Skips visibility checks.
                 generator = new DynamicILGenerator(dm);
             }
             else
@@ -185,9 +185,9 @@ namespace Jurassic.Library
 #endif
                 // Partial trust / silverlight.
                 dm = new System.Reflection.Emit.DynamicMethod(
-                    "Binder",                                                               // Name of the generated method.
-                    typeof(object),                                                         // Return type of the generated method.
-                    new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) }); // Parameter types of the generated method.
+                    string.Format("binder_for_{0}_{1}", binderMethod.Method.DeclaringType.Name, binderMethod.Name), // Name of the generated method.
+                    typeof(object),                                                                                 // Return type of the generated method.
+                    new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) });                         // Parameter types of the generated method.
                 generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
 #if !SILVERLIGHT
             }
