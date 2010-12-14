@@ -265,15 +265,22 @@ namespace Jurassic.Library
                 // The property exists; it can be cached as long as it is not an accessor property.
                 if ((propertyInfo.Attributes & (PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != 0)
                 {
+                    // Getters and the length property cannot be cached.
                     cachedIndex = -1;
                     cacheKey = null;
-                    return GetPropertyValue(name);
+
+                    // Call the getter if there is one.
+                    if (propertyInfo.IsAccessor == true)
+                        return ((PropertyAccessorValue)this.propertyValues[propertyInfo.Index]).GetValue(this);
+
+                    // Otherwise, the property is the "magic" length property.
+                    return ((ArrayInstance)this).Length;
                 }
 
                 // The property can be cached.
                 cachedIndex = propertyInfo.Index;
                 cacheKey = this.InlineCacheKey;
-                return this.InlinePropertyValues[cachedIndex];
+                return this.propertyValues[cachedIndex];
             }
             else
             {
@@ -282,7 +289,7 @@ namespace Jurassic.Library
                 cacheKey = null;
                 if (this.Prototype == null)
                     return null;
-                return this.Prototype.GetPropertyValue(name);
+                return this.Prototype.GetNamedPropertyValue(name);
             }
         }
 
@@ -477,6 +484,19 @@ namespace Jurassic.Library
             if (arrayIndex != uint.MaxValue)
                 return GetPropertyValue(arrayIndex);
 
+            // Otherwise, the property is a name.
+            return GetNamedPropertyValue(propertyName);
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name.  The name cannot be an array index.
+        /// </summary>
+        /// <param name="propertyName"> The name of the property.  The name cannot be an array index. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        private object GetNamedPropertyValue(string propertyName)
+        {
             ObjectInstance prototypeObject = this;
             do
             {
@@ -494,7 +514,7 @@ namespace Jurassic.Library
                         return ((PropertyAccessorValue)value).GetValue(this);
 
                     // Otherwise, the property is the "magic" length property.
-                    return (double)((ArrayInstance)prototypeObject).Length;
+                    return ((ArrayInstance)prototypeObject).Length;
                 }
 
                 // Traverse the prototype chain.
@@ -540,7 +560,7 @@ namespace Jurassic.Library
                     return new PropertyDescriptor(this.propertyValues[property.Index], property.Attributes);
 
                 // The property is the "magic" length property.
-                return new PropertyDescriptor((int)((ArrayInstance)this).Length, property.Attributes);
+                return new PropertyDescriptor(((ArrayInstance)this).Length, property.Attributes);
             }
 
             // The property doesn't exist.
