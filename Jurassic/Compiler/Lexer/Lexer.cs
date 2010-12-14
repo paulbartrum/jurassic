@@ -271,6 +271,9 @@ namespace Jurassic.Compiler
             return punctuator;
         }
 
+        /// <summary>
+        /// Wraps an existing TextReader and logs all characters to the given StringBuilder.
+        /// </summary>
         private class CapturingReader : TextReader
         {
             private TextReader baseReader;
