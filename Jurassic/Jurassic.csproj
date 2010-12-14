@@ -52,7 +52,6 @@
     <Compile Include="Compiler\Debugging\COMHelpers.cs" />
     <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
     <Compile Include="Compiler\Emit\LongJumpException.cs" />
-    <Compile Include="Compiler\Emit\ScopeSnapshot.cs" />
     <Compile Include="Compiler\Lexer\RegularExpressionLiteral.cs" />
     <Compile Include="Compiler\MethodGenerator\CompilerOptions.cs" />
     <Compile Include="Compiler\MethodGenerator\CodeContext.cs" />
