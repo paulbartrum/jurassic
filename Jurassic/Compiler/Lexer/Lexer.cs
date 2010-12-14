@@ -271,6 +271,31 @@ namespace Jurassic.Compiler
             return punctuator;
         }
 
+        private class CapturingReader : TextReader
+        {
+            private TextReader baseReader;
+            private StringBuilder inputCaptureBuilder;
+
+            public CapturingReader(TextReader baseReader, StringBuilder inputCaptureBuilder)
+            {
+                this.baseReader = baseReader;
+                this.inputCaptureBuilder = inputCaptureBuilder;
+            }
+
+            public override int Read()
+            {
+                int c = this.baseReader.Read();
+                if (c >= 0)
+                    this.inputCaptureBuilder.Append((char)c);
+                return c;
+            }
+
+            public override int Peek()
+            {
+                return this.baseReader.Peek();
+            }
+        }
+
         /// <summary>
         /// Reads a numeric literal token.
         /// </summary>
@@ -278,8 +303,14 @@ namespace Jurassic.Compiler
         /// <returns> A numeric literal token. </returns>
         private Token ReadNumericLiteral(int firstChar)
         {
+            // If this.InputCaptureStringBuilder is not null, wrap the text reader so that
+            // characters are captured even though ReadNextChar() is not called.
+            var reader = this.reader;
+            if (this.InputCaptureStringBuilder != null)
+                reader = new CapturingReader(reader, this.InputCaptureStringBuilder);
+
             NumberParser.ParseCoreStatus status;
-            double result = NumberParser.ParseCore(this.reader, (char)firstChar, out status);
+            double result = NumberParser.ParseCore(reader, (char)firstChar, out status);
 
             // Handle various error cases.
             switch (status)

@@ -134,6 +134,7 @@ namespace UnitTests
             Assert.AreEqual("function anonymous(a, b) {\nreturn a + b\n}", TestUtils.Evaluate("new Function('a, b', 'return a + b').toString()"));
             Assert.AreEqual("function atan2() { [native code] }", TestUtils.Evaluate("Math.atan2.toString()"));
             Assert.AreEqual("function (a, b) {\n return a + b \n}", TestUtils.Evaluate("(function(a, b) { return a + b }).toString()"));
+            Assert.AreEqual("function (a, b) {\n return a + 51 \n}", TestUtils.Evaluate("(function(a, b) { return a + 51 }).toString()"));
             Assert.AreEqual("function (a, b) {\n function inner() { return a + b } return inner() \n}",
                 TestUtils.Evaluate("(function(a, b) { function inner() { return a + b } return inner() }).toString()"));
         }
