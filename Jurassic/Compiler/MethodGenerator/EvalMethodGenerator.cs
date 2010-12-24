@@ -113,8 +113,14 @@ namespace Jurassic.Compiler
             if (this.StrictMode == true)
                 scope = scope.ParentScope;
 
-            // Execute the compiled delegate and return the result.
-            return ((Func<ScriptEngine, Scope, object, object>)this.CompiledDelegate)(this.Engine, scope, this.ThisObject);
+            // Execute the compiled delegate and store the result.
+            object result = ((Func<ScriptEngine, Scope, object, object>)this.GeneratedMethod.GeneratedDelegate)(this.Engine, scope, this.ThisObject);
+
+            // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
+            GC.KeepAlive(this);
+
+            // Return the result.
+            return result;
         }
     }
 

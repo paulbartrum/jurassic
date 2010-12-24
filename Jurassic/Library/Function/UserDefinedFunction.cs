@@ -11,8 +11,11 @@ namespace Jurassic.Library
     public class UserDefinedFunction : FunctionInstance
     {
         [NonSerialized]
-        private FunctionDelegate body;
+        private GeneratedMethod generatedMethod;
 
+        [NonSerialized]
+        private FunctionDelegate body;
+        
 
 
         //     INITIALIZATION
@@ -48,7 +51,7 @@ namespace Jurassic.Library
 #endif
 
             // Create a new user defined function.
-            Init(name, argumentNames, this.Engine.CreateGlobalScope(), bodyText, (FunctionDelegate)context.CompiledDelegate, context.StrictMode, true);
+            Init(name, argumentNames, this.Engine.CreateGlobalScope(), bodyText, context.GeneratedMethod, context.StrictMode, true);
         }
 
         /// <summary>
@@ -61,10 +64,26 @@ namespace Jurassic.Library
         /// <param name="bodyText"> The source code for the function body. </param>
         /// <param name="body"> A delegate which represents the body of the function. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
-        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, FunctionDelegate body, bool strictMode)
+        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, FunctionDelegate body, bool strictMode)
             : base(prototype)
         {
-            Init(name, argumentNames, parentScope, bodyText, body, strictMode, true);
+            Init(name, argumentNames, parentScope, bodyText, new GeneratedMethod(body, null), strictMode, true);
+        }
+
+        /// <summary>
+        /// Creates a new instance of a user-defined function.
+        /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        /// <param name="name"> The name of the function. </param>
+        /// <param name="argumentNames"> The names of the arguments. </param>
+        /// <param name="parentScope"> The scope at the point the function is declared. </param>
+        /// <param name="bodyText"> The source code for the function body. </param>
+        /// <param name="generatedMethod"> A delegate which represents the body of the function plus any dependencies. </param>
+        /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
+        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode)
+            : base(prototype)
+        {
+            Init(name, argumentNames, parentScope, bodyText, generatedMethod, strictMode, true);
         }
 
         /// <summary>
@@ -87,7 +106,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             var body = new FunctionDelegate((engine, scope, functionObject, thisObject, argumentValues) => Undefined.Value);
-            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), "return undefined", body, true, false);
+            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), "return undefined", new GeneratedMethod(body, null), true, false);
         }
 
         /// <summary>
@@ -97,11 +116,11 @@ namespace Jurassic.Library
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="parentScope"> The scope at the point the function is declared. </param>
         /// <param name="bodyText"> The source code for the function body. </param>
-        /// <param name="body"> A delegate which represents the body of the function. </param>
+        /// <param name="generatedMethod"> A delegate which represents the body of the function, plus any dependencies. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
         /// <param name="hasInstancePrototype"> <c>true</c> if the function should have a valid
         /// "prototype" property; <c>false</c> if the "prototype" property should be <c>null</c>. </param>
-        private void Init(string name, IList<string> argumentNames, Scope parentScope, string bodyText, FunctionDelegate body, bool strictMode, bool hasInstancePrototype)
+        private void Init(string name, IList<string> argumentNames, Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, bool hasInstancePrototype)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -109,13 +128,14 @@ namespace Jurassic.Library
                 throw new ArgumentNullException("argumentNames");
             if (bodyText == null)
                 throw new ArgumentNullException("bodyText");
-            if (body == null)
-                throw new ArgumentNullException("body");
+            if (generatedMethod == null)
+                throw new ArgumentNullException("generatedMethod");
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope");
             this.ArgumentNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(argumentNames);
             this.BodyText = bodyText;
-            this.body = body;
+            this.generatedMethod = generatedMethod;
+            this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
             this.ParentScope = parentScope;
             this.StrictMode = strictMode;
 
@@ -143,7 +163,8 @@ namespace Jurassic.Library
                 var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), this.Name, this.ArgumentNames);
                 var functionGenerator = new FunctionMethodGenerator(this.Engine, scope, this.Name, this.ArgumentNames, this.BodyText, new CompilerOptions());
                 functionGenerator.GenerateCode();
-                this.body = (FunctionDelegate)functionGenerator.CompiledDelegate;
+                this.generatedMethod = functionGenerator.GeneratedMethod;
+                this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
 
 #if DEBUG && !SILVERLIGHT
                 // Save the disassembled IL code (in debug mode only).

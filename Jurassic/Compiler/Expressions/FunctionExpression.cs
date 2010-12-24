@@ -63,6 +63,21 @@ namespace Jurassic.Compiler
             // Generate a new method.
             this.context.GenerateCode();
 
+            // Add the generated method to the nested function list.
+            if (optimizationInfo.NestedFunctions == null)
+                optimizationInfo.NestedFunctions = new List<GeneratedMethod>();
+            optimizationInfo.NestedFunctions.Add(this.context.GeneratedMethod);
+
+            // Add all the nested methods to the parent list.
+            if (this.context.GeneratedMethod.Dependencies != null)
+            {
+                foreach (var nestedFunctionExpression in this.context.GeneratedMethod.Dependencies)
+                    optimizationInfo.NestedFunctions.Add(nestedFunctionExpression);
+            }
+
+            // Store the generated method in the cache.
+            long generatedMethodID = GeneratedMethod.Save(this.context.GeneratedMethod);
+
             // Create a UserDefinedFunction.
 
             // prototype
@@ -91,9 +106,9 @@ namespace Jurassic.Compiler
             generator.LoadString(this.BodyText);
 
             // body
-            generator.LoadNull();
-            generator.LoadMethodPointer(this.context.GeneratedMethod);
-            generator.NewObject(ReflectionHelpers.FunctionDelegate_Constructor);
+            generator.LoadInt64(generatedMethodID);
+            generator.Call(ReflectionHelpers.GeneratedMethod_Load);
+
 
             // strictMode
             generator.LoadBoolean(this.context.StrictMode);

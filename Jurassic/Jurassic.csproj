@@ -57,6 +57,7 @@
     <Compile Include="Compiler\MethodGenerator\CodeContext.cs" />
     <Compile Include="Compiler\MethodGenerator\EvalMethodGenerator.cs" />
     <Compile Include="Compiler\MethodGenerator\FunctionMethodGenerator.cs" />
+    <Compile Include="Compiler\MethodGenerator\GeneratedMethod.cs" />
     <Compile Include="Compiler\MethodGenerator\GlobalMethodGenerator.cs" />
     <Compile Include="Compiler\MethodGenerator\MethodGenerator.cs" />
     <Compile Include="Compiler\Emit\MethodOptimizationHints.cs" />

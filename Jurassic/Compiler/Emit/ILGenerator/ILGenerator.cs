@@ -324,6 +324,12 @@ namespace Jurassic.Compiler
         public abstract void LoadInt32(int value);
 
         /// <summary>
+        /// Pushes a 64-bit constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The 64-bit integer to push onto the stack. </param>
+        public abstract void LoadInt64(long value);
+
+        /// <summary>
         /// Pushes a constant value onto the stack.
         /// </summary>
         /// <param name="value"> The number to push onto the stack. </param>
