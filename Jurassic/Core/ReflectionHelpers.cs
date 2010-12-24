@@ -166,7 +166,7 @@ namespace Jurassic
                 new Type[] { typeof(string), typeof(object), typeof(bool), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
 
             Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
-            ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance));
+            ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance), typeof(bool), typeof(bool));
             ObjectScope_ScopeObject = GetInstanceMethod(typeof(ObjectScope), "get_ScopeObject");
             DeclarativeScope_CreateRuntimeScope = GetStaticMethod(typeof(DeclarativeScope), "CreateRuntimeScope", typeof(Scope), typeof(string[]));
             DeclarativeScope_Values = GetInstanceMethod(typeof(DeclarativeScope), "get_Values");

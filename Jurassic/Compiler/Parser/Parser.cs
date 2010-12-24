@@ -1157,7 +1157,7 @@ namespace Jurassic.Compiler
             var expression = ParseFunction(FunctionType.Declaration, this.initialScope);
 
             // Add the function to the top-level scope.
-            this.initialScope.DeclareVariable(expression.Context.Name, expression, writable: true, deletable: this.context == CodeContext.Eval);
+            this.initialScope.DeclareVariable(expression.FunctionName, expression, writable: true, deletable: this.context == CodeContext.Eval);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1809,7 +1809,7 @@ namespace Jurassic.Compiler
 
                     // Get the function name.
                     var getOrSet = propertyName;
-                    propertyName = function.Context.Name;
+                    propertyName = function.FunctionName;
 
                     if (getOrSet == "get")
                     {

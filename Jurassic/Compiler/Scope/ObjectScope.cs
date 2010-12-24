@@ -58,10 +58,14 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
         /// <param name="scopeObject"> An expression that evaluates to the object to use. </param>
+        /// <param name="providesImplicitThisValue"> Indicates whether an implicit "this" value is
+        /// supplied to function calls in this scope. </param>
+        /// <param name="canDeclareVariables"> Indicates whether variables can be declared within
+        /// the scope. </param>
         /// <returns> A new ObjectScope instance. </returns>
-        public static ObjectScope CreateRuntimeScope(Scope parentScope, Library.ObjectInstance scopeObject)
+        public static ObjectScope CreateRuntimeScope(Scope parentScope, Library.ObjectInstance scopeObject, bool providesImplicitThisValue, bool canDeclareVariables)
         {
-            return new ObjectScope(parentScope) { ScopeObject = scopeObject };
+            return new ObjectScope(parentScope) { ScopeObject = scopeObject, ProvidesImplicitThisValue = providesImplicitThisValue, CanDeclareVariables = canDeclareVariables };
         }
 
         /// <summary>
@@ -171,6 +175,8 @@ namespace Jurassic.Compiler
                 this.ScopeObjectExpression.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToObject(generator, this.ScopeObjectExpression.ResultType);
             }
+            generator.LoadBoolean(this.ProvidesImplicitThisValue);
+            generator.LoadBoolean(this.CanDeclareVariables);
             generator.Call(ReflectionHelpers.ObjectScope_CreateRuntimeScope);
 
             // Save the new scope.
