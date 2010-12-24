@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -7,6 +8,8 @@ namespace Jurassic.Compiler
     /// </summary>
     internal sealed class FunctionExpression : Expression
     {
+        private FunctionMethodGenerator context;
+
         /// <summary>
         /// Creates a new instance of FunctionExpression.
         /// </summary>
@@ -15,16 +18,31 @@ namespace Jurassic.Compiler
         {
             if (functionContext == null)
                 throw new ArgumentNullException("functionContext");
-            this.Context = functionContext;
+            this.context = functionContext;
         }
 
         /// <summary>
-        /// Gets the function context associated with this expression.
+        /// Gets the name of the function.
         /// </summary>
-        public FunctionMethodGenerator Context
+        public string FunctionName
         {
-            get;
-            private set;
+            get { return this.context.Name; }
+        }
+
+        /// <summary>
+        /// Gets a list of argument names.
+        /// </summary>
+        public IList<string> ArgumentNames
+        {
+            get { return this.context.ArgumentNames; }
+        }
+
+        /// <summary>
+        /// Gets the source code for the body of the function.
+        /// </summary>
+        public string BodyText
+        {
+            get { return this.context.BodyText; }
         }
 
         /// <summary>
@@ -43,7 +61,7 @@ namespace Jurassic.Compiler
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Generate a new method.
-            this.Context.GenerateCode();
+            this.context.GenerateCode();
 
             // Create a UserDefinedFunction.
 
@@ -53,16 +71,16 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
 
             // name
-            generator.LoadString(this.Context.Name);
+            generator.LoadString(this.FunctionName);
 
             // argumentNames
-            generator.LoadInt32(this.Context.ArgumentNames.Count);
+            generator.LoadInt32(this.ArgumentNames.Count);
             generator.NewArray(typeof(string));
-            for (int i = 0; i < this.Context.ArgumentNames.Count; i++)
+            for (int i = 0; i < this.ArgumentNames.Count; i++)
             {
                 generator.Duplicate();
                 generator.LoadInt32(i);
-                generator.LoadString(this.Context.ArgumentNames[i]);
+                generator.LoadString(this.ArgumentNames[i]);
                 generator.StoreArrayElement(typeof(string));
             }
 
@@ -70,15 +88,15 @@ namespace Jurassic.Compiler
             EmitHelpers.LoadScope(generator);
 
             // bodyText
-            generator.LoadString(this.Context.BodyText);
+            generator.LoadString(this.BodyText);
 
             // body
             generator.LoadNull();
-            generator.LoadMethodPointer(this.Context.GeneratedMethod);
+            generator.LoadMethodPointer(this.context.GeneratedMethod);
             generator.NewObject(ReflectionHelpers.FunctionDelegate_Constructor);
 
             // strictMode
-            generator.LoadBoolean(this.Context.StrictMode);
+            generator.LoadBoolean(this.context.StrictMode);
 
             // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body, bool strictMode)
             generator.NewObject(ReflectionHelpers.UserDefinedFunction_Constructor);
@@ -88,7 +106,7 @@ namespace Jurassic.Compiler
             var temp = generator.CreateTemporaryVariable(typeof(Jurassic.Library.UserDefinedFunction));
             generator.Duplicate();
             generator.StoreVariable(temp);
-            generator.LoadString(this.Context.DisassembledIL);
+            generator.LoadString(this.context.DisassembledIL);
             generator.Call(ReflectionHelpers.UserDefinedFunction_set_DisassembledIL);
             generator.LoadVariable(temp);
             generator.ReleaseTemporaryVariable(temp);
@@ -109,10 +127,10 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException("displayName");
 
             // We only infer names for functions if the function doesn't have a name.
-            if (force == true || string.IsNullOrEmpty(this.Context.Name))
+            if (force == true || string.IsNullOrEmpty(this.FunctionName))
             {
                 // Statically set the display name.
-                this.Context.DisplayName = displayName;
+                this.context.DisplayName = displayName;
 
                 // Generate code to set the display name at runtime.
                 generator.Duplicate();
@@ -129,7 +147,7 @@ namespace Jurassic.Compiler
         /// <returns> A string representing this expression. </returns>
         public override string ToString()
         {
-            return this.Context.ToString();
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.FunctionName, StringHelpers.Join(", ", this.ArgumentNames), this.BodyText);
         }
     }
 
