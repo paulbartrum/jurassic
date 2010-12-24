@@ -370,6 +370,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Pushes a 64-bit constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The 64-bit integer to push onto the stack. </param>
+        public override void LoadInt64(long value)
+        {
+            this.generator.Emit(OpCodes.Ldc_I8, value);
+        }
+
+        /// <summary>
         /// Pushes a constant value onto the stack.
         /// </summary>
         /// <param name="value"> The number to push onto the stack. </param>

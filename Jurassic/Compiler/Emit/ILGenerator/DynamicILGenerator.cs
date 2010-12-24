@@ -216,21 +216,20 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Emits a 64-bit double and increments the offset member variable.
+        /// Emits a 64-bit integer and increments the offset member variable.
         /// </summary>
-        /// <param name="value"> The floating point number to emit. </param>
-        private void EmitFloat64(double value)
+        /// <param name="value"> The 64-bit integer to emit. </param>
+        private void EmitInt64(long value)
         {
-            long num = BitConverter.DoubleToInt64Bits(value);
             int offset = this.offset;
-            this.bytes[offset++] = (byte)num;
-            this.bytes[offset++] = (byte)(num >> 8);
-            this.bytes[offset++] = (byte)(num >> 16);
-            this.bytes[offset++] = (byte)(num >> 24);
-            this.bytes[offset++] = (byte)(num >> 32);
-            this.bytes[offset++] = (byte)(num >> 40);
-            this.bytes[offset++] = (byte)(num >> 48);
-            this.bytes[offset++] = (byte)(num >> 56);
+            this.bytes[offset++] = (byte)value;
+            this.bytes[offset++] = (byte)(value >> 8);
+            this.bytes[offset++] = (byte)(value >> 16);
+            this.bytes[offset++] = (byte)(value >> 24);
+            this.bytes[offset++] = (byte)(value >> 32);
+            this.bytes[offset++] = (byte)(value >> 40);
+            this.bytes[offset++] = (byte)(value >> 48);
+            this.bytes[offset++] = (byte)(value >> 56);
             this.offset = offset;
         }
 
@@ -333,13 +332,13 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Emits a one byte opcode plus a 4-byte operand.
+        /// Emits a one byte opcode plus a 8-byte operand.
         /// </summary>
         /// <param name="opCode"> The opcode to emit. </param>
         /// <param name="popCount"> The number of items to pop from the stack. </param>
         /// <param name="pushCount"> The number of items to push onto the stack. </param>
-        /// <param name="emitFloat64"> A 64-bit integer to emit. </param>
-        private void Emit1ByteOpCodeFloat64(byte opCode, int popCount, int pushCount, double emitFloat64)
+        /// <param name="emitInt64"> A 64-bit integer to emit. </param>
+        private void Emit1ByteOpCodeInt64(byte opCode, int popCount, int pushCount, long emitInt64)
         {
             // Enlarge the array if necessary.
             const int instructionSize = 9;
@@ -348,7 +347,7 @@ namespace Jurassic.Compiler
 
             // Emit the instruction bytes.
             this.bytes[this.offset++] = opCode;
-            EmitFloat64(emitFloat64);
+            EmitInt64(emitInt64);
 
             // The instruction pops two values and pushes a value to the stack.
             if (this.stackSize < popCount)
@@ -1178,12 +1177,25 @@ namespace Jurassic.Compiler
             }
             else
             {
-                // ldc.i4.s value = 20 <int32>
+                // ldc.i4 value = 20 <int32>
                 Emit1ByteOpCodeInt32(0x20, 0, 1, value);
             }
 
             // The instruction pushes a value onto the stack.
             PushStackOperand(VESType.Int32);
+        }
+
+        /// <summary>
+        /// Pushes a 64-bit constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The 64-bit integer to push onto the stack. </param>
+        public override void LoadInt64(long value)
+        {
+            // ldc.i8 value = 21 <int64>
+            Emit1ByteOpCodeInt64(0x21, 0, 1, value);
+
+            // The instruction pushes a value onto the stack.
+            PushStackOperand(VESType.Int64);
         }
 
         /// <summary>
@@ -1193,7 +1205,7 @@ namespace Jurassic.Compiler
         public override void LoadDouble(double value)
         {
             // ldc.r8 = 23 <float64>
-            Emit1ByteOpCodeFloat64(0x23, 0, 1, value);
+            Emit1ByteOpCodeInt64(0x23, 0, 1, BitConverter.DoubleToInt64Bits(value));
 
             // The instruction pushes a value onto the stack.
             PushStackOperand(VESType.Float);

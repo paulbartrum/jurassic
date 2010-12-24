@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -96,15 +97,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the emitted method.  This will be <c>null</c> until GenerateCode() is called.
-        /// </summary>
-        public System.Reflection.MethodInfo GeneratedMethod
-        {
-            get;
-            protected set;
-        }
-
-        /// <summary>
         /// Gets the generated IL.  This will be <c>null</c> until GenerateCode() is
         /// called.
         /// </summary>
@@ -115,14 +107,16 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets a delegate to the emitted dynamic method.  This will be <c>null</c> until
-        /// Execute() is called.
+        /// Gets a delegate to the emitted dynamic method, plus any dependencies.  This will be
+        /// <c>null</c> until GenerateCode() is called.
         /// </summary>
-        public Delegate CompiledDelegate
+        public GeneratedMethod GeneratedMethod
         {
             get;
             protected set;
         }
+
+
 
 #if DEBUG
 
@@ -212,8 +206,7 @@ namespace Jurassic.Compiler
 #endif
 
                 // Create a delegate from the method.
-                this.GeneratedMethod = dynamicMethod;
-                this.CompiledDelegate = dynamicMethod.CreateDelegate(GetDelegate());
+                this.GeneratedMethod = new GeneratedMethod(dynamicMethod.CreateDelegate(GetDelegate()), optimizationInfo.NestedFunctions);
             }
 #endif
             if (this.Options.EnableDebugging == true || ScriptEngine.LowPrivilegeEnvironment == true)
@@ -268,18 +261,18 @@ namespace Jurassic.Compiler
 
                 // Bake it.
                 var type = typeBuilder.CreateType();
-                this.GeneratedMethod = type.GetMethod(this.GetMethodName());
+                var methodInfo = type.GetMethod(this.GetMethodName());
 
 #if DEBUG && !SILVERLIGHT
                 // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
-                var reader = new ClrTest.Reflection.ILReader(this.GeneratedMethod);
+                var reader = new ClrTest.Reflection.ILReader(methodInfo);
                 var writer = new System.IO.StringWriter();
                 var visitor = new ClrTest.Reflection.ReadableILStringVisitor(new ClrTest.Reflection.ReadableILStringToTextWriter(writer));
                 reader.Accept(visitor);
                 this.DisassembledIL = writer.ToString();
 #endif
 
-                this.CompiledDelegate = Delegate.CreateDelegate(GetDelegate(), this.GeneratedMethod);
+                this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
             }
         }
 

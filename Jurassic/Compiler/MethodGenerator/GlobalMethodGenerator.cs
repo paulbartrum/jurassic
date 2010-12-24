@@ -87,8 +87,14 @@ namespace Jurassic.Compiler
             if (this.GeneratedMethod == null)
                 GenerateCode();
 
-            // Execute the compiled delegate and return the result.
-            return ((Func<ScriptEngine, Scope, object, object>)this.CompiledDelegate)(this.Engine, this.InitialScope, this.Engine.Global);
+            // Execute the compiled delegate and store the result.
+            object result = ((Func<ScriptEngine, Scope, object, object>)this.GeneratedMethod.GeneratedDelegate)(this.Engine, this.InitialScope, this.Engine.Global);
+
+            // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
+            GC.KeepAlive(this);
+
+            // Return the result.
+            return result;
         }
     }
 

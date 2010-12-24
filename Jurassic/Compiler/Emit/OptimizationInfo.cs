@@ -63,6 +63,22 @@ namespace Jurassic.Compiler
 
 
 
+        //     NESTED FUNCTIONS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets a list of generated methods that correspond to nested functions.
+        /// This list is maintained so that the garbage collector does not prematurely collect
+        /// the generated code for the nested functions.
+        /// </summary>
+        public IList<GeneratedMethod> NestedFunctions
+        {
+            get;
+            set;
+        }
+
+
+
         //     FUNCTION OPTIMIZATION
         //_________________________________________________________________________________________
 
