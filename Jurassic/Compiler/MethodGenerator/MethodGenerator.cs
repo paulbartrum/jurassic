@@ -181,26 +181,47 @@ namespace Jurassic.Compiler
             optimizationInfo.StrictMode = this.StrictMode;
             optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
 
-#if !SILVERLIGHT
-            if (this.Options.EnableDebugging == false && ScriptEngine.LowPrivilegeEnvironment == false)
+            if (this.Options.EnableDebugging == false)
             {
                 // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
                 // FunctionExpression class.
 
                 // Create a new dynamic method.
-                var dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                    GetMethodName(),                                        // Name of the generated method.
-                    typeof(object),                                         // Return type of the generated method.
-                    GetParameterTypes(),                                    // Parameter types of the generated method.
-                    typeof(MethodGenerator),                                // Owner type.
-                    true);                                                  // Skip visibility checks.
+                System.Reflection.Emit.DynamicMethod dynamicMethod;
+                ILGenerator generator;
+#if !SILVERLIGHT
+                if (ScriptEngine.LowPrivilegeEnvironment == false)
+                {
+                    // High privilege path.
+                    dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                        GetMethodName(),                                        // Name of the generated method.
+                        typeof(object),                                         // Return type of the generated method.
+                        GetParameterTypes(),                                    // Parameter types of the generated method.
+                        typeof(MethodGenerator),                                // Owner type.
+                        true);                                                  // Skip visibility checks.
 
-                // Generate the IL.
-                ILGenerator generator = new DynamicILGenerator(dynamicMethod);
+                    // Generate the IL.
+                    generator = new DynamicILGenerator(dynamicMethod);
+                }
+                else
+                {
+#endif
+                    // Low privilege path.
+                    dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                        GetMethodName(),                                        // Name of the generated method.
+                        typeof(object),                                         // Return type of the generated method.
+                        GetParameterTypes());                                   // Parameter types of the generated method.
+
+                    // Generate the IL.
+                    generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
+#if !SILVERLIGHT
+                }
+#endif
+                
                 GenerateCode(generator, optimizationInfo);
                 generator.Complete();
 
-#if DEBUG
+#if DEBUG && !SILVERLIGHT
                 // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
                 this.DisassembledIL = generator.ToString();
 #endif
@@ -208,8 +229,7 @@ namespace Jurassic.Compiler
                 // Create a delegate from the method.
                 this.GeneratedMethod = new GeneratedMethod(dynamicMethod.CreateDelegate(GetDelegate()), optimizationInfo.NestedFunctions);
             }
-#endif
-            if (this.Options.EnableDebugging == true || ScriptEngine.LowPrivilegeEnvironment == true)
+            else
             {
                 // Debugging or low trust path.
                 ScriptEngine.ReflectionEmitModuleInfo reflectionEmitInfo = this.Engine.ReflectionEmitInfo;

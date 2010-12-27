@@ -89,9 +89,6 @@ namespace Jurassic.Library
                 if (this.buckets[argumentCount] == null)
                     throw new InvalidOperationException("No preferred method could be found.");
             }
-
-            // Allocate an array containing delegates.
-            this.delegateCache = new BinderDelegate[MaximumSupportedParameterCount + 1];
         }
 
         /// <summary>
@@ -108,6 +105,9 @@ namespace Jurassic.Library
             // Create a delegate or retrieve it from the cache.
             if (arguments.Length <= MaximumSupportedParameterCount)
             {
+                // Save the delegate that is created into a cache so it doesn't have to be created again.
+                if (this.delegateCache == null)
+                    this.delegateCache = new BinderDelegate[MaximumSupportedParameterCount + 1];
                 delegateToCall = this.delegateCache[arguments.Length];
                 if (delegateToCall == null)
                     delegateToCall = this.delegateCache[arguments.Length] = CreateBinder(arguments.Length);

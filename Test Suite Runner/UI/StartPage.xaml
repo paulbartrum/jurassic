@@ -26,8 +26,7 @@
         <StackPanel Orientation="Vertical">
             <GroupBox Header="Options" Width="300" Margin="40" Padding="16">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox Content="Run with Full Trust" IsEnabled="False" IsChecked="True" />
-                    <CheckBox Content="Run with Partial Trust" IsEnabled="False" IsChecked="False" />
+                    <CheckBox Content="Run with Partial Trust" IsChecked="{Binding Path=RunInPartialTrust}" />
                 </StackPanel>
             </GroupBox>
 
