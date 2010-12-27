@@ -74,10 +74,12 @@ namespace Jurassic.Compiler
             /// </summary>
             public ILLabel EndOfStatement;
 
+#if DEBUG && !SILVERLIGHT
             /// <summary>
             /// Gets or sets the number of items on the IL stack at the start of the statement.
             /// </summary>
             public int OriginalStackSize;
+#endif
         }
 
         /// <summary>
