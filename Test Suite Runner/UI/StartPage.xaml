@@ -1,0 +1,39 @@
+﻿<Page x:Class="Test_Suite_Runner.UI.StartPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+      FontFamily="Calibri" FontSize="16"
+      Title="Start Page">
+
+    <StackPanel Orientation="Vertical">
+
+        <!-- Header image -->
+        <Grid>
+            <Rectangle VerticalAlignment="Top" Height="150">
+                <Rectangle.Fill>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FAFCFF" Offset="0" />
+                        <GradientStop Color="#D5EDFF" Offset="1" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Line X1="0" Y1="150.5" X2="100000" Y2="150.5" Stroke="#0094FF" StrokeThickness="2" />
+            <Image HorizontalAlignment="Center" VerticalAlignment="Top" Source="..\Assets\Header.png" Stretch="None" />
+        </Grid>
+
+        <StackPanel Orientation="Vertical">
+            <GroupBox Header="Options" Width="300" Margin="40" Padding="16">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox Content="Run with Partial Trust" IsChecked="{Binding Path=RunInPartialTrust}" />
+                </StackPanel>
+            </GroupBox>
+
+            <Button Name="startButton" Grid.Row="1" FontSize="22" Click="startButton_Click" Content="Start Running Tests"
+                    Width="250" Style="{StaticResource GreenButton}" />
+        </StackPanel>
+
+    </StackPanel>
+
+</Page>

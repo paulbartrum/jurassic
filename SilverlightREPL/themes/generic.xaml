@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:my="clr-namespace:SilverlightREPL">
+
+    <Style TargetType="my:CustomScrollViewer">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="my:CustomScrollViewer">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <my:CustomScrollContentPresenter
+                            x:Name="Presenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            VerticalOffset="{Binding Value, ElementName=VerticalScrollBar}" />
+                        <ScrollBar
+                            x:Name="VerticalScrollBar"
+                            IsTabStop="False"
+                            Grid.Column="1"
+                            Maximum="{Binding ExtentMinusViewportHeight, ElementName=Presenter}"
+                            ViewportSize="{Binding ViewportHeight, ElementName=Presenter}"
+                            SmallChange="16"
+                            LargeChange="{Binding ViewportHeight, ElementName=Presenter}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
