@@ -224,8 +224,8 @@ namespace Jurassic.Compiler
         public override ILLocalVariable DeclareVariable(Type type, string name = null)
         {
             var result = this.generator.DeclareLocal(type);
-            if (name != null)
-                result.SetLocalSymInfo(name);
+            //if (name != null)
+            //    result.SetLocalSymInfo(name);
             return new ReflectionEmitILLocalVariable(result);
         }
 
