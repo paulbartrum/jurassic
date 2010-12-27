@@ -159,7 +159,7 @@ namespace Jurassic.Compiler
 
             // Strengthen the variable types.
             List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>> previousVariableTypes = null;
-            if (optimizationInfo.OptimizeDeclarativeScopes == true)
+            if (optimizationInfo.OptimizeInferredTypes == true)
             {
                 // Keep a record of the variable types before strengthening.
                 previousVariableTypes = new List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>>();
@@ -168,8 +168,8 @@ namespace Jurassic.Compiler
                 foreach (var variableAndType in typedVariables)
                 {
                     var variable = variableAndType.Key;
-                    var variableType = variableAndType.Value;
-                    if (variableType != variable.Type)
+                    var variableInfo = variableAndType.Value;
+                    if (variableInfo.Conditional == false && variableInfo.Type != variable.Type)
                     {
                         // Save the previous type so we can restore it later.
                         var previousType = variable.Type;
@@ -180,8 +180,8 @@ namespace Jurassic.Compiler
                         nameExpression.GenerateGet(generator, optimizationInfo, false);
 
                         // Store the typed value.
-                        variable.Store = generator.DeclareVariable(variableType);
-                        variable.Type = variableType;
+                        variable.Store = generator.DeclareVariable(variableInfo.Type);
+                        variable.Type = variableInfo.Type;
                         nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
                     }
                 }
@@ -255,15 +255,24 @@ namespace Jurassic.Compiler
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
+        private struct InferredTypeInfo
+        {
+            // The inferred type of the variable.
+            public PrimitiveType Type;
+
+            // <c>true</c> if all the variable assignments are conditional (type inference cannot
+            // be used in this case).
+            public bool Conditional;
+        }
 
         /// <summary>
         /// Finds variables that were assigned to and determines their types.
         /// </summary>
         /// <param name="root"> The root of the abstract syntax tree to search. </param>
         /// <param name="variableTypes"> A dictionary containing the variables that were assigned to. </param>
-        private Dictionary<Scope.DeclaredVariable, PrimitiveType> FindTypedVariables()
+        private Dictionary<Scope.DeclaredVariable, InferredTypeInfo> FindTypedVariables()
         {
-            var result = new Dictionary<Scope.DeclaredVariable,PrimitiveType>();
+            var result = new Dictionary<Scope.DeclaredVariable, InferredTypeInfo>();
 
             // Special case for the common case of an incrementing or decrementing loop variable.
             // The loop must be one of the following forms:
@@ -347,18 +356,19 @@ namespace Jurassic.Compiler
                 }
             }
 
+            bool continueEncountered = false;
             if (everythingIsOkay == true)
             {
                 // The loop variable can be optimized to an integer.
                 var variable = loopVariableScope.GetDeclaredVariable(loopVariableName);
                 if (variable != null)
-                    result.Add(variable, PrimitiveType.Int32);
-                FindTypedVariables(this.Body, result);
+                    result.Add(variable, new InferredTypeInfo() { Type = PrimitiveType.Int32, Conditional = false });
+                FindTypedVariables(this.Body, result, conditional: false, continueEncountered: ref continueEncountered);
             }
             else
             {
                 // Unoptimized.
-                FindTypedVariables(this, result);
+                FindTypedVariables(this, result, conditional: false, continueEncountered: ref continueEncountered);
             }
 
             return result;
@@ -369,7 +379,11 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="root"> The root of the abstract syntax tree to search. </param>
         /// <param name="variableTypes"> A dictionary containing the variables that were assigned to. </param>
-        private static void FindTypedVariables(AstNode root, Dictionary<Scope.DeclaredVariable, PrimitiveType> variableTypes)
+        /// <param name="conditional"> <c>true</c> if execution of the AST node <paramref name="root"/>
+        /// is conditional (i.e. the node is inside an if statement or a conditional expression. </param>
+        /// <param name="continueEncountered"> Keeps track of whether a continue statement has been
+        /// encountered. </param>
+        private static void FindTypedVariables(AstNode root, Dictionary<Scope.DeclaredVariable, InferredTypeInfo> variableTypes, bool conditional, ref bool continueEncountered)
         {
             if (root is AssignmentExpression)
             {
@@ -386,27 +400,40 @@ namespace Jurassic.Compiler
                         {
                             // The variable is in the top-most scope.
                             // Check if the variable has been seen before.
-                            PrimitiveType existingType;
-                            if (variableTypes.TryGetValue(variable, out existingType) == false)
+                            InferredTypeInfo existingTypeInfo;
+                            if (variableTypes.TryGetValue(variable, out existingTypeInfo) == false)
                             {
                                 // This is the first time the variable has been encountered.
-                                variableTypes.Add(variable, assignment.ResultType);
+                                variableTypes.Add(variable, new InferredTypeInfo() { Type = assignment.ResultType, Conditional = conditional });
                             }
                             else
                             {
                                 // The variable has been seen before.
-                                variableTypes[variable] = PrimitiveTypeUtilities.GetCommonType(existingType, assignment.ResultType);
+                                variableTypes[variable] = new InferredTypeInfo()
+                                {
+                                    Type = PrimitiveTypeUtilities.GetCommonType(existingTypeInfo.Type, assignment.ResultType),
+                                    Conditional = existingTypeInfo.Conditional == true && conditional == true
+                                };
                             }
                         }
                     }
                 }
             }
-            else
-            {
-                // Search child nodes.
-                foreach (var node in root.ChildNodes)
-                    FindTypedVariables(node, variableTypes);
-            }
+            
+            // Determine whether the child nodes are conditional.
+            conditional = conditional == true ||
+                continueEncountered == true ||
+                root is IfStatement ||
+                root is TernaryExpression ||
+                root is TryCatchFinallyStatement;
+
+            // If the AST node is a continue statement, all further assignments are conditional.
+            if (root is ContinueStatement)
+                continueEncountered = true;
+
+            // Search child nodes for assignment statements.
+            foreach (var node in root.ChildNodes)
+                FindTypedVariables(node, variableTypes, conditional: conditional, continueEncountered: ref continueEncountered);
         }
 
         /// <summary>
