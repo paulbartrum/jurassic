@@ -106,6 +106,21 @@ namespace Jurassic.Compiler
             }
         }
 
+        /// <summary>
+        /// Gets a value that indicates whether the variables should be optimized if the type of
+        /// the variable can be inferred.
+        /// </summary>
+        public bool OptimizeInferredTypes
+        {
+            get
+            {
+                return this.MethodOptimizationHints.HasArguments == false &&
+                    this.MethodOptimizationHints.HasEval == false &&
+                    this.MethodOptimizationHints.HasNestedFunction == false &&
+                    this.EvalResult == null;
+            }
+        }
+
 
 
         //     VARIABLES
