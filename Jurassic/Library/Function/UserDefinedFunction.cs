@@ -45,11 +45,6 @@ namespace Jurassic.Library
             var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentNames, bodyText, new CompilerOptions());
             context.GenerateCode();
 
-#if DEBUG && !SILVERLIGHT
-            // Save the disassembled IL code (in debug mode only).
-            this.disassembledIL = context.DisassembledIL;
-#endif
-
             // Create a new user defined function.
             Init(name, argumentNames, this.Engine.CreateGlobalScope(), bodyText, context.GeneratedMethod, context.StrictMode, true);
         }
@@ -165,11 +160,6 @@ namespace Jurassic.Library
                 functionGenerator.GenerateCode();
                 this.generatedMethod = functionGenerator.GeneratedMethod;
                 this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
-
-#if DEBUG && !SILVERLIGHT
-                // Save the disassembled IL code (in debug mode only).
-                this.disassembledIL = functionGenerator.DisassembledIL;
-#endif
             }
             return this.body;
         }
@@ -219,8 +209,6 @@ namespace Jurassic.Library
 
 #if DEBUG && !SILVERLIGHT
 
-        private string disassembledIL;
-
         /// <summary>
         /// Gets the body of the method in the form of disassembled IL code.
         /// </summary>
@@ -232,11 +220,7 @@ namespace Jurassic.Library
                 var body = Compile();
 
                 // Return the disassembled IL.
-                return this.disassembledIL;
-            }
-            set
-            {
-                this.disassembledIL = value;
+                return this.generatedMethod.DisassembledIL;
             }
         }
 

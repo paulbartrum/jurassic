@@ -115,17 +115,6 @@ namespace Jurassic.Compiler
 
             // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body, bool strictMode)
             generator.NewObject(ReflectionHelpers.UserDefinedFunction_Constructor);
-
-#if DEBUG
-            // Set the DisassembledIL property.
-            var temp = generator.CreateTemporaryVariable(typeof(Jurassic.Library.UserDefinedFunction));
-            generator.Duplicate();
-            generator.StoreVariable(temp);
-            generator.LoadString(this.context.DisassembledIL);
-            generator.Call(ReflectionHelpers.UserDefinedFunction_set_DisassembledIL);
-            generator.LoadVariable(temp);
-            generator.ReleaseTemporaryVariable(temp);
-#endif
         }
 
         
