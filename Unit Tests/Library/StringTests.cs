@@ -445,6 +445,50 @@ namespace UnitTests
             // Undefined and null are not allowed as the "this" object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.match.call(undefined)"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.match.call(null)"));
+
+            // Test the deprecated RegExp properties.
+            TestUtils.Evaluate("'honey bunny'.match(/n(.)y/)");
+            Assert.AreEqual("e", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("honey bunny", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("honey bunny", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("ney", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("ney", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("e", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("e", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual(" bunny", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual(" bunny", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            TestUtils.Evaluate("'honey bunny'.match(/n.?y/g)");
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("honey bunny", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("honey bunny", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("nny", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("nny", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("honey bu", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("honey bu", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            TestUtils.Evaluate("'honey bunny'.match(/(bu|ho)(..)y/g)");
+            Assert.AreEqual("bu", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("nn", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$3"));
+            Assert.AreEqual("honey bunny", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("honey bunny", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("bunny", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("bunny", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("nn", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("nn", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("honey ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("honey ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
         }
 
         [TestMethod]
@@ -471,17 +515,20 @@ namespace UnitTests
                 replace(/""[^""\\\n\r]*""|true|false|null|-?\d+(?:\.\d*)?(:?[eE][+\-]?\d+)?/g, ']').
                 replace(/:/g, '@')"));
             Assert.AreEqual("A $ng $ring for te$ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, '$$')"));
+            Assert.AreEqual("A ${test}ng ${test}ring for te${test}ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, '${test}')"));
             Assert.AreEqual("A <lo>ng <st>ring for te<st>ing", TestUtils.Evaluate("'A long string for testing'.replace(/lo|st/g, '<$&>')"));
             Assert.AreEqual("A short <A short >ring", TestUtils.Evaluate("'A short string'.replace(/lo|st/g, '<$`>')"));
             Assert.AreEqual("A short <ring>ring", TestUtils.Evaluate(@"'A short string'.replace(/lo|st/g, '<$\'>')"));
             Assert.AreEqual("A l  $3 l0ng  t $3 0ring for te t $3 0ing", TestUtils.Evaluate("'A long string for testing'.replace(/(l)o|s(t)/g, '$1 $2 $3 $10')"));
+            Assert.AreEqual("A long string g", TestUtils.Evaluate("'A long string for testing'.replace(/(f)(o)(r)( )(t)(e)(s)(t)(i)(n)(g)/g, '$11')"));
             Assert.AreEqual("$1-$11,$1-$22", TestUtils.Evaluate(@"'$1,$2'.replace(/(\$(\d))/g, '$$1-$1$2')"));
+            Assert.AreEqual("$es$ing", TestUtils.Evaluate(@"'testing'.replace(/t/g, '$')"));
 
             // replace(regExp, function)
             Assert.AreEqual("blah def34", TestUtils.Evaluate("'abc12 def34'.replace(/([a-z]+)([0-9]+)/, function() { return 'blah' })"));
             Assert.AreEqual("12abc def34", TestUtils.Evaluate("'abc12 def34'.replace(/([a-z]+)([0-9]+)/, function() { return arguments[2] + arguments[1] })"));
             Assert.AreEqual("A aort aring", TestUtils.Evaluate("'A short string'.replace(/(s)h|s(t)/g, function() { return 'a'; })"));
-            TestUtils.Evaluate(@"var parameterValues = []");
+            TestUtils.Execute(@"var parameterValues = []");
             TestUtils.Evaluate("'A short string'.replace(/(s)h|s(t)/g, function() { parameterValues.push(arguments); })");
             Assert.AreEqual(2, TestUtils.Evaluate("parameterValues.length"));
             Assert.AreEqual(5, TestUtils.Evaluate("parameterValues[0].length"));
@@ -498,6 +545,24 @@ namespace UnitTests
             Assert.AreEqual(8, TestUtils.Evaluate("parameterValues[1][3]"));
             Assert.AreEqual("A short string", TestUtils.Evaluate("parameterValues[1][4]"));
 
+            Assert.AreEqual("undefined runny", TestUtils.Evaluate("arr = []; 'funny runny'.replace(/(..)nny/, function(a, b, c, d) { arr.push(a); arr.push(b); arr.push(c); arr.push(d) })"));
+            Assert.AreEqual("funny,fu,0,funny runny", TestUtils.Evaluate("arr.toString()"));
+
+            TestUtils.Execute(@"var parameterValues = []");
+            TestUtils.Execute(@"'Type some [Markdown] text on the left side.'.replace(/(\[([^\[\]]+)\])()()()()()/g, function(wholeMatch,m1,m2,m3,m4,m5,m6,m7) {parameterValues.push(arguments)})");
+            Assert.AreEqual(1, TestUtils.Evaluate("parameterValues.length"));
+            Assert.AreEqual(10, TestUtils.Evaluate("parameterValues[0].length"));
+            Assert.AreEqual("[Markdown]", TestUtils.Evaluate("parameterValues[0][0]"));
+            Assert.AreEqual("[Markdown]", TestUtils.Evaluate("parameterValues[0][1]"));
+            Assert.AreEqual("Markdown", TestUtils.Evaluate("parameterValues[0][2]"));
+            Assert.AreEqual("", TestUtils.Evaluate("parameterValues[0][3]"));
+            Assert.AreEqual("", TestUtils.Evaluate("parameterValues[0][4]"));
+            Assert.AreEqual("", TestUtils.Evaluate("parameterValues[0][5]"));
+            Assert.AreEqual("", TestUtils.Evaluate("parameterValues[0][6]"));
+            Assert.AreEqual("", TestUtils.Evaluate("parameterValues[0][7]"));
+            Assert.AreEqual(10, TestUtils.Evaluate("parameterValues[0][8]"));
+            Assert.AreEqual("Type some [Markdown] text on the left side.", TestUtils.Evaluate("parameterValues[0][9]"));
+
             // replace(string, function)
             Assert.AreEqual("A short string", TestUtils.Evaluate("'A short string'.replace('test', function() { return 'a'; })"));
             Assert.AreEqual("A ahort string", TestUtils.Evaluate("'A short string'.replace('s', function() { return 'a'; })"));
@@ -512,6 +577,64 @@ namespace UnitTests
             // Undefined and null are not allowed as the "this" object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.replace.call(undefined)"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.replace.call(null)"));
+
+            // Test the deprecated RegExp properties.
+            Assert.AreEqual(" runny", TestUtils.Evaluate("'funny runny'.replace(/(..)nny/, '')"));
+            Assert.AreEqual("fu", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("funny runny", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("funny runny", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("funny", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("funny", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("fu", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("fu", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual(" runny", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual(" runny", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            Assert.AreEqual(" ", TestUtils.Evaluate("'funny runny'.replace(/(..)nny/g, '')"));
+            Assert.AreEqual("ru", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("funny runny", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("funny runny", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("runny", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("runny", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("ru", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("ru", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("funny ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("funny ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            Assert.AreEqual("funny runny", TestUtils.Evaluate("'funny runny'.replace(/boo/g, '')"));
+            Assert.AreEqual("ru", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("funny runny", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("funny runny", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("runny", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("runny", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("ru", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("ru", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("funny ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("funny ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            Assert.AreEqual("fu,funny,fu,, runny", TestUtils.Evaluate(@"arr = []; 'funny runny'.replace(/(..)nny/, function() {
+                    arr.push(RegExp.$1);
+                    arr.push(RegExp.lastMatch);
+                    arr.push(RegExp.lastParen);
+                    arr.push(RegExp.leftContext);
+                    arr.push(RegExp.rightContext);
+                }); arr.toString()"));
+            Assert.AreEqual("fu,funny,fu,, runny,ru,runny,ru,funny ,", TestUtils.Evaluate(@"arr = []; 'funny runny'.replace(/(..)nny/g, function() {
+                    arr.push(RegExp.$1);
+                    arr.push(RegExp.lastMatch);
+                    arr.push(RegExp.lastParen);
+                    arr.push(RegExp.leftContext);
+                    arr.push(RegExp.rightContext);
+                }); arr.toString()"));
         }
 
         [TestMethod]
@@ -552,6 +675,35 @@ namespace UnitTests
             // Undefined and null are not allowed as the "this" object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.search.call(undefined)"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.search.call(null)"));
+
+            // Test the deprecated RegExp properties.
+            Assert.AreEqual(7, TestUtils.Evaluate("'lots of honey'.search(/(...)ney/)"));
+            Assert.AreEqual(" ho", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("lots of honey", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("lots of honey", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual(" honey", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual(" honey", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual(" ho", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual(" ho", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("lots of", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("lots of", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            Assert.AreEqual(-1, TestUtils.Evaluate("'tons of honey'.search(/nomatch/)"));
+            Assert.AreEqual(" ho", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("lots of honey", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("lots of honey", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual(" honey", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual(" honey", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual(" ho", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual(" ho", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("lots of", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("lots of", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
         }
 
         [TestMethod]
@@ -687,6 +839,35 @@ namespace UnitTests
             // Undefined and null are not allowed as the "this" object.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.split.call(undefined)"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.split.call(null)"));
+
+            // Test the deprecated RegExp properties.
+            TestUtils.Evaluate("'lots of money and honey'.split(/(..)ney/)");
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("lots of money and honey", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("lots of money and honey", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("honey", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("honey", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("lots of money and ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("lots of money and ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            TestUtils.Evaluate("'tons of money and honey'.split(/nomatch/)");
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("lots of money and honey", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("lots of money and honey", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("honey", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("honey", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("ho", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("lots of money and ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("lots of money and ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
         }
 
         [TestMethod]
