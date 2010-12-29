@@ -209,6 +209,10 @@ namespace Jurassic.Library
             if (this.Global == true)
                 this.LastIndex = match.Success == true ? match.Index + match.Length : 0;
 
+            // Set the deprecated RegExp properties.
+            if (match.Success == true)
+                this.Engine.RegExp.SetDeprecatedProperties(input, match);
+
             return match.Success;
         }
 
@@ -242,6 +246,9 @@ namespace Jurassic.Library
             if (this.Global == true)
                 this.LastIndex = match.Index + match.Length;
 
+            // Set the deprecated RegExp properties.
+            this.Engine.RegExp.SetDeprecatedProperties(input, match);
+
             // Otherwise, return an array.
             object[] array = new object[match.Groups.Count];
             for (int i = 0; i < match.Groups.Count; i++)
@@ -254,6 +261,7 @@ namespace Jurassic.Library
             var result = this.Engine.Array.New(array);
             result["index"] = match.Index;
             result["input"] = input;
+
             return result;
         }
 
@@ -285,6 +293,9 @@ namespace Jurassic.Library
             if (matches.Count == 0)
                 return Null.Value;
 
+            // Set the deprecated RegExp properties (using the last match).
+            this.Engine.RegExp.SetDeprecatedProperties(input, matches[matches.Count - 1]);
+
             // Construct the array to return.
             object[] matchValues = new object[matches.Count];
             for (int i = 0; i < matches.Count; i++)
@@ -300,10 +311,87 @@ namespace Jurassic.Library
         /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
         public string Replace(string input, string replaceText)
         {
-            if (this.Global == true)
-                return this.value.Replace(input, replaceText);
-            else
-                return this.value.Replace(input, replaceText, 1);
+            // Check if the replacement string contains any patterns.
+            bool replaceTextContainsPattern = replaceText.IndexOf('$') >= 0;
+
+            // Replace the input string with replaceText, recording the last match found.
+            Match lastMatch = null;
+            string result = this.value.Replace(input, match =>
+            {
+                lastMatch = match;
+
+                // If there is no pattern, replace the pattern as is.
+                if (replaceTextContainsPattern == false)
+                    return replaceText;
+
+                // Patterns
+                // $$	Inserts a "$".
+                // $&	Inserts the matched substring.
+                // $`	Inserts the portion of the string that precedes the matched substring.
+                // $'	Inserts the portion of the string that follows the matched substring.
+                // $n or $nn	Where n or nn are decimal digits, inserts the nth parenthesized submatch string, provided the first argument was a RegExp object.
+                var replacementBuilder = new System.Text.StringBuilder();
+                for (int i = 0; i < replaceText.Length; i++)
+                {
+                    char c = replaceText[i];
+                    if (c == '$' && i < replaceText.Length - 1)
+                    {
+                        c = replaceText[++i];
+                        if (c == '$')
+                            replacementBuilder.Append('$');
+                        else if (c == '&')
+                            replacementBuilder.Append(match.Value);
+                        else if (c == '`')
+                            replacementBuilder.Append(input.Substring(0, match.Index));
+                        else if (c == '\'')
+                            replacementBuilder.Append(input.Substring(match.Index + match.Length));
+                        else if (c >= '0' && c <= '9')
+                        {
+                            int matchNumber1 = c - '0';
+
+                            // The match number can be one or two digits long.
+                            int matchNumber2 = 0;
+                            if (i < replaceText.Length - 1 && replaceText[i + 1] >= '0' && replaceText[i + 1] <= '9')
+                                matchNumber2 = matchNumber1 * 10 + (replaceText[i + 1] - '0');
+
+                            // Try the two digit capture first.
+                            if (matchNumber2 > 0 && matchNumber2 < match.Groups.Count)
+                            {
+                                // Two digit capture replacement.
+                                replacementBuilder.Append(match.Groups[matchNumber2].Value);
+                                i++;
+                            }
+                            else if (matchNumber1 > 0 && matchNumber1 < match.Groups.Count)
+                            {
+                                // Single digit capture replacement.
+                                replacementBuilder.Append(match.Groups[matchNumber1].Value);
+                            }
+                            else
+                            {
+                                // Capture does not exist.
+                                replacementBuilder.Append('$');
+                                i--;
+                            }
+                        }
+                        else
+                        {
+                            // Unknown replacement pattern.
+                            replacementBuilder.Append('$');
+                            replacementBuilder.Append(c);
+                        }
+                    }
+                    else
+                        replacementBuilder.Append(c);
+                }
+
+                return replacementBuilder.ToString();
+            }, this.Global == true ? -1 : 1);
+
+            // Set the deprecated RegExp properties if at least one match was found.
+            if (lastMatch != null)
+                this.Engine.RegExp.SetDeprecatedProperties(input, lastMatch);
+
+            return result;
         }
 
         /// <summary>
@@ -317,10 +405,13 @@ namespace Jurassic.Library
         {
             return this.value.Replace(input, match =>
             {
+                // Set the deprecated RegExp properties.
+                this.Engine.RegExp.SetDeprecatedProperties(input, match);
+
                 object[] parameters = new object[match.Groups.Count + 2];
                 for (int i = 0; i < match.Groups.Count; i++)
                 {
-                    if (string.IsNullOrEmpty(match.Groups[i].Value) == true)
+                    if (match.Groups[i].Success == false)
                         parameters[i] = Undefined.Value;
                     else
                         parameters[i] = match.Groups[i].Value;
@@ -345,6 +436,9 @@ namespace Jurassic.Library
             if (match.Success == false)
                 return -1;
 
+            // Set the deprecated RegExp properties.
+            this.Engine.RegExp.SetDeprecatedProperties(input, match);
+
             // Otherwise, return the position of the match.
             return match.Index;
         }
@@ -366,6 +460,7 @@ namespace Jurassic.Library
 
             var results = new List<object>();
             int startIndex = 0;
+            Match lastMatch = null;
             while (match.Success == true)
             {
                 // Do not match the an empty substring at the start or end of the string or at the
@@ -393,10 +488,18 @@ namespace Jurassic.Library
                         return this.Engine.Array.New(results.ToArray());
                 }
 
+                // Record the last match.
+                lastMatch = match;
+
                 // Find the next match.
                 match = match.NextMatch();
             }
             results.Add(input.Substring(startIndex, input.Length - startIndex));
+
+            // Set the deprecated RegExp properties.
+            if (lastMatch != null)
+                this.Engine.RegExp.SetDeprecatedProperties(input, lastMatch);
+
             return this.Engine.Array.New(results.ToArray());
         }
 

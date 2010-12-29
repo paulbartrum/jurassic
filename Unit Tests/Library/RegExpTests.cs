@@ -239,6 +239,53 @@ namespace UnitTests
             TestUtils.Evaluate("x.lastIndex = 7");
             TestUtils.Evaluate("x.exec('helloabchello')");
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? 8 : 7, TestUtils.Evaluate("x.lastIndex"));
+
+            // Test the deprecated RegExp properties.
+            TestUtils.Evaluate("/li(..)le/.exec('santas little reindeers')");
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("santas little reindeers", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("santas little reindeers", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("little", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("little", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("santas ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("santas ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual(" reindeers", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual(" reindeers", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            TestUtils.Evaluate("/(li|re)(in)?(tt|deer)/.exec('santas little reindeers')");
+            Assert.AreEqual("li", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp.$3"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$4"));
+            Assert.AreEqual("santas little reindeers", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("santas little reindeers", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("litt", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("litt", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("santas ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("santas ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("le reindeers", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("le reindeers", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            TestUtils.Evaluate("/nomatch/.exec('santas little reindeers')");
+            Assert.AreEqual("li", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp.$3"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$4"));
+            Assert.AreEqual("santas little reindeers", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("santas little reindeers", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("litt", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("litt", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("tt", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("santas ", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("santas ", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("le reindeers", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("le reindeers", TestUtils.Evaluate("RegExp[\"$'\"]"));
         }
 
         [TestMethod]
@@ -265,6 +312,37 @@ namespace UnitTests
             TestUtils.Evaluate("x.lastIndex = 7");
             Assert.AreEqual(true, TestUtils.Evaluate("x.test('helloabchello')"));
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? 8 : 7, TestUtils.Evaluate("x.lastIndex"));
+
+            // Test the deprecated RegExp properties.
+            TestUtils.Evaluate("/te(..)(s|i)/.test('terrible teens')");
+            Assert.AreEqual("rr", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("i", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$3"));
+            Assert.AreEqual("terrible teens", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("terrible teens", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("terri", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("terri", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("i", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("i", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("ble teens", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("ble teens", TestUtils.Evaluate("RegExp[\"$'\"]"));
+
+            TestUtils.Evaluate("/notamatch/.test('my little friend')");
+            Assert.AreEqual("rr", TestUtils.Evaluate("RegExp.$1"));
+            Assert.AreEqual("i", TestUtils.Evaluate("RegExp.$2"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.$3"));
+            Assert.AreEqual("terrible teens", TestUtils.Evaluate("RegExp.input"));
+            Assert.AreEqual("terrible teens", TestUtils.Evaluate("RegExp.$_"));
+            Assert.AreEqual("terri", TestUtils.Evaluate("RegExp.lastMatch"));
+            Assert.AreEqual("terri", TestUtils.Evaluate("RegExp['$&']"));
+            Assert.AreEqual("i", TestUtils.Evaluate("RegExp.lastParen"));
+            Assert.AreEqual("i", TestUtils.Evaluate("RegExp['$+']"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp.leftContext"));
+            Assert.AreEqual("", TestUtils.Evaluate("RegExp['$`']"));
+            Assert.AreEqual("ble teens", TestUtils.Evaluate("RegExp.rightContext"));
+            Assert.AreEqual("ble teens", TestUtils.Evaluate("RegExp[\"$'\"]"));
         }
 
         //[TestMethod]
