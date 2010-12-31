@@ -74,7 +74,7 @@
     <Compile Include="Compiler\ExpressionTests.cs" />
     <Compile Include="Compiler\ParserTests.cs" />
     <Compile Include="Compiler\LexerTests.cs" />
-    <Compile Include="Real-world\ShowdownTests.cs" />
+    <Compile Include="Real-world\RealWorldTests.cs" />
     <Compile Include="Utils\DynamicCodeDebugger.cs" />
     <Compile Include="Utils\TestUtils.cs" />
     <Compile Include="Utils\Interop.cs" />
@@ -92,7 +92,12 @@
   <ItemGroup>
     <Content Include="Core\Sample Files\execute1.js" />
     <Content Include="Core\Sample Files\globals1.js" />
+    <Content Include="Real-world\Files\color-conversion.js" />
+    <Content Include="Real-world\Files\md5.js" />
+    <Content Include="Real-world\Files\sha1.js" />
+    <Content Include="Real-world\Files\sha256.js" />
     <Content Include="Real-world\Files\showdown.js" />
+    <Content Include="Real-world\Files\sprintf.js" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
