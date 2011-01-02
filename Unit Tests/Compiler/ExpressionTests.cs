@@ -897,6 +897,22 @@ namespace UnitTests
 
             // Strict mode: cannot write to a property that has a getter but no setter.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {get: function() { return 1 }}); x.a = 5;"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval = 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments = 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval = 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments = 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval = 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments = 5; } f()"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments' (compound assignment).
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval += 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments += 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval += 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments += 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval += 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments += 5; } f()"));
         }
 
         [TestMethod]
@@ -905,6 +921,14 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("x = 0; ++ x"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = 0; ++ x; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("++ 2"));
+
+            // Strict mode: reference cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; ++ eval;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; ++ arguments;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { ++ eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { ++ arguments; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; ++ eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; ++ arguments; } f()"));
         }
 
         [TestMethod]
@@ -913,6 +937,14 @@ namespace UnitTests
             Assert.AreEqual(-1, TestUtils.Evaluate("x = 0; -- x"));
             Assert.AreEqual(-1, TestUtils.Evaluate("x = 0; -- x; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("-- 2"));
+
+            // Strict mode: reference cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; -- eval;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; -- arguments;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { -- eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { -- arguments; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; -- eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; -- arguments; } f()"));
         }
 
         [TestMethod]
@@ -921,6 +953,14 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("x = 0; x ++"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = 0; x ++; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("2 ++"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval ++;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments ++;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval ++; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments ++; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval ++; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments ++; } f()"));
         }
 
         [TestMethod]
@@ -929,6 +969,14 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("x = 0; x --"));
             Assert.AreEqual(-1, TestUtils.Evaluate("x = 0; x --; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("2 --"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval --;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments --;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval --; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments --; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval --; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments --; } f()"));
         }
 
         [TestMethod]
