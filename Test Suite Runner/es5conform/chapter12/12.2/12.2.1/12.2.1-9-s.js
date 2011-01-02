@@ -24,20 +24,14 @@ id: "12.2.1-9-s",
 
 path: "TestCases/chapter12/12.2/12.2.1/12.2.1-9-s.js",
 
-description: "eval - an indirect eval declaring a var named 'eval' throws EvalError in strict mode",
+description: "eval - an indirect eval declaring a var named 'eval' is permitted if the eval code is not in strict mode",
 
 test: function testcase() {
   'use strict';
 
-  try {
-    var s = eval;
-    s('var eval;');
-  }
-  catch (e) {
-    if (e instanceof EvalError) {
-      return true;
-    }
-  }
+  var s = eval;
+  s('var eval;');
+  return true;
  },
 
 precondition: function prereq() {

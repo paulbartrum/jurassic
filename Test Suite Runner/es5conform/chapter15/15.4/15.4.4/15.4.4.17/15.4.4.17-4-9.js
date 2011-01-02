@@ -51,7 +51,7 @@ test: function testcase() {
   function cb(){}
   var i = f.some(cb);
   
-  if (i === -1) {
+  if (i === false) {
     return true;
   }
  },

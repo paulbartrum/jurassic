@@ -32,11 +32,10 @@ test: function testcase() {
   var desc = Object.getOwnPropertyDescriptor(arguments,"caller");
   if(desc.configurable === false &&
      desc.enumerable === false &&
-     desc.writable === true &&
      desc.hasOwnProperty('value') == false &&
      desc.hasOwnProperty('writable') == false &&
      desc.hasOwnProperty('get') == true &&
-     desc.hasOwnProperty('put') == true )
+     desc.hasOwnProperty('set') == true )
     return true;
  },
 

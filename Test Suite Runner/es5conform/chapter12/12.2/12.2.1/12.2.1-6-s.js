@@ -24,20 +24,14 @@ id: "12.2.1-6-s",
 
 path: "TestCases/chapter12/12.2/12.2.1/12.2.1-6-s.js",
 
-description: "eval - a Function assigning into 'eval' throws EvalError in strict mode",
+description: "eval - a Function assigning into 'eval' permitted if function is not in strict mode",
 
 test: function testcase() {
   'use strict';
 
-  try {
-    var f = Function('eval = 42;');
-    f();
-  }
-  catch (e) {
-    if (e instanceof EvalError) {
-      return true;
-    }
-  }
+  var f = Function('eval = 42;');
+  f();
+  return true;
  },
 
 precondition: function prereq() {
