@@ -24,7 +24,7 @@ id: "12.2.1-2-s",
 
 path: "TestCases/chapter12/12.2/12.2.1/12.2.1-2-s.js",
 
-description: "eval - a function assigning into 'eval' throws EvalError in strict mode",
+description: "eval - a function assigning into 'eval' throws SyntaxError in strict mode",
 
 test: function testcase() {
   'use strict';
@@ -33,7 +33,7 @@ test: function testcase() {
     eval('function foo() { eval = 42; }; foo()');
   }
   catch (e) {
-    if (e instanceof EvalError) {
+    if (e instanceof SyntaxError) {
       return true;
     }
   }

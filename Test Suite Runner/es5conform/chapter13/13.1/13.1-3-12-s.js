@@ -33,7 +33,9 @@ test: function testcase()
     eval("'use strict' ;(function arguments (){});");
     return false
   }
-  catch (e) { e instanceof SyntaxError }  
+  catch (e) {
+    return e instanceof SyntaxError;
+  }
  },
 
 precondition: function prereq() {

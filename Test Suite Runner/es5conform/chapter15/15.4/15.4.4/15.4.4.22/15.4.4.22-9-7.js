@@ -36,7 +36,7 @@ test: function testcase() {
 
   var o = new Object();
   o.arr = ['1',2,3,4,5];
-  if(o.arr.reduceRight(callbackfn) === 9 )    //two elements visited
+  if(o.arr.reduceRight(callbackfn) === '141' )
     return true;  
   
  },

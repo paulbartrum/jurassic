@@ -30,6 +30,7 @@ test: function testcase()
 { 
   "use strict"; 
   Function('a,a','return a;');
+  return true;
  },
 
 precondition: function prereq() {

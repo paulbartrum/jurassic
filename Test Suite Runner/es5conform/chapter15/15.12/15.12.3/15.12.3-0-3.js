@@ -41,6 +41,6 @@ test: function testcase() {
  },
 
  precondition: function preq () {
-  return JSON && Object.getOwnPropertyDescriptor
+  return typeof JSON !== "undefined" && fnExists(Object.getOwnPropertyDescriptor);
   }
 });

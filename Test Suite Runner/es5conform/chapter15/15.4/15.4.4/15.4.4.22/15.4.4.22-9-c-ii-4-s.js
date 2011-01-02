@@ -24,13 +24,17 @@ id: "15.4.4.22-9-c-ii-4-s",
 
 path: "TestCases/chapter15/15.4/15.4.4/15.4.4.22/15.4.4.21-9-c-ii-4-s.js",
 
-description: "Array.prototype.reduceRight - null passed as thisValue to strict callbackfn",
+description: "Array.prototype.reduceRight - undefined passed as thisValue to strict callbackfn",
 
-test: function testcase() { 
+//ES5 Errata, undefined in step 9.c.ii as thisValue is supposed to be undefined
+
+test: function testcase() {
+
   var innerThisCorrect = false;
   function callbackfn(prevVal, curVal, idx, obj)
-  { 
-     innerThisCorrect = this===null;
+  {
+     "use strict";
+     innerThisCorrect = this===undefined;
      return true;
   }
   [0].reduceRight(callbackfn,true);

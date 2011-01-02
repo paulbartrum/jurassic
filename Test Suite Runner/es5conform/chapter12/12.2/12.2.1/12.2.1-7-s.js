@@ -24,7 +24,7 @@ id: "12.2.1-7-s",
 
 path: "TestCases/chapter12/12.2/12.2.1/12.2.1-7-s.js",
 
-description: "eval - a direct eval declaring a var named 'eval' throws EvalError in strict mode",
+description: "eval - a direct eval declaring a var named 'eval' throws SyntaxError in strict mode",
 
 test: function testcase() {
   'use strict';
@@ -33,7 +33,7 @@ test: function testcase() {
     eval('var eval;');
   }
   catch (e) {
-    if (e instanceof EvalError) {
+    if (e instanceof SyntaxError) {
       return true;
     }
   }
