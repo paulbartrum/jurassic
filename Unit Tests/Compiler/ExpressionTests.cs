@@ -112,10 +112,13 @@ namespace UnitTests
             Assert.AreEqual("test6", TestUtils.Evaluate("'test' + new Number(6)"));
             Assert.AreEqual("5test", TestUtils.Evaluate("new Number(5) + 'test'"));
             Assert.AreEqual("1", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + ''"));
+            Assert.AreEqual("1test", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + 'test'"));
             Assert.AreEqual(5, TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + 4"));
             Assert.AreEqual("14", TestUtils.Evaluate("({valueOf: function() {return '1'}, toString: function() {return 0}}) + 4"));
             Assert.AreEqual("1", TestUtils.Evaluate("'' + {valueOf: function() {return 1}, toString: function() {return 0}}"));
+            Assert.AreEqual("test1", TestUtils.Evaluate("'test' + {valueOf: function() {return 1}, toString: function() {return 0}}"));
             Assert.AreEqual(3, TestUtils.Evaluate("1 + {valueOf: function() {return 2}, toString: function() {return 3}}"));
+            Assert.AreEqual("12", TestUtils.Evaluate("1 + {valueOf: function() {return '2'}, toString: function() {return '3'}}"));
 
             // Variables
             Assert.AreEqual(35, TestUtils.Evaluate("x = 15; x + 20"));
