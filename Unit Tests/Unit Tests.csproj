@@ -93,7 +93,10 @@
     <Content Include="Core\Sample Files\execute1.js" />
     <Content Include="Core\Sample Files\globals1.js" />
     <Content Include="Real-world\Files\color-conversion.js" />
+    <Content Include="Real-world\Files\levenshtein.js" />
+    <Content Include="Real-world\Files\lzw.js" />
     <Content Include="Real-world\Files\md5.js" />
+    <Content Include="Real-world\Files\rsa.js" />
     <Content Include="Real-world\Files\sha1.js" />
     <Content Include="Real-world\Files\sha256.js" />
     <Content Include="Real-world\Files\showdown.js" />
