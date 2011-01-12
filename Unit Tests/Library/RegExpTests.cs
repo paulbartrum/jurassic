@@ -25,8 +25,8 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("RegExp.length"));
 
             // for-in
-            Assert.AreEqual("", TestUtils.Evaluate("y = ''; for (var x in RegExp) { if (y != '') y += ','; y += x } y"));
-            Assert.AreEqual("", TestUtils.Evaluate("y = ''; for (var x in new RegExp('abc', 'g')) { if (y != '') y += ','; y += x } y"));
+            Assert.AreEqual("$1,$2,$3,$4,$5,$6,$7,$8,$9,input,lastMatch,lastParen,leftContext,rightContext", TestUtils.Evaluate("y = []; for (var x in RegExp) { y.push(x) } y.sort().toString()"));
+            Assert.AreEqual("", TestUtils.Evaluate("y = []; for (var x in new RegExp('abc', 'g')) { y.push(x) } y.sort().toString()"));
         }
 
         [TestMethod]
