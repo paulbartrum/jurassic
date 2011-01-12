@@ -95,37 +95,40 @@ namespace UnitTests
         [TestMethod]
         public void Add()
         {
-            //Assert.AreEqual(35, TestUtils.Evaluate("15 + 20"));
-            //Assert.AreEqual(21.5, TestUtils.Evaluate("1.5 + 20"));
-            //Assert.AreEqual(8589934608.0, TestUtils.Evaluate("4294967304 + 4294967304"));
-            //Assert.AreEqual("testing", TestUtils.Evaluate("'tes' + 'ting'"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("true + false"));
-            //Assert.AreEqual("102", TestUtils.Evaluate("'10' + 2"));
-            //Assert.AreEqual("10null", TestUtils.Evaluate("'10' + null"));
-            //Assert.AreEqual("51,2,3", TestUtils.Evaluate("5 + [1,2,3]"));
-            //StringAssert.StartsWith((string)TestUtils.Evaluate("5 + new Date(10)"), "5");
-            //Assert.AreEqual("5/abc/g", TestUtils.Evaluate("5 + /abc/g"));
-            //Assert.AreEqual("5[object Object]", TestUtils.Evaluate("5 + {}"));
+            Assert.AreEqual(35, TestUtils.Evaluate("15 + 20"));
+            Assert.AreEqual(21.5, TestUtils.Evaluate("1.5 + 20"));
+            Assert.AreEqual(8589934608.0, TestUtils.Evaluate("4294967304 + 4294967304"));
+            Assert.AreEqual("testing", TestUtils.Evaluate("'tes' + 'ting'"));
+            Assert.AreEqual(1, TestUtils.Evaluate("true + false"));
+            Assert.AreEqual("102", TestUtils.Evaluate("'10' + 2"));
+            Assert.AreEqual("10null", TestUtils.Evaluate("'10' + null"));
+            Assert.AreEqual("51,2,3", TestUtils.Evaluate("5 + [1,2,3]"));
+            StringAssert.StartsWith((string)TestUtils.Evaluate("5 + new Date(10)"), "5");
+            Assert.AreEqual("5/abc/g", TestUtils.Evaluate("5 + /abc/g"));
+            Assert.AreEqual("5[object Object]", TestUtils.Evaluate("5 + {}"));
 
-            //// Objects
-            //Assert.AreEqual(11, TestUtils.Evaluate("new Number(5) + new Number(6)"));
-            //Assert.AreEqual("test6", TestUtils.Evaluate("'test' + new Number(6)"));
-            //Assert.AreEqual("5test", TestUtils.Evaluate("new Number(5) + 'test'"));
-            //Assert.AreEqual("1", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + ''"));
-            //Assert.AreEqual("10", TestUtils.Evaluate("({valueOf: function() {return '1'}, toString: function() {return 0}}) + 0"));
+            // Objects
+            Assert.AreEqual(11, TestUtils.Evaluate("new Number(5) + new Number(6)"));
+            Assert.AreEqual("test6", TestUtils.Evaluate("'test' + new Number(6)"));
+            Assert.AreEqual("5test", TestUtils.Evaluate("new Number(5) + 'test'"));
+            Assert.AreEqual("1", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + ''"));
+            Assert.AreEqual(5, TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + 4"));
+            Assert.AreEqual("14", TestUtils.Evaluate("({valueOf: function() {return '1'}, toString: function() {return 0}}) + 4"));
+            Assert.AreEqual("1", TestUtils.Evaluate("'' + {valueOf: function() {return 1}, toString: function() {return 0}}"));
+            Assert.AreEqual(3, TestUtils.Evaluate("1 + {valueOf: function() {return 2}, toString: function() {return 3}}"));
 
-            //// Variables
-            //Assert.AreEqual(35, TestUtils.Evaluate("x = 15; x + 20"));
-            //Assert.AreEqual(21.5, TestUtils.Evaluate("x = 1.5; x + 20"));
-            //Assert.AreEqual(8589934608.0, TestUtils.Evaluate("x = 4294967304; x + 4294967304"));
-            //Assert.AreEqual("testing", TestUtils.Evaluate("x = 'tes'; x + 'ting'"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("x = true; x + false"));
-            //Assert.AreEqual("102", TestUtils.Evaluate("x = 2; '10' + x"));
-            //Assert.AreEqual("10null", TestUtils.Evaluate("x = '10'; x + null"));
-            //Assert.AreEqual("51,2,3", TestUtils.Evaluate("x = 5; x + [1,2,3]"));
-            //StringAssert.StartsWith((string)TestUtils.Evaluate("x = 5; x + new Date(10)"), "5");
-            //Assert.AreEqual("5/abc/g", TestUtils.Evaluate("x = 5; x + /abc/g"));
-            //Assert.AreEqual("5[object Object]", TestUtils.Evaluate("x = 5; x + {}"));
+            // Variables
+            Assert.AreEqual(35, TestUtils.Evaluate("x = 15; x + 20"));
+            Assert.AreEqual(21.5, TestUtils.Evaluate("x = 1.5; x + 20"));
+            Assert.AreEqual(8589934608.0, TestUtils.Evaluate("x = 4294967304; x + 4294967304"));
+            Assert.AreEqual("testing", TestUtils.Evaluate("x = 'tes'; x + 'ting'"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = true; x + false"));
+            Assert.AreEqual("102", TestUtils.Evaluate("x = 2; '10' + x"));
+            Assert.AreEqual("10null", TestUtils.Evaluate("x = '10'; x + null"));
+            Assert.AreEqual("51,2,3", TestUtils.Evaluate("x = 5; x + [1,2,3]"));
+            StringAssert.StartsWith((string)TestUtils.Evaluate("x = 5; x + new Date(10)"), "5");
+            Assert.AreEqual("5/abc/g", TestUtils.Evaluate("x = 5; x + /abc/g"));
+            Assert.AreEqual("5[object Object]", TestUtils.Evaluate("x = 5; x + {}"));
 
             // String concatenation.
             Assert.AreEqual("123456123789", TestUtils.Evaluate(@"

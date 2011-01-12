@@ -351,6 +351,7 @@ namespace Jurassic.Compiler
                 else
                 {
                     // Convert the operand to an object.
+                    EmitConversion.ToPrimitive(generator, rightType, PrimitiveTypeHint.None);
                     EmitConversion.ToAny(generator, rightType);
 
                     // Concatenate the two strings.
