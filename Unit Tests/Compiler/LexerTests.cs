@@ -168,6 +168,7 @@ namespace UnitTests
             Assert.AreEqual("1.1011110101011100101110101110111100001111110100001100 x 2^-31", ToBinary(TestUtils.Evaluate("8.10109172351e-10")));
             Assert.AreEqual("1.1000000000000000000000000000000000000000000000000000 x 2^0", ToBinary(TestUtils.Evaluate("1.50000000000000011102230246251565404236316680908203125")));
             Assert.AreEqual("1.1111111111111111111111111111111111111111111111111111 x 2^52", ToBinary(TestUtils.Evaluate("9007199254740991.4999999999999999999999999999999995")));
+            Assert.AreEqual("1.1111111111111111111111111111111111111111111111111111 x 2^-1023", ToBinary(TestUtils.Evaluate("2.2250738585072011e-308")));
 
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5.e"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("5e"));
