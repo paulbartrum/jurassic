@@ -292,13 +292,24 @@ namespace UnitTests
 
             // An empty property descriptor does nothing if the property already exists.
             Assert.AreEqual(true, TestUtils.Evaluate("var x = {a: 5}; Object.defineProperty(x, 'a', {}) === x"));
-            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("x.a"));
+            Assert.AreEqual(5, TestUtils.Evaluate("x.a"));
             Assert.AreEqual(true, TestUtils.Evaluate("x.hasOwnProperty('a')"));
-            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').value"));
+            Assert.AreEqual(5, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').value"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').get"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').set"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').enumerable"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').writable"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').configurable"));
+
+            // A property descriptor without a value does not change the existing value.
+            Assert.AreEqual(true, TestUtils.Evaluate("var x = {a: 5}; Object.defineProperty(x, 'a', {writable: false}) === x"));
+            Assert.AreEqual(5, TestUtils.Evaluate("x.a"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x.hasOwnProperty('a')"));
+            Assert.AreEqual(5, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').value"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').get"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').set"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').enumerable"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').writable"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.getOwnPropertyDescriptor(x, 'a').configurable"));
 
             // get and set can be undefined.

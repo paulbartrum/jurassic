@@ -146,8 +146,6 @@ namespace Jurassic.Library
         public static ObjectInstance DefineProperty([JSDoNotConvert] ObjectInstance obj, string propertyName, [JSDoNotConvert] ObjectInstance attributes)
         {
             var defaults = obj.GetOwnPropertyDescriptor(propertyName);
-            if (defaults.IsAccessor == false)
-                defaults = new PropertyDescriptor(Undefined.Value, defaults.Attributes);
             var descriptor = PropertyDescriptor.FromObject(attributes, defaults);
             obj.DefineProperty(propertyName, descriptor, true);
             return obj;
