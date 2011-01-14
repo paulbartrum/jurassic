@@ -76,6 +76,8 @@
     <Compile Include="CustomScrollContentPresenter.cs" />
     <Compile Include="CustomRichTextBox.cs" />
     <Compile Include="CustomScrollViewer.cs" />
+    <Compile Include="ExpandableObjectControl.cs" />
+    <Compile Include="ExpanderButton.cs" />
     <Compile Include="Icons\CommandIcon.xaml.cs">
       <DependentUpon>CommandIcon.xaml</DependentUpon>
     </Compile>
