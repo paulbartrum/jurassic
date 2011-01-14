@@ -1855,20 +1855,20 @@ namespace Jurassic.Compiler
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            if (this.EnableDiagnostics == true && ScriptEngine.LowPrivilegeEnvironment == false)
-            {
-                // Provides more information if a cast fails.
-                var endOfCheckLabel = this.CreateLabel();
-                this.Duplicate();
-                this.IsInstance(type);
-                this.BranchIfNotNull(endOfCheckLabel);
-                this.LoadToken(type);
-                this.Call(ReflectionHelpers.Type_GetTypeFromHandle);
-                this.LoadString(Environment.StackTrace);
-                this.Call(typeof(DynamicILGenerator).GetMethod("OnFailedCast", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic));
-                this.Throw();
-                this.DefineLabelPosition(endOfCheckLabel);
-            }
+            //if (this.EnableDiagnostics == true && ScriptEngine.LowPrivilegeEnvironment == false)
+            //{
+            //    // Provides more information if a cast fails.
+            //    var endOfCheckLabel = this.CreateLabel();
+            //    this.Duplicate();
+            //    this.IsInstance(type);
+            //    this.BranchIfNotNull(endOfCheckLabel);
+            //    this.LoadToken(type);
+            //    this.Call(ReflectionHelpers.Type_GetTypeFromHandle);
+            //    this.LoadString(Environment.StackTrace);
+            //    this.Call(typeof(DynamicILGenerator).GetMethod("OnFailedCast", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic));
+            //    this.Throw();
+            //    this.DefineLabelPosition(endOfCheckLabel);
+            //}
 
             int token = this.GetToken(type);
             Emit1ByteOpCodeInt32(0x74, 1, 1, token);
@@ -1876,18 +1876,18 @@ namespace Jurassic.Compiler
             PushStackOperand(VESType.Object);
         }
 
-        /// <summary>
-        /// Called if a cast fails.
-        /// </summary>
-        /// <param name="obj"> The object instance to cast. </param>
-        /// <param name="expectedType"> The expected type of the instance. </param>
-        /// <param name="stackTrace"> The stack trace when CastClass was called. </param>
-        /// <returns> An exception to throw. </returns>
-        private static Exception OnFailedCast(object obj, Type expectedType, string stackTrace)
-        {
-            return new InvalidCastException(string.Format("Could not cast {0} to {1} --> \r\n{2} --> \r\n{3} -->",
-                obj == null ? "null" : obj.GetType().ToString(), expectedType, stackTrace, new System.Diagnostics.StackTrace(0)));
-        }
+        ///// <summary>
+        ///// Called if a cast fails.
+        ///// </summary>
+        ///// <param name="obj"> The object instance to cast. </param>
+        ///// <param name="expectedType"> The expected type of the instance. </param>
+        ///// <param name="stackTrace"> The stack trace when CastClass was called. </param>
+        ///// <returns> An exception to throw. </returns>
+        //private static Exception OnFailedCast(object obj, Type expectedType, string stackTrace)
+        //{
+        //    return new InvalidCastException(string.Format("Could not cast {0} to {1} --> \r\n{2} --> \r\n{3} -->",
+        //        obj == null ? "null" : obj.GetType().ToString(), expectedType, stackTrace, new System.Diagnostics.StackTrace(0)));
+        //}
 
         /// <summary>
         /// Pops an object off the stack, checks that the object inherits from or implements the
