@@ -153,11 +153,29 @@ namespace Jurassic.Compiler
         public abstract void BranchIfGreaterThan(ILLabel label);
 
         /// <summary>
+        /// Branches to the given label if the first value on the stack is greater than the second
+        /// value on the stack.  If the operands are integers then they are treated as if they are
+        /// unsigned.  If the operands are floating point numbers then a NaN value will trigger a
+        /// branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public abstract void BranchIfGreaterThanUnsigned(ILLabel label);
+
+        /// <summary>
         /// Branches to the given label if the first value on the stack is greater than or equal to
         /// the second value on the stack.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
         public abstract void BranchIfGreaterThanOrEqual(ILLabel label);
+
+        /// <summary>
+        /// Branches to the given label if the first value on the stack is greater than or equal to
+        /// the second value on the stack.  If the operands are integers then they are treated as
+        /// if they are unsigned.  If the operands are floating point numbers then a NaN value will
+        /// trigger a branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public abstract void BranchIfGreaterThanOrEqualUnsigned(ILLabel label);
 
         /// <summary>
         /// Branches to the given label if the first value on the stack is less than the second
@@ -167,11 +185,29 @@ namespace Jurassic.Compiler
         public abstract void BranchIfLessThan(ILLabel label);
 
         /// <summary>
+        /// Branches to the given label if the first value on the stack is less than the second
+        /// value on the stack.  If the operands are integers then they are treated as if they are
+        /// unsigned.  If the operands are floating point numbers then a NaN value will trigger a
+        /// branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public abstract void BranchIfLessThanUnsigned(ILLabel label);
+
+        /// <summary>
         /// Branches to the given label if the first value on the stack is less than or equal to
         /// the second value on the stack.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
         public abstract void BranchIfLessThanOrEqual(ILLabel label);
+
+        /// <summary>
+        /// Branches to the given label if the first value on the stack is less than or equal to
+        /// the second value on the stack.  If the operands are integers then they are treated as
+        /// if they are unsigned.  If the operands are floating point numbers then a NaN value will
+        /// trigger a branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public abstract void BranchIfLessThanOrEqualUnsigned(ILLabel label);
 
         /// <summary>
         /// Returns from the current method.  A value is popped from the stack and used as the
