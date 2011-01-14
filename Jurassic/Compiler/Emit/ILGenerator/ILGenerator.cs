@@ -8,16 +8,16 @@ namespace Jurassic.Compiler
     /// </summary>
     internal abstract class ILGenerator
     {
-        /// <summary>
-        /// Gets or sets a value which indicates whether diagnostics are enabled.  Better error
-        /// messages are provided in some cases if this property is set to <c>true</c>, however
-        /// performance and memory usage are negatively impacted.
-        /// </summary>
-        public bool EnableDiagnostics
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        ///// Gets or sets a value which indicates whether diagnostics are enabled.  Better error
+        ///// messages are provided in some cases if this property is set to <c>true</c>, however
+        ///// performance and memory usage are negatively impacted.
+        ///// </summary>
+        //public bool EnableDiagnostics
+        //{
+        //    get;
+        //    set;
+        //}
 
 
 
