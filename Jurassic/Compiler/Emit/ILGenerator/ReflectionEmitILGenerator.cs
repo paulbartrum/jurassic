@@ -150,6 +150,20 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Branches to the given label if the first value on the stack is greater than the second
+        /// value on the stack.  If the operands are integers then they are treated as if they are
+        /// unsigned.  If the operands are floating point numbers then a NaN value will trigger a
+        /// branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public override void BranchIfGreaterThanUnsigned(ILLabel label)
+        {
+            if (label as ReflectionEmitILLabel == null)
+                throw new ArgumentNullException("label");
+            this.generator.Emit(OpCodes.Bgt_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+        }
+
+        /// <summary>
         /// Branches to the given label if the first value on the stack is greater than or equal to
         /// the second value on the stack.
         /// </summary>
@@ -159,6 +173,20 @@ namespace Jurassic.Compiler
             if (label as ReflectionEmitILLabel == null)
                 throw new ArgumentNullException("label");
             this.generator.Emit(OpCodes.Bge, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+        }
+
+        /// <summary>
+        /// Branches to the given label if the first value on the stack is greater than or equal to
+        /// the second value on the stack.  If the operands are integers then they are treated as
+        /// if they are unsigned.  If the operands are floating point numbers then a NaN value will
+        /// trigger a branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public override void BranchIfGreaterThanOrEqualUnsigned(ILLabel label)
+        {
+            if (label as ReflectionEmitILLabel == null)
+                throw new ArgumentNullException("label");
+            this.generator.Emit(OpCodes.Bge_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
         /// <summary>
@@ -174,6 +202,20 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Branches to the given label if the first value on the stack is less than the second
+        /// value on the stack.  If the operands are integers then they are treated as if they are
+        /// unsigned.  If the operands are floating point numbers then a NaN value will trigger a
+        /// branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public override void BranchIfLessThanUnsigned(ILLabel label)
+        {
+            if (label as ReflectionEmitILLabel == null)
+                throw new ArgumentNullException("label");
+            this.generator.Emit(OpCodes.Blt_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+        }
+
+        /// <summary>
         /// Branches to the given label if the first value on the stack is less than or equal to
         /// the second value on the stack.
         /// </summary>
@@ -183,6 +225,20 @@ namespace Jurassic.Compiler
             if (label as ReflectionEmitILLabel == null)
                 throw new ArgumentNullException("label");
             this.generator.Emit(OpCodes.Ble, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+        }
+
+        /// <summary>
+        /// Branches to the given label if the first value on the stack is less than or equal to
+        /// the second value on the stack.  If the operands are integers then they are treated as
+        /// if they are unsigned.  If the operands are floating point numbers then a NaN value will
+        /// trigger a branch.
+        /// </summary>
+        /// <param name="label"> The label to branch to. </param>
+        public override void BranchIfLessThanOrEqualUnsigned(ILLabel label)
+        {
+            if (label as ReflectionEmitILLabel == null)
+                throw new ArgumentNullException("label");
+            this.generator.Emit(OpCodes.Ble_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
         /// <summary>
