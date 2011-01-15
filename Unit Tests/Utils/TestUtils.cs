@@ -158,7 +158,8 @@ namespace UnitTests
                 while (totalTimeRemaining > 0)
                 {
                     // Reset the stopwatch.
-                    stopWatch.Restart();
+                    stopWatch.Reset();
+                    stopWatch.Start();
 
                     // Run the code to test.
                     codeToTest();
