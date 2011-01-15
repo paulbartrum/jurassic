@@ -184,7 +184,11 @@ namespace Jurassic.Compiler
                         GetParameterTypes(),                                    // Parameter types of the generated method.
                         typeof(MethodGenerator),                                // Owner type.
                         true);                                                  // Skip visibility checks.
-                    generator = new DynamicILGenerator(dynamicMethod);
+                    // TODO: Figure out why long methods give BadImageFormatException in .NET 3.5 when generated using DynamicILInfo.
+                    if (Environment.Version.Major >= 4)
+                        generator = new DynamicILGenerator(dynamicMethod);
+                    else
+                        generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
                 }
                 else
                 {

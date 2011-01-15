@@ -47,6 +47,85 @@ IL_000a: ret
         }
 
         [TestMethod]
+        public void FunctionCall0()
+        {
+            Assert.AreEqual(
+@"IL_0000: ldarg.3    
+IL_0001: stloc.0    
+IL_0002: ldarg.s    V_4
+IL_0004: ldlen      
+IL_0005: ldc.i4.0   
+IL_0006: ble        IL_0010
+IL_000b: ldarg.s    V_4
+IL_000d: ldc.i4.0   
+IL_000e: ldelem.ref 
+IL_000f: stloc.3    
+IL_0010: ldloc.3    
+IL_0011: isinst     Jurassic.Library.FunctionInstance
+IL_0016: dup        
+IL_0017: brtrue     IL_002e
+IL_001c: pop        
+IL_001d: ldarg.0    
+IL_001e: ldstr      ""TypeError""
+IL_0023: ldstr      ""'a' is not a function""
+IL_0028: newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+IL_002d: throw      
+IL_002e: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+IL_0033: ldc.i4.0   
+IL_0034: newarr     System.Object
+IL_0039: callvirt   System.Object CallLateBound(System.Object, System.Object[])/Jurassic.Library.FunctionInstance
+IL_003e: pop        
+IL_003f: ldnull     
+IL_0040: ret        
+",
+                GetFunctionIL(@"function f(a) {
+                    a();
+                }", "f"));
+        }
+
+        [TestMethod]
+        public void FunctionCall1()
+        {
+            Assert.AreEqual(
+@"IL_0000: ldarg.3    
+IL_0001: stloc.0    
+IL_0002: ldarg.s    V_4
+IL_0004: ldlen      
+IL_0005: ldc.i4.0   
+IL_0006: ble        IL_0010
+IL_000b: ldarg.s    V_4
+IL_000d: ldc.i4.0   
+IL_000e: ldelem.ref 
+IL_000f: stloc.3    
+IL_0010: ldloc.3    
+IL_0011: isinst     Jurassic.Library.FunctionInstance
+IL_0016: dup        
+IL_0017: brtrue     IL_002e
+IL_001c: pop        
+IL_001d: ldarg.0    
+IL_001e: ldstr      ""TypeError""
+IL_0023: ldstr      ""'a' is not a function""
+IL_0028: newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+IL_002d: throw      
+IL_002e: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+IL_0033: ldc.i4.1   
+IL_0034: newarr     System.Object
+IL_0039: dup        
+IL_003a: ldc.i4.0   
+IL_003b: ldc.i4.5   
+IL_003c: box        System.Int32
+IL_0041: stelem.ref 
+IL_0042: callvirt   System.Object CallLateBound(System.Object, System.Object[])/Jurassic.Library.FunctionInstance
+IL_0047: pop        
+IL_0048: ldnull     
+IL_0049: ret        
+",
+                GetFunctionIL(@"function f(a) {
+                    a(5);
+                }", "f"));
+        }
+
+        [TestMethod]
         public void ForLoop()
         {
             Assert.AreEqual(
