@@ -1248,6 +1248,13 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get 'f'() { return 1; }}; x.f = 5; x.f"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get 0() { return 1; }}; x[0] = 5; x[0]"));
 
+            // Check that "this" is correct inside getters and setters.
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get b() { return this.a; } }; y = Object.create(x); y.a = 9; y.b"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get b() { return this.a; } }; y = Object.create(x); y.a = 9; z = 'b'; y[z]"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); y.b = 9; y.a"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); y.b = 9; y.hasOwnProperty('a')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); z = 'b'; y[z] = 9; y.hasOwnProperty('a')"));
+
             // Errors
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("{a: 1, b: 2}"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = {a: 1,, }.a"));
