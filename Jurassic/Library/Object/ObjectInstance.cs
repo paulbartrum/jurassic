@@ -1159,10 +1159,20 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Populates the object with functions and properties.  Should be called only once at
-        /// startup.
+        /// Populates the object with functions by searching a .NET type for methods marked with
+        /// the [JSFunction] attribute.  Should be called only once at startup.
         /// </summary>
-        internal protected void PopulateFunctions(Type type = null)
+        internal protected void PopulateFunctions()
+        {
+            PopulateFunctions(null);
+        }
+
+        /// <summary>
+        /// Populates the object with functions by searching a .NET type for methods marked with
+        /// the [JSFunction] attribute.  Should be called only once at startup.
+        /// </summary>
+        /// <param name="type"> The type to search for methods. </param>
+        internal protected void PopulateFunctions(Type type)
         {
             if (type == null)
                 type = this.GetType();
@@ -1223,10 +1233,20 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Populates the object with functions and properties.  Should be called only once at
-        /// startup.
+        /// Populates the object with properties by searching a .NET type for fields marked with
+        /// the [JSField] attribute.  Should be called only once at startup.
         /// </summary>
-        internal protected void PopulateFields(Type type = null)
+        internal protected void PopulateFields()
+        {
+            PopulateFields(null);
+        }
+
+        /// <summary>
+        /// Populates the object with properties by searching a .NET type for fields marked with
+        /// the [JSField] attribute.  Should be called only once at startup.
+        /// </summary>
+        /// <param name="type"> The type to search for fields. </param>
+        internal protected void PopulateFields(Type type)
         {
             if (type == null)
                 type = this.GetType();

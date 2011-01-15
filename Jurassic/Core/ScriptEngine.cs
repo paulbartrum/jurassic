@@ -581,14 +581,26 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Executes the given file.  If the file does not have a BOM then it is assumed to be UTF8.
+        /// Execution is bound to the global scope.
+        /// </summary>
+        /// <param name="path"> The path to a javascript file.  This can be a local file path or a
+        /// UNC path. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="path"/> is a <c>null</c> reference. </exception>
+        public void ExecuteFile(string path)
+        {
+            ExecuteFile(path, null);
+        }
+
+        /// <summary>
         /// Executes the given file.  Execution is bound to the global scope.
         /// </summary>
         /// <param name="path"> The path to a javascript file.  This can be a local file path or a
         /// UNC path. </param>
         /// <param name="encoding"> The character encoding to use if the file lacks a byte order
-        /// mark (BOM).  If this parameter is omitted, the file is assumed to be UTF8. </param>
+        /// mark (BOM). </param>
         /// <exception cref="ArgumentNullException"> <paramref name="path"/> is a <c>null</c> reference. </exception>
-        public void ExecuteFile(string path, System.Text.Encoding encoding = null)
+        public void ExecuteFile(string path, System.Text.Encoding encoding)
         {
             Execute(new FileScriptSource(path, encoding));
         }
