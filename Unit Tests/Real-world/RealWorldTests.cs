@@ -156,7 +156,6 @@ For a Markdown cheat-sheet, switch the right-hand window from *Preview* to *Synt
         {
             // From http://jashkenas.github.com/coffee-script/
             var engine = new ScriptEngine();
-            engine.EnableDebugging = true;
             engine.ExecuteFile(@"..\..\..\Unit Tests\Real-world\Files\coffee-script.js");
             engine.SetGlobalValue("script", @"
                 # Assignment:
