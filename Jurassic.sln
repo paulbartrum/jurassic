@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REPL", "REPL\REPL.csproj", "{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unit Tests", "Unit Tests\Unit Tests.csproj", "{B0D0F980-2741-4D85-9D82-7F09ED470EB1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jurassic", "Jurassic\Jurassic.csproj", "{2CE5502D-8710-4BE3-9D90-201D526904B3}"
@@ -27,34 +25,31 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarker", "Benchmarker\
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
+		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs01
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = REPL\\REPL.csproj
-		SccProjectName1 = REPL
-		SccLocalPath1 = REPL
-		SccProjectUniqueName2 = Unit\u0020Tests\\Unit\u0020Tests.csproj
-		SccProjectName2 = Unit\u0020Tests
-		SccLocalPath2 = Unit\u0020Tests
-		SccProjectUniqueName3 = Jurassic\\Jurassic.csproj
-		SccProjectName3 = Jurassic
-		SccLocalPath3 = Jurassic
-		SccProjectUniqueName4 = Performance\\Performance.csproj
-		SccProjectName4 = Performance
-		SccLocalPath4 = Performance
-		SccProjectUniqueName5 = JurassicSL\\JurassicSL.csproj
-		SccProjectName5 = JurassicSL
-		SccLocalPath5 = JurassicSL
-		SccProjectUniqueName6 = SilverlightREPL\\SilverlightREPL.csproj
-		SccProjectName6 = SilverlightREPL
-		SccLocalPath6 = SilverlightREPL
-		SccProjectUniqueName7 = Test\u0020Suite\u0020Runner\\Test\u0020Suite\u0020Runner.csproj
-		SccProjectName7 = Test\u0020Suite\u0020Runner
-		SccLocalPath7 = Test\u0020Suite\u0020Runner
-		SccProjectUniqueName8 = Benchmarker\\Benchmarker.csproj
-		SccProjectName8 = Benchmarker
-		SccLocalPath8 = Benchmarker
+		SccProjectUniqueName1 = Unit\u0020Tests\\Unit\u0020Tests.csproj
+		SccProjectName1 = Unit\u0020Tests
+		SccLocalPath1 = Unit\u0020Tests
+		SccProjectUniqueName2 = Jurassic\\Jurassic.csproj
+		SccProjectName2 = Jurassic
+		SccLocalPath2 = Jurassic
+		SccProjectUniqueName3 = Performance\\Performance.csproj
+		SccProjectName3 = Performance
+		SccLocalPath3 = Performance
+		SccProjectUniqueName4 = JurassicSL\\JurassicSL.csproj
+		SccProjectName4 = JurassicSL
+		SccLocalPath4 = JurassicSL
+		SccProjectUniqueName5 = SilverlightREPL\\SilverlightREPL.csproj
+		SccProjectName5 = SilverlightREPL
+		SccLocalPath5 = SilverlightREPL
+		SccProjectUniqueName6 = Test\u0020Suite\u0020Runner\\Test\u0020Suite\u0020Runner.csproj
+		SccProjectName6 = Test\u0020Suite\u0020Runner
+		SccLocalPath6 = Test\u0020Suite\u0020Runner
+		SccProjectUniqueName7 = Benchmarker\\Benchmarker.csproj
+		SccProjectName7 = Benchmarker
+		SccLocalPath7 = Benchmarker
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,18 +62,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Release|x64.ActiveCfg = Release|Any CPU
-		{8D193FB8-D8A3-4D5C-9C07-87611FD9E16B}.Release|x86.ActiveCfg = Release|Any CPU
 		{B0D0F980-2741-4D85-9D82-7F09ED470EB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B0D0F980-2741-4D85-9D82-7F09ED470EB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0D0F980-2741-4D85-9D82-7F09ED470EB1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
