@@ -1042,6 +1042,12 @@ namespace UnitTests
             {
                 TestUtils.CompatibilityMode = CompatibilityMode.Latest;
             }
+
+            // 'arguments' and 'caller' must be undefined in strict mode.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ return test.arguments; } return inner(); } test()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ return inner.caller; } return inner(); } test()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ test.arguments = 5; } return inner(); } test()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ inner.caller = 5; } return inner(); } test()"));
         }
 
         [TestMethod]
@@ -1251,6 +1257,8 @@ namespace UnitTests
             // Check that "this" is correct inside getters and setters.
             Assert.AreEqual(9, TestUtils.Evaluate("x = { get b() { return this.a; } }; y = Object.create(x); y.a = 9; y.b"));
             Assert.AreEqual(9, TestUtils.Evaluate("x = { get b() { return this.a; } }; y = Object.create(x); y.a = 9; z = 'b'; y[z]"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get '2'() { return this.a; } }; y = Object.create(x); y.a = 9; y[2]"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get '2'() { return this.a; } }; y = Object.create(x); y.a = 9; z = 2; y[z]"));
             Assert.AreEqual(9, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); y.b = 9; y.a"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); y.b = 9; y.hasOwnProperty('a')"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); z = 'b'; y[z] = 9; y.hasOwnProperty('a')"));

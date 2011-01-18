@@ -78,12 +78,6 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; arguments ++ })(1, 2, 3)"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; ++ arguments })(1, 2, 3)"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("(function(a, b, c) { 'use strict'; return delete arguments })(1, 2, 3)"));
-
-            // Arguments and caller don't exist outside the function.
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(test.arguments); } return inner(); } test()"));
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ return typeof(inner.caller); } return inner(); } test()"));
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ test.arguments = 5; } return inner(); } test()"));
-            Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("'use strict'; function test(){ function inner(){ inner.caller = 5; } return inner(); } test()"));
         }
 
         [TestMethod]
