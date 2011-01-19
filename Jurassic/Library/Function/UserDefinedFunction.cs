@@ -207,10 +207,11 @@ namespace Jurassic.Library
             private set;
         }
 
-#if DEBUG && !SILVERLIGHT
+#if !SILVERLIGHT
 
         /// <summary>
-        /// Gets the body of the method in the form of disassembled IL code.
+        /// Gets the body of the method in the form of disassembled IL code.  Will be <c>null</c>
+        /// unless ScriptEngine.EnableILAnalysis has been set to <c>true</c>.
         /// </summary>
         public string DisassembledIL
         {

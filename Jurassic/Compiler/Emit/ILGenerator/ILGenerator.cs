@@ -553,8 +553,13 @@ namespace Jurassic.Compiler
         /// Pops a value from the stack, converts it to a double, then pushes it back onto
         /// the stack.
         /// </summary>
-        /// <param name="inputIsUnsigned"> <c>true</c> to treat the input as unsigned. </param>
-        public abstract void ConvertToDouble(bool inputIsUnsigned);
+        public abstract void ConvertToDouble();
+
+        /// <summary>
+        /// Pops an unsigned integer from the stack, converts it to a double, then pushes it back onto
+        /// the stack.
+        /// </summary>
+        public abstract void ConvertUnsignedToDouble();
 
 
 

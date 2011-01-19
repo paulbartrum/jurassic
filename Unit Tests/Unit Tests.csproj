@@ -50,7 +50,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compiler\OptimizationTests.cs" />
+    <Compile Include="Compiler\TypeInferenceTests.cs" />
     <Compile Include="Core\BigIntegerTests.cs" />
     <Compile Include="Core\SerializationTests.cs" />
     <Compile Include="Core\ScriptEngineTests.cs" />

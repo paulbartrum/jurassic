@@ -24,6 +24,14 @@ namespace Jurassic.Compiler
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the local variable name, or <c>null</c> if a name was not provided.
+        /// </summary>
+        public abstract string Name
+        {
+            get;
+        }
     }
 
 #if !SILVERLIGHT
@@ -35,6 +43,7 @@ namespace Jurassic.Compiler
     {
         private int index;
         private Type type;
+        private string name;
 
         /// <summary>
         /// Creates a new local variable instance.
@@ -52,7 +61,7 @@ namespace Jurassic.Compiler
             this.ILGenerator = generator;
             this.index = index;
             this.type = type;
-            this.Name = name;
+            this.name = name;
         }
 
         /// <summary>
@@ -81,12 +90,11 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the local variable name, if one was set.
+        /// Gets the local variable name, or <c>null</c> if a name was not provided.
         /// </summary>
-        public string Name
+        public override string Name
         {
-            get;
-            private set;
+            get { return this.name; }
         }
     }
 
@@ -97,15 +105,21 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class ReflectionEmitILLocalVariable : ILLocalVariable
     {
+        private string name;
+
         /// <summary>
         /// Creates a new local variable instance.
         /// </summary>
         /// <param name="local"> The underlying local variable. </param>
-        public ReflectionEmitILLocalVariable(System.Reflection.Emit.LocalBuilder local)
+        /// <param name="name"> The name of the local variable.  Can be <c>null</c>. </param>
+        public ReflectionEmitILLocalVariable(System.Reflection.Emit.LocalBuilder local, string name)
         {
             if (local == null)
                 throw new ArgumentNullException("local");
             this.UnderlyingLocal = local;
+            this.name = name;
+            //if (name != null)
+            //    local.SetLocalSymInfo(name);
         }
 
         /// <summary>
@@ -131,6 +145,14 @@ namespace Jurassic.Compiler
         public override Type Type
         {
             get { return this.UnderlyingLocal.LocalType; }
+        }
+
+        /// <summary>
+        /// Gets the local variable name, or <c>null</c> if a name was not provided.
+        /// </summary>
+        public override string Name
+        {
+            get { return this.name; }
         }
     }
 

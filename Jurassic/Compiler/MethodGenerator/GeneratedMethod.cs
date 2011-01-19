@@ -39,8 +39,6 @@ namespace Jurassic.Compiler
             private set;
         }
 
-#if DEBUG
-
         /// <summary>
         /// Gets or sets the disassembled IL code for the method.
         /// </summary>
@@ -49,8 +47,6 @@ namespace Jurassic.Compiler
             get;
             set;
         }
-
-#endif
 
 
 
