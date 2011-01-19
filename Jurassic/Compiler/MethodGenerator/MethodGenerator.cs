@@ -166,6 +166,7 @@ namespace Jurassic.Compiler
             optimizationInfo.StrictMode = this.StrictMode;
             optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
 
+            ILGenerator generator;
             if (this.Options.EnableDebugging == false)
             {
                 // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
@@ -173,7 +174,6 @@ namespace Jurassic.Compiler
 
                 // Create a new dynamic method.
                 System.Reflection.Emit.DynamicMethod dynamicMethod;
-                ILGenerator generator;
 #if !SILVERLIGHT
                 if (ScriptEngine.LowPrivilegeEnvironment == false)
                 {
@@ -203,17 +203,20 @@ namespace Jurassic.Compiler
                 }
 #endif
 
+#if !SILVERLIGHT
+                if (this.Engine.EnableILAnalysis == true)
+                {
+                    // Replace the generator with one that logs.
+                    generator = new LoggingILGenerator(generator);
+                }
+#endif
+
                 // Generate the IL.
                 GenerateCode(generator, optimizationInfo);
                 generator.Complete();
 
                 // Create a delegate from the method.
                 this.GeneratedMethod = new GeneratedMethod(dynamicMethod.CreateDelegate(GetDelegate()), optimizationInfo.NestedFunctions);
-
-#if DEBUG && !SILVERLIGHT
-                // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
-                this.GeneratedMethod.DisassembledIL = generator.ToString();
-#endif
 
             }
             else
@@ -253,7 +256,16 @@ namespace Jurassic.Compiler
                     typeof(object), GetParameterTypes());
 
                 // Generate the IL for the method.
-                var generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
+                generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
+
+#if !SILVERLIGHT
+                if (this.Engine.EnableILAnalysis == true)
+                {
+                    // Replace the generator with one that logs.
+                    generator = new LoggingILGenerator(generator);
+                }
+#endif
+
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
                     // Initialize the debugging information.
@@ -270,16 +282,15 @@ namespace Jurassic.Compiler
                 var type = typeBuilder.CreateType();
                 var methodInfo = type.GetMethod(this.GetMethodName());
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
-
-#if DEBUG && !SILVERLIGHT
-                // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
-                var reader = new ClrTest.Reflection.ILReader(methodInfo);
-                var writer = new System.IO.StringWriter();
-                var visitor = new ClrTest.Reflection.ReadableILStringVisitor(new ClrTest.Reflection.ReadableILStringToTextWriter(writer));
-                reader.Accept(visitor);
-                this.GeneratedMethod.DisassembledIL = writer.ToString();
-#endif
             }
+
+#if !SILVERLIGHT
+            if (this.Engine.EnableILAnalysis == true)
+            {
+                // Store the disassembled IL so it can be retrieved for analysis purposes.
+                this.GeneratedMethod.DisassembledIL = generator.ToString();
+            }
+#endif
         }
 
         /// <summary>

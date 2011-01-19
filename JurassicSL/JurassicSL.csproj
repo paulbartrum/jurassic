@@ -81,41 +81,11 @@
     <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\ILLocalVariable.cs">
       <Link>Compiler\Emit\ILGenerator\ILLocalVariable.cs</Link>
     </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\LoggingILGenerator.cs">
+      <Link>Compiler\Emit\ILGenerator\LoggingILGenerator.cs</Link>
+    </Compile>
     <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\ReflectionEmitILGenerator.cs">
       <Link>Compiler\Emit\ILGenerator\ReflectionEmitILGenerator.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\ByteArrayILProvider.cs">
-      <Link>Compiler\Emit\ILReader\ByteArrayILProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\DynamicILInfoTokenResolver.cs">
-      <Link>Compiler\Emit\ILReader\DynamicILInfoTokenResolver.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\DynamicMethodILProvider.cs">
-      <Link>Compiler\Emit\ILReader\DynamicMethodILProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\DynamicScopeTokenResolver.cs">
-      <Link>Compiler\Emit\ILReader\DynamicScopeTokenResolver.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\FormatProvider.cs">
-      <Link>Compiler\Emit\ILReader\FormatProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\ILInstruction.cs">
-      <Link>Compiler\Emit\ILReader\ILInstruction.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\ILProvider.cs">
-      <Link>Compiler\Emit\ILReader\ILProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\ILReader.cs">
-      <Link>Compiler\Emit\ILReader\ILReader.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\ILReaderFactory.cs">
-      <Link>Compiler\Emit\ILReader\ILReaderFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\ReadableILStringVisitor.cs">
-      <Link>Compiler\Emit\ILReader\ReadableILStringVisitor.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Compiler\Emit\ILReader\TokenResolver.cs">
-      <Link>Compiler\Emit\ILReader\TokenResolver.cs</Link>
     </Compile>
     <Compile Include="..\Jurassic\Compiler\Emit\LongJumpException.cs">
       <Link>Compiler\Emit\LongJumpException.cs</Link>
@@ -489,9 +459,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Jurassic\Compiler\Emit\ILReader\README.txt">
-      <Link>Compiler\Emit\ILReader\README.txt</Link>
-    </Content>
     <Content Include="..\Jurassic\Compiler\Emit\Optimizations.txt">
       <Link>Compiler\Emit\Optimizations.txt</Link>
     </Content>
@@ -500,13 +467,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Compiler\Emit\ILReader\" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
         <SilverlightProjectProperties />
       </FlavorProperties>
-      <UserProperties ProjectLinkReference="2ce5502d-8710-4be3-9d90-201d526904b3" ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" />
+      <UserProperties ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" ProjectLinkReference="2ce5502d-8710-4be3-9d90-201d526904b3" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

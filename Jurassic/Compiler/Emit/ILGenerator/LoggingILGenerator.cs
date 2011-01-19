@@ -1,24 +1,38 @@
 ﻿using System;
-using OpCodes = System.Reflection.Emit.OpCodes;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Jurassic.Compiler
 {
     /// <summary>
-    /// Represents a generator of CIL bytes.
+    /// Represents a generator that logs all operations.
     /// </summary>
-    internal class ReflectionEmitILGenerator : ILGenerator
+    internal class LoggingILGenerator : ILGenerator
     {
-        private System.Reflection.Emit.ILGenerator generator;
+        private ILGenerator generator;
+        private StringBuilder log;
+        private bool nextInstructionHasLabel;
+        private int nextLabelNumber;
+        private Dictionary<ILLabel, int> definedLabels;     // label -> label number
+        private class LabelFixUp
+        {
+            public ILLabel Label;
+            public int BufferOffset;
+        }
+        private List<LabelFixUp> fixUps;
 
         /// <summary>
-        /// Creates a new ReflectionEmitILGenerator instance.
+        /// Creates a new LoggingILGenerator instance.
         /// </summary>
         /// <param name="generator"> The ILGenerator that is used to output the IL. </param>
-        public ReflectionEmitILGenerator(System.Reflection.Emit.ILGenerator generator)
+        public LoggingILGenerator(ILGenerator generator)
         {
             if (generator == null)
                 throw new ArgumentNullException("generator");
             this.generator = generator;
+            this.log = new StringBuilder();
+            this.definedLabels = new Dictionary<ILLabel, int>();
+            this.fixUps = new List<LabelFixUp>();
         }
 
 
@@ -32,7 +46,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Complete()
         {
-            Return();
+            Log("ret");
+            this.generator.Complete();
         }
 
 
@@ -45,7 +60,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Pop()
         {
-            this.generator.Emit(OpCodes.Pop);
+            Log("pop");
+            this.generator.Pop();
         }
 
         /// <summary>
@@ -53,7 +69,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Duplicate()
         {
-            this.generator.Emit(OpCodes.Dup);
+            Log("dup");
+            this.generator.Duplicate();
         }
 
 
@@ -67,7 +84,7 @@ namespace Jurassic.Compiler
         /// <returns> A new label. </returns>
         public override ILLabel CreateLabel()
         {
-            return new ReflectionEmitILLabel(this.generator.DefineLabel());
+            return this.generator.CreateLabel();
         }
 
         /// <summary>
@@ -76,9 +93,27 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to define. </param>
         public override void DefineLabelPosition(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.MarkLabel(((ReflectionEmitILLabel)label).UnderlyingLabel);
+            this.generator.DefineLabelPosition(label);
+
+            // Output a label for the next instruction.
+            this.nextInstructionHasLabel = true;
+
+            // Fix up any previous references to the label.
+            for (int i = 0; i < this.fixUps.Count; i++)
+            {
+                if (this.fixUps[i].Label == label)
+                {
+                    // Patch the label text.
+                    int offset = this.fixUps[i].BufferOffset;
+                    string labelText = string.Format("L{0:D3}", this.nextLabelNumber);
+                    for (int j = 0; j < labelText.Length; j++)
+                        this.log[offset + j] = labelText[j];
+
+                    // Remove the fix up.
+                    this.fixUps.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
         /// <summary>
@@ -87,9 +122,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void Branch(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Br, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("br", label);
+            this.generator.Branch(label);
         }
 
         /// <summary>
@@ -98,9 +132,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfZero(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Brfalse, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("brfalse", label);
+            this.generator.BranchIfZero(label);
         }
 
         /// <summary>
@@ -110,9 +143,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfNotZero(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Brtrue, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("brtrue", label);
+            this.generator.BranchIfNotZero(label);
         }
 
         /// <summary>
@@ -121,9 +153,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfEqual(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Beq, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("beq", label);
+            this.generator.BranchIfEqual(label);
         }
 
         /// <summary>
@@ -132,9 +163,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfNotEqual(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Bne_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("bne", label);
+            this.generator.BranchIfNotEqual(label);
         }
 
         /// <summary>
@@ -144,9 +174,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfGreaterThan(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Bgt, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("bgt", label);
+            this.generator.BranchIfGreaterThan(label);
         }
 
         /// <summary>
@@ -158,9 +187,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfGreaterThanUnsigned(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Bgt_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("bgt.un", label);
+            this.generator.BranchIfGreaterThanUnsigned(label);
         }
 
         /// <summary>
@@ -170,9 +198,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfGreaterThanOrEqual(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Bge, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("bge", label);
+            this.generator.BranchIfGreaterThanOrEqual(label);
         }
 
         /// <summary>
@@ -184,9 +211,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfGreaterThanOrEqualUnsigned(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Bge_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("bge.un", label);
+            this.generator.BranchIfGreaterThanOrEqualUnsigned(label);
         }
 
         /// <summary>
@@ -196,9 +222,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfLessThan(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Blt, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("blt", label);
+            this.generator.BranchIfLessThan(label);
         }
 
         /// <summary>
@@ -210,9 +235,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfLessThanUnsigned(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Blt_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("blt.un", label);
+            this.generator.BranchIfLessThanUnsigned(label);
         }
 
         /// <summary>
@@ -222,9 +246,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfLessThanOrEqual(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Ble, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("ble", label);
+            this.generator.BranchIfLessThanOrEqual(label);
         }
 
         /// <summary>
@@ -236,9 +259,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfLessThanOrEqualUnsigned(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Ble_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("ble.un", label);
+            this.generator.BranchIfLessThanOrEqualUnsigned(label);
         }
 
         /// <summary>
@@ -247,7 +269,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Return()
         {
-            this.generator.Emit(OpCodes.Ret);
+            Log("ret");
+            this.generator.Return();
         }
 
         /// <summary>
@@ -257,13 +280,8 @@ namespace Jurassic.Compiler
         /// <param name="labels"> A array of labels. </param>
         public override void Switch(ILLabel[] labels)
         {
-            if (labels == null)
-                throw new ArgumentNullException("labels");
-
-            var reflectionLabels = new System.Reflection.Emit.Label[labels.Length];
-            for (int i = 0; i < labels.Length; i++)
-                reflectionLabels[i] = ((ReflectionEmitILLabel)labels[i]).UnderlyingLabel;
-            this.generator.Emit(OpCodes.Switch, reflectionLabels);
+            Log("switch", labels);
+            this.generator.Switch(labels);
         }
 
 
@@ -279,7 +297,7 @@ namespace Jurassic.Compiler
         /// <returns> A new local variable. </returns>
         public override ILLocalVariable DeclareVariable(Type type, string name = null)
         {
-            return new ReflectionEmitILLocalVariable(this.generator.DeclareLocal(type), name);
+            return this.generator.DeclareVariable(type, name);
         }
 
         /// <summary>
@@ -288,9 +306,8 @@ namespace Jurassic.Compiler
         /// <param name="variable"> The variable whose value will be pushed. </param>
         public override void LoadVariable(ILLocalVariable variable)
         {
-            if (variable as ReflectionEmitILLocalVariable == null)
-                throw new ArgumentNullException("variable");
-            this.generator.Emit(OpCodes.Ldloc, ((ReflectionEmitILLocalVariable)variable).UnderlyingLocal);
+            Log("ldloc", variable);
+            this.generator.LoadVariable(variable);
         }
 
         /// <summary>
@@ -299,9 +316,8 @@ namespace Jurassic.Compiler
         /// <param name="variable"> The variable whose address will be pushed. </param>
         public override void LoadAddressOfVariable(ILLocalVariable variable)
         {
-            if (variable as ReflectionEmitILLocalVariable == null)
-                throw new ArgumentNullException("variable");
-            this.generator.Emit(OpCodes.Ldloca, ((ReflectionEmitILLocalVariable)variable).UnderlyingLocal);
+            Log("ldloca", variable);
+            this.generator.LoadAddressOfVariable(variable);
         }
 
         /// <summary>
@@ -310,9 +326,8 @@ namespace Jurassic.Compiler
         /// <param name="variable"> The variable to store the value. </param>
         public override void StoreVariable(ILLocalVariable variable)
         {
-            if (variable as ReflectionEmitILLocalVariable == null)
-                throw new ArgumentNullException("variable");
-            this.generator.Emit(OpCodes.Stloc, ((ReflectionEmitILLocalVariable)variable).UnderlyingLocal);
+            Log("stloc", variable);
+            this.generator.StoreVariable(variable);
         }
 
         /// <summary>
@@ -321,29 +336,8 @@ namespace Jurassic.Compiler
         /// <param name="argumentIndex"> The index of the argument to push onto the stack. </param>
         public override void LoadArgument(int argumentIndex)
         {
-            if (argumentIndex < 0)
-                throw new ArgumentOutOfRangeException("argumentIndex");
-            switch (argumentIndex)
-            {
-                case 0:
-                    this.generator.Emit(OpCodes.Ldarg_0);
-                    break;
-                case 1:
-                    this.generator.Emit(OpCodes.Ldarg_1);
-                    break;
-                case 2:
-                    this.generator.Emit(OpCodes.Ldarg_2);
-                    break;
-                case 3:
-                    this.generator.Emit(OpCodes.Ldarg_3);
-                    break;
-                default:
-                    if (argumentIndex < 256)
-                        this.generator.Emit(OpCodes.Ldarg_S, (byte)argumentIndex);
-                    else
-                        this.generator.Emit(OpCodes.Ldarg, (short)argumentIndex);
-                    break;
-            }
+            Log("ldarg", argumentIndex);
+            this.generator.LoadArgument(argumentIndex);
         }
 
         /// <summary>
@@ -352,12 +346,8 @@ namespace Jurassic.Compiler
         /// <param name="argumentIndex"> The index of the argument to store into. </param>
         public override void StoreArgument(int argumentIndex)
         {
-            if (argumentIndex < 0)
-                throw new ArgumentOutOfRangeException("argumentIndex");
-            if (argumentIndex < 256)
-                this.generator.Emit(OpCodes.Starg_S, (byte)argumentIndex);
-            else
-                this.generator.Emit(OpCodes.Starg, (short)argumentIndex);
+            Log("starg", argumentIndex);
+            this.generator.StoreArgument(argumentIndex);
         }
 
 
@@ -370,7 +360,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void LoadNull()
         {
-            this.generator.Emit(OpCodes.Ldnull);
+            Log("ldnull");
+            this.generator.LoadNull();
         }
 
         /// <summary>
@@ -379,47 +370,8 @@ namespace Jurassic.Compiler
         /// <param name="value"> The integer to push onto the stack. </param>
         public override void LoadInt32(int value)
         {
-            if (value >= -1 && value <= 8)
-            {
-                switch (value)
-                {
-                    case -1:
-                        this.generator.Emit(OpCodes.Ldc_I4_M1);
-                        break;
-                    case 0:
-                        this.generator.Emit(OpCodes.Ldc_I4_0);
-                        break;
-                    case 1:
-                        this.generator.Emit(OpCodes.Ldc_I4_1);
-                        break;
-                    case 2:
-                        this.generator.Emit(OpCodes.Ldc_I4_2);
-                        break;
-                    case 3:
-                        this.generator.Emit(OpCodes.Ldc_I4_3);
-                        break;
-                    case 4:
-                        this.generator.Emit(OpCodes.Ldc_I4_4);
-                        break;
-                    case 5:
-                        this.generator.Emit(OpCodes.Ldc_I4_5);
-                        break;
-                    case 6:
-                        this.generator.Emit(OpCodes.Ldc_I4_6);
-                        break;
-                    case 7:
-                        this.generator.Emit(OpCodes.Ldc_I4_7);
-                        break;
-                    case 8:
-                        this.generator.Emit(OpCodes.Ldc_I4_8);
-                        break;
-                }
-                
-            }
-            else if (value >= -128 && value < 128)
-                this.generator.Emit(OpCodes.Ldc_I4_S, (byte)value);
-            else
-                this.generator.Emit(OpCodes.Ldc_I4, value);
+            Log("ldc.i4", value);
+            this.generator.LoadInt32(value);
         }
 
         /// <summary>
@@ -428,7 +380,8 @@ namespace Jurassic.Compiler
         /// <param name="value"> The 64-bit integer to push onto the stack. </param>
         public override void LoadInt64(long value)
         {
-            this.generator.Emit(OpCodes.Ldc_I8, value);
+            Log("ldc.i8", value);
+            this.generator.LoadInt64(value);
         }
 
         /// <summary>
@@ -437,7 +390,8 @@ namespace Jurassic.Compiler
         /// <param name="value"> The number to push onto the stack. </param>
         public override void LoadDouble(double value)
         {
-            this.generator.Emit(OpCodes.Ldc_R8, value);
+            Log("ldc.r8", value);
+            this.generator.LoadDouble(value);
         }
 
         /// <summary>
@@ -446,7 +400,8 @@ namespace Jurassic.Compiler
         /// <param name="value"> The string to push onto the stack. </param>
         public override void LoadString(string value)
         {
-            this.generator.Emit(OpCodes.Ldstr, value);
+            Log("ldstr", value);
+            this.generator.LoadString(value);
         }
 
 
@@ -461,7 +416,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void CompareEqual()
         {
-            this.generator.Emit(OpCodes.Ceq);
+            Log("ceq");
+            this.generator.CompareEqual();
         }
 
         /// <summary>
@@ -471,7 +427,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void CompareGreaterThan()
         {
-            this.generator.Emit(OpCodes.Cgt);
+            Log("cgt");
+            this.generator.CompareGreaterThan();
         }
 
         /// <summary>
@@ -481,7 +438,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void CompareGreaterThanUnsigned()
         {
-            this.generator.Emit(OpCodes.Cgt_Un);
+            Log("cgt.un");
+            this.generator.CompareGreaterThanUnsigned();
         }
 
         /// <summary>
@@ -491,7 +449,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void CompareLessThan()
         {
-            this.generator.Emit(OpCodes.Clt);
+            Log("clt");
+            this.generator.CompareLessThan();
         }
 
         /// <summary>
@@ -501,7 +460,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void CompareLessThanUnsigned()
         {
-            this.generator.Emit(OpCodes.Clt_Un);
+            Log("clt.un");
+            this.generator.CompareLessThanUnsigned();
         }
 
 
@@ -515,7 +475,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Add()
         {
-            this.generator.Emit(OpCodes.Add);
+            Log("add");
+            this.generator.Add();
         }
 
         /// <summary>
@@ -524,7 +485,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Subtract()
         {
-            this.generator.Emit(OpCodes.Sub);
+            Log("sub");
+            this.generator.Subtract();
         }
 
         /// <summary>
@@ -533,7 +495,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Multiply()
         {
-            this.generator.Emit(OpCodes.Mul);
+            Log("mul");
+            this.generator.Multiply();
         }
 
         /// <summary>
@@ -542,7 +505,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Divide()
         {
-            this.generator.Emit(OpCodes.Div);
+            Log("div");
+            this.generator.Divide();
         }
 
         /// <summary>
@@ -551,7 +515,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Remainder()
         {
-            this.generator.Emit(OpCodes.Rem);
+            Log("rem");
+            this.generator.Remainder();
         }
 
         /// <summary>
@@ -559,7 +524,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Negate()
         {
-            this.generator.Emit(OpCodes.Neg);
+            Log("neg");
+            this.generator.Negate();
         }
 
         /// <summary>
@@ -568,7 +534,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BitwiseAnd()
         {
-            this.generator.Emit(OpCodes.And);
+            Log("and");
+            this.generator.BitwiseAnd();
         }
 
         /// <summary>
@@ -577,7 +544,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BitwiseOr()
         {
-            this.generator.Emit(OpCodes.Or);
+            Log("or");
+            this.generator.BitwiseOr();
         }
 
         /// <summary>
@@ -586,7 +554,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BitwiseXor()
         {
-            this.generator.Emit(OpCodes.Xor);
+            Log("xor");
+            this.generator.BitwiseXor();
         }
 
         /// <summary>
@@ -594,7 +563,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BitwiseNot()
         {
-            this.generator.Emit(OpCodes.Not);
+            Log("not");
+            this.generator.BitwiseNot();
         }
 
         /// <summary>
@@ -603,7 +573,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void ShiftLeft()
         {
-            this.generator.Emit(OpCodes.Shl);
+            Log("shl");
+            this.generator.ShiftLeft();
         }
 
         /// <summary>
@@ -612,7 +583,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void ShiftRight()
         {
-            this.generator.Emit(OpCodes.Shr);
+            Log("shr");
+            this.generator.ShiftRight();
         }
 
         /// <summary>
@@ -621,7 +593,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void ShiftRightUnsigned()
         {
-            this.generator.Emit(OpCodes.Shr_Un);
+            Log("shr.un");
+            this.generator.ShiftRightUnsigned();
         }
 
 
@@ -635,11 +608,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Box(Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
-                throw new ArgumentException("The type to box must be a value type.", "type");
-            this.generator.Emit(OpCodes.Box, type);
+            Log("box", type);
+            this.generator.Box(type);
         }
 
         /// <summary>
@@ -649,11 +619,8 @@ namespace Jurassic.Compiler
         /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
         public override void Unbox(Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
-                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
-            this.generator.Emit(OpCodes.Unbox_Any, type);
+            Log("unbox", type);
+            this.generator.Unbox(type);
         }
 
         /// <summary>
@@ -662,7 +629,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void ConvertToInteger()
         {
-            this.generator.Emit(OpCodes.Conv_I4);
+            Log("conv.i4");
+            this.generator.ConvertToInteger();
         }
 
         /// <summary>
@@ -671,7 +639,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void ConvertToUnsignedInteger()
         {
-            this.generator.Emit(OpCodes.Conv_U4);
+            Log("conv.u4");
+            this.generator.ConvertToUnsignedInteger();
         }
 
         /// <summary>
@@ -680,7 +649,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void ConvertToDouble()
         {
-            this.generator.Emit(OpCodes.Conv_R8);
+            Log("conv.u4");
+            this.generator.ConvertToDouble();
         }
 
         /// <summary>
@@ -689,7 +659,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void ConvertUnsignedToDouble()
         {
-            this.generator.Emit(OpCodes.Conv_R_Un);
+            Log("conv.r.un");
+            this.generator.ConvertUnsignedToDouble();
         }
 
 
@@ -703,7 +674,8 @@ namespace Jurassic.Compiler
         /// <param name="constructor"> The constructor that is used to initialize the object. </param>
         public override void NewObject(System.Reflection.ConstructorInfo constructor)
         {
-            this.generator.Emit(OpCodes.Newobj, constructor);
+            Log("newobj", constructor);
+            this.generator.NewObject(constructor);
         }
 
         /// <summary>
@@ -715,7 +687,8 @@ namespace Jurassic.Compiler
         /// <param name="method"> The method to call. </param>
         public override void CallStatic(System.Reflection.MethodInfo method)
         {
-            this.generator.Emit(OpCodes.Call, method);
+            Log("call", method);
+            this.generator.CallStatic(method);
         }
 
         /// <summary>
@@ -727,11 +700,8 @@ namespace Jurassic.Compiler
         /// <exception cref="ArgumentException"> The method is static. </exception>
         public override void CallVirtual(System.Reflection.MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException("method");
-            if (method.IsStatic == true)
-                throw new ArgumentException("Static methods cannot be called this method.", "method");
-            this.generator.Emit(OpCodes.Callvirt, method);
+            Log("callvirt", method);
+            this.generator.CallVirtual(method);
         }
 
         /// <summary>
@@ -740,12 +710,11 @@ namespace Jurassic.Compiler
         /// <param name="field"> The field whose value will be pushed. </param>
         public override void LoadField(System.Reflection.FieldInfo field)
         {
-            if (field == null)
-                throw new ArgumentNullException("field");
-            if (field.IsStatic == true)
-                this.generator.Emit(OpCodes.Ldsfld, field);
+            if (field.IsStatic == false)
+                Log("ldfld", field);
             else
-                this.generator.Emit(OpCodes.Ldfld, field);
+                Log("ldsfld", field);
+            this.generator.LoadField(field);
         }
 
         /// <summary>
@@ -757,7 +726,8 @@ namespace Jurassic.Compiler
         /// object implements. </param>
         public override void CastClass(Type type)
         {
-            this.generator.Emit(OpCodes.Castclass, type);
+            Log("castclass", type);
+            this.generator.CastClass(type);
         }
 
         /// <summary>
@@ -769,7 +739,8 @@ namespace Jurassic.Compiler
         /// object implements. </param>
         public override void IsInstance(Type type)
         {
-            this.generator.Emit(OpCodes.Isinst, type);
+            Log("ininst", type);
+            this.generator.IsInstance(type);
         }
 
         /// <summary>
@@ -778,7 +749,8 @@ namespace Jurassic.Compiler
         /// <param name="type"> The type to convert to a RuntimeTypeHandle. </param>
         public override void LoadToken(Type type)
         {
-            this.generator.Emit(OpCodes.Ldtoken, type);
+            Log("ldtoken", type);
+            this.generator.LoadToken(type);
         }
 
         /// <summary>
@@ -788,7 +760,8 @@ namespace Jurassic.Compiler
         /// <param name="method"> The method to convert to a RuntimeMethodHandle. </param>
         public override void LoadToken(System.Reflection.MethodInfo method)
         {
-            this.generator.Emit(OpCodes.Ldtoken, method);
+            Log("ldtoken", method);
+            this.generator.LoadToken(method);
         }
 
         /// <summary>
@@ -797,7 +770,8 @@ namespace Jurassic.Compiler
         /// <param name="field"> The type to convert to a RuntimeFieldHandle. </param>
         public override void LoadToken(System.Reflection.FieldInfo field)
         {
-            this.generator.Emit(OpCodes.Ldtoken, field);
+            Log("ldtoken", field);
+            this.generator.LoadToken(field);
         }
 
         /// <summary>
@@ -807,7 +781,8 @@ namespace Jurassic.Compiler
         /// <param name="method"> The method to retrieve a pointer for. </param>
         public override void LoadStaticMethodPointer(System.Reflection.MethodInfo method)
         {
-            this.generator.Emit(OpCodes.Ldftn, method);
+            Log("ldftn", method);
+            this.generator.LoadStaticMethodPointer(method);
         }
 
         /// <summary>
@@ -818,9 +793,8 @@ namespace Jurassic.Compiler
         /// <exception cref="ArgumentException"> The method is static. </exception>
         public override void LoadVirtualMethodPointer(System.Reflection.MethodInfo method)
         {
-            if (method != null && method.IsStatic == true)
-                throw new ArgumentException("The given method cannot be static.", "method");
-            this.generator.Emit(OpCodes.Ldvirtftn, method);
+            Log("ldvirtftn", method);
+            this.generator.LoadVirtualMethodPointer(method);
         }
 
 
@@ -835,7 +809,8 @@ namespace Jurassic.Compiler
         /// <param name="type"> The element type. </param>
         public override void NewArray(Type type)
         {
-            this.generator.Emit(OpCodes.Newarr, type);
+            Log("newarr", type);
+            this.generator.NewArray(type);
         }
 
         /// <summary>
@@ -844,37 +819,8 @@ namespace Jurassic.Compiler
         /// <param name="type"> The element type. </param>
         public override void LoadArrayElement(Type type)
         {
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Byte:
-                case TypeCode.SByte:
-                    this.generator.Emit(OpCodes.Ldelem_I1);
-                    break;
-                case TypeCode.UInt16:
-                case TypeCode.Int16:
-                    this.generator.Emit(OpCodes.Ldelem_I2);
-                    break;
-                case TypeCode.UInt32:
-                case TypeCode.Int32:
-                    this.generator.Emit(OpCodes.Ldelem_I4);
-                    break;
-                case TypeCode.UInt64:
-                case TypeCode.Int64:
-                    this.generator.Emit(OpCodes.Ldelem_I8);
-                    break;
-                case TypeCode.Single:
-                    this.generator.Emit(OpCodes.Ldelem_R4);
-                    break;
-                case TypeCode.Double:
-                    this.generator.Emit(OpCodes.Ldelem_R8);
-                    break;
-                default:
-                    if (type.IsClass == true)
-                        this.generator.Emit(OpCodes.Ldelem_Ref);
-                    else
-                        this.generator.Emit(OpCodes.Ldelem, type);
-                    break;
-            }
+            Log("ldelem", type);
+            this.generator.LoadArrayElement(type);
         }
 
         /// <summary>
@@ -883,37 +829,8 @@ namespace Jurassic.Compiler
         /// <param name="type"> The element type. </param>
         public override void StoreArrayElement(Type type)
         {
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Byte:
-                case TypeCode.SByte:
-                    this.generator.Emit(OpCodes.Stelem_I1);
-                    break;
-                case TypeCode.UInt16:
-                case TypeCode.Int16:
-                    this.generator.Emit(OpCodes.Stelem_I2);
-                    break;
-                case TypeCode.UInt32:
-                case TypeCode.Int32:
-                    this.generator.Emit(OpCodes.Stelem_I4);
-                    break;
-                case TypeCode.UInt64:
-                case TypeCode.Int64:
-                    this.generator.Emit(OpCodes.Stelem_I8);
-                    break;
-                case TypeCode.Single:
-                    this.generator.Emit(OpCodes.Stelem_R4);
-                    break;
-                case TypeCode.Double:
-                    this.generator.Emit(OpCodes.Stelem_R8);
-                    break;
-                default:
-                    if (type.IsClass == true)
-                        this.generator.Emit(OpCodes.Stelem_Ref);
-                    else
-                        this.generator.Emit(OpCodes.Stelem, type);
-                    break;
-            }
+            Log("stelem", type);
+            this.generator.StoreArrayElement(type);
         }
 
         /// <summary>
@@ -921,7 +838,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void LoadArrayLength()
         {
-            this.generator.Emit(OpCodes.Ldlen);
+            Log("ldlen");
+            this.generator.LoadArrayLength();
         }
 
 
@@ -934,7 +852,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Throw()
         {
-            this.generator.Emit(OpCodes.Throw);
+            Log("throw");
+            this.generator.Throw();
         }
 
         /// <summary>
@@ -976,7 +895,7 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BeginFilterBlock()
         {
-            this.generator.BeginExceptFilterBlock();
+            this.generator.BeginFilterBlock();
         }
 
         /// <summary>
@@ -994,9 +913,8 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void Leave(ILLabel label)
         {
-            if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
-            this.generator.Emit(OpCodes.Leave, ((ReflectionEmitILLabel)label).UnderlyingLabel);
+            Log("leave", label);
+            this.generator.Leave(label);
         }
 
         /// <summary>
@@ -1005,7 +923,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void EndFinally()
         {
-            this.generator.Emit(OpCodes.Endfinally);
+            Log("endfinally");
+            this.generator.EndFinally();
         }
 
         /// <summary>
@@ -1016,7 +935,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void EndFilter()
         {
-            this.generator.Emit(OpCodes.Endfilter);
+            Log("endfilter");
+            this.generator.EndFilter();
         }
 
 
@@ -1029,7 +949,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Breakpoint()
         {
-            this.generator.Emit(OpCodes.Break);
+            Log("break");
+            this.generator.Breakpoint();
         }
 
         /// <summary>
@@ -1055,7 +976,213 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void NoOperation()
         {
-            this.generator.Emit(OpCodes.Nop);
+            Log("nop");
+            this.generator.NoOperation();
+        }
+
+
+
+        //     OBJECT OVERRIDES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Converts the object to a string.
+        /// </summary>
+        /// <returns> A string containing the IL generated by this object. </returns>
+        public override string ToString()
+        {
+            return this.log.ToString();
+        }
+
+
+
+        //     PRIVATE HELPER METHODS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Outputs an instruction to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        private void Log(string instruction)
+        {
+            LogCore(instruction, null);
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a label to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="label"> The label to output. </param>
+        private void Log(string instruction, ILLabel label)
+        {
+            LogCore(instruction, string.Empty);
+            AppendLabel(label);
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a number of labels to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="labels"> The labels to output. </param>
+        private void Log(string instruction, ILLabel[] labels)
+        {
+            LogCore(instruction, string.Empty);
+            bool first = true;
+            foreach (var label in labels)
+            {
+                if (first == false)
+                    this.log.Append(", ");
+                first = false;
+                AppendLabel(label);
+            }
+        }
+
+        /// <summary>
+        /// Appends the name of a label to the log.
+        /// </summary>
+        /// <param name="label"> The label to convert. </param>
+        /// <returns> A string representation of the label. </returns>
+        private void AppendLabel(ILLabel label)
+        {
+            // See if the label has been defined already.
+            int labelNumber;
+            if (this.definedLabels.TryGetValue(label, out labelNumber) == true)
+            {
+                // The label is defined.
+                this.log.AppendFormat("L{0:D3}", labelNumber);
+            }
+
+            // The label is not defined.
+            this.fixUps.Add(new LabelFixUp() { Label = label, BufferOffset = this.log.Length });
+            this.log.Append(' ', 4);
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a variable to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="variable"> The variable to output. </param>
+        private void Log(string instruction, ILLocalVariable variable)
+        {
+            if (variable.Name == null)
+                LogCore(instruction, string.Format("V{0}", variable.Index));
+            else
+                LogCore(instruction, string.Format("V{0} ({1})", variable.Index, variable.Name));
+        }
+
+        /// <summary>
+        /// Outputs an instruction and an integer to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="indexOrValue"> The integer to output. </param>
+        private void Log(string instruction, int indexOrValue)
+        {
+            LogCore(instruction, indexOrValue.ToString());
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a 64-bit integer to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="numericValue"> The 64-bit integer to output. </param>
+        private void Log(string instruction, long numericValue)
+        {
+            LogCore(instruction, numericValue.ToString());
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a floating-point value to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="numericValue"> The floating-point vaue to output. </param>
+        private void Log(string instruction, double numericValue)
+        {
+            LogCore(instruction, numericValue.ToString());
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a string literal to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="stringConstant"> The string literal to output. </param>
+        private void Log(string instruction, string stringConstant)
+        {
+            LogCore(instruction, Jurassic.Library.StringInstance.Quote(stringConstant));
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a type to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="type"> The type to output. </param>
+        private void Log(string instruction, Type type)
+        {
+            LogCore(instruction, type.ToString());
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a method to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="method"> The method to output. </param>
+        private void Log(string instruction, System.Reflection.MethodInfo method)
+        {
+            LogCore(instruction, string.Format("{0}/{1}", method, method.DeclaringType));
+        }
+        
+        /// <summary>
+        /// Outputs an instruction and a field to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="field"> The field to output. </param>
+        private void Log(string instruction, System.Reflection.FieldInfo field)
+        {
+            LogCore(instruction, string.Format("{0}/{1}", field, field.DeclaringType));
+        }
+
+        /// <summary>
+        /// Outputs an instruction and a constructor to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="constructor"> The constructor to output. </param>
+        private void Log(string instruction, System.Reflection.ConstructorInfo constructor)
+        {
+            LogCore(instruction, string.Format("{0}/{1}", constructor, constructor.DeclaringType));
+        }
+
+        /// <summary>
+        /// Outputs an instruction and an arbitrary suffix to the log.
+        /// </summary>
+        /// <param name="instruction"> The instruction to output. </param>
+        /// <param name="suffix"> A suffix to output. </param>
+        private void LogCore(string instruction, string suffix)
+        {
+            // Output a new line.
+            if (this.log.Length > 0)
+                this.log.Append(Environment.NewLine);
+
+            // Output the label, if there is one.
+            if (this.nextInstructionHasLabel == true)
+            {
+                this.log.AppendFormat("L{0:D3}: ", this.nextLabelNumber);
+                this.nextInstructionHasLabel = false;
+                this.nextLabelNumber++;
+            }
+            else
+                this.log.Append(' ', 6);
+
+            // Output the instruction.
+            this.log.Append(instruction);
+
+            if (suffix != null)
+            {
+                // Pad the instruction to eleven characters long.
+                this.log.Append(' ', 11 - instruction.Length);
+
+                // Output the suffix.
+                if (suffix != string.Empty)
+                    this.log.Append(suffix);
+            }
         }
     }
 

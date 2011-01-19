@@ -54,7 +54,7 @@ namespace Jurassic.Compiler
 
             // The first return statement initializes the variable that holds the return value.
             if (optimizationInfo.ReturnVariable == null)
-                optimizationInfo.ReturnVariable = generator.DeclareVariable(typeof(object));
+                optimizationInfo.ReturnVariable = generator.DeclareVariable(typeof(object), "returnValue");
 
             // Store the return value in a variable.
             generator.StoreVariable(optimizationInfo.ReturnVariable);

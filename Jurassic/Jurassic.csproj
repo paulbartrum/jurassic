@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Compiler\Debugging\COMHelpers.cs" />
     <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
+    <Compile Include="Compiler\Emit\ILGenerator\LoggingILGenerator.cs" />
     <Compile Include="Compiler\Emit\LongJumpException.cs" />
     <Compile Include="Compiler\Lexer\RegularExpressionLiteral.cs" />
     <Compile Include="Compiler\MethodGenerator\CompilerOptions.cs" />
@@ -63,7 +64,6 @@
     <Compile Include="Compiler\Emit\MethodOptimizationHints.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ILGenerator.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ReflectionEmitILGenerator.cs" />
-    <Compile Include="Compiler\Emit\ILReader\DynamicILInfoTokenResolver.cs" />
     <Compile Include="Compiler\Emit\OptimizationInfo.cs" />
     <Compile Include="Compiler\Emit\EmitHelpers.cs" />
     <Compile Include="Compiler\Expressions\ThisExpression.cs" />
@@ -75,16 +75,6 @@
     <Compile Include="Compiler\Expressions\IReferenceExpression.cs" />
     <Compile Include="Compiler\Emit\PrimitiveTypeUtilities.cs" />
     <Compile Include="Compiler\Emit\PrimitiveType.cs" />
-    <Compile Include="Compiler\Emit\ILReader\ByteArrayILProvider.cs" />
-    <Compile Include="Compiler\Emit\ILReader\DynamicMethodILProvider.cs" />
-    <Compile Include="Compiler\Emit\ILReader\DynamicScopeTokenResolver.cs" />
-    <Compile Include="Compiler\Emit\ILReader\FormatProvider.cs" />
-    <Compile Include="Compiler\Emit\ILReader\ILInstruction.cs" />
-    <Compile Include="Compiler\Emit\ILReader\ILProvider.cs" />
-    <Compile Include="Compiler\Emit\ILReader\ILReader.cs" />
-    <Compile Include="Compiler\Emit\ILReader\ILReaderFactory.cs" />
-    <Compile Include="Compiler\Emit\ILReader\ReadableILStringVisitor.cs" />
-    <Compile Include="Compiler\Emit\ILReader\TokenResolver.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ILLocalVariable.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ILLabel.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\DynamicILGenerator.cs" />
@@ -196,7 +186,6 @@
     <Compile Include="Library\Object\Attributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Compiler\Emit\ILReader\README.txt" />
     <Content Include="Compiler\Emit\Optimizations.txt" />
     <Content Include="License.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

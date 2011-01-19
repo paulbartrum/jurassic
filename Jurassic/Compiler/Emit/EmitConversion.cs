@@ -300,17 +300,17 @@ namespace Jurassic.Compiler
 
                 case PrimitiveType.Bool:
                     // Converting from a boolean produces 0 if the boolean is false, or 1 if the boolean is true.
-                    generator.ConvertToDouble(false);
+                    generator.ConvertToDouble();
                     break;
 
                 case PrimitiveType.Int32:
                     // Converting from int32 produces the same number.
-                    generator.ConvertToDouble(false);
+                    generator.ConvertToDouble();
                     break;
 
                 case PrimitiveType.UInt32:
                     // Converting from a number produces the following:
-                    generator.ConvertToDouble(true);
+                    generator.ConvertUnsignedToDouble();
                     break;
 
                 case PrimitiveType.String:

@@ -254,6 +254,16 @@ namespace Jurassic
 
 #if !SILVERLIGHT
 
+        /// <summary>
+        /// Gets or sets a value that indicates whether to disassemble any generated IL and store it
+        /// in the associated function.
+        /// </summary>
+        public bool EnableILAnalysis
+        {
+            get;
+            set;
+        }
+
         private static object lowPrivilegeEnvironmentLock = new object();
         private static bool lowPrivilegeEnvironmentTested = false;
         private static bool lowPrivilegeEnvironment = false;
@@ -278,14 +288,6 @@ namespace Jurassic
                 return lowPrivilegeEnvironment;
             }
         }
-
-        ///// <summary>
-        ///// Indicates that the current AppDomain is a low privilege environment.
-        ///// </summary>
-        //internal static void SetLowPrivilegeEnvironment()
-        //{
-        //    LowPrivilegeEnvironment = true;
-        //}
 
 #else
 

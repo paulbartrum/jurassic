@@ -10,10 +10,10 @@ using Jurassic.Compiler;
 namespace UnitTests
 {
     /// <summary>
-    /// Optimization tests.
+    /// Type inference tests.
     /// </summary>
     [TestClass]
-    public class OptimizationTests
+    public class TypeInferenceTests
     {
         
         [TestMethod]
