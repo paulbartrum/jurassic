@@ -28,6 +28,29 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Evaluates the expression, if possible.
+        /// </summary>
+        /// <returns> The result of evaluating the expression, or <c>null</c> if the expression can
+        /// not be evaluated. </returns>
+        public override object Evaluate()
+        {
+            // Array literal.
+            if (this.Value is List<Expression>)
+                return null;
+
+            // Object literal.
+            if (this.Value is Dictionary<string, object>)
+                return null;
+
+            // RegExp literal.
+            if (this.Value is RegularExpressionLiteral)
+                return null;
+
+            // Everything else.
+            return this.Value;
+        }
+
+        /// <summary>
         /// Gets the type that results from evaluating this expression.
         /// </summary>
         public override PrimitiveType ResultType

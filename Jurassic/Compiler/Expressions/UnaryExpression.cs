@@ -25,6 +25,46 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Evaluates the expression, if possible.
+        /// </summary>
+        /// <returns> The result of evaluating the expression, or <c>null</c> if the expression can
+        /// not be evaluated. </returns>
+        public override object Evaluate()
+        {
+            // Evaluate the operand.
+            var operand = this.Operand.Evaluate();
+            if (operand == null)
+                return null;
+
+            // Apply the unary operator logic.
+            switch (this.OperatorType)
+            {
+                case OperatorType.Plus:
+                    return +TypeConverter.ToNumber(operand);
+                case OperatorType.Minus:
+                    return -TypeConverter.ToNumber(operand);
+
+                case OperatorType.BitwiseNot:
+                    return ~TypeConverter.ToInt32(operand);
+
+                case OperatorType.LogicalNot:
+                    return TypeConverter.ToBoolean(operand) == false;
+
+                case OperatorType.Void:
+                    return Undefined.Value;
+
+                case OperatorType.Typeof:
+                    return TypeUtilities.TypeOf(operand);
+
+                case OperatorType.Delete:
+                    return null;
+
+                default:
+                    throw new NotImplementedException(string.Format("Unsupported operator {0}", this.OperatorType));
+            }
+        }
+
+        /// <summary>
         /// Gets the type that results from evaluating this expression.
         /// </summary>
         public override PrimitiveType ResultType

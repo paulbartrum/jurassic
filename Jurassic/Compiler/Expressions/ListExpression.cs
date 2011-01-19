@@ -38,6 +38,25 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Evaluates the expression, if possible.
+        /// </summary>
+        /// <returns> The result of evaluating the expression, or <c>null</c> if the expression can
+        /// not be evaluated. </returns>
+        public override object Evaluate()
+        {
+            // Evaluate the operands.
+            var left = this.GetRawOperand(0).Evaluate();
+            if (left == null)
+                return null;
+            var right = this.GetRawOperand(1).Evaluate();
+            if (right == null)
+                return null;
+
+            // Return the last value.
+            return right;
+        }
+
+        /// <summary>
         /// Gets the type that results from evaluating this expression.
         /// </summary>
         public override PrimitiveType ResultType
