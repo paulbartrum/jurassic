@@ -47,6 +47,95 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Evaluates the expression, if possible.
+        /// </summary>
+        /// <returns> The result of evaluating the expression, or <c>null</c> if the expression can
+        /// not be evaluated. </returns>
+        public override object Evaluate()
+        {
+            // Evaluate the operands.
+            var left = this.Left.Evaluate();
+            if (left == null)
+                return null;
+            var right = this.Right.Evaluate();
+            if (right == null)
+                return null;
+
+            // Apply the binary operator logic.
+            switch (this.OperatorType)
+            {
+                case OperatorType.Add:
+                    {
+                        var leftPrimitive = TypeConverter.ToPrimitive(left, PrimitiveTypeHint.None);
+                        var rightPrimitive = TypeConverter.ToPrimitive(right, PrimitiveTypeHint.None);
+                        if (TypeUtilities.IsString(leftPrimitive) == true || TypeUtilities.IsString(rightPrimitive) == true)
+                            return TypeConverter.ToString(leftPrimitive) + TypeConverter.ToString(rightPrimitive);
+                        return TypeConverter.ToNumber(leftPrimitive) + TypeConverter.ToNumber(rightPrimitive);
+                    }
+
+                // Arithmetic operations.
+                case OperatorType.Subtract:
+                    return TypeConverter.ToNumber(left) - TypeConverter.ToNumber(right);
+                case OperatorType.Multiply:
+                    return TypeConverter.ToNumber(left) * TypeConverter.ToNumber(right);
+                case OperatorType.Divide:
+                    return TypeConverter.ToNumber(left) / TypeConverter.ToNumber(right);
+                case OperatorType.Modulo:
+                    return TypeConverter.ToNumber(left) % TypeConverter.ToNumber(right);
+
+                // Bitwise operations.
+                case OperatorType.BitwiseAnd:
+                    return TypeConverter.ToInt32(left) & TypeConverter.ToInt32(right);
+                case OperatorType.BitwiseOr:
+                    return TypeConverter.ToInt32(left) | TypeConverter.ToInt32(right);
+                case OperatorType.BitwiseXor:
+                    return TypeConverter.ToInt32(left) ^ TypeConverter.ToInt32(right);
+                case OperatorType.LeftShift:
+                    return TypeConverter.ToInt32(left) << (int)(TypeConverter.ToUint32(right) & 0x1F);
+                case OperatorType.SignedRightShift:
+                    return TypeConverter.ToInt32(left) >> (int)(TypeConverter.ToUint32(right) & 0x1F);
+                case OperatorType.UnsignedRightShift:
+                    return (uint)TypeConverter.ToInt32(left) >> (int)(TypeConverter.ToUint32(right) & 0x1F);
+
+                // Relational operations.
+                case OperatorType.LessThan:
+                case OperatorType.LessThanOrEqual:
+                case OperatorType.GreaterThan:
+                case OperatorType.GreaterThanOrEqual:
+                    return PrimitiveType.Bool;
+
+                // Equality operations.
+                case OperatorType.Equal:
+                    return TypeComparer.Equals(left, right) == true;
+                case OperatorType.StrictlyEqual:
+                    return TypeComparer.StrictEquals(left, right) == true;
+                case OperatorType.NotEqual:
+                    return TypeComparer.Equals(left, right) == false;
+                case OperatorType.StrictlyNotEqual:
+                    return TypeComparer.StrictEquals(left, right) == false;
+
+                // Logical operations.
+                case OperatorType.LogicalAnd:
+                    if (TypeConverter.ToBoolean(left) == false)
+                        return left;
+                    return right;
+
+                case OperatorType.LogicalOr:
+                    if (TypeConverter.ToBoolean(left) == true)
+                        return left;
+                    return right;
+
+                // Misc
+                case OperatorType.InstanceOf:
+                case OperatorType.In:
+                    return null;
+
+                default:
+                    throw new NotImplementedException(string.Format("Unsupported operator {0}", this.OperatorType));
+            }
+        }
+
+        /// <summary>
         /// Gets the type that results from evaluating this expression.
         /// </summary>
         public override PrimitiveType ResultType
