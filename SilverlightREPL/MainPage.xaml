@@ -27,7 +27,7 @@
                     Margin="0"
                     MouseSelectionEnded="HistoryTextBox_MouseSelectionEnded">
                     <Paragraph>
-                        Silverlight JavaScript console v2
+                        Silverlight JavaScript console v2.1
                         <LineBreak/>
                         by Paul Bartrum
                         <LineBreak/>

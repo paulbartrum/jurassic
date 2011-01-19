@@ -35,7 +35,7 @@ test: function testcase() {
      desc.hasOwnProperty('value') == false &&
      desc.hasOwnProperty('writable') == false &&
      desc.hasOwnProperty('get') == true &&
-     desc.hasOwnProperty('put') == true)
+     desc.hasOwnProperty('set') == true)
     return true;
  },
 

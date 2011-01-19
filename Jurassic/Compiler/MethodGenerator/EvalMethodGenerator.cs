@@ -51,7 +51,7 @@ namespace Jurassic.Compiler
             parser.DirectivePrologueProcessedCallback = parser2 =>
             {
                 if (parser2.StrictMode == true)
-                    parser2.Scope = DeclarativeScope.CreateEvalScope(parser2.Scope);
+                    parser2.InitialScope = parser2.Scope = DeclarativeScope.CreateEvalScope(parser2.Scope);
             };
 
             this.AbstractSyntaxTree = parser.Parse();

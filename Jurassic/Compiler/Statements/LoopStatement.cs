@@ -425,7 +425,9 @@ namespace Jurassic.Compiler
                 continueEncountered == true ||
                 root is IfStatement ||
                 root is TernaryExpression ||
-                root is TryCatchFinallyStatement;
+                root is TryCatchFinallyStatement ||
+                (root is BinaryExpression && ((BinaryExpression)root).OperatorType == OperatorType.LogicalAnd) ||
+                (root is BinaryExpression && ((BinaryExpression)root).OperatorType == OperatorType.LogicalOr);
 
             // If the AST node is a continue statement, all further assignments are conditional.
             if (root is ContinueStatement)

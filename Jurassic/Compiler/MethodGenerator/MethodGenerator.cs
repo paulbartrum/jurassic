@@ -116,21 +116,6 @@ namespace Jurassic.Compiler
             protected set;
         }
 
-
-
-#if DEBUG
-
-        /// <summary>
-        /// Gets the disassembled IL code for the method.
-        /// </summary>
-        public string DisassembledIL
-        {
-            get;
-            private set;
-        }
-
-#endif
-
         /// <summary>
         /// Gets a name for the generated method.
         /// </summary>
@@ -199,9 +184,11 @@ namespace Jurassic.Compiler
                         GetParameterTypes(),                                    // Parameter types of the generated method.
                         typeof(MethodGenerator),                                // Owner type.
                         true);                                                  // Skip visibility checks.
-
-                    // Generate the IL.
-                    generator = new DynamicILGenerator(dynamicMethod);
+                    // TODO: Figure out why long methods give BadImageFormatException in .NET 3.5 when generated using DynamicILInfo.
+                    if (Environment.Version.Major >= 4)
+                        generator = new DynamicILGenerator(dynamicMethod);
+                    else
+                        generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
                 }
                 else
                 {
@@ -211,23 +198,23 @@ namespace Jurassic.Compiler
                         GetMethodName(),                                        // Name of the generated method.
                         typeof(object),                                         // Return type of the generated method.
                         GetParameterTypes());                                   // Parameter types of the generated method.
-
-                    // Generate the IL.
                     generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
 #if !SILVERLIGHT
                 }
 #endif
-                
+
+                // Generate the IL.
                 GenerateCode(generator, optimizationInfo);
                 generator.Complete();
 
-#if DEBUG && !SILVERLIGHT
-                // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
-                this.DisassembledIL = generator.ToString();
-#endif
-
                 // Create a delegate from the method.
                 this.GeneratedMethod = new GeneratedMethod(dynamicMethod.CreateDelegate(GetDelegate()), optimizationInfo.NestedFunctions);
+
+#if DEBUG && !SILVERLIGHT
+                // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
+                this.GeneratedMethod.DisassembledIL = generator.ToString();
+#endif
+
             }
             else
             {
@@ -282,6 +269,7 @@ namespace Jurassic.Compiler
                 // Bake it.
                 var type = typeBuilder.CreateType();
                 var methodInfo = type.GetMethod(this.GetMethodName());
+                this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
 
 #if DEBUG && !SILVERLIGHT
                 // Store the disassembled IL (in debug mode only) so it can be retrieved for analysis purposes.
@@ -289,10 +277,8 @@ namespace Jurassic.Compiler
                 var writer = new System.IO.StringWriter();
                 var visitor = new ClrTest.Reflection.ReadableILStringVisitor(new ClrTest.Reflection.ReadableILStringToTextWriter(writer));
                 reader.Accept(visitor);
-                this.DisassembledIL = writer.ToString();
+                this.GeneratedMethod.DisassembledIL = writer.ToString();
 #endif
-
-                this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
             }
         }
 

@@ -152,6 +152,16 @@ namespace UnitTests
                 }
                 f()"));
 
+            // Again, "x" is not a number because the assignment statement never executes.
+            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+                function f() {
+                    var x = null;
+                    for (var i = 1; i < 10; i ++)
+                        i < 1 && (x = 1);
+                    return x;
+                }
+                f()"));
+
 
             // Again, "x" is not a number because the assignment statement never executes.
             Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"

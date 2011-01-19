@@ -58,7 +58,6 @@
     <Compile Include="Core\TypeComparerTests.cs" />
     <Compile Include="Library\ArgumentsTests.cs" />
     <Compile Include="Library\ArrayTests.cs" />
-    <Compile Include="Core\FunctionBinderTests.cs" />
     <Compile Include="Library\BooleanTests.cs" />
     <Compile Include="Library\JSONTests.cs" />
     <Compile Include="Library\FunctionTests.cs" />
@@ -74,6 +73,7 @@
     <Compile Include="Compiler\ExpressionTests.cs" />
     <Compile Include="Compiler\ParserTests.cs" />
     <Compile Include="Compiler\LexerTests.cs" />
+    <Compile Include="Real-world\RealWorldTests.cs" />
     <Compile Include="Utils\DynamicCodeDebugger.cs" />
     <Compile Include="Utils\TestUtils.cs" />
     <Compile Include="Utils\Interop.cs" />
@@ -91,6 +91,16 @@
   <ItemGroup>
     <Content Include="Core\Sample Files\execute1.js" />
     <Content Include="Core\Sample Files\globals1.js" />
+    <Content Include="Real-world\Files\coffee-script.js" />
+    <Content Include="Real-world\Files\color-conversion.js" />
+    <Content Include="Real-world\Files\levenshtein.js" />
+    <Content Include="Real-world\Files\lzw.js" />
+    <Content Include="Real-world\Files\md5.js" />
+    <Content Include="Real-world\Files\rsa.js" />
+    <Content Include="Real-world\Files\sha1.js" />
+    <Content Include="Real-world\Files\sha256.js" />
+    <Content Include="Real-world\Files\showdown.js" />
+    <Content Include="Real-world\Files\sprintf.js" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

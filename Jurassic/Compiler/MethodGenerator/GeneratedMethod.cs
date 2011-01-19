@@ -39,6 +39,21 @@ namespace Jurassic.Compiler
             private set;
         }
 
+#if DEBUG
+
+        /// <summary>
+        /// Gets or sets the disassembled IL code for the method.
+        /// </summary>
+        public string DisassembledIL
+        {
+            get;
+            set;
+        }
+
+#endif
+
+
+
         private static Dictionary<long, WeakReference> generatedMethodCache;
         private static object cacheLock = new object();
         private static long generatedMethodID;

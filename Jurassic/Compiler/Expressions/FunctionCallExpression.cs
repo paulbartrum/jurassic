@@ -104,22 +104,9 @@ namespace Jurassic.Compiler
             generator.BranchIfNotNull(endOfTypeCheck);
 
             // Throw an nicely formatted exception.
-            var targetValue = generator.CreateTemporaryVariable(typeof(object));
-            generator.StoreVariable(targetValue);
-            EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadString("TypeError");
-            generator.LoadString("{0} is not a function");
-            generator.LoadInt32(1);
-            generator.NewArray(typeof(object));
-            generator.Duplicate();
-            generator.LoadInt32(0);
-            generator.LoadString(this.Target.ToString());
-            generator.StoreArrayElement(typeof(object));
-            generator.Call(ReflectionHelpers.String_Format);
-            generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Error);
-            generator.Throw();
+            generator.Pop();
+            EmitHelpers.EmitThrow(generator, "TypeError", string.Format("'{0}' is not a function", this.Target.ToString()));
             generator.DefineLabelPosition(endOfTypeCheck);
-            generator.ReleaseTemporaryVariable(targetValue);
 
             // Generate code to produce the "this" value.  There are three cases.
             if (this.Target is NameExpression)

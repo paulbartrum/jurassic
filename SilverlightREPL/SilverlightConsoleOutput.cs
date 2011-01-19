@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -80,15 +81,6 @@ namespace SilverlightREPL
             if (this.BeforeLog != null)
                 BeforeLog(this, EventArgs.Empty);
 
-            // Convert the objects to a string.
-            var message = new System.Text.StringBuilder();
-            for (int i = 0; i < objects.Length; i++)
-            {
-                if (i > 0)
-                    message.Append(' ');
-                message.Append(TypeConverter.ToString(objects[i]));
-            }
-
             // Determine the color and icon.
             Color color = Colors.Black;
             UIElement icon = null;
@@ -125,12 +117,57 @@ namespace SilverlightREPL
                 Canvas.SetTop(icon, 1);
                 paragraph.Inlines.Add(new InlineUIContainer() { Child = canvas });
             }
-            paragraph.Inlines.Add(new Run() { Text = message.ToString(), Foreground = new SolidColorBrush(color) });
+
+            // Add the messages to the paragraph.
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if (i > 0)
+                    paragraph.Inlines.Add(new Run() { Text = " " });
+                if (objects[i] is ObjectInstance)
+                {
+                    var expandableObject = new ExpandableObjectControl(TypeConverter.ToString(objects[i]), objects[i], EnumerateProperties);
+                    paragraph.Inlines.Add(new InlineUIContainer() { Child = expandableObject, Foreground = new SolidColorBrush(color) });
+                }
+                else
+                {
+                    paragraph.Inlines.Add(new Run() { Text = TypeConverter.ToString(objects[i]), Foreground = new SolidColorBrush(color) });
+                }
+            }
             this.richTextBox.Blocks.Add(paragraph);
 
             // Trigger AfterLog event.
             if (this.AfterLog != null)
                 AfterLog(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Callback for enumerating property names and values.
+        /// </summary>
+        /// <param name="key"> The object instance to retrieve the properties for. </param>
+        /// <returns> An enumerable list of ExpandableObjectProperty instances. </returns>
+        private IEnumerable<ExpandableObjectProperty> EnumerateProperties(object key)
+        {
+            var obj = key as Jurassic.Library.ObjectInstance;
+            if (obj == null)
+                throw new InvalidOperationException("Can only enumerate ObjectInstances.");
+            foreach (var property in obj.Properties)
+            {
+                object value = (property.Attributes & ~PropertyAttributes.FullAccess) == 0 ? property.Value : obj[property.Name];
+                Color color = Colors.Black;
+                string valueText = Jurassic.TypeConverter.ToString(value);
+                if (value is string)
+                {
+                    // Make sure the string isn't too long.
+                    if (valueText.Length > 100)
+                        valueText = valueText.Substring(0, 100) + "...";
+                    valueText = Jurassic.Library.StringInstance.Quote(valueText);
+                }
+                else if (property.Value == null || value == Jurassic.Undefined.Value)
+                    color = Colors.Gray;
+                var result = new ExpandableObjectProperty(property.Name, valueText, value as Jurassic.Library.ObjectInstance);
+                result.Color = color;
+                yield return result;
+            }
         }
 
         /// <summary>

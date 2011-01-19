@@ -95,37 +95,43 @@ namespace UnitTests
         [TestMethod]
         public void Add()
         {
-            //Assert.AreEqual(35, TestUtils.Evaluate("15 + 20"));
-            //Assert.AreEqual(21.5, TestUtils.Evaluate("1.5 + 20"));
-            //Assert.AreEqual(8589934608.0, TestUtils.Evaluate("4294967304 + 4294967304"));
-            //Assert.AreEqual("testing", TestUtils.Evaluate("'tes' + 'ting'"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("true + false"));
-            //Assert.AreEqual("102", TestUtils.Evaluate("'10' + 2"));
-            //Assert.AreEqual("10null", TestUtils.Evaluate("'10' + null"));
-            //Assert.AreEqual("51,2,3", TestUtils.Evaluate("5 + [1,2,3]"));
-            //StringAssert.StartsWith((string)TestUtils.Evaluate("5 + new Date(10)"), "5");
-            //Assert.AreEqual("5/abc/g", TestUtils.Evaluate("5 + /abc/g"));
-            //Assert.AreEqual("5[object Object]", TestUtils.Evaluate("5 + {}"));
+            Assert.AreEqual(35, TestUtils.Evaluate("15 + 20"));
+            Assert.AreEqual(21.5, TestUtils.Evaluate("1.5 + 20"));
+            Assert.AreEqual(8589934608.0, TestUtils.Evaluate("4294967304 + 4294967304"));
+            Assert.AreEqual("testing", TestUtils.Evaluate("'tes' + 'ting'"));
+            Assert.AreEqual(1, TestUtils.Evaluate("true + false"));
+            Assert.AreEqual("102", TestUtils.Evaluate("'10' + 2"));
+            Assert.AreEqual("10null", TestUtils.Evaluate("'10' + null"));
+            Assert.AreEqual("51,2,3", TestUtils.Evaluate("5 + [1,2,3]"));
+            StringAssert.StartsWith((string)TestUtils.Evaluate("5 + new Date(10)"), "5");
+            Assert.AreEqual("5/abc/g", TestUtils.Evaluate("5 + /abc/g"));
+            Assert.AreEqual("5[object Object]", TestUtils.Evaluate("5 + {}"));
 
-            //// Objects
-            //Assert.AreEqual(11, TestUtils.Evaluate("new Number(5) + new Number(6)"));
-            //Assert.AreEqual("test6", TestUtils.Evaluate("'test' + new Number(6)"));
-            //Assert.AreEqual("5test", TestUtils.Evaluate("new Number(5) + 'test'"));
-            //Assert.AreEqual("1", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + ''"));
-            //Assert.AreEqual("10", TestUtils.Evaluate("({valueOf: function() {return '1'}, toString: function() {return 0}}) + 0"));
+            // Objects
+            Assert.AreEqual(11, TestUtils.Evaluate("new Number(5) + new Number(6)"));
+            Assert.AreEqual("test6", TestUtils.Evaluate("'test' + new Number(6)"));
+            Assert.AreEqual("5test", TestUtils.Evaluate("new Number(5) + 'test'"));
+            Assert.AreEqual("1", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + ''"));
+            Assert.AreEqual("1test", TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + 'test'"));
+            Assert.AreEqual(5, TestUtils.Evaluate("({valueOf: function() {return 1}, toString: function() {return 0}}) + 4"));
+            Assert.AreEqual("14", TestUtils.Evaluate("({valueOf: function() {return '1'}, toString: function() {return 0}}) + 4"));
+            Assert.AreEqual("1", TestUtils.Evaluate("'' + {valueOf: function() {return 1}, toString: function() {return 0}}"));
+            Assert.AreEqual("test1", TestUtils.Evaluate("'test' + {valueOf: function() {return 1}, toString: function() {return 0}}"));
+            Assert.AreEqual(3, TestUtils.Evaluate("1 + {valueOf: function() {return 2}, toString: function() {return 3}}"));
+            Assert.AreEqual("12", TestUtils.Evaluate("1 + {valueOf: function() {return '2'}, toString: function() {return '3'}}"));
 
-            //// Variables
-            //Assert.AreEqual(35, TestUtils.Evaluate("x = 15; x + 20"));
-            //Assert.AreEqual(21.5, TestUtils.Evaluate("x = 1.5; x + 20"));
-            //Assert.AreEqual(8589934608.0, TestUtils.Evaluate("x = 4294967304; x + 4294967304"));
-            //Assert.AreEqual("testing", TestUtils.Evaluate("x = 'tes'; x + 'ting'"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("x = true; x + false"));
-            //Assert.AreEqual("102", TestUtils.Evaluate("x = 2; '10' + x"));
-            //Assert.AreEqual("10null", TestUtils.Evaluate("x = '10'; x + null"));
-            //Assert.AreEqual("51,2,3", TestUtils.Evaluate("x = 5; x + [1,2,3]"));
-            //StringAssert.StartsWith((string)TestUtils.Evaluate("x = 5; x + new Date(10)"), "5");
-            //Assert.AreEqual("5/abc/g", TestUtils.Evaluate("x = 5; x + /abc/g"));
-            //Assert.AreEqual("5[object Object]", TestUtils.Evaluate("x = 5; x + {}"));
+            // Variables
+            Assert.AreEqual(35, TestUtils.Evaluate("x = 15; x + 20"));
+            Assert.AreEqual(21.5, TestUtils.Evaluate("x = 1.5; x + 20"));
+            Assert.AreEqual(8589934608.0, TestUtils.Evaluate("x = 4294967304; x + 4294967304"));
+            Assert.AreEqual("testing", TestUtils.Evaluate("x = 'tes'; x + 'ting'"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = true; x + false"));
+            Assert.AreEqual("102", TestUtils.Evaluate("x = 2; '10' + x"));
+            Assert.AreEqual("10null", TestUtils.Evaluate("x = '10'; x + null"));
+            Assert.AreEqual("51,2,3", TestUtils.Evaluate("x = 5; x + [1,2,3]"));
+            StringAssert.StartsWith((string)TestUtils.Evaluate("x = 5; x + new Date(10)"), "5");
+            Assert.AreEqual("5/abc/g", TestUtils.Evaluate("x = 5; x + /abc/g"));
+            Assert.AreEqual("5[object Object]", TestUtils.Evaluate("x = 5; x + {}"));
 
             // String concatenation.
             Assert.AreEqual("123456123789", TestUtils.Evaluate(@"
@@ -897,6 +903,22 @@ namespace UnitTests
 
             // Strict mode: cannot write to a property that has a getter but no setter.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {get: function() { return 1 }}); x.a = 5;"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval = 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments = 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval = 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments = 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval = 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments = 5; } f()"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments' (compound assignment).
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval += 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments += 5;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval += 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments += 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval += 5; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments += 5; } f()"));
         }
 
         [TestMethod]
@@ -905,6 +927,14 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("x = 0; ++ x"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = 0; ++ x; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("++ 2"));
+
+            // Strict mode: reference cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; ++ eval;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; ++ arguments;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { ++ eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { ++ arguments; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; ++ eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; ++ arguments; } f()"));
         }
 
         [TestMethod]
@@ -913,6 +943,14 @@ namespace UnitTests
             Assert.AreEqual(-1, TestUtils.Evaluate("x = 0; -- x"));
             Assert.AreEqual(-1, TestUtils.Evaluate("x = 0; -- x; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("-- 2"));
+
+            // Strict mode: reference cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; -- eval;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; -- arguments;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { -- eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { -- arguments; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; -- eval; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; -- arguments; } f()"));
         }
 
         [TestMethod]
@@ -921,6 +959,14 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("x = 0; x ++"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = 0; x ++; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("2 ++"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval ++;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments ++;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval ++; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments ++; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval ++; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments ++; } f()"));
         }
 
         [TestMethod]
@@ -929,6 +975,14 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("x = 0; x --"));
             Assert.AreEqual(-1, TestUtils.Evaluate("x = 0; x --; x"));
             Assert.AreEqual("ReferenceError", TestUtils.EvaluateExceptionType("2 --"));
+
+            // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; eval --;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; arguments --;"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { eval --; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; function f() { arguments --; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; eval --; } f()"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("function f() { 'use strict'; arguments --; } f()"));
         }
 
         [TestMethod]
@@ -988,6 +1042,12 @@ namespace UnitTests
             {
                 TestUtils.CompatibilityMode = CompatibilityMode.Latest;
             }
+
+            // 'arguments' and 'caller' must be undefined in strict mode.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ return test.arguments; } return inner(); } test()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ return inner.caller; } return inner(); } test()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ test.arguments = 5; } return inner(); } test()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("'use strict'; function test(){ function inner(){ inner.caller = 5; } return inner(); } test()"));
         }
 
         [TestMethod]
@@ -1193,6 +1253,15 @@ namespace UnitTests
             Assert.AreEqual(3, TestUtils.Evaluate("x = {set: 3}; x.set"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get 'f'() { return 1; }}; x.f = 5; x.f"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get 0() { return 1; }}; x[0] = 5; x[0]"));
+
+            // Check that "this" is correct inside getters and setters.
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get b() { return this.a; } }; y = Object.create(x); y.a = 9; y.b"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get b() { return this.a; } }; y = Object.create(x); y.a = 9; z = 'b'; y[z]"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get '2'() { return this.a; } }; y = Object.create(x); y.a = 9; y[2]"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { get '2'() { return this.a; } }; y = Object.create(x); y.a = 9; z = 2; y[z]"));
+            Assert.AreEqual(9, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); y.b = 9; y.a"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); y.b = 9; y.hasOwnProperty('a')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = { set b(value) { this.a = value; } }; y = Object.create(x); z = 'b'; y[z] = 9; y.hasOwnProperty('a')"));
 
             // Errors
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("{a: 1, b: 2}"));

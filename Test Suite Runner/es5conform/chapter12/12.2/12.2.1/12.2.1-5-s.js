@@ -24,19 +24,13 @@ id: "12.2.1-5-s",
 
 path: "TestCases/chapter12/12.2/12.2.1/12.2.1-5-s.js",
 
-description: "eval - a Function declaring var named 'eval' throws EvalError in strict mode",
+description: "eval - a Function declaring var named 'eval' allowed if function is not in strict mode",
 
 test: function testcase() {
   'use strict';
 
-  try {
-    Function('var eval;');
-  }
-  catch (e) {
-    if (e instanceof EvalError) {
-      return true;
-    }
-  }
+  Function('var eval;');
+  return true;
  },
 
 precondition: function prereq() {

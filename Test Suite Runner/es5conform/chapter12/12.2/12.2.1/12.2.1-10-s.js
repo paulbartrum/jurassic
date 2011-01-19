@@ -24,20 +24,14 @@ id: "12.2.1-10-s",
 
 path: "TestCases/chapter12/12.2/12.2.1/12.2.1-10-s.js",
 
-description: "eval - an indirect eval assigning into 'eval' throws EvalError in strict mode",
+description: "eval - an indirect eval assigning into 'eval' permitted if eval code is not in strict mode",
 
 test: function testcase() {
   'use strict';
 
-  try {
-    var s = eval;
-    s('eval = 42;');
-  }
-  catch (e) {
-    if (e instanceof EvalError) {
-      return true;
-    }
-  }
+  var s = eval;
+  s('eval = 42;');
+  return true;
  },
 
 precondition: function prereq() {

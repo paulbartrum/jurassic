@@ -289,7 +289,7 @@ namespace Jurassic.Library
                 cacheKey = null;
                 if (this.Prototype == null)
                     return null;
-                return this.Prototype.GetNamedPropertyValue(name);
+                return this.Prototype.GetNamedPropertyValue(name, this);
             }
         }
 
@@ -452,6 +452,19 @@ namespace Jurassic.Library
         /// this object. </remarks>
         public object GetPropertyValue(uint index)
         {
+            return GetPropertyValue(index, this);
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given array index.
+        /// </summary>
+        /// <param name="index"> The array index of the property. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        private object GetPropertyValue(uint index, ObjectInstance thisValue)
+        {
             // Get the descriptor for the property.
             var property = this.GetOwnPropertyDescriptor(index);
             if (property.Exists == true)
@@ -460,14 +473,14 @@ namespace Jurassic.Library
                 object value = property.Value;
                 var accessor = value as PropertyAccessorValue;
                 if (accessor != null)
-                    return accessor.GetValue(this);
+                    return accessor.GetValue(thisValue);
                 return value;
             }
 
             // The property might exist in the prototype.
             if (this.prototype == null)
                 return null;
-            return this.prototype.GetPropertyValue(index);
+            return this.prototype.GetPropertyValue(index, thisValue);
         }
 
         /// <summary>
@@ -485,17 +498,18 @@ namespace Jurassic.Library
                 return GetPropertyValue(arrayIndex);
 
             // Otherwise, the property is a name.
-            return GetNamedPropertyValue(propertyName);
+            return GetNamedPropertyValue(propertyName, this);
         }
 
         /// <summary>
         /// Gets the value of the property with the given name.  The name cannot be an array index.
         /// </summary>
         /// <param name="propertyName"> The name of the property.  The name cannot be an array index. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        private object GetNamedPropertyValue(string propertyName)
+        private object GetNamedPropertyValue(string propertyName, ObjectInstance thisValue)
         {
             ObjectInstance prototypeObject = this;
             do
@@ -511,7 +525,7 @@ namespace Jurassic.Library
 
                     // Call the getter if there is one.
                     if (property.IsAccessor == true)
-                        return ((PropertyAccessorValue)value).GetValue(this);
+                        return ((PropertyAccessorValue)value).GetValue(thisValue);
 
                     // Otherwise, the property is the "magic" length property.
                     return ((ArrayInstance)prototypeObject).Length;
@@ -1145,10 +1159,20 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Populates the object with functions and properties.  Should be called only once at
-        /// startup.
+        /// Populates the object with functions by searching a .NET type for methods marked with
+        /// the [JSFunction] attribute.  Should be called only once at startup.
         /// </summary>
-        internal protected void PopulateFunctions(Type type = null)
+        internal protected void PopulateFunctions()
+        {
+            PopulateFunctions(null);
+        }
+
+        /// <summary>
+        /// Populates the object with functions by searching a .NET type for methods marked with
+        /// the [JSFunction] attribute.  Should be called only once at startup.
+        /// </summary>
+        /// <param name="type"> The type to search for methods. </param>
+        internal protected void PopulateFunctions(Type type)
         {
             if (type == null)
                 type = this.GetType();
@@ -1209,10 +1233,20 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Populates the object with functions and properties.  Should be called only once at
-        /// startup.
+        /// Populates the object with properties by searching a .NET type for fields marked with
+        /// the [JSField] attribute.  Should be called only once at startup.
         /// </summary>
-        internal protected void PopulateFields(Type type = null)
+        internal protected void PopulateFields()
+        {
+            PopulateFields(null);
+        }
+
+        /// <summary>
+        /// Populates the object with properties by searching a .NET type for fields marked with
+        /// the [JSField] attribute.  Should be called only once at startup.
+        /// </summary>
+        /// <param name="type"> The type to search for fields. </param>
+        internal protected void PopulateFields(Type type)
         {
             if (type == null)
                 type = this.GetType();

@@ -121,6 +121,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets or sets the scope that function declarations are declared in.
+        /// </summary>
+        public Scope InitialScope
+        {
+            get { return this.initialScope; }
+            set { this.initialScope = value; }
+        }
+
+        /// <summary>
         /// Gets or sets a value that indicates whether the parser is operating in strict mode.
         /// </summary>
         public bool StrictMode
