@@ -22,20 +22,28 @@ namespace UnitTests
             var engine = new ScriptEngine();
             engine.ExecuteFile(@"..\..\..\Unit Tests\Real-world\Files\showdown.js");
             engine.Execute("var converter = new Showdown.converter()");
-            engine.SetGlobalValue("text", @"
-Showdown Demo
--------------
+            engine.SetGlobalValue("text", TestUtils.NormalizeText(@"
+                Showdown Demo
+                -------------
 
-You can try out Showdown on this page:
+                You can try out Showdown on this page:
 
-  - Type some [Markdown] text on the left side.
-  - See the corresponding HTML on the right.
+                  - Type some [Markdown] text on the left side.
+                  - See the corresponding HTML on the right.
 
-For a Markdown cheat-sheet, switch the right-hand window from *Preview* to *Syntax Guide*.");
-            Assert.AreEqual("<h2>Showdown Demo</h2>\n\n<p>You can try out Showdown on this page:</p>\n\n" +
-                "<ul>\n<li>Type some [Markdown] text on the left side.</li>\n<li>See the corresponding HTML on the right.</li>\n" +
-                "</ul>\n\n<p>For a Markdown cheat-sheet, switch the right-hand window from <em>Preview</em> to <em>Syntax Guide</em>.</p>",
-                engine.Evaluate(@"converter.makeHtml(text);"));
+                For a Markdown cheat-sheet, switch the right-hand window from *Preview* to *Syntax Guide*."));
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                <h2>Showdown Demo</h2>
+
+                <p>You can try out Showdown on this page:</p>
+
+                <ul>
+                <li>Type some [Markdown] text on the left side.</li>
+                <li>See the corresponding HTML on the right.</li>
+                </ul>
+
+                <p>For a Markdown cheat-sheet, switch the right-hand window from <em>Preview</em> to <em>Syntax Guide</em>.</p>"),
+                TestUtils.NormalizeText(engine.Evaluate<string>("converter.makeHtml(text)")));
         }
 
         [TestMethod]
@@ -186,44 +194,45 @@ For a Markdown cheat-sheet, switch the right-hand window from *Preview* to *Synt
 
                 # Array comprehensions:
                 cubes = (math.cube num for num in list)");
-            Assert.AreEqual(@"(function() {
-  var cubes, list, math, num, number, opposite, race, square;
-  var __slice = Array.prototype.slice;
-  number = 42;
-  opposite = true;
-  if (opposite) {
-    number = -42;
-  }
-  square = function(x) {
-    return x * x;
-  };
-  list = [1, 2, 3, 4, 5];
-  math = {
-    root: Math.sqrt,
-    square: square,
-    cube: function(x) {
-      return x * square(x);
-    }
-  };
-  race = function() {
-    var runners, winner;
-    winner = arguments[0], runners = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    return print(winner, runners);
-  };
-  if (typeof elvis != ""undefined"" && elvis !== null) {
-    alert(""I knew it!"");
-  }
-  cubes = (function() {
-    var _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = list.length; _i < _len; _i++) {
-      num = list[_i];
-      _results.push(math.cube(num));
-    }
-    return _results;
-  })();
-}).call(this);
-", engine.Evaluate(@"CoffeeScript.compile(script, {})"));
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                (function() {
+                  var cubes, list, math, num, number, opposite, race, square;
+                  var __slice = Array.prototype.slice;
+                  number = 42;
+                  opposite = true;
+                  if (opposite) {
+                    number = -42;
+                  }
+                  square = function(x) {
+                    return x * x;
+                  };
+                  list = [1, 2, 3, 4, 5];
+                  math = {
+                    root: Math.sqrt,
+                    square: square,
+                    cube: function(x) {
+                      return x * square(x);
+                    }
+                  };
+                  race = function() {
+                    var runners, winner;
+                    winner = arguments[0], runners = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+                    return print(winner, runners);
+                  };
+                  if (typeof elvis != ""undefined"" && elvis !== null) {
+                    alert(""I knew it!"");
+                  }
+                  cubes = (function() {
+                    var _i, _len, _results;
+                    _results = [];
+                    for (_i = 0, _len = list.length; _i < _len; _i++) {
+                      num = list[_i];
+                      _results.push(math.cube(num));
+                    }
+                    return _results;
+                  })();
+                }).call(this);"),
+               TestUtils.NormalizeText(engine.Evaluate<string>("CoffeeScript.compile(script, {})")));
         }
     }
 }
