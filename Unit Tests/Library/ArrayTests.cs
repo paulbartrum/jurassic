@@ -166,6 +166,7 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("Array.isArray.length"));
         }
 
+        [Ignore]
         [TestMethod]
         public void freezeSealAndPreventExtensions()
         {
