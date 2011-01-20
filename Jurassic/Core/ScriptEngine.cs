@@ -252,8 +252,6 @@ namespace Jurassic
             }
         }
 
-#if !SILVERLIGHT
-
         /// <summary>
         /// Gets or sets a value that indicates whether to disassemble any generated IL and store it
         /// in the associated function.
@@ -263,6 +261,8 @@ namespace Jurassic
             get;
             set;
         }
+
+#if !SILVERLIGHT
 
         private static object lowPrivilegeEnvironmentLock = new object();
         private static bool lowPrivilegeEnvironmentTested = false;
