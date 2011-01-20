@@ -68,10 +68,10 @@ namespace Performance
                 // Output the time taken.
                 //Console.WriteLine("Performance test '{0}' took {1:f1} ± {2:f1} milliseconds.", testName, average, deviation * 2);
                 for (int i = 0; i < elapsedTimes.Count; i++)
-                    Console.WriteLine("Test #{0}: {1:f1} milliseconds.", i + 1, elapsedTimes[i] * ticksToMilliseconds);
+                    Console.WriteLine("Test #{0}: {1:g3} milliseconds.", i + 1, elapsedTimes[i] * ticksToMilliseconds);
 
                 // Show the results in the unit test error message column.
-                throw new AssertInconclusiveException(string.Format("{0:f1} operations/sec (± {1:f1}), was {2}",
+                throw new AssertInconclusiveException(string.Format("{0:g3} operations/sec (± {1:g2}), was {2}",
                     1000.0 / average, (1000.0 / (average - min) - 1000.0 / (average + max)) / 2, previousResult));
 
                 //if (testName != null)
