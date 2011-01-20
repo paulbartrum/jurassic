@@ -18,6 +18,9 @@ namespace Performance
         public void EmptyFunction()
         {
             Assert.AreEqual(NormalizeILWhitespace(@"
+                .local [0] System.Object f
+                .local [1] System.Object this
+                .local [2] System.Object arguments
                       ldarg      3
                       stloc      V0 (f)
                 L000: ldnull
@@ -31,6 +34,10 @@ namespace Performance
         public void SimpleReturn()
         {
             Assert.AreEqual(NormalizeILWhitespace(@"
+                .local [0] System.Object f
+                .local [1] System.Object this
+                .local [2] System.Object arguments
+                .local [3] System.Object returnValue
                       ldarg      3
                       stloc      V0 (f)
                 L000: ldc.i4     5
@@ -48,6 +55,10 @@ namespace Performance
         public void FunctionCall0()
         {
             Assert.AreEqual(NormalizeILWhitespace(@"
+                .local [0] System.Object f
+                .local [1] System.Object this
+                .local [2] System.Object arguments
+                .local [3] System.Object a
                       ldarg      3
                       stloc      V0 (f)
                 L000: ldarg      4
@@ -85,6 +96,10 @@ namespace Performance
         public void FunctionCall1()
         {
             Assert.AreEqual(NormalizeILWhitespace(@"
+                .local [0] System.Object f
+                .local [1] System.Object this
+                .local [2] System.Object arguments
+                .local [3] System.Object a
                       ldarg      3
                       stloc      V0 (f)
                 L000: ldarg      4
@@ -127,6 +142,11 @@ namespace Performance
         public void ForLoop()
         {
             Assert.AreEqual(NormalizeILWhitespace(@"
+                .local [0] System.Object f
+                .local [1] System.Object this
+                .local [2] System.Object arguments
+                .local [3] System.Object i
+                .local [4] System.Int32
                       ldarg      3
                       stloc      V0 (f)
                 L000: ldc.i4     0
@@ -151,20 +171,26 @@ namespace Performance
                       ldloc      V3 (i)
                 L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
                       stloc      V4
-                L006: ldloc      V4
-                L007: ldc.i4     10
-                      clt
-                      brfalse    L011
-                L008: ldloc      V4
-                L009: dup
-                      ldc.i4     1
-                      add
-                      stloc      V4
-                L010: pop
-                      br             
-                L011: ldloc      V4
-                L012: box        System.Int32
-                      stloc      V3 (i)
+                .try
+                {
+                    L006: ldloc      V4
+                    L007: ldc.i4     10
+                          clt
+                          brfalse    L011
+                    L008: ldloc      V4
+                    L009: dup
+                          ldc.i4     1
+                          add
+                          stloc      V4
+                    L010: pop
+                          br             
+                }
+                .finally
+                {
+                    L011: ldloc      V4
+                    L012: box        System.Int32
+                          stloc      V3 (i)
+                }
                 L013: ldnull
                       ret
                 "),
@@ -178,6 +204,13 @@ namespace Performance
         public void GetGlobalVariable()
         {
             Assert.AreEqual(NormalizeILWhitespace(@"
+                .local [0] System.Object f
+                .local [1] System.Object this
+                .local [2] System.Object arguments
+                .local [3] System.Object
+                .local [4] System.Int32
+                .local [5] Jurassic.Library.ObjectInstance
+                .local [6] System.Object returnValue
                       ldarg      3
                       stloc      V0 (f)
                 L000: ldarg      1
