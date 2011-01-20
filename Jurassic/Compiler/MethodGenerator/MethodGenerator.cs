@@ -203,13 +203,11 @@ namespace Jurassic.Compiler
                 }
 #endif
 
-#if !SILVERLIGHT
                 if (this.Engine.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
                     generator = new LoggingILGenerator(generator);
                 }
-#endif
 
                 // Generate the IL.
                 GenerateCode(generator, optimizationInfo);
@@ -258,13 +256,11 @@ namespace Jurassic.Compiler
                 // Generate the IL for the method.
                 generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
 
-#if !SILVERLIGHT
                 if (this.Engine.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
                     generator = new LoggingILGenerator(generator);
                 }
-#endif
 
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
@@ -284,13 +280,11 @@ namespace Jurassic.Compiler
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
             }
 
-#if !SILVERLIGHT
             if (this.Engine.EnableILAnalysis == true)
             {
                 // Store the disassembled IL so it can be retrieved for analysis purposes.
                 this.GeneratedMethod.DisassembledIL = generator.ToString();
             }
-#endif
         }
 
         /// <summary>
