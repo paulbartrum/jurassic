@@ -24,7 +24,7 @@ namespace Performance
                         x = x & i
                 }
                 f()
-                ", 149.2);
+                ", 470);
         }
 
         [TestMethod]
@@ -37,7 +37,7 @@ namespace Performance
                         x = x | i
                 }
                 f();
-                ", 146.8);
+                ", 440);
         }
 
         [TestMethod]
@@ -50,7 +50,7 @@ namespace Performance
                         x = x ^ i
                 }
                 f();
-                ", 138.9);
+                ", 474);
         }
 
         [TestMethod]
@@ -63,7 +63,7 @@ namespace Performance
                         x = x + i
                 }
                 f();
-                ", 121.0);
+                ", 155);
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace Performance
                         x = x - i
                 }
                 f();
-                ", 157.2);
+                ", 407);
         }
 
         [TestMethod]
@@ -128,7 +128,7 @@ namespace Performance
                         x = x * i
                 }
                 f();
-                ", 168.9);
+                ", 409);
         }
 
         [TestMethod]
@@ -141,7 +141,7 @@ namespace Performance
                         x = x / i
                 }
                 f();
-                ", 171.8);
+                ", 360);
         }
 
         [TestMethod]
@@ -154,7 +154,7 @@ namespace Performance
                         x = x % i
                 }
                 f();
-                ", 107.4);
+                ", 212);
         }
 
         [TestMethod]
@@ -167,7 +167,7 @@ namespace Performance
                         x = x << i
                 }
                 f();
-                ", 146.1);
+                ", 430);
         }
 
         [TestMethod]
@@ -180,7 +180,7 @@ namespace Performance
                         x = x >> i
                 }
                 f();
-                ", 143.9);
+                ", 423);
         }
 
         [TestMethod]
@@ -193,7 +193,7 @@ namespace Performance
                         x = x >>> i
                 }
                 f();
-                ", 127.5);
+                ", 254);
         }
 
         [TestMethod]
@@ -206,7 +206,7 @@ namespace Performance
                         x = x < i
                 }
                 f();
-                ", 111.7);
+                ", 417);
         }
 
         [TestMethod]
@@ -219,7 +219,7 @@ namespace Performance
                         x = x <= i
                 }
                 f();
-                ", 110.7);
+                ", 429);
         }
 
         [TestMethod]
@@ -232,7 +232,7 @@ namespace Performance
                         x = x > i
                 }
                 f();
-                ", 112.1);
+                ", 425);
         }
 
         [TestMethod]
@@ -245,7 +245,7 @@ namespace Performance
                         x = x >= i
                 }
                 f();
-                ", 110.9);
+                ", 425);
         }
 
         [TestMethod]
@@ -258,7 +258,7 @@ namespace Performance
                         x = x == i
                 }
                 f();
-                ", 110.2);
+                ", 65.5);
         }
 
         [TestMethod]
@@ -271,7 +271,7 @@ namespace Performance
                         x = x === i
                 }
                 f();
-                ", 135.4);
+                ", 152);
         }
 
         [TestMethod]
@@ -284,7 +284,7 @@ namespace Performance
                         x = x != i
                 }
                 f();
-                ", 118.7);
+                ", 67.1);
         }
 
         [TestMethod]
@@ -310,7 +310,7 @@ namespace Performance
                         x = x && i
                 }
                 f();
-                ", 202.2);
+                ", 338);
         }
 
         [TestMethod]
@@ -323,7 +323,7 @@ namespace Performance
                         x = x || i
                 }
                 f();
-                ", 177.2);
+                ", 317);
         }
 
         [TestMethod]
@@ -334,7 +334,7 @@ namespace Performance
                 }
                 for (var i = 0; i < 10000; i++)
                     f(1, 2, 3)
-                ", 155);
+                ", 167);
         }
 
         [TestMethod]
@@ -376,7 +376,7 @@ namespace Performance
                     }
                 }
                 f()
-                ", 74.9);
+                ", 418);
         }
 
         [TestMethod]
@@ -437,7 +437,7 @@ namespace Performance
                     }
                 }
                 f()
-                ", 32.2);
+                ", 43.4);
         }
 
         [TestMethod]
@@ -466,7 +466,7 @@ namespace Performance
                             sum -= x[j];
                 }
                 f()
-                ", 6.2);
+                ", 9);
         }
 
         [TestMethod]
@@ -479,7 +479,7 @@ namespace Performance
                         x[i] = i;
                 }
                 f()
-                ", 25.5);
+                ", 48.2);
         }
     }
 
