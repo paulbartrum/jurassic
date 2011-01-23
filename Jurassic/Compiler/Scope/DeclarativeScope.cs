@@ -247,10 +247,11 @@ namespace Jurassic.Compiler
             {
 
                 // The declarative scope can be optimized away entirely.
-
-                // Allocate storage for each variable.
                 foreach (var variable in this.DeclaredVariables)
-                    variable.Store = generator.DeclareVariable(typeof(object), variable.Name);
+                {
+                    variable.Store = null;
+                    variable.Type = PrimitiveType.Any;
+                }
 
                 // Indicate the scope was not created.
                 this.ExistsAtRuntime = false;

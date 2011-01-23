@@ -121,9 +121,9 @@ namespace Jurassic.Compiler
                             // The scope has been optimized away.  The value of the variable is stored
                             // in an ILVariable.
 
-                            // A variable should have been allocated in Scope.GenerateDeclarations().
+                            // Declare an IL local variable if no storage location has been allocated yet.
                             if (variable.Store == null)
-                                throw new InvalidOperationException(string.Format("The variable {0} has not been initialized.", this.Name));
+                                variable.Store = generator.DeclareVariable(typeof(object), variable.Name);
 
                             // Load the value from the variable.
                             generator.LoadVariable(variable.Store);
@@ -336,9 +336,9 @@ namespace Jurassic.Compiler
                             // The scope has been optimized away.  The value of the variable is stored
                             // in an ILVariable.
 
-                            // A variable should have been allocated in Scope.GenerateDeclarations().
+                            // Declare an IL local variable if no storage location has been allocated yet.
                             if (variable.Store == null)
-                                throw new InvalidOperationException(string.Format("The variable {0} has not been initialized.", this.Name));
+                                variable.Store = generator.DeclareVariable(typeof(object), variable.Name);
 
                             if (value == null)
                             {
