@@ -270,16 +270,19 @@ namespace UnitTests
             // Remove that amount of space from each line.
             // Also, normalize line breaks to Environment.NewLine.
             var result = new StringBuilder(text.Length);
-            for (int i = 0; i < text.Length; i++)
+            int j = 0;
+            for (; j < Math.Min(indentationToRemove, text.Length); j++)
+                if (text[j] != ' ')
+                    break;
+            for (int i = j; i < text.Length; i++)
             {
                 if (text[i] == '\r' || text[i] == '\n')
                 {
                     if (text[i] == '\r' && i < text.Length - 1 && text[i + 1] == '\n')
                         i++;
                     result.Append(lineBreak == null ? Environment.NewLine : lineBreak);
-                    i ++;
-                    int j = i;
-                    for (; j < Math.Min(i + indentationToRemove, text.Length); j++)
+                    i++;
+                    for (j = i; j < Math.Min(i + indentationToRemove, text.Length); j++)
                         if (text[j] != ' ')
                             break;
                     i = j - 1;

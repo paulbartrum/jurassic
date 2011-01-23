@@ -98,6 +98,67 @@ namespace Performance
             var engine = new Jurassic.ScriptEngine();
             Benchmark(() => engine.Execute(new Jurassic.StringScriptSource(code)), previousResult);
         }
+
+        /// <summary>
+        /// Removes spaces from the start of each line and removes extraneous line breaks from the
+        /// start and end of the given text.
+        /// </summary>
+        /// <param name="text"> The text to operate on. </param>
+        /// <param name="lineBreak"> The type of line break to normalize to. </param>
+        /// <returns> The text, but with extra space removed. </returns>
+        public static string NormalizeText(string text, string lineBreak = null)
+        {
+            if (text == null)
+                throw new ArgumentNullException("text");
+
+            // Find the maximum number of spaces that is common to each line.
+            bool startOfLine = true;
+            int indentationToRemove = int.MaxValue;
+            int startOfLineSpace = 0;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] == '\r' || text[i] == '\n')
+                {
+                    startOfLine = true;
+                    startOfLineSpace = 0;
+                }
+                else if (startOfLine == true)
+                {
+                    if (text[i] == ' ')
+                        startOfLineSpace++;
+                    else
+                    {
+                        indentationToRemove = Math.Min(indentationToRemove, startOfLineSpace);
+                        startOfLine = false;
+                    }
+                }
+            }
+
+            // Remove that amount of space from each line.
+            // Also, normalize line breaks to Environment.NewLine.
+            var result = new StringBuilder(text.Length);
+            int j = 0;
+            for (; j < Math.Min(indentationToRemove, text.Length); j++)
+                if (text[j] != ' ')
+                    break;
+            for (int i = j; i < text.Length; i++)
+            {
+                if (text[i] == '\r' || text[i] == '\n')
+                {
+                    if (text[i] == '\r' && i < text.Length - 1 && text[i + 1] == '\n')
+                        i++;
+                    result.Append(lineBreak == null ? Environment.NewLine : lineBreak);
+                    i++;
+                    for (j = i; j < Math.Min(i + indentationToRemove, text.Length); j++)
+                        if (text[j] != ' ')
+                            break;
+                    i = j - 1;
+                }
+                else
+                    result.Append(text[i]);
+            }
+            return result.ToString().Trim('\r', '\n');
+        }
     }
 
 }
