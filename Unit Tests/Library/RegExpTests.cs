@@ -293,6 +293,7 @@ namespace UnitTests
         {
             Assert.AreEqual(false, TestUtils.Evaluate("/abc/.test('hello')"));
             Assert.AreEqual(true, TestUtils.Evaluate("/abc/.test('helloabchello')"));
+            Assert.AreEqual(true, TestUtils.Evaluate(@"/\s^/m.test('\n')"));
 
             // The lastIndex field should be used to indicate the start position, but
             // only if the global flag is set.
