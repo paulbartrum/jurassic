@@ -221,7 +221,7 @@ namespace Jurassic.Compiler
             VerifyScope(generator);
 
             // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
-            if (this.StrictMode == false && (this.MethodOptimizationHints.HasThis == true || this.MethodOptimizationHints.HasEval == true))
+            if (this.StrictMode == false && this.MethodOptimizationHints.HasThis == true)
             {
                 // if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
                 EmitHelpers.LoadThis(generator);
@@ -259,7 +259,9 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the function name into the scope.
-            if (string.IsNullOrEmpty(this.Name) == false && this.ArgumentNames.Contains(this.Name) == false)
+            if (string.IsNullOrEmpty(this.Name) == false &&
+                this.ArgumentNames.Contains(this.Name) == false &&
+                optimizationInfo.MethodOptimizationHints.HasVariable(this.Name))
             {
                 EmitHelpers.LoadFunction(generator);
                 var functionName = new NameExpression(this.InitialScope, this.Name);

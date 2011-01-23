@@ -175,6 +175,9 @@ namespace Jurassic.Compiler
             // In strict mode, the variable name cannot be "eval" or "arguments".
             if (this.StrictMode == true && (name == "eval" || name == "arguments"))
                 throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The variable name cannot be '{0}' in strict mode.", name), this.LineNumber, this.SourcePath);
+
+            // Record each occurance of a variable name.
+            this.methodOptimizationHints.EncounteredVariable(name);
         }
 
 
@@ -1482,14 +1485,9 @@ namespace Jurassic.Compiler
                         var identifierName = ((IdentifierToken)this.nextToken).Name;
                         terminal = new NameExpression(this.currentScope, identifierName);
 
-                        // Add method optimization info.
+                        // Record each occurance of a variable name.
                         if (unboundOperator == null || unboundOperator.OperatorType != OperatorType.MemberAccess)
-                        {
-                            if (identifierName == "eval")
-                                this.methodOptimizationHints.HasEval = true;
-                            if (identifierName == "arguments")
-                                this.methodOptimizationHints.HasArguments = true;
-                        }
+                            this.methodOptimizationHints.EncounteredVariable(identifierName);
                     }
                     else if (this.nextToken == KeywordToken.This)
                     {

@@ -17,13 +17,8 @@ namespace Performance
         [TestMethod]
         public void EmptyFunction()
         {
-            Assert.AreEqual(NormalizeILWhitespace(@"
-                .local [0] System.Object f
-                .local [1] System.Object this
-                .local [2] System.Object arguments
-                      ldarg      3
-                      stloc      V0 (f)
-                L000: ldnull
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                      ldnull
                       ret
                 "),
                 GetFunctionIL(@"function f() {
@@ -33,17 +28,12 @@ namespace Performance
         [TestMethod]
         public void SimpleReturn()
         {
-            Assert.AreEqual(NormalizeILWhitespace(@"
-                .local [0] System.Object f
-                .local [1] System.Object this
-                .local [2] System.Object arguments
-                .local [3] System.Object returnValue
-                      ldarg      3
-                      stloc      V0 (f)
-                L000: ldc.i4     5
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                .local [0] System.Object returnValue
+                      ldc.i4     5
                       box        System.Int32
-                      stloc      V3 (returnValue)
-                      ldloc      V3 (returnValue)
+                      stloc      V0 (returnValue)
+                      ldloc      V0 (returnValue)
                       ret
                 "),
                 GetFunctionIL(@"function f() {
@@ -54,32 +44,27 @@ namespace Performance
         [TestMethod]
         public void FunctionCall0()
         {
-            Assert.AreEqual(NormalizeILWhitespace(@"
-                .local [0] System.Object f
-                .local [1] System.Object this
-                .local [2] System.Object arguments
-                .local [3] System.Object a
-                      ldarg      3
-                      stloc      V0 (f)
-                L000: ldarg      4
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                .local [0] System.Object a
+                      ldarg      4
                       ldlen
                       ldc.i4     0
-                      ble        L001
+                      ble        L000
                       ldarg      4
                       ldc.i4     0
                       ldelem     System.Object
-                      stloc      V3 (a)
-                L001: ldloc      V3 (a)
-                L002: ininst     Jurassic.Library.FunctionInstance
+                      stloc      V0 (a)
+                L000: ldloc      V0 (a)
+                L001: ininst     Jurassic.Library.FunctionInstance
                       dup
-                      brtrue     L003
+                      brtrue     L002
                       pop
                       ldarg      0
                       ldstr      ""TypeError""
                       ldstr      ""'a' is not a function""
                       newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
                       throw
-                L003: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                L002: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       ldc.i4     0
                       newarr     System.Object
                       callvirt   System.Object CallLateBound(System.Object, System.Object[])/Jurassic.Library.FunctionInstance
@@ -95,32 +80,27 @@ namespace Performance
         [TestMethod]
         public void FunctionCall1()
         {
-            Assert.AreEqual(NormalizeILWhitespace(@"
-                .local [0] System.Object f
-                .local [1] System.Object this
-                .local [2] System.Object arguments
-                .local [3] System.Object a
-                      ldarg      3
-                      stloc      V0 (f)
-                L000: ldarg      4
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                .local [0] System.Object a
+                      ldarg      4
                       ldlen
                       ldc.i4     0
-                      ble        L001
+                      ble        L000
                       ldarg      4
                       ldc.i4     0
                       ldelem     System.Object
-                      stloc      V3 (a)
-                L001: ldloc      V3 (a)
-                L002: ininst     Jurassic.Library.FunctionInstance
+                      stloc      V0 (a)
+                L000: ldloc      V0 (a)
+                L001: ininst     Jurassic.Library.FunctionInstance
                       dup
-                      brtrue     L003
+                      brtrue     L002
                       pop
                       ldarg      0
                       ldstr      ""TypeError""
                       ldstr      ""'a' is not a function""
                       newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
                       throw
-                L003: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                L002: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       ldc.i4     1
                       newarr     System.Object
                       dup
@@ -141,57 +121,52 @@ namespace Performance
         [TestMethod]
         public void ForLoop()
         {
-            Assert.AreEqual(NormalizeILWhitespace(@"
-                .local [0] System.Object f
-                .local [1] System.Object this
-                .local [2] System.Object arguments
-                .local [3] System.Object i
-                .local [4] System.Int32
-                      ldarg      3
-                      stloc      V0 (f)
-                L000: ldc.i4     0
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                .local [0] System.Object i
+                .local [1] System.Int32
+                      ldc.i4     0
                       dup
                       box        System.Int32
-                      stloc      V3 (i)
-                L001: pop
-                      ldloc      V3 (i)
-                L002: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      stloc      V0 (i)
+                L000: pop
+                      ldloc      V0 (i)
+                L001: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
                       ldc.i4     10
                       conv.u4
                       clt
-                      brfalse    L013
-                      ldloc      V3 (i)
-                L003: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      brfalse    L012
+                      ldloc      V0 (i)
+                L002: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
                       dup
                       ldc.r8     1
                       add
                       box        System.Double
-                      stloc      V3 (i)
-                L004: pop
-                      ldloc      V3 (i)
-                L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
-                      stloc      V4
+                      stloc      V0 (i)
+                L003: pop
+                      ldloc      V0 (i)
+                L004: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
+                      stloc      V1
                 .try
                 {
-                    L006: ldloc      V4
-                    L007: ldc.i4     10
+                    L005: ldloc      V1
+                    L006: ldc.i4     10
                           clt
-                          brfalse    L011
-                    L008: ldloc      V4
-                    L009: dup
+                          brfalse    L010
+                    L007: ldloc      V1
+                    L008: dup
                           ldc.i4     1
                           add
-                          stloc      V4
-                    L010: pop
+                          stloc      V1
+                    L009: pop
                           br             
                 }
                 .finally
                 {
-                    L011: ldloc      V4
-                    L012: box        System.Int32
-                          stloc      V3 (i)
+                    L010: ldloc      V1
+                    L011: box        System.Int32
+                          stloc      V0 (i)
                 }
-                L013: ldnull
+                L012: ldnull
                       ret
                 "),
                 GetFunctionIL(@"function f() {
@@ -203,53 +178,43 @@ namespace Performance
         [TestMethod]
         public void GetGlobalVariable()
         {
-            Assert.AreEqual(NormalizeILWhitespace(@"
-                .local [0] System.Object f
-                .local [1] System.Object this
-                .local [2] System.Object arguments
-                .local [3] System.Object
-                .local [4] System.Int32
-                .local [5] Jurassic.Library.ObjectInstance
-                .local [6] System.Object returnValue
-                      ldarg      3
-                      stloc      V0 (f)
-                L000: ldarg      1
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                .local [0] System.Object
+                .local [1] System.Int32
+                .local [2] Jurassic.Library.ObjectInstance
+                .local [3] System.Object returnValue
+                      ldarg      1
                       castclass  Jurassic.Compiler.ObjectScope
                       callvirt   Jurassic.Library.ObjectInstance get_ScopeObject()/Jurassic.Compiler.ObjectScope
-                      stloc      V5
-                      ldloc      V3
-                      ldloc      V5
+                      stloc      V2
+                      ldloc      V0
+                      ldloc      V2
                       callvirt   System.Object get_InlineCacheKey()/Jurassic.Library.ObjectInstance
-                      beq        L001
-                      ldloc      V5
+                      beq        L000
+                      ldloc      V2
                       ldstr      ""x""
-                      ldloca     V4
-                      ldloca     V3
+                      ldloca     V1
+                      ldloca     V0
                       callvirt   System.Object InlineGetPropertyValue(System.String, Int32 ByRef, System.Object ByRef)/Jurassic.Library.ObjectInstance
-                      br         L002
-                L001: ldloc      V5
+                      br         L001
+                L000: ldloc      V2
                       callvirt   System.Object[] get_InlinePropertyValues()/Jurassic.Library.ObjectInstance
-                      ldloc      V4
+                      ldloc      V1
                       ldelem     System.Object
-                L002: dup
-                      brtrue     L003
+                L001: dup
+                      brtrue     L002
                       ldarg      0
                       ldstr      ""ReferenceError""
                       ldstr      ""x is not defined""
                       newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
                       throw
-                L003: stloc      V6 (returnValue)
-                      ldloc      V6 (returnValue)
-                      ret"),
+                L002: stloc      V3 (returnValue)
+                      ldloc      V3 (returnValue)
+                      ret
+                "),
                 GetFunctionIL(@"function f() {
                     return x;
                 }", "f"));
-        }
-
-        private static string NormalizeILWhitespace(string text)
-        {
-            // Remove excess spaces and carriage returns at the start or end.
-            return text.Replace("                ", "").Trim('\r', '\n');
         }
 
         private static string GetFunctionIL(string code, string functionName)
@@ -260,7 +225,7 @@ namespace Performance
             var function = (Jurassic.Library.UserDefinedFunction)scriptEngine.GetGlobalValue(functionName);
             if (function == null)
                 throw new ArgumentException(string.Format("The function {0} was not found.", functionName));
-            return NormalizeILWhitespace(function.DisassembledIL);
+            return TestUtils.NormalizeText(function.DisassembledIL);
         }
     }
 
