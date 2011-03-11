@@ -90,7 +90,7 @@ namespace Jurassic.Compiler
                     {
                         // scope.Values[index]
                         if (scopeVariable == null)
-                            generator.LoadArgument(0);
+                            EmitHelpers.LoadScope(generator);
                         else
                             generator.LoadVariable(scopeVariable);
                         generator.CastClass(typeof(DeclarativeScope));
@@ -104,7 +104,7 @@ namespace Jurassic.Compiler
                 {
                     // This method gets the value of a variable in an object scope.
                     if (scopeVariable == null)
-                        generator.LoadArgument(0);
+                        EmitHelpers.LoadScope(generator);
                     else
                         generator.LoadVariable(scopeVariable);
                     generator.CastClass(typeof(ObjectScope));
@@ -126,7 +126,7 @@ namespace Jurassic.Compiler
                     if (scopeVariable == null)
                     {
                         scopeVariable = generator.CreateTemporaryVariable(typeof(Scope));
-                        generator.LoadArgument(0);
+                        EmitHelpers.LoadScope(generator);
                     }
                     else
                     {
@@ -183,7 +183,7 @@ namespace Jurassic.Compiler
                     {
                         // scope.Values[index] = value
                         if (scopeVariable == null)
-                            generator.LoadArgument(0);
+                            EmitHelpers.LoadScope(generator);
                         else
                             generator.LoadVariable(scopeVariable);
                         generator.CastClass(typeof(DeclarativeScope));
@@ -197,7 +197,7 @@ namespace Jurassic.Compiler
                 else
                 {
                     if (scopeVariable == null)
-                        generator.LoadArgument(0);
+                        EmitHelpers.LoadScope(generator);
                     else
                         generator.LoadVariable(scopeVariable);
                     generator.CastClass(typeof(ObjectScope));
@@ -228,7 +228,7 @@ namespace Jurassic.Compiler
                     if (scopeVariable == null)
                     {
                         scopeVariable = generator.CreateTemporaryVariable(typeof(Scope));
-                        generator.LoadArgument(0);
+                        EmitHelpers.LoadScope(generator);
                     }
                     else
                     {
@@ -263,12 +263,12 @@ namespace Jurassic.Compiler
         {
             // Deleting a variable is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
-                throw new JavaScriptException("SyntaxError", string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name));
+                throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name));
 
             var endOfDelete = generator.CreateLabel();
             var scope = this.Scope;
             ILLocalVariable scopeVariable = generator.CreateTemporaryVariable(typeof(Scope));
-            generator.LoadArgument(0);
+            EmitHelpers.LoadScope(generator);
             generator.StoreVariable(scopeVariable);
             do
             {
@@ -365,7 +365,7 @@ namespace Jurassic.Compiler
 
             scope = this.Scope;
             ILLocalVariable scopeVariable = generator.CreateTemporaryVariable(typeof(Scope));
-            generator.LoadArgument(0);
+            EmitHelpers.LoadScope(generator);
             generator.StoreVariable(scopeVariable);
 
             do

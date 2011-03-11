@@ -60,9 +60,10 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.SameValue(false, 0));
 
             // object
-            var temp1 = GlobalObject.Object.Construct();
-            var temp2 = GlobalObject.Object.Construct();
-            var number1 = GlobalObject.Number.Construct(5.0);
+            var engine = new ScriptEngine();
+            var temp1 = engine.Object.Construct();
+            var temp2 = engine.Object.Construct();
+            var number1 = engine.Number.Construct(5.0);
             Assert.AreEqual(true, TypeComparer.SameValue(temp1, temp1));
             Assert.AreEqual(false, TypeComparer.SameValue(temp1, temp2));
             Assert.AreEqual(true, TypeComparer.SameValue(number1, number1));

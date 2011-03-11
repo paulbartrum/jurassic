@@ -22,10 +22,6 @@ namespace Jurassic.Library
         private Dictionary<string, HiddenClassSchema> deleteTransitions;
         private Dictionary<AddPropertyTransition, HiddenClassSchema> modifyTransitions;
 
-        // The initial schema
-        [ThreadStatic]
-        private static HiddenClassSchema empty;
-
         /// <summary>
         /// Creates a new HiddenClassSchema instance.
         /// </summary>
@@ -38,16 +34,12 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets an empty schema.
+        /// Creates a hidden class schema with no properties.
         /// </summary>
-        public static HiddenClassSchema Empty
+        /// <returns> A hidden class schema with no properties. </returns>
+        public static HiddenClassSchema CreateEmptySchema()
         {
-            get
-            {
-                if (empty == null)
-                    empty = new HiddenClassSchema(new Dictionary<string, SchemaProperty>());
-                return empty;
-            }
+            return new HiddenClassSchema(new Dictionary<string, SchemaProperty>());
         }
 
         /// <summary>

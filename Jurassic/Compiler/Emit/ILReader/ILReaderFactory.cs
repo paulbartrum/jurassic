@@ -7,7 +7,8 @@ using System.Reflection;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public class ILReaderFactory {
+    internal class ILReaderFactory
+    {
         public static ILReader Create(object obj) {
             Type type = obj.GetType();
 

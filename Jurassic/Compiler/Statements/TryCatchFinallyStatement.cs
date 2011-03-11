@@ -120,9 +120,9 @@ namespace Jurassic.Compiler
 
                 // Revert the scope.
                 generator.BeginFinallyBlock();
-                generator.LoadArgument(0);
+                EmitHelpers.LoadScope(generator);
                 generator.Call(ReflectionHelpers.Scope_ParentScope);
-                generator.StoreArgument(0);
+                EmitHelpers.StoreScope(generator);
                 generator.EndExceptionBlock();
 
                 // Branch here if no exception was thrown.

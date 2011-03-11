@@ -24,7 +24,12 @@ namespace Jurassic.Library
             this.Method = method;
             this.Flags = flags;
             this.Preferred = (flags & FunctionBinderFlags.Preferred) != 0;
-            this.HasExplicitThisParameter = method.IsStatic == true ? (flags & FunctionBinderFlags.HasThisObject) != 0 : false;
+            this.HasEngineParameter = (flags & FunctionBinderFlags.HasEngineParameter) != 0;
+            if (this.HasEngineParameter == true && method.IsStatic == false)
+                throw new InvalidOperationException(string.Format("The {0} flag cannot be used on the instance method '{1}'.", FunctionBinderFlags.HasEngineParameter, method.Name));
+            this.HasExplicitThisParameter = (flags & FunctionBinderFlags.HasThisObject) != 0;
+            if (this.HasExplicitThisParameter == true && method.IsStatic == false)
+                throw new InvalidOperationException(string.Format("The {0} flag cannot be used on the instance method '{1}'.", FunctionBinderFlags.HasThisObject, method.Name));
 
             var parameters = method.GetParameters();
 
@@ -32,13 +37,22 @@ namespace Jurassic.Library
             this.DelegateParameterCount = this.HasThisParameter ? parameters.Length + 1 : parameters.Length;
             if (this.DelegateParameterCount > FunctionBinder.MaximumSupportedParameterCount)
                 throw new NotImplementedException(string.Format("Methods with more than {0} parameters are not supported.", FunctionBinder.MaximumSupportedParameterCount));
-            
+
+            // If HasEngineParameter is specified, the first parameter must be of type ScriptEngine.
+            if (this.HasEngineParameter == true)
+            {
+                if (parameters.Length == 0)
+                    throw new InvalidOperationException(string.Format("The method '{0}' does not have enough parameters.", method.Name));
+                if (parameters[0].ParameterType != typeof(ScriptEngine))
+                    throw new InvalidOperationException(string.Format("The first parameter of the method '{0}' must be of type ScriptEngine.", method.Name));
+            }
+
             // If there is a "this" parameter, it must be of type ObjectInstance (or derived from it).
             if (this.HasExplicitThisParameter == true)
             {
-                if (parameters.Length == 0)
-                    throw new InvalidOperationException("Static methods with hasThisParameter=true must have at least one parameter.");
-                this.ThisType = parameters[0].ParameterType;
+                if (parameters.Length <= (this.HasEngineParameter ? 1 : 0))
+                    throw new InvalidOperationException(string.Format("The method '{0}' does not have enough parameters.", method.Name));
+                this.ThisType = parameters[this.HasEngineParameter ? 1 : 0].ParameterType;
             }
             else if (method.IsStatic == false)
             {
@@ -69,9 +83,16 @@ namespace Jurassic.Library
                 this.MaxParameterCount -= 1;
             }
 
+            // Methods with a "engine" parameter effectively have one less parameter.
+            if (this.HasEngineParameter == true)
+            {
+                this.MinParameterCount -= 1;
+                this.MaxParameterCount -= 1;
+            }
+
             // Check the parameter types (the this parameter has already been checked).
             // Only certain types are supported.
-            for (int i = this.HasExplicitThisParameter ? 1 : 0; i < parameters.Length; i++)
+            for (int i = (this.HasExplicitThisParameter ? 1 : 0) + (this.HasEngineParameter ? 1 : 0); i < parameters.Length; i++)
             {
                 Type type = parameters[i].ParameterType;
 
@@ -130,8 +151,19 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets a value that indicates whether the "this" object should be passed as the first
+        /// Gets a value that indicates whether the script engine should be passed as the first
         /// parameter.  Always false for instance methods.
+        /// </summary>
+        public bool HasEngineParameter
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a value that indicates whether the "this" object should be passed as the first
+        /// parameter (or the second parameter if HasEngineParameter is <c>true</c>).  Always false
+        /// for instance methods.
         /// </summary>
         public bool HasExplicitThisParameter
         {
@@ -169,12 +201,12 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets the number of parameters that the method requires (excluding the implicit
-        /// this parameter and the ParamArray parameter, if these are present).
+        /// Gets the number of parameters that the method requires (excluding the script engine
+        /// parameter, explicit this parameter and the ParamArray parameter, if these are present).
         /// </summary>
         public int ParameterCount
         {
-            get { return this.Method.GetParameters().Length - (this.HasExplicitThisParameter ? 1 : 0); }
+            get { return this.Method.GetParameters().Length - (this.HasExplicitThisParameter ? 1 : 0) - (this.HasEngineParameter ? 1 : 0); }
         }
 
         /// <summary>

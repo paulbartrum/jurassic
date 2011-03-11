@@ -40,7 +40,7 @@ namespace Jurassic.Compiler
         {
             //if (optimizationInfo.SuppressReturnValue == true)
             //    return;
-            generator.LoadArgument(1);
+            EmitHelpers.LoadThis(generator);
         }
 
         /// <summary>

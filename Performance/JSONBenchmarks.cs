@@ -90,34 +90,16 @@ namespace Performance
     }";
 
         [TestMethod]
-        public void parse1()
-        {
-            // 16700 inner loops/sec
-            jsonString1 = string.Concat("(", jsonString1, ")");
-            TestUtils.Benchmark(() =>
-            {
-                for (int i = 0; i < 1000; i++)
-                {
-                    //object obj = Jurassic.Library.JSONObject.Parse(jsonString1);
-                    //object obj = Jurassic.Library.GlobalObject.Eval(string.Concat("(", jsonString1, ")"));
-                    //var lexer = new Jurassic.Library.JSONLexer(new System.IO.StringReader(jsonString1));
-                    var lexer = new Jurassic.Compiler.Lexer(new System.IO.StringReader(jsonString1), null);
-                    while (lexer.NextToken() != null)
-                        ;
-                }
-            });
-        }
-
-        [TestMethod]
         public void stringify1()
         {
             // 27100 inner loops/sec
-            var jsonObject = Jurassic.Library.JSONObject.Parse(jsonString1);
+            var engine = new Jurassic.ScriptEngine();
+            var jsonObject = Jurassic.Library.JSONObject.Parse(engine, jsonString1);
             TestUtils.Benchmark(() =>
             {
                 for (int i = 0; i < 1000; i++)
                 {
-                    string str = Jurassic.Library.JSONObject.Stringify(jsonObject);
+                    string str = Jurassic.Library.JSONObject.Stringify(engine, jsonObject);
                 }
             });
         }
@@ -128,11 +110,12 @@ namespace Performance
         public void parse2()
         {
             // 19600 inner loops/sec
+            var engine = new Jurassic.ScriptEngine();
             TestUtils.Benchmark(() =>
             {
                 for (int i = 0; i < 1000; i++)
                 {
-                    object obj = Jurassic.Library.JSONObject.Parse(jsonString2);
+                    object obj = Jurassic.Library.JSONObject.Parse(engine, jsonString2);
                 }
             });
         }
@@ -141,12 +124,13 @@ namespace Performance
         public void stringify2()
         {
             // 22100 inner loops/sec
-            var jsonObject = Jurassic.Library.JSONObject.Parse(jsonString2);
+            var engine = new Jurassic.ScriptEngine();
+            var jsonObject = Jurassic.Library.JSONObject.Parse(engine, jsonString2);
             TestUtils.Benchmark(() =>
             {
                 for (int i = 0; i < 1000; i++)
                 {
-                    string str = Jurassic.Library.JSONObject.Stringify(jsonObject);
+                    string str = Jurassic.Library.JSONObject.Stringify(engine, jsonObject);
                 }
             });
         }
@@ -12959,9 +12943,10 @@ namespace Performance
         public void parse3()
         {
             // 110 inner loops/sec
+            var engine = new Jurassic.ScriptEngine();
             TestUtils.Benchmark(() =>
             {
-                object obj = Jurassic.Library.JSONObject.Parse(jsonString3);
+                object obj = Jurassic.Library.JSONObject.Parse(engine, jsonString3);
             });
         }
 
@@ -12969,10 +12954,11 @@ namespace Performance
         public void stringify3()
         {
             // 166 inner loops/sec
-            var jsonObject = Jurassic.Library.JSONObject.Parse(jsonString3);
+            var engine = new Jurassic.ScriptEngine();
+            var jsonObject = Jurassic.Library.JSONObject.Parse(engine, jsonString3);
             TestUtils.Benchmark(() =>
             {
-                string str = Jurassic.Library.JSONObject.Stringify(jsonObject);
+                string str = Jurassic.Library.JSONObject.Stringify(engine, jsonObject);
             });
         }
     }

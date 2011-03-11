@@ -9,7 +9,7 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents the current expression state of the parser.
     /// </summary>
-    public enum ExpressionState
+    internal enum ExpressionState
     {
         /// <summary>
         /// Indicates the context is not known.  The lexer will guess.
@@ -32,31 +32,35 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class Lexer
     {
+        private ScriptEngine engine;
+        private ScriptSource source;
         private TextReader reader;
         private int lineNumber, columnNumber;
-        private string sourcePath;
 
         /// <summary>
         /// Creates a Lexer instance with the given source of text.
         /// </summary>
-        /// <param name="reader"> A reader that will supply the javascript source code. </param>
-        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
-        public Lexer(TextReader reader, string sourcePath)
+        /// <param name="engine"> The associated script engine. </param>
+        /// <param name="source"> The source of javascript code. </param>
+        public Lexer(ScriptEngine engine, ScriptSource source)
         {
-            if (reader == null)
-                throw new ArgumentNullException("reader");
-            this.reader = reader;
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+            if (source == null)
+                throw new ArgumentNullException("source");
+            this.engine = engine;
+            this.source = source;
+            this.reader = source.GetReader();
             this.lineNumber = 1;
             this.columnNumber = 1;
-            this.sourcePath = sourcePath;
         }
 
         /// <summary>
         /// Gets the reader that was supplied to the constructor.
         /// </summary>
-        public TextReader Reader
+        public ScriptSource Source
         {
-            get { return this.reader; }
+            get { return this.source; }
         }
 
         /// <summary>
@@ -73,14 +77,6 @@ namespace Jurassic.Compiler
         public int ColumnNumber
         {
             get { return this.columnNumber; }
-        }
-
-        /// <summary>
-        /// Gets the path or URL of the source file.  Can be <c>null</c>.
-        /// </summary>
-        public string SourcePath
-        {
-            get { return this.sourcePath; }
         }
 
         /// <summary>
@@ -164,7 +160,7 @@ namespace Jurassic.Compiler
                 return null;
             }
             else
-                throw new JavaScriptException("SyntaxError", string.Format("Unexpected character '{0}'.", (char)c1), this.lineNumber, this.sourcePath);
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected character '{0}'.", (char)c1), this.lineNumber, this.Source.Path);
         }
 
         /// <summary>
@@ -180,10 +176,10 @@ namespace Jurassic.Compiler
             {
                 // Unicode escape sequence.
                 if (ReadNextChar() != 'u')
-                    throw new JavaScriptException("SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
                 firstChar = ReadHexNumber(4);
                 if (IsIdentifierChar(firstChar) == false)
-                    throw new JavaScriptException("SyntaxError", "Invalid character in identifier.", this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
             }
             name.Append((char)firstChar);
 
@@ -199,10 +195,10 @@ namespace Jurassic.Compiler
                     // Unicode escape sequence.
                     ReadNextChar();
                     if (ReadNextChar() != 'u')
-                        throw new JavaScriptException("SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.sourcePath);
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
                     c = ReadHexNumber(4);
                     if (IsIdentifierChar(c) == false)
-                        throw new JavaScriptException("SyntaxError", "Invalid character in identifier.", this.lineNumber, this.sourcePath);
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
                     name.Append((char)c);
                 }
                 else
@@ -347,7 +343,7 @@ namespace Jurassic.Compiler
 
                 // Check a number was actually provided.
                 if (double.IsNaN(result) == true || digitsRead == 0)
-                    throw new JavaScriptException("SyntaxError", "Invalid number.", this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
 
                 // Apply the exponent.
                 if (exponent >= 0)
@@ -401,9 +397,9 @@ namespace Jurassic.Compiler
                 if (c == firstChar)
                     break;
                 if (c == -1)
-                    throw new JavaScriptException("SyntaxError", "Unexpected end of input in string literal.", this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in string literal.", this.lineNumber, this.Source.Path);
                 if (IsLineTerminator(c))
-                    throw new JavaScriptException("SyntaxError", "Unexpected line terminator in string literal.", this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected line terminator in string literal.", this.lineNumber, this.Source.Path);
                 if (c == '\\')
                 {
                     // Escape sequence or line continuation.
@@ -491,7 +487,7 @@ namespace Jurassic.Compiler
                 int c = ReadNextChar();
                 contents.Append((char)c);
                 if (IsHexDigit(c) == false)
-                    throw new JavaScriptException("SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
             }
             return (char)int.Parse(contents.ToString(), System.Globalization.NumberStyles.HexNumber);
         }
@@ -530,7 +526,7 @@ namespace Jurassic.Compiler
             // Read the first character.
             int c1 = ReadNextChar();
             if (c1 == -1)
-                throw new JavaScriptException("SyntaxError", "Unexpected end of input in multi-line comment.", this.lineNumber, this.sourcePath);
+                throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in multi-line comment.", this.lineNumber, this.Source.Path);
 
             // Read all the characters up to the "*/".
             while (true)
@@ -698,9 +694,9 @@ namespace Jurassic.Compiler
                 if (c == '/' && insideCharacterClass == false)
                     break;
                 if (c == -1)
-                    throw new JavaScriptException("SyntaxError", "Unexpected end of input in regular expression literal.", this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in regular expression literal.", this.lineNumber, this.Source.Path);
                 if (IsLineTerminator(c))
-                    throw new JavaScriptException("SyntaxError", "Unexpected line terminator in regular expression literal.", this.lineNumber, this.sourcePath);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected line terminator in regular expression literal.", this.lineNumber, this.Source.Path);
                 if (c == '\\')
                 {
                     // Escape sequence.
@@ -845,12 +841,13 @@ namespace Jurassic.Compiler
         /// Validates the given string is a valid identifier and returns the identifier name after
         /// escape sequences have been processed.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="str"> The string to resolve into an identifier. </param>
         /// <returns> The identifier name after escape sequences have been processed, or
         /// <c>null</c> if the string is not an identifier. </returns>
-        public static string ResolveIdentifier(string str)
+        internal static string ResolveIdentifier(ScriptEngine engine, string str)
         {
-            var lexer = new Lexer(new StringReader(str), null);
+            var lexer = new Lexer(engine, new StringScriptSource(str));
             var argumentToken = lexer.NextToken();
             if ((argumentToken is IdentifierToken) == false || lexer.NextToken() != null)
                 return null;

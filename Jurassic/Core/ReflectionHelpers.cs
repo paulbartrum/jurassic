@@ -18,7 +18,7 @@ namespace Jurassic
         internal static MethodInfo TypeConverter_ToString;
         internal static MethodInfo TypeConverter_ToNumber;
         internal static MethodInfo TypeConverter_ToBoolean;
-        internal static MethodInfo TypeConverter_ToObject;
+        internal static MethodInfo TypeConverter_ToObject2;
         internal static MethodInfo TypeConverter_ToInteger;
         internal static MethodInfo TypeConverter_ToInt32;
         internal static MethodInfo TypeConverter_ToUint32;
@@ -31,22 +31,22 @@ namespace Jurassic
         internal static MethodInfo TypeComparer_GreaterThanOrEqual;
 
         internal static MethodInfo TypeUtilities_TypeOf;
-        internal static MethodInfo TypeUtilities_EnumeratePropertyNames;
+        internal static MethodInfo TypeUtilities_EnumeratePropertyNames2;
         internal static MethodInfo TypeUtilities_Add;
-        internal static MethodInfo TypeUtilities_VerifyThisObject;
+        internal static MethodInfo TypeUtilities_VerifyThisObject2;
 
         internal static MethodInfo FunctionInstance_HasInstance;
         internal static MethodInfo FunctionInstance_ConstructLateBound;
         internal static MethodInfo FunctionInstance_CallLateBound;
         internal static MethodInfo FunctionInstance_InstancePrototype;
 
-        internal static MethodInfo Global_Instance;
-        internal static MethodInfo Global_Boolean;
-        internal static MethodInfo Global_Function;
-        internal static MethodInfo Global_RegExp;
-        internal static MethodInfo Global_Array;
-        internal static MethodInfo Global_Object;
-        internal static MethodInfo Global_Eval;
+        internal static MethodInfo ScriptEngine_Global;
+        internal static MethodInfo ScriptEngine_Boolean;
+        internal static MethodInfo ScriptEngine_Function;
+        internal static MethodInfo ScriptEngine_RegExp;
+        internal static MethodInfo ScriptEngine_Array;
+        internal static MethodInfo ScriptEngine_Object;
+        internal static MethodInfo Global_Eval2;
 
         internal static MethodInfo String_Concat;
         internal static MethodInfo String_Length;
@@ -94,9 +94,10 @@ namespace Jurassic
         internal static MethodInfo ObjectScope_ScopeObject;
         internal static MethodInfo DeclarativeScope_CreateRuntimeScope;
         internal static MethodInfo DeclarativeScope_Values;
+        internal static MethodInfo DeclarativeScope_ResizeValuesArray;
 
-        internal static ConstructorInfo JavaScriptException_Constructor2;
-        internal static ConstructorInfo JavaScriptException_Constructor3;
+        internal static ConstructorInfo JavaScriptException_Constructor_Error;
+        internal static ConstructorInfo JavaScriptException_Constructor_Object;
         internal static ConstructorInfo UserDefinedFunction_Constructor;
         internal static ConstructorInfo FunctionDelegate_Constructor;
         internal static ConstructorInfo Arguments_Constructor;
@@ -114,7 +115,7 @@ namespace Jurassic
             TypeConverter_ToString = GetStaticMethod(typeof(TypeConverter), "ToString", typeof(object));
             TypeConverter_ToNumber = GetStaticMethod(typeof(TypeConverter), "ToNumber", typeof(object));
             TypeConverter_ToBoolean = GetStaticMethod(typeof(TypeConverter), "ToBoolean", typeof(object));
-            TypeConverter_ToObject = GetStaticMethod(typeof(TypeConverter), "ToObject", typeof(object));
+            TypeConverter_ToObject2 = GetStaticMethod(typeof(TypeConverter), "ToObject", typeof(ScriptEngine), typeof(object));
             TypeConverter_ToInteger = GetStaticMethod(typeof(TypeConverter), "ToInteger", typeof(object));
             TypeConverter_ToInt32 = GetStaticMethod(typeof(TypeConverter), "ToInt32", typeof(object));
             TypeConverter_ToUint32 = GetStaticMethod(typeof(TypeConverter), "ToUint32", typeof(object));
@@ -127,9 +128,9 @@ namespace Jurassic
             TypeComparer_GreaterThanOrEqual = GetStaticMethod(typeof(TypeComparer), "GreaterThanOrEqual", typeof(object), typeof(object));
 
             TypeUtilities_TypeOf = GetStaticMethod(typeof(TypeUtilities), "TypeOf", typeof(object));
-            TypeUtilities_EnumeratePropertyNames = GetStaticMethod(typeof(TypeUtilities), "EnumeratePropertyNames", typeof(object));
+            TypeUtilities_EnumeratePropertyNames2 = GetStaticMethod(typeof(TypeUtilities), "EnumeratePropertyNames", typeof(ScriptEngine), typeof(object));
             TypeUtilities_Add = GetStaticMethod(typeof(TypeUtilities), "Add", typeof(object), typeof(object));
-            TypeUtilities_VerifyThisObject = GetStaticMethod(typeof(TypeUtilities), "VerifyThisObject", typeof(object), typeof(string));
+            TypeUtilities_VerifyThisObject2 = GetStaticMethod(typeof(TypeUtilities), "VerifyThisObject", typeof(ScriptEngine), typeof(object), typeof(string));
 
             ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(string), typeof(bool));
             ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(string), typeof(PropertyDescriptor), typeof(bool));
@@ -153,19 +154,20 @@ namespace Jurassic
             ObjectScope_ScopeObject = GetInstanceMethod(typeof(ObjectScope), "get_ScopeObject");
             DeclarativeScope_CreateRuntimeScope = GetStaticMethod(typeof(DeclarativeScope), "CreateRuntimeScope", typeof(Scope), typeof(string[]));
             DeclarativeScope_Values = GetInstanceMethod(typeof(DeclarativeScope), "get_Values");
+            DeclarativeScope_ResizeValuesArray = GetInstanceMethod(typeof(DeclarativeScope), "ResizeValuesArray");
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));
             FunctionInstance_ConstructLateBound = GetInstanceMethod(typeof(FunctionInstance), "ConstructLateBound", typeof(object[]));
             FunctionInstance_CallLateBound = GetInstanceMethod(typeof(FunctionInstance), "CallLateBound", typeof(object), typeof(object[]));
             FunctionInstance_InstancePrototype = GetInstanceMethod(typeof(FunctionInstance), "get_InstancePrototype");
 
-            Global_Instance = GetStaticMethod(typeof(GlobalObject), "get_Instance");
-            Global_Boolean = GetStaticMethod(typeof(GlobalObject), "get_Boolean");
-            Global_Function = GetStaticMethod(typeof(GlobalObject), "get_Function");
-            Global_RegExp = GetStaticMethod(typeof(GlobalObject), "get_RegExp");
-            Global_Array = GetStaticMethod(typeof(GlobalObject), "get_Array");
-            Global_Object = GetStaticMethod(typeof(GlobalObject), "get_Object");
-            Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(string), typeof(Scope), typeof(object), typeof(bool));
+            ScriptEngine_Global = GetInstanceMethod(typeof(ScriptEngine), "get_Global");
+            ScriptEngine_Boolean = GetInstanceMethod(typeof(ScriptEngine), "get_Boolean");
+            ScriptEngine_Function = GetInstanceMethod(typeof(ScriptEngine), "get_Function");
+            ScriptEngine_RegExp = GetInstanceMethod(typeof(ScriptEngine), "get_RegExp");
+            ScriptEngine_Array = GetInstanceMethod(typeof(ScriptEngine), "get_Array");
+            ScriptEngine_Object = GetInstanceMethod(typeof(ScriptEngine), "get_Object");
+            Global_Eval2 = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(ScriptEngine), typeof(string), typeof(Scope), typeof(object), typeof(bool));
 
             String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
@@ -178,8 +180,8 @@ namespace Jurassic
             ConcatenatedString_Length = GetInstanceMethod(typeof(ConcatenatedString), "get_Length");
             ConcatenatedString_ToString = GetInstanceMethod(typeof(ConcatenatedString), "ToString");
 
-            JavaScriptException_Constructor2 = GetConstructor(typeof(JavaScriptException), typeof(string), typeof(string));
-            JavaScriptException_Constructor3 = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string));
+            JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ScriptEngine), typeof(string), typeof(string));
+            JavaScriptException_Constructor_Object = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string));
             IEnumerable_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<string>), "GetEnumerator");
             IEnumerator_MoveNext = GetInstanceMethod(typeof(System.Collections.IEnumerator), "MoveNext");
             IEnumerator_Current = GetInstanceMethod(typeof(IEnumerator<string>), "get_Current");

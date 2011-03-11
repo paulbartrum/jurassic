@@ -4,11 +4,13 @@ using System.Reflection;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public interface IILProvider {
+    internal interface IILProvider
+    {
         Byte[] GetByteArray();
     }
 
-    public class MethodBaseILProvider : IILProvider {
+    internal class MethodBaseILProvider : IILProvider
+    {
         MethodBase m_method;
         byte[] m_byteArray;
 

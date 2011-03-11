@@ -25,9 +25,9 @@ namespace Jurassic.Library
         {
             this.FastSetProperty("length", 0);
             this.IsExtensible = false;
-            this.body = new FunctionDelegate((scope, thisObject, functionObject, argumentValues) =>
+            this.body = new FunctionDelegate((engine, scope, thisObject, functionObject, argumentValues) =>
                 {
-                    throw new JavaScriptException("TypeError", "It is illegal to access the 'callee' or 'caller' property in strict mode");
+                    throw new JavaScriptException(this.Engine, "TypeError", "It is illegal to access the 'callee' or 'caller' property in strict mode");
                 });
         }
 
@@ -44,7 +44,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            return this.body(null, thisObject, this, argumentValues);
+            return this.body(this.Engine, null, thisObject, this, argumentValues);
         }
 
         /// <summary>

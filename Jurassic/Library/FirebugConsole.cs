@@ -20,8 +20,9 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a new FirebugConsole instance.
         /// </summary>
-        public FirebugConsole()
-            : base(GlobalObject.Object.InstancePrototype)
+        /// <param name="engine"> The associated script engine. </param>
+        public FirebugConsole(ScriptEngine engine)
+            : base(engine.Object.InstancePrototype)
         {
             this.Output = Console.Out;
             this.IndentationDelta = 4;
@@ -85,9 +86,8 @@ namespace Jurassic.Library
         /// joined together in a space separated line.  The first parameter can be a string
         /// containing the following patterns:
         ///  %s	 String
-        ///  %d, %i	 Integer (numeric formatting is not yet supported)
-        ///  %f	 Floating point number (numeric formatting is not yet supported)
-        ///  %o	 Object hyperlink (not yet supported)
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
         /// </summary>
         /// <param name="items"> The items to format. </param>
         [JSFunction(Name = "log")]
@@ -101,9 +101,8 @@ namespace Jurassic.Library
         /// joined together in a space separated line.  The first parameter can be a string
         /// containing the following patterns:
         ///  %s	 String
-        ///  %d, %i	 Integer (numeric formatting is not yet supported)
-        ///  %f	 Floating point number (numeric formatting is not yet supported)
-        ///  %o	 Object hyperlink (not yet supported)
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
         /// </summary>
         /// <param name="items"> The items to format. </param>
         [JSFunction(Name = "debug")]
@@ -117,9 +116,8 @@ namespace Jurassic.Library
         /// objects provided will be converted to strings then joined together in a space separated
         /// line.  The first parameter can be a string containing the following patterns:
         ///  %s	 String
-        ///  %d, %i	 Integer (numeric formatting is not yet supported)
-        ///  %f	 Floating point number (numeric formatting is not yet supported)
-        ///  %o	 Object hyperlink (not yet supported)
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
         /// </summary>
         /// <param name="items"> The items to format. </param>
         [JSFunction(Name = "info")]
@@ -136,9 +134,8 @@ namespace Jurassic.Library
         /// will be converted to strings then joined together in a space separated line.  The first
         /// parameter can be a string containing the following patterns:
         ///  %s	 String
-        ///  %d, %i	 Integer (numeric formatting is not yet supported)
-        ///  %f	 Floating point number (numeric formatting is not yet supported)
-        ///  %o	 Object hyperlink (not yet supported)
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
         /// </summary>
         /// <param name="items"> The items to format. </param>
         [JSFunction(Name = "warn")]
@@ -155,9 +152,8 @@ namespace Jurassic.Library
         /// will be converted to strings then joined together in a space separated line.  The
         /// first parameter can be a string containing the following patterns:
         ///  %s	 String
-        ///  %d, %i	 Integer (numeric formatting is not yet supported)
-        ///  %f	 Floating point number (numeric formatting is not yet supported)
-        ///  %o	 Object hyperlink (not yet supported)
+        ///  %d, %i	 Integer
+        ///  %f	 Floating point number
         /// </summary>
         /// <param name="items"> The items to format. </param>
         [JSFunction(Name = "error")]

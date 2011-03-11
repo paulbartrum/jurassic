@@ -45,8 +45,8 @@ namespace Jurassic.Library
         public ObjectInstance Construct(object obj)
         {
             if (obj == null || obj == Undefined.Value || obj == Null.Value)
-                return GlobalObject.Object.Construct();
-            return TypeConverter.ToObject(obj);
+                return this.Engine.Object.Construct();
+            return TypeConverter.ToObject(this.Engine, obj);
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Jurassic.Library
         {
             if (obj == null || obj == Undefined.Value || obj == Null.Value)
                 return this.Construct();
-            return TypeConverter.ToObject(obj);
+            return TypeConverter.ToObject(this.Engine, obj);
         }
 
 
@@ -94,7 +94,7 @@ namespace Jurassic.Library
             var descriptor = obj.GetOwnPropertyDescriptor(propertyName);
             if (descriptor.Exists == false)
                 return null;
-            return descriptor.ToObject();
+            return descriptor.ToObject(obj.Engine);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "getOwnPropertyNames")]
         public static ArrayInstance GetOwnPropertyNames([JSDoNotConvert] ObjectInstance obj)
         {
-            var result = GlobalObject.Array.New();
+            var result = obj.Engine.Array.New();
             foreach (var property in ((ObjectInstance)obj).Properties)
                 result.Push(property.Name);
             return result;
@@ -119,14 +119,14 @@ namespace Jurassic.Library
         /// created object. </param>
         /// <param name="properties"> An object containing one or more property descriptors. </param>
         /// <returns> A new object instance. </returns>
-        [JSFunction(Name = "create")]
-        public static ObjectInstance Create(object prototype, ObjectInstance properties = null)
+        [JSFunction(Name = "create", Flags = FunctionBinderFlags.HasEngineParameter)]
+        public static ObjectInstance Create(ScriptEngine engine, object prototype, ObjectInstance properties = null)
         {
             if ((prototype is ObjectInstance) == false && prototype != Null.Value)
-                throw new JavaScriptException("TypeError", "object prototype must be an object or null");
+                throw new JavaScriptException(engine, "TypeError", "object prototype must be an object or null");
             ObjectInstance result;
             if (prototype == Null.Value)
-                result = ObjectInstance.CreateRootObject();
+                result = ObjectInstance.CreateRootObject(engine);
             else
                 result = ObjectInstance.CreateRawObject((ObjectInstance)prototype);
             if (properties != null)
@@ -161,7 +161,7 @@ namespace Jurassic.Library
         {
             foreach (var property in properties.Properties)
                 if (property.IsEnumerable == true)
-                    DefineProperty(obj, property.Name, TypeConverter.ToObject(property.Value));
+                    DefineProperty(obj, property.Name, TypeConverter.ToObject(obj.Engine, property.Value));
             return obj;
         }
 
@@ -267,7 +267,7 @@ namespace Jurassic.Library
         [JSFunction(Name = "keys")]
         public static ArrayInstance Keys([JSDoNotConvert] ObjectInstance obj)
         {
-            var result = GlobalObject.Array.New();
+            var result = obj.Engine.Array.New();
             foreach (var property in obj.Properties)
                 if (property.IsEnumerable == true)
                     result.Push(property.Name);

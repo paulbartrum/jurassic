@@ -84,7 +84,8 @@ namespace Jurassic.Compiler
                 generator.BranchIfNotEqual(label1);
 
                 // sharedRegExp = Global.RegExp.Construct(source, flags)
-                generator.Call(ReflectionHelpers.Global_RegExp);
+                EmitHelpers.LoadScriptEngine(generator);
+                generator.Call(ReflectionHelpers.ScriptEngine_RegExp);
                 generator.LoadString(((RegularExpressionLiteral)this.Value).Pattern);
                 generator.LoadString(((RegularExpressionLiteral)this.Value).Flags);
                 generator.Call(ReflectionHelpers.RegExp_Construct1);
@@ -96,7 +97,8 @@ namespace Jurassic.Compiler
                 generator.DefineLabelPosition(label1);
 
                 // Global.RegExp.Construct(sharedRegExp, flags)
-                generator.Call(ReflectionHelpers.Global_RegExp);
+                EmitHelpers.LoadScriptEngine(generator);
+                generator.Call(ReflectionHelpers.ScriptEngine_RegExp);
                 generator.LoadVariable(sharedRegExpVariable);
                 generator.LoadNull();
                 generator.Call(ReflectionHelpers.RegExp_Construct2);
@@ -116,7 +118,8 @@ namespace Jurassic.Compiler
 
                 // Operands for ArrayConstructor.New() are: an ArrayConstructor instance (ArrayConstructor), an array (object[])
                 // ArrayConstructor
-                generator.Call(ReflectionHelpers.Global_Array);
+                EmitHelpers.LoadScriptEngine(generator);
+                generator.Call(ReflectionHelpers.ScriptEngine_Array);
 
                 // object[]
                 generator.LoadInt32(arrayLiteral.Count);
@@ -153,7 +156,8 @@ namespace Jurassic.Compiler
                 var properties = (Dictionary<string, object>)this.Value;
 
                 // Create a new object.
-                generator.Call(ReflectionHelpers.Global_Object);
+                EmitHelpers.LoadScriptEngine(generator);
+                generator.Call(ReflectionHelpers.ScriptEngine_Object);
                 generator.Call(ReflectionHelpers.Object_Construct);
 
                 foreach (var keyValuePair in properties)

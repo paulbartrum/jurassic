@@ -424,7 +424,12 @@ namespace Jurassic.Compiler
                 case PrimitiveType.Any:
                     // Otherwise, fall back to calling TypeConverter.ToObject()
                     ToAny(generator, fromType);
-                    generator.Call(ReflectionHelpers.TypeConverter_ToObject);
+                    var temp = generator.CreateTemporaryVariable(typeof(object));
+                    generator.StoreVariable(temp);
+                    EmitHelpers.LoadScriptEngine(generator);
+                    generator.LoadVariable(temp);
+                    generator.ReleaseTemporaryVariable(temp);
+                    generator.Call(ReflectionHelpers.TypeConverter_ToObject2);
                     break;
 
                 default:

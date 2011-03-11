@@ -73,7 +73,7 @@ namespace Jurassic.Library
         public string ToExponential(int fractionDigits = 20)
         {
             if (fractionDigits < 0 || fractionDigits > 20)
-                throw new JavaScriptException("RangeError", "toExponential() argument must be between 0 and 20.");
+                throw new JavaScriptException(this.Engine, "RangeError", "toExponential() argument must be between 0 and 20.");
             return this.value.ToString(string.Concat("0.", new string('#', fractionDigits), "e+0"),
                 System.Globalization.CultureInfo.InvariantCulture);
         }
@@ -92,7 +92,7 @@ namespace Jurassic.Library
         public string ToFixed(int fractionDigits = 0)
         {
             if (fractionDigits < 0 || fractionDigits > 20)
-                throw new JavaScriptException("RangeError", "toFixed() argument must be between 0 and 20.");
+                throw new JavaScriptException(this.Engine, "RangeError", "toFixed() argument must be between 0 and 20.");
             return this.value.ToString("f" + fractionDigits, System.Globalization.CultureInfo.InvariantCulture);
         }
 
@@ -134,11 +134,11 @@ namespace Jurassic.Library
         /// returned.
         /// If precision is not supplied or is undefined, the toString method is called instead.
         /// </remarks>
-        [JSFunction(Name = "toPrecision", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "toPrecision")]
         public string ToPrecision(int precision)
         {
             if (precision < 0 || precision > 21)
-                throw new JavaScriptException("RangeError", "toPrecision() argument must be between 0 and 21.");
+                throw new JavaScriptException(this.Engine, "RangeError", "toPrecision() argument must be between 0 and 21.");
             return this.value.ToString("g" + precision, System.Globalization.CultureInfo.InvariantCulture).
                 Replace("e+0", "e+").Replace("e-0", "e-");  // Hack: remove the extra zero in the exponent.
         }
@@ -152,7 +152,7 @@ namespace Jurassic.Library
         public string ToStringJS(int radix = 10)
         {
             if (radix < 2 || radix > 36)
-                throw new JavaScriptException("RangeError", "The radix must be between 2 and 36, inclusive.");
+                throw new JavaScriptException(this.Engine, "RangeError", "The radix must be between 2 and 36, inclusive.");
 
             // Check for common case: base 10.
             if (radix == 10)
@@ -225,17 +225,13 @@ namespace Jurassic.Library
             }
 
             return result.ToString();
-
-            // 0.3333333333333333
-            // 0.3333333333333333
-            // 0.333333333333333
         }
 
         /// <summary>
         /// Returns the primitive value of the specified object.
         /// </summary>
         /// <returns> The primitive value of the specified object. </returns>
-        [JSFunction(Name = "valueOf", Flags = FunctionBinderFlags.HasThisObject)]
+        [JSFunction(Name = "valueOf")]
         public new double ValueOf()
         {
             return this.value;

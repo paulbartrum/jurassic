@@ -17,6 +17,9 @@ namespace UnitTests
         [ThreadStatic]
         private static ActiveScriptEngine jscriptEngine;
 
+        [ThreadStatic]
+        private static Jurassic.ScriptEngine jurassicScriptEngine;
+
         public static JSEngine Engine
         {
             get { return JSEngine.Jurassic; }
@@ -37,7 +40,14 @@ namespace UnitTests
             }
             else
             {
-                result = Jurassic.Library.GlobalObject.Eval(script);
+                if (jurassicScriptEngine == null)
+                {
+                    jurassicScriptEngine = new Jurassic.ScriptEngine();
+#if !DEBUG
+                    jurassicScriptEngine.EnableDebugging = true;
+#endif
+                }
+                result = jurassicScriptEngine.Evaluate(script);
             }
             if (result is double)
             {
@@ -66,15 +76,16 @@ namespace UnitTests
             }
             else
             {
+                object result;
                 try
                 {
-                    Evaluate(script);
+                    result = Evaluate(script);
                 }
                 catch (Jurassic.JavaScriptException ex)
                 {
                     return ex.Name;
                 }
-                return "No error was thrown";
+                return string.Format("No error was thrown (result was '{0}')", result);
             }
         }
 

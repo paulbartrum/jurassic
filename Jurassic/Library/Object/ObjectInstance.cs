@@ -10,11 +10,14 @@ namespace Jurassic.Library
     /// </summary>
     public class ObjectInstance
     {
+        // The script engine associated with this object.
+        private ScriptEngine engine;
+
         // Internal prototype chain.
         private ObjectInstance prototype;
 
         // Stores the property names and attributes for this object.
-        private HiddenClassSchema schema = HiddenClassSchema.Empty;
+        private HiddenClassSchema schema;
 
         // Stores the property values for this object.
         private object[] propertyValues = new object[4];
@@ -39,8 +42,13 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates an Object with no prototype.
         /// </summary>
-        private ObjectInstance()
+        /// <param name="engine"> The script engine associated with this object. </param>
+        protected ObjectInstance(ScriptEngine engine)
         {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+            this.engine = engine;
+            this.schema = this.engine.EmptySchema;
         }
 
         /// <summary>
@@ -52,20 +60,24 @@ namespace Jurassic.Library
             if (prototype == null)
                 throw new ArgumentNullException("prototype");
             this.prototype = prototype;
+            this.engine = prototype.Engine;
+            this.schema = this.engine.EmptySchema;
         }
 
         /// <summary>
         /// Creates an Object with no prototype to serve as the base prototype of all objects.
         /// </summary>
+        /// <param name="engine"> The script engine associated with this object. </param>
         /// <returns> An Object with no prototype. </returns>
-        internal static ObjectInstance CreateRootObject()
+        internal static ObjectInstance CreateRootObject(ScriptEngine engine)
         {
-            return new ObjectInstance();
+            return new ObjectInstance(engine);
         }
 
         /// <summary>
         /// Creates an Object instance (use ObjectConstructor.Construct rather than this).
         /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <returns> An Object instance. </returns>
         internal static ObjectInstance CreateRawObject(ObjectInstance prototype)
         {
@@ -78,12 +90,20 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
+        /// Gets a reference to the script engine associated with this object.
+        /// </summary>
+        public ScriptEngine Engine
+        {
+            get { return this.engine; }
+        }
+
+        /// <summary>
         /// Gets the internal class name of the object.  Used by the default toString()
         /// implementation.
         /// </summary>
         protected virtual string InternalClassName
         {
-            get { return "Object"; }
+            get { return this is ObjectInstance ? "Object" : this.GetType().Name; }
         }
 
         /// <summary>
@@ -541,7 +561,7 @@ namespace Jurassic.Library
                 {
                     // The property is read-only.
                     if (throwOnError == true)
-                        throw new JavaScriptException("TypeError", string.Format("The property '{0}' is read-only.", propertyName));
+                        throw new JavaScriptException(this.Engine, "TypeError", string.Format("The property '{0}' is read-only.", propertyName));
                     return true;
                 }
 
@@ -560,7 +580,7 @@ namespace Jurassic.Library
                     // Otherwise, the property is the "magic" length property.
                     double length = TypeConverter.ToNumber(value);
                     if (length < 0 || length > uint.MaxValue)
-                        throw new JavaScriptException("RangeError", "Invalid array length");
+                        throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
                     ((ArrayInstance)this).Length = TypeConverter.ToUint32(length);
                 }
                 return true;
@@ -646,7 +666,7 @@ namespace Jurassic.Library
             if (propertyInfo.IsConfigurable == false)
             {
                 if (throwOnError == true)
-                    throw new JavaScriptException("TypeError", string.Format("The property '{0}' cannot be deleted.", propertyName));
+                    throw new JavaScriptException(this.Engine, "TypeError", string.Format("The property '{0}' cannot be deleted.", propertyName));
                 return false;
             }
 
@@ -696,7 +716,7 @@ namespace Jurassic.Library
                     (descriptor.IsAccessor == false && current.IsWritable == false && TypeComparer.SameValue(currentValue, descriptor.Value) == false))
                 {
                     if (throwOnError == true)
-                        throw new JavaScriptException("TypeError", string.Format("The property '{0}' is non-configurable.", propertyName));
+                        throw new JavaScriptException(this.Engine, "TypeError", string.Format("The property '{0}' is non-configurable.", propertyName));
                     return false;
                 }
             }
@@ -724,7 +744,7 @@ namespace Jurassic.Library
             if (this.IsExtensible == false)
             {
                 if (throwOnError == true)
-                    throw new JavaScriptException("TypeError", string.Format("The property '{0}' cannot be created as the object is not extensible.", propertyName));
+                    throw new JavaScriptException(this.Engine, "TypeError", string.Format("The property '{0}' cannot be created as the object is not extensible.", propertyName));
                 return false;
             }
 
@@ -827,7 +847,7 @@ namespace Jurassic.Library
 
             }
 
-            throw new JavaScriptException("TypeError", "Attempted conversion of the object to a primitive value failed.  Check the toString() and valueOf() functions.");
+            throw new JavaScriptException(this.Engine, "TypeError", "Attempted conversion of the object to a primitive value failed.  Check the toString() and valueOf() functions.");
         }
 
         /// <summary>
@@ -841,9 +861,9 @@ namespace Jurassic.Library
         {
             var function = GetPropertyValue(functionName);
             if (function == null)
-                throw new JavaScriptException("TypeError", string.Format("Object {0} has no method '{1}'", this.ToString(), functionName));
+                throw new JavaScriptException(this.Engine, "TypeError", string.Format("Object {0} has no method '{1}'", this.ToString(), functionName));
             if ((function is FunctionInstance) == false)
-                throw new JavaScriptException("TypeError", string.Format("Property '{1}' of object {0} is not a function", this.ToString(), functionName));
+                throw new JavaScriptException(this.Engine, "TypeError", string.Format("Property '{1}' of object {0} is not a function", this.ToString(), functionName));
             return ((FunctionInstance)function).CallLateBound(this, parameters);
         }
 
@@ -910,29 +930,31 @@ namespace Jurassic.Library
         /// <summary>
         /// Determines if a property with the given name exists on this object.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="propertyName"> The name of the property. </param>
         /// <returns> <c>true</c> if a property with the given name exists on this object,
         /// <c>false</c> otherwise. </returns>
         /// <remarks> Objects in the prototype chain are not considered. </remarks>
-        [JSFunction(Name = "hasOwnProperty", Flags = FunctionBinderFlags.HasThisObject)]
-        public static bool HasOwnProperty(object thisObject, string propertyName)
+        [JSFunction(Name = "hasOwnProperty", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        public static bool HasOwnProperty(ScriptEngine engine, object thisObject, string propertyName)
         {
-            TypeUtilities.VerifyThisObject(thisObject, "hasOwnProperty");
-            return TypeConverter.ToObject(thisObject).GetOwnPropertyDescriptor(propertyName).Exists;
+            TypeUtilities.VerifyThisObject(engine, thisObject, "hasOwnProperty");
+            return TypeConverter.ToObject(engine, thisObject).GetOwnPropertyDescriptor(propertyName).Exists;
         }
 
         /// <summary>
         /// Determines if this object is in the prototype chain of the given object.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if this object is in the prototype chain of the given object;
         /// <c>false</c> otherwise. </returns>
-        [JSFunction(Name = "isPrototypeOf", Flags = FunctionBinderFlags.HasThisObject)]
-        public static bool IsPrototypeOf(object thisObject, object obj)
+        [JSFunction(Name = "isPrototypeOf", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        public static bool IsPrototypeOf(ScriptEngine engine, object thisObject, object obj)
         {
             if ((obj is ObjectInstance) == false)
                 return false;
-            TypeUtilities.VerifyThisObject(thisObject, "isPrototypeOf");
+            TypeUtilities.VerifyThisObject(engine, thisObject, "isPrototypeOf");
             var obj2 = obj as ObjectInstance;
             while (true)
             {
@@ -947,15 +969,16 @@ namespace Jurassic.Library
         /// <summary>
         /// Determines if a property with the given name exists on this object and is enumerable.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="propertyName"> The name of the property. </param>
         /// <returns> <c>true</c> if a property with the given name exists on this object and is
         /// enumerable, <c>false</c> otherwise. </returns>
         /// <remarks> Objects in the prototype chain are not considered. </remarks>
-        [JSFunction(Name = "propertyIsEnumerable", Flags = FunctionBinderFlags.HasThisObject)]
-        public static bool PropertyIsEnumerable(object thisObject, string propertyName)
+        [JSFunction(Name = "propertyIsEnumerable", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        public static bool PropertyIsEnumerable(ScriptEngine engine, object thisObject, string propertyName)
         {
-            TypeUtilities.VerifyThisObject(thisObject, "propertyIsEnumerable");
-            var property = TypeConverter.ToObject(thisObject).GetOwnPropertyDescriptor(propertyName);
+            TypeUtilities.VerifyThisObject(engine, thisObject, "propertyIsEnumerable");
+            var property = TypeConverter.ToObject(engine, thisObject).GetOwnPropertyDescriptor(propertyName);
             return property.Exists && property.IsEnumerable;
         }
 
@@ -984,14 +1007,14 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword. </param>
         /// <returns> A string representing the current object. </returns>
-        [JSFunction(Name = "toString", Flags = FunctionBinderFlags.HasThisObject)]
-        public static string ToStringJS(object thisObject)
+        [JSFunction(Name = "toString", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        public static string ToStringJS(ScriptEngine engine, object thisObject)
         {
             if (thisObject == null || thisObject == Undefined.Value)
                 return "[object undefined]";
             if (thisObject == Null.Value)
                 return "[object null]";
-            return string.Format("[object {0}]", TypeConverter.ToObject(thisObject).InternalClassName);
+            return string.Format("[object {0}]", TypeConverter.ToObject(engine, thisObject).InternalClassName);
         }
 
 
@@ -1028,7 +1051,7 @@ namespace Jurassic.Library
                 string name;
                 if (attribute.Name != null)
                 {
-                    name = Compiler.Lexer.ResolveIdentifier(attribute.Name);
+                    name = Compiler.Lexer.ResolveIdentifier(this.Engine, attribute.Name);
                     if (name == null)
                         throw new InvalidOperationException(string.Format("The name provided to [JSFunction] on {0} is not a valid identifier.", method));
                 }
@@ -1065,7 +1088,7 @@ namespace Jurassic.Library
                 MethodGroup methodGroup = pair.Value;
 
                 // Add the function as a property of the object.
-                this.FastSetProperty(name, new ClrFunction(GlobalObject.Function.InstancePrototype, methodGroup.Methods, name, methodGroup.Length), PropertyAttributes.NonEnumerable);
+                this.FastSetProperty(name, new ClrFunction(this.Engine.Function.InstancePrototype, methodGroup.Methods, name, methodGroup.Length), PropertyAttributes.NonEnumerable);
             }
         }
 

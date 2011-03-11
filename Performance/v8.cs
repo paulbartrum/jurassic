@@ -12,14 +12,33 @@ namespace Performance
     [TestClass]
     public class v8
     {
+        [ThreadStatic]
+        private static Jurassic.ScriptEngine engine;
+
+        [ThreadStatic]
+        private static System.Diagnostics.Stopwatch timer;
+
+        [ThreadStatic]
+        private static double parseTime, optimizationTime, codeGenerationTime;
+
         private static object originalRandom;
 
         [ClassInitialize]
         public static void WarmUp(TestContext context)
         {
+            // Create a new script engine.
+            var warmUpTimer = System.Diagnostics.Stopwatch.StartNew();
+            engine = new Jurassic.ScriptEngine();
+            context.WriteLine("Warm up time: {0:n2}ms", warmUpTimer.Elapsed.TotalMilliseconds);
+
+            // Hook events to record statistics.
+            engine.OptimizationStarted += (sender, e) => { parseTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
+            engine.CodeGenerationStarted += (sender, e) => { optimizationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
+            engine.ExecutionStarted += (sender, e) => { codeGenerationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
+
             // Replace the default random number generator with a deterministic one.
-            originalRandom = GlobalObject.Math["random"];
-            GlobalObject.Math["random"] = GlobalObject.Eval(@"
+            originalRandom = engine.Math["random"];
+            engine.Math["random"] = engine.Evaluate(@"
                 (function() {
                   var seed = 49734321;
                   return function() {
@@ -39,7 +58,7 @@ namespace Performance
         public static void CleanUp()
         {
             // Revert the random number generator.
-            GlobalObject.Math["random"] = originalRandom;
+            engine.Math["random"] = originalRandom;
         }
 
         [TestMethod]
@@ -47,7 +66,7 @@ namespace Performance
         {
             // The test calls alert if there is an error.  Since alert is not supported,
             // translate this into throwing an exception.
-            GlobalObject.Instance["alert"] = GlobalObject.Eval("(function alert(str) { throw new Error(str) })");
+            engine.Global["alert"] = engine.Evaluate("(function alert(str) { throw new Error(str) })");
 
             RunTest(@"crypto.js", 0);
         }
@@ -57,7 +76,7 @@ namespace Performance
         {
             // The test calls alert if there is an error.  Since alert is not supported,
             // translate this into throwing an exception.
-            GlobalObject.Instance["alert"] = GlobalObject.Eval("(function alert(str) { throw new Error(str) })");
+            engine.Global["alert"] = engine.Evaluate("(function alert(str) { throw new Error(str) })");
             
             // Run the deltablue test.
             RunTest(@"deltablue.js", 352.3);
@@ -68,7 +87,7 @@ namespace Performance
         {
             // The test calls alert if there is an error.  Since alert is not supported,
             // translate this into throwing an exception.
-            GlobalObject.Instance["alert"] = GlobalObject.Eval("(function alert(str) { throw new Error(str) })");
+            engine.Global["alert"] = engine.Evaluate("(function alert(str) { throw new Error(str) })");
 
             RunTest(@"earley-boyer.js", 0);
         }
@@ -88,14 +107,14 @@ namespace Performance
         [TestMethod]
         public void richards()
         {
-            GlobalObject.Instance["console"] = new Jurassic.Library.FirebugConsole();
+            engine.Global["console"] = new Jurassic.Library.FirebugConsole(engine);
             RunTest(@"richards.js", 298.7);
         }
 
         [TestMethod]
         public void splay()
         {
-            GlobalObject.Instance["console"] = new Jurassic.Library.FirebugConsole();
+            engine.Global["console"] = new Jurassic.Library.FirebugConsole(engine);
             RunTest(@"splay.js", 6873);
         }
 
@@ -110,34 +129,18 @@ namespace Performance
 
         private void RunTest(string scriptPath, double previous, bool assertResults = true)
         {
-            scriptPath = Path.GetFullPath(Path.Combine(@"..\..\..\Performance\Files\v8\", scriptPath));
+            scriptPath = Path.Combine(@"..\..\..\Performance\Files\v8\", scriptPath);
             var script = File.ReadAllText(scriptPath);
-            var timer = System.Diagnostics.Stopwatch.StartNew();
 
-            // Parse the javascript code.
-            var context = new Jurassic.Compiler.GlobalContext(new System.IO.StringReader(script), scriptPath);
-            context.Parse();
-            double parseTime = timer.Elapsed.TotalMilliseconds;
-
-            // Optimize the code.
-            timer.Restart();
-            context.Optimize();
-            double optimizationTime = timer.Elapsed.TotalMilliseconds;
-
-            // Compile the code.
-            timer.Restart();
-            context.GenerateCode();
-            double compilationTime = timer.Elapsed.TotalMilliseconds;
-
-            // Run the javascript code.
-            timer.Restart();
-            context.Execute();
+            // Execute the javascript code.
+            timer = System.Diagnostics.Stopwatch.StartNew();
+            engine.Execute(new Jurassic.StringScriptSource(script));
             double runTime = timer.Elapsed.TotalMilliseconds;
 
             string infoString = string.Format("{0:n1}ms (parse: {1:n1}ms, compile: {2:n1}ms, optimize: {3:n1}ms, runtime: {4:n1}ms)",
-                parseTime + compilationTime + runTime,
+                parseTime + optimizationTime + codeGenerationTime + runTime,
                 parseTime,
-                compilationTime,
+                codeGenerationTime,
                 optimizationTime,
                 runTime);
             if (previous > 0)
@@ -146,10 +149,10 @@ namespace Performance
             Console.WriteLine("{0}\t{1:n1}\t{2:n1}\t{3:n1}\t{4:n1}\t{5:n1}",
                 Path.GetFileNameWithoutExtension(scriptPath),
                 parseTime,
-                compilationTime,
+                codeGenerationTime,
                 optimizationTime,
                 runTime,
-                parseTime + compilationTime + runTime);
+                parseTime + optimizationTime + codeGenerationTime + runTime);
             if (assertResults == true)
                 throw new AssertInconclusiveException(infoString);
         }

@@ -133,7 +133,7 @@ namespace UnitTests
         {
             Assert.AreEqual("[object Math]", TestUtils.Evaluate("({}.toString.call(Math))"));
             Assert.AreEqual(2, TestUtils.Evaluate("new Function('a', 'return this / a').call(10, 5)"));
-            Assert.AreEqual(GlobalObject.Instance, TestUtils.Evaluate("new Function('return this').call()"));
+            Assert.AreEqual(true, TestUtils.Evaluate("new Function('return this').call() === this"));
             Assert.AreEqual("[object undefined]", TestUtils.Evaluate("toString.call()"));
 
             // length
@@ -147,6 +147,13 @@ namespace UnitTests
             Assert.AreEqual(32, TestUtils.Evaluate("var f = Math.pow.bind(undefined, 2); f(5);"));
             Assert.AreEqual(5, TestUtils.Evaluate("new Function('a,b', 'return a / b').bind(undefined, 10)(2)"));
             Assert.AreEqual(15, TestUtils.Evaluate("new Function('a,b', 'return a + b').bind(undefined, 10, 5)(2)"));
+
+            // length of bound functions is the number of arguments remaining.
+            Assert.AreEqual(2, TestUtils.Evaluate("Math.pow.length"));
+            Assert.AreEqual(2, TestUtils.Evaluate("var f = Math.pow.bind(undefined); f.length"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var f = Math.pow.bind(undefined, 2); f.length"));
+            Assert.AreEqual(0, TestUtils.Evaluate("var f = Math.pow.bind(undefined, 2, 5); f.length"));
+            Assert.AreEqual(0, TestUtils.Evaluate("var f = Math.pow.bind(undefined, 2, 5, 7); f.length"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Function.prototype.bind.length"));

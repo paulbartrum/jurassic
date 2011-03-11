@@ -28,13 +28,20 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -43,10 +50,11 @@
     <Compile Include="Compiler\Debugging\COMHelpers.cs" />
     <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
     <Compile Include="Compiler\Lexer\RegularExpressionLiteral.cs" />
-    <Compile Include="Compiler\Context\EvalContext.cs" />
-    <Compile Include="Compiler\Context\FunctionContext.cs" />
-    <Compile Include="Compiler\Context\GlobalContext.cs" />
-    <Compile Include="Compiler\Context\ScriptContext.cs" />
+    <Compile Include="Compiler\MethodGenerator\CompilerOptions.cs" />
+    <Compile Include="Compiler\MethodGenerator\EvalMethodGenerator.cs" />
+    <Compile Include="Compiler\MethodGenerator\FunctionMethodGenerator.cs" />
+    <Compile Include="Compiler\MethodGenerator\GlobalMethodGenerator.cs" />
+    <Compile Include="Compiler\MethodGenerator\MethodGenerator.cs" />
     <Compile Include="Compiler\Emit\FunctionOptimizationInfo.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ILGenerator.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\ReflectionEmitILGenerator.cs" />
@@ -97,13 +105,16 @@
     <Compile Include="Compiler\Statements\Statement.cs" />
     <Compile Include="Compiler\Debugging\SourceCodeSpan.cs" />
     <Compile Include="Core\ConcatenatedString.cs" />
+    <Compile Include="Core\ScriptEngine.cs" />
+    <Compile Include="Core\ScriptSource\StringScriptSource.cs" />
+    <Compile Include="Core\ScriptSource\FileScriptSource.cs" />
+    <Compile Include="Core\ScriptSource\ScriptSource.cs" />
     <Compile Include="Library\FirebugConsole.cs" />
     <Compile Include="Library\Function\BoundFunction.cs" />
     <Compile Include="Library\Function\ThrowTypeErrorFunction.cs" />
     <Compile Include="Library\JSON\JSONParser.cs" />
     <Compile Include="Library\JSON\JSONSerializer.cs" />
     <Compile Include="Library\JSON\JSONLexer.cs" />
-    <Compile Include="Core\ExecutionStack.cs" />
     <Compile Include="Core\TypeUtilities.cs" />
     <Compile Include="Core\ReflectionHelpers.cs" />
     <Compile Include="Compiler\Lexer\IdentifierToken.cs" />
@@ -174,7 +185,6 @@
     <Content Include="Compiler\Emit\ILReader\README.txt" />
     <Content Include="Compiler\Emit\Optimizations.txt" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -18,7 +18,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal DateConstructor(ObjectInstance prototype)
-            : base(prototype, "Date", new DateInstance(GlobalObject.Object.InstancePrototype, double.NaN))
+            : base(prototype, "Date", new DateInstance(prototype.Engine.Object.InstancePrototype, double.NaN))
         {
         }
 

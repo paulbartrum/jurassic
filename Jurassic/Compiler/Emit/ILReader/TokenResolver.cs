@@ -4,7 +4,8 @@ using System.Reflection;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public interface ITokenResolver {
+    internal interface ITokenResolver
+    {
         MethodBase AsMethod(int token);
         FieldInfo AsField(int token);
         Type AsType(int token);
@@ -13,7 +14,8 @@ namespace ClrTest.Reflection {
         byte[] AsSignature(int token);
     }
 
-    public class ModuleScopeTokenResolver : ITokenResolver {
+    internal class ModuleScopeTokenResolver : ITokenResolver
+    {
         private Module m_module;
         private MethodBase m_enclosingMethod;
         private Type[] m_methodContext;

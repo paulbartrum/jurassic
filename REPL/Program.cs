@@ -9,10 +9,12 @@ namespace REPL
     {
         static void Main(string[] args)
         {
+            var engine = new Jurassic.ScriptEngine();
+
             // Register the firebug console object.
-            var console = new Jurassic.Library.FirebugConsole();
+            var console = new Jurassic.Library.FirebugConsole(engine);
             console.CurrentIndentation = 2;
-            Jurassic.Library.GlobalObject.Instance["console"] = console;
+            engine.Global["console"] = console;
 
             Console.WriteLine("JavaScript console (type 'quit' to exit)");
             Console.WriteLine("Most Firebug console commands are available");
@@ -26,7 +28,7 @@ namespace REPL
                     return;
                 try
                 {
-                    var result = Jurassic.Library.GlobalObject.Eval(source);
+                    var result = engine.Evaluate(source);
 
                     // Write the result.
                     var original = Console.ForegroundColor;

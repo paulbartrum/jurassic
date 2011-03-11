@@ -69,10 +69,80 @@ namespace Jurassic.Compiler
         /// <param name="message"> The error message. </param>
         public static void EmitThrow(ILGenerator generator, string name, string message)
         {
+            EmitHelpers.LoadScriptEngine(generator);
             generator.LoadString(name);
             generator.LoadString(message);
-            generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor2);
+            generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Error);
             generator.Throw();
+        }
+
+
+
+        //     LOAD METHOD PARAMETERS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Pushes a reference to the script engine onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void LoadScriptEngine(ILGenerator generator)
+        {
+            generator.LoadArgument(0);
+        }
+
+        /// <summary>
+        /// Pushes a reference to the current scope onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void LoadScope(ILGenerator generator)
+        {
+            generator.LoadArgument(1);
+        }
+
+        /// <summary>
+        /// Stores the reference on top of the stack as the new scope.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void StoreScope(ILGenerator generator)
+        {
+            generator.StoreArgument(1);
+        }
+
+        /// <summary>
+        /// Pushes the value of the <c>this</c> keyword onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void LoadThis(ILGenerator generator)
+        {
+            generator.LoadArgument(2);
+        }
+
+        /// <summary>
+        /// Stores the reference on top of the stack as the new value of the <c>this</c> keyword.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void StoreThis(ILGenerator generator)
+        {
+            generator.StoreArgument(2);
+        }
+
+        /// <summary>
+        /// Pushes a reference to the current function onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void LoadFunction(ILGenerator generator)
+        {
+            generator.LoadArgument(3);
+        }
+
+        /// <summary>
+        /// Pushes a reference to the array of argument values for the current function onto the
+        /// stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void LoadArgumentsArray(ILGenerator generator)
+        {
+            generator.LoadArgument(4);
         }
     }
 

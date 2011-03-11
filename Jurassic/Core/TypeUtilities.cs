@@ -38,13 +38,14 @@ namespace Jurassic
         /// Enumerates the names of the enumerable properties on the given object, including
         /// properties defined on the object's prototype.  Used by the for-in statement.
         /// </summary>
+        /// <param name="engine"> The script engine used to convert the given value to an object. </param>
         /// <param name="obj"> The object to enumerate. </param>
         /// <returns> An enumerator that iteratively returns property names. </returns>
-        public static IEnumerable<string> EnumeratePropertyNames(object obj)
+        public static IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
         {
             if (obj == null || obj == Undefined.Value || obj == Null.Value)
                 return new string[0];
-            var obj2 = TypeConverter.ToObject(obj);
+            var obj2 = TypeConverter.ToObject(engine, obj);
             var names = new List<string>();
             do
             {
@@ -106,14 +107,15 @@ namespace Jurassic
         /// <summary>
         /// Throws a TypeError when the given value is <c>null</c> or <c>undefined.</c>
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="value"> The value to check. </param>
         /// <param name="functionName"> The name of the function which is doing the check. </param>
-        public static void VerifyThisObject(object value, string functionName)
+        public static void VerifyThisObject(ScriptEngine engine, object value, string functionName)
         {
             if (value == null || value == Undefined.Value)
-                throw new JavaScriptException("TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
+                throw new JavaScriptException(engine, "TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
             if (value == Null.Value)
-                throw new JavaScriptException("TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
+                throw new JavaScriptException(engine, "TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
         }
     }
 

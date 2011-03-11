@@ -239,7 +239,7 @@ namespace Jurassic.Library
                 if (match.Groups[i].Value == string.Empty)
                     array[i] = Undefined.Value;
             }
-            var result = GlobalObject.Array.New(array);
+            var result = this.Engine.Array.New(array);
             result["index"] = match.Index;
             result["input"] = input;
             return result;
@@ -277,7 +277,7 @@ namespace Jurassic.Library
             object[] matchValues = new object[matches.Count];
             for (int i = 0; i < matches.Count; i++)
                 matchValues[i] = matches[i].Value;
-            return GlobalObject.Array.New(matchValues);
+            return this.Engine.Array.New(matchValues);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace Jurassic.Library
                 }
                 parameters[match.Groups.Count] = match.Index;
                 parameters[match.Groups.Count + 1] = input;
-                return replaceFunction.CallLateBound(GlobalObject.Instance, parameters).ToString();
+                return replaceFunction.CallLateBound(this.Engine.Global, parameters).ToString();
             });
         }
 
@@ -348,7 +348,7 @@ namespace Jurassic.Library
             // Constrain limit to a positive number.
             limit = Math.Max(0, limit);
             if (limit == 0)
-                return GlobalObject.Array.New(new object[0]);
+                return this.Engine.Array.New(new object[0]);
 
             // Find the first match.
             Match match = this.value.Match(input, 0);
@@ -377,14 +377,14 @@ namespace Jurassic.Library
                     else
                         results.Add(match.Groups[i].Value);
                     if (results.Count >= limit)
-                        return GlobalObject.Array.New(results.ToArray());
+                        return this.Engine.Array.New(results.ToArray());
                 }
 
                 // Find the next match.
                 match = match.NextMatch();
             }
             results.Add(input.Substring(startIndex, input.Length - startIndex));
-            return GlobalObject.Array.New(results.ToArray());
+            return this.Engine.Array.New(results.ToArray());
         }
 
         /// <summary>

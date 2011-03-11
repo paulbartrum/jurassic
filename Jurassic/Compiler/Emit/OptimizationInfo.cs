@@ -38,8 +38,22 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class OptimizationInfo
     {
-        public OptimizationInfo()
+        /// <summary>
+        /// Creates a new OptimizationInfo instance.
+        /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
+        public OptimizationInfo(ScriptEngine engine)
         {
+            this.Engine = engine;
+        }
+
+        /// <summary>
+        /// Gets the associated script engine.
+        /// </summary>
+        public ScriptEngine Engine
+        {
+            get;
+            private set;
         }
 
         //private OptimizationFlags flags;
@@ -225,7 +239,7 @@ namespace Jurassic.Compiler
                 foreach (var labelName in labelNames)
                     foreach (var info in this.breakOrContinueStack)
                         if (info.LabelNames != null && info.LabelNames.Contains(labelName) == true)
-                            throw new JavaScriptException("SyntaxError", string.Format("Label '{0}' has already been declared", labelName));
+                            throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Label '{0}' has already been declared", labelName));
             }
 
             // Push the info to the stack.
@@ -262,7 +276,7 @@ namespace Jurassic.Compiler
                     if (info.LabelledOnly == false)
                         return info.BreakTarget;
                 }
-                throw new JavaScriptException("SyntaxError", "Illegal break statement");
+                throw new JavaScriptException(this.Engine, "SyntaxError", "Illegal break statement");
             }
             else
             {
@@ -271,7 +285,7 @@ namespace Jurassic.Compiler
                     if (info.LabelNames != null && info.LabelNames.Contains(labelName) == true)
                         return info.BreakTarget;
                 }
-                throw new JavaScriptException("SyntaxError", string.Format("Undefined label '{0}'", labelName));
+                throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Undefined label '{0}'", labelName));
             }
         }
 
@@ -291,7 +305,7 @@ namespace Jurassic.Compiler
                     if (info.ContinueTarget != null && info.LabelledOnly == false)
                         return info.ContinueTarget;
                 }
-                throw new JavaScriptException("SyntaxError", "Illegal continue statement");
+                throw new JavaScriptException(this.Engine, "SyntaxError", "Illegal continue statement");
             }
             else
             {
@@ -300,11 +314,11 @@ namespace Jurassic.Compiler
                     if (info.LabelNames != null && info.LabelNames.Contains(labelName) == true)
                     {
                         if (info.ContinueTarget == null)
-                            throw new JavaScriptException("SyntaxError", string.Format("The statement with label '{0}' is not a loop", labelName));
+                            throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("The statement with label '{0}' is not a loop", labelName));
                         return info.ContinueTarget;
                     }
                 }
-                throw new JavaScriptException("SyntaxError", string.Format("Undefined label '{0}'", labelName));
+                throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Undefined label '{0}'", labelName));
             }
         }
     }

@@ -18,7 +18,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal RegExpConstructor(ObjectInstance prototype)
-            : base(prototype, "RegExp", new RegExpInstance(GlobalObject.Object.InstancePrototype, string.Empty))
+            : base(prototype, "RegExp", new RegExpInstance(prototype.Engine.Object.InstancePrototype, string.Empty))
         {
         }
 
@@ -55,7 +55,7 @@ namespace Jurassic.Library
         public RegExpInstance Call(RegExpInstance regExp, string flags = null)
         {
             if (flags != null)
-                throw new JavaScriptException("TypeError", "Cannot supply flags when constructing one RegExp from another");
+                throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
             return regExp;
         }
 
@@ -88,7 +88,7 @@ namespace Jurassic.Library
         public RegExpInstance Construct(RegExpInstance regExp, string flags = null)
         {
             if (flags != null)
-                throw new JavaScriptException("TypeError", "Cannot supply flags when constructing one RegExp from another");
+                throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
             return new RegExpInstance(this.InstancePrototype, regExp);
         }
     }
