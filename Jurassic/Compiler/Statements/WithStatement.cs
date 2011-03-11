@@ -45,7 +45,7 @@ namespace Jurassic.Compiler
         {
             // This statement is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
-                throw new JavaScriptException("SyntaxError", "The with statement is not supported in strict mode");
+                throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "The with statement is not supported in strict mode");
 
             // Create the scope.
             this.Scope.GenerateScopeCreation(generator, optimizationInfo);
@@ -58,9 +58,9 @@ namespace Jurassic.Compiler
 
             // Revert the scope.
             generator.BeginFinallyBlock();
-            generator.LoadArgument(0);
+            EmitHelpers.LoadScope(generator);
             generator.Call(ReflectionHelpers.Scope_ParentScope);
-            generator.StoreArgument(0);
+            EmitHelpers.StoreScope(generator);
             generator.EndExceptionBlock();
         }
 

@@ -62,12 +62,12 @@ namespace Jurassic.Library
                     // Trim any whitespace from the start and end of the argument name.
                     string argumentName = StringInstance.Trim(splitNames[j]);
                     if (argumentName == string.Empty)
-                        throw new JavaScriptException("SyntaxError", "Unexpected ',' in argument");
+                        throw new JavaScriptException(this.Engine, "SyntaxError", "Unexpected ',' in argument");
 
                     // Check the name is valid and resolve any escape sequences.
-                    argumentName = Compiler.Lexer.ResolveIdentifier(argumentName);
+                    argumentName = Compiler.Lexer.ResolveIdentifier(this.Engine, argumentName);
                     if (argumentName == null)
-                        throw new JavaScriptException("SyntaxError", "Expected identifier");
+                        throw new JavaScriptException(this.Engine, "SyntaxError", "Expected identifier");
                     splitNames[j] = argumentName;
                 }
                 argumentNames.AddRange(splitNames);

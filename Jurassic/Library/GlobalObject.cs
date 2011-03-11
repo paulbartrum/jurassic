@@ -10,31 +10,6 @@ namespace Jurassic.Library
     /// </summary>
     public class GlobalObject : ObjectInstance
     {
-        // There is exactly one global instance per thread.
-        [ThreadStatic]
-        private static GlobalObject instance;
-
-        // The built-in objects.
-        private ArrayConstructor arrayConstructor;
-        private BooleanConstructor booleanConstructor;
-        private DateConstructor dateConstructor;
-        private FunctionConstructor functionConstructor;
-        private JSONObject jsonObject;
-        private MathObject mathObject;
-        private NumberConstructor numberConstructor;
-        private ObjectConstructor objectConstructor;
-        private RegExpConstructor regExpConstructor;
-        private StringConstructor stringConstructor;
-
-        // The built-in error objects.
-        private ErrorConstructor errorConstructor;
-        private ErrorConstructor rangeErrorConstructor;
-        private ErrorConstructor typeErrorConstructor;
-        private ErrorConstructor syntaxErrorConstructor;
-        private ErrorConstructor uriErrorConstructor;
-        private ErrorConstructor evalErrorConstructor;
-        private ErrorConstructor referenceErrorConstructor;
-
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
@@ -43,90 +18,13 @@ namespace Jurassic.Library
         /// Creates a new Global object.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        private GlobalObject(ObjectInstance prototype)
+        internal GlobalObject(ObjectInstance prototype)
             : base(prototype)
         {
             // Add the global constants.
             this.FastSetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed);
             this.FastSetProperty("NaN", double.NaN, PropertyAttributes.Sealed);
             this.FastSetProperty("undefined", Undefined.Value, PropertyAttributes.Sealed);
-        }
-
-        /// <summary>
-        /// Creates the globally accessible objects.
-        /// </summary>
-        private void InitializeObjects()
-        {
-            // NOTE: separating this method from the constructor prevents a stack overflow.
-            var baseObject = this.Prototype;
-
-            // Create the function object that second to last in the prototype chain.
-            var baseFunction = UserDefinedFunction.CreateEmptyFunction(baseObject);
-
-            // Object must be created first, then function.
-            this.objectConstructor = new ObjectConstructor(baseFunction, baseObject);
-            this.functionConstructor = new FunctionConstructor(baseFunction, baseFunction);
-
-            // Create all the built-in objects.
-            this.mathObject = new MathObject(baseObject);
-            this.jsonObject = new JSONObject(baseObject);
-
-            // Create all the built-in functions.
-            this.arrayConstructor = new ArrayConstructor(baseFunction);
-            this.booleanConstructor = new BooleanConstructor(baseFunction);
-            this.dateConstructor = new DateConstructor(baseFunction);
-            this.numberConstructor = new NumberConstructor(baseFunction);
-            this.regExpConstructor = new RegExpConstructor(baseFunction);
-            this.stringConstructor = new StringConstructor(baseFunction);
-
-            // Create the error functions.
-            this.errorConstructor = new ErrorConstructor(baseFunction, "Error");
-            this.rangeErrorConstructor = new ErrorConstructor(baseFunction, "RangeError");
-            this.typeErrorConstructor = new ErrorConstructor(baseFunction, "TypeError");
-            this.syntaxErrorConstructor = new ErrorConstructor(baseFunction, "SyntaxError");
-            this.uriErrorConstructor = new ErrorConstructor(baseFunction, "URIError");
-            this.evalErrorConstructor = new ErrorConstructor(baseFunction, "EvalError");
-            this.referenceErrorConstructor = new ErrorConstructor(baseFunction, "ReferenceError");
-
-            // Populate the instance prototypes (TODO: optimize this, currently takes about 15ms).
-            this.PopulateFunctions();
-            this.objectConstructor.PopulateFunctions();
-            this.objectConstructor.InstancePrototype.PopulateFunctions();
-            this.functionConstructor.InstancePrototype.PopulateFunctions(typeof(FunctionInstance));
-            this.mathObject.PopulateFunctions();
-            this.mathObject.PopulateFields();
-            this.jsonObject.PopulateFunctions();
-            this.arrayConstructor.InstancePrototype.PopulateFunctions();
-            this.booleanConstructor.InstancePrototype.PopulateFunctions();
-            this.dateConstructor.PopulateFunctions();
-            this.dateConstructor.InstancePrototype.PopulateFunctions();
-            this.numberConstructor.InstancePrototype.PopulateFunctions();
-            this.numberConstructor.PopulateFields();
-            this.regExpConstructor.InstancePrototype.PopulateFunctions();
-            this.stringConstructor.PopulateFunctions();
-            this.stringConstructor.InstancePrototype.PopulateFunctions();
-            this.errorConstructor.InstancePrototype.PopulateFunctions();
-
-            // Add them as JavaScript-accessible properties of the global instance.
-            this["Array"] = instance.arrayConstructor;
-            this["Boolean"] = instance.booleanConstructor;
-            this["Date"] = instance.dateConstructor;
-            this["Function"] = instance.functionConstructor;
-            this["JSON"] = instance.jsonObject;
-            this["Math"] = instance.mathObject;
-            this["Number"] = instance.numberConstructor;
-            this["Object"] = instance.objectConstructor;
-            this["RegExp"] = instance.regExpConstructor;
-            this["String"] = instance.stringConstructor;
-
-            // And the errors.
-            this["Error"] = instance.errorConstructor;
-            this["RangeError"] = instance.rangeErrorConstructor;
-            this["TypeError"] = instance.typeErrorConstructor;
-            this["SyntaxError"] = instance.syntaxErrorConstructor;
-            this["URIError"] = instance.uriErrorConstructor;
-            this["EvalError"] = instance.evalErrorConstructor;
-            this["ReferenceError"] = instance.referenceErrorConstructor;
         }
 
 
@@ -143,156 +41,7 @@ namespace Jurassic.Library
             get { return "Global"; }
         }
 
-        /// <summary>
-        /// Gets the instance that is used when no other limiting scope is present.
-        /// </summary>
-        public static GlobalObject Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    // Create the base of the prototype chain.
-                    var baseObject = ObjectInstance.CreateRootObject();
 
-                    // Create the global object.
-                    instance = new GlobalObject(baseObject);
-
-                    // Create the rest of the objects.
-                    instance.InitializeObjects();
-                }
-                return instance;
-            }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible Array object.
-        /// </summary>
-        public static ArrayConstructor Array
-        {
-            get { return Instance.arrayConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible Boolean object.
-        /// </summary>
-        public static BooleanConstructor Boolean
-        {
-            get { return Instance.booleanConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible Date object.
-        /// </summary>
-        public static DateConstructor Date
-        {
-            get { return Instance.dateConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible Function object.
-        /// </summary>
-        public static FunctionConstructor Function
-        {
-            get { return Instance.functionConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible Math object.
-        /// </summary>
-        public static MathObject Math
-        {
-            get { return Instance.mathObject; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible Number object.
-        /// </summary>
-        public static NumberConstructor Number
-        {
-            get { return Instance.numberConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible Object object.
-        /// </summary>
-        public static ObjectConstructor Object
-        {
-            get { return Instance.objectConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible RegExp object.
-        /// </summary>
-        public static RegExpConstructor RegExp
-        {
-            get { return Instance.regExpConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible String object.
-        /// </summary>
-        public static StringConstructor String
-        {
-            get { return Instance.stringConstructor; }
-        }
-
-
-        /// <summary>
-        /// Gets the globally accessible Error object.
-        /// </summary>
-        public static ErrorConstructor Error
-        {
-            get { return Instance.errorConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible RangeError object.
-        /// </summary>
-        public static ErrorConstructor RangeError
-        {
-            get { return Instance.rangeErrorConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible TypeError object.
-        /// </summary>
-        public static ErrorConstructor TypeError
-        {
-            get { return Instance.typeErrorConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible SyntaxError object.
-        /// </summary>
-        public static ErrorConstructor SyntaxError
-        {
-            get { return Instance.syntaxErrorConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible URIError object.
-        /// </summary>
-        public static ErrorConstructor URIError
-        {
-            get { return Instance.uriErrorConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible EvalError object.
-        /// </summary>
-        public static ErrorConstructor EvalError
-        {
-            get { return Instance.evalErrorConstructor; }
-        }
-
-        /// <summary>
-        /// Gets the globally accessible ReferenceError object.
-        /// </summary>
-        public static ErrorConstructor ReferenceError
-        {
-            get { return Instance.referenceErrorConstructor; }
-        }
 
 
 
@@ -303,45 +52,48 @@ namespace Jurassic.Library
         /// <summary>
         /// Decodes a string that was encoded with the encodeURI function.
         /// </summary>
-        /// <param name="input"> The string to decode. </param>
+        /// <param name="input"> The associated script engine. </param>
         /// <returns> The string, as it was before encoding. </returns>
-        [JSFunction(Name = "decodeURI")]
-        public static string DecodeURI(string input)
+        [JSFunction(Name = "decodeURI", Flags = FunctionBinderFlags.HasEngineParameter)]
+        public static string DecodeURI(ScriptEngine engine, string input)
         {
-            return Decode(input, ";/?:@&=+$,#");
+            return Decode(engine, input, ";/?:@&=+$,#");
         }
 
         /// <summary>
         /// Decodes a string that was encoded with the decodeURIComponent function.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to decode. </param>
         /// <returns> The string, as it was before encoding. </returns>
-        [JSFunction(Name = "decodeURIComponent")]
-        public static string DecodeURIComponent(string input)
+        [JSFunction(Name = "decodeURIComponent", Flags = FunctionBinderFlags.HasEngineParameter)]
+        public static string DecodeURIComponent(ScriptEngine engine, string input)
         {
-            return Decode(input, "");
+            return Decode(engine, input, "");
         }
 
         /// <summary>
         /// Encodes a string containing a Uniform Resource Identifier (URI).
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to encode. </param>
         /// <returns> A copy of the given URI with the special characters encoded. </returns>
-        [JSFunction(Name = "encodeURI")]
-        public static string EncodeURI(string input)
+        [JSFunction(Name = "encodeURI", Flags = FunctionBinderFlags.HasEngineParameter)]
+        public static string EncodeURI(ScriptEngine engine, string input)
         {
-            return Encode(input, ";/?:@&=+$,-_.!~*'()#");
+            return Encode(engine, input, ";/?:@&=+$,-_.!~*'()#");
         }
 
         /// <summary>
         /// Encodes a string containing a portion of a Uniform Resource Identifier (URI).
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to encode. </param>
         /// <returns> A copy of the given URI with the special characters encoded. </returns>
-        [JSFunction(Name = "encodeURIComponent")]
-        public static string EncodeURIComponent(string input)
+        [JSFunction(Name = "encodeURIComponent", Flags = FunctionBinderFlags.HasEngineParameter)]
+        public static string EncodeURIComponent(ScriptEngine engine, string input)
         {
-            return Encode(input, "-_.!~*'()");
+            return Encode(engine, input, "-_.!~*'()");
         }
 
         /// <summary>
@@ -370,20 +122,26 @@ namespace Jurassic.Library
         /// <summary>
         /// Evaluates the given javascript source code and returns the result.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="code"> The source code to evaluate. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        [JSFunction(Name = "eval")]
-        public static object Eval(string code)
+        [JSFunction(Name = "eval", Flags = FunctionBinderFlags.HasEngineParameter)]
+        public static object Eval(ScriptEngine engine, string code)
         {
-            var scope = Compiler.ObjectScope.CreateGlobalScope();
-            var evalContext = new Jurassic.Compiler.EvalContext(scope, scope.ScopeObject, code, false);
-            return evalContext.Execute();
+            var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
+                engine,                             // The script engine.
+                engine.CreateGlobalScope(),         // The scope to run the code in.
+                new StringScriptSource(code),       // The source code to execute.
+                new Compiler.CompilerOptions(),     // Options.
+                engine.Global);                     // The value of the "this" keyword.
+            return evalGen.Execute();
         }
 
         /// <summary>
         /// Evaluates the given javascript source code and returns the result.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="code"> The source code to evaluate. </param>
         /// <param name="scope"> The containing scope. </param>
         /// <param name="thisObject"> The value of the "this" keyword in the containing scope. </param>
@@ -391,14 +149,21 @@ namespace Jurassic.Library
         /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        public static object Eval(string code, Compiler.Scope scope, object thisObject, bool strictMode)
+        public static object Eval(ScriptEngine engine, string code, Compiler.Scope scope, object thisObject, bool strictMode)
         {
             if (scope == null)
                 throw new ArgumentNullException("scope");
             if (code == null)
                 return Undefined.Value;
-            var evalContext = new Jurassic.Compiler.EvalContext(scope, thisObject, code, strictMode);
-            return evalContext.Execute();
+
+            var options = new Compiler.CompilerOptions() { ForceStrictMode = strictMode };
+            var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
+                engine,                             // The script engine.
+                scope,                              // The scope to run the code in.
+                new StringScriptSource(code),       // The source code to execute.
+                options,                            // Options.
+                thisObject);                        // The value of the "this" keyword.
+            return evalGen.Execute();
         }
 
         /// <summary>
@@ -736,11 +501,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Decodes a string containing a URI or a portion of a URI.
         /// </summary>
+        /// <param name="engine"> The script engine used to create the error objects. </param>
         /// <param name="input"> The string to decode. </param>
         /// <param name="unescapedSet"> A string containing the set of characters that should not
         /// be escaped.  Alphanumeric characters should not be included. </param>
         /// <returns> A copy of the given string with the escape sequences decoded. </returns>
-        private static string Decode(string input, string reservedSet)
+        private static string Decode(ScriptEngine engine, string input, string reservedSet)
         {
             var result = new StringBuilder(input.Length);
             for (int i = 0; i < input.Length; i++)
@@ -752,7 +518,7 @@ namespace Jurassic.Library
 
                     // Make sure the string is long enough and the next two digits are valid hex digits.
                     if (i >= input.Length - 2 || IsHexDigit(input[i + 1]) == false || IsHexDigit(input[i + 2]) == false)
-                        throw new JavaScriptException("URIError", "URI malformed");
+                        throw new JavaScriptException(engine, "URIError", "URI malformed");
 
                     // Decode the %XX encoding.
                     int utf8Byte = int.Parse(input.Substring(i + 1, 2), System.Globalization.NumberStyles.HexNumber);
@@ -778,7 +544,7 @@ namespace Jurassic.Library
 
                         // Check for an invalid UTF-8 start value.
                         if (utf8Byte == 0xc0 || utf8Byte == 0xc1)
-                            throw new JavaScriptException("URIError", "URI malformed");
+                            throw new JavaScriptException(engine, "URIError", "URI malformed");
 
                         // Count the number of high bits set (this is the number of bytes required for the character).
                         int utf8ByteCount = 1;
@@ -790,7 +556,7 @@ namespace Jurassic.Library
                                 break;
                         }
                         if (utf8ByteCount < 2 || utf8ByteCount > 4)
-                            throw new JavaScriptException("URIError", "URI malformed");
+                            throw new JavaScriptException(engine, "URIError", "URI malformed");
 
                         // Read the additional bytes.
                         byte[] utf8Bytes = new byte[utf8ByteCount];
@@ -799,18 +565,18 @@ namespace Jurassic.Library
                         {
                             // An additional escape sequence is expected.
                             if (i >= input.Length - 1 || input[++i] != '%')
-                                throw new JavaScriptException("URIError", "URI malformed");
+                                throw new JavaScriptException(engine, "URIError", "URI malformed");
 
                             // Make sure the string is long enough and the next two digits are valid hex digits.
                             if (i >= input.Length - 2 || IsHexDigit(input[i + 1]) == false || IsHexDigit(input[i + 2]) == false)
-                                throw new JavaScriptException("URIError", "URI malformed");
+                                throw new JavaScriptException(engine, "URIError", "URI malformed");
 
                             // Decode the %XX encoding.
                             utf8Byte = int.Parse(input.Substring(i + 1, 2), System.Globalization.NumberStyles.HexNumber);
 
                             // Top two bits must be 10 (i.e. byte must be 10XXXXXX in binary).
                             if ((utf8Byte & 0xC0) != 0x80)
-                                throw new JavaScriptException("URIError", "URI malformed");
+                                throw new JavaScriptException(engine, "URIError", "URI malformed");
 
                             // Store the byte.
                             utf8Bytes[j] = (byte)utf8Byte;
@@ -832,11 +598,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Encodes a string containing a URI or a portion of a URI.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="input"> The string to encode. </param>
         /// <param name="unescapedSet"> A string containing the set of characters that should not
         /// be escaped.  Alphanumeric characters should not be included. </param>
         /// <returns> A copy of the given URI with the special characters encoded. </returns>
-        private static string Encode(string input, string unescapedSet)
+        private static string Encode(ScriptEngine engine, string input, string unescapedSet)
         {
             var result = new StringBuilder(input.Length);
             for (int i = 0; i < input.Length; i++)
@@ -849,7 +616,7 @@ namespace Jurassic.Library
                 }
                 catch (ArgumentException)
                 {
-                    throw new JavaScriptException("URIError", "URI malformed");
+                    throw new JavaScriptException(engine, "URIError", "URI malformed");
                 }
 
                 // Detect if the code point is a surrogate pair.

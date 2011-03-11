@@ -274,7 +274,7 @@ namespace Jurassic.Library
             return System.Math.Pow(@base, exponent);
         }
 
-        [ThreadStatic]
+        private static object randomNumberGeneratorLock = new object();
         private static Random randomNumberGenerator;
 
         /// <summary>
@@ -287,9 +287,12 @@ namespace Jurassic.Library
         [JSFunction(Name = "random")]
         public static double Random()
         {
-            if (randomNumberGenerator == null)
-                randomNumberGenerator = new Random();
-            return randomNumberGenerator.NextDouble();
+            lock (randomNumberGeneratorLock)
+            {
+                if (randomNumberGenerator == null)
+                    randomNumberGenerator = new Random();
+                return randomNumberGenerator.NextDouble();
+            }
         }
 
         /// <summary>

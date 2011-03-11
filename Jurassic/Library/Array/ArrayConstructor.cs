@@ -18,7 +18,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal ArrayConstructor(ObjectInstance prototype)
-            : base(prototype, "Array", new ArrayInstance(GlobalObject.Object.InstancePrototype, 0, 0))
+            : base(prototype, "Array", new ArrayInstance(prototype.Engine.Object.InstancePrototype, 0, 0))
         {
         }
 
@@ -78,7 +78,7 @@ namespace Jurassic.Library
                 {
                     double length = (double)elements[0];
                     if (length < 0 || length > uint.MaxValue)
-                        throw new JavaScriptException("RangeError", "Invalid array length");
+                        throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
                     uint length32 = TypeConverter.ToUint32(length);
                     return new ArrayInstance(this.InstancePrototype, length32, length32);
                 }
@@ -86,7 +86,7 @@ namespace Jurassic.Library
                 {
                     int length = (int)elements[0];
                     if (length < 0)
-                        throw new JavaScriptException("RangeError", "Invalid array length");
+                        throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
                     return new ArrayInstance(this.InstancePrototype, (uint)length, (uint)length);
                 }
             }

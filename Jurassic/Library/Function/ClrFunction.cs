@@ -76,7 +76,7 @@ namespace Jurassic.Library
             if (constructBinderMethods.Count > 0)
                 this.constructBinder = new FunctionBinder(constructBinderMethods);
             else
-                this.constructBinder = new FunctionBinder(new FunctionBinderMethod(new Func<ObjectInstance>(() => GlobalObject.Object.Construct()).Method));
+                this.constructBinder = new FunctionBinder(new FunctionBinderMethod(new Func<ObjectInstance>(() => this.Engine.Object.Construct()).Method));
 
             // Add function properties.
             this.FastSetProperty("name", name);
@@ -104,7 +104,7 @@ namespace Jurassic.Library
             // Add function properties.
             this.FastSetProperty("name", name != null ? name : binderMethod.Name);
             this.FastSetProperty("length", length >= 0 ? length : binderMethod.ParameterCount);
-            this.FastSetProperty("prototype", GlobalObject.Object.Construct());
+            this.FastSetProperty("prototype", this.Engine.Object.Construct());
             this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
@@ -136,7 +136,7 @@ namespace Jurassic.Library
             // Add function properties.
             this.FastSetProperty("name", name);
             this.FastSetProperty("length", length >= 0 ? length : methods.Max(bm => bm.ParameterCount));
-            this.FastSetProperty("prototype", GlobalObject.Object.Construct());
+            this.FastSetProperty("prototype", this.Engine.Object.Construct());
             this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
@@ -153,7 +153,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] arguments)
         {
-            return this.callBinder.Call(bindThis == true ? this : thisObject, arguments);
+            return this.callBinder.Call(this.Engine, bindThis == true ? this : thisObject, arguments);
         }
 
         /// <summary>
@@ -164,8 +164,8 @@ namespace Jurassic.Library
         public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {
             if (this.constructBinder == null)
-                return GlobalObject.Object.Construct();
-            return (ObjectInstance)this.constructBinder.Call(this, argumentValues);
+                return this.Engine.Object.Construct();
+            return (ObjectInstance)this.constructBinder.Call(this.Engine, this, argumentValues);
         }
 
         /// <summary>

@@ -117,7 +117,7 @@ namespace Jurassic.Library
     /// the wrong type is passed to the function, a TypeError exception will be thrown.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public sealed class JSDoNotConvertAttribute : Attribute
+    internal sealed class JSDoNotConvertAttribute : Attribute
     {
     }
 }

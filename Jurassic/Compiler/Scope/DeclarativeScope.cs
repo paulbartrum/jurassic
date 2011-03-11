@@ -15,7 +15,7 @@ namespace Jurassic.Compiler
         /// <param name="functionName"> The name of the function.  Can be empty for an anonymous function. </param>
         /// <param name="argumentNames"> The names of each of the function arguments. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        public static DeclarativeScope CreateFunctionScope(Scope parentScope, string functionName, IEnumerable<string> argumentNames)
+        internal static DeclarativeScope CreateFunctionScope(Scope parentScope, string functionName, IEnumerable<string> argumentNames)
         {
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
@@ -38,7 +38,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        public static DeclarativeScope CreateCatchScope(Scope parentScope)
+        internal static DeclarativeScope CreateCatchScope(Scope parentScope)
         {
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
@@ -50,7 +50,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        public static DeclarativeScope CreateEvalScope(Scope parentScope)
+        internal static DeclarativeScope CreateEvalScope(Scope parentScope)
         {
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Eval scopes must have a parent scope.");
@@ -98,6 +98,20 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// The number of items available in the Values array can get out of sync with the number
+        /// of declared variables.  This method enlarges the values array to accommodate any new
+        /// declarations.
+        /// </summary>
+        public void ResizeValuesArray()
+        {
+            if (this.Values.Length == this.DeclaredVariableCount)
+                return;
+            var values = this.Values;
+            Array.Resize(ref values, this.DeclaredVariableCount);
+            this.Values = values;
+        }
+
+        /// <summary>
         /// Returns <c>true</c> if the given variable exists in this scope.
         /// </summary>
         /// <param name="variableName"> The name of the variable to check. </param>
@@ -135,6 +149,8 @@ namespace Jurassic.Compiler
         /// CreateRuntimeScope(). </exception>
         public override void SetValue(string variableName, object value)
         {
+            if (this.Values == null)
+                throw new InvalidOperationException("This method can only be used when the DeclarativeScope is created using CreateRuntimeScope().");
             int index = GetDeclaredVariableIndex(variableName);
             if (index < 0)
             {
@@ -154,7 +170,7 @@ namespace Jurassic.Compiler
             // Create a new declarative scope.
             
             // parentScope
-            generator.LoadArgument(0);
+            EmitHelpers.LoadScope(generator);
 
             // declaredVariableNames
             generator.LoadInt32(this.DeclaredVariableCount);
@@ -171,8 +187,22 @@ namespace Jurassic.Compiler
             // DeclarativeScope.CreateRuntimeScope(parentScope, declaredVariableNames)
             generator.Call(ReflectionHelpers.DeclarativeScope_CreateRuntimeScope);
 
-            // Store the new scope in the first method parameter.
-            generator.StoreArgument(0);
+            // Save the new scope.
+            EmitHelpers.StoreScope(generator);
+        }
+
+        /// <summary>
+        /// Generates code that makes more variables available at runtime.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        internal void GenerateRuntimeResize(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            // This is needed because we rely on the fact that the number of declared variables is
+            // known at compile-time when we create the Values array but eval() can introduce new
+            // variables into the scope.
+            EmitHelpers.LoadScope(generator);
+            generator.Call(ReflectionHelpers.DeclarativeScope_ResizeValuesArray);
         }
     }
 

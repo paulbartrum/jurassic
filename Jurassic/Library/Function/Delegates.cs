@@ -7,21 +7,23 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a delegate that is used for user-defined functions.  For internal use only.
     /// </summary>
+    /// <param name="engine"> The associated script engine. </param>
     /// <param name="scope"> The scope (global or eval context) or the parent scope (function
     /// context). </param>
     /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
     /// <param name="functionObject"> The function object. </param>
     /// <param name="arguments"> The arguments that were passed to the function. </param>
     /// <returns> The result of calling the method. </returns>
-    public delegate object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments);
+    public delegate object FunctionDelegate(ScriptEngine engine, Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments);
 
     /// <summary>
     /// Represents a generic delegate that all method calls pass through.  For internal use only.
     /// </summary>
+    /// <param name="engine"> The associated script engine. </param>
     /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
     /// <param name="arguments"> The arguments that were passed to the function. </param>
     /// <returns> The result of calling the method. </returns>
-    internal delegate object BinderDelegate(object thisObject, params object[] arguments);
+    internal delegate object BinderDelegate(ScriptEngine engine, object thisObject, params object[] arguments);
 
     /// <summary>
     /// Called once per element by Array.prototype.every, Array.prototype.some and Array.prototype.filter.

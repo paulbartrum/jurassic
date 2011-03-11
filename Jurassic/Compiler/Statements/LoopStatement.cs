@@ -236,7 +236,7 @@ namespace Jurassic.Compiler
                 this.InitStatement.GenerateCode(generator, optimizationInfo);
 
             // Check the condition and jump to the end if it is false.
-            if (this.CheckConditionAtEnd == false && this.Condition != null)
+            if (this.CheckConditionAtEnd == false && this.ConditionStatement != null)
             {
                 if (optimizationInfo.DebugDocument != null)
                     generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.ConditionStatement.DebugInfo);
@@ -287,7 +287,7 @@ namespace Jurassic.Compiler
             var startOfLoop = generator.DefineLabelPosition();
 
             // Check the condition and jump to the end if it is false.
-            if (this.Condition != null)
+            if (this.ConditionStatement != null)
             {
                 if (optimizationInfo.DebugDocument != null)
                     generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.ConditionStatement.DebugInfo);

@@ -210,10 +210,10 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="substr"> The substring to search for. </param>
         /// <returns> An array containing the matched strings. </returns>
-        [JSFunction(Name = "match", Flags = FunctionBinderFlags.HasThisObject | FunctionBinderFlags.Preferred)]
-        public static object Match(string thisObject, string substr)
+        [JSFunction(Name = "match", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject | FunctionBinderFlags.Preferred)]
+        public static object Match(ScriptEngine engine, string thisObject, string substr)
         {
-            return Match(thisObject, GlobalObject.RegExp.Construct(substr));
+            return Match(thisObject, engine.RegExp.Construct(substr));
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Jurassic.Library
             {
                 int newPosition = thisObject.IndexOf(substr);
                 result.Append(thisObject.Substring(position, newPosition - position));
-                result.Append(replaceFunction.CallLateBound(GlobalObject.Instance, substr, newPosition, thisObject).ToString());
+                result.Append(replaceFunction.CallLateBound(replaceFunction.Engine.Global, substr, newPosition, thisObject).ToString());
                 position = newPosition + substr.Length;
             }
             return result.ToString();
@@ -377,15 +377,15 @@ namespace Jurassic.Library
         /// <param name="separator"> A string or regular expression that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        [JSFunction(Name = "split", Flags = FunctionBinderFlags.HasThisObject)]
-        public static ArrayInstance Split(string thisObject, object separator, int limit = int.MaxValue)
+        [JSFunction(Name = "split", Flags = FunctionBinderFlags.HasEngineParameter | FunctionBinderFlags.HasThisObject)]
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, int limit = int.MaxValue)
         {
             // Note: automatic binding will call the string version if the limit parameter is
             // not an integer, which is wrong.
             if (separator is RegExpInstance)
                 return Split(thisObject, (RegExpInstance)separator, limit);
             else
-                return Split(thisObject, TypeConverter.ToString(separator), limit);
+                return Split(engine, thisObject, TypeConverter.ToString(separator), limit);
         }
 
         /// <summary>
@@ -405,14 +405,14 @@ namespace Jurassic.Library
         /// <param name="separator"> A string that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(string thisObject, string separator, int limit = int.MaxValue)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, string separator, int limit = int.MaxValue)
         {
             if (string.IsNullOrEmpty(separator))
-                return GlobalObject.Array.New(new object[] { thisObject });
+                return engine.Array.New(new object[] { thisObject });
             var splitStrings = thisObject.Split(new string[] { separator }, StringSplitOptions.None);
             if (limit < splitStrings.Length)
                 splitStrings = splitStrings.Take(limit).ToArray();
-            return GlobalObject.Array.New(splitStrings);
+            return engine.Array.New(splitStrings);
         }
 
         /// <summary>

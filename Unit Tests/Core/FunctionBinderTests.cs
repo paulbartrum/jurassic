@@ -17,7 +17,8 @@ namespace UnitTests
         [TestMethod]
         public void ToBoolean()
         {
-            var function = new ClrFunction(GlobalObject.Function.InstancePrototype, new FunctionBinderMethod[] {
+            var engine = new ScriptEngine();
+            var function = new ClrFunction(engine.Function.InstancePrototype, new FunctionBinderMethod[] {
                 new FunctionBinderMethod(new Func<bool, bool>(arg => arg).Method, FunctionBinderFlags.None)
             });
             Assert.AreEqual(false, function.CallLateBound(null, Null.Value));
@@ -32,21 +33,22 @@ namespace UnitTests
             Assert.AreEqual(false, function.CallLateBound(null, ""));
             Assert.AreEqual(true, function.CallLateBound(null, "false"));
             Assert.AreEqual(true, function.CallLateBound(null, "true"));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.Boolean.Construct(false)));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.Boolean.Construct(true)));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.Date.Construct(0.0)));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.Date.Construct(double.NaN)));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.Number.Construct(0.0)));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.Number.Construct(1.0)));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.Object.Construct()));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.String.Construct("")));
-            Assert.AreEqual(true, function.CallLateBound(null, GlobalObject.String.Construct("test")));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.Boolean.Construct(false)));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.Boolean.Construct(true)));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.Date.Construct(0.0)));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.Date.Construct(double.NaN)));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.Number.Construct(0.0)));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.Number.Construct(1.0)));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.Object.Construct()));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.String.Construct("")));
+            Assert.AreEqual(true, function.CallLateBound(null, engine.String.Construct("test")));
         }
 
         [TestMethod]
         public new void ToString()
         {
-            var function = new ClrFunction(GlobalObject.Function.InstancePrototype, new FunctionBinderMethod[] {
+            var engine = new ScriptEngine();
+            var function = new ClrFunction(engine.Function.InstancePrototype, new FunctionBinderMethod[] {
                 new FunctionBinderMethod(new Func<string, string>(arg => arg).Method, FunctionBinderFlags.None)
             });
             Assert.AreEqual("undefined", function.CallLateBound(null, Undefined.Value));
@@ -61,21 +63,22 @@ namespace UnitTests
             Assert.AreEqual("6442450954", function.CallLateBound(null, 6442450954.0));
             Assert.AreEqual("NaN", function.CallLateBound(null, double.NaN));
             Assert.AreEqual("", function.CallLateBound(null, ""));
-            Assert.AreEqual("false", function.CallLateBound(null, GlobalObject.Boolean.Construct(false)));
-            Assert.AreEqual("true", function.CallLateBound(null, GlobalObject.Boolean.Construct(true)));
-            Assert.AreEqual("0", function.CallLateBound(null, GlobalObject.Date.Construct(0.0)));
-            Assert.AreEqual("NaN", function.CallLateBound(null, GlobalObject.Date.Construct(double.NaN)));
-            Assert.AreEqual("0", function.CallLateBound(null, GlobalObject.Number.Construct(0.0)));
-            Assert.AreEqual("1", function.CallLateBound(null, GlobalObject.Number.Construct(1.0)));
-            Assert.AreEqual("[object Object]", function.CallLateBound(null, GlobalObject.Object.Construct()));
-            Assert.AreEqual("", function.CallLateBound(null, GlobalObject.String.Construct("")));
-            Assert.AreEqual("test", function.CallLateBound(null, GlobalObject.String.Construct("test")));
+            Assert.AreEqual("false", function.CallLateBound(null, engine.Boolean.Construct(false)));
+            Assert.AreEqual("true", function.CallLateBound(null, engine.Boolean.Construct(true)));
+            Assert.AreEqual("0", function.CallLateBound(null, engine.Date.Construct(0.0)));
+            Assert.AreEqual("NaN", function.CallLateBound(null, engine.Date.Construct(double.NaN)));
+            Assert.AreEqual("0", function.CallLateBound(null, engine.Number.Construct(0.0)));
+            Assert.AreEqual("1", function.CallLateBound(null, engine.Number.Construct(1.0)));
+            Assert.AreEqual("[object Object]", function.CallLateBound(null, engine.Object.Construct()));
+            Assert.AreEqual("", function.CallLateBound(null, engine.String.Construct("")));
+            Assert.AreEqual("test", function.CallLateBound(null, engine.String.Construct("test")));
         }
 
         [TestMethod]
         public void ToNumber()
         {
-            var function = new ClrFunction(GlobalObject.Function.InstancePrototype, new FunctionBinderMethod[] {
+            var engine = new ScriptEngine();
+            var function = new ClrFunction(engine.Function.InstancePrototype, new FunctionBinderMethod[] {
                 new FunctionBinderMethod(new Func<double, double>(arg => arg).Method, FunctionBinderFlags.None)
             });
             Assert.AreEqual(+0.0, function.CallLateBound(null, Null.Value));
@@ -117,23 +120,24 @@ namespace UnitTests
             Assert.AreEqual(10.0, function.CallLateBound(null, "10."));
             Assert.AreEqual(10.0, function.CallLateBound(null, "10e"));
             Assert.AreEqual(10.0, function.CallLateBound(null, "10e+"));
-            Assert.AreEqual(0.0, function.CallLateBound(null, GlobalObject.Boolean.Construct(false)));
-            Assert.AreEqual(1.0, function.CallLateBound(null, GlobalObject.Boolean.Construct(true)));
-            Assert.AreEqual(0.0, function.CallLateBound(null, GlobalObject.Date.Construct(0.0)));
-            Assert.AreEqual(double.NaN, function.CallLateBound(null, GlobalObject.Date.Construct(double.NaN)));
-            Assert.AreEqual(0.0, function.CallLateBound(null, GlobalObject.Number.Construct(0.0)));
-            Assert.AreEqual(1.0, function.CallLateBound(null, GlobalObject.Number.Construct(1.0)));
-            Assert.AreEqual(double.NaN, function.CallLateBound(null, GlobalObject.Object.Construct()));
-            Assert.AreEqual(0.0, function.CallLateBound(null, GlobalObject.String.Construct("")));
-            Assert.AreEqual(double.NaN, function.CallLateBound(null, GlobalObject.String.Construct("test")));
-            Assert.AreEqual(1.9, function.CallLateBound(null, GlobalObject.String.Construct("1.9")));
-            Assert.AreEqual(16.0, function.CallLateBound(null, GlobalObject.String.Construct("0x10")));
+            Assert.AreEqual(0.0, function.CallLateBound(null, engine.Boolean.Construct(false)));
+            Assert.AreEqual(1.0, function.CallLateBound(null, engine.Boolean.Construct(true)));
+            Assert.AreEqual(0.0, function.CallLateBound(null, engine.Date.Construct(0.0)));
+            Assert.AreEqual(double.NaN, function.CallLateBound(null, engine.Date.Construct(double.NaN)));
+            Assert.AreEqual(0.0, function.CallLateBound(null, engine.Number.Construct(0.0)));
+            Assert.AreEqual(1.0, function.CallLateBound(null, engine.Number.Construct(1.0)));
+            Assert.AreEqual(double.NaN, function.CallLateBound(null, engine.Object.Construct()));
+            Assert.AreEqual(0.0, function.CallLateBound(null, engine.String.Construct("")));
+            Assert.AreEqual(double.NaN, function.CallLateBound(null, engine.String.Construct("test")));
+            Assert.AreEqual(1.9, function.CallLateBound(null, engine.String.Construct("1.9")));
+            Assert.AreEqual(16.0, function.CallLateBound(null, engine.String.Construct("0x10")));
         }
 
         [TestMethod]
         public void ToInteger()
         {
-            var function = new ClrFunction(GlobalObject.Function.InstancePrototype, new FunctionBinderMethod[] {
+            var engine = new ScriptEngine();
+            var function = new ClrFunction(engine.Function.InstancePrototype, new FunctionBinderMethod[] {
                 new FunctionBinderMethod(new Func<int, int>(arg => arg).Method, FunctionBinderFlags.None)
             });
             Assert.AreEqual(0, function.CallLateBound(null, Undefined.Value));
@@ -160,16 +164,16 @@ namespace UnitTests
             Assert.AreEqual(int.MaxValue, function.CallLateBound(null, "4294967304"));
             Assert.AreEqual(int.MaxValue, function.CallLateBound(null, "2147483658"));
             Assert.AreEqual(int.MaxValue, function.CallLateBound(null, "6442450954"));
-            Assert.AreEqual(0, function.CallLateBound(null, GlobalObject.Boolean.Construct(false)));
-            Assert.AreEqual(1, function.CallLateBound(null, GlobalObject.Boolean.Construct(true)));
-            Assert.AreEqual(1, function.CallLateBound(null, GlobalObject.Date.Construct(1.0)));
-            Assert.AreEqual(0, function.CallLateBound(null, GlobalObject.Date.Construct(double.NaN)));
-            Assert.AreEqual(0, function.CallLateBound(null, GlobalObject.Number.Construct(0.0)));
-            Assert.AreEqual(1, function.CallLateBound(null, GlobalObject.Number.Construct(1.0)));
-            Assert.AreEqual(0, function.CallLateBound(null, GlobalObject.Object.Construct()));
-            Assert.AreEqual(0, function.CallLateBound(null, GlobalObject.String.Construct("")));
-            Assert.AreEqual(0, function.CallLateBound(null, GlobalObject.String.Construct("test")));
-            Assert.AreEqual(1, function.CallLateBound(null, GlobalObject.String.Construct("1.9")));
+            Assert.AreEqual(0, function.CallLateBound(null, engine.Boolean.Construct(false)));
+            Assert.AreEqual(1, function.CallLateBound(null, engine.Boolean.Construct(true)));
+            Assert.AreEqual(1, function.CallLateBound(null, engine.Date.Construct(1.0)));
+            Assert.AreEqual(0, function.CallLateBound(null, engine.Date.Construct(double.NaN)));
+            Assert.AreEqual(0, function.CallLateBound(null, engine.Number.Construct(0.0)));
+            Assert.AreEqual(1, function.CallLateBound(null, engine.Number.Construct(1.0)));
+            Assert.AreEqual(0, function.CallLateBound(null, engine.Object.Construct()));
+            Assert.AreEqual(0, function.CallLateBound(null, engine.String.Construct("")));
+            Assert.AreEqual(0, function.CallLateBound(null, engine.String.Construct("test")));
+            Assert.AreEqual(1, function.CallLateBound(null, engine.String.Construct("1.9")));
         }
     }
 }

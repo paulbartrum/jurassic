@@ -20,28 +20,29 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
         internal ErrorConstructor(ObjectInstance prototype, string typeName)
-            : base(prototype, typeName, GetInstancePrototype(typeName))
+            : base(prototype, typeName, GetInstancePrototype(prototype.Engine, typeName))
         {
         }
 
         /// <summary>
         /// Determine the instance prototype for the given error type.
         /// </summary>
+        /// <param name="engine"> The script engine associated with this object. </param>
         /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
         /// <returns> The instance prototype. </returns>
-        private static ObjectInstance GetInstancePrototype(string typeName)
+        private static ObjectInstance GetInstancePrototype(ScriptEngine engine, string typeName)
         {
             if (typeName == "Error")
             {
                 // This constructor is for regular Error objects.
                 // Prototype chain: Error instance -> Error prototype -> Object prototype
-                return new ErrorInstance(GlobalObject.Object.InstancePrototype, typeName, string.Empty, false);
+                return new ErrorInstance(engine.Object.InstancePrototype, typeName, string.Empty, false);
             }
             else
             {
                 // This constructor is for derived Error objects like RangeError, etc.
                 // Prototype chain: XXXError instance -> XXXError prototype -> Error prototype -> Object prototype
-                return new ErrorInstance(GlobalObject.Error.InstancePrototype, typeName, null, false);
+                return new ErrorInstance(engine.Error.InstancePrototype, typeName, null, false);
             }
         }
 

@@ -43,7 +43,8 @@ namespace Performance
             TestUtils.Benchmark(() =>
             {
                 // 2,080,000 inner loops/s
-                var array = Jurassic.Library.GlobalObject.Array.New();
+                var engine = new Jurassic.ScriptEngine();
+                var array = engine.Array.New();
                 for (int i = 0; i < 1000; i++)
                     Jurassic.Library.ArrayInstance.Unshift(array, i);
             });
@@ -52,7 +53,8 @@ namespace Performance
         [TestMethod]
         public void pop()
         {
-            var array = Jurassic.Library.GlobalObject.Array.New();
+            var engine = new Jurassic.ScriptEngine();
+            var array = engine.Array.New();
             for (int i = 0; i < 1024 * 100; i++)
                 Jurassic.Library.ArrayInstance.Push(array, i);
             TestUtils.Benchmark(() =>
@@ -65,7 +67,8 @@ namespace Performance
         [TestMethod]
         public void sum()
         {
-            var array = Jurassic.Library.GlobalObject.Array.New();
+            var engine = new Jurassic.ScriptEngine();
+            var array = engine.Array.New();
             for (int i = 0; i < 1024 * 100; i++)
                 Jurassic.Library.ArrayInstance.Push(array, i);
             TestUtils.Benchmark(() =>
@@ -79,7 +82,8 @@ namespace Performance
         [TestMethod]
         public void push()
         {
-            var array = Jurassic.Library.GlobalObject.Array.New();
+            var engine = new Jurassic.ScriptEngine();
+            var array = engine.Array.New();
             TestUtils.Benchmark(() =>
             {
                 for (int i = 0; i < 1024 * 100; i++)

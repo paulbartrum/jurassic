@@ -139,10 +139,11 @@ namespace Jurassic.Library
         /// <summary>
         /// Calls the method represented by this object.
         /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
         /// <param name="arguments"> The arguments to pass to the function. </param>
         /// <returns> The result of calling the method. </returns>
-        public object Call(object thisObject, params object[] arguments)
+        public object Call(ScriptEngine engine, object thisObject, params object[] arguments)
         {
             // Extract the argument types.
             Type[] argumentTypes = GetArgumentTypes(arguments);
@@ -151,7 +152,7 @@ namespace Jurassic.Library
             var delegateToCall = CreateBinder(argumentTypes);
 
             // Execute the delegate.
-            return delegateToCall(thisObject, arguments);
+            return delegateToCall(engine, thisObject, arguments);
         }
 
         /// <summary>
@@ -219,7 +220,7 @@ namespace Jurassic.Library
             foreach (var binderMethod in bucket.OtherMethods)
             {
                 var parameterTypes = binderMethod.Method.GetParameters();
-                int indexOffset = binderMethod.HasExplicitThisParameter ? 1 : 0;
+                int indexOffset = (binderMethod.HasEngineParameter ? 1 : 0) + (binderMethod.HasExplicitThisParameter ? 1 : 0);
                 var useThisMethod = true;
                 for (int i = 0; i < Math.Min(argumentTypes.Length, parameterTypes.Length - indexOffset); i++)
                     if (parameterTypes[i + indexOffset].ParameterType != argumentTypes[i])
@@ -267,14 +268,14 @@ namespace Jurassic.Library
         {
             // Create a new dynamic method.
             var dm = new DynamicMethod(
-                "Binder",                                               // Name of the generated method.
-                typeof(object),                                         // Return type of the generated method.
-                new Type[] { typeof(object), typeof(object[]) },        // Parameter types of the generated method.
-                typeof(FunctionBinder),                                 // Owner type.
-                true);                                                  // Skip visibility checks.
+                "Binder",                                                               // Name of the generated method.
+                typeof(object),                                                         // Return type of the generated method.
+                new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },  // Parameter types of the generated method.
+                typeof(FunctionBinder),                                                 // Owner type.
+                true);                                                                  // Skip visibility checks.
 
             // Here is what we are going to generate.
-            //private static object SampleBinder(object thisObject, object[] arguments)
+            //private static object SampleBinder(ScriptEngine engine, object thisObject, object[] arguments)
             //{
             //    // Target function signature: int (bool, int, string, object).
             //    bool param1;
@@ -308,19 +309,30 @@ namespace Jurassic.Library
             ParameterInfo[] targetParameters = targetMethod.GetParameters();
             ParameterInfo targetReturnParameter = targetMethod.ReturnParameter;
 
+            // Emit the "engine" parameter.
+            if (binderMethod.HasEngineParameter)
+            {
+                // Load the "engine" parameter passed by the client.
+                il.Emit(OpCodes.Ldarg_0);
+            }
+
             // Emit the "this" parameter.
             if (binderMethod.HasThisParameter)
             {
                 // Load the "this" parameter passed by the client.
-                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
 
                 if (binderMethod.ThisType != typeof(object))
                 {
                     // If the target "this" object type is not of type object, throw an error if
                     // the value is undefined or null.
                     il.Emit(OpCodes.Dup);
+                    var temp = il.DeclareLocal(typeof(object));
+                    il.Emit(OpCodes.Stloc_S, temp);
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldloc_S, temp);
                     il.Emit(OpCodes.Ldstr, binderMethod.Name);
-                    il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject, null);
+                    il.EmitCall(OpCodes.Call, ReflectionHelpers.TypeUtilities_VerifyThisObject2, null);
                 }
 
                 // Convert to the target type.
@@ -336,24 +348,25 @@ namespace Jurassic.Library
                     var endOfThrowLabel = il.DefineLabel();
                     il.Emit(OpCodes.Dup);
                     il.Emit(OpCodes.Brtrue_S, endOfThrowLabel);
+                    il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldstr, "TypeError");
                     il.Emit(OpCodes.Ldstr, string.Format("The method '{0}' is not generic", binderMethod.Name));
-                    il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor2);
+                    il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
                     il.Emit(OpCodes.Throw);
                     il.MarkLabel(endOfThrowLabel);
                 }
             }
 
             // Emit the parameters to the target function.
-            int explicitThisOffset = binderMethod.HasExplicitThisParameter ? 1 : 0;
-            int initialEmitCount = targetParameters.Length - explicitThisOffset - (binderMethod.HasParamArray ? 1 : 0);
+            int offset = (binderMethod.HasEngineParameter ? 1 : 0) + (binderMethod.HasExplicitThisParameter ? 1 : 0);
+            int initialEmitCount = targetParameters.Length - offset - (binderMethod.HasParamArray ? 1 : 0);
             for (int i = 0; i < initialEmitCount; i++)
             {
-                var targetParameter = targetParameters[i + explicitThisOffset];
+                var targetParameter = targetParameters[i + offset];
                 if (i < argumentTypes.Length)
                 {
                     // Load the argument onto the stack.
-                    il.Emit(OpCodes.Ldarg_1);
+                    il.Emit(OpCodes.Ldarg_2);
                     il.Emit(OpCodes.Ldc_I4_S, (byte)i);
                     il.Emit(OpCodes.Ldelem_Ref);
                     if (argumentTypes[i].IsClass == false)
@@ -377,10 +390,11 @@ namespace Jurassic.Library
                             il.Emit(OpCodes.Dup);
                             il.Emit(OpCodes.Brtrue_S, endOfThrowLabel);
                         }
+                        il.Emit(OpCodes.Ldarg_0);
                         il.Emit(OpCodes.Ldstr, "TypeError");
                         il.Emit(OpCodes.Ldstr, string.Format("The {1} parameter of {0}() must be an object", binderMethod.Name,
                             i == 0 ? "first" : i == 1 ? "second" : i == 2 ? "third" : string.Format("{0}th", i + 1)));
-                        il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor2);
+                        il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
                         il.Emit(OpCodes.Throw);
                         il.MarkLabel(endOfThrowLabel);
                     }
@@ -407,7 +421,7 @@ namespace Jurassic.Library
                     il.Emit(OpCodes.Ldc_I4_S, (byte)(i - initialEmitCount));
 
                     // Extract the input parameter and do type conversion as normal.
-                    il.Emit(OpCodes.Ldarg_1);
+                    il.Emit(OpCodes.Ldarg_2);
                     il.Emit(OpCodes.Ldc_I4_S, (byte)i);
                     il.Emit(OpCodes.Ldelem_Ref);
                     if (elementType != typeof(object))
@@ -866,17 +880,22 @@ namespace Jurassic.Library
                 // output = Global.Boolean.Construct(input)
                 var temp = il.DeclareLocal(fromType);
                 il.Emit(OpCodes.Stloc_S, temp);
-                il.Emit(OpCodes.Call, ReflectionHelpers.Global_Boolean);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Callvirt, ReflectionHelpers.ScriptEngine_Boolean);
                 il.Emit(OpCodes.Ldloc_S, temp);
                 il.Emit(OpCodes.Callvirt, ReflectionHelpers.Boolean_Construct);
             }
             else
             {
                 // Convert from any other type: call TypeConverter.ToObject()
-                // output = TypeConverter.ToString(input)
+                // output = TypeConverter.ToObject(engine, input)
+                var temp = il.DeclareLocal(fromType);
+                il.Emit(OpCodes.Stloc_S, temp);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldloc_S, temp);
                 if (fromType.IsValueType == true)
                     il.Emit(OpCodes.Box, fromType);
-                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToObject);
+                il.Emit(OpCodes.Call, ReflectionHelpers.TypeConverter_ToObject2);
             }
 
             if (toType != typeof(ObjectInstance))
@@ -935,9 +954,10 @@ namespace Jurassic.Library
                 il.Emit(OpCodes.Ldsfld, ReflectionHelpers.Undefined_Value);
             else if (typeof(ObjectInstance).IsAssignableFrom(toType))
             {
+                il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldstr, "TypeError");
                 il.Emit(OpCodes.Ldstr, "Undefined cannot be converted to an object");
-                il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor2);
+                il.Emit(OpCodes.Newobj, ReflectionHelpers.JavaScriptException_Constructor_Error);
                 il.Emit(OpCodes.Throw);
             }
             else

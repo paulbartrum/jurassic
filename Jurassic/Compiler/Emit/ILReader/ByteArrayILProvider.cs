@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public class ByteArrayILProvider : IILProvider {
+    internal class ByteArrayILProvider : IILProvider {
         byte[] m_byteArray;
 
         public ByteArrayILProvider(byte[] bytes, int length)

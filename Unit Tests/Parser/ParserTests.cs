@@ -1155,7 +1155,7 @@ namespace UnitTests
 
             // Implicit this.
             Assert.AreEqual(1970, TestUtils.Evaluate("x = new Date(5); x.f = x.getFullYear; with (x) { f() }"));
-            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("x = { a: 1, b: 2 }; with (x) { (function() { return this })() }"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = { a: 1, b: 2 }; with (x) { (function() { return this })() === this }"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("x = new Date(5); f = x.getFullYear; with (x) { f() }"));
             Assert.AreEqual(1970, TestUtils.Evaluate("x = new Date(5); x.f = x.getFullYear; with (x) { (function b() { return f() })() }"));
 
@@ -1260,12 +1260,11 @@ namespace UnitTests
         public void This()
         {
             // "this" is set to the global object by default.
-            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("this"));
             Assert.AreEqual(5, TestUtils.Evaluate("this.x = 5; this.x"));
 
             // In ES3 functions will get the global object as the "this" value by default.
-            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("(function(){ return this; }).call(null)"));
-            Assert.AreEqual(Jurassic.Library.GlobalObject.Instance, TestUtils.Evaluate("(function(){ return this; }).call(undefined)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("(function(){ return this; }).call(null) === this"));
+            Assert.AreEqual(true, TestUtils.Evaluate("(function(){ return this; }).call(undefined) === this"));
             Assert.AreEqual("object", TestUtils.Evaluate("typeof (function(){ return this; }).call(5)"));
 
             // Check that the this parameter is passed correctly.

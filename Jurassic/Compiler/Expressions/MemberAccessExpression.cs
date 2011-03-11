@@ -69,7 +69,7 @@ namespace Jurassic.Compiler
             {
                 var rhs = this.GetOperand(1) as NameExpression;
                 if (rhs == null)
-                    throw new JavaScriptException("SyntaxError", "Invalid member access");
+                    throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "Invalid member access");
                 propertyName = rhs.Name;
             }
 
@@ -210,7 +210,7 @@ namespace Jurassic.Compiler
             {
                 var rhs = this.GetOperand(1) as NameExpression;
                 if (rhs == null)
-                    throw new JavaScriptException("SyntaxError", "Invalid member access");
+                    throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "Invalid member access");
                 propertyName = rhs.Name;
             }
 

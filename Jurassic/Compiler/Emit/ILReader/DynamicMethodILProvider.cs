@@ -7,7 +7,8 @@ using System.Reflection.Emit;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public class DynamicMethodILProvider : IILProvider {
+    internal class DynamicMethodILProvider : IILProvider
+    {
         static FieldInfo s_fiLen = typeof(ILGenerator).GetField("m_length", BindingFlags.NonPublic | BindingFlags.Instance);
         static FieldInfo s_fiStream = typeof(ILGenerator).GetField("m_ILStream", BindingFlags.NonPublic | BindingFlags.Instance);
         static MethodInfo s_miBakeByteArray = typeof(ILGenerator).GetMethod("BakeByteArray", BindingFlags.NonPublic | BindingFlags.Instance);

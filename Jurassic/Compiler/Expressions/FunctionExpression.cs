@@ -11,7 +11,7 @@ namespace Jurassic.Compiler
         /// Creates a new instance of FunctionExpression.
         /// </summary>
         /// <param name="functionContext"> The function context to base this expression on. </param>
-        public FunctionExpression(FunctionContext functionContext)
+        public FunctionExpression(FunctionMethodGenerator functionContext)
         {
             if (functionContext == null)
                 throw new ArgumentNullException("functionContext");
@@ -21,7 +21,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the function context associated with this expression.
         /// </summary>
-        public FunctionContext Context
+        public FunctionMethodGenerator Context
         {
             get;
             private set;
@@ -48,7 +48,8 @@ namespace Jurassic.Compiler
             // Create a UserDefinedFunction.
 
             // prototype
-            generator.Call(ReflectionHelpers.Global_Function);
+            EmitHelpers.LoadScriptEngine(generator);
+            generator.Call(ReflectionHelpers.ScriptEngine_Function);
             generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
 
             // name
@@ -66,7 +67,7 @@ namespace Jurassic.Compiler
             }
 
             // scope
-            generator.LoadArgument(0);
+            EmitHelpers.LoadScope(generator);
 
             // body
             generator.LoadNull();

@@ -9,6 +9,7 @@ namespace Jurassic.Library
     /// </summary>
     internal class JSONSerializer
     {
+        private ScriptEngine engine;
         private Stack<ObjectInstance> objectStack;
         private Stack<ArrayInstance> arrayStack;
         private string separator;
@@ -16,8 +17,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a new JSONSerializer instance with the default options.
         /// </summary>
-        public JSONSerializer()
+        /// <param name="engine"> The associated script engine. </param>
+        public JSONSerializer(ScriptEngine engine)
         {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+            this.engine = engine;
         }
 
         /// <summary>
@@ -61,7 +66,7 @@ namespace Jurassic.Library
             this.separator = string.IsNullOrEmpty(this.Indentation) ? string.Empty : "\n";
 
             // Create a temp object to hold the value.
-            var tempObject = GlobalObject.Object.Construct();
+            var tempObject = this.engine.Object.Construct();
             tempObject[string.Empty] = value;
 
             // Transform the value.
@@ -290,7 +295,7 @@ namespace Jurassic.Library
 
             // Check for cyclical references.
             if (this.objectStack.Contains(value) == true)
-                throw new JavaScriptException("TypeError", "The given object must not contain cyclical references");
+                throw new JavaScriptException(this.engine, "TypeError", "The given object must not contain cyclical references");
             this.objectStack.Push(value);
 
             // Create a list of property names to serialize.
@@ -354,7 +359,7 @@ namespace Jurassic.Library
 
             // Check for cyclical references.
             if (this.arrayStack.Contains(value) == true)
-                throw new JavaScriptException("TypeError", "The given object must not contain cyclical references");
+                throw new JavaScriptException(this.engine, "TypeError", "The given object must not contain cyclical references");
             this.arrayStack.Push(value);
 
             result.Append('[');

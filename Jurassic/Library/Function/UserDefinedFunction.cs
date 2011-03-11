@@ -27,14 +27,14 @@ namespace Jurassic.Library
             : base(prototype)
         {
             // Set up a new function scope.
-            var scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(), name, argumentNames);
+            var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), name, argumentNames);
 
             // Compile the code.
-            var context = new FunctionContext(scope, name, argumentNames, body);
+            var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentNames, body, new CompilerOptions());
             context.GenerateCode();
 
             // Create a new user defined function.
-            Init(name, argumentNames, ObjectScope.CreateGlobalScope(), (FunctionDelegate)context.CompiledDelegate, true);
+            Init(name, argumentNames, this.Engine.CreateGlobalScope(), (FunctionDelegate)context.CompiledDelegate, true);
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Jurassic.Library
         private UserDefinedFunction(ObjectInstance prototype)
             : base(prototype)
         {
-            var body = new FunctionDelegate((scope, functionObject, thisObject, argumentValues) => Undefined.Value);
-            Init("Empty", new string[0], ObjectScope.CreateGlobalScope(), body, false);
+            var body = new FunctionDelegate((engine, scope, functionObject, thisObject, argumentValues) => Undefined.Value);
+            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), body, false);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Jurassic.Library
             this.FastSetProperty("length", argumentNames.Count);
             if (hasInstancePrototype == true)
             {
-                this.FastSetProperty("prototype", GlobalObject.Object.Construct(), PropertyAttributes.Writable);
+                this.FastSetProperty("prototype", this.Engine.Object.Construct(), PropertyAttributes.Writable);
                 this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
             }
             else
@@ -176,7 +176,7 @@ namespace Jurassic.Library
             //if (this.StrictMode == false)
             //{
             //    if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
-            //        thisObject = GlobalObject.Instance;
+            //        thisObject = this.Engine.Global;
             //    else
             //        thisObject = TypeConverter.ToObject(thisObject);
             //}
@@ -197,11 +197,11 @@ namespace Jurassic.Library
             //if (scope.HasValue("arguments", true) == false)
             //{
             //    scope.CreateMutableBinding("arguments", false);
-            //    scope.SetMutableBinding("arguments", new ArgumentsInstance(GlobalObject.Object.InstancePrototype, this, scope, argumentValues), this.StrictMode);
+            //    scope.SetMutableBinding("arguments", new ArgumentsInstance(this.Engine.Object.InstancePrototype, this, scope, argumentValues), this.StrictMode);
             //}
 
             // Call the function.
-            return this.body(this.ParentScope, thisObject, this, argumentValues);
+            return this.body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
         }
 
         /// <summary>

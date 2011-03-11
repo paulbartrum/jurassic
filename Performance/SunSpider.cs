@@ -12,12 +12,27 @@ namespace Performance
     [TestClass]
     public class SunSpider
     {
+        [ThreadStatic]
+        private static Jurassic.ScriptEngine engine;
+
+        [ThreadStatic]
+        private static System.Diagnostics.Stopwatch timer;
+
+        [ThreadStatic]
+        private static double parseTime, optimizationTime, codeGenerationTime;
+
         [ClassInitialize]
         public static void WarmUp(TestContext context)
         {
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            GlobalObject.Eval("qwerew = 1");
-            context.WriteLine("Warm up time: {0:n2}ms", timer.Elapsed.TotalMilliseconds);
+            // Create a new script engine.
+            var warmUpTimer = System.Diagnostics.Stopwatch.StartNew();
+            engine = new Jurassic.ScriptEngine();
+            context.WriteLine("Warm up time: {0:n2}ms", warmUpTimer.Elapsed.TotalMilliseconds);
+
+            // Hook events to record statistics.
+            engine.OptimizationStarted += (sender, e) => { parseTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
+            engine.CodeGenerationStarted += (sender, e) => { optimizationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
+            engine.ExecutionStarted += (sender, e) => { codeGenerationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
         }
 
         [TestMethod]
@@ -185,59 +200,20 @@ namespace Performance
             Assert.Inconclusive(string.Format("{0}ms, was 24471ms", timer.ElapsedMilliseconds));
         }
 
-        [TestMethod]
-        public void RunAllTestsWithJint()
-        {
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            var engine = new Jint.JintEngine();
-            foreach (string path in Directory.EnumerateFiles(@"..\..\..\Performance\Files\sunspider-0.9.1"))
-            {
-                //try
-                //{
-                    var timer2 = System.Diagnostics.Stopwatch.StartNew();
-                    engine.Run(File.ReadAllText(path));
-                    Console.WriteLine("{0}\t{1:n1}",
-                        Path.GetFileNameWithoutExtension(path),
-                        timer2.ElapsedMilliseconds);
-                //}
-                //catch (Exception ex)
-                //{
-                //    Console.WriteLine("{0}\tFAILED ({1})", Path.GetFileNameWithoutExtension(path), ex.Message);
-                //}
-            }
-            Assert.Inconclusive(string.Format("{0}ms, was ?ms", timer.ElapsedMilliseconds));
-        }
-
         private void RunTest(string scriptPath, double previous, bool assertResults = true)
         {
             scriptPath = Path.Combine(@"..\..\..\Performance\Files\sunspider-0.9.1\", scriptPath);
             var script = File.ReadAllText(scriptPath);
-            var timer = System.Diagnostics.Stopwatch.StartNew();
 
-            // Parse the javascript code.
-            var context = new Jurassic.Compiler.GlobalContext(new System.IO.StringReader(script), scriptPath);
-            context.Parse();
-            double parseTime = timer.Elapsed.TotalMilliseconds;
-
-            // Optimize the code.
-            timer.Restart();
-            context.Optimize();
-            double optimizationTime = timer.Elapsed.TotalMilliseconds;
-
-            // Compile the code.
-            timer.Restart();
-            context.GenerateCode();
-            double compilationTime = timer.Elapsed.TotalMilliseconds;
-
-            // Run the javascript code.
-            timer.Restart();
-            context.Execute();
+            // Execute the javascript code.
+            timer = System.Diagnostics.Stopwatch.StartNew();
+            engine.Execute(new Jurassic.StringScriptSource(script));
             double runTime = timer.Elapsed.TotalMilliseconds;
 
             string infoString = string.Format("{0:n1}ms (parse: {1:n1}ms, compile: {2:n1}ms, optimize: {3:n1}ms, runtime: {4:n1}ms)",
-                parseTime + compilationTime + runTime,
+                parseTime + optimizationTime + codeGenerationTime + runTime,
                 parseTime,
-                compilationTime,
+                codeGenerationTime,
                 optimizationTime,
                 runTime);
             if (previous > 0)
@@ -246,10 +222,10 @@ namespace Performance
             Console.WriteLine("{0}\t{1:n1}\t{2:n1}\t{3:n1}\t{4:n1}\t{5:n1}",
                 Path.GetFileNameWithoutExtension(scriptPath),
                 parseTime,
-                compilationTime,
+                codeGenerationTime,
                 optimizationTime,
                 runTime,
-                parseTime + compilationTime + runTime);
+                parseTime + optimizationTime + codeGenerationTime + runTime);
             if (assertResults == true)
                 throw new AssertInconclusiveException(infoString);
         }

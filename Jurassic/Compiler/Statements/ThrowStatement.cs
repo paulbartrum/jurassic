@@ -38,7 +38,7 @@ namespace Jurassic.Compiler
             EmitConversion.ToAny(generator, this.Value.ResultType);
             generator.LoadInt32(0);
             generator.LoadNull();
-            generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor3);
+            generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Object);
             generator.Throw();
         }
 

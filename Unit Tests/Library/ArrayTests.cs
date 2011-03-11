@@ -113,8 +113,11 @@ namespace UnitTests
             // Setting a new element increases the length.
             Assert.AreEqual(3, TestUtils.Evaluate("var x = [1, 2, 3]; x.length"));
             Assert.AreEqual(4, TestUtils.Evaluate("var x = [1, 2, 3]; x[3] = 4; x.length"));
+            Assert.AreEqual(3, TestUtils.Evaluate("var x = [1, 2, 3]; x[0] = 4; x.length"));
             Assert.AreEqual(301, TestUtils.Evaluate("var x = [1, 2, 3]; x[300] = 4; x.length"));
             Assert.AreEqual(false, TestUtils.Evaluate("var x = [1, 2, 3]; x[300] = 4; x.hasOwnProperty(299)"));
+            Assert.AreEqual(100000, TestUtils.Evaluate(@"var a = new Array(); a[99999] = ''; a.length"));
+            Assert.AreEqual(100000, TestUtils.Evaluate(@"var a = new Array(); a[99999] = ''; a[5] = 2; a.length"));
 
             // Increasing the length has no effect on the elements of the array.
             Assert.AreEqual(false, TestUtils.Evaluate("var x = [1, 2, 3]; x.length = 10; x.hasOwnProperty(3)"));
@@ -128,6 +131,18 @@ namespace UnitTests
 
             // The length property is virtual, but it should behave as though it was a real property.
             Assert.AreEqual(0, TestUtils.Evaluate("length = 0; with (Object.create(['one', 'two', 'three'])) { length = 5 } length"));
+        }
+
+        [TestMethod]
+        public void isArray()
+        {
+            Assert.AreEqual(false, TestUtils.Evaluate("Array.isArray(0)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Array.isArray({})"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Array.isArray([])"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Array.isArray(new Array())"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.isArray.length"));
         }
 
         [TestMethod]
@@ -193,6 +208,9 @@ namespace UnitTests
             TestUtils.Evaluate("var x = new Number(5);");
             TestUtils.Evaluate("x.concat = Array.prototype.concat");
             Assert.AreEqual("5,6", TestUtils.Evaluate("x.concat(6).toString()"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.concat.length"));
         }
 
         [TestMethod]
@@ -212,6 +230,9 @@ namespace UnitTests
             TestUtils.Evaluate("var x = { '0': 5, '1': 6, length: 2};");
             TestUtils.Evaluate("x.join = Array.prototype.join;");
             Assert.AreEqual("5,6", TestUtils.Evaluate("x.join()"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.join.length"));
         }
 
         [TestMethod]
@@ -231,6 +252,9 @@ namespace UnitTests
             Assert.AreEqual(6, TestUtils.Evaluate("x.pop()"));
             Assert.AreEqual(1, TestUtils.Evaluate("x.length"));
             Assert.AreEqual("undefined", TestUtils.Evaluate("typeof(x[1])"));
+
+            // length
+            Assert.AreEqual(0, TestUtils.Evaluate("Array.prototype.pop.length"));
         }
 
         [TestMethod]
@@ -258,6 +282,9 @@ namespace UnitTests
             Assert.AreEqual(3, TestUtils.Evaluate("x.push(7)"));
             Assert.AreEqual(7, TestUtils.Evaluate("x[2]"));
             Assert.AreEqual(3, TestUtils.Evaluate("x.length"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.push.length"));
         }
 
         [TestMethod]
@@ -304,6 +331,9 @@ namespace UnitTests
             Assert.AreEqual(6, TestUtils.Evaluate("x[0]"));
             Assert.AreEqual(5, TestUtils.Evaluate("x[1]"));
             Assert.AreEqual(2, TestUtils.Evaluate("x.length"));
+
+            // length
+            Assert.AreEqual(0, TestUtils.Evaluate("Array.prototype.reverse.length"));
         }
 
         [TestMethod]
@@ -350,6 +380,9 @@ namespace UnitTests
             if (TestUtils.Engine != JSEngine.JScript)   // JScript bug.
                 Assert.AreEqual("undefined", TestUtils.Evaluate("typeof(x[1])"));
             Assert.AreEqual(1, TestUtils.Evaluate("x.length"));
+
+            // length
+            Assert.AreEqual(0, TestUtils.Evaluate("Array.prototype.shift.length"));
         }
 
         [TestMethod]
@@ -405,6 +438,9 @@ namespace UnitTests
             Assert.AreEqual(6, TestUtils.Evaluate("y[0]"));
             Assert.AreEqual("undefined", TestUtils.Evaluate("typeof(y[1])"));
             Assert.AreEqual(1, TestUtils.Evaluate("y.length"));
+
+            // length
+            Assert.AreEqual(2, TestUtils.Evaluate("Array.prototype.slice.length"));
         }
 
         private string[] words = new string[] {
@@ -452,6 +488,9 @@ namespace UnitTests
             Assert.AreEqual(4, TestUtils.Evaluate("array[1]"));
             Assert.AreEqual(11, TestUtils.Evaluate("array[2]"));
             Assert.AreEqual(21, TestUtils.Evaluate("array[3]"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.sort.length"));
         }
 
         [TestMethod]
@@ -475,6 +514,9 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("array[0]"));
             Assert.AreEqual(21, TestUtils.Evaluate("array[1]"));
             Assert.AreEqual(11, TestUtils.Evaluate("array[2]"));
+
+            // length
+            Assert.AreEqual(2, TestUtils.Evaluate("Array.prototype.splice.length"));
         }
 
         [TestMethod]
@@ -574,6 +616,9 @@ namespace UnitTests
             // Check boundary conditions.
             Assert.AreEqual(4294967295.0, TestUtils.Evaluate("new Array(4294967293).unshift(1, 2)"));
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(4294967293).unshift(1, 2, 3)"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.unshift.length"));
         }
 
         [TestMethod]
@@ -599,11 +644,35 @@ namespace UnitTests
             Assert.AreEqual(1, TestUtils.Evaluate("[3, 2, 1].indexOf(2, 1)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("[3, 2, 1].indexOf(3, 1)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("[3, 2, 1].indexOf(4, 1)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("[3, 2, 1].indexOf(2, -1)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("[3, 2, 1].indexOf(2, -2)"));
             Assert.AreEqual(0, TestUtils.Evaluate("['a', 'b', 'c', 'a'].indexOf('a', 0)"));
             Assert.AreEqual(3, TestUtils.Evaluate("['a', 'b', 'c', 'a'].indexOf('a', 1)"));
             Assert.AreEqual(0, TestUtils.Evaluate("['a', 'b', 'c', 'a'].indexOf('a', -10)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("['a', 'b', 'c', 'a'].indexOf('a', 10)"));
             Assert.AreEqual(2, TestUtils.Evaluate("[3, 2, 1].indexOf(1, undefined)"));
+
+            TestUtils.Evaluate(@"
+                var a = new Array();
+                a[100] = 1;
+                a[99999] = '';  
+                a[10] = new Object();
+                a[5555] = 5.5;
+                a[123456] = 'str';
+                a[5] = 1E+309;");
+            Assert.AreEqual(100, TestUtils.Evaluate("a.indexOf(1)"));
+            Assert.AreEqual(99999, TestUtils.Evaluate("a.indexOf('')"));
+            Assert.AreEqual(123456, TestUtils.Evaluate("a.indexOf('str')"));
+            Assert.AreEqual(5, TestUtils.Evaluate("a.indexOf(1E+309)"));
+            Assert.AreEqual(5555, TestUtils.Evaluate("a.indexOf(5.5)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("a.indexOf(true)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("a.indexOf(5)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("a.indexOf('str1')"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("a.indexOf(null)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("a.indexOf(new Object())"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.indexOf.length"));
         }
 
         [TestMethod]
@@ -634,6 +703,9 @@ namespace UnitTests
             Assert.AreEqual(-1, TestUtils.Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', -10)"));
             Assert.AreEqual(3, TestUtils.Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', 10)"));
             Assert.AreEqual(2, TestUtils.Evaluate("[3, 2, 1].lastIndexOf(1, undefined)"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.lastIndexOf.length"));
         }
 
         [TestMethod]
@@ -649,6 +721,9 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("array.every(function(value, index, array) { return value > 4 })"));
             Assert.AreEqual(true, TestUtils.Evaluate("array.every(function(value, index, array) { return this == 0 }, 0)"));
             Assert.AreEqual(false, TestUtils.Evaluate("array.every(function(value, index, array) { return this == 1 }, 0)"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.every.length"));
         }
 
         [TestMethod]
@@ -664,6 +739,9 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("array.some(function(value, index, array) { return value > 4 })"));
             Assert.AreEqual(true, TestUtils.Evaluate("array.some(function(value, index, array) { return this == 0 }, 0)"));
             Assert.AreEqual(false, TestUtils.Evaluate("array.some(function(value, index, array) { return this == 1 }, 0)"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.some.length"));
         }
 
         [TestMethod]
@@ -675,6 +753,9 @@ namespace UnitTests
 
             Assert.AreEqual("2,3,4", TestUtils.Evaluate("array = [1, 2, 3]; array.forEach(function(value, index, array) { array[index] = value + 1 }); array.toString()"));
             Assert.AreEqual("2,3,4", TestUtils.Evaluate("array = [1, 2, 3]; array.forEach(function(value, index, array) { this[index] = value + 1 }, array); array.toString()"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.forEach.length"));
         }
 
         [TestMethod]
@@ -685,6 +766,9 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual("2,3,4", TestUtils.Evaluate("[1, 2, 3].map(function(value, index, array) { return value + 1; }).toString()"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.map.length"));
         }
 
         [TestMethod]
@@ -695,6 +779,9 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual("2,3", TestUtils.Evaluate("[1, 2, 3].filter(function(value, index, array) { return value > 1; }).toString()"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.filter.length"));
         }
 
         [TestMethod]
@@ -705,6 +792,9 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual(6, TestUtils.Evaluate("[1, 2, 3].reduce(function(accum, value, index, array) { return accum + value; })"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.reduce.length"));
         }
 
         [TestMethod]
@@ -715,6 +805,9 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual(6, TestUtils.Evaluate("[1, 2, 3].reduceRight(function(accum, value, index, array) { return accum + value; })"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.reduceRight.length"));
         }
 
         [TestMethod]
@@ -750,6 +843,9 @@ namespace UnitTests
                 // Revert the culture back to the original value.
                 System.Threading.Thread.CurrentThread.CurrentCulture = originalCulture;
             }
+
+            // length
+            Assert.AreEqual(0, TestUtils.Evaluate("Array.prototype.toLocaleString.length"));
         }
 
         [TestMethod]
@@ -767,6 +863,9 @@ namespace UnitTests
             TestUtils.Evaluate("x.join = function() { return 'join overridden'; }");
             TestUtils.Evaluate("x.toString = Array.prototype.toString;");
             Assert.AreEqual("join overridden", TestUtils.Evaluate("x.toString()"));
+
+            // length
+            Assert.AreEqual(0, TestUtils.Evaluate("Array.prototype.toString.length"));
         }
     }
 }

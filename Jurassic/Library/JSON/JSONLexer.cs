@@ -10,16 +10,21 @@ namespace Jurassic.Library
     /// </summary>
     internal class JSONLexer
     {
+        private ScriptEngine engine;
         private TextReader reader;
 
         /// <summary>
         /// Creates a JSONLexer instance with the given source of text.
         /// </summary>
+        /// <param name="engine"> The script engine used to create error objects. </param>
         /// <param name="reader"> A reader that will supply the JSON source text. </param>
-        public JSONLexer(TextReader reader)
+        public JSONLexer(ScriptEngine engine, TextReader reader)
         {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
             if (reader == null)
                 throw new ArgumentNullException("reader");
+            this.engine = engine;
             this.reader = reader;
         }
 
@@ -79,7 +84,7 @@ namespace Jurassic.Library
                         // End of input.
                         return null;
                     default:
-                        throw new JavaScriptException("SyntaxError", string.Format("Unexpected character '{0}'.", (char)c));
+                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected character '{0}'.", (char)c));
                 }
             }
         }
@@ -118,7 +123,7 @@ namespace Jurassic.Library
             else if (keyword == "true")
                 return LiteralToken.True;
             else
-                throw new JavaScriptException("SyntaxError", string.Format("Unexpected keyword '{0}'", keyword));
+                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected keyword '{0}'", keyword));
         }
 
         /// <summary>
@@ -139,11 +144,11 @@ namespace Jurassic.Library
 
             // If the first character is '0' then a period must be the next character.
             if (firstChar == '0' && digitsRead != 0)
-                throw new JavaScriptException("SyntaxError", "Invalid number");
+                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
 
             // If the first character is '-' then a digit must be the next character.
             if (firstChar == '-' && digitsRead == 0)
-                throw new JavaScriptException("SyntaxError", "Invalid number");
+                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
 
             if (this.reader.Peek() == '.')
             {
@@ -153,7 +158,7 @@ namespace Jurassic.Library
                 // Read the fractional component.
                 double fraction = ReadInteger(0.0, out digitsRead);
                 if (digitsRead == 0)
-                    throw new JavaScriptException("SyntaxError", "Invalid number");
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
 
                 // Apply the fractional component.
                 result += fraction / System.Math.Pow(10, digitsRead);
@@ -183,11 +188,11 @@ namespace Jurassic.Library
 
                 // Check a number was actually provided.
                 if (digitsRead == 0)
-                    throw new JavaScriptException("SyntaxError", "Invalid number.");
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.");
 
                 // If the first character of the exponent is '0' then a period must be the next character.
                 if (firstChar == '0' && digitsRead > 1)
-                    throw new JavaScriptException("SyntaxError", "Invalid number");
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number");
 
                 // Apply the exponent.
                 if (exponent >= 0)
@@ -238,9 +243,9 @@ namespace Jurassic.Library
                 if (c == '"')
                     break;
                 if (c == -1)
-                    throw new JavaScriptException("SyntaxError", "Unexpected end of input in string literal");
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in string literal");
                 if (c < 0x20)
-                    throw new JavaScriptException("SyntaxError", "Unexpected character in string literal");
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected character in string literal");
 
                 if (c == '\\')
                 {
@@ -285,7 +290,7 @@ namespace Jurassic.Library
                             contents.Append(ReadHexNumber(4));
                             break;
                         default:
-                            throw new JavaScriptException("SyntaxError", "Unexpected character in escape sequence.");
+                            throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected character in escape sequence.");
                     }
                 }
                 else
@@ -309,7 +314,7 @@ namespace Jurassic.Library
                 int c = this.reader.Read();
                 contents.Append((char)c);
                 if (IsHexDigit(c) == false)
-                    throw new JavaScriptException("SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c));
+                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c));
             }
             return (char)int.Parse(contents.ToString(), System.Globalization.NumberStyles.HexNumber);
         }

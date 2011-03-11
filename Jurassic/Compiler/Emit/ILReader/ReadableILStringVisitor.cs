@@ -4,11 +4,13 @@ using System.IO;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public interface IILStringCollector {
+    internal interface IILStringCollector
+    {
         void Process(ILInstruction ilInstruction, string operandString);
     }
 
-    public class ReadableILStringToTextWriter : IILStringCollector {
+    internal class ReadableILStringToTextWriter : IILStringCollector
+    {
         protected TextWriter writer;
 
         public ReadableILStringToTextWriter(TextWriter writer) {
@@ -23,7 +25,8 @@ namespace ClrTest.Reflection {
         }
     }
 
-    public class RawILStringToTextWriter : ReadableILStringToTextWriter {
+    internal class RawILStringToTextWriter : ReadableILStringToTextWriter
+    {
         public RawILStringToTextWriter(TextWriter writer)
             : base(writer) {
         }
@@ -36,7 +39,8 @@ namespace ClrTest.Reflection {
         }
     }
 
-    public abstract class ILInstructionVisitor {
+    internal abstract class ILInstructionVisitor
+    {
         public virtual void VisitInlineBrTargetInstruction(InlineBrTargetInstruction inlineBrTargetInstruction) { }
         public virtual void VisitInlineFieldInstruction(InlineFieldInstruction inlineFieldInstruction) { }
         public virtual void VisitInlineIInstruction(InlineIInstruction inlineIInstruction) { }
@@ -56,7 +60,8 @@ namespace ClrTest.Reflection {
         public virtual void VisitShortInlineVarInstruction(ShortInlineVarInstruction shortInlineVarInstruction) { }
     }
 
-    public class ReadableILStringVisitor : ILInstructionVisitor {
+    internal class ReadableILStringVisitor : ILInstructionVisitor
+    {
         protected IFormatProvider formatProvider;
         protected IILStringCollector collector;
 
@@ -162,7 +167,8 @@ namespace ClrTest.Reflection {
         }
     }
 
-    public class RawILStringVisitor : ReadableILStringVisitor {
+    internal class RawILStringVisitor : ReadableILStringVisitor
+    {
         public RawILStringVisitor(IILStringCollector collector)
             : this(collector, DefaultFormatProvider.Instance) {
         }

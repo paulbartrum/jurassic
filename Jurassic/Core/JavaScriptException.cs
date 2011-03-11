@@ -31,12 +31,13 @@ namespace Jurassic
         /// <summary>
         /// Creates a new JavaScriptException instance.
         /// </summary>
+        /// <param name="engine"> The script engine used to create the error object. </param>
         /// <param name="name"> The name of the error, e.g "RangeError". </param>
         /// <param name="message"> A description of the error. </param>
-        public JavaScriptException(string name, string message)
+        public JavaScriptException(ScriptEngine engine, string name, string message)
             : base(string.Format("{0}: {1}", name, message))
         {
-            this.ErrorObject = CreateError(name, message);
+            this.ErrorObject = CreateError(engine, name, message);
             this.LineNumber = -1;
         }
 
@@ -47,10 +48,10 @@ namespace Jurassic
         /// <param name="message"> A description of the error. </param>
         /// <param name="innerException"> The exception that is the cause of the current exception,
         /// or <c>null</c> if no inner exception is specified. </param>
-        public JavaScriptException(string name, string message, Exception innerException)
+        public JavaScriptException(ScriptEngine engine, string name, string message, Exception innerException)
             : base(string.Format("{0}: {1}", name, message), innerException)
         {
-            this.ErrorObject = CreateError(name, message);
+            this.ErrorObject = CreateError(engine, name, message);
             this.LineNumber = -1;
         }
 
@@ -61,10 +62,10 @@ namespace Jurassic
         /// <param name="message"> A description of the error. </param>
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
-        public JavaScriptException(string name, string message, int lineNumber, string sourcePath)
+        public JavaScriptException(ScriptEngine engine, string name, string message, int lineNumber, string sourcePath)
             : base(string.Format("{0}: {1}", name, message))
         {
-            this.ErrorObject = CreateError(name, message);
+            this.ErrorObject = CreateError(engine, name, message);
             this.LineNumber = lineNumber;
             this.SourcePath = sourcePath;
         }
@@ -122,15 +123,18 @@ namespace Jurassic
         /// <summary>
         /// Creates an error object with the given message.
         /// </summary>
+        /// <param name="engine"> The script engine used to create the error object. </param>
         /// <param name="name"> The name of the error, e.g "RangeError". </param>
         /// <param name="message"> A description of the error. </param>
         /// <returns> A new Error instance. </returns>
-        private static Library.ErrorInstance CreateError(string name, string message)
+        private static Library.ErrorInstance CreateError(ScriptEngine engine, string name, string message)
         {
-            var errorPropertyInfo = typeof(Library.GlobalObject).GetProperty(name);
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+            var errorPropertyInfo = typeof(ScriptEngine).GetProperty(name);
             if (errorPropertyInfo == null)
                 throw new ArgumentException(string.Format("No error named '{0}' could be found.", name), "name");
-            var errorConstructor = (Library.FunctionInstance)errorPropertyInfo.GetValue(Library.GlobalObject.Instance, null);
+            var errorConstructor = (Library.FunctionInstance)errorPropertyInfo.GetValue(engine, null);
             return (Library.ErrorInstance)errorConstructor.ConstructLateBound(message);
         }
     }

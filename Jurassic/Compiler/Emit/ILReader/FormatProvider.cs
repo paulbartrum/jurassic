@@ -8,7 +8,8 @@ using System.Reflection;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public interface IFormatProvider {
+    internal interface IFormatProvider
+    {
         string Int32ToHex(int int32);
         string Int16ToHex(int int16);
         string Int8ToHex(int int8);
@@ -19,7 +20,8 @@ namespace ClrTest.Reflection {
         string SigByteArrayToString(byte[] sig);
     }
 
-    public class DefaultFormatProvider : IFormatProvider {
+    internal class DefaultFormatProvider : IFormatProvider
+    {
         private DefaultFormatProvider() { }
 
         public static DefaultFormatProvider Instance = new DefaultFormatProvider();

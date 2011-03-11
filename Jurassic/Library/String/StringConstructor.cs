@@ -18,7 +18,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal StringConstructor(ObjectInstance prototype)
-            : base(prototype, "String", new StringInstance(GlobalObject.Object.InstancePrototype, string.Empty))
+            : base(prototype, "String", new StringInstance(prototype.Engine.Object.InstancePrototype, string.Empty))
         {
         }
 

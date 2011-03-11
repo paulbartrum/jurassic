@@ -198,16 +198,13 @@ namespace Jurassic.Compiler
             get { return this.SecondTokenEncountered == false ? this.Operator.SecondaryPrecedence : this.Operator.TertiaryPrecedence; }
         }
 
-        /// <summary>
-        /// Gets a value that indicates whether this 
-        /// </summary>
-        public void CheckValid()
-        {
-            if (this.Operator.IsValidNumberOfOperands(this.OperandCount) == false)
-                throw new JavaScriptException("SyntaxError", "Wrong number of operands", 1, "");
-            if (this.Operator.SecondaryToken != null && this.SecondTokenEncountered == false)
-                throw new JavaScriptException("SyntaxError", string.Format("Missing closing token '{0}'", this.Operator.SecondaryToken.Text), 1, "");
-        }
+        //public void CheckValid()
+        //{
+        //    if (this.Operator.IsValidNumberOfOperands(this.OperandCount) == false)
+        //        throw new JavaScriptException("SyntaxError", "Wrong number of operands", 1, "");
+        //    if (this.Operator.SecondaryToken != null && this.SecondTokenEncountered == false)
+        //        throw new JavaScriptException("SyntaxError", string.Format("Missing closing token '{0}'", this.Operator.SecondaryToken.Text), 1, "");
+        //}
 
         /// <summary>
         /// Visits every node in the expression.

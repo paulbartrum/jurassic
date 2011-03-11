@@ -53,9 +53,9 @@ namespace Jurassic.Library
                     this.mappedArguments[i] = mappedNames.Add(callee.ArgumentNames[i]);
                     if (this.mappedArguments[i] == true)
                     {
-                        var getter = new UserDefinedFunction(GlobalObject.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter);
+                        var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, ArgumentGetter);
                         getter.SetPropertyValue("argumentIndex", i, false);
-                        var setter = new UserDefinedFunction(GlobalObject.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter);
+                        var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[0], this.scope, ArgumentSetter);
                         setter.SetPropertyValue("argumentIndex", i, false);
                         this.DefineProperty(i.ToString(), new PropertyDescriptor(getter, setter, PropertyAttributes.FullAccess), false);
                     }
@@ -65,7 +65,7 @@ namespace Jurassic.Library
             // In strict mode, accessing caller or callee is illegal.
             if (this.callee.StrictMode == true)
             {
-                var throwErrorFunction = new ThrowTypeErrorFunction(GlobalObject.Function.InstancePrototype);
+                var throwErrorFunction = new ThrowTypeErrorFunction(this.Engine.Function.InstancePrototype);
                 this.DefineProperty("caller", new PropertyDescriptor(throwErrorFunction, throwErrorFunction, PropertyAttributes.Sealed), false);
                 this.DefineProperty("callee", new PropertyDescriptor(throwErrorFunction, throwErrorFunction, PropertyAttributes.Sealed), false);
             }
@@ -88,13 +88,14 @@ namespace Jurassic.Library
         /// <summary>
         /// Used to retrieve the value of an argument.
         /// </summary>
+        /// <param name="scriptEngine"> The associated script engine. </param>
         /// <param name="scope"> The scope (global or eval context) or the parent scope (function
         /// context). </param>
         /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
         /// <param name="functionObject"> The function object. </param>
-        /// <param name="arguments"> The arguments that were passed to the function. </param>
+        /// <param name="argumentValues"> The arguments that were passed to the function. </param>
         /// <returns> The result of calling the method. </returns>
-        private object ArgumentGetter(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] argumentValues)
+        private object ArgumentGetter(ScriptEngine engine, Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] argumentValues)
         {
             int argumentIndex = TypeConverter.ToInteger(functionObject.GetPropertyValue("argumentIndex"));
             return this.scope.GetValue(this.callee.ArgumentNames[argumentIndex]);
@@ -103,13 +104,14 @@ namespace Jurassic.Library
         /// <summary>
         /// Used to set the value of an argument.
         /// </summary>
+        /// <param name="scriptEngine"> The associated script engine. </param>
         /// <param name="scope"> The scope (global or eval context) or the parent scope (function
         /// context). </param>
         /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
         /// <param name="functionObject"> The function object. </param>
-        /// <param name="arguments"> The arguments that were passed to the function. </param>
+        /// <param name="argumentValues"> The arguments that were passed to the function. </param>
         /// <returns> The result of calling the method. </returns>
-        private object ArgumentSetter(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] argumentValues)
+        private object ArgumentSetter(ScriptEngine engine, Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] argumentValues)
         {
             int argumentIndex = TypeConverter.ToInteger(functionObject.GetPropertyValue("argumentIndex"));
             if (argumentValues != null && argumentValues.Length >= 1)

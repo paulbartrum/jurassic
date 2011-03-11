@@ -12,9 +12,11 @@ namespace Jurassic.Compiler
         /// Creates a new global object scope.
         /// </summary>
         /// <returns> A new ObjectScope instance. </returns>
-        public static ObjectScope CreateGlobalScope()
+        internal static ObjectScope CreateGlobalScope(Library.GlobalObject globalObject)
         {
-            return new ObjectScope(null) { ScopeObject = Library.GlobalObject.Instance };
+            if (globalObject == null)
+                throw new ArgumentNullException("globalObject");
+            return new ObjectScope(null) { ScopeObject = globalObject };
         }
 
         /// <summary>
@@ -30,18 +32,18 @@ namespace Jurassic.Compiler
             return new ObjectScope(parentScope) { ScopeObjectExpression = scopeObject, ProvidesImplicitThisValue = true };
         }
 
-        /// <summary>
-        /// Creates a new object scope for use inside a with statement.
-        /// </summary>
-        /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
-        /// <param name="scopeObject"> An expression that evaluates to the object to use. </param>
-        /// <returns> A new ObjectScope instance. </returns>
-        public static ObjectScope CreateWithScope(Scope parentScope, Library.ObjectInstance scopeObject)
-        {
-            if (parentScope == null)
-                throw new ArgumentException("With scopes must have a parent scope.");
-            return new ObjectScope(parentScope) { ScopeObject = scopeObject, ProvidesImplicitThisValue = true };
-        }
+        ///// <summary>
+        ///// Creates a new object scope for use inside a with statement.
+        ///// </summary>
+        ///// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
+        ///// <param name="scopeObject"> An expression that evaluates to the object to use. </param>
+        ///// <returns> A new ObjectScope instance. </returns>
+        //public static ObjectScope CreateWithScope(Scope parentScope, Library.ObjectInstance scopeObject)
+        //{
+        //    if (parentScope == null)
+        //        throw new ArgumentException("With scopes must have a parent scope.");
+        //    return new ObjectScope(parentScope) { ScopeObject = scopeObject, ProvidesImplicitThisValue = true };
+        //}
 
         /// <summary>
         /// Creates a new object scope for use at runtime.
@@ -139,10 +141,11 @@ namespace Jurassic.Compiler
         internal override void GenerateScopeCreation(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Create a new runtime object scope.
-            generator.LoadArgument(0);  // parent scope
+            EmitHelpers.LoadScope(generator);  // parent scope
             if (this.ScopeObjectExpression == null)
             {
-                generator.Call(ReflectionHelpers.Global_Instance);
+                EmitHelpers.LoadScriptEngine(generator);
+                generator.Call(ReflectionHelpers.ScriptEngine_Global);
             }
             else
             {
@@ -151,8 +154,8 @@ namespace Jurassic.Compiler
             }
             generator.Call(ReflectionHelpers.ObjectScope_CreateRuntimeScope);
 
-            // Store the scope in the first method parameter.
-            generator.StoreArgument(0);
+            // Save the new scope.
+            EmitHelpers.StoreScope(generator);
         }
 
         /// <summary>
@@ -195,7 +198,7 @@ namespace Jurassic.Compiler
             //// Store the scope object into a temp variable.
             //var scopeObject = generator.DeclareVariable(typeof(Library.ObjectInstance));
             //if (scope == null)
-            //    generator.LoadArgument(0);
+            //    EmitHelpers.LoadScope(generator);
             //else
             //    generator.LoadVariable(scope);
             //generator.Call(ReflectionHelpers.Scope_ScopeObject);
@@ -246,7 +249,7 @@ namespace Jurassic.Compiler
             //{
             //    // scope = scope.ParentScope
             //    if (scope == null)
-            //        generator.LoadArgument(0);
+            //        EmitHelpers.LoadScope(generator);
             //    else
             //        generator.LoadVariable(scope);
             //    generator.Duplicate();
@@ -327,7 +330,7 @@ namespace Jurassic.Compiler
             //// Store the scope object into a temp variable.
             //var scopeObject = generator.DeclareVariable(typeof(Library.ObjectInstance));
             //if (scope == null)
-            //    generator.LoadArgument(0);
+            //    EmitHelpers.LoadScope(generator);
             //else
             //    generator.LoadVariable(scope);
             //generator.Call(ReflectionHelpers.Scope_ScopeObject);
@@ -388,7 +391,7 @@ namespace Jurassic.Compiler
             //{
             //    // scope = scope.ParentScope
             //    if (scope == null)
-            //        generator.LoadArgument(0);
+            //        EmitHelpers.LoadScope(generator);
             //    else
             //        generator.LoadVariable(scope);
             //    generator.Duplicate();

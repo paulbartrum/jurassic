@@ -94,24 +94,9 @@ namespace Performance
 
         public static void Benchmark(string code, double previousResult = 0)
         {
-            // Parse the javascript code.
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            var context = new Jurassic.Compiler.GlobalContext(new System.IO.StringReader(code), null);
-            context.Parse();
-            Console.WriteLine("Parse: {0:n1}ms", timer.Elapsed.TotalMilliseconds);
-
-            // Optimize the code.
-            timer.Reset();
-            context.Optimize();
-            Console.WriteLine("Optimization: {0:n1}ms", timer.Elapsed.TotalMilliseconds);
-
-            // Compile the code.
-            timer.Reset();
-            context.GenerateCode();
-            Console.WriteLine("Code generation: {0:n1}ms", timer.Elapsed.TotalMilliseconds);
-
             // Run the javascript code.
-            Benchmark(() => context.Execute(), previousResult);
+            var engine = new Jurassic.ScriptEngine();
+            Benchmark(() => engine.Execute(new Jurassic.StringScriptSource(code)), previousResult);
         }
     }
 

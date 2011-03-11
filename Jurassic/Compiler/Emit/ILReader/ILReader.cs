@@ -7,7 +7,8 @@ using System.Reflection.Emit;
 #if DEBUG
 
 namespace ClrTest.Reflection {
-    public sealed class ILReader : IEnumerable<ILInstruction>, IEnumerable {
+    internal sealed class ILReader : IEnumerable<ILInstruction>, IEnumerable
+    {
         #region Static members
         static Type s_runtimeMethodInfoType = Type.GetType("System.Reflection.RuntimeMethodInfo");
         static Type s_runtimeConstructorInfoType = Type.GetType("System.Reflection.RuntimeConstructorInfo");
