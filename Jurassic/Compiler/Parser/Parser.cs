@@ -1795,9 +1795,6 @@ namespace Jurassic.Compiler
             else
                 throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found '{0}'", this.nextToken.Text), 1, "");
 
-            // Check the property name is valid.
-            ValidateVariableName(propertyName);
-
             // Consume the token.
             this.Consume();
 

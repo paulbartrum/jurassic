@@ -920,6 +920,7 @@ namespace UnitTests
             Assert.AreEqual(2, TestUtils.Evaluate("x = {a: 1, a: 2}.a"));   // This is an error in strict mode.
             Assert.AreEqual(3, TestUtils.Evaluate("var obj = {valueOf:0, toString:1, foo:2}; x = 0; for (var y in obj) { x ++; } x"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {if: 1}; x.if"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = {eval: 1}; x.eval"));
 
             // Object literals can have getters and setters.
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get f() { return 1; }}; x.f"));
@@ -1334,6 +1335,9 @@ namespace UnitTests
 
             // Defining a property more than once fails.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var x = {a: 1, a: 2};"));
+
+            // Eval is allowed for a object literal property.
+            Assert.AreEqual(1, TestUtils.Evaluate("'use strict'; x = {eval: 1}; x.eval"));
 
             // Attempts to use the name "eval" are not allowed in strict mode.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; var eval = 5"));

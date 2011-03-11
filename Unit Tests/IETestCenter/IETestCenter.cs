@@ -9,23 +9,41 @@ namespace Performance
 {
 
     /// <summary>
-    /// Runs the IE Test Center javascript tests.
+    /// Runs the IE Test Center javascript tests (available here: http://es5conform.codeplex.com).
     /// </summary>
     [TestClass]
     public class IETestCenter
     {
+        // Chapter 7
+
+        [TestMethod]
+        public void IETestCenter_Literals()
+        {
+            RunTests(@"chapter07\7.8");
+        }
+
+
+        // Chapter 8
+
+        [TestMethod]
+        public void IETestCenter_Reference()
+        {
+            RunTests(@"chapter08\8.7");
+        }
+
+
         // Chapter 10
 
         [TestMethod]
         public void IETestCenter_Execution()
         {
-            RunTests("Execution");
+            RunTests(@"chapter10\10.4");
         }
 
         [TestMethod]
         public void IETestCenter_Argument()
         {
-            RunTests("Argument");
+            RunTests(@"chapter10\10.6");
         }
 
 
@@ -34,19 +52,19 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Primary()
         {
-            RunTests("Primary");
+            RunTests(@"chapter11\11.1");
         }
 
         [TestMethod]
         public void IETestCenter_Unary()
         {
-            RunTests("Unary");
+            RunTests(@"chapter11\11.4");
         }
 
         [TestMethod]
         public void IETestCenter_Assignment()
         {
-            RunTests("Assignment");
+            RunTests(@"chapter11\11.13");
         }
 
 
@@ -55,19 +73,37 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Try()
         {
-            RunTests("Try", "12.14-5");
+            RunTests(@"chapter12\12.14", "12.14-5");
         }
 
         [TestMethod]
         public void IETestCenter_With()
         {
-            RunTests("With");
+            RunTests(@"chapter12\12.10");
         }
 
         [TestMethod]
         public void IETestCenter_Var()
         {
-            RunTests("Var");
+            RunTests(@"chapter12\12.2");
+        }
+
+
+        // Chapter 13
+
+        [TestMethod]
+        public void IETestCenter_StrictMode()
+        {
+            RunTests(@"chapter13\13.1");
+        }
+        
+
+        // Chapter 14
+
+        [TestMethod]
+        public void IETestCenter_Directive()
+        {
+            RunTests(@"chapter14\14.1");
         }
 
 
@@ -76,57 +112,67 @@ namespace Performance
         [TestMethod]
         public void IETestCenter_Array()
         {
-            RunTests("Array", "15.4.4.14-1-16", "15.4.4.14-2-16");
+            RunTests(@"chapter15\15.4", "15.4.4.14-1-16", "15.4.4.14-2-16");
         }
 
         [TestMethod]
         public void IETestCenter_Date()
         {
-            RunTests("Date");
+            RunTests(@"chapter15\15.9");
         }
 
         [TestMethod]
         public void IETestCenter_Function()
         {
-            RunTests("Function");
+            RunTests(@"chapter15\15.3");
+        }
+
+        [TestMethod]
+        public void IETestCenter_Global()
+        {
+            RunTests(@"chapter15\15.1");
         }
 
         [TestMethod]
         public void IETestCenter_JSON()
         {
-            RunTests("JSON");
+            RunTests(@"chapter15\15.12");
         }
 
         [TestMethod]
         public void IETestCenter_Number()
         {
-            RunTests("Number");
+            RunTests(@"chapter15\15.7");
         }
 
         [TestMethod]
         public void IETestCenter_Object()
         {
-            RunTests("Object");
+            RunTests(@"chapter15\15.2");
         }
 
         [TestMethod]
         public void IETestCenter_RegExp()
         {
-            RunTests("RegExp");
+            RunTests(@"chapter15\15.10");
         }
 
         [TestMethod]
         public void IETestCenter_String()
         {
-            RunTests("String");
+            RunTests(@"chapter15\15.5");
         }
 
 
 
-        private void RunTests(string folderName, params string[] suppressTests)
+        private void RunTests(string path, params string[] suppressTests)
         {
-            foreach (string path in Directory.EnumerateFiles(Path.Combine(@"..\..\..\Unit Tests\IETestCenter\", folderName)))
-                RunTestFile(path, suppressTests);
+            if (Path.IsPathRooted(path) == false)
+                path = Path.GetFullPath(Path.Combine(@"..\..\..\Unit Tests\IETestCenter\", path));
+            foreach (string filePath in Directory.EnumerateFiles(path))
+                RunTestFile(filePath, suppressTests);
+            foreach (string dirPath in Directory.EnumerateDirectories(path))
+                RunTests(dirPath, suppressTests);
         }
 
         public class ES5Harness : ObjectInstance
@@ -167,6 +213,9 @@ namespace Performance
                     return true;
                   }
                 }");
+
+            // Create the fnSupportsStrict helper function.
+            engine.Execute(@"function fnSupportsStrict() { return true; }");
 
             // One test uses "window" as a synonym for the global object.
             engine.SetGlobalValue("window", engine.Global);
