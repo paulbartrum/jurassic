@@ -19,9 +19,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Performance", "Performance\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sputnik", "Sputnik\Sputnik.csproj", "{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "es5conform", "es5conform\es5conform.csproj", "{4F79A9C7-39B7-483D-9E61-121ED3E053C6}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 7
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs01
 		SccLocalPath0 = .
@@ -40,6 +42,9 @@ Global
 		SccProjectUniqueName5 = Sputnik\\Sputnik.csproj
 		SccProjectName5 = Sputnik
 		SccLocalPath5 = Sputnik
+		SccProjectUniqueName6 = es5conform\\es5conform.csproj
+		SccProjectName6 = es5conform
+		SccLocalPath6 = es5conform
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -112,6 +117,18 @@ Global
 		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|x64.ActiveCfg = Release|x86
 		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|x86.ActiveCfg = Release|x86
 		{5F1F9129-FA3E-47A8-99C5-1FC2BC70F64D}.Release|x86.Build.0 = Release|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|x64.ActiveCfg = Debug|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|x86.ActiveCfg = Debug|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Debug|x86.Build.0 = Debug|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|Any CPU.ActiveCfg = Release|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|Mixed Platforms.Build.0 = Release|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x64.ActiveCfg = Release|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x86.ActiveCfg = Release|x86
+		{4F79A9C7-39B7-483D-9E61-121ED3E053C6}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
