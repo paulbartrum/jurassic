@@ -33,6 +33,7 @@ namespace Jurassic
         internal static MethodInfo TypeUtilities_TypeOf;
         internal static MethodInfo TypeUtilities_EnumeratePropertyNames;
         internal static MethodInfo TypeUtilities_Add;
+        internal static MethodInfo TypeUtilities_IsPrimitiveOrObject;
         internal static MethodInfo TypeUtilities_VerifyThisObject;
 
         internal static MethodInfo FunctionInstance_HasInstance;
@@ -48,10 +49,12 @@ namespace Jurassic
         internal static MethodInfo ScriptEngine_Object;
         internal static MethodInfo Global_Eval;
 
+        internal static ConstructorInfo String_Constructor_Char_Int;
         internal static MethodInfo String_Concat;
         internal static MethodInfo String_Length;
         internal static MethodInfo String_CompareOrdinal;
         internal static MethodInfo String_Format;
+        internal static MethodInfo String_GetChars;
 
         internal static ConstructorInfo ConcatenatedString_Constructor_String;
         internal static ConstructorInfo ConcatenatedString_Constructor_String_String;
@@ -79,6 +82,9 @@ namespace Jurassic
         internal static MethodInfo Type_GetTypeFromHandle;
         internal static MethodInfo MethodBase_GetMethodFromHandle;
         internal static MethodInfo GeneratedMethod_Load;
+        internal static MethodInfo ClrInstanceWrapper_GetWrappedInstance;
+        internal static MethodInfo Decimal_ToDouble;
+        internal static MethodInfo BinderUtilities_ResolveOverloads;
 
         internal static MethodInfo ObjectInstance_Delete;
         internal static MethodInfo ObjectInstance_DefineProperty;
@@ -111,6 +117,8 @@ namespace Jurassic
         internal static ConstructorInfo Arguments_Constructor;
         internal static ConstructorInfo PropertyDescriptor_Constructor2;
         internal static ConstructorInfo PropertyDescriptor_Constructor3;
+        internal static ConstructorInfo ClrInstanceWrapper_Constructor;
+        internal static ConstructorInfo Decimal_Constructor_Double;
 
         internal static FieldInfo Undefined_Value;
         internal static FieldInfo Null_Value;
@@ -144,6 +152,7 @@ namespace Jurassic
             TypeUtilities_TypeOf = GetStaticMethod(typeof(TypeUtilities), "TypeOf", typeof(object));
             TypeUtilities_EnumeratePropertyNames = GetStaticMethod(typeof(TypeUtilities), "EnumeratePropertyNames", typeof(ScriptEngine), typeof(object));
             TypeUtilities_Add = GetStaticMethod(typeof(TypeUtilities), "Add", typeof(object), typeof(object));
+            TypeUtilities_IsPrimitiveOrObject = GetStaticMethod(typeof(TypeUtilities), "IsPrimitiveOrObject", typeof(object));
             TypeUtilities_VerifyThisObject = GetStaticMethod(typeof(TypeUtilities), "VerifyThisObject", typeof(ScriptEngine), typeof(object), typeof(string));
 
             ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(string), typeof(bool));
@@ -186,10 +195,12 @@ namespace Jurassic
             ScriptEngine_Object = GetInstanceMethod(typeof(ScriptEngine), "get_Object");
             Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(ScriptEngine), typeof(object), typeof(Scope), typeof(object), typeof(bool));
 
+            String_Constructor_Char_Int = GetConstructor(typeof(string), typeof(char), typeof(int));
             String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
             String_CompareOrdinal = GetStaticMethod(typeof(string), "CompareOrdinal", typeof(string), typeof(string));
             String_Format = GetStaticMethod(typeof(string), "Format", typeof(string), typeof(object[]));
+            String_GetChars = GetInstanceMethod(typeof(string), "get_Chars", typeof(int));
 
             ConcatenatedString_Constructor_String = GetConstructor(typeof(ConcatenatedString), typeof(string));
             ConcatenatedString_Constructor_String_String = GetConstructor(typeof(ConcatenatedString), typeof(string), typeof(string));
@@ -223,7 +234,13 @@ namespace Jurassic
             Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
             PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(Library.PropertyAttributes));
             PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
+            ClrInstanceWrapper_Constructor = GetConstructor(typeof(ClrInstanceWrapper), typeof(ScriptEngine), typeof(object));
+            Decimal_Constructor_Double = GetConstructor(typeof(decimal), typeof(double));
+
             GeneratedMethod_Load = GetStaticMethod(typeof(GeneratedMethod), "Load", typeof(long));
+            ClrInstanceWrapper_GetWrappedInstance = GetInstanceMethod(typeof(ClrInstanceWrapper), "get_WrappedInstance");
+            Decimal_ToDouble = GetStaticMethod(typeof(decimal), "ToDouble", typeof(decimal));
+            BinderUtilities_ResolveOverloads = GetStaticMethod(typeof(BinderUtilities), "ResolveOverloads", typeof(RuntimeMethodHandle[]), typeof(ScriptEngine), typeof(object), typeof(object[]));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

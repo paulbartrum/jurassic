@@ -220,7 +220,7 @@ namespace Jurassic.Library
         /// to stop the timer and print the time elapsed.
         /// </summary>
         /// <param name="name"> The name of the time to create. </param>
-        [JSFunction(Name = "time")]
+        [JSFunction(Name = "time", Flags = JSFunctionFlags.MutatesThisObject)]
         public void Time(string name = "")
         {
             if (name == null)
@@ -236,7 +236,7 @@ namespace Jurassic.Library
         /// Stops a timer created by a call to console.time(name) and writes the time elapsed.
         /// </summary>
         /// <param name="name"> The name of the timer to stop. </param>
-        [JSFunction(Name = "timeEnd")]
+        [JSFunction(Name = "timeEnd", Flags = JSFunctionFlags.MutatesThisObject)]
         public void TimeEnd(string name = "")
         {
             if (name == null)

@@ -112,12 +112,45 @@ namespace Jurassic.Library
     {
     }
 
-    /// <summary>
-    /// Prevents argument values from being converted to the argument type.  If an argument of
-    /// the wrong type is passed to the function, a TypeError exception will be thrown.
-    /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    internal sealed class JSDoNotConvertAttribute : Attribute
+    public sealed class JSParameterAttribute : Attribute
     {
+        /// <summary>
+        /// Creates a new JSParameterAttribute instance.
+        /// </summary>
+        /// <param name="flags"> One or more flags. </param>
+        public JSParameterAttribute(JSParameterFlags flags)
+        {
+            this.Flags = flags;
+        }
+
+        /// <summary>
+        /// Gets or sets the flags associated with the parameter.
+        /// </summary>
+        public JSParameterFlags Flags
+        {
+            get;
+            set;
+        }
+    }
+
+    public enum JSParameterFlags
+    {
+        /// <summary>
+        /// No flags were specified.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Prevents argument values from being converted to the argument type.  If an argument of
+        /// the wrong type is passed to the function, a TypeError exception will be thrown.
+        /// </summary>
+        DoNotConvert = 1,
+
+        /// <summary>
+        /// Indicates the parameter may be modified by the function.  Only applicable to object
+        /// types.
+        /// </summary>
+        Mutated = 2,
     }
 }

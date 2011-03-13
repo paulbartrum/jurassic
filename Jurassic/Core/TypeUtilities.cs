@@ -91,6 +91,10 @@ namespace Jurassic
             }
             else if (obj is ConcatenatedString)
                 obj = ((ConcatenatedString)obj).ToString();
+            else if (obj is ClrInstanceWrapper)
+                obj = ((ClrInstanceWrapper)obj).WrappedInstance;
+            else if (obj is ClrStaticTypeWrapper)
+                obj = ((ClrStaticTypeWrapper)obj).WrappedType;
             return obj;
         }
 
@@ -161,7 +165,7 @@ namespace Jurassic
         /// <param name="value"> The value to test. </param>
         /// <returns> <c>true</c> if the given value is a supported JavaScript primitive;
         /// <c>false</c> otherwise. </returns>
-        internal static bool IsPrimitive(object value)
+        public static bool IsPrimitive(object value)
         {
             if (value == null)
                 return true;
@@ -170,6 +174,25 @@ namespace Jurassic
                 type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
                 type == typeof(string) || type == typeof(ConcatenatedString) ||
                 type == typeof(Null) || type == typeof(Undefined);
+        }
+
+        /// <summary>
+        /// Determines if the given value is a supported JavaScript primitive or derives from
+        /// ObjectInstance.
+        /// </summary>
+        /// <param name="value"> The value to test. </param>
+        /// <returns> <c>true</c> if the given value is a supported JavaScript primitive or derives
+        /// from ObjectInstance; <c>false</c> otherwise. </returns>
+        public static bool IsPrimitiveOrObject(object value)
+        {
+            if (value == null)
+                return true;
+            var type = value.GetType();
+            return type == typeof(bool) ||
+                type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
+                type == typeof(string) || type == typeof(ConcatenatedString) ||
+                type == typeof(Null) || type == typeof(Undefined) ||
+                typeof(ObjectInstance).IsAssignableFrom(type);
         }
 
         /// <summary>

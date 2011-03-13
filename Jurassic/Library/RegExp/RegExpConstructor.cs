@@ -9,6 +9,9 @@ namespace Jurassic.Library
     [Serializable]
     public class RegExpConstructor : ClrFunction
     {
+        private string lastInput;
+        private System.Text.RegularExpressions.Match lastMatch;
+
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
@@ -20,20 +23,14 @@ namespace Jurassic.Library
         internal RegExpConstructor(ObjectInstance prototype)
             : base(prototype, "RegExp", new RegExpInstance(prototype.Engine.Object.InstancePrototype, string.Empty))
         {
-            // Set the deprecated properties to their default values.
-            for (int i = 0; i < 9; i++)
-                this.FastSetProperty("$" + (char)('1' + i), string.Empty, PropertyAttributes.Enumerable);
-            this.FastSetProperty("input",           string.Empty, PropertyAttributes.Enumerable);
-            this.FastSetProperty("$_",              string.Empty, PropertyAttributes.Sealed);
-            this.FastSetProperty("lastMatch",       string.Empty, PropertyAttributes.Enumerable);
-            this.FastSetProperty("$&",              string.Empty, PropertyAttributes.Sealed);
-            this.FastSetProperty("lastParen",       string.Empty, PropertyAttributes.Enumerable);
-            this.FastSetProperty("$+",              string.Empty, PropertyAttributes.Sealed);
-            this.FastSetProperty("leftContext",     string.Empty, PropertyAttributes.Enumerable);
-            this.FastSetProperty("$`",              string.Empty, PropertyAttributes.Sealed);
-            this.FastSetProperty("rightContext",    string.Empty, PropertyAttributes.Enumerable);
-            this.FastSetProperty("$'",              string.Empty, PropertyAttributes.Sealed);
+            this.InitializeDeprecatedProperties();
         }
+
+
+
+
+        //     DEPRECATED PROPERTIES
+        //_________________________________________________________________________________________
 
         // Deprecated properties:
         // $1, ..., $9          Parenthesized substring matches, if any.
@@ -44,44 +41,210 @@ namespace Jurassic.Library
         // rightContext ($')    The substring following the most recent match.
 
         /// <summary>
+        /// Initializes the deprecated RegExp properties.
+        /// </summary>
+        private void InitializeDeprecatedProperties()
+        {
+            // Set the deprecated properties to their default values.
+            this.InitializeDeprecatedProperty("$1", GetGroup1, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$2", GetGroup2, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$3", GetGroup3, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$4", GetGroup4, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$5", GetGroup5, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$6", GetGroup6, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$7", GetGroup7, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$8", GetGroup8, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$9", GetGroup9, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("input", GetInput, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$_", GetInput, PropertyAttributes.Sealed);
+            this.InitializeDeprecatedProperty("lastMatch", GetLastMatch, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$&", GetLastMatch, PropertyAttributes.Sealed);
+            this.InitializeDeprecatedProperty("lastParen", GetLastParen, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$+", GetLastParen, PropertyAttributes.Sealed);
+            this.InitializeDeprecatedProperty("leftContext", GetLeftContext, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$`", GetLeftContext, PropertyAttributes.Sealed);
+            this.InitializeDeprecatedProperty("rightContext", GetRightContext, PropertyAttributes.Enumerable);
+            this.InitializeDeprecatedProperty("$'", GetRightContext, PropertyAttributes.Sealed);
+        }
+
+        /// <summary>
+        /// Initializes a single deprecated property.
+        /// </summary>
+        /// <param name="propertyName"> The name of the property. </param>
+        /// <param name="getter"> The property getter. </param>
+        /// <param name="attributes"> The property attributes (determines whether the property is enumerable). </param>
+        private void InitializeDeprecatedProperty(string propertyName, Func<string> getter, PropertyAttributes attributes)
+        {
+            this.DefineProperty(propertyName, new PropertyDescriptor(new PropertyAccessorValue(new ClrFunction(this.Engine.Function.InstancePrototype, getter), null), attributes), false);
+        }
+
+        /// <summary>
         /// Sets the deprecated RegExp properties.
         /// </summary>
         /// <param name="input"> The string against which a regular expression is matched. </param>
         /// <param name="match"> The regular expression match to base the properties on. </param>
         internal void SetDeprecatedProperties(string input, System.Text.RegularExpressions.Match match)
         {
-            // Set the input property.
-            this.FastSetProperty("input", input);
-            this.FastSetProperty("$_", input);
-
-            // Set $1 to $9.
-            for (int i = 1; i <= 9; i++)
-            {
-                if (i < match.Groups.Count)
-                    this.FastSetProperty("$" + (char)('0' + i), match.Groups[i].Value);
-                else
-                    this.FastSetProperty("$" + (char)('0' + i), string.Empty);
-            }
-
-            // Set the lastMatch property.
-            this.FastSetProperty("lastMatch", match.Value);
-            this.FastSetProperty("$&", match.Value);
-
-            // Set the lastParen property.
-            var lastParen = match.Groups.Count > 1 ? match.Groups[match.Groups.Count - 1].Value : string.Empty;
-            this.FastSetProperty("lastParen", lastParen);
-            this.FastSetProperty("$+", lastParen);
-
-            // Set the leftContext property.
-            var leftContext = input.Substring(0, match.Index);
-            this.FastSetProperty("leftContext", leftContext);
-            this.FastSetProperty("$`", leftContext);
-
-            // Set the rightContext property.
-            var rightContext = input.Substring(match.Index + match.Length);
-            this.FastSetProperty("rightContext", rightContext);
-            this.FastSetProperty("$'", rightContext);
+            this.lastInput = input;
+            this.lastMatch = match;
         }
+
+        /// <summary>
+        /// Gets the value of RegExp.input and RegExp.$_.
+        /// </summary>
+        /// <returns> The value of RegExp.input and RegExp.$_. </returns>
+        private string GetInput()
+        {
+            if (this.lastMatch == null)
+                return string.Empty;
+            return this.lastInput;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$1.
+        /// </summary>
+        /// <returns> The value of RegExp.$1. </returns>
+        private string GetGroup1()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 1)
+                return string.Empty;
+            return this.lastMatch.Groups[1].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$2.
+        /// </summary>
+        /// <returns> The value of RegExp.$2. </returns>
+        private string GetGroup2()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 2)
+                return string.Empty;
+            return this.lastMatch.Groups[2].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$3.
+        /// </summary>
+        /// <returns> The value of RegExp.$3. </returns>
+        private string GetGroup3()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 3)
+                return string.Empty;
+            return this.lastMatch.Groups[3].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$4.
+        /// </summary>
+        /// <returns> The value of RegExp.$4. </returns>
+        private string GetGroup4()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 4)
+                return string.Empty;
+            return this.lastMatch.Groups[4].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$5.
+        /// </summary>
+        /// <returns> The value of RegExp.$5. </returns>
+        private string GetGroup5()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 5)
+                return string.Empty;
+            return this.lastMatch.Groups[5].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$6.
+        /// </summary>
+        /// <returns> The value of RegExp.$6. </returns>
+        private string GetGroup6()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 6)
+                return string.Empty;
+            return this.lastMatch.Groups[6].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$7.
+        /// </summary>
+        /// <returns> The value of RegExp.$7. </returns>
+        private string GetGroup7()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 7)
+                return string.Empty;
+            return this.lastMatch.Groups[7].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$8.
+        /// </summary>
+        /// <returns> The value of RegExp.$8. </returns>
+        private string GetGroup8()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 8)
+                return string.Empty;
+            return this.lastMatch.Groups[8].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.$9.
+        /// </summary>
+        /// <returns> The value of RegExp.$9. </returns>
+        private string GetGroup9()
+        {
+            if (this.lastMatch == null || this.lastMatch.Groups.Count < 9)
+                return string.Empty;
+            return this.lastMatch.Groups[9].Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.lastMatch and RegExp.$&.
+        /// </summary>
+        /// <returns> The value of RegExp.lastMatch and RegExp.$&. </returns>
+        private string GetLastMatch()
+        {
+            if (this.lastMatch == null)
+                return string.Empty;
+            return this.lastMatch.Value;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.lastParen and RegExp.$+.
+        /// </summary>
+        /// <returns> The value of RegExp.lastParen and RegExp.$+. </returns>
+        private string GetLastParen()
+        {
+            if (this.lastMatch == null)
+                return string.Empty;
+            return this.lastMatch.Groups.Count > 1 ?
+                this.lastMatch.Groups[this.lastMatch.Groups.Count - 1].Value :
+                string.Empty;
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.leftContext and RegExp.$`.
+        /// </summary>
+        /// <returns> The value of RegExp.leftContext and RegExp.$`. </returns>
+        private string GetLeftContext()
+        {
+            if (this.lastMatch == null)
+                return string.Empty;
+            return this.lastInput.Substring(0, this.lastMatch.Index);
+        }
+
+        /// <summary>
+        /// Gets the value of RegExp.rightContext and RegExp.$'.
+        /// </summary>
+        /// <returns> The value of RegExp.rightContext and RegExp.$'. </returns>
+        private string GetRightContext()
+        {
+            if (this.lastMatch == null)
+                return string.Empty;
+            return this.lastInput.Substring(this.lastMatch.Index + this.lastMatch.Length);
+        }
+
 
 
 

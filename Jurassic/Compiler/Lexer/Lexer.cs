@@ -272,30 +272,24 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Wraps an existing TextReader and logs all characters to the given StringBuilder.
+        /// Creates a TextReader that calls ReadNextChar().
         /// </summary>
-        private class CapturingReader : TextReader
+        private class LexerReader : TextReader
         {
-            private TextReader baseReader;
-            private StringBuilder inputCaptureBuilder;
-
-            public CapturingReader(TextReader baseReader, StringBuilder inputCaptureBuilder)
+            private Lexer lexer;
+            public LexerReader(Lexer lexer)
             {
-                this.baseReader = baseReader;
-                this.inputCaptureBuilder = inputCaptureBuilder;
+                this.lexer = lexer;
             }
 
             public override int Read()
             {
-                int c = this.baseReader.Read();
-                if (c >= 0)
-                    this.inputCaptureBuilder.Append((char)c);
-                return c;
+                return this.lexer.ReadNextChar();
             }
 
             public override int Peek()
             {
-                return this.baseReader.Peek();
+                return this.lexer.reader.Peek();
             }
         }
 
@@ -306,11 +300,8 @@ namespace Jurassic.Compiler
         /// <returns> A numeric literal token. </returns>
         private Token ReadNumericLiteral(int firstChar)
         {
-            // If this.InputCaptureStringBuilder is not null, wrap the text reader so that
-            // characters are captured even though ReadNextChar() is not called.
-            var reader = this.reader;
-            if (this.InputCaptureStringBuilder != null)
-                reader = new CapturingReader(reader, this.InputCaptureStringBuilder);
+            // We need to keep track of the column and possibly capture the input into a string.
+            var reader = new LexerReader(this);
 
             NumberParser.ParseCoreStatus status;
             double result = NumberParser.ParseCore(reader, (char)firstChar, out status);

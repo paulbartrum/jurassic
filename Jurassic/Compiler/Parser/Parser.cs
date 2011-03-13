@@ -456,11 +456,11 @@ namespace Jurassic.Compiler
         {
             var result = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
 
-            // Keep track of the start of the statement so that source debugging works correctly.
-            var start = this.PositionAfterWhitespace;
-
             // Read past the var token.
             this.Expect(KeywordToken.Var);
+
+            // Keep track of the start of the statement so that source debugging works correctly.
+            var start = this.PositionAfterWhitespace;
 
             // There can be multiple declarations.
             while (true)

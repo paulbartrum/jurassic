@@ -122,7 +122,7 @@ namespace Jurassic.Compiler
                         break;
                 }
                 //if (optimizationInfo.SuppressReturnValue == false)
-                    EmitHelpers.EmitDummyValue(generator, this.ResultType);
+                    EmitHelpers.EmitDefaultValue(generator, this.ResultType);
                 return;
             }
 

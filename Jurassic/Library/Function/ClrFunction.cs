@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Jurassic.Compiler;
+using Binder = Jurassic.Compiler.Binder;
 
 namespace Jurassic.Library
 {
@@ -13,8 +15,8 @@ namespace Jurassic.Library
     public class ClrFunction : FunctionInstance
     {
         object thisBinding;
-        private FunctionBinder callBinder;
-        private FunctionBinder constructBinder;
+        private Binder callBinder;
+        private Binder constructBinder;
 
 
         //     INITIALIZATION
@@ -38,8 +40,8 @@ namespace Jurassic.Library
             thisBinding = this;
 
             // Search through every method in this type looking for [JSFunction] attributes.
-            var callBinderMethods = new List<FunctionBinderMethod>(1);
-            var constructBinderMethods = new List<FunctionBinderMethod>(1);
+            var callBinderMethods = new List<JSBinderMethod>(1);
+            var constructBinderMethods = new List<JSBinderMethod>(1);
             var methods = this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
@@ -54,34 +56,34 @@ namespace Jurassic.Library
                 if (callAttribute != null)
                 {
                     // Method is marked with [JSCallFunction]
-                    callBinderMethods.Add(new FunctionBinderMethod(method, callAttribute.Flags));
+                    callBinderMethods.Add(new JSBinderMethod(method, callAttribute.Flags));
                 }
                 else if (constructorAttribute != null)
                 {
-                    var binderMethod = new FunctionBinderMethod(method, constructorAttribute.Flags);
+                    var binderMethod = new JSBinderMethod(method, constructorAttribute.Flags);
                     constructBinderMethods.Add(binderMethod);
                     
                     // Constructors must return ObjectInstance or a derived type.
-                    if (typeof(ObjectInstance).IsAssignableFrom(binderMethod.Method.ReturnType) == false)
+                    if (typeof(ObjectInstance).IsAssignableFrom(binderMethod.ReturnType) == false)
                         throw new InvalidOperationException(string.Format("Constructors must return {0} (or a derived type).", typeof(ObjectInstance).Name));
                 }
             }
 
             // Initialize the Call function.
             if (callBinderMethods.Count > 0)
-                this.callBinder = new FunctionBinder(callBinderMethods);
+                this.callBinder = new JSBinder(callBinderMethods);
             else
-                this.callBinder = new FunctionBinder(new FunctionBinderMethod(new Func<object>(() => Undefined.Value).Method));
+                this.callBinder = new JSBinder(new JSBinderMethod(new Func<object>(() => Undefined.Value).Method));
 
             // Initialize the Construct function.
             if (constructBinderMethods.Count > 0)
-                this.constructBinder = new FunctionBinder(constructBinderMethods);
+                this.constructBinder = new JSBinder(constructBinderMethods);
             else
-                this.constructBinder = new FunctionBinder(new FunctionBinderMethod(new Func<ObjectInstance>(() => this.Engine.Object.Construct()).Method));
+                this.constructBinder = new JSBinder(new JSBinderMethod(new Func<ObjectInstance>(() => this.Engine.Object.Construct()).Method));
 
             // Add function properties.
             this.FastSetProperty("name", name);
-            this.FastSetProperty("length", callBinderMethods.FirstOrDefault() == null ? 0 : callBinderMethods.Max(bm => bm.ParameterCount));
+            this.FastSetProperty("length", this.callBinder.FunctionLength);
             this.FastSetProperty("prototype", instancePrototype);
             instancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
@@ -99,15 +101,14 @@ namespace Jurassic.Library
             : base(prototype)
         {
             // Initialize the [[Call]] method.
-            var binderMethod = new FunctionBinderMethod(delegateToCall.Method);
-            this.callBinder = new FunctionBinder(new FunctionBinderMethod(delegateToCall.Method));
+            this.callBinder = new JSBinder(new JSBinderMethod(delegateToCall.Method));
 
             // If the delegate has a class instance, use that to call the method.
             this.thisBinding = delegateToCall.Target;
 
             // Add function properties.
-            this.FastSetProperty("name", name != null ? name : binderMethod.Name);
-            this.FastSetProperty("length", length >= 0 ? length : binderMethod.ParameterCount);
+            this.FastSetProperty("name", name != null ? name : this.callBinder.Name);
+            this.FastSetProperty("length", length >= 0 ? length : this.callBinder.FunctionLength);
             //this.FastSetProperty("prototype", this.Engine.Object.Construct());
             //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
@@ -123,23 +124,31 @@ namespace Jurassic.Library
         /// the same name). </param>
         /// <param name="length"> The "typical" number of arguments expected by the function.  Pass
         /// <c>-1</c> to use the maximum of arguments expected by any of the provided methods. </param>
-        internal ClrFunction(ObjectInstance prototype, IEnumerable<FunctionBinderMethod> methods, string name = null, int length = -1)
+        internal ClrFunction(ObjectInstance prototype, IEnumerable<JSBinderMethod> methods, string name = null, int length = -1)
             : base(prototype)
         {
-            this.callBinder = new FunctionBinder(methods);
-
-            // Determine the name automatically if it wasn't provided.
-            if (name == null)
-            {
-                // Verify all the methods have the same name.
-                name = methods.First().Name;
-                if (methods.All(bm => bm.Name == name) == false)
-                    throw new ArgumentException("To determine the function name automatically, all of the supplied methods need to have the same name.", "methods");
-            }
+            this.callBinder = new JSBinder(methods);
 
             // Add function properties.
-            this.FastSetProperty("name", name);
-            this.FastSetProperty("length", length >= 0 ? length : methods.Max(bm => bm.ParameterCount));
+            this.FastSetProperty("name", name == null ? this.callBinder.Name : name);
+            this.FastSetProperty("length", length >= 0 ? length : this.callBinder.FunctionLength);
+            //this.FastSetProperty("prototype", this.Engine.Object.Construct());
+            //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
+        }
+
+        /// <summary>
+        /// Creates a new instance of a function which calls the given binder.
+        /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        /// <param name="binder"> An object representing a collection of methods to bind to. </param>
+        internal ClrFunction(ObjectInstance prototype, Binder binder)
+            : base(prototype)
+        {
+            this.callBinder = binder;
+
+            // Add function properties.
+            this.FastSetProperty("name", binder.Name);
+            this.FastSetProperty("length", binder.FunctionLength);
             //this.FastSetProperty("prototype", this.Engine.Object.Construct());
             //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
