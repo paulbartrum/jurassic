@@ -621,14 +621,25 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
-        /// then pushes the value onto the stack.
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the
+        /// address, then pushes that address onto the stack.
         /// </summary>
         /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
         public override void Unbox(Type type)
         {
             Log("unbox", type);
             this.generator.Unbox(type);
+        }
+
+        /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
+        /// then pushes the value onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public override void UnboxAny(Type type)
+        {
+            Log("unbox.any", type);
+            this.generator.UnboxAny(type);
         }
 
         /// <summary>
@@ -649,6 +660,26 @@ namespace Jurassic.Compiler
         {
             Log("conv.u4");
             this.generator.ConvertToUnsignedInteger();
+        }
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to a signed 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public override void ConvertToInt64()
+        {
+            Log("conv.i8");
+            this.generator.ConvertToInt64();
+        }
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to an unsigned 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public override void ConvertToUnsignedInt64()
+        {
+            Log("conv.u8");
+            this.generator.ConvertToUnsignedInt64();
         }
 
         /// <summary>
@@ -673,6 +704,7 @@ namespace Jurassic.Compiler
 
 
 
+
         //     OBJECTS, METHODS, TYPES AND FIELDS
         //_________________________________________________________________________________________
 
@@ -693,7 +725,7 @@ namespace Jurassic.Compiler
         /// callsite.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public override void CallStatic(System.Reflection.MethodInfo method)
+        public override void CallStatic(System.Reflection.MethodBase method)
         {
             Log("call", method);
             this.generator.CallStatic(method);
@@ -706,7 +738,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public override void CallVirtual(System.Reflection.MethodInfo method)
+        public override void CallVirtual(System.Reflection.MethodBase method)
         {
             Log("callvirt", method);
             this.generator.CallVirtual(method);
@@ -718,11 +750,28 @@ namespace Jurassic.Compiler
         /// <param name="field"> The field whose value will be pushed. </param>
         public override void LoadField(System.Reflection.FieldInfo field)
         {
+            if (field == null)
+                throw new ArgumentNullException("field");
             if (field.IsStatic == false)
                 Log("ldfld", field);
             else
                 Log("ldsfld", field);
             this.generator.LoadField(field);
+        }
+
+        /// <summary>
+        /// Pops a value off the stack and stores it in the given field.
+        /// </summary>
+        /// <param name="field"> The field to modify. </param>
+        public override void StoreField(System.Reflection.FieldInfo field)
+        {
+            if (field == null)
+                throw new ArgumentNullException("field");
+            if (field.IsStatic == false)
+                Log("stfld", field);
+            else
+                Log("stsfld", field);
+            this.generator.StoreField(field);
         }
 
         /// <summary>
@@ -766,7 +815,7 @@ namespace Jurassic.Compiler
         /// stack.
         /// </summary>
         /// <param name="method"> The method to convert to a RuntimeMethodHandle. </param>
-        public override void LoadToken(System.Reflection.MethodInfo method)
+        public override void LoadToken(System.Reflection.MethodBase method)
         {
             Log("ldtoken", method);
             this.generator.LoadToken(method);
@@ -787,7 +836,7 @@ namespace Jurassic.Compiler
         /// stack.  The virtual qualifier will be ignored, if present.
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
-        public override void LoadStaticMethodPointer(System.Reflection.MethodInfo method)
+        public override void LoadStaticMethodPointer(System.Reflection.MethodBase method)
         {
             Log("ldftn", method);
             this.generator.LoadStaticMethodPointer(method);
@@ -799,11 +848,23 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public override void LoadVirtualMethodPointer(System.Reflection.MethodInfo method)
+        public override void LoadVirtualMethodPointer(System.Reflection.MethodBase method)
         {
             Log("ldvirtftn", method);
             this.generator.LoadVirtualMethodPointer(method);
         }
+
+        /// <summary>
+        /// Pops a managed or native pointer off the stack and initializes the referenced type with
+        /// zeros.
+        /// </summary>
+        /// <param name="type"> The type the pointer on the top of the stack is pointing to. </param>
+        public override void InitObject(Type type)
+        {
+            Log("initobj", type);
+            this.generator.InitObject(type);
+        }
+
 
 
 
@@ -1154,7 +1215,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="instruction"> The instruction to output. </param>
         /// <param name="method"> The method to output. </param>
-        private void Log(string instruction, System.Reflection.MethodInfo method)
+        private void Log(string instruction, System.Reflection.MethodBase method)
         {
             LogInstruction(instruction, string.Format("{0}/{1}", method, method.DeclaringType));
         }

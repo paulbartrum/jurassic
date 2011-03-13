@@ -1616,8 +1616,27 @@ namespace Jurassic.Compiler
             // Get the token for the type.
             int token = this.GetToken(type);
             Emit1ByteOpCodeInt32(0x8C, 1, 1, token);
-            PopStackOperands(VESType.Int32 | VESType.Float);
+            PopStackOperands(VESType.Int32 | VESType.Int64 | VESType.Float | VESType.ManagedPointer | VESType.Object);
             PushStackOperand(VESType.Object);
+        }
+
+        /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the
+        /// address, then pushes that address onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public override void Unbox(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (type.IsValueType == false)
+                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
+
+            // Get the token for the type.
+            int token = this.GetToken(type);
+            Emit1ByteOpCodeInt32(0x79, 1, 1, token);
+            PopStackOperands(VESType.Object);
+            PushStackOperand(VESType.ManagedPointer);
         }
 
         /// <summary>
@@ -1625,7 +1644,7 @@ namespace Jurassic.Compiler
         /// then pushes the value onto the stack.
         /// </summary>
         /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
-        public override void Unbox(Type type)
+        public override void UnboxAny(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -1659,6 +1678,28 @@ namespace Jurassic.Compiler
             Emit1ByteOpCode(0x6D, 1, 1);
             PopStackOperands(VESType.Int32 | VESType.Int64 | VESType.NativeInt | VESType.Float);
             PushStackOperand(VESType.Int32);
+        }
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to a signed 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public override void ConvertToInt64()
+        {
+            Emit1ByteOpCode(0x6A, 1, 1);
+            PopStackOperands(VESType.Int32 | VESType.Int64 | VESType.NativeInt | VESType.Float);
+            PushStackOperand(VESType.Int64);
+        }
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to an unsigned 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public override void ConvertToUnsignedInt64()
+        {
+            Emit1ByteOpCode(0x6E, 1, 1);
+            PopStackOperands(VESType.Int32 | VESType.Int64 | VESType.NativeInt | VESType.Float);
+            PushStackOperand(VESType.Int64);
         }
 
         /// <summary>
@@ -1720,7 +1761,7 @@ namespace Jurassic.Compiler
         /// callsite.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public override void CallStatic(System.Reflection.MethodInfo method)
+        public override void CallStatic(System.Reflection.MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -1736,7 +1777,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public override void CallVirtual(System.Reflection.MethodInfo method)
+        public override void CallVirtual(System.Reflection.MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -1752,11 +1793,17 @@ namespace Jurassic.Compiler
         /// to the stack (if there was one).
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        private void EmitCall(byte opcode, System.Reflection.MethodInfo method)
+        private void EmitCall(byte opcode, System.Reflection.MethodBase method)
         {
             // Get the argument and return type details.
             var parameters = method.GetParameters();
-            var returnType = method.ReturnType;
+            Type returnType;
+            if (method is System.Reflection.ConstructorInfo)
+                returnType = method.DeclaringType;
+            else if (method is System.Reflection.MethodInfo)
+                returnType = ((System.Reflection.MethodInfo)method).ReturnType;
+            else
+                throw new InvalidOperationException("Unsupported subtype of MethodBase.");
 
             // Get a token for the method.
             int token = this.GetToken(method);
@@ -1797,6 +1844,7 @@ namespace Jurassic.Compiler
         {
             switch (Type.GetTypeCode(type))
             {
+                case TypeCode.Char:
                 case TypeCode.Boolean:
                 case TypeCode.SByte:
                 case TypeCode.Int16:
@@ -1813,9 +1861,13 @@ namespace Jurassic.Compiler
                     return VESType.Float;
                 case TypeCode.String:
                     return VESType.Object;
+                case TypeCode.DateTime:
+                case TypeCode.Decimal:
                 case TypeCode.Object:
                     if (type == typeof(IntPtr))
                         return VESType.NativeInt;
+                    else if (type.IsValueType == true)
+                        return VESType.ManagedPointer;
                     return VESType.Object;
                 default:
                     throw new NotImplementedException(string.Format("Unsupported type {0}", type));
@@ -1844,6 +1896,30 @@ namespace Jurassic.Compiler
                 Emit1ByteOpCodeInt32(0x7B, 1, 1, token);
             }
             PushStackOperand(ToVESType(field.FieldType));
+        }
+
+        /// <summary>
+        /// Pops a value off the stack and stores it in the given field.
+        /// </summary>
+        /// <param name="field"> The field to modify. </param>
+        public override void StoreField(System.Reflection.FieldInfo field)
+        {
+            if (field == null)
+                throw new ArgumentNullException("field");
+
+            int token = this.GetToken(field);
+            if (field.IsStatic == true)
+            {
+                // stsfld = 80 <token>
+                PopStackOperands(ToVESType(field.FieldType));
+                Emit1ByteOpCodeInt32(0x80, 1, 0, token);
+            }
+            else
+            {
+                // stfld = 7D <token>
+                PopStackOperands(VESType.Object | VESType.ManagedPointer | VESType.NativeInt, ToVESType(field.FieldType));
+                Emit1ByteOpCodeInt32(0x7D, 2, 0, token);
+            }
         }
 
         /// <summary>
@@ -1919,7 +1995,7 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException("type");
             var token = this.GetToken(type);
             Emit1ByteOpCodeInt32(0xD0, 0, 1, token);
-            PushStackOperand(VESType.Object);
+            PushStackOperand(VESType.ManagedPointer);
         }
 
         /// <summary>
@@ -1927,13 +2003,13 @@ namespace Jurassic.Compiler
         /// stack.
         /// </summary>
         /// <param name="method"> The method to convert to a RuntimeMethodHandle. </param>
-        public override void LoadToken(System.Reflection.MethodInfo method)
+        public override void LoadToken(System.Reflection.MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
             var token = this.GetToken(method);
             Emit1ByteOpCodeInt32(0xD0, 0, 1, token);
-            PushStackOperand(VESType.Object);
+            PushStackOperand(VESType.ManagedPointer);
         }
 
         /// <summary>
@@ -1946,7 +2022,7 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException("field");
             var token = this.GetToken(field);
             Emit1ByteOpCodeInt32(0xD0, 0, 1, token);
-            PushStackOperand(VESType.Object);
+            PushStackOperand(VESType.ManagedPointer);
         }
 
         /// <summary>
@@ -1954,7 +2030,7 @@ namespace Jurassic.Compiler
         /// stack.  The virtual qualifier will be ignored, if present.
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
-        public override void LoadStaticMethodPointer(System.Reflection.MethodInfo method)
+        public override void LoadStaticMethodPointer(System.Reflection.MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -1969,7 +2045,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public override void LoadVirtualMethodPointer(System.Reflection.MethodInfo method)
+        public override void LoadVirtualMethodPointer(System.Reflection.MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -1978,6 +2054,20 @@ namespace Jurassic.Compiler
             var token = this.GetToken(method);
             Emit2ByteOpCodeInt32(0xFE, 0x07, 0, 1, token);
             PushStackOperand(VESType.NativeInt);
+        }
+
+        /// <summary>
+        /// Pops a managed or native pointer off the stack and initializes the referenced type with
+        /// zeros.
+        /// </summary>
+        /// <param name="type"> The type the pointer on the top of the stack is pointing to. </param>
+        public override void InitObject(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            var token = this.GetToken(type);
+            Emit2ByteOpCodeInt32(0xFE, 0x15, 1, 0, token);
+            PopStackOperands(VESType.NativeInt | VESType.ManagedPointer);
         }
 
 

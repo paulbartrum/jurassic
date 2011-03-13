@@ -48,9 +48,9 @@ namespace Benchmarker
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
             // Sunspider.
-            var files = Directory.GetFiles(@"..\..\Files\sunspider-0.9.1");
+            var files = Directory.GetFiles(@"..\..\Files\sunspider-0.9.1", "*.js");
             var results = new Series[files.Length];
-            for (int j = 0; j < 20; j++)
+            for (int j = 0; j < 5; j++)
             {
                 Console.WriteLine("Beginning phase #{0}...", j + 1);
 
@@ -64,6 +64,7 @@ namespace Benchmarker
 
                     // Initialize the script engine.
                     var engine = new ScriptEngine();
+                    engine.EnableDebugging = true;
 
                     // Load the javascript source into a string (so no I/O during benchmarking).
                     var script = File.ReadAllText(path);

@@ -49,6 +49,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler\Binders\Binder.cs" />
+    <Compile Include="Compiler\Binders\BinderMethod.cs" />
+    <Compile Include="Compiler\Binders\BinderUtilities.cs" />
+    <Compile Include="Compiler\Binders\MethodBinder.cs" />
+    <Compile Include="Compiler\Binders\FieldBinders.cs" />
     <Compile Include="Compiler\Debugging\COMHelpers.cs" />
     <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\LoggingILGenerator.cs" />
@@ -111,6 +116,10 @@
     <Compile Include="Core\ScriptSource\StringScriptSource.cs" />
     <Compile Include="Core\ScriptSource\FileScriptSource.cs" />
     <Compile Include="Core\ScriptSource\ScriptSource.cs" />
+    <Compile Include="Library\ClrWrapper\ClrInstanceWrapper.cs" />
+    <Compile Include="Library\ClrWrapper\ClrStaticTypeWrapper.cs" />
+    <Compile Include="Compiler\Binders\ClrBinder.cs" />
+    <Compile Include="Library\ClrWrapper\ClrInstanceTypeWrapper.cs" />
     <Compile Include="Library\FirebugConsole\StandardConsoleOutput.cs" />
     <Compile Include="Library\FirebugConsole\FirebugConsole.cs" />
     <Compile Include="Library\FirebugConsole\IFirebugConsoleOutput.cs" />
@@ -135,10 +144,10 @@
     <Compile Include="Library\Date\DateParser.cs" />
     <Compile Include="Library\Function\ArgumentsInstance.cs" />
     <Compile Include="Library\Function\UserDefinedFunction.cs" />
-    <Compile Include="Library\Function\FunctionBinderFlags.cs" />
+    <Compile Include="Library\Object\JSFunctionFlags.cs" />
     <Compile Include="Library\Function\ClrFunction.cs" />
-    <Compile Include="Library\Function\FunctionBinderMethod.cs" />
-    <Compile Include="Library\Function\FunctionBinder.cs" />
+    <Compile Include="Compiler\Binders\JSBinderMethod.cs" />
+    <Compile Include="Compiler\Binders\JSBinder.cs" />
     <Compile Include="Library\JSON\JSONObject.cs" />
     <Compile Include="Library\Object\PropertyAccessorValue.cs" />
     <Compile Include="Library\Object\SchemaProperty.cs" />

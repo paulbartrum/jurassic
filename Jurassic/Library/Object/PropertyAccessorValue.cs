@@ -17,7 +17,7 @@ namespace Jurassic.Library
         /// Creates a new PropertyAccessorValue instance.
         /// </summary>
         /// <param name="getter"> The getter function, or <c>null</c> if no getter was provided. </param>
-        /// <param name="getter"> The setter function, or <c>null</c> if no setter was provided. </param>
+        /// <param name="setter"> The setter function, or <c>null</c> if no setter was provided. </param>
         public PropertyAccessorValue(FunctionInstance getter, FunctionInstance setter)
         {
             this.getter = getter;

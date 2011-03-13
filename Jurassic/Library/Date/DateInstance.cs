@@ -345,7 +345,7 @@ namespace Jurassic.Library
         /// <param name="year"> The 4 digit year. </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setFullYear")]
+        [JSFunction(Name = "setFullYear", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetFullYear(double year)
         {
             return SetDateComponents(DateComponent.Year, DateTimeKind.Local, year);
@@ -358,7 +358,7 @@ namespace Jurassic.Library
         /// <param name="month"> The month (0-11). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setFullYear")]
+        [JSFunction(Name = "setFullYear", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetFullYear(double year, double month)
         {
             return SetDateComponents(DateComponent.Year, DateTimeKind.Local, year, month);
@@ -372,7 +372,7 @@ namespace Jurassic.Library
         /// <param name="day"> The day of the month (1-31). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setFullYear")]
+        [JSFunction(Name = "setFullYear", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetFullYear(double year, double month, double day)
         {
             return SetDateComponents(DateComponent.Year, DateTimeKind.Local, year, month, day);
@@ -384,7 +384,7 @@ namespace Jurassic.Library
         /// <param name="year"> The year.  Numbers less than 100 will be assumed to be  </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Deprecated = true, Name = "setYear")]
+        [JSFunction(Deprecated = true, Name = "setYear", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetYear(double year)
         {
             return SetDateComponents(DateComponent.Year, DateTimeKind.Local, year >= 0 && year < 100 ? year + 1900 : year);
@@ -396,7 +396,7 @@ namespace Jurassic.Library
         /// <param name="month"> The month (0-11). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setMonth")]
+        [JSFunction(Name = "setMonth", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetMonth(double month)
         {
             return SetDateComponents(DateComponent.Month, DateTimeKind.Local, month);
@@ -409,7 +409,7 @@ namespace Jurassic.Library
         /// <param name="day"> The day of the month (1-31). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setMonth")]
+        [JSFunction(Name = "setMonth", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetMonth(double month, double day)
         {
             return SetDateComponents(DateComponent.Month, DateTimeKind.Local, month, day);
@@ -421,7 +421,7 @@ namespace Jurassic.Library
         /// <param name="day"> The day of the month (1-31). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setDate")]
+        [JSFunction(Name = "setDate", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetDate(double day)
         {
             return SetDateComponents(DateComponent.Day, DateTimeKind.Local, day);
@@ -433,7 +433,7 @@ namespace Jurassic.Library
         /// <param name="hour"> The number of hours since midnight (0-23). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setHours")]
+        [JSFunction(Name = "setHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetHours(double hour)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Local, hour);
@@ -446,7 +446,7 @@ namespace Jurassic.Library
         /// <param name="minute"> The number of minutes since the hour (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setHours")]
+        [JSFunction(Name = "setHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetHours(double hour, double minute)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Local, hour, minute);
@@ -460,7 +460,7 @@ namespace Jurassic.Library
         /// <param name="second"> The number of seconds since the minute (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setHours")]
+        [JSFunction(Name = "setHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetHours(double hour, double minute, double second)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Local, hour, minute, second);
@@ -475,7 +475,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setHours")]
+        [JSFunction(Name = "setHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetHours(double hour, double minute, double second, double millisecond)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Local, hour, minute, second, millisecond);
@@ -487,7 +487,7 @@ namespace Jurassic.Library
         /// <param name="minute"> The number of minutes since the hour (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setMinutes")]
+        [JSFunction(Name = "setMinutes", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetMinutes(double minute)
         {
             return SetDateComponents(DateComponent.Minute, DateTimeKind.Local, minute);
@@ -500,7 +500,7 @@ namespace Jurassic.Library
         /// <param name="second"> The number of seconds since the minute (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setMinutes")]
+        [JSFunction(Name = "setMinutes", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetMinutes(double minute, double second)
         {
             return SetDateComponents(DateComponent.Minute, DateTimeKind.Local, minute, second);
@@ -514,7 +514,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setMinutes")]
+        [JSFunction(Name = "setMinutes", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetMinutes(double minute, double second, double millisecond)
         {
             return SetDateComponents(DateComponent.Minute, DateTimeKind.Local, minute, second, millisecond);
@@ -526,7 +526,7 @@ namespace Jurassic.Library
         /// <param name="second"> The number of seconds since the minute (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setSeconds")]
+        [JSFunction(Name = "setSeconds", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetSeconds(double second)
         {
             return SetDateComponents(DateComponent.Second, DateTimeKind.Local, second);
@@ -539,7 +539,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setSeconds")]
+        [JSFunction(Name = "setSeconds", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetSeconds(double second, double millisecond)
         {
             return SetDateComponents(DateComponent.Second, DateTimeKind.Local, second, millisecond);
@@ -551,7 +551,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setMilliseconds")]
+        [JSFunction(Name = "setMilliseconds", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetMilliseconds(double millisecond)
         {
             return SetDateComponents(DateComponent.Millisecond, DateTimeKind.Local, millisecond);
@@ -563,7 +563,7 @@ namespace Jurassic.Library
         /// <param name="year"> The 4 digit year. </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCFullYear")]
+        [JSFunction(Name = "setUTCFullYear", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCFullYear(double year)
         {
             return SetDateComponents(DateComponent.Year, DateTimeKind.Utc, year);
@@ -576,7 +576,7 @@ namespace Jurassic.Library
         /// <param name="month"> The month (0-11). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCFullYear")]
+        [JSFunction(Name = "setUTCFullYear", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCFullYear(double year, double month)
         {
             return SetDateComponents(DateComponent.Year, DateTimeKind.Utc, year, month);
@@ -590,7 +590,7 @@ namespace Jurassic.Library
         /// <param name="day"> The day of the month (1-31). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCFullYear")]
+        [JSFunction(Name = "setUTCFullYear", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCFullYear(double year, double month, double day)
         {
             return SetDateComponents(DateComponent.Year, DateTimeKind.Utc, year, month, day);
@@ -602,7 +602,7 @@ namespace Jurassic.Library
         /// <param name="month"> The month (0-11). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCMonth")]
+        [JSFunction(Name = "setUTCMonth", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCMonth(double month)
         {
             return SetDateComponents(DateComponent.Month, DateTimeKind.Utc, month);
@@ -615,7 +615,7 @@ namespace Jurassic.Library
         /// <param name="day"> The day of the month (1-31). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCMonth")]
+        [JSFunction(Name = "setUTCMonth", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCMonth(double month, double day)
         {
             return SetDateComponents(DateComponent.Month, DateTimeKind.Utc, month, day);
@@ -627,7 +627,7 @@ namespace Jurassic.Library
         /// <param name="day"> The day of the month (1-31). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCDate")]
+        [JSFunction(Name = "setUTCDate", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCDate(double day)
         {
             return SetDateComponents(DateComponent.Day, DateTimeKind.Utc, day);
@@ -639,7 +639,7 @@ namespace Jurassic.Library
         /// <param name="hour"> The number of hours since midnight (0-23). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCHours")]
+        [JSFunction(Name = "setUTCHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCHours(double hour)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Utc, hour);
@@ -652,7 +652,7 @@ namespace Jurassic.Library
         /// <param name="minute"> The number of minutes since the hour (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCHours")]
+        [JSFunction(Name = "setUTCHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCHours(double hour, double minute)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Utc, hour, minute);
@@ -666,7 +666,7 @@ namespace Jurassic.Library
         /// <param name="second"> The number of seconds since the minute (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCHours")]
+        [JSFunction(Name = "setUTCHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCHours(double hour, double minute, double second)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Utc, hour, minute, second);
@@ -681,7 +681,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCHours")]
+        [JSFunction(Name = "setUTCHours", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCHours(double hour, double minute, double second, double millisecond)
         {
             return SetDateComponents(DateComponent.Hour, DateTimeKind.Utc, hour, minute, second, millisecond);
@@ -693,7 +693,7 @@ namespace Jurassic.Library
         /// <param name="minute"> The number of minutes since the hour (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCMinutes")]
+        [JSFunction(Name = "setUTCMinutes", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCMinutes(double minute)
         {
             return SetDateComponents(DateComponent.Minute, DateTimeKind.Utc, minute);
@@ -706,7 +706,7 @@ namespace Jurassic.Library
         /// <param name="second"> The number of seconds since the minute (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCMinutes")]
+        [JSFunction(Name = "setUTCMinutes", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCMinutes(double minute, double second)
         {
             return SetDateComponents(DateComponent.Minute, DateTimeKind.Utc, minute, second);
@@ -720,7 +720,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCMinutes")]
+        [JSFunction(Name = "setUTCMinutes", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCMinutes(double minute, double second, double millisecond)
         {
             return SetDateComponents(DateComponent.Minute, DateTimeKind.Utc, minute, second, millisecond);
@@ -732,7 +732,7 @@ namespace Jurassic.Library
         /// <param name="second"> The number of seconds since the minute (0-59). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCSeconds")]
+        [JSFunction(Name = "setUTCSeconds", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCSeconds(double second)
         {
             return SetDateComponents(DateComponent.Second, DateTimeKind.Utc, second);
@@ -745,7 +745,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCSeconds")]
+        [JSFunction(Name = "setUTCSeconds", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCSeconds(double second, double millisecond)
         {
             return SetDateComponents(DateComponent.Second, DateTimeKind.Utc, second, millisecond);
@@ -757,7 +757,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since the second (0-999). </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setUTCMilliseconds")]
+        [JSFunction(Name = "setUTCMilliseconds", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetUTCMilliseconds(double millisecond)
         {
             return SetDateComponents(DateComponent.Millisecond, DateTimeKind.Utc, millisecond);
@@ -769,7 +769,7 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds since January 1, 1970, 00:00:00 UTC. </param>
         /// <returns> The number of milliseconds elapsed since January 1, 1970, 00:00:00 UTC for
         /// the new date. </returns>
-        [JSFunction(Name = "setTime")]
+        [JSFunction(Name = "setTime", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetTime(double millisecond)
         {
             this.value = ToDateTime(millisecond);

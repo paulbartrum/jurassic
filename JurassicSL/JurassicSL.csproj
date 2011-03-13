@@ -54,6 +54,30 @@
     <Reference Include="system" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Jurassic\Compiler\Binders\Binder.cs">
+      <Link>Compiler\Binders\Binder.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\BinderMethod.cs">
+      <Link>Compiler\Binders\BinderMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\BinderUtilities.cs">
+      <Link>Compiler\Binders\BinderUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\ClrBinder.cs">
+      <Link>Compiler\Binders\ClrBinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\FieldBinders.cs">
+      <Link>Compiler\Binders\FieldBinders.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\JSBinder.cs">
+      <Link>Compiler\Binders\JSBinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\JSBinderMethod.cs">
+      <Link>Compiler\Binders\JSBinderMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\MethodBinder.cs">
+      <Link>Compiler\Binders\MethodBinder.cs</Link>
+    </Compile>
     <Compile Include="..\Jurassic\Compiler\Debugging\COMHelpers.cs">
       <Link>Compiler\Debugging\COMHelpers.cs</Link>
     </Compile>
@@ -336,6 +360,15 @@
     <Compile Include="..\Jurassic\Library\Boolean\BooleanInstance.cs">
       <Link>Library\Boolean\BooleanInstance.cs</Link>
     </Compile>
+    <Compile Include="..\Jurassic\Library\ClrWrapper\ClrInstanceTypeWrapper.cs">
+      <Link>Library\ClrWrapper\ClrInstanceTypeWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\ClrWrapper\ClrInstanceWrapper.cs">
+      <Link>Library\ClrWrapper\ClrInstanceWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\ClrWrapper\ClrStaticTypeWrapper.cs">
+      <Link>Library\ClrWrapper\ClrStaticTypeWrapper.cs</Link>
+    </Compile>
     <Compile Include="..\Jurassic\Library\Date\DateConstructor.cs">
       <Link>Library\Date\DateConstructor.cs</Link>
     </Compile>
@@ -371,15 +404,6 @@
     </Compile>
     <Compile Include="..\Jurassic\Library\Function\Delegates.cs">
       <Link>Library\Function\Delegates.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Library\Function\FunctionBinder.cs">
-      <Link>Library\Function\FunctionBinder.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Library\Function\FunctionBinderFlags.cs">
-      <Link>Library\Function\FunctionBinderFlags.cs</Link>
-    </Compile>
-    <Compile Include="..\Jurassic\Library\Function\FunctionBinderMethod.cs">
-      <Link>Library\Function\FunctionBinderMethod.cs</Link>
     </Compile>
     <Compile Include="..\Jurassic\Library\Function\FunctionConstructor.cs">
       <Link>Library\Function\FunctionConstructor.cs</Link>
@@ -422,6 +446,9 @@
     </Compile>
     <Compile Include="..\Jurassic\Library\Object\HiddenClassSchema.cs">
       <Link>Library\Object\HiddenClassSchema.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\JSFunctionFlags.cs">
+      <Link>Library\Object\JSFunctionFlags.cs</Link>
     </Compile>
     <Compile Include="..\Jurassic\Library\Object\ObjectConstructor.cs">
       <Link>Library\Object\ObjectConstructor.cs</Link>

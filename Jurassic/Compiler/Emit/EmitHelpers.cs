@@ -26,38 +26,27 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Emits a default value of the given type.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="type"> The type of value to generate. </param>
+        public static void EmitDefaultValue(ILGenerator generator, Type type)
+        {
+            var temp = generator.CreateTemporaryVariable(type);
+            generator.LoadAddressOfVariable(temp);
+            generator.InitObject(temp.Type);
+            generator.LoadVariable(temp);
+            generator.ReleaseTemporaryVariable(temp);
+        }
+
+        /// <summary>
         /// Emits a dummy value of the given type.
         /// </summary>
         /// <param name="generator"> The IL generator. </param>
         /// <param name="type"> The type of value to generate. </param>
-        public static void EmitDummyValue(ILGenerator generator, PrimitiveType type)
+        public static void EmitDefaultValue(ILGenerator generator, PrimitiveType type)
         {
-            switch (type)
-            {
-                case PrimitiveType.Bool:
-                    generator.LoadBoolean(false);
-                    break;
-                case PrimitiveType.UInt32:
-                case PrimitiveType.Int32:
-                    generator.LoadInt32(0);
-                    break;
-                case PrimitiveType.Null:
-                    EmitNull(generator);
-                    break;
-                case PrimitiveType.Number:
-                    generator.LoadDouble(0);
-                    break;
-                case PrimitiveType.Undefined:
-                    EmitUndefined(generator);
-                    break;
-                case PrimitiveType.Any:
-                case PrimitiveType.Object:
-                case PrimitiveType.String:
-                    generator.LoadNull();
-                    break;
-                default:
-                    throw new NotImplementedException("Unsupported PrimitiveType value.");
-            }
+            EmitDefaultValue(generator, PrimitiveTypeUtilities.ToType(type));
         }
 
         /// <summary>
@@ -73,6 +62,68 @@ namespace Jurassic.Compiler
             generator.LoadString(message);
             generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Error);
             generator.Throw();
+        }
+
+        /// <summary>
+        /// Emits the given value.  Only possible for certain types.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="value"> The value to emit. </param>
+        public static void EmitValue(ILGenerator generator, object value)
+        {
+            if (value == null)
+                generator.LoadNull();
+            else
+            {
+                switch (Type.GetTypeCode(value.GetType()))
+                {
+                    case TypeCode.Boolean:
+                        generator.LoadBoolean((bool)value);
+                        break;
+                    case TypeCode.Byte:
+                        generator.LoadInt32((byte)value);
+                        break;
+                    case TypeCode.Char:
+                        generator.LoadInt32((char)value);
+                        break;
+                    case TypeCode.Double:
+                        generator.LoadDouble((double)value);
+                        break;
+                    case TypeCode.Int16:
+                        generator.LoadInt32((short)value);
+                        break;
+                    case TypeCode.Int32:
+                        generator.LoadInt32((int)value);
+                        break;
+                    case TypeCode.Int64:
+                        generator.LoadInt64((long)value);
+                        break;
+                    case TypeCode.SByte:
+                        generator.LoadInt32((sbyte)value);
+                        break;
+                    case TypeCode.Single:
+                        generator.LoadDouble((float)value);
+                        break;
+                    case TypeCode.String:
+                        generator.LoadString((string)value);
+                        break;
+                    case TypeCode.UInt16:
+                        generator.LoadInt32((ushort)value);
+                        break;
+                    case TypeCode.UInt32:
+                        generator.LoadInt32((uint)value);
+                        break;
+                    case TypeCode.UInt64:
+                        generator.LoadInt64((ulong)value);
+                        break;
+                    case TypeCode.Object:
+                    case TypeCode.Empty:
+                    case TypeCode.DateTime:
+                    case TypeCode.DBNull:
+                    case TypeCode.Decimal:
+                        throw new NotImplementedException(string.Format("Cannot emit the value '{0}'", value));
+                }
+            }
         }
 
 

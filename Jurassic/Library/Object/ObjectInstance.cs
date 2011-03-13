@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Jurassic.Compiler;
 
 namespace Jurassic.Library
 {
@@ -48,17 +49,14 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The script engine associated with this object. </param>
         protected ObjectInstance(ScriptEngine engine)
+            : this(engine, null)
         {
-            if (engine == null)
-                throw new ArgumentNullException("engine");
-            this.engine = engine;
-            this.schema = this.engine.EmptySchema;
         }
 
         /// <summary>
         /// Called by derived classes to create a new object instance.
         /// </summary>
-        /// <param name="prototype"> The next object in the prototype chain. </param>
+        /// <param name="prototype"> The next object in the prototype chain.  Cannot be <c>null</c>. </param>
         protected ObjectInstance(ObjectInstance prototype)
         {
             if (prototype == null)
@@ -66,6 +64,20 @@ namespace Jurassic.Library
             this.prototype = prototype;
             this.engine = prototype.Engine;
             this.schema = this.engine.EmptySchema;
+        }
+
+        /// <summary>
+        /// Called by derived classes to create a new object instance.
+        /// </summary>
+        /// <param name="engine"> The script engine associated with this object. </param>
+        /// <param name="prototype"> The next object in the prototype chain.  Can be <c>null</c>. </param>
+        protected ObjectInstance(ScriptEngine engine, ObjectInstance prototype)
+        {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+            this.engine = engine;
+            this.prototype = prototype;
+            this.schema = engine.EmptySchema;
         }
 
         /// <summary>
@@ -1154,7 +1166,7 @@ namespace Jurassic.Library
 
         private class MethodGroup
         {
-            public List<FunctionBinderMethod> Methods;
+            public List<JSBinderMethod> Methods;
             public int Length;
         }
 
@@ -1202,14 +1214,14 @@ namespace Jurassic.Library
                 MethodGroup methodGroup;
                 if (functions.ContainsKey(name) == false)
                 {
-                    methodGroup = new MethodGroup { Methods = new List<FunctionBinderMethod>(1), Length = -1 };
+                    methodGroup = new MethodGroup { Methods = new List<JSBinderMethod>(1), Length = -1 };
                     functions.Add(name, methodGroup);
                 }
                 else
                     methodGroup = functions[name];
 
                 // Add the method to the list.
-                methodGroup.Methods.Add(new FunctionBinderMethod(method, attribute.Flags));
+                methodGroup.Methods.Add(new JSBinderMethod(method, attribute.Flags));
 
                 // If the length doesn't equal -1, that indicates an explicit length has been set.
                 // Make sure it is consistant with the other methods.

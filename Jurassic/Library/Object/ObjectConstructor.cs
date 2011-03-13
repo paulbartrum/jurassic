@@ -73,7 +73,7 @@ namespace Jurassic.Library
         /// <returns> The next object in the prototype chain for the given object, or <c>null</c>
         /// if the object has no prototype chain. </returns>
         [JSFunction(Name = "getPrototypeOf")]
-        public static object GetPrototypeOf([JSDoNotConvert] ObjectInstance obj)
+        public static object GetPrototypeOf([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             var result = obj.Prototype;
             if (result == null)
@@ -89,7 +89,7 @@ namespace Jurassic.Library
         /// <returns> An object containing some of the following properties: configurable,
         /// writable, enumerable, value, get and set. </returns>
         [JSFunction(Name = "getOwnPropertyDescriptor")]
-        public static ObjectInstance GetOwnPropertyDescriptor([JSDoNotConvert] ObjectInstance obj, string propertyName)
+        public static ObjectInstance GetOwnPropertyDescriptor([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj, string propertyName)
         {
             var descriptor = obj.GetOwnPropertyDescriptor(propertyName);
             if (descriptor.Exists == false)
@@ -104,7 +104,7 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to retrieve the property names for. </param>
         /// <returns> An array containing the names of all the properties on the object. </returns>
         [JSFunction(Name = "getOwnPropertyNames")]
-        public static ArrayInstance GetOwnPropertyNames([JSDoNotConvert] ObjectInstance obj)
+        public static ArrayInstance GetOwnPropertyNames([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             var result = obj.Engine.Array.New();
             foreach (var property in ((ObjectInstance)obj).Properties)
@@ -143,7 +143,7 @@ namespace Jurassic.Library
         /// properties: configurable, writable, enumerable, value, get and set. </param>
         /// <returns> The object with the property. </returns>
         [JSFunction(Name = "defineProperty")]
-        public static ObjectInstance DefineProperty([JSDoNotConvert] ObjectInstance obj, string propertyName, [JSDoNotConvert] ObjectInstance attributes)
+        public static ObjectInstance DefineProperty([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj, string propertyName, [JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance attributes)
         {
             var defaults = obj.GetOwnPropertyDescriptor(propertyName);
             var descriptor = PropertyDescriptor.FromObject(attributes, defaults);
@@ -158,7 +158,7 @@ namespace Jurassic.Library
         /// <param name="properties"> An object containing one or more property descriptors. </param>
         /// <returns> The object with the properties. </returns>
         [JSFunction(Name = "defineProperties")]
-        public static ObjectInstance DefineProperties([JSDoNotConvert] ObjectInstance obj, ObjectInstance properties)
+        public static ObjectInstance DefineProperties([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj, ObjectInstance properties)
         {
             foreach (var property in properties.Properties)
                 if (property.IsEnumerable == true)
@@ -177,7 +177,7 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to modify. </param>
         /// <returns> The object that was affected. </returns>
         [JSFunction(Name = "seal")]
-        public static ObjectInstance Seal([JSDoNotConvert] ObjectInstance obj)
+        public static ObjectInstance Seal([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             var properties = new List<PropertyNameAndValue>();
             foreach (var property in obj.Properties)
@@ -197,7 +197,7 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to modify. </param>
         /// <returns> The object that was affected. </returns>
         [JSFunction(Name = "freeze")]
-        public static ObjectInstance Freeze([JSDoNotConvert] ObjectInstance obj)
+        public static ObjectInstance Freeze([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             var properties = new List<PropertyNameAndValue>();
             foreach (var property in obj.Properties)
@@ -217,7 +217,7 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to modify. </param>
         /// <returns> The object that was affected. </returns>
         [JSFunction(Name = "preventExtensions")]
-        public static ObjectInstance PreventExtensions([JSDoNotConvert] ObjectInstance obj)
+        public static ObjectInstance PreventExtensions([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             obj.IsExtensible = false;
             return obj;
@@ -230,7 +230,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if properties can be added or at least one property can be
         /// deleted; <c>false</c> otherwise. </returns>
         [JSFunction(Name = "isSealed")]
-        public static bool IsSealed([JSDoNotConvert] ObjectInstance obj)
+        public static bool IsSealed([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             foreach (var property in obj.Properties)
                 if (property.IsConfigurable == true)
@@ -246,7 +246,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if properties can be added or at least one property can be
         /// deleted or modified; <c>false</c> otherwise. </returns>
         [JSFunction(Name = "isFrozen")]
-        public static bool IsFrozen([JSDoNotConvert] ObjectInstance obj)
+        public static bool IsFrozen([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             foreach (var property in obj.Properties)
                 if (property.IsConfigurable == true || property.IsWritable == true)
@@ -260,7 +260,7 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if properties can be added to the object; <c>false</c> otherwise. </returns>
         [JSFunction(Name = "isExtensible")]
-        public static new bool IsExtensible([JSDoNotConvert] ObjectInstance obj)
+        public static new bool IsExtensible([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             return obj.IsExtensible;
         }
@@ -271,7 +271,7 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to retrieve the property names for. </param>
         /// <returns> An array containing the names of all the enumerable properties on the object. </returns>
         [JSFunction(Name = "keys")]
-        public static ArrayInstance Keys([JSDoNotConvert] ObjectInstance obj)
+        public static ArrayInstance Keys([JSParameter(JSParameterFlags.DoNotConvert)] ObjectInstance obj)
         {
             var result = obj.Engine.Array.New();
             foreach (var property in obj.Properties)

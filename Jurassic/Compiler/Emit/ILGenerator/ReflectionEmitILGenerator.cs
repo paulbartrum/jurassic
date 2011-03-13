@@ -643,11 +643,25 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the
+        /// address, then pushes that address onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public override void Unbox(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (type.IsValueType == false)
+                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
+            this.generator.Emit(OpCodes.Unbox, type);
+        }
+
+        /// <summary>
         /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
         /// then pushes the value onto the stack.
         /// </summary>
         /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
-        public override void Unbox(Type type)
+        public override void UnboxAny(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -672,6 +686,24 @@ namespace Jurassic.Compiler
         public override void ConvertToUnsignedInteger()
         {
             this.generator.Emit(OpCodes.Conv_U4);
+        }
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to a signed 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public override void ConvertToInt64()
+        {
+            this.generator.Emit(OpCodes.Conv_I8);
+        }
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to an unsigned 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public override void ConvertToUnsignedInt64()
+        {
+            this.generator.Emit(OpCodes.Conv_U8);
         }
 
         /// <summary>
@@ -713,9 +745,14 @@ namespace Jurassic.Compiler
         /// callsite.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public override void CallStatic(System.Reflection.MethodInfo method)
+        public override void CallStatic(System.Reflection.MethodBase method)
         {
-            this.generator.Emit(OpCodes.Call, method);
+            if (method is System.Reflection.ConstructorInfo)
+                this.generator.Emit(OpCodes.Call, (System.Reflection.ConstructorInfo)method);
+            else if (method is System.Reflection.MethodInfo)
+                this.generator.Emit(OpCodes.Call, (System.Reflection.MethodInfo)method);
+            else
+                throw new InvalidOperationException("Unsupported subtype of MethodBase.");
         }
 
         /// <summary>
@@ -725,13 +762,18 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public override void CallVirtual(System.Reflection.MethodInfo method)
+        public override void CallVirtual(System.Reflection.MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
             if (method.IsStatic == true)
                 throw new ArgumentException("Static methods cannot be called this method.", "method");
-            this.generator.Emit(OpCodes.Callvirt, method);
+            if (method is System.Reflection.ConstructorInfo)
+                this.generator.Emit(OpCodes.Callvirt, (System.Reflection.ConstructorInfo)method);
+            else if (method is System.Reflection.MethodInfo)
+                this.generator.Emit(OpCodes.Callvirt, (System.Reflection.MethodInfo)method);
+            else
+                throw new InvalidOperationException("Unsupported subtype of MethodBase.");
         }
 
         /// <summary>
@@ -746,6 +788,20 @@ namespace Jurassic.Compiler
                 this.generator.Emit(OpCodes.Ldsfld, field);
             else
                 this.generator.Emit(OpCodes.Ldfld, field);
+        }
+
+        /// <summary>
+        /// Pops a value off the stack and stores it in the given field.
+        /// </summary>
+        /// <param name="field"> The field to modify. </param>
+        public override void StoreField(System.Reflection.FieldInfo field)
+        {
+            if (field == null)
+                throw new ArgumentNullException("field");
+            if (field.IsStatic == true)
+                this.generator.Emit(OpCodes.Stsfld, field);
+            else
+                this.generator.Emit(OpCodes.Stfld, field);
         }
 
         /// <summary>
@@ -786,9 +842,14 @@ namespace Jurassic.Compiler
         /// stack.
         /// </summary>
         /// <param name="method"> The method to convert to a RuntimeMethodHandle. </param>
-        public override void LoadToken(System.Reflection.MethodInfo method)
+        public override void LoadToken(System.Reflection.MethodBase method)
         {
-            this.generator.Emit(OpCodes.Ldtoken, method);
+            if (method is System.Reflection.ConstructorInfo)
+                this.generator.Emit(OpCodes.Ldtoken, (System.Reflection.ConstructorInfo)method);
+            else if (method is System.Reflection.MethodInfo)
+                this.generator.Emit(OpCodes.Ldtoken, (System.Reflection.MethodInfo)method);
+            else
+                throw new InvalidOperationException("Unsupported subtype of MethodBase.");
         }
 
         /// <summary>
@@ -805,9 +866,14 @@ namespace Jurassic.Compiler
         /// stack.  The virtual qualifier will be ignored, if present.
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
-        public override void LoadStaticMethodPointer(System.Reflection.MethodInfo method)
+        public override void LoadStaticMethodPointer(System.Reflection.MethodBase method)
         {
-            this.generator.Emit(OpCodes.Ldftn, method);
+            if (method is System.Reflection.ConstructorInfo)
+                this.generator.Emit(OpCodes.Ldftn, (System.Reflection.ConstructorInfo)method);
+            else if (method is System.Reflection.MethodInfo)
+                this.generator.Emit(OpCodes.Ldftn, (System.Reflection.MethodInfo)method);
+            else
+                throw new InvalidOperationException("Unsupported subtype of MethodBase.");
         }
 
         /// <summary>
@@ -816,11 +882,28 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public override void LoadVirtualMethodPointer(System.Reflection.MethodInfo method)
+        public override void LoadVirtualMethodPointer(System.Reflection.MethodBase method)
         {
             if (method != null && method.IsStatic == true)
                 throw new ArgumentException("The given method cannot be static.", "method");
-            this.generator.Emit(OpCodes.Ldvirtftn, method);
+            if (method is System.Reflection.ConstructorInfo)
+                this.generator.Emit(OpCodes.Ldvirtftn, (System.Reflection.ConstructorInfo)method);
+            else if (method is System.Reflection.MethodInfo)
+                this.generator.Emit(OpCodes.Ldvirtftn, (System.Reflection.MethodInfo)method);
+            else
+                throw new InvalidOperationException("Unsupported subtype of MethodBase.");
+        }
+
+        /// <summary>
+        /// Pops a managed or native pointer off the stack and initializes the referenced type with
+        /// zeros.
+        /// </summary>
+        /// <param name="type"> The type the pointer on the top of the stack is pointing to. </param>
+        public override void InitObject(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            this.generator.Emit(OpCodes.Initobj, type);
         }
 
 

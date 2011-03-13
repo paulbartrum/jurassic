@@ -278,6 +278,7 @@ namespace Jurassic.Compiler
 
 
 
+
         //     TEMPORARY VARIABLES
         //_________________________________________________________________________________________
 
@@ -360,10 +361,28 @@ namespace Jurassic.Compiler
         public abstract void LoadInt32(int value);
 
         /// <summary>
+        /// Pushes an unsigned constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The integer to push onto the stack. </param>
+        public void LoadInt32(uint value)
+        {
+            LoadInt32((int)value);
+        }
+
+        /// <summary>
         /// Pushes a 64-bit constant value onto the stack.
         /// </summary>
         /// <param name="value"> The 64-bit integer to push onto the stack. </param>
         public abstract void LoadInt64(long value);
+
+        /// <summary>
+        /// Pushes an unsigned 64-bit constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The 64-bit integer to push onto the stack. </param>
+        public void LoadInt64(ulong value)
+        {
+            LoadInt64((long)value);
+        }
 
         /// <summary>
         /// Pushes a constant value onto the stack.
@@ -521,20 +540,37 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
-        /// then pushes the value onto the stack.
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the
+        /// address, then pushes that address onto the stack.
         /// </summary>
         /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
         public abstract void Unbox(Type type);
+
+        /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the
+        /// address, then pushes that address onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public void Unbox(PrimitiveType type)
+        {
+            Unbox(PrimitiveTypeUtilities.ToType(type));
+        }
 
         /// <summary>
         /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
         /// then pushes the value onto the stack.
         /// </summary>
         /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
-        public void Unbox(PrimitiveType type)
+        public abstract void UnboxAny(Type type);
+
+        /// <summary>
+        /// Pops an object reference (representing a boxed value) from the stack, extracts the value,
+        /// then pushes the value onto the stack.
+        /// </summary>
+        /// <param name="type"> The type of the boxed value.  This should be a value type. </param>
+        public void UnboxAny(PrimitiveType type)
         {
-            Unbox(PrimitiveTypeUtilities.ToType(type));
+            UnboxAny(PrimitiveTypeUtilities.ToType(type));
         }
 
         /// <summary>
@@ -548,6 +584,18 @@ namespace Jurassic.Compiler
         /// onto the stack.
         /// </summary>
         public abstract void ConvertToUnsignedInteger();
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to a signed 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public abstract void ConvertToInt64();
+
+        /// <summary>
+        /// Pops a value from the stack, converts it to an unsigned 64-bit integer, then pushes it
+        /// back onto the stack.
+        /// </summary>
+        public abstract void ConvertToUnsignedInt64();
 
         /// <summary>
         /// Pops a value from the stack, converts it to a double, then pushes it back onto
@@ -578,7 +626,7 @@ namespace Jurassic.Compiler
         /// method (or is declared on a value type) or CallVirtual() otherwise.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public void Call(System.Reflection.MethodInfo method)
+        public void Call(System.Reflection.MethodBase method)
         {
             if (method.IsStatic == true || method.DeclaringType.IsValueType == true)
                 CallStatic(method);
@@ -593,7 +641,7 @@ namespace Jurassic.Compiler
         /// callsite.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public abstract void CallStatic(System.Reflection.MethodInfo method);
+        public abstract void CallStatic(System.Reflection.MethodBase method);
 
         /// <summary>
         /// Pops the method arguments off the stack, calls the given method, then pushes the result
@@ -602,13 +650,19 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public abstract void CallVirtual(System.Reflection.MethodInfo method);
+        public abstract void CallVirtual(System.Reflection.MethodBase method);
 
         /// <summary>
         /// Pushes the value of the given field onto the stack.
         /// </summary>
         /// <param name="field"> The field whose value will be pushed. </param>
         public abstract void LoadField(System.Reflection.FieldInfo field);
+
+        /// <summary>
+        /// Pops a value off the stack and stores it in the given field.
+        /// </summary>
+        /// <param name="field"> The field to modify. </param>
+        public abstract void StoreField(System.Reflection.FieldInfo field);
 
         /// <summary>
         /// Pops an object off the stack, checks that the object inherits from or implements the
@@ -639,7 +693,7 @@ namespace Jurassic.Compiler
         /// stack.
         /// </summary>
         /// <param name="method"> The method to convert to a RuntimeMethodHandle. </param>
-        public abstract void LoadToken(System.Reflection.MethodInfo method);
+        public abstract void LoadToken(System.Reflection.MethodBase method);
 
         /// <summary>
         /// Pushes a RuntimeFieldHandle corresponding to the given field onto the evaluation stack.
@@ -652,7 +706,7 @@ namespace Jurassic.Compiler
         /// stack.  The virtual qualifier will be ignored, if present.
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
-        public abstract void LoadStaticMethodPointer(System.Reflection.MethodInfo method);
+        public abstract void LoadStaticMethodPointer(System.Reflection.MethodBase method);
 
         /// <summary>
         /// Pushes a pointer to the native code implementing the given method onto the
@@ -660,7 +714,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public abstract void LoadVirtualMethodPointer(System.Reflection.MethodInfo method);
+        public abstract void LoadVirtualMethodPointer(System.Reflection.MethodBase method);
 
         /// <summary>
         /// Pushes a pointer to the native code implementing the given method onto the evaluation
@@ -668,7 +722,7 @@ namespace Jurassic.Compiler
         /// method (or is declared on a value type) or LoadVirtualMethodPointer() otherwise.
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
-        public void LoadMethodPointer(System.Reflection.MethodInfo method)
+        public void LoadMethodPointer(System.Reflection.MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");
@@ -677,6 +731,14 @@ namespace Jurassic.Compiler
             else
                 LoadVirtualMethodPointer(method);
         }
+
+        /// <summary>
+        /// Pops a managed or native pointer off the stack and initializes the referenced type with
+        /// zeros.
+        /// </summary>
+        /// <param name="type"> The type the pointer on the top of the stack is pointing to. </param>
+        public abstract void InitObject(Type type);
+
 
 
 
