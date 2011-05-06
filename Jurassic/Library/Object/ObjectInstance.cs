@@ -300,7 +300,7 @@ namespace Jurassic.Library
                 cachedIndex = -1;
                 cacheKey = null;
                 if (this.Prototype == null)
-                    return null;
+                    return GetMissingPropertyValue(name);
                 return this.Prototype.GetNamedPropertyValue(name, this);
             }
         }
@@ -491,7 +491,7 @@ namespace Jurassic.Library
 
             // The property might exist in the prototype.
             if (this.prototype == null)
-                return null;
+                return thisValue.GetMissingPropertyValue(index.ToString());
             return this.prototype.GetPropertyValue(index, thisValue);
         }
 
@@ -548,7 +548,23 @@ namespace Jurassic.Library
             } while (prototypeObject != null);
 
             // The property doesn't exist.
-            return null;
+            return thisValue.GetMissingPropertyValue(propertyName);
+        }
+
+        /// <summary>
+        /// Retrieves the value of a property which doesn't exist on the object.  This method can
+        /// be overridden to effectively construct properties on the fly.  The default behavior is
+        /// to return <c>undefined</c>.
+        /// </summary>
+        /// <param name="propertyName"> The name of the missing property. </param>
+        /// <returns> The value of the missing property. </returns>
+        /// <remarks> When overriding, call the base class implementation only if you want to
+        /// revert to the default behavior. </remarks>
+        protected virtual object GetMissingPropertyValue(string propertyName)
+        {
+            if (this.prototype == null)
+                return null;
+            return this.prototype.GetMissingPropertyValue(propertyName);
         }
 
         /// <summary>
@@ -592,32 +608,6 @@ namespace Jurassic.Library
             // The property doesn't exist.
             return PropertyDescriptor.Undefined;
         }
-
-        ///// <summary>
-        ///// Determines if the property with the given name is writable.
-        ///// </summary>
-        ///// <param name="propertyName"> The name of the property. </param>
-        ///// <returns> <c>true</c> if a property with the given name is writable; <c>false</c>
-        ///// otherwise. </returns>
-        //internal bool CanPut(string propertyName)
-        //{
-        //    // Retrieve the property on this object.
-        //    PropertyDescriptor descriptor = GetOwnProperty(propertyName);
-        //    if (descriptor.Exists == true)
-        //        return descriptor.IsWritable;
-
-        //    // The property doesn't exist on this object.  A new property would normally be
-        //    // created, unless an accessor function exists in the prototype chain.
-        //    if (this.prototype != null)
-        //    {
-        //        descriptor = this.prototype.GetProperty(propertyName);
-        //        if (descriptor.IsAccessor == true)
-        //            return descriptor.SetAccessor != null;
-        //    }
-
-        //    // A new property can be created if the object is extensible.
-        //    return this.IsExtensible;
-        //}
 
         /// <summary>
         /// Sets the value of the property with the given array index.  If a property with the
