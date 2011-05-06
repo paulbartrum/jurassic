@@ -52,6 +52,18 @@ namespace Jurassic.Library
             var constructors = type.GetConstructors();
             if (constructors.Length > 0)
                 this.constructBinder = new ClrBinder(constructors);
+            else
+            {
+                // The built-in primitive types do not have constructors, but we still want to
+                // allow their construction since there is no way to construct them otherwise.
+                // Pretend that a constructor does exist.
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.Int32:
+                        this.constructBinder = new ClrBinder(ReflectionHelpers.Convert_ToInt32_Double);
+                        break;
+                }
+            }
 
             this.FastSetProperty("name", type.Name);
             if (this.constructBinder != null)

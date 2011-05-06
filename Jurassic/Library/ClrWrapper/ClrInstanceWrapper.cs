@@ -57,6 +57,28 @@ namespace Jurassic.Library
 
 
 
+        //     OBJECTINSTANCE OVERRIDES
+        //_________________________________________________________________________________________
+
+        ///// <summary>
+        ///// Returns a primitive value that represents the current object.  Used by the addition and
+        ///// equality operators.
+        ///// </summary>
+        ///// <param name="hint"> Indicates the preferred type of the result. </param>
+        ///// <returns> A primitive value that represents the current object. </returns>
+        //protected internal override object GetPrimitiveValue(PrimitiveTypeHint typeHint)
+        //{
+        //    // If this wrapper is for a primitive.
+        //    if (TypeUtilities.IsPrimitive(this.WrappedInstance) == true)
+        //        return this.WrappedInstance;
+
+        //    // Otherwise, use the default implementation.
+        //    return base.GetPrimitiveValue(typeHint);
+        //}
+
+
+
+
         //     OBJECT OVERRIDES
         //_________________________________________________________________________________________
 
