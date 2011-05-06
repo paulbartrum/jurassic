@@ -45,11 +45,11 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an Object with no prototype.
+        /// Creates an Object with the default prototype.
         /// </summary>
         /// <param name="engine"> The script engine associated with this object. </param>
         protected ObjectInstance(ScriptEngine engine)
-            : this(engine, null)
+            : this(engine, engine.Object.InstancePrototype)
         {
         }
 
@@ -87,7 +87,7 @@ namespace Jurassic.Library
         /// <returns> An Object with no prototype. </returns>
         internal static ObjectInstance CreateRootObject(ScriptEngine engine)
         {
-            return new ObjectInstance(engine);
+            return new ObjectInstance(engine, null);
         }
 
         /// <summary>
