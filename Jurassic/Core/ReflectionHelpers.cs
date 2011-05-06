@@ -85,6 +85,7 @@ namespace Jurassic
         internal static MethodInfo ClrInstanceWrapper_GetWrappedInstance;
         internal static MethodInfo Decimal_ToDouble;
         internal static MethodInfo BinderUtilities_ResolveOverloads;
+        internal static MethodInfo Convert_ToInt32_Double;
 
         internal static MethodInfo ObjectInstance_Delete;
         internal static MethodInfo ObjectInstance_DefineProperty;
@@ -241,6 +242,7 @@ namespace Jurassic
             ClrInstanceWrapper_GetWrappedInstance = GetInstanceMethod(typeof(ClrInstanceWrapper), "get_WrappedInstance");
             Decimal_ToDouble = GetStaticMethod(typeof(decimal), "ToDouble", typeof(decimal));
             BinderUtilities_ResolveOverloads = GetStaticMethod(typeof(BinderUtilities), "ResolveOverloads", typeof(RuntimeMethodHandle[]), typeof(ScriptEngine), typeof(object), typeof(object[]));
+            Convert_ToInt32_Double = GetStaticMethod(typeof(Convert), "ToInt32", typeof(double));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

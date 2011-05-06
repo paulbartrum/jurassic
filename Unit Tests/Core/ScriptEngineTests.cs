@@ -179,13 +179,19 @@ namespace UnitTests
             }
         }
 
+        private class TestInstance2
+        {
+            public int value;
+        }
+
         [TestMethod]
         public void SetGlobalValueClassInstance()
         {
             var engine = new ScriptEngine();
 
-            // Try setting a type.
+            // Try setting up some types.
             engine.SetGlobalValue("TestInstance", typeof(TestInstance));
+            engine.SetGlobalValue("TestInstance2", typeof(TestInstance2));
 
             // Constructor.
             engine.Execute("var instance = new TestInstance(5)");
@@ -221,6 +227,10 @@ namespace UnitTests
             // Types get unwrapped when they are returned from ScriptEngine APIs.
             Assert.AreEqual(typeof(TestInstance), engine.Evaluate("TestInstance"));
             Assert.AreEqual(typeof(TestInstance), engine.GetGlobalValue("TestInstance"));
+
+            // Class with no constructors.
+            engine.Execute("var instance2 = new TestInstance2()");
+            Assert.AreEqual(0, engine.Evaluate("instance2.value"));
         }
 
         private struct TestStruct

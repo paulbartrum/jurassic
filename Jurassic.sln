@@ -24,33 +24,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarker", "Benchmarker\Benchmarker.csproj", "{E507B982-1D98-4A65-B77B-E382F461646E}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 8
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs01
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = Unit\u0020Tests\\Unit\u0020Tests.csproj
-		SccProjectName1 = Unit\u0020Tests
-		SccLocalPath1 = Unit\u0020Tests
-		SccProjectUniqueName2 = Jurassic\\Jurassic.csproj
-		SccProjectName2 = Jurassic
-		SccLocalPath2 = Jurassic
-		SccProjectUniqueName3 = Performance\\Performance.csproj
-		SccProjectName3 = Performance
-		SccLocalPath3 = Performance
-		SccProjectUniqueName4 = JurassicSL\\JurassicSL.csproj
-		SccProjectName4 = JurassicSL
-		SccLocalPath4 = JurassicSL
-		SccProjectUniqueName5 = SilverlightREPL\\SilverlightREPL.csproj
-		SccProjectName5 = SilverlightREPL
-		SccLocalPath5 = SilverlightREPL
-		SccProjectUniqueName6 = Test\u0020Suite\u0020Runner\\Test\u0020Suite\u0020Runner.csproj
-		SccProjectName6 = Test\u0020Suite\u0020Runner
-		SccLocalPath6 = Test\u0020Suite\u0020Runner
-		SccProjectUniqueName7 = Benchmarker\\Benchmarker.csproj
-		SccProjectName7 = Benchmarker
-		SccLocalPath7 = Benchmarker
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
