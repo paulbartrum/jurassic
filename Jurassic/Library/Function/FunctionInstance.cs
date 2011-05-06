@@ -18,10 +18,19 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
+        /// Creates a new instance of a built-in function object, with the default Function
+        /// prototype.
+        /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
+        protected FunctionInstance(ScriptEngine engine)
+            : base(engine, engine.Function.InstancePrototype)
+        {
+        }
+
+        /// <summary>
         /// Creates a new instance of a built-in function object.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        /// <param name="name"> The name of the function. </param>
         protected FunctionInstance(ObjectInstance prototype)
             : base(prototype)
         {
@@ -32,7 +41,6 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="prototype"> The next object in the prototype chain.  Can be <c>null</c>. </param>
-        /// <param name="name"> The name of the function. </param>
         protected FunctionInstance(ScriptEngine engine, ObjectInstance prototype)
             : base(engine, prototype)
         {
