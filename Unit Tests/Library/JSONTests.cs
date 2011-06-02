@@ -199,6 +199,8 @@ namespace UnitTests
             Assert.AreEqual(@"""\u0000""", TestUtils.Evaluate("JSON.stringify(String.fromCharCode(0))"));
             Assert.AreEqual(@"""\u001f""", TestUtils.Evaluate("JSON.stringify(String.fromCharCode(0x1F))"));
             Assert.AreEqual(@"""test""", TestUtils.Evaluate("JSON.stringify(new String('test'))"));
+            Assert.AreEqual(@"""te\""st""", TestUtils.Evaluate("JSON.stringify('te\"st')"));
+            Assert.AreEqual(@"""te'st""", TestUtils.Evaluate("JSON.stringify('te\\'st')"));
 
             // Dates.
             Assert.AreEqual("null", TestUtils.Evaluate("JSON.stringify(Date.prototype)"));
