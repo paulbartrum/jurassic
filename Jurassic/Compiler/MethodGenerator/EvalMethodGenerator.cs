@@ -44,21 +44,23 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Parse()
         {
-            var lexer = new Lexer(this.Engine, this.Source);
-            var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Eval);
-
-            // If the eval() is running strict mode, create a new scope.
-            parser.DirectivePrologueProcessedCallback = parser2 =>
+            using (var lexer = new Lexer(this.Engine, this.Source))
             {
-                if (parser2.StrictMode == true)
-                    parser2.InitialScope = parser2.Scope = DeclarativeScope.CreateEvalScope(parser2.Scope);
-            };
+                var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Eval);
 
-            this.AbstractSyntaxTree = parser.Parse();
+                // If the eval() is running strict mode, create a new scope.
+                parser.DirectivePrologueProcessedCallback = parser2 =>
+                {
+                    if (parser2.StrictMode == true)
+                        parser2.InitialScope = parser2.Scope = DeclarativeScope.CreateEvalScope(parser2.Scope);
+                };
 
-            this.StrictMode = parser.StrictMode;
-            this.InitialScope = parser.Scope;
-            this.MethodOptimizationHints = parser.MethodOptimizationHints;
+                this.AbstractSyntaxTree = parser.Parse();
+
+                this.StrictMode = parser.StrictMode;
+                this.InitialScope = parser.Scope;
+                this.MethodOptimizationHints = parser.MethodOptimizationHints;
+            }
         }
 
         /// <summary>
