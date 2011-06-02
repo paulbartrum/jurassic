@@ -30,7 +30,7 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Converts a JavaScript source file into a series of tokens.
     /// </summary>
-    internal class Lexer
+    internal class Lexer : IDisposable
     {
         private ScriptEngine engine;
         private ScriptSource source;
@@ -53,6 +53,14 @@ namespace Jurassic.Compiler
             this.reader = source.GetReader();
             this.lineNumber = 1;
             this.columnNumber = 1;
+        }
+
+        /// <summary>
+        /// Cleans up any resources used by the lexer.
+        /// </summary>
+        public void Dispose()
+        {
+            this.reader.Dispose();
         }
 
         /// <summary>

@@ -330,5 +330,50 @@ namespace UnitTests
             Assert.AreEqual(5, engine.Evaluate("global().parseInt('5')"));
         }
 
+        private class TestScriptSource : ScriptSource
+        {
+            public override string Path
+            {
+                get { return "test"; }
+            }
+
+            public override System.IO.TextReader GetReader()
+            {
+                GetReaderCount++;
+                return new TestReader(this);
+            }
+
+            public int GetReaderCount = 0;
+            public int DisposeCount = 0;
+
+            private class TestReader : System.IO.StringReader
+            {
+                private TestScriptSource parent;
+
+                public TestReader(TestScriptSource parent)
+                    : base("92")
+                {
+                    this.parent = parent;
+                }
+
+                protected override void Dispose(bool disposing)
+                {
+                    this.parent.DisposeCount++;
+                    base.Dispose(disposing);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void ScriptSourceTests()
+        {
+            // Check that Dispose is called for every Reader that is created.
+            var engine = new ScriptEngine();
+            var source = new TestScriptSource();
+            Assert.AreEqual(92, engine.Evaluate(source));
+            Assert.AreEqual(source.GetReaderCount, source.DisposeCount);
+            engine.Execute(source);
+            Assert.AreEqual(source.GetReaderCount, source.DisposeCount);
+        }
     }
 }
