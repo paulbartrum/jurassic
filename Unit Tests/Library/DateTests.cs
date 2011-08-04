@@ -704,8 +704,9 @@ namespace UnitTests
         {
             var timeZoneInfo = TimeZoneInfo.Local;
             var offset = timeZoneInfo.GetUtcOffset(date);
-            return string.Format("GMT+{0:d2}{1:d2} ({2})", offset.Hours, offset.Minutes,
-                timeZoneInfo.IsDaylightSavingTime(date) ? timeZoneInfo.DaylightName : timeZoneInfo.StandardName);
+            return string.Format("GMT{3}{0:d2}{1:d2} ({2})", offset.Hours, offset.Minutes,
+                timeZoneInfo.IsDaylightSavingTime(date) ? timeZoneInfo.DaylightName : timeZoneInfo.StandardName, 
+                offset.Hours > 0 ? "+" : "");
         }
     }
 }

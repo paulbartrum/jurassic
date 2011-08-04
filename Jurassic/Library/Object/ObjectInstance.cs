@@ -1162,7 +1162,8 @@ namespace Jurassic.Library
 
         /// <summary>
         /// Populates the object with functions by searching a .NET type for methods marked with
-        /// the [JSFunction] attribute.  Should be called only once at startup.
+        /// the [JSFunction] attribute.  Should be called only once at startup.  Also automatically
+        /// populates properties marked with the [JSProperty] attribute.
         /// </summary>
         internal protected void PopulateFunctions()
         {
@@ -1231,6 +1232,50 @@ namespace Jurassic.Library
 
                 // Add the function as a property of the object.
                 this.FastSetProperty(name, new ClrFunction(this.Engine.Function.InstancePrototype, methodGroup.Methods, name, methodGroup.Length), PropertyAttributes.NonEnumerable);
+            }
+
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            foreach (PropertyInfo prop in properties)
+            {
+                var attribute = Attribute.GetCustomAttribute(prop, typeof(JSPropertyAttribute), false) as JSPropertyAttribute;
+                if (attribute == null)
+                    continue;
+
+                string name;
+                if (!string.IsNullOrEmpty(attribute.Name))
+                {
+                    name = Compiler.Lexer.ResolveIdentifier(this.Engine, attribute.Name);
+                    if (name == null)
+                        throw new InvalidOperationException(string.Format("The name provided to [JSProperty] on {0} is not a valid identifier.", prop));
+                }
+                else
+                {
+                    name = prop.Name;
+                }
+
+                ClrFunction getter = null, setter = null;
+                PropertyAttributes descriptorAttributes = PropertyAttributes.Sealed;
+                if (prop.CanRead)
+                {
+                    var getMethod = prop.GetGetMethod(true);
+                    getter = new ClrFunction(engine.Function.InstancePrototype, new ClrBinder(getMethod));
+                    descriptorAttributes |= PropertyAttributes.IsAccessorProperty;
+                }
+
+                if (prop.CanWrite)
+                {
+                    var setMethod = prop.GetSetMethod();
+                    setter = new ClrFunction(engine.Function.InstancePrototype, new ClrBinder(setMethod));
+                    descriptorAttributes |= PropertyAttributes.Writable;
+                }
+
+                if (attribute.IsEnumerable)
+                    descriptorAttributes |= PropertyAttributes.Enumerable;
+                if (attribute.IsConfigurable)
+                    descriptorAttributes |= PropertyAttributes.Configurable;
+
+                PropertyDescriptor descriptor = new PropertyDescriptor(getter, setter, descriptorAttributes);
+                this.DefineProperty(name, descriptor, true);
             }
         }
 

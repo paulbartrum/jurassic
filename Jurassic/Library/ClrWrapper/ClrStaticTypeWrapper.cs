@@ -28,6 +28,9 @@ namespace Jurassic.Library
         /// <param name="type"> The CLR type to wrap. </param>
         public static ClrStaticTypeWrapper FromCache(ScriptEngine engine, Type type)
         {
+            if (!engine.EnableExposedClrTypes)
+                throw new JavaScriptException(engine, "TypeError", "Unsupported type: CLR types are not supported.  Enable CLR types by setting the ScriptEngine's EnableExposedClrTypes property to true.");
+
             ClrStaticTypeWrapper cachedInstance;
             if (engine.StaticTypeWrapperCache.TryGetValue(type, out cachedInstance) == true)
                 return cachedInstance;

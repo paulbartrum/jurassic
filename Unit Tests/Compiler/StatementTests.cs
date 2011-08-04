@@ -217,10 +217,14 @@ namespace UnitTests
             Assert.AreEqual("number", TestUtils.Evaluate("x = { a: 234 }; a = 1; b = 2; with (x) { a = 12, typeof(b) }"));
 
             // Implicit this.
-            Assert.AreEqual(1970, TestUtils.Evaluate("x = new Date(5); x.f = x.getFullYear; with (x) { f() }"));
+            // corrected test case to account for time zone differences
+            int baseYear = 1970;
+            if ((DateTime.Now - DateTime.UtcNow).Ticks < 0)
+                baseYear = 1969;
+            Assert.AreEqual(baseYear, TestUtils.Evaluate("x = new Date(5); x.f = x.getFullYear; with (x) { f() }"));
             Assert.AreEqual(true, TestUtils.Evaluate("x = { a: 1, b: 2 }; with (x) { (function() { return this })() === this }"));
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("x = new Date(5); f = x.getFullYear; with (x) { f() }"));
-            Assert.AreEqual(1970, TestUtils.Evaluate("x = new Date(5); x.f = x.getFullYear; with (x) { (function b() { return f() })() }"));
+            Assert.AreEqual(baseYear, TestUtils.Evaluate("x = new Date(5); x.f = x.getFullYear; with (x) { (function b() { return f() })() }"));
 
             // With and var.
             Assert.AreEqual(5, TestUtils.Evaluate("x = { a: 234 }; with (x) { var a = 5; } x.a"));

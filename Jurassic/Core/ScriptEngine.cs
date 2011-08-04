@@ -479,6 +479,23 @@ namespace Jurassic
             set;
         }
 
+        /// <summary>
+        /// Gets or sets whether CLR types can be exposed directly to the script engine.  If this is set to 
+        /// <c>false</c>, attempting to instantiate CLR types from script may result in exceptions being
+        /// thrown in script.
+        /// </summary>
+        /// <remarks>
+        /// <para>This property is intended to prevent script developers from accessing the entire CLR
+        /// type system, for security purposes.  When this property is set to <c>false</c>, it should prevent
+        /// new instances of CLR types from being exposed to the script engine, even if you have already 
+        /// exposed CLR types to the script engine.</para>
+        /// </remarks>
+        public bool EnableExposedClrTypes
+        {
+            get;
+            set;
+        }
+
         internal class ReflectionEmitModuleInfo
         {
             public System.Reflection.Emit.AssemblyBuilder AssemblyBuilder;
