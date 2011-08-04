@@ -60,7 +60,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the starting column number of this range.
         /// </summary>
-	    public int StartColumn
+        public int StartColumn
         {
             get;
             private set;
@@ -69,7 +69,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the ending line number of this range.
         /// </summary>
-	    public int EndLine
+        public int EndLine
         {
             get;
             private set;

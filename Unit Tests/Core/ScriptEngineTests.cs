@@ -61,12 +61,17 @@ namespace UnitTests
 
             public static bool Overload1(int a, int b) { return true; }
             public static bool Overload1(double a, double b) { return false; }
+            public static string Overload1(string a, string b) { return a + b; }
         }
 
         [TestMethod]
         public void SetGlobalValueType()
         {
             var engine = new ScriptEngine();
+
+            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("Math", typeof(Math)));
+
+            engine.EnableExposedClrTypes = true;
 
             // Try setting a few Types.
             engine.SetGlobalValue("Math", typeof(Math));
@@ -115,6 +120,7 @@ namespace UnitTests
             Assert.AreEqual(4, engine.Evaluate("Math.Max(3, 4)"));
             Assert.AreEqual(3, engine.Evaluate("Math.Abs(-3)"));
             Assert.AreEqual(false, engine.Evaluate("TestClass.Overload1(1, 2)"));
+            Assert.AreEqual("Hello, world", engine.Evaluate<string>("TestClass.Overload1('Hello, ', 'world')"));
             engine.SetGlobalValue("Int32", typeof(int));
             Assert.AreEqual(true, engine.Evaluate("TestClass.Overload1(new Int32(1), new Int32(2))"));
 
@@ -188,6 +194,12 @@ namespace UnitTests
         public void SetGlobalValueClassInstance()
         {
             var engine = new ScriptEngine();
+
+            engine.EnableExposedClrTypes = false;
+            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestInstance", typeof(TestInstance)));
+            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestInstance2", typeof(TestInstance2)));
+
+            engine.EnableExposedClrTypes = true;
 
             // Try setting up some types.
             engine.SetGlobalValue("TestInstance", typeof(TestInstance));
@@ -274,7 +286,11 @@ namespace UnitTests
         {
             var engine = new ScriptEngine();
 
+            engine.EnableExposedClrTypes = false;
+            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestStruct", typeof(TestStruct)));
+
             // Try setting a type.
+            engine.EnableExposedClrTypes = true;
             engine.SetGlobalValue("TestStruct", typeof(TestStruct));
 
             // Constructor.
@@ -374,6 +390,58 @@ namespace UnitTests
             Assert.AreEqual(source.GetReaderCount, source.DisposeCount);
             engine.Execute(source);
             Assert.AreEqual(source.GetReaderCount, source.DisposeCount);
+        }
+
+        [TestMethod]
+        public void TestPropertyMarshalling()
+        {
+            ScriptEngine engine = new ScriptEngine();
+            TestPropertyMarshalObj testObj = new TestPropertyMarshalObj(engine.Object.Prototype, 10);
+            engine.SetGlobalValue("TestObject", testObj);
+            Assert.AreEqual(10, engine.Evaluate<int>("TestObject.Value2"));
+            engine.Execute("TestObject.Value = 5;");
+            Assert.AreEqual(5, engine.Evaluate<int>("TestObject.Value"));
+            Assert.AreEqual("5; 10", engine.Evaluate<string>("TestObject.toString()"));
+        }
+
+        private class TestPropertyMarshalObj : ObjectInstance
+        {
+            public TestPropertyMarshalObj(ObjectInstance prototype, int val2)
+                : base(prototype)
+            {
+                this.PopulateFunctions();
+                _val2 = val2;
+            }
+
+            private int _value;
+            [JSProperty]
+            public int Value
+            {
+                get
+                {
+                    return _value;
+                }
+                set
+                {
+                    _value = value;
+                }
+            }
+
+            private int _val2;
+            [JSProperty]
+            public int Value2
+            {
+                get
+                {
+                    return _val2;
+                }
+            }
+
+            [JSFunction(Name = "toString")]
+            public override string ToString()
+            {
+                return _value + "; " + _val2;
+            }
         }
     }
 }

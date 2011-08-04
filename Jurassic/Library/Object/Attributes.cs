@@ -87,6 +87,54 @@ namespace Jurassic.Library
     }
 
     /// <summary>
+    /// Marks a property as being visible to JavaScript code.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public sealed class JSPropertyAttribute : Attribute
+    {
+        /// <summary>
+        /// Creates a new <see cref="JSPropertyAttribute"/>
+        /// </summary>
+        public JSPropertyAttribute()
+        {
+            IsEnumerable = true;
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the property as exposed to JavaScript code.
+        /// </summary>
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets whether the property should be enumerable (exposed via the 
+        /// <c>for...in</c> construct) in JavaScript code.  The default value of this
+        /// property is <c>true</c>.
+        /// </summary>
+        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        public bool IsEnumerable
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets whether the property should be configurable, that is, whether
+        /// the property may be changed or have its descriptor changed by JavaScript
+        /// code.  The default value of this property is <c>false</c>.
+        /// </summary>
+        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        public bool IsConfigurable
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
     /// Some built-in objects act like both classes and functions depending on whether the
     /// <c>new</c> operator is used (for example, the Number object acts this way).  This
     /// property indicates that the method should be called when an object is called like
