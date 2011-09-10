@@ -183,7 +183,7 @@ namespace Jurassic.Library
                 if (double.IsInfinity((double)value) == true || double.IsNaN((double)value))
                     result.Append("null");
                 else
-                    result.Append(((double)value).ToString());
+                    result.Append(NumberFormatter.ToString((double)value, 10, NumberFormatter.Style.Regular));
                 return;
             }
             if (value is int)

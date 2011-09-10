@@ -292,5 +292,30 @@ namespace UnitTests
             }
             return result.ToString().Trim('\r', '\n');
         }
+
+        /// <summary>
+        /// Changes the culture to run the the given action, then restores the culture.
+        /// </summary>
+        /// <param name="cultureName"> The culture name. </param>
+        /// <param name="action"> The action to run under the modified culture. </param>
+        public static T ChangeLocale<T>(string cultureName, Func<T> action)
+        {
+            // Save the current culture.
+            var previousCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+
+            // Replace it with a new culture.
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(cultureName, false);
+
+            try
+            {
+                // Run the action.
+                return action();
+            }
+            finally
+            {
+                // Restore the previous culture.
+                System.Threading.Thread.CurrentThread.CurrentCulture = previousCulture;
+            }
+        }
     }
 }

@@ -186,7 +186,9 @@ namespace UnitTests
 
             // Numbers.
             Assert.AreEqual("5", TestUtils.Evaluate("JSON.stringify(5)"));
-            Assert.AreEqual("5E+100", TestUtils.Evaluate("JSON.stringify(5e100)"));
+            Assert.AreEqual("5e+100", TestUtils.Evaluate("JSON.stringify(5e100)"));
+            Assert.AreEqual("5.1", TestUtils.Evaluate("JSON.stringify(5.1)"));
+            Assert.AreEqual("5.1", TestUtils.ChangeLocale("es-ES", () => TestUtils.Evaluate("JSON.stringify(5.1)")));
             Assert.AreEqual("null", TestUtils.Evaluate("JSON.stringify(-Infinity)"));
             Assert.AreEqual("null", TestUtils.Evaluate("JSON.stringify(Infinity)"));
             Assert.AreEqual("null", TestUtils.Evaluate("JSON.stringify(NaN)"));

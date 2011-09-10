@@ -151,6 +151,18 @@ namespace UnitTests
             {
                 Assert.AreEqual("77", TestUtils.Evaluate("77 .toLocaleString()"));
                 Assert.AreEqual("77.5", TestUtils.Evaluate("77.5.toLocaleString()"));
+
+                // English.
+                Assert.AreEqual("77.123", TestUtils.ChangeLocale("en-NZ", () => TestUtils.Evaluate("77.123.toLocaleString()")));
+                Assert.AreEqual("7.7e+101", TestUtils.ChangeLocale("en-NZ", () => TestUtils.Evaluate("77e100 .toLocaleString()")));
+                Assert.AreEqual("123456789", TestUtils.ChangeLocale("en-NZ", () => TestUtils.Evaluate("123456789 .toLocaleString()")));
+                Assert.AreEqual("-500", TestUtils.ChangeLocale("en-NZ", () => TestUtils.Evaluate("(-500).toLocaleString()")));
+
+                // Spanish.
+                Assert.AreEqual("77,123", TestUtils.ChangeLocale("es-ES", () => TestUtils.Evaluate("77.123.toLocaleString()")));
+                Assert.AreEqual("7,7e+101", TestUtils.ChangeLocale("es-ES", () => TestUtils.Evaluate("77e100 .toLocaleString()")));
+                Assert.AreEqual("123456789", TestUtils.ChangeLocale("es-ES", () => TestUtils.Evaluate("123456789 .toLocaleString()")));
+                Assert.AreEqual("-500", TestUtils.ChangeLocale("es-ES", () => TestUtils.Evaluate("(-500).toLocaleString()")));
             }
             Assert.AreEqual("Infinity", TestUtils.Evaluate("Infinity.toLocaleString()"));
             Assert.AreEqual("-Infinity", TestUtils.Evaluate("(-Infinity).toLocaleString()"));
@@ -278,6 +290,9 @@ namespace UnitTests
             Assert.AreEqual("0.00142233513615237575", TestUtils.Evaluate("0.003.toString(8)"));
             Assert.AreEqual("27524716460150203300000000000000000", TestUtils.Evaluate("15e30.toString(8)"));
             Assert.AreEqual("0.252525252525252525", TestUtils.Evaluate("(1/3).toString(8)"));
+
+            // Decimal point should be '.' regardless of locale.
+            Assert.AreEqual("77.1274", TestUtils.ChangeLocale("es-ES", () => TestUtils.Evaluate("77.1274.toString()")));
 
             // Radix out of range.
             Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "TypeError" : "RangeError", TestUtils.EvaluateExceptionType("254 .toString(37)"));
