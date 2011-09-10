@@ -42,6 +42,8 @@ namespace Jurassic
             Exponential,
         }
 
+        private const string exponentSymbol = "e";
+
         /// <summary>
         /// Converts a number to a string.
         /// </summary>
@@ -57,9 +59,28 @@ namespace Jurassic
         /// </param>
         internal static string ToString(double value, int radix, Style style, int precision = 0)
         {
+            return ToString(value, radix, System.Globalization.CultureInfo.InvariantCulture.NumberFormat, style, precision);
+        }
+
+        /// <summary>
+        /// Converts a number to a string.
+        /// </summary>
+        /// <param name="value"> The value to convert to a string. </param>
+        /// <param name="radix"> The base of the number system to convert to. </param>
+        /// <param name="numberFormatInfo"> The number format style to use. </param>
+        /// <param name="style"> The type of formatting to apply. </param>
+        /// <param name="precision">
+        /// This value is dependent on the formatting style:
+        /// Regular - this value has no meaning.
+        /// Precision - the number of significant figures to display.
+        /// Fixed - the number of figures to display after the decimal point.
+        /// Exponential - the number of figures to display after the decimal point.
+        /// </param>
+        internal static string ToString(double value, int radix, System.Globalization.NumberFormatInfo numberFormatInfo, Style style, int precision = 0)
+        {
             // Handle NaN.
             if (double.IsNaN(value))
-                return "NaN";
+                return numberFormatInfo.NaNSymbol;  // "NaN"
 
             // Handle zero.
             if (value == 0.0)
@@ -69,15 +90,15 @@ namespace Jurassic
                     case Style.Regular:
                         return "0";
                     case Style.Precision:
-                        return "0." + new string('0', precision - 1);
+                        return "0" + numberFormatInfo.NumberDecimalSeparator + new string('0', precision - 1);
                     case Style.Fixed:
                         if (precision == 0)
                             return "0";
-                        return "0." + new string('0', precision);
+                        return "0" + numberFormatInfo.NumberDecimalSeparator + new string('0', precision);
                     case Style.Exponential:
                         if (precision <= 0)
-                            return "0e+0";
-                        return string.Format("0.{0}e+0", new string('0', precision));
+                            return "0" + exponentSymbol + numberFormatInfo.PositiveSign + "0";
+                        return "0" + numberFormatInfo.NumberDecimalSeparator + new string('0', precision) + exponentSymbol + numberFormatInfo.PositiveSign + "0";
                 }
             }
 
@@ -87,13 +108,13 @@ namespace Jurassic
             if (value < 0.0)
             {
                 value = -value;
-                result.Append('-');
+                result.Append(numberFormatInfo.NegativeSign);
             }
 
             // Handle infinity.
             if (double.IsPositiveInfinity(value))
             {
-                result.Append("Infinity");
+                result.Append(numberFormatInfo.PositiveInfinitySymbol);     // "Infinity"
                 return result.ToString();
             }
 
@@ -238,7 +259,7 @@ namespace Jurassic
                 result.Append('0');
                 if (integralDigits < 0)
                 {
-                    result.Append('.');
+                    result.Append(numberFormatInfo.NumberDecimalSeparator);
                     decimalPointOutput = true;
                     result.Append('0', -integralDigits);
                 }
@@ -349,7 +370,7 @@ namespace Jurassic
                     // Check if the decimal point should be output.
                     if (decimalPointOutput == false && (scientificNotation == true || digitsOutput == integralDigits))
                     {
-                        result.Append('.');
+                        result.Append(numberFormatInfo.NumberDecimalSeparator);
                         decimalPointOutput = true;
                     }
 
@@ -403,16 +424,16 @@ namespace Jurassic
             if (redundentZeroCount > 0)
             {
                 if (decimalPointOutput == false)
-                    result.Append('.');
+                    result.Append(numberFormatInfo.NumberDecimalSeparator);
                 result.Append('0', redundentZeroCount);
             }
 
             if (scientificNotation == true)
             {
                 // Add the exponent on the end.
-                result.Append('e');
+                result.Append(exponentSymbol);
                 if (exponent > 0)
-                    result.Append('+');
+                    result.Append(numberFormatInfo.PositiveSign);
                 result.Append(exponent);
             }
 

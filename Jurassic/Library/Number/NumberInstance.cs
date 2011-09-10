@@ -116,7 +116,8 @@ namespace Jurassic.Library
         [JSFunction(Name = "toLocaleString")]
         public new string ToLocaleString()
         {
-            return this.value.ToString();
+            // NumberFormatter does the hard work.
+            return NumberFormatter.ToString(this.value, 10, CultureInfo.CurrentCulture.NumberFormat, NumberFormatter.Style.Regular);
         }
 
         /// <summary>
