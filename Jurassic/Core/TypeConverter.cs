@@ -46,7 +46,7 @@ namespace Jurassic
                 return ToNumber(value);
             if (type == typeof(string))
                 return ToString(value);
-            if (type == typeof(ObjectInstance))
+            if (typeof(ObjectInstance).IsAssignableFrom(type))
                 return ToObject(engine, value);
             if (type == typeof(object))
                 return value;

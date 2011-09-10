@@ -55,6 +55,7 @@ namespace UnitTests
             // ConvertTo ObjectInstance
             Assert.IsInstanceOfType(TypeConverter.ConvertTo<ObjectInstance>(engine, 100), typeof(NumberInstance));
             Assert.AreEqual(100.0, ((NumberInstance)TypeConverter.ConvertTo<ObjectInstance>(engine, 100)).ValueOf());
+            Assert.IsInstanceOfType(TypeConverter.ConvertTo<NumberInstance>(engine, 100), typeof(NumberInstance));
         }
 
         [TestMethod]
