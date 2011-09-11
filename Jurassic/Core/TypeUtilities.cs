@@ -24,7 +24,7 @@ namespace Jurassic
                 return "object";
             if (obj is bool)
                 return "boolean";
-            if (obj is double || obj is int)
+            if (obj is double || obj is int || obj is uint)
                 return "number";
             if (obj is string || obj is ConcatenatedString)
                 return "string";
@@ -53,7 +53,7 @@ namespace Jurassic
         /// otherwise. </returns>
         internal static bool IsNumeric(object obj)
         {
-            return obj is double || obj is int;
+            return obj is double || obj is int || obj is uint;
         }
 
         /// <summary>

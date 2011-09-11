@@ -1372,6 +1372,7 @@ namespace UnitTests
             Assert.AreEqual("number", TestUtils.Evaluate("x = 1.5; typeof x"));
             Assert.AreEqual("string", TestUtils.Evaluate("x = 'hello'; typeof x"));
             Assert.AreEqual("number", TestUtils.Evaluate("x = 5; (function() { return typeof(x) })()"));
+            Assert.AreEqual("number", TestUtils.Evaluate("typeof([1, 2].length)"));
         }
 
         [TestMethod]
