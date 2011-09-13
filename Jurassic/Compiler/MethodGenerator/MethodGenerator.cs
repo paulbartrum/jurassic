@@ -193,12 +193,12 @@ namespace Jurassic.Compiler
                 else
                 {
 #endif
-                    // Low privilege path.
-                    dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                        GetMethodName(),                                        // Name of the generated method.
-                        typeof(object),                                         // Return type of the generated method.
-                        GetParameterTypes());                                   // Parameter types of the generated method.
-                    generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
+                // Low privilege path.
+                dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                    GetMethodName(),                                        // Name of the generated method.
+                    typeof(object),                                         // Return type of the generated method.
+                    GetParameterTypes());                                   // Parameter types of the generated method.
+                generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
 #if !SILVERLIGHT
                 }
 #endif
@@ -219,6 +219,9 @@ namespace Jurassic.Compiler
             }
             else
             {
+#if WINDOWS_PHONE
+                throw new NotImplementedException();
+#else
                 // Debugging or low trust path.
                 ScriptEngine.ReflectionEmitModuleInfo reflectionEmitInfo = this.Engine.ReflectionEmitInfo;
                 if (reflectionEmitInfo == null)
@@ -278,6 +281,7 @@ namespace Jurassic.Compiler
                 var type = typeBuilder.CreateType();
                 var methodInfo = type.GetMethod(this.GetMethodName());
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
+#endif //WINDOWS_PHONE
             }
 
             if (this.Engine.EnableILAnalysis == true)
