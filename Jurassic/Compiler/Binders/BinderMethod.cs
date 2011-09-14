@@ -358,7 +358,7 @@ namespace Jurassic.Compiler
                     var optionalParameter = parameters[argumentCount + i];
                     if ((optionalParameter.Attributes & ParameterAttributes.HasDefault) == ParameterAttributes.HasDefault)
                         // Emit the default value.
-                        EmitHelpers.EmitValue(generator, optionalParameter.DefaultValue);
+                        EmitHelpers.EmitValue(generator, new BinderArgument(optionalParameter, 0).DefaultValue);
                     else
                         // Emit default(T).
                         EmitHelpers.EmitDefaultValue(generator, optionalParameter.ParameterType);
@@ -482,7 +482,19 @@ namespace Jurassic.Compiler
         /// </summary>
         public object DefaultValue
         {
-            get { return this.parameterInfo == null ? null : this.parameterInfo.DefaultValue; }
+            get
+            {
+                if (this.parameterInfo == null || this.HasDefaultValue == false)
+                    return null;
+                var attribute = GetCustomAttribute<DefaultParameterValueAttribute>();
+                if (attribute == null)
+                    throw new InvalidOperationException(string.Format("Expected [DefaultParameterValue] on parameter '{0}'.", this.parameterInfo.Name));
+                if (attribute.Value == null && this.Type.IsValueType == true)
+                    throw new InvalidOperationException(string.Format("Null is not a valid default value for parameter '{0}'.", this.parameterInfo.Name));
+                if (attribute.Value != null && attribute.Value.GetType() != this.Type)
+                    throw new InvalidOperationException(string.Format("Default value for parameter '{0}' should be '{1}'.", this.parameterInfo.Name, this.Type));
+                return attribute.Value;
+            }
         }
 
         /// <summary>

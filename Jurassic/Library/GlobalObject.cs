@@ -231,7 +231,7 @@ namespace Jurassic.Library
         /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
         /// character, at which point parsing stops.  No error is returned in this case. </remarks>
         [JSFunction(Name = "parseInt", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static double ParseInt(ScriptEngine engine, string input, double radix = 0)
+        public static double ParseInt(ScriptEngine engine, string input, [DefaultParameterValue(0.0)] double radix = 0)
         {
             // Check for a valid radix.
             // Note: this is the only function that uses TypeConverter.ToInt32() for parameter

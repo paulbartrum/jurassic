@@ -43,7 +43,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="value"> The value to initialize to.  Defaults to false. </param>
         [JSConstructorFunction]
-        public BooleanInstance Construct(bool value = false)
+        public BooleanInstance Construct([DefaultParameterValue(false)] bool value = false)
         {
             return new BooleanInstance(this.InstancePrototype, value);
         }

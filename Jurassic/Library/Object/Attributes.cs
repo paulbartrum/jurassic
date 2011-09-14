@@ -201,4 +201,29 @@ namespace Jurassic.Library
         /// </summary>
         Mutated = 2,
     }
+
+    /// <summary>
+    /// Workaround for the lack of support for default value reflection in WP7.1.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public class DefaultParameterValueAttribute : Attribute
+    {
+        /// <summary>
+        /// Initializes a new instance of the DefaultValueAttribute class.
+        /// </summary>
+        /// <param name="defaultValue"> An Object that represents the default value. </param>
+        public DefaultParameterValueAttribute(object defaultValue)
+        {
+            this.Value = defaultValue;
+        }
+
+        /// <summary>
+        /// Gets the default value.
+        /// </summary>
+        public object Value
+        {
+            get;
+            private set;
+        }
+    }
 }

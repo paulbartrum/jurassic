@@ -179,7 +179,7 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSFunction(Deprecated = true, Name = "compile")]
-        public void Compile(string pattern, string flags = null)
+        public void Compile(string pattern, [DefaultParameterValue(null)] string flags = null)
         {
 #if !SILVERLIGHT
             this.value = new Regex(pattern, ParseFlags(flags) | RegexOptions.Compiled);
@@ -449,7 +449,7 @@ namespace Jurassic.Library
         /// <param name="input"> The string to split. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public ArrayInstance Split(string input, uint limit = uint.MaxValue)
+        public ArrayInstance Split(string input, [DefaultParameterValue(uint.MaxValue)] uint limit = uint.MaxValue)
         {
             // Return an empty array if limit = 0.
             if (limit == 0)

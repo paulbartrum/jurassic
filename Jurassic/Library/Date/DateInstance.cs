@@ -67,7 +67,8 @@ namespace Jurassic.Library
         /// <remarks>
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        public DateInstance(ObjectInstance prototype, int year, int month, int day = 1, int hour = 0, int minute = 0, int second = 0, int millisecond = 0)
+        public DateInstance(ObjectInstance prototype, int year, int month, [DefaultParameterValue(1)] int day = 1, [DefaultParameterValue(0)] int hour = 0,
+            [DefaultParameterValue(0)] int minute = 0, [DefaultParameterValue(0)] int second = 0, [DefaultParameterValue(0)] int millisecond = 0)
             : this(prototype, DateInstance.ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
         {
         }
@@ -950,7 +951,8 @@ namespace Jurassic.Library
         /// 
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        public static double UTC(int year, int month, int day = 1, int hour = 0, int minute = 0, int second = 0, int millisecond = 0)
+        public static double UTC(int year, int month, [DefaultParameterValue(1)] int day = 1, [DefaultParameterValue(0)] int hour = 0,
+            [DefaultParameterValue(0)] int minute = 0, [DefaultParameterValue(0)] int second = 0, [DefaultParameterValue(0)] int millisecond = 0)
         {
             return ToJSDate(ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc));
         }

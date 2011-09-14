@@ -120,7 +120,7 @@ namespace Jurassic.Library
         /// <param name="properties"> An object containing one or more property descriptors. </param>
         /// <returns> A new object instance. </returns>
         [JSFunction(Name = "create", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static ObjectInstance Create(ScriptEngine engine, object prototype, ObjectInstance properties = null)
+        public static ObjectInstance Create(ScriptEngine engine, object prototype, [DefaultParameterValue(null)] ObjectInstance properties = null)
         {
             if ((prototype is ObjectInstance) == false && prototype != Null.Value)
                 throw new JavaScriptException(engine, "TypeError", "object prototype must be an object or null");
