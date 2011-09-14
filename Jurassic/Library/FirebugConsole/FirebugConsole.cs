@@ -221,7 +221,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="name"> The name of the time to create. </param>
         [JSFunction(Name = "time", Flags = JSFunctionFlags.MutatesThisObject)]
-        public void Time(string name = "")
+        public void Time([DefaultParameterValue("")] string name = "")
         {
             if (name == null)
                 name = string.Empty;
@@ -237,7 +237,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="name"> The name of the timer to stop. </param>
         [JSFunction(Name = "timeEnd", Flags = JSFunctionFlags.MutatesThisObject)]
-        public void TimeEnd(string name = "")
+        public void TimeEnd([DefaultParameterValue("")] string name = "")
         {
             if (name == null)
                 name = string.Empty;

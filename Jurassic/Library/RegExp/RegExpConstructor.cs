@@ -263,7 +263,7 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSCallFunction]
-        public RegExpInstance Call(object patternOrRegExp, string flags = null)
+        public RegExpInstance Call(object patternOrRegExp, [DefaultParameterValue(null)] string flags = null)
         {
             if (patternOrRegExp is RegExpInstance)
             {
@@ -293,7 +293,7 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSConstructorFunction]
-        public RegExpInstance Construct(object patternOrRegExp, string flags = null)
+        public RegExpInstance Construct(object patternOrRegExp, [DefaultParameterValue(null)] string flags = null)
         {
             if (patternOrRegExp is RegExpInstance)
             {

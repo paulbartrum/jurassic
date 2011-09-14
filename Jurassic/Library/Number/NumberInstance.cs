@@ -99,7 +99,7 @@ namespace Jurassic.Library
         /// If fractionDigits is not supplied or undefined, the toFixed method assumes the value
         /// is zero. </returns>
         [JSFunction(Name = "toFixed")]
-        public string ToFixed(int fractionDigits = 0)
+        public string ToFixed([DefaultParameterValue(0)] int fractionDigits = 0)
         {
             // Check the parameter is within range.
             if (fractionDigits < 0 || fractionDigits > 20)
@@ -158,7 +158,7 @@ namespace Jurassic.Library
         /// <param name="radix"> Specifies a radix for converting numeric values to strings. </param>
         /// <returns> The textual representation of the number. </returns>
         [JSFunction(Name = "toString")]
-        public string ToStringJS(int radix = 10)
+        public string ToStringJS([DefaultParameterValue(10)] int radix = 10)
         {
             // Check the parameter is in range.
             if (radix < 2 || radix > 36)

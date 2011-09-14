@@ -57,7 +57,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="message"> A description of the error. </param>
         [JSCallFunction]
-        public ErrorInstance Call(string message = "")
+        public ErrorInstance Call([DefaultParameterValue("")] string message = "")
         {
             return new ErrorInstance(this.InstancePrototype, null, message, true);
         }
@@ -67,7 +67,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="message"> A description of the error. </param>
         [JSConstructorFunction]
-        public ErrorInstance Construct(string message = "")
+        public ErrorInstance Construct([DefaultParameterValue("")] string message = "")
         {
             return new ErrorInstance(this.InstancePrototype, null, message, true);
         }

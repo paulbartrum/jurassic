@@ -187,7 +187,7 @@ namespace Jurassic.Library
         /// <param name="startIndex"> The character position to start searching from.  Defaults to 0. </param>
         /// <returns> The character position of the start of the substring, if it was found, or -1 if it wasn't. </returns>
         [JSFunction(Name = "indexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static int IndexOf(string thisObject, string substring, int startIndex = 0)
+        public static int IndexOf(string thisObject, string substring, [DefaultParameterValue(0)] int startIndex = 0)
         {
             startIndex = Math.Min(Math.Max(startIndex, 0), thisObject.Length);
             return thisObject.IndexOf(substring, startIndex, StringComparison.Ordinal);
@@ -203,7 +203,7 @@ namespace Jurassic.Library
         /// <param name="startIndex"> The index of the character to start searching. </param>
         /// <returns> The index of the substring, or <c>-1</c> if not found. </returns>
         [JSFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static int LastIndexOf(string thisObject, string substring, double startIndex = double.NaN)
+        public static int LastIndexOf(string thisObject, string substring, [DefaultParameterValue(double.NaN)] double startIndex = double.NaN)
         {
             // Limit startIndex to the length of the string.  This must be done first otherwise
             // when startIndex = MaxValue it wraps around to negative.
@@ -405,7 +405,7 @@ namespace Jurassic.Library
         /// <param name="end"> The character position to stop extacting. </param>
         /// <returns> A section of the string. </returns>
         [JSFunction(Name = "slice", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Slice(string thisObject, int start, int end = int.MaxValue)
+        public static string Slice(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int end = int.MaxValue)
         {
             // Negative offsets are measured from the end of the string.
             if (start < 0)
@@ -429,7 +429,7 @@ namespace Jurassic.Library
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
         [JSFunction(Name = "split", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, double limit = uint.MaxValue)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, [DefaultParameterValue(4294967295.0)] double limit = uint.MaxValue)
         {
             // Limit defaults to unlimited.  Note the ToUint32() conversion.
             uint limit2 = uint.MaxValue;
@@ -449,7 +449,7 @@ namespace Jurassic.Library
         /// <param name="regExp"> A regular expression that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, uint limit = uint.MaxValue)
+        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, [DefaultParameterValue(uint.MaxValue)] uint limit = uint.MaxValue)
         {
             return regExp.Split(thisObject, limit);
         }
@@ -460,7 +460,7 @@ namespace Jurassic.Library
         /// <param name="separator"> A string that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, string separator, uint limit = uint.MaxValue)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, string separator, [DefaultParameterValue(uint.MaxValue)] uint limit = uint.MaxValue)
         {
             if (string.IsNullOrEmpty(separator))
             {
@@ -487,7 +487,7 @@ namespace Jurassic.Library
         /// <param name="length"> The number of characters to extract. </param>
         /// <returns> A substring of this string. </returns>
         [JSFunction(Name = "substr", Flags = JSFunctionFlags.HasThisObject, Deprecated = true)]
-        public static string Substr(string thisObject, int start, int length = int.MaxValue)
+        public static string Substr(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int length = int.MaxValue)
         {
             // If start is less than zero, it is measured from the end of the string.
             if (start < 0)
@@ -509,7 +509,7 @@ namespace Jurassic.Library
         /// <param name="end"> The character position to stop extracting. </param>
         /// <returns> A substring of this string. </returns>
         [JSFunction(Name = "substring", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Substring(string thisObject, int start, int end = int.MaxValue)
+        public static string Substring(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int end = int.MaxValue)
         {
             return Slice(thisObject, Math.Max(Math.Min(start, end), 0), Math.Max(Math.Max(start, end), 0));
         }
