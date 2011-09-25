@@ -25,15 +25,15 @@ namespace UnitTests
             }
 
             [JSFunction(Name = "a")]
-            public int Test1()
+            public virtual int Test1()
             {
                 return 5;
             }
         }
 
-        private class InheritedObjectInstance : CustomObjectInstance
+        private class InheritedObjectInstance1 : CustomObjectInstance
         {
-            public InheritedObjectInstance(ScriptEngine engine)
+            public InheritedObjectInstance1(ScriptEngine engine)
                 : base(new CustomObjectInstance(engine))
             {
                 this.PopulateFunctions();
@@ -43,6 +43,21 @@ namespace UnitTests
             public int Test2()
             {
                 return 6;
+            }
+        }
+
+        private class InheritedObjectInstance2 : CustomObjectInstance
+        {
+            public InheritedObjectInstance2(ScriptEngine engine)
+                : base(engine)
+            {
+                this.PopulateFunctions();
+            }
+
+            [JSFunction(Name = "a")]
+            public override int Test1()
+            {
+                return 7;
             }
         }
 
@@ -67,9 +82,11 @@ namespace UnitTests
             engine.SetGlobalValue("test", new CustomObjectInstance(engine));
             Assert.AreEqual(true, engine.Evaluate("test.a() === 5"));
             Assert.AreEqual(true, engine.Evaluate("test.Test1 === undefined"));
-            engine.SetGlobalValue("test", new InheritedObjectInstance(engine));
+            engine.SetGlobalValue("test", new InheritedObjectInstance1(engine));
             Assert.AreEqual(true, engine.Evaluate("test.a() === 5"));
             Assert.AreEqual(true, engine.Evaluate("test.b() === 6"));
+            engine.SetGlobalValue("test", new InheritedObjectInstance2(engine));
+            Assert.AreEqual(true, engine.Evaluate("test.a() === 7"));
         }
 
         private class TestClass
