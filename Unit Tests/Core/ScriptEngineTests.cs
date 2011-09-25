@@ -11,6 +11,41 @@ namespace UnitTests
     [TestClass]
     public class ScriptEngineTests
     {
+        private class CustomObjectInstance : ObjectInstance
+        {
+            public CustomObjectInstance(ScriptEngine engine)
+                : base(engine)
+            {
+                this.PopulateFunctions();
+            }
+
+            protected CustomObjectInstance(ObjectInstance prototype)
+                : base(prototype)
+            {
+            }
+
+            [JSFunction(Name = "a")]
+            public int Test1()
+            {
+                return 5;
+            }
+        }
+
+        private class InheritedObjectInstance : CustomObjectInstance
+        {
+            public InheritedObjectInstance(ScriptEngine engine)
+                : base(new CustomObjectInstance(engine))
+            {
+                this.PopulateFunctions();
+            }
+
+            [JSFunction(Name = "b")]
+            public int Test2()
+            {
+                return 6;
+            }
+        }
+
         [TestMethod]
         public void SetGlobalValue()
         {
@@ -29,6 +64,12 @@ namespace UnitTests
             Assert.AreEqual(true, engine.Evaluate("test === 'test'"));
             engine.SetGlobalValue("test", engine.String.Construct("test"));
             Assert.AreEqual(true, engine.Evaluate("test == 'test'"));
+            engine.SetGlobalValue("test", new CustomObjectInstance(engine));
+            Assert.AreEqual(true, engine.Evaluate("test.a() === 5"));
+            Assert.AreEqual(true, engine.Evaluate("test.Test1 === undefined"));
+            engine.SetGlobalValue("test", new InheritedObjectInstance(engine));
+            Assert.AreEqual(true, engine.Evaluate("test.a() === 5"));
+            Assert.AreEqual(true, engine.Evaluate("test.b() === 6"));
         }
 
         private class TestClass
