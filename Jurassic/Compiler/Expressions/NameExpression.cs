@@ -513,6 +513,7 @@ namespace Jurassic.Compiler
                         generator.LoadVariable(cachedIndex);
                         generator.LoadVariable(value);
                         generator.StoreArrayElement(typeof(object));
+                        generator.Branch(endOfSet);
 
                         // End of the if statement
                         generator.DefineLabelPosition(endOfIf);

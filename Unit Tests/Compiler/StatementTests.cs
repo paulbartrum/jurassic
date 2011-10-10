@@ -85,6 +85,11 @@ namespace UnitTests
             Assert.AreEqual(11, TestUtils.Evaluate("y = 1; for (var x = 1; x < 5; x ++) { y = y + x } y"));
             Assert.AreEqual(11, TestUtils.Evaluate("for (var x = 1, y = 1; x < 5; x ++) { y = y + x } y"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("for (var x + 1; x < 5; x ++) { }"));
+
+            // Strict mode.
+            Assert.AreEqual(45, TestUtils.Evaluate("'use strict'; var y = 0; for (var x = 0; x < 10; x ++) { y += x; } y"));
+            TestUtils.Execute("'use strict'; var y = 0; for (var x = 0; x < 10; x ++) { y += x; }");
+            Assert.AreEqual(45, TestUtils.Evaluate("y"));
         }
 
         [TestMethod]
@@ -136,19 +141,19 @@ namespace UnitTests
         [TestMethod]
         public void Break()
         {
-            //// break
-            //Assert.AreEqual(1, TestUtils.Evaluate("x = 1; while(x < 5) { break; x ++ } x"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("x = 1; do { break; x = 5 } while(false); x"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("for(x = 1; x < 5; x ++) { break; } x"));
+            // break
+            Assert.AreEqual(1, TestUtils.Evaluate("x = 1; while(x < 5) { break; x ++ } x"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = 1; do { break; x = 5 } while(false); x"));
+            Assert.AreEqual(1, TestUtils.Evaluate("for(x = 1; x < 5; x ++) { break; } x"));
 
-            //// break [label]
-            //Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: do { break test; x = 5 } while(false); x"));
-            //Assert.AreEqual(3, TestUtils.Evaluate("x = 1; test: do { x = 2; do { x = 3; break test; x = 4 } while(false); x = 5 } while(false); x"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: break test; x"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: { break test; x = 5 } x"));
-            //Assert.AreEqual(6, TestUtils.Evaluate("x = 6; test: with (x) { break test; 5 }"));
-            //Assert.AreEqual(6, TestUtils.Evaluate("x = 6; test: with (x) { break test; 5 }"));
-            //Assert.AreEqual(1, TestUtils.Evaluate("var j = 0; lbl: for(var i in {p1: 1, p2: 1}){ j ++; break lbl; } j"));
+            // break [label]
+            Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: do { break test; x = 5 } while(false); x"));
+            Assert.AreEqual(3, TestUtils.Evaluate("x = 1; test: do { x = 2; do { x = 3; break test; x = 4 } while(false); x = 5 } while(false); x"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: break test; x"));
+            Assert.AreEqual(1, TestUtils.Evaluate("x = 1; test: { break test; x = 5 } x"));
+            Assert.AreEqual(6, TestUtils.Evaluate("x = 6; test: with (x) { break test; 5 }"));
+            Assert.AreEqual(6, TestUtils.Evaluate("x = 6; test: with (x) { break test; 5 }"));
+            Assert.AreEqual(1, TestUtils.Evaluate("var j = 0; lbl: for(var i in {p1: 1, p2: 1}){ j ++; break lbl; } j"));
 
             // Test in the presence of type inference.
             Assert.AreEqual(7, TestUtils.Evaluate(@"
@@ -157,23 +162,23 @@ namespace UnitTests
                     while (r != 1) { r--; break; }
                     return r;
                 })();"));
-//            Assert.AreEqual(1, TestUtils.Evaluate(@"
-//                (function() {
-//                    var r = 8;
-//                    var count = Array(8);
-//                    while (true) {
-//                        while (r != 1) { count[r - 1] = r; r--; }
-//                        break;
-//                    }
-//                    return r;
-//                })();"));
+            Assert.AreEqual(1, TestUtils.Evaluate(@"
+                (function() {
+                    var r = 8;
+                    var count = Array(8);
+                    while (true) {
+                        while (r != 1) { count[r - 1] = r; r--; }
+                        break;
+                    }
+                    return r;
+                })();"));
 
-//            // Duplicate nested labels are not allowed.
-//            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("label: { } label: { }"));
-//            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("label: { label: { } }"));
+            // Duplicate nested labels are not allowed.
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("label: { } label: { }"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("label: { label: { } }"));
 
-//            // The label must be an enclosing statement in the same function.
-//            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = 1; test: x ++; break test; x")); // Not an enclosing statement.
+            // The label must be an enclosing statement in the same function.
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("x = 1; test: x ++; break test; x")); // Not an enclosing statement.
         }
 
         [TestMethod]
