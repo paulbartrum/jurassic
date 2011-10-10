@@ -64,7 +64,6 @@ namespace Benchmarker
 
                     // Initialize the script engine.
                     var engine = new ScriptEngine();
-                    engine.EnableDebugging = true;
 
                     // Load the javascript source into a string (so no I/O during benchmarking).
                     var script = File.ReadAllText(path);
