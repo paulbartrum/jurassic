@@ -167,7 +167,7 @@ namespace UnitTests
             Assert.AreEqual("[object Math]", TestUtils.Evaluate("({}.toString.call(Math))"));
             Assert.AreEqual(2, TestUtils.Evaluate("new Function('a', 'return this / a').call(10, 5)"));
             Assert.AreEqual(true, TestUtils.Evaluate("new Function('return this').call() === this"));
-            Assert.AreEqual("[object undefined]", TestUtils.Evaluate("toString.call()"));
+            Assert.AreEqual("[object Undefined]", TestUtils.Evaluate("toString.call()"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Function.prototype.call.length"));
@@ -190,6 +190,18 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Function.prototype.bind.length"));
+
+            // Caller and arguments throw a TypeError exception.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType(@"
+                function foo() { return bar.arguments; }
+                var bar = foo.bind({});
+                function baz() { return bar(); }
+                baz();"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType(@"
+                function foo() { return bar.caller; }
+                var bar = foo.bind({});
+                function baz() { return bar(); }
+                baz();"));
         }
     }
 }

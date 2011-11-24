@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Test_Suite_Runner___Console</RootNamespace>
     <AssemblyName>Test Suite Runner - Console</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -42,12 +43,12 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BlockingQueue.cs" />
-    <Compile Include="TestEventArgs.cs" />
+    <Compile Include="Core\BlockingQueue.cs" />
+    <Compile Include="Core\TestEventArgs.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Test.cs" />
-    <Compile Include="TestSuite.cs" />
+    <Compile Include="Core\Test.cs" />
+    <Compile Include="Core\TestSuite.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jurassic\Jurassic.csproj">
@@ -74,11 +75,12 @@
     <Content Include="harness\sections.js" />
     <Content Include="harness\sta.js" />
     <Content Include="harness\sth.js" />
-    <Content Include="ICSharpCode.SharpZipLib.dll" />
+    <Content Include="References\ICSharpCode.SharpZipLib.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="suite\2011-11-11.zip" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
