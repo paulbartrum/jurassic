@@ -312,14 +312,14 @@ namespace Test_Suite_Runner_WP7
                 if (test.IsNegativeTest)
                 {
                     // The test succeeded but was expected to fail.
-                    this.failedTestCount++;
+                    Interlocked.Increment(ref this.failedTestCount);
                     TestFinished(this, new TestEventArgs(TestRunStatus.Failed, test, engine.ForceStrictMode,
                         new InvalidOperationException("Expected failure but the test succeeded.")));
                 }
                 else
                 {
                     // The test succeeded and was expected to succeed.
-                    this.successfulTestCount++;
+                    Interlocked.Increment(ref this.successfulTestCount);
                     TestFinished(this, new TestEventArgs(TestRunStatus.Success, test, engine.ForceStrictMode));
                 }
             }
@@ -331,7 +331,7 @@ namespace Test_Suite_Runner_WP7
                     if (test.NegativeErrorPattern == null)
                     {
                         // The test succeeded.
-                        this.successfulTestCount ++;
+                        Interlocked.Increment(ref this.successfulTestCount);
                         TestFinished(this, new TestEventArgs(TestRunStatus.Success, test, engine.ForceStrictMode));
                     }
                     else
@@ -341,13 +341,13 @@ namespace Test_Suite_Runner_WP7
                             System.Text.RegularExpressions.Regex.IsMatch(TypeConverter.ToString(((ObjectInstance)ex.ErrorObject)["name"]), test.NegativeErrorPattern))
                         {
                             // The test succeeded.
-                            this.successfulTestCount ++;
+                            Interlocked.Increment(ref this.successfulTestCount);
                             TestFinished(this, new TestEventArgs(TestRunStatus.Success, test, engine.ForceStrictMode));
                         }
                         else
                         {
                             // The type of error was wrong.
-                            this.failedTestCount++;
+                            Interlocked.Increment(ref this.failedTestCount);
                             TestFinished(this, new TestEventArgs(TestRunStatus.Failed, test, engine.ForceStrictMode, ex));
                         }
                     }
@@ -355,14 +355,14 @@ namespace Test_Suite_Runner_WP7
                 else
                 {
                     // The test shouldn't have thrown an exception.
-                    this.failedTestCount ++;
+                    Interlocked.Increment(ref this.failedTestCount);
                     TestFinished(this, new TestEventArgs(TestRunStatus.Failed, test, engine.ForceStrictMode, ex));
                 }
             }
             catch (Exception ex)
             {
                 // .NET exceptions are always bad.
-                this.failedTestCount ++;
+                Interlocked.Increment(ref this.failedTestCount);
                 TestFinished(this, new TestEventArgs(TestRunStatus.Failed, test, engine.ForceStrictMode, ex));
             }
         }
