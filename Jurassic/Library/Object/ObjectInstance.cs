@@ -1143,9 +1143,9 @@ namespace Jurassic.Library
         public static string ToStringJS(ScriptEngine engine, object thisObject)
         {
             if (thisObject == null || thisObject == Undefined.Value)
-                return "[object undefined]";
+                return "[object Undefined]";
             if (thisObject == Null.Value)
-                return "[object null]";
+                return "[object Null]";
             return string.Format("[object {0}]", TypeConverter.ToObject(engine, thisObject).InternalClassName);
         }
 

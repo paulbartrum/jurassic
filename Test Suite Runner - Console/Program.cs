@@ -10,6 +10,8 @@ namespace Test_Suite_Runner_WP7
         static void Main(string[] args)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
+            var engine = new Jurassic.ScriptEngine();
+            Console.WriteLine("Start-up time: {0}ms", timer.ElapsedMilliseconds);
             using (var testSuite = new TestSuite(@"..\..\"))
             {
                 testSuite.TestFinished += OnTestFinished;

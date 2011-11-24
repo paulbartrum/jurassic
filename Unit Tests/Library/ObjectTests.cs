@@ -654,8 +654,8 @@ namespace UnitTests
             Assert.AreEqual("Error", TestUtils.EvaluateExceptionType("({ toString: function() { throw new Error('test') } }).toString()"));
 
             // Addendum 7-1-10: null and undefined return their own strings.
-            Assert.AreEqual("[object undefined]", TestUtils.Evaluate("({}).toString.call(undefined)"));
-            Assert.AreEqual("[object null]", TestUtils.Evaluate("({}).toString.call(null)"));
+            Assert.AreEqual("[object Undefined]", TestUtils.Evaluate("({}).toString.call(undefined)"));
+            Assert.AreEqual("[object Null]", TestUtils.Evaluate("({}).toString.call(null)"));
         }
 
         [TestMethod]

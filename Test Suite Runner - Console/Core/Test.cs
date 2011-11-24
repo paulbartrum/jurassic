@@ -68,7 +68,6 @@ namespace Test_Suite_Runner_WP7
             // The comment metadata is optional.
             if (Regex.IsMatch(line, @"^\s*/\*.*$"))
             {
-                var description = new StringBuilder();
                 while (true)
                 {
 
@@ -101,8 +100,8 @@ namespace Test_Suite_Runner_WP7
                                 break;
                             case "negative":
                                 this.IsNegativeTest = true;
-                                if (string.IsNullOrWhiteSpace(propertyText) == false)
-                                    this.NegativeErrorName = propertyText.Trim();
+                                if (string.IsNullOrEmpty(propertyText.Trim()) == false)
+                                    this.NegativeErrorPattern = propertyText.Trim();
                                 break;
                         }
                     }
@@ -164,10 +163,11 @@ namespace Test_Suite_Runner_WP7
         public bool IsNegativeTest { get; private set; }
 
         /// <summary>
-        /// If non-null, the name of the error that must be thrown for the test to succeed.  The
-        /// name of the error is retrieved using the name property of the exception object.
+        /// If non-null, a regular expression that matches the name of the error that must be
+        /// thrown for the test to succeed.  The name of the error is retrieved using the name
+        /// property of the exception object.
         /// </summary>
-        public string NegativeErrorName { get; private set; }
+        public string NegativeErrorPattern { get; private set; }
 
         /// <summary>
         /// The script to run to evaluate the test.

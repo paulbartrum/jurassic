@@ -635,6 +635,24 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.sort.length"));
+
+            // "this" should be the global object in non-strict mode.
+            Assert.AreEqual(true, TestUtils.Evaluate(@"
+                var global = this;
+                var success = false;
+                [2,3].sort(function (x, y) {
+                    success = this === global;
+                });
+                success"));
+
+            // "this" should be undefined in strict mode.
+            Assert.AreEqual(true, TestUtils.Evaluate(@"
+                'use strict';
+                var success = false;
+                [2,3].sort(function (x, y) {
+                    success = this === undefined;
+                });
+                success"));
         }
 
         [TestMethod]

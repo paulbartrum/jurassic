@@ -897,7 +897,7 @@ namespace Jurassic.Library
                         return 1f;
                     if (b == Undefined.Value)
                         return -1f;
-                    return TypeConverter.ToNumber(comparisonFunction.CallLateBound(thisObj.Engine.Global, a, b));
+                    return TypeConverter.ToNumber(comparisonFunction.CallLateBound(null, a, b));
                 }; 
 
             try

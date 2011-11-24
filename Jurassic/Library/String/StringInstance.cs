@@ -344,7 +344,7 @@ namespace Jurassic.Library
             int end = start + substr.Length;
 
             // Get the replacement text from the provided function.
-            var replaceText = TypeConverter.ToString(replaceFunction.CallLateBound(replaceFunction.Engine.Global, substr, start, thisObject));
+            var replaceText = TypeConverter.ToString(replaceFunction.CallLateBound(null, substr, start, thisObject));
 
             // Replace only the first match.
             var result = new System.Text.StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using ICSharpCode.SharpZipLib.Zip;
 using Jurassic;
 using Jurassic.Library;
@@ -17,6 +18,7 @@ namespace Test_Suite_Runner_WP7
         private ZipFile zipFile;
         private List<string> skippedTestNames = new List<string>();
         private string includes;
+        private static Dictionary<string, object> includeProperties;
         private int successfulTestCount;
         private int failedTestCount;
         private int skippedTestCount;
@@ -27,7 +29,7 @@ namespace Test_Suite_Runner_WP7
         /// <param name="storagePath"> The path of the directory that contains the config, harness and suite directories. </param>
         public TestSuite(string storagePath)
             : this(
-                path => Directory.EnumerateFiles(Path.Combine(storagePath, path)),
+                path => Directory.GetFiles(Path.Combine(storagePath, path)),
                 path => new FileStream(Path.Combine(storagePath, path), FileMode.Open, FileAccess.Read)
             )
         {
@@ -152,12 +154,51 @@ namespace Test_Suite_Runner_WP7
         }
 
         /// <summary>
+        /// Represents information needed to run a test.
+        /// </summary>
+        private class TestExecutionState
+        {
+            /// <summary>
+            /// Initializes a TestExecutionState instance.
+            /// </summary>
+            /// <param name="test"> The test to run. </param>
+            /// <param name="runInStrictMode"> Whether or not to run in strict mode. </param>
+            public TestExecutionState(Test test, bool runInStrictMode)
+            {
+                this.Test = test;
+                this.RunInStrictMode = runInStrictMode;
+            }
+
+            /// <summary>
+            /// The test to run.
+            /// </summary>
+            public Test Test { get; private set; }
+
+            /// <summary>
+            /// Whether or not to run in strict mode.
+            /// </summary>
+            public bool RunInStrictMode { get; private set; }
+        }
+
+        /// <summary>
         /// Starts executing the test suite.
         /// </summary>
         public void Start()
         {
             // Create a ScriptEngine and freeze its state.
-            var serializedScriptEngine = SerializeTemplateScriptEngine();
+            SaveScriptEngineSnapshot();
+
+            // Create a queue to hold the tests.
+            var queue = new BlockingQueue<TestExecutionState>(100);
+
+            // Create a thread per processor.
+            var threads = new List<Thread>();
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
+                var thread = new Thread(ThreadStart);
+                thread.Start(queue);
+                threads.Add(thread);
+            }
 
             for (int i = 0; i < this.zipFile.Count; i++)
             {
@@ -185,40 +226,81 @@ namespace Test_Suite_Runner_WP7
                         continue;
                     }
 
-                    // Run the test.
+                    // Queue the test.
                     if (test.RunInNonStrictMode)
-                        RunTest(false, test, serializedScriptEngine);
+                        queue.Enqueue(new TestExecutionState(test, runInStrictMode: false));
                     if (test.RunInStrictMode)
-                        RunTest(true, test, serializedScriptEngine);
+                        queue.Enqueue(new TestExecutionState(test, runInStrictMode: true));
                 }
+            }
+
+            // Signal the threads that no more tests will be provided.
+            queue.Close();
+
+            // Wait for all threads to exit.
+            foreach (var thread in threads)
+                thread.Join();
+        }
+
+        /// <summary>
+        /// Called to start a thread that runs tests.
+        /// </summary>
+        /// <param name="state">  </param>
+        private void ThreadStart(object state)
+        {
+            var queue = (BlockingQueue<TestExecutionState>)state;
+
+            // Loop as long as there are tests in the queue.
+            while (true)
+            {
+
+                // Retrieve a test from the queue.
+                TestExecutionState executionState;
+                if (queue.TryDequeue(out executionState) == false)
+                    break;
+
+                // Run the test.
+                RunTest(executionState.Test, strictMode: executionState.RunInStrictMode);
+
             }
         }
 
         /// <summary>
-        /// Creates a script engine, runs the includes, then serializes it to a byte array.
+        /// Creates a script engine, runs the includes, then saves any new state.
         /// </summary>
-        /// <returns> A byte array containing the state of the script engine. </returns>
-        private byte[] SerializeTemplateScriptEngine()
+        private void SaveScriptEngineSnapshot()
         {
-            var scriptEngineTemplate = new ScriptEngine();
-            scriptEngineTemplate.Execute(this.includes);
-            var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            var scriptEngineStream = new System.IO.MemoryStream();
-            binaryFormatter.Serialize(scriptEngineStream, scriptEngineTemplate);
-            return scriptEngineStream.ToArray();
+            // Create a new script engine.
+            var engine = new ScriptEngine();
+
+            // Record all the global properties.
+            var standardGlobals = new HashSet<string>();
+            foreach (var property in engine.Global.Properties)
+                standardGlobals.Add(property.Name);
+
+            // Execute the includes file.
+            engine.Execute(this.includes);
+
+            // Record all new properties.
+            var additionalProperties = new Dictionary<string, object>();
+            foreach (var property in engine.Global.Properties)
+                if (standardGlobals.Contains(property.Name) == false)
+                    additionalProperties.Add(property.Name, property.Value);
+            includeProperties = additionalProperties;
         }
 
         /// <summary>
         /// Runs a single test.
         /// </summary>
-        /// <param name="strictMode"> <c>true</c> to run in strict mode; <c>false</c> otherwise. </param>
         /// <param name="test"> The test to run. </param>
-        private void RunTest(bool strictMode, Test test, byte[] serializedScriptEngine)
+        /// <param name="strictMode"> <c>true</c> to run in strict mode; <c>false</c> otherwise. </param>
+        private void RunTest(Test test, bool strictMode)
         {
-            // Deserialize the ScriptEngine.
-            var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            var engine = (ScriptEngine)binaryFormatter.Deserialize(new MemoryStream(serializedScriptEngine));
-            
+            // Restore the ScriptEngine state.
+            var engine = new ScriptEngine();
+            foreach (var propertyNameAndValue in includeProperties)
+                engine.Global[propertyNameAndValue.Key] = propertyNameAndValue.Value;
+
             // Set strict mode.
             engine.ForceStrictMode = strictMode;
 
@@ -246,7 +328,7 @@ namespace Test_Suite_Runner_WP7
                 if (test.IsNegativeTest)
                 {
                     // The test was expected to fail.
-                    if (test.NegativeErrorName == null)
+                    if (test.NegativeErrorPattern == null)
                     {
                         // The test succeeded.
                         this.successfulTestCount ++;
@@ -255,7 +337,8 @@ namespace Test_Suite_Runner_WP7
                     else
                     {
                         // Check if the exception had the name we expected.
-                        if (ex.ErrorObject is ObjectInstance && test.NegativeErrorName == TypeConverter.ToString(((ObjectInstance)ex.ErrorObject)["name"]))
+                        if (ex.ErrorObject is ObjectInstance &&
+                            System.Text.RegularExpressions.Regex.IsMatch(TypeConverter.ToString(((ObjectInstance)ex.ErrorObject)["name"]), test.NegativeErrorPattern))
                         {
                             // The test succeeded.
                             this.successfulTestCount ++;
