@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.20506</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{AD773E12-ADD3-4387-9EB6-63E6E90FA37C}</ProjectGuid>
+    <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Jurassic.TestSuite</RootNamespace>
+    <AssemblyName>Test Suite Runner WP7</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <TargetFrameworkProfile>WindowsPhone71</TargetFrameworkProfile>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <SilverlightApplication>true</SilverlightApplication>
+    <SupportedCultures>
+    </SupportedCultures>
+    <XapOutputs>true</XapOutputs>
+    <GenerateSilverlightManifest>true</GenerateSilverlightManifest>
+    <XapFilename>Test_Suite_Runner_WP7.xap</XapFilename>
+    <SilverlightManifestTemplate>Properties\AppManifest.xml</SilverlightManifestTemplate>
+    <SilverlightAppEntry>Test_Suite_Runner_WP7.App</SilverlightAppEntry>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Phone" />
+    <Reference Include="Microsoft.Phone.Interop" />
+    <Reference Include="SharpZipLib.WindowsPhone7, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System.Windows" />
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Xml" />
+    <Reference Include="mscorlib.extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Test Suite Core\Core\BlockingQueue.cs">
+      <Link>Core\BlockingQueue.cs</Link>
+    </Compile>
+    <Compile Include="..\Test Suite Core\Core\Test.cs">
+      <Link>Core\Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Test Suite Core\Core\TestEventArgs.cs">
+      <Link>Core\TestEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Test Suite Core\Core\TestSuite.cs">
+      <Link>Core\TestSuite.cs</Link>
+    </Compile>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+    <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Test Suite Files\suite\2011-11-11.zip">
+      <Link>Files\suite\2011-11-11.zip</Link>
+    </Content>
+    <None Include="Properties\AppManifest.xml" />
+    <None Include="Properties\WMAppManifest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Test Suite Files\config\excludelist.xml">
+      <Link>Files\config\excludelist.xml</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\cth.js">
+      <Link>Files\harness\cth.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\Date_constants.js">
+      <Link>Files\harness\Date_constants.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\Date_library.js">
+      <Link>Files\harness\Date_library.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\ed.js">
+      <Link>Files\harness\ed.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\environment.js">
+      <Link>Files\harness\environment.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\framework.js">
+      <Link>Files\harness\framework.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\gs.js">
+      <Link>Files\harness\gs.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\helper.js">
+      <Link>Files\harness\helper.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\jquery-1.4.2.min.js">
+      <Link>Files\harness\jquery-1.4.2.min.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\jquery.base64.js">
+      <Link>Files\harness\jquery.base64.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\jqueryprogressbar.js">
+      <Link>Files\harness\jqueryprogressbar.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\math_isequal.js">
+      <Link>Files\harness\math_isequal.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\math_precision.js">
+      <Link>Files\harness\math_precision.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\numeric_conversion.js">
+      <Link>Files\harness\numeric_conversion.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\sections.js">
+      <Link>Files\harness\sections.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\sta.js">
+      <Link>Files\harness\sta.js</Link>
+    </Content>
+    <Content Include="..\Test Suite Files\harness\sth.js">
+      <Link>Files\harness\sth.js</Link>
+    </Content>
+    <Content Include="ApplicationIcon.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Background.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="References\SharpZipLib.WindowsPhone7.dll" />
+    <Content Include="References\SharpZipLib.WindowsPhone7.pdb" />
+    <Content Include="SplashScreenImage.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JurassicWP71\JurassicWP71.csproj">
+      <Project>{2E08F1C2-5DC6-4A2F-9A99-62DF9EB9AC86}</Project>
+      <Name>JurassicWP71</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties ProjectLinkReference="96371037-f900-4e84-adb8-0cf7767ef723" ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

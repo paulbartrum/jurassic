@@ -159,6 +159,7 @@ namespace Jurassic.Compiler
 
             // Strengthen the variable types.
             List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>> previousVariableTypes = null;
+            var previousInsideTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
             if (optimizationInfo.OptimizeInferredTypes == true)
             {
                 // Keep a record of the variable types before strengthening.
@@ -188,7 +189,13 @@ namespace Jurassic.Compiler
 
                 // The variables must be reverted even in the presence of exceptions.
                 if (previousVariableTypes.Count > 0)
+                {
                     generator.BeginExceptionBlock();
+
+                    // Setting the InsideTryCatchOrFinally flag converts BR instructions into LEAVE
+                    // instructions so that the finally block is executed correctly.
+                    optimizationInfo.InsideTryCatchOrFinally = true;
+                }
             }
 
             // The inner loop starts here.
@@ -225,6 +232,9 @@ namespace Jurassic.Compiler
             // Revert the variable types.
             if (previousVariableTypes != null && previousVariableTypes.Count > 0)
             {
+                // Revert the InsideTryCatchOrFinally flag.
+                optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
+
                 // Revert the variable types within a finally block.
                 generator.BeginFinallyBlock();
 

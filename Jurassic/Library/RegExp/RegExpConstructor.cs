@@ -93,7 +93,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.input and RegExp.$_.
         /// </summary>
         /// <returns> The value of RegExp.input and RegExp.$_. </returns>
-        private string GetInput()
+        public string GetInput()
         {
             if (this.lastMatch == null)
                 return string.Empty;
@@ -104,7 +104,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$1.
         /// </summary>
         /// <returns> The value of RegExp.$1. </returns>
-        private string GetGroup1()
+        public string GetGroup1()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 1)
                 return string.Empty;
@@ -115,7 +115,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$2.
         /// </summary>
         /// <returns> The value of RegExp.$2. </returns>
-        private string GetGroup2()
+        public string GetGroup2()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 2)
                 return string.Empty;
@@ -126,7 +126,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$3.
         /// </summary>
         /// <returns> The value of RegExp.$3. </returns>
-        private string GetGroup3()
+        public string GetGroup3()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 3)
                 return string.Empty;
@@ -137,7 +137,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$4.
         /// </summary>
         /// <returns> The value of RegExp.$4. </returns>
-        private string GetGroup4()
+        public string GetGroup4()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 4)
                 return string.Empty;
@@ -148,7 +148,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$5.
         /// </summary>
         /// <returns> The value of RegExp.$5. </returns>
-        private string GetGroup5()
+        public string GetGroup5()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 5)
                 return string.Empty;
@@ -159,7 +159,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$6.
         /// </summary>
         /// <returns> The value of RegExp.$6. </returns>
-        private string GetGroup6()
+        public string GetGroup6()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 6)
                 return string.Empty;
@@ -170,7 +170,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$7.
         /// </summary>
         /// <returns> The value of RegExp.$7. </returns>
-        private string GetGroup7()
+        public string GetGroup7()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 7)
                 return string.Empty;
@@ -181,7 +181,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$8.
         /// </summary>
         /// <returns> The value of RegExp.$8. </returns>
-        private string GetGroup8()
+        public string GetGroup8()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 8)
                 return string.Empty;
@@ -192,7 +192,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.$9.
         /// </summary>
         /// <returns> The value of RegExp.$9. </returns>
-        private string GetGroup9()
+        public string GetGroup9()
         {
             if (this.lastMatch == null || this.lastMatch.Groups.Count < 9)
                 return string.Empty;
@@ -203,7 +203,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.lastMatch and RegExp.$&.
         /// </summary>
         /// <returns> The value of RegExp.lastMatch and RegExp.$&. </returns>
-        private string GetLastMatch()
+        public string GetLastMatch()
         {
             if (this.lastMatch == null)
                 return string.Empty;
@@ -214,7 +214,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.lastParen and RegExp.$+.
         /// </summary>
         /// <returns> The value of RegExp.lastParen and RegExp.$+. </returns>
-        private string GetLastParen()
+        public string GetLastParen()
         {
             if (this.lastMatch == null)
                 return string.Empty;
@@ -227,7 +227,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.leftContext and RegExp.$`.
         /// </summary>
         /// <returns> The value of RegExp.leftContext and RegExp.$`. </returns>
-        private string GetLeftContext()
+        public string GetLeftContext()
         {
             if (this.lastMatch == null)
                 return string.Empty;
@@ -238,7 +238,7 @@ namespace Jurassic.Library
         /// Gets the value of RegExp.rightContext and RegExp.$'.
         /// </summary>
         /// <returns> The value of RegExp.rightContext and RegExp.$'. </returns>
-        private string GetRightContext()
+        public string GetRightContext()
         {
             if (this.lastMatch == null)
                 return string.Empty;

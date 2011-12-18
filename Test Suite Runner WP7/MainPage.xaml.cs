@@ -10,44 +10,56 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
+using Jurassic.TestSuite;
 
 namespace Test_Suite_Runner_WP7
 {
     public partial class MainPage : PhoneApplicationPage
     {
-        private SuiteRunner runner;
+        private TestSuite suite;
 
         // Constructor
         public MainPage()
         {
             InitializeComponent();
 
-            this.runner = new SuiteRunner();
-            this.runner.Suites.Add(new ES5ConformTestSuite());
-            this.runner.EnumerateTests();
-            this.runner.TestSucceeded += new EventHandler<TestEventArgs>(runner_TestRun);
-            this.runner.TestFailed += new EventHandler<TestEventArgs>(runner_TestFailed);
-            this.runner.TestSkipped += new EventHandler<TestEventArgs>(runner_TestRun);
-            this.runner.Run(null);
+            // Start running tests in a background thread.
+            var thread = new System.Threading.Thread(WorkerThread);
+            thread.Start();
         }
 
-        private void runner_TestRun(object sender, TestEventArgs e)
+        private void WorkerThread()
         {
+            this.suite = new TestSuite(path => App.GetResourceStream(new Uri("Files/" + path.Replace('\\', '/'), UriKind.Relative)).Stream);
+            this.suite.TestFinished += new EventHandler<TestEventArgs>(OnTestFinished);
+            this.suite.Start();
             this.StatusTextBlock.Dispatcher.BeginInvoke(() =>
-                {
-                    this.StatusTextBlock.Text = string.Format("{0} success, {1} skipped, {2} failures, {3} total",
-                        this.runner.OverallSuccessCount, this.runner.OverallSkipCount, this.runner.OverallFailureCount, this.runner.TotalTestCount);
-                });
+            {
+                this.StatusTextBlock.Text = string.Format("{0} success, {1} skipped, {2} failures, {3} total",
+                    this.suite.SuccessfulTestCount, this.suite.SkippedTestCount, this.suite.FailedTestCount, this.suite.ExecutedTestCount);
+            });
         }
 
-        private void runner_TestFailed(object sender, TestEventArgs e)
-        {
-            runner_TestRun(sender, e);
+        private DateTime lastUpdate = DateTime.MinValue;
 
-            this.FailuresStackPanel.Dispatcher.BeginInvoke(() =>
+        private void OnTestFinished(object sender, TestEventArgs e)
+        {
+            if (e.Status == TestRunStatus.Failed)
+            {
+                this.FailuresStackPanel.Dispatcher.BeginInvoke(() =>
                 {
-                    this.FailuresStackPanel.Children.Add(new TextBlock() { Text = e.Test.Name });
+                    this.FailuresStackPanel.Children.Add(new TextBlock() { Text = "Failed: " + e.Test.Name });
                 });
+            }
+            if (DateTime.Now.Subtract(lastUpdate).TotalSeconds >= 0.1)
+            {
+                this.StatusTextBlock.Dispatcher.BeginInvoke(() =>
+                {
+                    this.StatusTextBlock.Text = string.Format("{0} / {1} ({2:p})",
+                        this.suite.ExecutedTestCount, this.suite.ApproximateTotalTestCount, (double)this.suite.ExecutedTestCount / this.suite.ApproximateTotalTestCount);
+                });
+                lastUpdate = DateTime.Now;
+            }
         }
     }
 }

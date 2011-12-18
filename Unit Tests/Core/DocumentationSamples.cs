@@ -55,8 +55,6 @@ namespace UnitTests
             var engine = new Jurassic.ScriptEngine();
             engine.SetGlobalFunction("test", new Func<int, int, int>((a, b) => a + b));
             Assert.AreEqual(11, engine.Evaluate<int>("test(5, 6)"));
-            engine.SetGlobalFunction("test2", new Action<string>(str => Console.WriteLine(str)));
-            Assert.AreEqual(11, engine.Evaluate<int>("test2('test')"));
         }
 
         [TestMethod]

@@ -200,6 +200,7 @@ namespace UnitTests
         [TestMethod]
         public void Return()
         {
+            Assert.AreEqual(10, TestUtils.Evaluate("function f() { for (var i = 0; i < 1; i++) { return 10; } return 15; } f()"));
             Assert.AreEqual(5, TestUtils.Evaluate("function f() { return 5 } f()"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f() { } f()"));
             Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("function f() { return } f()"));

@@ -8,9 +8,9 @@
     <ProjectGuid>{73B31BC6-5614-4A58-A312-06B53CD0E8C0}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Test_Suite_Runner___Console</RootNamespace>
-    <AssemblyName>Test Suite Runner - Console</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <RootNamespace>Jurassic.TestSuite</RootNamespace>
+    <AssemblyName>Test Suite Runner</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -35,20 +35,28 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.84.0.0, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\ICSharpCode.SharpZipLib.dll</HintPath>
+      <HintPath>..\Test Suite Files\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\BlockingQueue.cs" />
-    <Compile Include="Core\TestEventArgs.cs" />
+    <Compile Include="..\Test Suite Core\Core\BlockingQueue.cs">
+      <Link>Core\BlockingQueue.cs</Link>
+    </Compile>
+    <Compile Include="..\Test Suite Core\Core\Test.cs">
+      <Link>Core\Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Test Suite Core\Core\TestEventArgs.cs">
+      <Link>Core\TestEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Test Suite Core\Core\TestSuite.cs">
+      <Link>Core\TestSuite.cs</Link>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Core\Test.cs" />
-    <Compile Include="Core\TestSuite.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jurassic\Jurassic.csproj">
@@ -57,31 +65,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="config\excludelist.xml" />
-    <Content Include="harness\cth.js" />
-    <Content Include="harness\Date_constants.js" />
-    <Content Include="harness\Date_library.js" />
-    <Content Include="harness\ed.js" />
-    <Content Include="harness\environment.js" />
-    <Content Include="harness\framework.js" />
-    <Content Include="harness\gs.js" />
-    <Content Include="harness\helper.js" />
-    <Content Include="harness\jquery-1.4.2.min.js" />
-    <Content Include="harness\jquery.base64.js" />
-    <Content Include="harness\jqueryprogressbar.js" />
-    <Content Include="harness\math_isequal.js" />
-    <Content Include="harness\math_precision.js" />
-    <Content Include="harness\numeric_conversion.js" />
-    <Content Include="harness\sections.js" />
-    <Content Include="harness\sta.js" />
-    <Content Include="harness\sth.js" />
-    <Content Include="References\ICSharpCode.SharpZipLib.dll" />
+    <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="suite\2011-11-11.zip" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" ProjectLinkReference="96371037-f900-4e84-adb8-0cf7767ef723" />
+    </VisualStudio>
+  </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

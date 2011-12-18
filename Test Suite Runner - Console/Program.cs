@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Jurassic.TestSuite;
 
-namespace Test_Suite_Runner_WP7
+namespace Jurassic.TestSuite
 {
     class Program
     {
@@ -12,8 +13,12 @@ namespace Test_Suite_Runner_WP7
             var timer = System.Diagnostics.Stopwatch.StartNew();
             var engine = new Jurassic.ScriptEngine();
             Console.WriteLine("Start-up time: {0}ms", timer.ElapsedMilliseconds);
-            using (var testSuite = new TestSuite(@"..\..\"))
+            using (var testSuite = new TestSuite(@"..\..\..\Test Suite Files\"))
             {
+                //testSuite.RunInSandbox = true;
+                //testSuite.IncludedTests.Add("12.7-1");
+                //testSuite.IncludedTests.Add("15.2.3.14-5-13");
+
                 testSuite.TestFinished += OnTestFinished;
                 testSuite.Start();
 
@@ -28,6 +33,7 @@ namespace Test_Suite_Runner_WP7
 
         private static object lockObject = new object();
         private static bool newlineRequired = false;
+        private static int executedTests = 0;
 
         private static void OnTestFinished(object sender, TestEventArgs e)
         {
@@ -42,12 +48,15 @@ namespace Test_Suite_Runner_WP7
                     var mode = e.StrictMode ? " (strict)" : "";
                     Console.WriteLine("{0}{1}: {2}", e.Test.Name, mode, e.FailureException.Message);
                     newlineRequired = false;
+                    //Console.WriteLine(e.Test.Script);
                 }
-                else
+
+                if (e.Status != TestRunStatus.Skipped)
                 {
-                    if ((e.Test.Suite.ExecutedTestCount % 20) == 0)
+                    executedTests++;
+                    if ((executedTests % 20) == 0)
                     {
-                        if ((e.Test.Suite.ExecutedTestCount % 100) == 0)
+                        if ((executedTests % 100) == 0)
                         {
                             if (newlineRequired)
                                 Console.WriteLine();
