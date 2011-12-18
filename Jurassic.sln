@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Documentation\E262-3.doc = Documentation\E262-3.doc
 		Documentation\ECMA-262 (ECMAScript 5.1).pdf = Documentation\ECMA-262 (ECMAScript 5.1).pdf
 		Documentation\ECMA-335 (CLI).pdf = Documentation\ECMA-335 (CLI).pdf
-		Performance1.psess = Performance1.psess
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Performance", "Performance\Performance.csproj", "{C0B52B91-21C0-4669-9B2E-F33838BD7F65}"

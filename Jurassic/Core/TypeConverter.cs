@@ -110,9 +110,12 @@ namespace Jurassic
         }
 
         // Single-item cache.
-        private static object cacheLock = new object();
-        private static double cacheValue;
-        private static string cacheResult = "0";
+        private class NumberToStringCache
+        {
+            public double Value;
+            public string Result;
+        }
+        private static NumberToStringCache numberToStringCache = new NumberToStringCache() { Value = 0.0, Result = "0" };
 
         /// <summary>
         /// Converts any JavaScript value to a primitive string value.
@@ -135,21 +138,16 @@ namespace Jurassic
             {
                 // Check if the value is in the cache.
                 double doubleValue = (double)value;
-                lock (cacheLock)
-                {
-                    if (doubleValue == cacheValue)
-                        return cacheResult;
-                }
+                var cache = numberToStringCache;
+                if (doubleValue == cache.Value)
+                    return cache.Result;
 
                 // Convert the number to a string.
-                var result = NumberFormatter.ToString(doubleValue, 10, NumberFormatter.Style.Regular);
+                var result = NumberFormatter.ToString((double)value, 10, NumberFormatter.Style.Regular);
 
                 // Cache the result.
-                lock (cacheLock)
-                {
-                    cacheValue = doubleValue;
-                    cacheResult = result;
-                }
+                // This is thread-safe on Intel but not architectures with weak write ordering.
+                numberToStringCache = new NumberToStringCache() { Value = doubleValue, Result = result };
 
                 return result;
             }
