@@ -7,6 +7,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a function that has bound arguments.
     /// </summary>
+    [Serializable]
     internal class BoundFunction : FunctionInstance
     {
 
@@ -38,7 +39,7 @@ namespace Jurassic.Library
             this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
             
             // Caller and arguments cannot be accessed.
-            var thrower = new ClrFunction(this.Engine.Function, new Action(() => { throw new JavaScriptException(this.Engine, "TypeError", "The 'caller' or 'arguments' properties cannot be accessed on a bound function."); }));
+            var thrower = new ThrowTypeErrorFunction(this.Engine.Function, "The 'caller' or 'arguments' properties cannot be accessed on a bound function.");
             var accessor = new PropertyAccessorValue(thrower, thrower);
             this.FastSetProperty("caller", accessor, PropertyAttributes.IsAccessorProperty, overwriteAttributes: true);
             this.FastSetProperty("arguments", accessor, PropertyAttributes.IsAccessorProperty, overwriteAttributes: true);

@@ -8,10 +8,11 @@
     <ProjectGuid>{96371037-F900-4E84-ADB8-0CF7767EF723}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Test_Suite_Core</RootNamespace>
+    <RootNamespace>Jurassic.TestSuite</RootNamespace>
     <AssemblyName>Test Suite Core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,16 +32,27 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.84.0.0, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Test Suite Files\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Core\BlockingQueue.cs" />
+    <Compile Include="Core\Test.cs" />
+    <Compile Include="Core\TestEventArgs.cs" />
+    <Compile Include="Core\TestSuite.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jurassic\Jurassic.csproj">
       <Project>{2CE5502D-8710-4BE3-9D90-201D526904B3}</Project>
       <Name>Jurassic</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

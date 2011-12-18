@@ -217,6 +217,72 @@ namespace Performance
                 }", "f"));
         }
 
+        [TestMethod]
+        public void ReturnInsideFor()
+        {
+            Assert.AreEqual(TestUtils.NormalizeText(@"
+                .local [0] System.Object i
+                .local [1] System.Object returnValue
+                .local [2] System.Int32
+                      ldc.i4     0
+                      dup
+                      box        System.Int32
+                      stloc      V0 (i)
+                L000: pop
+                      ldloc      V0 (i)
+                L001: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      ldc.i4     10
+                      conv.u4
+                      clt
+                      brfalse    L012
+                      ldc.i4     1
+                      box        System.Int32
+                      stloc      V1 (returnValue)
+                      br         L012
+                      ldloc      V0 (i)
+                L002: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      dup
+                      ldc.r8     1
+                      add
+                      box        System.Double
+                      stloc      V0 (i)
+                L003: pop
+                      ldloc      V0 (i)
+                L004: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
+                      stloc      V2
+                .try
+                {
+                    L005: ldloc      V2
+                    L006: ldc.i4     10
+                          clt
+                          brfalse    L010
+                          ldc.i4     1
+                          box        System.Int32
+                          stloc      V1 (returnValue)
+                          br         L012
+                    L007: ldloc      V2
+                    L008: dup
+                          ldc.i4     1
+                          add
+                          stloc      V2
+                    L009: pop
+                          br             
+                }
+                .finally
+                {
+                    L010: ldloc      V2
+                    L011: box        System.Int32
+                          stloc      V0 (i)
+                }
+                L012: ldloc      V1 (returnValue)
+                      ret
+                "),
+                GetFunctionIL(@"function f() {
+                    for (var i = 0; i < 10; i ++)
+                        return 1;
+                }", "f"));
+        }
+
         private static string GetFunctionIL(string code, string functionName)
         {
             var scriptEngine = new ScriptEngine();
