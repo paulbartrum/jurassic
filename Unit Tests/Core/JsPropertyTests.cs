@@ -79,5 +79,52 @@ namespace UnitTests
             Assert.AreEqual(false, engine.Evaluate<bool>("delete test.TestStr"));
             Assert.AreEqual(true, engine.Evaluate<bool>("delete test.TestObj"));
         }
+
+        public class ClassWithPrivateSetter : ObjectInstance
+        {
+            public ClassWithPrivateSetter(ScriptEngine engine)
+                : base(engine)
+            {
+                this.PopulateFunctions();
+                this.PrivateSetter = 13;
+            }
+
+            [JSProperty]
+            public int GetterOnly { get { return 11; } }
+
+            [JSProperty]
+            public int PrivateSetter { get; private set; }
+        }
+
+        [TestMethod]
+        public void PrivateSetter()
+        {
+            var engine = new Jurassic.ScriptEngine();
+            engine.SetGlobalValue("test", new ClassWithPrivateSetter(engine));
+            Assert.AreEqual(11, engine.Evaluate<int>("test.GetterOnly"));
+            Assert.AreEqual(11, engine.Evaluate<int>("test.GetterOnly = 3; test.GetterOnly"));
+            Assert.AreEqual(13, engine.Evaluate<int>("test.PrivateSetter"));
+            Assert.AreEqual(13, engine.Evaluate<int>("test.PrivateSetter = 4; test.PrivateSetter"));
+        }
+
+        public class ClassWithAnonymousProperty : ObjectInstance
+        {
+            public ClassWithAnonymousProperty(ScriptEngine engine)
+                : base(engine)
+            {
+                this.PopulateFunctions();
+            }
+
+            [JSProperty(Name = "")]
+            public int Anon { get { return 5; } }
+        }
+
+        [TestMethod]
+        public void AnonymousProperty()
+        {
+            var engine = new Jurassic.ScriptEngine();
+            engine.SetGlobalValue("test", new ClassWithAnonymousProperty(engine));
+            Assert.AreEqual(5, engine.Evaluate<int>("test['']"));
+        }
     }
 }

@@ -1194,11 +1194,7 @@ namespace Jurassic.Library
                 // Determine the name of the method.
                 string name;
                 if (attribute.Name != null)
-                {
-                    name = Compiler.Lexer.ResolveIdentifier(this.Engine, attribute.Name);
-                    if (name == null)
-                        throw new InvalidOperationException(string.Format("The name provided to [JSInternalFunction] on {0} is not a valid identifier.", method));
-                }
+                    name = attribute.Name;
                 else
                     name = method.Name;
 
@@ -1261,11 +1257,7 @@ namespace Jurassic.Library
                 // The property name.
                 string name;
                 if (attribute.Name != null)
-                {
-                    name = Compiler.Lexer.ResolveIdentifier(this.Engine, attribute.Name);
-                    if (name == null)
-                        throw new InvalidOperationException(string.Format("The name provided to [JSProperty] on {0} is not a valid identifier.", prop));
-                }
+                    name = attribute.Name;
                 else
                     name = prop.Name;
 
