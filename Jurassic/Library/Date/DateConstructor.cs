@@ -139,7 +139,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <returns> The current date and time as the number of milliseconds elapsed since January 1,
         /// 1970, 00:00:00 UTC. </returns>
-        [JSFunction(Name = "now")]
+        [JSInternalFunction(Name = "now")]
         public static double Now()
         {
             return DateInstance.Now();
@@ -165,7 +165,7 @@ namespace Jurassic.Library
         /// 
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        [JSFunction(Name = "UTC")]
+        [JSInternalFunction(Name = "UTC")]
         public static double UTC(int year, int month, [DefaultParameterValue(1)] int day = 1, [DefaultParameterValue(0)] int hour = 0,
             [DefaultParameterValue(0)] int minute = 0, [DefaultParameterValue(0)] int second = 0, [DefaultParameterValue(0)] int millisecond = 0)
         {
@@ -177,7 +177,7 @@ namespace Jurassic.Library
         /// January 1, 1970, 00:00:00 UTC.
         /// </summary>
         /// <param name="dateStr"> A string representing a date, expressed in RFC 1123 format. </param>
-        [JSFunction(Name = "parse")]
+        [JSInternalFunction(Name = "parse")]
         public static double Parse(string dateStr)
         {
             return DateInstance.Parse(dateStr);

@@ -38,7 +38,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Marks a method as being visible to javascript code.
     /// </summary>
-    public sealed class JSFunctionAttribute : BaseJSFunctionAttribute
+    public class JSFunctionAttribute : BaseJSFunctionAttribute
     {
         /// <summary>
         /// Creates a new JSFunctionAttribute instance with no flags.
@@ -47,6 +47,8 @@ namespace Jurassic.Library
             : base(JSFunctionFlags.None)
         {
             this.Length = -1;
+            this.IsWritable = true;
+            this.IsConfigurable = true;
         }
 
         /// <summary>
@@ -84,6 +86,50 @@ namespace Jurassic.Library
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets whether the property value is writable.  If this flag is not set,
+        /// attempting to modify the property will fail.  The default value of this property
+        /// is <c>true</c>.
+        /// </summary>
+        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        public bool IsWritable
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets whether the property should be enumerable (exposed via the 
+        /// <c>for...in</c> construct) in JavaScript code.  The default value of this
+        /// property is <c>false</c>.
+        /// </summary>
+        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        public bool IsEnumerable
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets whether the property should be configurable, that is, whether
+        /// the property may be changed or have its descriptor changed by JavaScript
+        /// code.  The default value of this property is <c>true</c>.
+        /// </summary>
+        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        public bool IsConfigurable
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// Marks a method as being visible to javascript code.
+    /// Used internally - has different defaults to what you would expect.
+    /// </summary>
+    internal class JSInternalFunctionAttribute : JSFunctionAttribute
+    {
     }
 
     /// <summary>
@@ -97,7 +143,7 @@ namespace Jurassic.Library
         /// </summary>
         public JSPropertyAttribute()
         {
-            IsEnumerable = true;
+            this.IsEnumerable = true;
         }
 
         /// <summary>

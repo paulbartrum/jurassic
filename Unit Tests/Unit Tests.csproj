@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Compiler\TypeInferenceTests.cs" />
     <Compile Include="Core\BigIntegerTests.cs" />
+    <Compile Include="Core\JsPropertyTests.cs" />
     <Compile Include="Core\DynamicMetaObjectTests.cs" />
     <Compile Include="Core\ObjectExtensibilityTests.cs" />
     <Compile Include="Core\SerializationTests.cs" />

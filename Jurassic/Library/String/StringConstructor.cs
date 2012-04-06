@@ -76,7 +76,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="charCodes"></param>
         /// <returns></returns>
-        [JSFunction(Name = "fromCharCode")]
+        [JSInternalFunction(Name = "fromCharCode")]
         public static string FromCharCode(params double[] charCodes)
         {
             // Note: charCodes must be an array of doubles, because the default marshalling

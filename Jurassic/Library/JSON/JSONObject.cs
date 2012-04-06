@@ -47,7 +47,7 @@ namespace Jurassic.Library
         /// <param name="text"> The JSON text to parse. </param>
         /// <param name="reviver"> A function that will be called for each value. </param>
         /// <returns> The value of the JSON text. </returns>
-        [JSFunction(Name = "parse", Flags = JSFunctionFlags.HasEngineParameter)]
+        [JSInternalFunction(Name = "parse", Flags = JSFunctionFlags.HasEngineParameter)]
         public static object Parse(ScriptEngine engine, string text, [DefaultParameterValue(null)] object reviver = null)
         {
             var parser = new JSONParser(engine, new JSONLexer(engine, new System.IO.StringReader(text)));
@@ -64,7 +64,7 @@ namespace Jurassic.Library
         /// <param name="spacer"> Either the number of spaces to use for indentation, or a string
         /// that is used for indentation. </param>
         /// <returns> The JSON string representing the value. </returns>
-        [JSFunction(Name = "stringify", Flags = JSFunctionFlags.HasEngineParameter)]
+        [JSInternalFunction(Name = "stringify", Flags = JSFunctionFlags.HasEngineParameter)]
         public static string Stringify(ScriptEngine engine, object value, [DefaultParameterValue(null)] object replacer = null, [DefaultParameterValue(null)] object spacer = null)
         {
             var serializer = new JSONSerializer(engine);

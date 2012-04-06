@@ -190,7 +190,7 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The value of <c>this</c> in the context of the function. </param>
         /// <param name="argumentArray"> The arguments passed to the function, as an array. </param>
         /// <returns> The result from the function call. </returns>
-        [JSFunction(Name = "apply")]
+        [JSInternalFunction(Name = "apply")]
         public object Apply(object thisObj, object arguments)
         {
             // Convert the arguments parameter into an array.
@@ -222,7 +222,7 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The value of <c>this</c> in the context of the function. </param>
         /// <param name="arguments"> Any number of arguments that will be passed to the function. </param>
         /// <returns> The result from the function call. </returns>
-        [JSFunction(Name = "call", Length = 1)]
+        [JSInternalFunction(Name = "call", Length = 1)]
         public object Call(object thisObj, params object[] arguments)
         {
             return this.CallLateBound(thisObj, arguments);
@@ -235,7 +235,7 @@ namespace Jurassic.Library
         /// <param name="boundThis"> The fixed value of "this". </param>
         /// <param name="boundArguments"> Any number of fixed arguments values. </param>
         /// <returns> A new function. </returns>
-        [JSFunction(Name = "bind", Length = 1)]
+        [JSInternalFunction(Name = "bind", Length = 1)]
         public FunctionInstance Bind(object boundThis, params object[] boundArguments)
         {
             return new BoundFunction(this, boundThis, boundArguments);
@@ -245,7 +245,7 @@ namespace Jurassic.Library
         /// Returns a string representing this object.
         /// </summary>
         /// <returns> A string representing this object. </returns>
-        [JSFunction(Name = "toString")]
+        [JSInternalFunction(Name = "toString")]
         public string ToStringJS()
         {
             return this.ToString();

@@ -178,7 +178,7 @@ namespace Jurassic.Library
         /// g (global search for all occurrences of pattern)
         /// i (ignore case)
         /// m (multiline search)</param>
-        [JSFunction(Deprecated = true, Name = "compile")]
+        [JSInternalFunction(Deprecated = true, Name = "compile")]
         public void Compile(string pattern, [DefaultParameterValue(null)] string flags = null)
         {
 #if !SILVERLIGHT
@@ -199,7 +199,7 @@ namespace Jurassic.Library
         /// <param name="input"> The string on which to perform the search. </param>
         /// <returns> <c>true</c> if the regular expression has at least one match in the given
         /// string; <c>false</c> otherwise. </returns>
-        [JSFunction(Name = "test")]
+        [JSInternalFunction(Name = "test")]
         public bool Test(string input)
         {
             // Check if there is a match.
@@ -227,7 +227,7 @@ namespace Jurassic.Library
         /// property contains the position of the matched substring within the complete searched
         /// string. The lastIndex property contains the position following the last character in
         /// the match. </returns>
-        [JSFunction(Name = "exec")]
+        [JSInternalFunction(Name = "exec")]
         public object Exec(string input)
         {
             // Perform the regular expression matching.
@@ -507,7 +507,7 @@ namespace Jurassic.Library
         /// Returns a string representing the current object.
         /// </summary>
         /// <returns> A string representing the current object. </returns>
-        [JSFunction(Name = "toString")]
+        [JSInternalFunction(Name = "toString")]
         public new string ToString()
         {
             return string.Format("/{0}/{1}", this.Source, this.Flags);

@@ -223,7 +223,20 @@ namespace Jurassic.Compiler
             if (binderMethod.ReturnType == typeof(void))
                 EmitHelpers.EmitUndefined(generator);
             else
+            {
                 EmitTypeConversion(generator, binderMethod.ReturnType, typeof(object));
+
+                // Convert a null return value to Null.Value or Undefined.Value.
+                var endOfSpecialCaseLabel = generator.CreateLabel();
+                generator.Duplicate();
+                generator.BranchIfNotNull(endOfSpecialCaseLabel);
+                generator.Pop();
+                if ((binderMethod.Flags & JSFunctionFlags.ConvertNullReturnValueToUndefined) != 0)
+                    EmitHelpers.EmitUndefined(generator);
+                else
+                    EmitHelpers.EmitNull(generator);
+                generator.DefineLabelPosition(endOfSpecialCaseLabel);
+            }
 
             // End the IL.
             generator.Complete();

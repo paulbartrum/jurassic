@@ -185,6 +185,7 @@ namespace UnitTests
             Assert.AreEqual("onetwo", TestUtils.Evaluate("'one'.concat('two')"));
             Assert.AreEqual("onetwothree", TestUtils.Evaluate("'one'.concat('two', 'three')"));
             Assert.AreEqual("oneundefined", TestUtils.Evaluate("'one'.concat(undefined)"));
+            Assert.AreEqual("onenull", TestUtils.Evaluate("'one'.concat(null)"));
 
             // concat does not change the original string.
             Assert.AreEqual("onetwo", TestUtils.Evaluate("var x = 'one'; x.concat('two')"));
@@ -293,6 +294,9 @@ namespace UnitTests
             Assert.AreEqual(3, TestUtils.Evaluate("'onetwothree'.lastIndexOf('two', NaN)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("''.lastIndexOf('no')"));
             Assert.AreEqual(0, TestUtils.Evaluate("''.lastIndexOf('')"));
+            Assert.AreEqual(3, TestUtils.Evaluate("'onenullthree'.lastIndexOf(null)"));
+            Assert.AreEqual(3, TestUtils.Evaluate("'oneundefinedthree'.lastIndexOf(undefined)"));
+            
 
             // length
             if (TestUtils.Engine != JSEngine.JScript)
@@ -321,6 +325,8 @@ namespace UnitTests
             Assert.AreEqual(-1, TestUtils.Evaluate("'haha'.localeCompare('HAHA')"));
             Assert.AreEqual(-1, TestUtils.Evaluate("'a'.localeCompare('b')"));
             Assert.AreEqual(1, TestUtils.Evaluate("'b'.localeCompare('a')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("'undefined'.localeCompare(undefined)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("'null'.localeCompare(null)"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("''.localeCompare.length"));

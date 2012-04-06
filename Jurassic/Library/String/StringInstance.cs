@@ -122,7 +122,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="index"> The character position (starts at 0). </param>
         /// <returns></returns>
-        [JSFunction(Name = "charAt", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "charAt", Flags = JSFunctionFlags.HasThisObject)]
         public static string CharAt(string thisObject, int index)
         {
             if (index < 0 || index >= thisObject.Length)
@@ -135,7 +135,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="index"> The character position (starts at 0). </param>
         /// <returns></returns>
-        [JSFunction(Name = "charCodeAt", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "charCodeAt", Flags = JSFunctionFlags.HasThisObject)]
         public static double CharCodeAt(string thisObject, int index)
         {
             if (index < 0 || index >= thisObject.Length)
@@ -148,7 +148,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="strings"> The strings to concatenate with this string. </param>
         /// <returns> The result of combining this string with the given strings. </returns>
-        [JSFunction(Name = "concat", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "concat", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static ConcatenatedString Concat(ScriptEngine engine, object thisObject, params object[] strings)
         {
             if (thisObject is ConcatenatedString)
@@ -186,7 +186,7 @@ namespace Jurassic.Library
         /// <param name="substring"> The substring to search for. </param>
         /// <param name="startIndex"> The character position to start searching from.  Defaults to 0. </param>
         /// <returns> The character position of the start of the substring, if it was found, or -1 if it wasn't. </returns>
-        [JSFunction(Name = "indexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        [JSInternalFunction(Name = "indexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static int IndexOf(string thisObject, string substring, [DefaultParameterValue(0)] int startIndex = 0)
         {
             startIndex = Math.Min(Math.Max(startIndex, 0), thisObject.Length);
@@ -202,7 +202,7 @@ namespace Jurassic.Library
         /// <param name="substring"> The substring to search for. </param>
         /// <param name="startIndex"> The index of the character to start searching. </param>
         /// <returns> The index of the substring, or <c>-1</c> if not found. </returns>
-        [JSFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        [JSInternalFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static int LastIndexOf(string thisObject, string substring, [DefaultParameterValue(double.NaN)] double startIndex = double.NaN)
         {
             // Limit startIndex to the length of the string.  This must be done first otherwise
@@ -226,7 +226,7 @@ namespace Jurassic.Library
         /// <param name="str"> The string to compare with. </param>
         /// <returns> -1, 0 or 1 depending on whether the given string comes before or after or is
         /// the same as the given string in sort order. </returns>
-        [JSFunction(Name = "localeCompare", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "localeCompare", Flags = JSFunctionFlags.HasThisObject)]
         public static int LocaleCompare(string thisObject, string str)
         {
             return string.Compare(thisObject, str);
@@ -237,7 +237,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="substr"> The substring to search for. </param>
         /// <returns> An array containing the matched strings. </returns>
-        [JSFunction(Name = "match", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "match", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static object Match(ScriptEngine engine, string thisObject, object substrOrRegExp)
         {
             if (substrOrRegExp is RegExpInstance)
@@ -259,7 +259,7 @@ namespace Jurassic.Library
         /// <param name="thisObject"> The string to wrap. </param>
         /// <returns> The input string wrapped with double quotes and with existing double quotes
         /// escaped. </returns>
-        [JSFunction(Name = "quote", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "quote", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Quote(string thisObject)
         {
             var result = new System.Text.StringBuilder(thisObject.Length + 2);
@@ -284,7 +284,7 @@ namespace Jurassic.Library
         /// <param name="replaceTextOrFunction"> The text to substitute -or- a function that
         /// returns the text to substitute. </param>
         /// <returns> A copy of this string with text replaced. </returns>
-        [JSFunction(Name = "replace", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "replace", Flags = JSFunctionFlags.HasThisObject)]
         public static string Replace(string thisObject, object substrOrRegExp, object replaceTextOrFunction)
         {
             // The built-in function binding system is not powerful enough to bind the replace
@@ -383,7 +383,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="substrOrRegExp"> The string or regular expression to search for. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
-        [JSFunction(Name = "search", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "search", Flags = JSFunctionFlags.HasThisObject)]
         public static int Search(string thisObject, object substrOrRegExp)
         {
             if (substrOrRegExp is RegExpInstance)
@@ -404,7 +404,7 @@ namespace Jurassic.Library
         /// <param name="start"> The character position to start extracting. </param>
         /// <param name="end"> The character position to stop extacting. </param>
         /// <returns> A section of the string. </returns>
-        [JSFunction(Name = "slice", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "slice", Flags = JSFunctionFlags.HasThisObject)]
         public static string Slice(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int end = int.MaxValue)
         {
             // Negative offsets are measured from the end of the string.
@@ -428,7 +428,7 @@ namespace Jurassic.Library
         /// <param name="separator"> A string or regular expression that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        [JSFunction(Name = "split", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "split", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, [DefaultParameterValue(4294967295.0)] double limit = uint.MaxValue)
         {
             // Limit defaults to unlimited.  Note the ToUint32() conversion.
@@ -486,7 +486,7 @@ namespace Jurassic.Library
         /// <param name="start"> The character position to start extracting. </param>
         /// <param name="length"> The number of characters to extract. </param>
         /// <returns> A substring of this string. </returns>
-        [JSFunction(Name = "substr", Flags = JSFunctionFlags.HasThisObject, Deprecated = true)]
+        [JSInternalFunction(Name = "substr", Flags = JSFunctionFlags.HasThisObject, Deprecated = true)]
         public static string Substr(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int length = int.MaxValue)
         {
             // If start is less than zero, it is measured from the end of the string.
@@ -508,7 +508,7 @@ namespace Jurassic.Library
         /// <param name="start"> The character position to start extracting. </param>
         /// <param name="end"> The character position to stop extracting. </param>
         /// <returns> A substring of this string. </returns>
-        [JSFunction(Name = "substring", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "substring", Flags = JSFunctionFlags.HasThisObject)]
         public static string Substring(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int end = int.MaxValue)
         {
             return Slice(thisObject, Math.Max(Math.Min(start, end), 0), Math.Max(Math.Max(start, end), 0));
@@ -519,7 +519,7 @@ namespace Jurassic.Library
         /// locale.
         /// </summary>
         /// <returns> A copy of this string with the characters converted to lowercase. </returns>
-        [JSFunction(Name = "toLocaleLowerCase", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "toLocaleLowerCase", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToLocaleLowerCase(string thisObject)
         {
             return thisObject.ToLower();
@@ -530,7 +530,7 @@ namespace Jurassic.Library
         /// locale.
         /// </summary>
         /// <returns> A copy of this string with the characters converted to uppercase. </returns>
-        [JSFunction(Name = "toLocaleUpperCase", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "toLocaleUpperCase", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToLocaleUpperCase(string thisObject)
         {
             return thisObject.ToUpper();
@@ -540,7 +540,7 @@ namespace Jurassic.Library
         /// Returns the calling string value converted to lowercase.
         /// </summary>
         /// <returns> A copy of this string with the characters converted to lowercase. </returns>
-        [JSFunction(Name = "toLowerCase", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "toLowerCase", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToLowerCase(string thisObject)
         {
             return thisObject.ToLowerInvariant();
@@ -550,7 +550,7 @@ namespace Jurassic.Library
         /// Returns a string representing the current object.
         /// </summary>
         /// <returns> A string representing the current object. </returns>
-        [JSFunction(Name = "toString")]
+        [JSInternalFunction(Name = "toString")]
         public new string ToString()
         {
             return this.value;
@@ -560,7 +560,7 @@ namespace Jurassic.Library
         /// Returns the calling string value converted to uppercase.
         /// </summary>
         /// <returns> A copy of this string with the characters converted to uppercase. </returns>
-        [JSFunction(Name = "toUpperCase", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "toUpperCase", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToUpperCase(string thisObject)
         {
             return thisObject.ToUpperInvariant();
@@ -584,7 +584,7 @@ namespace Jurassic.Library
         /// Trims whitespace from the beginning and end of the string.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "trim", Flags = JSFunctionFlags.HasThisObject)]
+        [JSInternalFunction(Name = "trim", Flags = JSFunctionFlags.HasThisObject)]
         public static string Trim(string thisObject)
         {
             return thisObject.Trim(trimCharacters);
@@ -594,7 +594,7 @@ namespace Jurassic.Library
         /// Trims whitespace from the beginning of the string.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "trimLeft", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "trimLeft", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string TrimLeft(string thisObject)
         {
             return thisObject.TrimStart(trimCharacters);
@@ -604,7 +604,7 @@ namespace Jurassic.Library
         /// Trims whitespace from the beginning of the string.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "trimRight", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "trimRight", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string TrimRight(string thisObject)
         {
             return thisObject.TrimEnd(trimCharacters);
@@ -614,7 +614,7 @@ namespace Jurassic.Library
         /// Returns the underlying primitive value of the current object.
         /// </summary>
         /// <returns> The underlying primitive value of the current object. </returns>
-        [JSFunction(Name = "valueOf")]
+        [JSInternalFunction(Name = "valueOf")]
         public new string ValueOf()
         {
             return this.value;
@@ -630,7 +630,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="name"> The name of the anchor. </param>
         /// <returns> </returns>
-        [JSFunction(Name = "anchor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "anchor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Anchor(string thisObject, string name)
         {
             return string.Format(@"<a name=""{1}"">{0}</a>", thisObject, name);
@@ -640,7 +640,7 @@ namespace Jurassic.Library
         /// Wraps the string with a big tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "big", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "big", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Big(string thisObject)
         {
             return string.Format("<big>{0}</big>", thisObject);
@@ -650,7 +650,7 @@ namespace Jurassic.Library
         /// Wraps the string with a blink tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "blink", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "blink", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Blink(string thisObject)
         {
             return string.Format("<blink>{0}</blink>", thisObject);
@@ -660,7 +660,7 @@ namespace Jurassic.Library
         /// Wraps the string with a bold (b) tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "bold", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "bold", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Bold(string thisObject)
         {
             return string.Format("<b>{0}</b>", thisObject);
@@ -670,7 +670,7 @@ namespace Jurassic.Library
         /// Wraps the string with a tt tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "fixed", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "fixed", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Fixed(string thisObject)
         {
             return string.Format("<tt>{0}</tt>", thisObject);
@@ -681,7 +681,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="colorValue"> The color value or name. </param>
         /// <returns></returns>
-        [JSFunction(Name = "fontcolor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "fontcolor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string FontColor(string thisObject, string colorValue)
         {
             return string.Format(@"<font color=""{1}"">{0}</font>", thisObject, colorValue);
@@ -692,7 +692,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="size"> The font size, specified as an integer. </param>
         /// <returns></returns>
-        [JSFunction(Name = "fontsize", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "fontsize", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string FontSize(string thisObject, string size)
         {
             return string.Format(@"<font size=""{1}"">{0}</font>", thisObject, size);
@@ -702,7 +702,7 @@ namespace Jurassic.Library
         /// Wraps the string with a italics (i) tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "italics", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "italics", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Italics(string thisObject)
         {
             return string.Format("<i>{0}</i>", thisObject);
@@ -713,7 +713,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="href"></param>
         /// <returns></returns>
-        [JSFunction(Name = "link", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "link", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Link(string thisObject, string href)
         {
             return string.Format(@"<a href=""{1}"">{0}</a>", thisObject, href);
@@ -723,7 +723,7 @@ namespace Jurassic.Library
         /// Wraps the string in a <c>small</c> tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "small", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "small", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Small(string thisObject)
         {
             return string.Format("<small>{0}</small>", thisObject);
@@ -733,7 +733,7 @@ namespace Jurassic.Library
         /// Wraps the string in a <c>strike</c> tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "strike", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "strike", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Strike(string thisObject)
         {
             return string.Format("<strike>{0}</strike>", thisObject);
@@ -743,7 +743,7 @@ namespace Jurassic.Library
         /// Wraps the string in a <c>sub</c> tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "sub", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "sub", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Sub(string thisObject)
         {
             return string.Format("<sub>{0}</sub>", thisObject);
@@ -753,7 +753,7 @@ namespace Jurassic.Library
         /// Wraps the string in a <c>sup</c> tag.
         /// </summary>
         /// <returns></returns>
-        [JSFunction(Name = "sup", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
+        [JSInternalFunction(Name = "sup", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Sup(string thisObject)
         {
             return string.Format("<sup>{0}</sup>", thisObject);
