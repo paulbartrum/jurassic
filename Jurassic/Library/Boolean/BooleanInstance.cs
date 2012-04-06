@@ -59,7 +59,7 @@ namespace Jurassic.Library
         /// Returns the underlying primitive value of the current object.
         /// </summary>
         /// <returns> The underlying primitive value of the current object. </returns>
-        [JSFunction(Name = "valueOf")]
+        [JSInternalFunction(Name = "valueOf")]
         public new bool ValueOf()
         {
             return this.value;
@@ -69,7 +69,7 @@ namespace Jurassic.Library
         /// Returns a string representing this object.
         /// </summary>
         /// <returns> A string representing this object. </returns>
-        [JSFunction(Name = "toString")]
+        [JSInternalFunction(Name = "toString")]
         public string ToStringJS()
         {
             return this.value ? "true" : "false";

@@ -70,7 +70,7 @@ namespace Jurassic.Library
         /// <returns> A string representation of a number in exponential notation. The string
         /// contains one digit before the significand's decimal point, and may contain
         /// fractionDigits digits after it. </returns>
-        [JSFunction(Name = "toExponential")]
+        [JSInternalFunction(Name = "toExponential")]
         public string ToExponential(object fractionDigits)
         {
             // If precision is undefined, the number of digits is dependant on the number.
@@ -98,7 +98,7 @@ namespace Jurassic.Library
         /// fractionDigits digits after it.
         /// If fractionDigits is not supplied or undefined, the toFixed method assumes the value
         /// is zero. </returns>
-        [JSFunction(Name = "toFixed")]
+        [JSInternalFunction(Name = "toFixed")]
         public string ToFixed([DefaultParameterValue(0)] int fractionDigits = 0)
         {
             // Check the parameter is within range.
@@ -113,7 +113,7 @@ namespace Jurassic.Library
         /// Returns a string containing a locale-dependant version of the number.
         /// </summary>
         /// <returns> A string containing a locale-dependant version of the number. </returns>
-        [JSFunction(Name = "toLocaleString")]
+        [JSInternalFunction(Name = "toLocaleString")]
         public new string ToLocaleString()
         {
             // NumberFormatter does the hard work.
@@ -134,7 +134,7 @@ namespace Jurassic.Library
         /// returned.
         /// If precision is not supplied or is undefined, the toString method is called instead.
         /// </remarks>
-        [JSFunction(Name = "toPrecision")]
+        [JSInternalFunction(Name = "toPrecision")]
         public string ToPrecision(object precision)
         {
             // If precision is undefined, delegate to "toString()".
@@ -157,7 +157,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="radix"> Specifies a radix for converting numeric values to strings. </param>
         /// <returns> The textual representation of the number. </returns>
-        [JSFunction(Name = "toString")]
+        [JSInternalFunction(Name = "toString")]
         public string ToStringJS([DefaultParameterValue(10)] int radix = 10)
         {
             // Check the parameter is in range.
@@ -172,7 +172,7 @@ namespace Jurassic.Library
         /// Returns the primitive value of the specified object.
         /// </summary>
         /// <returns> The primitive value of the specified object. </returns>
-        [JSFunction(Name = "valueOf")]
+        [JSInternalFunction(Name = "valueOf")]
         public new double ValueOf()
         {
             return this.value;

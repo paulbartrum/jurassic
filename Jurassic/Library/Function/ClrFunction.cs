@@ -39,7 +39,7 @@ namespace Jurassic.Library
             // This is a constructor so ignore the "this" parameter when the function is called.
             thisBinding = this;
 
-            // Search through every method in this type looking for [JSFunction] attributes.
+            // Search through every method in this type looking for [JSInternalFunction] attributes.
             var callBinderMethods = new List<JSBinderMethod>(1);
             var constructBinderMethods = new List<JSBinderMethod>(1);
             var methods = this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);

@@ -96,7 +96,7 @@ namespace Jurassic.Library
         /// Returns a string representing the current object.
         /// </summary>
         /// <returns> A string representing the current object. </returns>
-        [JSFunction(Name = "toString")]
+        [JSInternalFunction(Name = "toString")]
         public string ToStringJS()
         {
             if (string.IsNullOrEmpty(this.Message))

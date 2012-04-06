@@ -25,5 +25,11 @@ namespace Jurassic.Library
         /// Indicates that the instance object may be modified by the function.
         /// </summary>
         MutatesThisObject = 4,
+
+        /// <summary>
+        /// A return value of null is converted to undefined immediately after control leaves the
+        /// method.
+        /// </summary>
+        ConvertNullReturnValueToUndefined = 8,
     }
 }

@@ -109,7 +109,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="value"> The value to test. </param>
         /// <returns> <c>true</c> if the given value is an Array instance, <c>false</c> otherwise. </returns>
-        [JSFunction(Name = "isArray")]
+        [JSInternalFunction(Name = "isArray")]
         public bool IsArray(object value)
         {
             return value is ArrayInstance;
