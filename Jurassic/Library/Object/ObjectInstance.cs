@@ -1163,7 +1163,7 @@ namespace Jurassic.Library
 
         /// <summary>
         /// Populates the object with functions by searching a .NET type for methods marked with
-        /// the [JSInternalFunction] attribute.  Should be called only once at startup.  Also automatically
+        /// the [JSFunction] attribute.  Should be called only once at startup.  Also automatically
         /// populates properties marked with the [JSProperty] attribute.
         /// </summary>
         internal protected void PopulateFunctions()
@@ -1173,17 +1173,29 @@ namespace Jurassic.Library
 
         /// <summary>
         /// Populates the object with functions by searching a .NET type for methods marked with
-        /// the [JSInternalFunction] attribute.  Should be called only once at startup.
+        /// the [JSFunction] attribute.  Should be called only once at startup.  Also automatically
+        /// populates properties marked with the [JSProperty] attribute.
         /// </summary>
         /// <param name="type"> The type to search for methods. </param>
         internal protected void PopulateFunctions(Type type)
+        {
+            PopulateFunctions(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        }
+
+        /// <summary>
+        /// Populates the object with functions by searching a .NET type for methods marked with
+        /// the [JSFunction] attribute.  Should be called only once at startup.
+        /// </summary>
+        /// <param name="type"> The type to search for methods. </param>
+        /// <param name="bindingFlags"> The binding flags to use to search for properties and methods. </param>
+        internal protected void PopulateFunctions(Type type, BindingFlags bindingFlags)
         {
             if (type == null)
                 type = this.GetType();
             
             // Group the methods on the given type by name.
             var functions = new Dictionary<string, MethodGroup>(20);
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            var methods = type.GetMethods(bindingFlags);
             foreach (var method in methods)
             {
                 // Make sure the method has the [JSInternalFunction] attribute.
@@ -1247,7 +1259,7 @@ namespace Jurassic.Library
                 this.FastSetProperty(name, new ClrFunction(this.Engine.Function.InstancePrototype, methodGroup.Methods, name, methodGroup.Length), methodGroup.PropertyAttributes);
             }
 
-            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            PropertyInfo[] properties = type.GetProperties(bindingFlags);
             foreach (PropertyInfo prop in properties)
             {
                 var attribute = Attribute.GetCustomAttribute(prop, typeof(JSPropertyAttribute), false) as JSPropertyAttribute;
