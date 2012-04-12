@@ -1179,12 +1179,13 @@ namespace Jurassic.Library
         /// <param name="type"> The type to search for methods. </param>
         internal protected void PopulateFunctions(Type type)
         {
-            PopulateFunctions(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            PopulateFunctions(type, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
         }
 
         /// <summary>
         /// Populates the object with functions by searching a .NET type for methods marked with
-        /// the [JSFunction] attribute.  Should be called only once at startup.
+        /// the [JSFunction] attribute.  Should be called only once at startup.  Also automatically
+        /// populates properties marked with the [JSProperty] attribute.
         /// </summary>
         /// <param name="type"> The type to search for methods. </param>
         /// <param name="bindingFlags"> The binding flags to use to search for properties and methods. </param>
@@ -1285,7 +1286,7 @@ namespace Jurassic.Library
                 ClrFunction setter = null;
                 if (prop.CanWrite)
                 {
-                    var setMethod = prop.GetSetMethod();
+                    var setMethod = prop.GetSetMethod((bindingFlags & BindingFlags.NonPublic) != 0);
                     if (setMethod != null)
                         setter = new ClrFunction(engine.Function.InstancePrototype, new JSBinderMethod[] { new JSBinderMethod(setMethod) }, name, 1);
                 }
