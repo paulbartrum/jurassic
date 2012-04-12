@@ -159,6 +159,7 @@ namespace Jurassic.Library
             // Classify each word.
             int year = -1, month = -1, day = -1;
             int hour = 0, minute = 0, second = 0, millisecond = 0;
+            bool twelveHourTime = false;
             DateTimeKind kind = DateTimeKind.Local;
             int offsetInMinutes = 0;
             List<int> unclassifiedNumbers = new List<int>();
@@ -195,6 +196,17 @@ namespace Jurassic.Library
                     kind = DateTimeKind.Utc;
                     offsetInMinutes -= numericValue * 60;
                 }
+                else if (word.Equals("AM", StringComparison.OrdinalIgnoreCase))
+                {
+                    // This is a 12-hour time.
+                    twelveHourTime = true;
+                }
+                else if (word.Equals("PM", StringComparison.OrdinalIgnoreCase))
+                {
+                    // This is a 12-hour time.
+                    twelveHourTime = true;
+                    offsetInMinutes = 60 * 12;
+                }
                 else if (int.TryParse(word, out numericValue) == true)
                 {
                     // Guess that a number >= 1000 is the year.
@@ -226,7 +238,7 @@ namespace Jurassic.Library
                         return DateTime.MinValue;
                     if (int.TryParse(components[1], out minute) == false)
                         return DateTime.MinValue;
-                    if (int.TryParse(components[2], out second) == false)
+                    if (components.Length >= 3 && int.TryParse(components[2], out second) == false)
                         return DateTime.MinValue;
                 }
                 else if (dayOfWeekNames.Contains(word) == true)
@@ -279,12 +291,16 @@ namespace Jurassic.Library
                 return DateTime.MinValue;
             if (day < 1 || day > 31)
                 return DateTime.MinValue;
-            if (hour >= 24)
+            if (hour >= 24 || (twelveHourTime && hour >= 13))
                 return DateTime.MinValue;
             if (minute >= 60)
                 return DateTime.MinValue;
             if (second >= 60)
                 return DateTime.MinValue;
+
+            // If there exists an AM/PM designator, 12:00 is the same as 0:00.
+            if (twelveHourTime && hour == 12)
+                hour = 0;
 
             // Create a date from the components.
             var result = new DateTime(year, month, 1, hour, minute, second, millisecond, kind);
