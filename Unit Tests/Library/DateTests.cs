@@ -185,6 +185,12 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 3, 30, 01)), TestUtils.Evaluate("Date.parse('24 Apr 2010 3:30:01')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 2, 3, 1)), TestUtils.Evaluate("Date.parse('24 Apr 2010 2:3:1')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 15, 30, 01)), TestUtils.Evaluate("Date.parse('24 Apr 2010 15:30:01')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 30, 01)), TestUtils.Evaluate("Date.parse('24 Apr 2010 12:30:01')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 2, 30, 01)), TestUtils.Evaluate("Date.parse('24 Apr 2010 2:30:01 am')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 14, 30, 01)), TestUtils.Evaluate("Date.parse('24 Apr 2010 2:30:01 PM')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 0, 30, 01)), TestUtils.Evaluate("Date.parse('24 Apr 2010 12:30:01 AM')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 0, 30, 01)), TestUtils.Evaluate("Date.parse('24 Apr 2010 0:30:01 AM')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 30, 0)), TestUtils.Evaluate("Date.parse('24 Apr 2010 12:30  pm')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 59, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('24 Apr 2010 23:59:59 UT')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 59, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('24 Apr 2010 23:59:59 GMT')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 4, 59, 59, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('24 Apr 2010 23:59:59 EST')")); // -5
@@ -236,6 +242,8 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('24 Apr 2010 15')"));                // extraneous number
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('24 Apr 2010 15:30:01.123')"));      // milliseconds not supported
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('24 Apr 2010 hello')"));             // extraneous text
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('24 Apr 2010 13:30:01 AM')"));       // 12 hour clock goes from 0-12.
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('24 Apr 2010 13:30:01 PM')"));       // 12 hour clock goes from 0-12.
         }
 
         [TestMethod]
