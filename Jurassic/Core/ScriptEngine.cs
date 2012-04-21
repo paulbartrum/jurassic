@@ -496,12 +496,11 @@ namespace Jurassic
             set;
         }
 
+#if !WINDOWS_PHONE
         internal class ReflectionEmitModuleInfo
         {
-#if !WINDOWS_PHONE
             public System.Reflection.Emit.AssemblyBuilder AssemblyBuilder;
             public System.Reflection.Emit.ModuleBuilder ModuleBuilder;
-#endif //!WINDOWS_PHONE
             public int TypeCount;
         }
 
@@ -510,6 +509,7 @@ namespace Jurassic
         /// </summary>
         [NonSerialized]
         internal ReflectionEmitModuleInfo ReflectionEmitInfo;
+#endif //!WINDOWS_PHONE
 
 
 
