@@ -62,7 +62,7 @@ namespace Jurassic.TestSuite
             includeBuilder.AppendLine(ReadInclude(openFile, "ed.js"));
             this.includes = includeBuilder.ToString();
 
-            this.zipStream = openFile(@"suite\2011-11-11.zip");
+            this.zipStream = openFile(@"suite\2012-05-18.zip");
             this.zipFile = new ZipFile(this.zipStream);
             this.ApproximateTotalTestCount = (int)this.zipFile.Count;
         }

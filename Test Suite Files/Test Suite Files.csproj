@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="config\excludelist.xml" />
+    <Content Include="Results 2012-06-25.txt" />
     <Content Include="harness\cth.js" />
     <Content Include="harness\Date_constants.js" />
     <Content Include="harness\Date_library.js" />
@@ -53,9 +54,11 @@
     <Content Include="harness\sta.js" />
     <Content Include="harness\sth.js" />
     <Content Include="ICSharpCode.SharpZipLib.dll" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="suite\2011-11-11.zip" />
+    <None Include="suite\2012-05-18.zip" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
