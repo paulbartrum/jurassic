@@ -1,0 +1,61 @@
+﻿<UserControl
+    xmlns:my="clr-namespace:SilverlightREPL"
+    x:Class="SilverlightREPL.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="400"
+    FontFamily="Consolas,Courier New" FontSize="13.66472060050041701417848206839">
+
+    <!--
+        Consolas font metrics
+        Ascent: 1884
+        Descent: 514
+        Em height: 2048
+        Line height: 2398
+    -->
+
+    <Border BorderThickness="1" BorderBrush="#85BFF2">
+        <my:CustomScrollViewer x:Name="ScrollViewer" GotFocus="ScrollViewer_GotFocus">
+            <StackPanel>
+                <my:CustomRichTextBox
+                    x:Name="HistoryTextBox"
+                    BorderThickness="0"
+                    IsReadOnly="True"
+                    Padding="16,0,0,0"
+                    Margin="0"
+                    MouseSelectionEnded="HistoryTextBox_MouseSelectionEnded">
+                    <Paragraph>
+                        Silverlight JavaScript console v2.1
+                        <LineBreak/>
+                        by Paul Bartrum
+                        <LineBreak/>
+                    </Paragraph>
+                </my:CustomRichTextBox>
+
+                <Grid Margin="0,-1,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="17" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Canvas>
+                        <my:CommandIcon Foreground="Black" Canvas.Top="2"
+                                HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    </Canvas>
+                    <TextBox Name="CommandTextBox"
+                             Grid.Column="1"
+                             KeyDown="CommandTextBox_KeyDown"
+                             AcceptsReturn="True"
+                             Margin="0,0,0,2">
+                        <TextBox.Template>
+                            <ControlTemplate TargetType="TextBox">
+                                <ScrollViewer x:Name="ContentElement" Padding="0" BorderThickness="0" IsTabStop="False"/>
+                            </ControlTemplate>
+                        </TextBox.Template>
+                    </TextBox>
+                </Grid>
+            </StackPanel>
+        </my:CustomScrollViewer>
+    </Border>
+</UserControl>

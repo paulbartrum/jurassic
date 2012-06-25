@@ -1,0 +1,520 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{55C69A46-6FB0-49DB-9A26-C0C051E58A16}</ProjectGuid>
+    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JurassicSL</RootNamespace>
+    <AssemblyName>Jurassic</AssemblyName>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <!-- This property group is only here to support building this project using the 
+       MSBuild 3.5 toolset. In order to work correctly with this older toolset, it needs 
+       to set the TargetFrameworkVersion to v3.5 -->
+  <PropertyGroup Condition="'$(MSBuildToolsVersion)' == '3.5'">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="system" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Jurassic\Compiler\Binders\Binder.cs">
+      <Link>Compiler\Binders\Binder.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\BinderMethod.cs">
+      <Link>Compiler\Binders\BinderMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\BinderUtilities.cs">
+      <Link>Compiler\Binders\BinderUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\ClrBinder.cs">
+      <Link>Compiler\Binders\ClrBinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\FieldBinders.cs">
+      <Link>Compiler\Binders\FieldBinders.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\JSBinder.cs">
+      <Link>Compiler\Binders\JSBinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\JSBinderMethod.cs">
+      <Link>Compiler\Binders\JSBinderMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Binders\MethodBinder.cs">
+      <Link>Compiler\Binders\MethodBinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Debugging\COMHelpers.cs">
+      <Link>Compiler\Debugging\COMHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Debugging\SourceCodePosition.cs">
+      <Link>Compiler\Debugging\SourceCodePosition.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Debugging\SourceCodeSpan.cs">
+      <Link>Compiler\Debugging\SourceCodeSpan.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\EmitConversion.cs">
+      <Link>Compiler\Emit\EmitConversion.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\EmitHelpers.cs">
+      <Link>Compiler\Emit\EmitHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\DynamicILGenerator.cs">
+      <Link>Compiler\Emit\ILGenerator\DynamicILGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\ILGenerator.cs">
+      <Link>Compiler\Emit\ILGenerator\ILGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\ILLabel.cs">
+      <Link>Compiler\Emit\ILGenerator\ILLabel.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\ILLocalVariable.cs">
+      <Link>Compiler\Emit\ILGenerator\ILLocalVariable.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\LoggingILGenerator.cs">
+      <Link>Compiler\Emit\ILGenerator\LoggingILGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\ILGenerator\ReflectionEmitILGenerator.cs">
+      <Link>Compiler\Emit\ILGenerator\ReflectionEmitILGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\LongJumpException.cs">
+      <Link>Compiler\Emit\LongJumpException.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\MethodOptimizationHints.cs">
+      <Link>Compiler\Emit\MethodOptimizationHints.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\OptimizationInfo.cs">
+      <Link>Compiler\Emit\OptimizationInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\PrimitiveType.cs">
+      <Link>Compiler\Emit\PrimitiveType.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Emit\PrimitiveTypeUtilities.cs">
+      <Link>Compiler\Emit\PrimitiveTypeUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\AssignmentExpression.cs">
+      <Link>Compiler\Expressions\AssignmentExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\BinaryExpression.cs">
+      <Link>Compiler\Expressions\BinaryExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\Expression.cs">
+      <Link>Compiler\Expressions\Expression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\FunctionCallExpression.cs">
+      <Link>Compiler\Expressions\FunctionCallExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\FunctionExpression.cs">
+      <Link>Compiler\Expressions\FunctionExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\GroupingExpression.cs">
+      <Link>Compiler\Expressions\GroupingExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\IReferenceExpression.cs">
+      <Link>Compiler\Expressions\IReferenceExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\ListExpression.cs">
+      <Link>Compiler\Expressions\ListExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\LiteralExpression.cs">
+      <Link>Compiler\Expressions\LiteralExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\MemberAccessExpression.cs">
+      <Link>Compiler\Expressions\MemberAccessExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\NameExpression.cs">
+      <Link>Compiler\Expressions\NameExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\NewExpression.cs">
+      <Link>Compiler\Expressions\NewExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\OperatorExpression.cs">
+      <Link>Compiler\Expressions\OperatorExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\TernaryExpression.cs">
+      <Link>Compiler\Expressions\TernaryExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\ThisExpression.cs">
+      <Link>Compiler\Expressions\ThisExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Expressions\UnaryExpression.cs">
+      <Link>Compiler\Expressions\UnaryExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Lexer\IdentifierToken.cs">
+      <Link>Compiler\Lexer\IdentifierToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Lexer\KeywordToken.cs">
+      <Link>Compiler\Lexer\KeywordToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Lexer\Lexer.cs">
+      <Link>Compiler\Lexer\Lexer.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Lexer\LiteralToken.cs">
+      <Link>Compiler\Lexer\LiteralToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Lexer\PunctuatorToken.cs">
+      <Link>Compiler\Lexer\PunctuatorToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Lexer\RegularExpressionLiteral.cs">
+      <Link>Compiler\Lexer\RegularExpressionLiteral.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Lexer\Token.cs">
+      <Link>Compiler\Lexer\Token.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\MethodGenerator\CodeContext.cs">
+      <Link>Compiler\MethodGenerator\CodeContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\MethodGenerator\CompilerOptions.cs">
+      <Link>Compiler\MethodGenerator\CompilerOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\MethodGenerator\EvalMethodGenerator.cs">
+      <Link>Compiler\MethodGenerator\EvalMethodGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\MethodGenerator\FunctionMethodGenerator.cs">
+      <Link>Compiler\MethodGenerator\FunctionMethodGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\MethodGenerator\GeneratedMethod.cs">
+      <Link>Compiler\MethodGenerator\GeneratedMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\MethodGenerator\GlobalMethodGenerator.cs">
+      <Link>Compiler\MethodGenerator\GlobalMethodGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\MethodGenerator\MethodGenerator.cs">
+      <Link>Compiler\MethodGenerator\MethodGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Parser\AstNode.cs">
+      <Link>Compiler\Parser\AstNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Parser\Operator.cs">
+      <Link>Compiler\Parser\Operator.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Parser\Parser.cs">
+      <Link>Compiler\Parser\Parser.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Scope\DeclarativeScope.cs">
+      <Link>Compiler\Scope\DeclarativeScope.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Scope\ObjectScope.cs">
+      <Link>Compiler\Scope\ObjectScope.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Scope\Scope.cs">
+      <Link>Compiler\Scope\Scope.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\BlockStatement.cs">
+      <Link>Compiler\Statements\BlockStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\BreakStatement.cs">
+      <Link>Compiler\Statements\BreakStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\ContinueStatement.cs">
+      <Link>Compiler\Statements\ContinueStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\DebuggerStatement.cs">
+      <Link>Compiler\Statements\DebuggerStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\DoWhileStatement.cs">
+      <Link>Compiler\Statements\DoWhileStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\EmptyStatement.cs">
+      <Link>Compiler\Statements\EmptyStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\ExpressionStatement.cs">
+      <Link>Compiler\Statements\ExpressionStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\ForInStatement.cs">
+      <Link>Compiler\Statements\ForInStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\ForStatement.cs">
+      <Link>Compiler\Statements\ForStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\IfStatement.cs">
+      <Link>Compiler\Statements\IfStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\LoopStatement.cs">
+      <Link>Compiler\Statements\LoopStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\ReturnStatement.cs">
+      <Link>Compiler\Statements\ReturnStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\Statement.cs">
+      <Link>Compiler\Statements\Statement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\SwitchStatement.cs">
+      <Link>Compiler\Statements\SwitchStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\ThrowStatement.cs">
+      <Link>Compiler\Statements\ThrowStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\TryCatchFinallyStatement.cs">
+      <Link>Compiler\Statements\TryCatchFinallyStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\VarStatement.cs">
+      <Link>Compiler\Statements\VarStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\WhileStatement.cs">
+      <Link>Compiler\Statements\WhileStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Compiler\Statements\WithStatement.cs">
+      <Link>Compiler\Statements\WithStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\BigInteger.cs">
+      <Link>Core\BigInteger.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\CompatibilityMode.cs">
+      <Link>Core\CompatibilityMode.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\ConcatenatedString.cs">
+      <Link>Core\ConcatenatedString.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\JavaScriptException.cs">
+      <Link>Core\JavaScriptException.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\Null.cs">
+      <Link>Core\Null.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\NumberFormatter.cs">
+      <Link>Core\NumberFormatter.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\NumberParser.cs">
+      <Link>Core\NumberParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\ReflectionHelpers.cs">
+      <Link>Core\ReflectionHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\ScriptEngine.cs">
+      <Link>Core\ScriptEngine.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\ScriptSource\FileScriptSource.cs">
+      <Link>Core\ScriptSource\FileScriptSource.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\ScriptSource\ScriptSource.cs">
+      <Link>Core\ScriptSource\ScriptSource.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\ScriptSource\StringScriptSource.cs">
+      <Link>Core\ScriptSource\StringScriptSource.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\Serialization.cs">
+      <Link>Core\Serialization.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\StringHelpers.cs">
+      <Link>Core\StringHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\TypeComparer.cs">
+      <Link>Core\TypeComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\TypeConverter.cs">
+      <Link>Core\TypeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\TypeUtilities.cs">
+      <Link>Core\TypeUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Core\Undefined.cs">
+      <Link>Core\Undefined.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Array\ArrayConstructor.cs">
+      <Link>Library\Array\ArrayConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Array\ArrayInstance.cs">
+      <Link>Library\Array\ArrayInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Array\SparseArray.cs">
+      <Link>Library\Array\SparseArray.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Boolean\BooleanConstructor.cs">
+      <Link>Library\Boolean\BooleanConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Boolean\BooleanInstance.cs">
+      <Link>Library\Boolean\BooleanInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\ClrWrapper\ClrInstanceTypeWrapper.cs">
+      <Link>Library\ClrWrapper\ClrInstanceTypeWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\ClrWrapper\ClrInstanceWrapper.cs">
+      <Link>Library\ClrWrapper\ClrInstanceWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\ClrWrapper\ClrStaticTypeWrapper.cs">
+      <Link>Library\ClrWrapper\ClrStaticTypeWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Date\DateConstructor.cs">
+      <Link>Library\Date\DateConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Date\DateInstance.cs">
+      <Link>Library\Date\DateInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Date\DateParser.cs">
+      <Link>Library\Date\DateParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Error\ErrorConstructor.cs">
+      <Link>Library\Error\ErrorConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Error\ErrorInstance.cs">
+      <Link>Library\Error\ErrorInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\FirebugConsole\FirebugConsole.cs">
+      <Link>Library\FirebugConsole\FirebugConsole.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\FirebugConsole\IFirebugConsoleOutput.cs">
+      <Link>Library\FirebugConsole\IFirebugConsoleOutput.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\FirebugConsole\StandardConsoleOutput.cs">
+      <Link>Library\FirebugConsole\StandardConsoleOutput.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\ArgumentsInstance.cs">
+      <Link>Library\Function\ArgumentsInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\BoundFunction.cs">
+      <Link>Library\Function\BoundFunction.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\ClrFunction.cs">
+      <Link>Library\Function\ClrFunction.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\Delegates.cs">
+      <Link>Library\Function\Delegates.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\FunctionConstructor.cs">
+      <Link>Library\Function\FunctionConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\FunctionInstance.cs">
+      <Link>Library\Function\FunctionInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\ThrowTypeErrorFunction.cs">
+      <Link>Library\Function\ThrowTypeErrorFunction.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Function\UserDefinedFunction.cs">
+      <Link>Library\Function\UserDefinedFunction.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\GlobalObject.cs">
+      <Link>Library\GlobalObject.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\JSON\JSONLexer.cs">
+      <Link>Library\JSON\JSONLexer.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\JSON\JSONObject.cs">
+      <Link>Library\JSON\JSONObject.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\JSON\JSONParser.cs">
+      <Link>Library\JSON\JSONParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\JSON\JSONSerializer.cs">
+      <Link>Library\JSON\JSONSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\MathObject.cs">
+      <Link>Library\MathObject.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Number\NumberConstructor.cs">
+      <Link>Library\Number\NumberConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Number\NumberInstance.cs">
+      <Link>Library\Number\NumberInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\Attributes.cs">
+      <Link>Library\Object\Attributes.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\HiddenClassSchema.cs">
+      <Link>Library\Object\HiddenClassSchema.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\JSFunctionFlags.cs">
+      <Link>Library\Object\JSFunctionFlags.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\ObjectConstructor.cs">
+      <Link>Library\Object\ObjectConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\ObjectInstance.cs">
+      <Link>Library\Object\ObjectInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\PropertyAccessorValue.cs">
+      <Link>Library\Object\PropertyAccessorValue.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\PropertyAttributes.cs">
+      <Link>Library\Object\PropertyAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\PropertyDescriptor.cs">
+      <Link>Library\Object\PropertyDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\PropertyNameAndValue.cs">
+      <Link>Library\Object\PropertyNameAndValue.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\Object\SchemaProperty.cs">
+      <Link>Library\Object\SchemaProperty.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\RegExp\RegExpConstructor.cs">
+      <Link>Library\RegExp\RegExpConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\RegExp\RegExpInstance.cs">
+      <Link>Library\RegExp\RegExpInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\String\StringConstructor.cs">
+      <Link>Library\String\StringConstructor.cs</Link>
+    </Compile>
+    <Compile Include="..\Jurassic\Library\String\StringInstance.cs">
+      <Link>Library\String\StringInstance.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Jurassic\Compiler\Emit\Optimizations.txt">
+      <Link>Compiler\Emit\Optimizations.txt</Link>
+    </Content>
+    <Content Include="..\Jurassic\License.txt">
+      <Link>License.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Compiler\Emit\ILReader\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
+        <SilverlightProjectProperties />
+      </FlavorProperties>
+      <UserProperties ProjectLinkReference="2ce5502d-8710-4be3-9d90-201d526904b3" ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

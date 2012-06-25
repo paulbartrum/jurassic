@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E507B982-1D98-4A65-B77B-E382F461646E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Benchmarker</RootNamespace>
+    <AssemblyName>Benchmarker</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Files\sunspider-0.9.1\3d-cube.js" />
+    <Content Include="Files\sunspider-0.9.1\3d-morph.js" />
+    <Content Include="Files\sunspider-0.9.1\3d-raytrace.js" />
+    <Content Include="Files\sunspider-0.9.1\access-binary-trees.js" />
+    <Content Include="Files\sunspider-0.9.1\access-fannkuch.js" />
+    <Content Include="Files\sunspider-0.9.1\access-nbody.js" />
+    <Content Include="Files\sunspider-0.9.1\access-nsieve.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-3bit-bits-in-byte.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-bits-in-byte.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-bitwise-and.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-nsieve-bits.js" />
+    <Content Include="Files\sunspider-0.9.1\controlflow-recursive.js" />
+    <Content Include="Files\sunspider-0.9.1\crypto-aes.js" />
+    <Content Include="Files\sunspider-0.9.1\crypto-md5.js" />
+    <Content Include="Files\sunspider-0.9.1\crypto-sha1.js" />
+    <Content Include="Files\sunspider-0.9.1\date-format-tofte.js" />
+    <Content Include="Files\sunspider-0.9.1\date-format-xparb.js" />
+    <Content Include="Files\sunspider-0.9.1\math-cordic.js" />
+    <Content Include="Files\sunspider-0.9.1\math-partial-sums.js" />
+    <Content Include="Files\sunspider-0.9.1\math-spectral-norm.js" />
+    <Content Include="Files\sunspider-0.9.1\regexp-dna.js" />
+    <Content Include="Files\sunspider-0.9.1\string-base64.js" />
+    <Content Include="Files\sunspider-0.9.1\string-fasta.js" />
+    <Content Include="Files\sunspider-0.9.1\string-tagcloud.js" />
+    <Content Include="Files\sunspider-0.9.1\string-unpack-code.js" />
+    <Content Include="Files\sunspider-0.9.1\string-validate-input.js" />
+    <Content Include="Files\ubench\function-closure.js" />
+    <Content Include="Files\ubench\function-correct-args.js" />
+    <Content Include="Files\ubench\function-empty.js" />
+    <Content Include="Files\ubench\function-excess-args.js" />
+    <Content Include="Files\ubench\function-missing-args.js" />
+    <Content Include="Files\ubench\function-sum.js" />
+    <Content Include="Files\ubench\loop-empty-resolve.js" />
+    <Content Include="Files\ubench\loop-empty.js" />
+    <Content Include="Files\ubench\loop-sum.js" />
+    <Content Include="Files\v8\crypto.js" />
+    <Content Include="Files\v8\deltablue.js" />
+    <Content Include="Files\v8\earley-boyer.js" />
+    <Content Include="Files\v8\raytrace.js" />
+    <Content Include="Files\v8\README.txt" />
+    <Content Include="Files\v8\regexp.js" />
+    <Content Include="Files\v8\richards.js" />
+    <Content Include="Files\v8\splay.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jurassic\Jurassic.csproj">
+      <Project>{2CE5502D-8710-4BE3-9D90-201D526904B3}</Project>
+      <Name>Jurassic</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
