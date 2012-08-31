@@ -61,6 +61,47 @@ namespace Jurassic.Compiler
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the source of javascript code.
+        /// </summary>
+        public ScriptSource Source
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the function that is being generated.
+        /// </summary>
+        public string FunctionName
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets the portion of source code associated with the statement that code is
+        /// being generated for.
+        /// </summary>
+        public SourceCodeSpan SourceSpan
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Emits a sequence point, and sets the SourceSpan property.
+        /// </summary>
+        /// <param name="generator"> The IL generator used to emit the sequence point. </param>
+        /// <param name="span"> The source code span. </param>
+        public void MarkSequencePoint(ILGenerator generator, SourceCodeSpan span)
+        {
+            if (span == null)
+                throw new ArgumentNullException("span");
+            if (this.DebugDocument != null)
+                generator.MarkSequencePoint(this.DebugDocument, span);
+            this.SourceSpan = span;
+        }
 
 
         //     NESTED FUNCTIONS

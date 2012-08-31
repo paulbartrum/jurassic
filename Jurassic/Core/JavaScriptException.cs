@@ -27,6 +27,24 @@ namespace Jurassic
             this.ErrorObject = errorObject;
             this.LineNumber = lineNumber;
             this.SourcePath = sourcePath;
+            this.PopulateStackTrace();
+        }
+
+        /// <summary>
+        /// Creates a new JavaScriptException instance based on the given object.
+        /// </summary>
+        /// <param name="errorObject"> The javascript object that was thrown. </param>
+        /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
+        public JavaScriptException(object errorObject, int lineNumber, string sourcePath, string functionName)
+            : base(TypeConverter.ToString(errorObject))
+        {
+            this.ErrorObject = errorObject;
+            this.LineNumber = lineNumber;
+            this.SourcePath = sourcePath;
+            this.FunctionName = functionName;
+            this.PopulateStackTrace();
         }
 
         /// <summary>
@@ -39,7 +57,7 @@ namespace Jurassic
             : base(string.Format("{0}: {1}", name, message))
         {
             this.ErrorObject = CreateError(engine, name, message);
-            this.LineNumber = 0;
+            this.PopulateStackTrace();
         }
 
         /// <summary>
@@ -53,7 +71,7 @@ namespace Jurassic
             : base(string.Format("{0}: {1}", name, message), innerException)
         {
             this.ErrorObject = CreateError(engine, name, message);
-            this.LineNumber = 0;
+            this.PopulateStackTrace();
         }
 
         /// <summary>
@@ -69,6 +87,25 @@ namespace Jurassic
             this.ErrorObject = CreateError(engine, name, message);
             this.LineNumber = lineNumber;
             this.SourcePath = sourcePath;
+            this.PopulateStackTrace();
+        }
+
+        /// <summary>
+        /// Creates a new JavaScriptException instance.
+        /// </summary>
+        /// <param name="name"> The name of the error, e.g "RangeError". </param>
+        /// <param name="message"> A description of the error. </param>
+        /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
+        public JavaScriptException(ScriptEngine engine, string name, string message, int lineNumber, string sourcePath, string functionName)
+            : base(string.Format("{0}: {1}", name, message))
+        {
+            this.ErrorObject = CreateError(engine, name, message);
+            this.LineNumber = lineNumber;
+            this.SourcePath = sourcePath;
+            this.FunctionName = functionName;
+            this.PopulateStackTrace();
         }
 
 
@@ -131,8 +168,14 @@ namespace Jurassic
         /// </summary>
         public int LineNumber
         {
-            get { return (int)this.Data["LineNumber"]; }
-            private set { this.Data["LineNumber"] = value; }
+            get
+            {
+                object line = this.Data["LineNumber"];
+                if (line == null)
+                    return 0;
+                return (int)line;
+            }
+            internal set { this.Data["LineNumber"] = value; }
         }
 
         /// <summary>
@@ -142,7 +185,17 @@ namespace Jurassic
         public string SourcePath
         {
             get { return (string)this.Data["SourcePath"]; }
-            private set { this.Data["SourcePath"] = value; }
+            internal set { this.Data["SourcePath"] = value; }
+        }
+
+        /// <summary>
+        /// Gets the name of the function where the exception occurred.  Can be <c>null</c> if no
+        /// source information is available.
+        /// </summary>
+        public string FunctionName
+        {
+            get { return (string)this.Data["FunctionName"]; }
+            internal set { this.Data["FunctionName"] = value; }
         }
 
 
@@ -183,6 +236,18 @@ namespace Jurassic
 
             // Create an error instance.
             return (Library.ErrorInstance)constructor.ConstructLateBound(message);
+        }
+
+        /// <summary>
+        /// Populates the error object stack trace, if the error object is an Error.
+        /// </summary>
+        internal void PopulateStackTrace()
+        {
+            // Ensure the error object is an Error or derived instance.
+            var errorObject = this.ErrorObject as Library.ErrorInstance;
+            if (errorObject == null)
+                return;
+            errorObject.SetStackTrace(this.SourcePath, this.FunctionName, this.LineNumber);
         }
     }
 }

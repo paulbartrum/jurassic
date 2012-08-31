@@ -100,7 +100,7 @@ namespace Jurassic.Library
 
             // Transform the value by calling the replacer function, if one was provided.
             if (this.ReplacerFunction != null)
-                value = this.ReplacerFunction.CallLateBound(holder, propertyName, value);
+                value = this.ReplacerFunction.CallFromNative("stringify", holder, propertyName, value);
 
             return value;
         }
@@ -130,7 +130,7 @@ namespace Jurassic.Library
             {
                 if (propertyName == null)
                     propertyName = arrayIndex.ToString();
-                value = this.ReplacerFunction.CallLateBound(holder, propertyName, value);
+                value = this.ReplacerFunction.CallFromNative("stringify", holder, propertyName, value);
             }
 
             return value;

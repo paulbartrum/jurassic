@@ -7,7 +7,6 @@ namespace Jurassic.Compiler
     /// </summary>
     internal static class EmitConversion
     {
-
         /// <summary>
         /// Pops the value on the stack, converts it to the given type, then pushes the result
         /// onto the stack.
@@ -16,6 +15,34 @@ namespace Jurassic.Compiler
         /// <param name="fromType"> The type to convert from. </param>
         /// <param name="toType"> The type to convert to. </param>
         public static void Convert(ILGenerator generator, PrimitiveType fromType, PrimitiveType toType)
+        {
+            Convert(generator, fromType, toType, null, null, 0);
+        }
+
+        /// <summary>
+        /// Pops the value on the stack, converts it to the given type, then pushes the result
+        /// onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="fromType"> The type to convert from. </param>
+        /// <param name="toType"> The type to convert to. </param>
+        /// <param name="optimizationInfo"> Information about the line number, function and path. </param>
+        public static void Convert(ILGenerator generator, PrimitiveType fromType, PrimitiveType toType, OptimizationInfo optimizationInfo)
+        {
+            Convert(generator, fromType, toType, optimizationInfo.Source.Path, optimizationInfo.FunctionName, optimizationInfo.SourceSpan.StartLine);
+        }
+
+        /// <summary>
+        /// Pops the value on the stack, converts it to the given type, then pushes the result
+        /// onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="fromType"> The type to convert from. </param>
+        /// <param name="toType"> The type to convert to. </param>
+        /// <param name="path"> The path of the javascript source file that is currently executing. </param>
+        /// <param name="function"> The name of the currently executing function. </param>
+        /// <param name="line"> The line number of the statement that is currently executing. </param>
+        public static void Convert(ILGenerator generator, PrimitiveType fromType, PrimitiveType toType, string path, string function, int line)
         {
             // Check that a conversion is actually necessary.
             if (fromType == toType)
@@ -62,7 +89,7 @@ namespace Jurassic.Compiler
                     break;
 
                 case PrimitiveType.Object:
-                    ToObject(generator, fromType);
+                    ToObject(generator, fromType, path, function, line);
                     break;
 
                 default:
@@ -425,13 +452,41 @@ namespace Jurassic.Compiler
             
         }
 
+        //        /// <summary>
+        ///// Pops the value on the stack, converts it to a javascript object, then pushes the result
+        ///// onto the stack.
+        ///// </summary>
+        ///// <param name="generator"> The IL generator. </param>
+        ///// <param name="fromType"> The type to convert from. </param>
+        ///// <param name="path"> The path of the javascript source file that is currently executing. </param>
+        ///// <param name="function"> The name of the currently executing function. </param>
+        ///// <param name="line"> The line number of the statement that is currently executing. </param>
+        //public static void ToObject(ILGenerator generator, PrimitiveType fromType, string path, string function, int line)
+        //{
+        //}
+
         /// <summary>
         /// Pops the value on the stack, converts it to a javascript object, then pushes the result
         /// onto the stack.
         /// </summary>
         /// <param name="generator"> The IL generator. </param>
         /// <param name="fromType"> The type to convert from. </param>
-        public static void ToObject(ILGenerator generator, PrimitiveType fromType)
+        /// <param name="optimizationInfo"> Information about the line number, function and path. </param>
+        public static void ToObject(ILGenerator generator, PrimitiveType fromType, OptimizationInfo optimizationInfo)
+        {
+            ToObject(generator, fromType, optimizationInfo.Source.Path, optimizationInfo.FunctionName, optimizationInfo.SourceSpan.StartLine);
+        }
+
+        /// <summary>
+        /// Pops the value on the stack, converts it to a javascript object, then pushes the result
+        /// onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="fromType"> The type to convert from. </param>
+        /// <param name="path"> The path of the javascript source file that is currently executing. </param>
+        /// <param name="function"> The name of the currently executing function. </param>
+        /// <param name="line"> The line number of the statement that is currently executing. </param>
+        public static void ToObject(ILGenerator generator, PrimitiveType fromType, string path, string function, int line)
         {
             // Check that a conversion is actually necessary.
             if (fromType == PrimitiveType.Object)
@@ -441,12 +496,12 @@ namespace Jurassic.Compiler
             {
                 case PrimitiveType.Undefined:
                     // Converting from undefined always throws an exception.
-                    EmitHelpers.EmitThrow(generator, "TypeError", "Undefined cannot be converted to an object");
+                    EmitHelpers.EmitThrow(generator, "TypeError", "Undefined cannot be converted to an object", path, function, line);
                     break;
 
                 case PrimitiveType.Null:
                     // Converting from null always throws an exception.
-                    EmitHelpers.EmitThrow(generator, "TypeError", "Null cannot be converted to an object");
+                    EmitHelpers.EmitThrow(generator, "TypeError", "Null cannot be converted to an object", path, function, line);
                     break;
 
                 case PrimitiveType.Bool:

@@ -129,7 +129,7 @@ namespace Jurassic.Compiler
                             generator.LoadVariable(variable.Store);
 
                             // Ensure that we match ResultType.
-                            EmitConversion.Convert(generator, variable.Type, this.ResultType);
+                            EmitConversion.Convert(generator, variable.Type, this.ResultType, optimizationInfo);
                         }
                         else
                         {
@@ -289,7 +289,7 @@ namespace Jurassic.Compiler
 
             // Throw an error if the name does not exist and throwIfUnresolvable is true.
             if (scope == null && throwIfUnresolvable == true)
-                EmitHelpers.EmitThrow(generator, "ReferenceError", this.Name + " is not defined");
+                EmitHelpers.EmitThrow(generator, "ReferenceError", this.Name + " is not defined", optimizationInfo);
 
             // Release the temporary variable.
             if (scopeVariable != null)
@@ -344,13 +344,13 @@ namespace Jurassic.Compiler
                             {
                                 // The value to store is on the top of the stack - convert it to the
                                 // storage type of the variable.
-                                EmitConversion.Convert(generator, valueType, variable.Type);
+                                EmitConversion.Convert(generator, valueType, variable.Type, optimizationInfo);
                             }
                             else
                             {
                                 // The value to store is in a temporary variable.
                                 generator.LoadVariable(value);
-                                EmitConversion.Convert(generator, PrimitiveType.Any, variable.Type);
+                                EmitConversion.Convert(generator, PrimitiveType.Any, variable.Type, optimizationInfo);
                             }
 
                             // Store the value in the variable.
@@ -362,7 +362,7 @@ namespace Jurassic.Compiler
                             {
                                 // The value to store is on the top of the stack - convert it to an
                                 // object and store it in a temporary variable.
-                                EmitConversion.Convert(generator, valueType, PrimitiveType.Any);
+                                EmitConversion.Convert(generator, valueType, PrimitiveType.Any, optimizationInfo);
                                 value = generator.CreateTemporaryVariable(typeof(object));
                                 generator.StoreVariable(value);
                             }
@@ -399,7 +399,7 @@ namespace Jurassic.Compiler
                             {
                                 // The value to store is on the top of the stack - convert it to an
                                 // object and store it in a temporary variable.
-                                EmitConversion.Convert(generator, valueType, PrimitiveType.Any);
+                                EmitConversion.Convert(generator, valueType, PrimitiveType.Any, optimizationInfo);
                                 value = generator.CreateTemporaryVariable(typeof(object));
                                 generator.StoreVariable(value);
                             }
@@ -437,7 +437,7 @@ namespace Jurassic.Compiler
                     {
                         // The value to store is on the top of the stack - convert it to an
                         // object and store it in a temporary variable.
-                        EmitConversion.Convert(generator, valueType, PrimitiveType.Any);
+                        EmitConversion.Convert(generator, valueType, PrimitiveType.Any, optimizationInfo);
                         value = generator.CreateTemporaryVariable(typeof(object));
                         generator.StoreVariable(value);
                     }
@@ -575,7 +575,7 @@ namespace Jurassic.Compiler
 
             // Throw an error if the name does not exist and throwIfUnresolvable is true.
             if (scope == null && throwIfUnresolvable == true)
-                EmitHelpers.EmitThrow(generator, "ReferenceError", this.Name + " is not defined");
+                EmitHelpers.EmitThrow(generator, "ReferenceError", this.Name + " is not defined", optimizationInfo);
 
             // Release the temporary variables.
             if (value != null)

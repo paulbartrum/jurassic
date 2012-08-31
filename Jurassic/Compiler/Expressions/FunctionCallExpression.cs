@@ -108,6 +108,11 @@ namespace Jurassic.Compiler
             EmitHelpers.EmitThrow(generator, "TypeError", string.Format("'{0}' is not a function", this.Target.ToString()));
             generator.DefineLabelPosition(endOfTypeCheck);
 
+            // Pass in the path, function name and line.
+            generator.LoadStringOrNull(optimizationInfo.Source.Path);
+            generator.LoadStringOrNull(optimizationInfo.FunctionName);
+            generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
+
             // Generate code to produce the "this" value.  There are three cases.
             if (this.Target is NameExpression)
             {
@@ -135,7 +140,7 @@ namespace Jurassic.Compiler
             GenerateArgumentsArray(generator, optimizationInfo);
 
             // Call FunctionInstance.CallLateBound(thisValue, argumentValues)
-            generator.Call(ReflectionHelpers.FunctionInstance_CallLateBound);
+            generator.Call(ReflectionHelpers.FunctionInstance_CallWithStackTrace);
 
             // Allow reuse of the temporary variable.
             if (targetBase != null)
