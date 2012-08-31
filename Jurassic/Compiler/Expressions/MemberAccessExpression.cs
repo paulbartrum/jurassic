@@ -96,7 +96,7 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
                 // Load the right-hand side and convert to a uint32.
                 var rhs = this.GetOperand(1);
@@ -132,7 +132,7 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
                 // TODO: share these variables somehow.
                 var cacheKey = generator.DeclareVariable(typeof(object));
@@ -181,7 +181,7 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
                 // Load the property name and convert to a string.
                 var rhs = this.GetOperand(1);
@@ -244,7 +244,7 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
                 // Load the right-hand side and convert to a uint32.
                 var rhs = this.GetOperand(1);
@@ -284,7 +284,7 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
                 // TODO: share these variables somehow.
                 var cacheKey = generator.DeclareVariable(typeof(object));
@@ -336,7 +336,7 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
                 // Load the property name and convert to a string.
                 var rhs = this.GetOperand(1);
@@ -364,7 +364,7 @@ namespace Jurassic.Compiler
             // Load the left-hand side and convert to an object instance.
             var lhs = this.GetOperand(0);
             lhs.GenerateCode(generator, optimizationInfo);
-            EmitConversion.ToObject(generator, lhs.ResultType);
+            EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
             // Load the property name and convert to a string.
             var rhs = this.GetOperand(1);

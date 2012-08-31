@@ -19,6 +19,22 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Determines if this node or any of this node's children are of the given type.
+        /// </summary>
+        /// <typeparam name="T"> The type of AstNode to search for. </typeparam>
+        /// <returns> <c>true</c> if this node or any of this node's children are of the given
+        /// type; <c>false</c> otherwise. </returns>
+        public bool ContainsNodeOfType<T>() where T : AstNode
+        {
+            if (this is T)
+                return true;
+            foreach (var child in this.ChildNodes)
+                if (child.ContainsNodeOfType<T>())
+                    return true;
+            return false;
+        }
+
+        /// <summary>
         /// Generates CIL for the expression.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>

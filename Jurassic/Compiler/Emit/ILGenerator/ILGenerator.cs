@@ -396,6 +396,18 @@ namespace Jurassic.Compiler
         /// <param name="value"> The string to push onto the stack. </param>
         public abstract void LoadString(string value);
 
+        /// <summary>
+        /// Pushes a constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The string to push onto the stack.  Can be <c>null</c>. </param>
+        public void LoadStringOrNull(string value)
+        {
+            if (value == null)
+                LoadNull();
+            else
+                LoadString(value);
+        }
+
 
 
         //     RELATIONAL OPERATIONS
@@ -809,23 +821,23 @@ namespace Jurassic.Compiler
         public abstract void EndExceptionBlock();
 
         /// <summary>
-        /// Begins a catch block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a catch block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         /// <param name="exceptionType"> The type of exception to handle. </param>
         public abstract void BeginCatchBlock(Type exceptionType);
 
         /// <summary>
-        /// Begins a finally block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a finally block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         public abstract void BeginFinallyBlock();
 
         /// <summary>
-        /// Begins a filter block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a filter block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         public abstract void BeginFilterBlock();
 
         /// <summary>
-        /// Begins a fault block.  BeginTryCatchFinallyBlock() must have already been called.
+        /// Begins a fault block.  BeginExceptionBlock() must have already been called.
         /// </summary>
         public abstract void BeginFaultBlock();
 

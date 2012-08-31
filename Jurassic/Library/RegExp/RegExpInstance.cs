@@ -418,7 +418,7 @@ namespace Jurassic.Library
                 }
                 parameters[match.Groups.Count] = match.Index;
                 parameters[match.Groups.Count + 1] = input;
-                return TypeConverter.ToString(replaceFunction.CallLateBound(null, parameters));
+                return TypeConverter.ToString(replaceFunction.CallFromNative("replace", null, parameters));
             }, this.Global == true ? int.MaxValue : 1);
         }
 

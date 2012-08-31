@@ -1023,7 +1023,7 @@ namespace Jurassic
             var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
                 this,                                                   // The script engine.
                 scope,                                                  // The scope to run the code in.
-                new StringScriptSource(code),                           // The source code to execute.
+                new StringScriptSource(code, "eval"),                   // The source code to execute.
                 options,                                                // Options.
                 thisObject);                                            // The value of the "this" keyword.
 
@@ -1039,6 +1039,87 @@ namespace Jurassic
         }
 
 
+
+        //     STACK TRACE SUPPORT
+        //_________________________________________________________________________________________
+
+        private class StackFrame
+        {
+            public string Path;
+            public string Function;
+            public int Line;
+        }
+
+        private Stack<StackFrame> stackFrames = new Stack<StackFrame>();
+
+        /// <summary>
+        /// Creates a stack trace.
+        /// </summary>
+        /// <param name="errorName"> The name of the error (e.g. "ReferenceError"). </param>
+        /// <param name="message"> The error message. </param>
+        /// <param name="path"> The path of the javascript source file that is currently executing. </param>
+        /// <param name="function"> The name of the currently executing function. </param>
+        /// <param name="line"> The line number of the statement that is currently executing. </param>
+        internal string FormatStackTrace(string errorName, string message, string path, string function, int line)
+        {
+            var result = new System.Text.StringBuilder(errorName);
+            if (string.IsNullOrEmpty(message) == false)
+            {
+                result.Append(": ");
+                result.Append(message);
+            }
+            if (path != null || function != null || line != 0)
+                AppendStackFrame(result, path, function, line);
+            foreach (var frame in stackFrames)
+                AppendStackFrame(result, frame.Path, frame.Function, frame.Line);
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Appends a stack frame to the end of the given StringBuilder instance.
+        /// </summary>
+        /// <param name="result"> The StringBuilder to append to. </param>
+        /// <param name="path"> The path of the javascript source file. </param>
+        /// <param name="function"> The name of the function. </param>
+        /// <param name="line"> The line number of the statement. </param>
+        private void AppendStackFrame(System.Text.StringBuilder result, string path, string function, int line)
+        {
+            result.AppendLine();
+            result.Append("    ");
+            result.Append("at ");
+            if (string.IsNullOrEmpty(function) == false)
+            {
+                result.Append(function);
+                result.Append(" (");
+            }
+            result.Append(path ?? "unknown");
+            if (line > 0)
+            {
+                result.Append(":");
+                result.Append(line);
+            }
+            if (string.IsNullOrEmpty(function) == false)
+                result.Append(")");
+        }
+
+        /// <summary>
+        /// Pushes a frame to the javascript stack.
+        /// </summary>
+        /// <param name="path"> The path of the javascript source file that contains the function. </param>
+        /// <param name="function"> The name of the function that is calling another function. </param>
+        /// <param name="line"> The line number of the function call. </param>
+        internal void PushStackFrame(string path, string function, int line)
+        {
+            this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line });
+        }
+
+        /// <summary>
+        /// Pops a frame from the javascript stack.
+        /// </summary>
+        internal void PopStackFrame()
+        {
+            this.stackFrames.Pop();
+        }
 
 
         //     CLRTYPEWRAPPER CACHE

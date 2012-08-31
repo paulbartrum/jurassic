@@ -57,9 +57,38 @@ namespace Jurassic.Compiler
         /// <param name="message"> The error message. </param>
         public static void EmitThrow(ILGenerator generator, string name, string message)
         {
+            EmitThrow(generator, name, message, null, null, 0);
+        }
+
+        /// <summary>
+        /// Emits a JavaScriptException.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="name"> The type of error to generate. </param>
+        /// <param name="message"> The error message. </param>
+        /// <param name="optimizationInfo"> Information about the line number, function and path. </param>
+        public static void EmitThrow(ILGenerator generator, string name, string message, OptimizationInfo optimizationInfo)
+        {
+            EmitThrow(generator, name, message, optimizationInfo.Source.Path, optimizationInfo.FunctionName, optimizationInfo.SourceSpan.StartLine);
+        }
+
+        /// <summary>
+        /// Emits a JavaScriptException.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="name"> The type of error to generate. </param>
+        /// <param name="message"> The error message. </param>
+        /// <param name="path"> The path of the javascript source file that is currently executing. </param>
+        /// <param name="function"> The name of the currently executing function. </param>
+        /// <param name="line"> The line number of the statement that is currently executing. </param>
+        public static void EmitThrow(ILGenerator generator, string name, string message, string path, string function, int line)
+        {
             EmitHelpers.LoadScriptEngine(generator);
             generator.LoadString(name);
             generator.LoadString(message);
+            generator.LoadInt32(line);
+            generator.LoadStringOrNull(path);
+            generator.LoadStringOrNull(function);
             generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Error);
             generator.Throw();
         }

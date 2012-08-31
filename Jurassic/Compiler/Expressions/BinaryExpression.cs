@@ -733,6 +733,9 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.TypeUtilities_TypeOf);
             generator.StoreArrayElement(typeof(object));
             generator.Call(ReflectionHelpers.String_Format);
+            generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
+            generator.LoadStringOrNull(optimizationInfo.Source.Path);
+            generator.LoadStringOrNull(optimizationInfo.FunctionName);
             generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Error);
             generator.Throw();
             generator.DefineLabelPosition(endOfTypeCheck);
@@ -787,6 +790,9 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.TypeUtilities_TypeOf);
             generator.StoreArrayElement(typeof(object));
             generator.Call(ReflectionHelpers.String_Format);
+            generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
+            generator.LoadStringOrNull(optimizationInfo.Source.Path);
+            generator.LoadStringOrNull(optimizationInfo.FunctionName);
             generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Error);
             generator.Throw();
             generator.DefineLabelPosition(endOfTypeCheck);

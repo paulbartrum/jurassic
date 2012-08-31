@@ -897,7 +897,7 @@ namespace Jurassic.Library
                         return 1f;
                     if (b == Undefined.Value)
                         return -1f;
-                    return TypeConverter.ToNumber(comparisonFunction.CallLateBound(null, a, b));
+                    return TypeConverter.ToNumber(comparisonFunction.CallFromNative("sort", null, a, b));
                 }; 
 
             try
@@ -1227,7 +1227,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    if (TypeConverter.ToBoolean(callbackFunction.CallLateBound(context, elementValue, i, thisObj)) == false)
+                    if (TypeConverter.ToBoolean(callbackFunction.CallFromNative("every", context, elementValue, i, thisObj)) == false)
                         return false;
                 }
             }
@@ -1269,7 +1269,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    if (TypeConverter.ToBoolean(callbackFunction.CallLateBound(context, elementValue, i, thisObj)) == true)
+                    if (TypeConverter.ToBoolean(callbackFunction.CallFromNative("some", context, elementValue, i, thisObj)) == true)
                         return true;
                 }
             }
@@ -1307,7 +1307,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    callbackFunction.CallLateBound(context, elementValue, i, thisObj);
+                    callbackFunction.CallFromNative("forEach", context, elementValue, i, thisObj);
                 }
             }
         }
@@ -1351,7 +1351,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    object result = callbackFunction.CallLateBound(context, elementValue, i, thisObj);
+                    object result = callbackFunction.CallFromNative("map", context, elementValue, i, thisObj);
 
                     // Store the result.
                     resultArray[(uint)i] = result;
@@ -1399,7 +1399,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    bool includeInArray = TypeConverter.ToBoolean(callbackFunction.CallLateBound(context, elementValue, i, thisObj));
+                    bool includeInArray = TypeConverter.ToBoolean(callbackFunction.CallFromNative("filter", context, elementValue, i, thisObj));
 
                     // Store the result if the callback function returned true.
                     if (includeInArray == true)
@@ -1463,7 +1463,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    accumulatedValue = callbackFunction.CallLateBound(Undefined.Value, accumulatedValue, elementValue, i, thisObj);
+                    accumulatedValue = callbackFunction.CallFromNative("reduce", Undefined.Value, accumulatedValue, elementValue, i, thisObj);
                 }
             }
 
@@ -1525,7 +1525,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    accumulatedValue = callbackFunction.CallLateBound(Undefined.Value, accumulatedValue, elementValue, i, thisObj);
+                    accumulatedValue = callbackFunction.CallFromNative("reduceRight", Undefined.Value, accumulatedValue, elementValue, i, thisObj);
                 }
             }
 

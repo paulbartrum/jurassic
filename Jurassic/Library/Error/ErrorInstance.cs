@@ -22,31 +22,13 @@ namespace Jurassic.Library
         /// creating this property. </param>
         /// <param name="message"> The initial value of the message property.  Pass <c>null</c> to
         /// avoid creating this property. </param>
-        /// <param name="generateStack"> Indicates whether to generate a stack trace and attach it
-        /// to this object. </param>
-        internal ErrorInstance(ObjectInstance prototype, string name, string message, bool generateStack)
+        internal ErrorInstance(ObjectInstance prototype, string name, string message)
             : base(prototype)
         {
             if (name != null)
                 this.FastSetProperty("name", name, PropertyAttributes.FullAccess);
             if (message != null)
                 this.FastSetProperty("message", message, PropertyAttributes.FullAccess);
-
-#if !SILVERLIGHT            
-            if (generateStack == true && ScriptEngine.LowPrivilegeEnvironment == false)
-            {
-                //try
-                //{
-                    var stackTrace = string.Concat(this.ToStringJS(), Environment.NewLine, Environment.StackTrace);
-                    this.FastSetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
-                //}
-                //catch (System.Security.SecurityException)
-                //{
-                //    // Note: Environment.StackTrace requires EnvironmentPermission (unrestricted).
-                //    ScriptEngine.SetLowPrivilegeEnvironment();
-                //}
-            }
-#endif
         }
 
 
@@ -80,11 +62,26 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets the stack trace
+        /// Gets the stack trace.  Note that this is populated when the object is thrown, NOT when
+        /// it is initialized.
         /// </summary>
         public string Stack
         {
             get { return TypeConverter.ToString(this["stack"]); }
+        }
+
+        /// <summary>
+        /// Sets the stack trace information.
+        /// </summary>
+        /// <param name="errorName"> The name of the error (e.g. "ReferenceError"). </param>
+        /// <param name="message"> The error message. </param>
+        /// <param name="path"> The path of the javascript source file that is currently executing. </param>
+        /// <param name="function"> The name of the currently executing function. </param>
+        /// <param name="line"> The line number of the statement that is currently executing. </param>
+        internal void SetStackTrace(string path, string function, int line)
+        {
+            var stackTrace = this.Engine.FormatStackTrace(this.Name, this.Message, path, function, line);
+            this.FastSetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
         }
 
 

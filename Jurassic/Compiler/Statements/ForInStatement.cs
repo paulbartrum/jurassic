@@ -30,7 +30,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the portion of source code associated with the variable.
         /// </summary>
-        public SourceCodeSpan VariableDebugInfo
+        public SourceCodeSpan VariableSourceSpan
         {
             get;
             set;
@@ -48,7 +48,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the portion of source code associated with the target object.
         /// </summary>
-        public SourceCodeSpan TargetObjectDebugInfo
+        public SourceCodeSpan TargetObjectSourceSpan
         {
             get;
             set;
@@ -71,7 +71,7 @@ namespace Jurassic.Compiler
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Generate code for the start of the statement.
-            var statementLocals = new StatementLocals() { NonDefaultBreakStatementBehavior = true, NonDefaultDebugInfoBehavior = true };
+            var statementLocals = new StatementLocals() { NonDefaultBreakStatementBehavior = true, NonDefaultSourceSpanBehavior = true };
             GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
 
             // Construct a loop expression.
@@ -87,6 +87,7 @@ namespace Jurassic.Compiler
             // break-target:
 
             // Call IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
+            optimizationInfo.MarkSequencePoint(generator, this.TargetObjectSourceSpan);
             EmitHelpers.LoadScriptEngine(generator);
             this.TargetObject.GenerateCode(generator, optimizationInfo);
             EmitConversion.ToAny(generator, this.TargetObject.ResultType);
@@ -104,7 +105,7 @@ namespace Jurassic.Compiler
 
             // Emit debugging information.
             if (optimizationInfo.DebugDocument != null)
-                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.VariableDebugInfo);
+                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.VariableSourceSpan);
 
             //   if (enumerator.MoveNext() == false)
             //     goto break-target;

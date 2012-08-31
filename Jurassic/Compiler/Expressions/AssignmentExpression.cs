@@ -110,15 +110,15 @@ namespace Jurassic.Compiler
                 {
                     case OperatorType.PostIncrement:
                     case OperatorType.PostDecrement:
-                        EmitHelpers.EmitThrow(generator, "ReferenceError", "Invalid left-hand side in postfix operation");
+                        EmitHelpers.EmitThrow(generator, "ReferenceError", "Invalid left-hand side in postfix operation", optimizationInfo);
                         break;
                     case OperatorType.PreIncrement:
                     case OperatorType.PreDecrement:
-                        EmitHelpers.EmitThrow(generator, "ReferenceError", "Invalid left-hand side in prefix operation");
+                        EmitHelpers.EmitThrow(generator, "ReferenceError", "Invalid left-hand side in prefix operation", optimizationInfo);
                         break;
                     case OperatorType.Assignment:
                     default:
-                        EmitHelpers.EmitThrow(generator, "ReferenceError", "Invalid left-hand side in assignment");
+                        EmitHelpers.EmitThrow(generator, "ReferenceError", "Invalid left-hand side in assignment", optimizationInfo);
                         break;
                 }
                 //if (optimizationInfo.SuppressReturnValue == false)

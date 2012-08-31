@@ -36,7 +36,7 @@ namespace Jurassic.Compiler
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             // Generate code for the start of the statement.
-            var statementLocals = new StatementLocals();
+            var statementLocals = new StatementLocals() { NonDefaultSourceSpanBehavior = true };
             GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
 
             foreach (var statement in this.Statements)

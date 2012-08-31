@@ -159,6 +159,48 @@ namespace Jurassic.Library
         public abstract object CallLateBound(object thisObject, params object[] argumentValues);
 
         /// <summary>
+        /// Calls this function, passing in the given "this" value and zero or more arguments.
+        /// </summary>
+        /// <param name="function"> The name of the caller function. </param>
+        /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
+        /// <returns> The value that was returned from the function. </returns>
+        internal object CallFromNative(string function, object thisObject, params object[] argumentValues)
+        {
+            this.Engine.PushStackFrame("native", function, 0);
+            try
+            {
+                return CallLateBound(thisObject, argumentValues);
+            }
+            finally
+            {
+                this.Engine.PopStackFrame();
+            }
+        }
+
+        /// <summary>
+        /// Calls this function, passing in the given "this" value and zero or more arguments.
+        /// </summary>
+        /// <param name="path"> The path of the javascript source file that contains the caller. </param>
+        /// <param name="function"> The name of the caller function. </param>
+        /// <param name="line"> The line number of the statement that is calling this function. </param>
+        /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
+        /// <returns> The value that was returned from the function. </returns>
+        public object CallWithStackTrace(string path, string function, int line, object thisObject, object[] argumentValues)
+        {
+            this.Engine.PushStackFrame(path, function, line);
+            try
+            {
+                return CallLateBound(thisObject, argumentValues);
+            }
+            finally
+            {
+                this.Engine.PopStackFrame();
+            }
+        }
+
+        /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
         /// <param name="argumentValues"> An array of argument values. </param>

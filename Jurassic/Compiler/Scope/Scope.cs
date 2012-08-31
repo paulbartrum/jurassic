@@ -284,7 +284,7 @@ namespace Jurassic.Compiler
                         generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
                         generator.LoadString(variable.Name);
                         variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
-                        EmitConversion.Convert(generator, variable.ValueAtTopOfScope.ResultType, PrimitiveType.Any);
+                        EmitConversion.Convert(generator, variable.ValueAtTopOfScope.ResultType, PrimitiveType.Any, optimizationInfo);
                         generator.LoadInt32((int)attributes);
                         generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor2);
                         generator.LoadBoolean(false);

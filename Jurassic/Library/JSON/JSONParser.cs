@@ -119,7 +119,7 @@ namespace Jurassic.Library
             {
                 var tempObject = this.engine.Object.Construct();
                 tempObject[string.Empty] = root;
-                return this.ReviverFunction.CallLateBound(tempObject, string.Empty, root);
+                return this.ReviverFunction.CallFromNative("parse", tempObject, string.Empty, root);
             }
 
             return root;
@@ -180,7 +180,7 @@ namespace Jurassic.Library
                 // Apply the reviver function.
                 if (this.ReviverFunction != null)
                 {
-                    var transformedValue = this.ReviverFunction.CallLateBound(result, arrayIndex.ToString(), elementValue);
+                    var transformedValue = this.ReviverFunction.CallFromNative("parse", result, arrayIndex.ToString(), elementValue);
                     if (transformedValue != elementValue)
                     {
                         if (transformedValue == Undefined.Value || transformedValue == null)
@@ -247,7 +247,7 @@ namespace Jurassic.Library
                 // Apply the reviver function.
                 if (this.ReviverFunction != null)
                 {
-                    var transformedValue = this.ReviverFunction.CallLateBound(result, propertyName, propertyValue);
+                    var transformedValue = this.ReviverFunction.CallFromNative("parse", result, propertyName, propertyValue);
                     if (transformedValue != propertyValue)
                     {
                         if (transformedValue == Undefined.Value || transformedValue == null)
