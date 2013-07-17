@@ -325,9 +325,9 @@ namespace Jurassic.Compiler
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal constant.", this.lineNumber, this.Source.Path);
                 case NumberParser.ParseCoreStatus.OctalLiteral:
-                    // Octal number are only supported in ECMAScript 3 compatibility mode.
-                    if (this.engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not supported.", this.lineNumber, this.Source.Path);
+                    // Octal number are not supported in strict mode.
+                    if (this.StrictMode)
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not allowed in strict mode.", this.lineNumber, this.Source.Path);
                     break;
                 case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal constant.", this.lineNumber, this.Source.Path);
@@ -499,8 +499,8 @@ namespace Jurassic.Compiler
         private char ReadOctalEscapeSequence(int firstDigit)
         {
             // Octal escape sequences are only supported in ECMAScript 3 compatibility mode.
-            if (this.engine.CompatibilityMode != CompatibilityMode.ECMAScript3)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are only supported in ECMAScript 3 compatibility mode.", this.lineNumber, this.Source.Path);
+            if (this.StrictMode)
+                throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are not allowed in strict mode.", this.lineNumber, this.Source.Path);
 
             int numericValue = firstDigit;
             for (int i = 0; i < 2; i++)
