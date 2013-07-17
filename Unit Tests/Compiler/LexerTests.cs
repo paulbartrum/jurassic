@@ -193,7 +193,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'te\r\nst'"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'test\""));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("\"test'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"'te\1st'"));
+            Assert.AreEqual("test", TestUtils.Evaluate(@"'te\1st'"));
         }
 
         [TestMethod]
@@ -225,14 +225,21 @@ namespace UnitTests
         [TestMethod]
         public void OctalNumbers()
         {
-            // Octal numbers and escape sequences are not supported in ECMAScript 5 mode.
+            // Octal numbers and escape sequences are not supported in strict mode.
+            Assert.AreEqual(0, TestUtils.Evaluate("'use strict'; 0"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; 05"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; 011"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; 0123456701234567"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; 09"));
+
+            // Octal numbers and escape sequences are supported in ECMAScript 5 mode.
             Assert.AreEqual(0, TestUtils.Evaluate("0"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("05"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("011"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0123456701234567"));
+            Assert.AreEqual(5, TestUtils.Evaluate("05"));
+            Assert.AreEqual(9, TestUtils.Evaluate("011"));
+            Assert.AreEqual(5744368105847.0, TestUtils.Evaluate("0123456701234567"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("09"));
 
-            // But they are supported in compatibility mode.
+            // And they are supported in compatibility mode.
             TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
             try
             {
@@ -251,18 +258,29 @@ namespace UnitTests
         [TestMethod]
         public void OctalEscapeSequence()
         {
-            // Octal escape sequences are not supported in ECMAScript 5 mode.
-            Assert.AreEqual("\0", TestUtils.Evaluate("'\\0'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\05'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\05a'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\011'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0377'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0400'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\09'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\0444'"));
-            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\44'"));
+            // Octal escape sequences are not supported in strict mode.
+            Assert.AreEqual("\0", TestUtils.Evaluate("'use strict'; '\\0'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\05'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\05a'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\011'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\0377'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\0400'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\09'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\0444'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'use strict'; '\\44'"));
 
-            // But they are supported in compatibility mode.
+            // Octal escape sequences are supported in ECMAScript 5 mode.
+            Assert.AreEqual("\0", TestUtils.Evaluate("'\\0'"));
+            Assert.AreEqual("\u0005", TestUtils.Evaluate("'\\05'"));
+            Assert.AreEqual("\u0005Z", TestUtils.Evaluate("'\\05Z'"));
+            Assert.AreEqual("\u0009", TestUtils.Evaluate("'\\011'"));
+            Assert.AreEqual("\u001F7", TestUtils.Evaluate("'\\0377'"));
+            Assert.AreEqual("\u00200", TestUtils.Evaluate("'\\0400'"));
+            Assert.AreEqual("$4", TestUtils.Evaluate("'\\0444'"));
+            Assert.AreEqual("$", TestUtils.Evaluate("'\\44'"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'\\09'"));
+
+            // And they are supported in compatibility mode.
             TestUtils.CompatibilityMode = CompatibilityMode.ECMAScript3;
             try
             {
