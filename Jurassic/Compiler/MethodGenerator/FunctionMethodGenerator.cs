@@ -13,16 +13,18 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="engine"> The script engine. </param>
         /// <param name="scope"> The function scope. </param>
-        /// <param name="name"> The name of the function. </param>
+        /// <param name="functionName"> The name of the function. </param>
+        /// <param name="includeNameInScope"> Indicates whether the name should be included in the function scope. </param>
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="bodyText"> The source code of the function. </param>
         /// <param name="body"> The root of the abstract syntax tree for the body of the function. </param>
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, IList<string> argumentNames, string bodyText, Statement body, string scriptPath, CompilerOptions options)
+        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, bool includeNameInScope, IList<string> argumentNames, string bodyText, Statement body, string scriptPath, CompilerOptions options)
             : base(engine, scope, new DummyScriptSource(scriptPath), options)
         {
             this.Name = functionName;
+            this.IncludeNameInScope = includeNameInScope;
             this.ArgumentNames = argumentNames;
             this.BodyRoot = body;
             this.BodyText = bodyText;
@@ -87,6 +89,17 @@ namespace Jurassic.Compiler
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Indicates whether the function name should be included in the function scope (i.e. if
+        /// this is <c>false</c>, then you cannot reference the function by name from within the
+        /// body of the function).
+        /// </summary>
+        internal bool IncludeNameInScope
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -262,6 +275,7 @@ namespace Jurassic.Compiler
 
             // Transfer the function name into the scope.
             if (string.IsNullOrEmpty(this.Name) == false &&
+                this.IncludeNameInScope == true &&
                 this.ArgumentNames.Contains(this.Name) == false &&
                 optimizationInfo.MethodOptimizationHints.HasVariable(this.Name))
             {
