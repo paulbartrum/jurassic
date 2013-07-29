@@ -3,3 +3,6 @@ bin
 obj
 *.suo
 Bin
+_ReSharper.*
+TestResults/*
+*.user
