@@ -1253,6 +1253,7 @@ namespace UnitTests
             Assert.AreEqual(3, TestUtils.Evaluate("x = {set: 3}; x.set"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get 'f'() { return 1; }}; x.f = 5; x.f"));
             Assert.AreEqual(1, TestUtils.Evaluate("x = {get 0() { return 1; }}; x[0] = 5; x[0]"));
+            Assert.AreEqual(4, TestUtils.Evaluate("var f = 4; x = {get f() { return f; }}; x.f"));
 
             // Check that "this" is correct inside getters and setters.
             Assert.AreEqual(9, TestUtils.Evaluate("x = { get b() { return this.a; } }; y = Object.create(x); y.a = 9; y.b"));
