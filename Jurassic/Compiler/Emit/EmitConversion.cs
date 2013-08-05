@@ -518,6 +518,9 @@ namespace Jurassic.Compiler
                     EmitHelpers.LoadScriptEngine(generator);
                     generator.LoadVariable(temp);
                     generator.ReleaseTemporaryVariable(temp);
+                    generator.LoadInt32(line);
+                    generator.LoadStringOrNull(path);
+                    generator.LoadStringOrNull(function);
                     generator.Call(ReflectionHelpers.TypeConverter_ToObject);
                     break;
 

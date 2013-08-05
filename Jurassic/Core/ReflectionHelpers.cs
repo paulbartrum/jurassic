@@ -137,7 +137,7 @@ namespace Jurassic
             TypeConverter_ToConcatenatedString = GetStaticMethod(typeof(TypeConverter), "ToConcatenatedString", typeof(object));
             TypeConverter_ToNumber = GetStaticMethod(typeof(TypeConverter), "ToNumber", typeof(object));
             TypeConverter_ToBoolean = GetStaticMethod(typeof(TypeConverter), "ToBoolean", typeof(object));
-            TypeConverter_ToObject = GetStaticMethod(typeof(TypeConverter), "ToObject", typeof(ScriptEngine), typeof(object));
+            TypeConverter_ToObject = GetStaticMethod(typeof(TypeConverter), "ToObject", typeof(ScriptEngine), typeof(object), typeof(int), typeof(string), typeof(string));
             TypeConverter_ToInteger = GetStaticMethod(typeof(TypeConverter), "ToInteger", typeof(object));
             TypeConverter_ToInt32 = GetStaticMethod(typeof(TypeConverter), "ToInt32", typeof(object));
             TypeConverter_ToUint32 = GetStaticMethod(typeof(TypeConverter), "ToUint32", typeof(object));

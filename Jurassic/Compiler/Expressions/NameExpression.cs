@@ -597,7 +597,7 @@ namespace Jurassic.Compiler
         {
             // Deleting a variable is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
-                throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name));
+                throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name), optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
 
             var endOfDelete = generator.CreateLabel();
             var scope = this.Scope;
