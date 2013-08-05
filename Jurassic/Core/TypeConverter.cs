@@ -180,14 +180,28 @@ namespace Jurassic
         /// <returns> An object. </returns>
         public static ObjectInstance ToObject(ScriptEngine engine, object value)
         {
+            return ToObject(engine, value, 0, null, null);
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to an object.
+        /// </summary>
+        /// <param name="engine"> The script engine used to create new objects. </param>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
+        /// <returns> An object. </returns>
+        public static ObjectInstance ToObject(ScriptEngine engine, object value, int lineNumber, string sourcePath, string functionName)
+        {
             if (engine == null)
                 throw new ArgumentNullException("engine");
             if (value is ObjectInstance)
                 return (ObjectInstance)value;
             if (value == null || value == Undefined.Value)
-                throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+                throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object", lineNumber, sourcePath, functionName);
             if (value == Null.Value)
-                throw new JavaScriptException(engine, "TypeError", "null cannot be converted to an object");
+                throw new JavaScriptException(engine, "TypeError", "null cannot be converted to an object", lineNumber, sourcePath, functionName);
             if (value is bool)
                 return engine.Boolean.Construct((bool)value);
             if (value is int)

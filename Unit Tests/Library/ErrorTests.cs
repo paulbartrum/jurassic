@@ -155,6 +155,16 @@ namespace UnitTests
                     catch (e) {
                         e.stack
                     }"));
+            Assert.AreEqual("TypeError: undefined cannot be converted to an object\r\n" +
+                "    at unknown:4",
+                TestUtils.Evaluate(@"
+                    try {
+                        var x = undefined;
+                        x.sdfsf();
+                    }
+                    catch (e) {
+                        e.stack
+                    }"));
         }
     }
 }
