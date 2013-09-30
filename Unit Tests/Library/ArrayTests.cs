@@ -233,6 +233,29 @@ namespace UnitTests
             TestUtils.Evaluate("var x = [1, 2]; x = x.concat(new Array(2000))");
             Assert.AreEqual(2002, TestUtils.Evaluate("x.length"));
 
+            var x = (ArrayInstance)TestUtils.Evaluate(
+                @"var x = [];
+                  x[1] = 5;
+                  x[22] = 13
+                  var y = [];
+                  y[0] = 22;
+                  y[25] = 34
+                  y[66] = 12;
+                  x.concat(y)");
+            Assert.AreEqual(Undefined.Value, x[0]);
+            Assert.AreEqual(5, x[1]);
+            Assert.AreEqual(Undefined.Value, x[2]);
+            Assert.AreEqual(Undefined.Value, x[21]);
+            Assert.AreEqual(13, x[22]);
+            Assert.AreEqual(22, x[23]);
+            Assert.AreEqual(Undefined.Value, x[24]);
+            Assert.AreEqual(Undefined.Value, x[47]);
+            Assert.AreEqual(34, x[48]);
+            Assert.AreEqual(Undefined.Value, x[49]);
+            Assert.AreEqual(Undefined.Value, x[88]);
+            Assert.AreEqual(12, x[89]);
+            Assert.AreEqual(null, x[90]);
+
             // concat is generic.
             TestUtils.Evaluate("var x = new Number(5);");
             TestUtils.Evaluate("x.concat = Array.prototype.concat");

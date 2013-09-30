@@ -243,7 +243,7 @@ namespace Jurassic.Library
                     Node node = info.node;
                     if (info.depth < this.depth)
                     {
-                        for (uint i = NodeSize - 1; i >= 0; i--)
+                        for (uint i = NodeSize - 1; i != uint.MaxValue; i--)
                             if (node.array[i] != null)
                                 stack.Push(new NodeInfo() { depth = info.depth + 1, index = info.index * NodeSize + i, node = (Node)node.array[i] });
                     }
@@ -276,7 +276,7 @@ namespace Jurassic.Library
                     this.mask = NodeShift * this.depth >= 32 ? -1 : (1 << NodeShift * this.depth) - 1;
                 } while ((index & this.mask) != index);
             }
-            
+
             // Find the node.
             Node current = this.root;
             for (int depth = this.depth - 1; depth > 0; depth--)
@@ -333,16 +333,16 @@ namespace Jurassic.Library
         /// <param name="start"> The zero-based index at which copying begins. </param>
         public void CopyTo(SparseArray source, uint start)
         {
+            var originalStart = start;
             foreach (var sourceRange in source.Ranges)
             {
                 int sourceOffset = 0;
-                uint destIndex = start + sourceRange.StartIndex;
-
+                start = originalStart + sourceRange.StartIndex;
                 do
                 {
                     // Get a reference to the array to copy to.
                     object[] dest = FindOrCreateArray(start, writeAccess: true);
-                    int destOffset = (int)(destIndex & NodeMask);
+                    int destOffset = (int)(start & NodeMask);
 
                     // Copy as much as possible.
                     int copyLength = Math.Min(sourceRange.Length - sourceOffset, dest.Length - destOffset);
