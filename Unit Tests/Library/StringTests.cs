@@ -1050,5 +1050,83 @@ namespace UnitTests
             // valueOf is not generic.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.valueOf.call(5)"));
         }
+
+        [TestMethod]
+        public void startsWith()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("'To be, or not to be, that is the question.'.startsWith('To be')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'To be, or not to be, that is the question.'.startsWith('not to be')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'To be, or not to be, that is the question.'.startsWith('not to be', 10)"));
+
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.startsWith('AB')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.startsWith('abc')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.startsWith('ABCD')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.startsWith('B', 1)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.startsWith('bc', 1)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.startsWith('BCD', 1)"));
+
+            // Length
+            Assert.AreEqual(1, TestUtils.Evaluate("'To be, or not to be, that is the question.'.startsWith.length"));
+        }
+
+        [TestMethod]
+        public void endsWith()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("'To be, or not to be, that is the question.'.endsWith('question.')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'To be, or not to be, that is the question.'.endsWith('not to be')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'To be, or not to be, that is the question.'.endsWith('not to be', 19)"));
+
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.endsWith('BC')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('bc')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('ABCD')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.endsWith('B', 2)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('bc', 3)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('BCD', 2)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.endsWith('C', 100)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('C', 1)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('C', 0)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('C', -1)"));
+
+            // Length
+            Assert.AreEqual(1, TestUtils.Evaluate("'To be, or not to be, that is the question.'.endsWith.length"));
+        }
+
+        [TestMethod]
+        public void contains()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("'To be, or not to be, that is the question.'.contains('question.')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'To be, or not to be, that is the question.'.contains('not to be')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'To be, or not to be, that is the question.'.contains('NOT')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'To be, or not to be, that is the question.'.contains('not to be', 19)"));
+
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.contains('BC')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.contains('bc')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.contains('ABCD')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.contains('B', 2)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.contains('bc', 3)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.contains('BCD', 2)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.contains('C', 100)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.contains('C', 1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.contains('C', 0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'ABC'.contains('C', -1)"));
+
+            // Length
+            Assert.AreEqual(1, TestUtils.Evaluate("'To be, or not to be, that is the question.'.contains.length"));
+        }
+
+        [TestMethod]
+        public void repeat()
+        {
+            Assert.AreEqual("", TestUtils.Evaluate("''.repeat(0)"));
+            Assert.AreEqual("ab", TestUtils.Evaluate("'ab'.repeat(1)"));
+            Assert.AreEqual("abab", TestUtils.Evaluate("'ab'.repeat(2)"));
+            Assert.AreEqual("ababab", TestUtils.Evaluate("'ab'.repeat(3)"));
+
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("'ABC'.repeat(-1)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("'ABC'.repeat(Infinity)"));
+
+            // Length
+            Assert.AreEqual(1, TestUtils.Evaluate("'ab'.repeat.length"));
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Jurassic.Library
 {
@@ -618,6 +619,73 @@ namespace Jurassic.Library
         public new string ValueOf()
         {
             return this.value;
+        }
+
+
+
+        //     ECMASCRIPT 6 FUNCTIONS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Determines whether a string begins with the characters of another string.
+        /// </summary>
+        /// <param name="searchString"> The characters to be searched for at the start of this string. </param>
+        /// <param name="position"> The position at which to begin searching.  Defaults to zero. </param>
+        /// <returns> <c>true</c> if this string starts with the given string, <c>false</c> otherwise. </returns>
+        [JSInternalFunction(Name = "startsWith", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static bool StartsWith(string thisObject, string searchString, [DefaultParameterValue(0)] int position = 0)
+        {
+            if (position == 0)
+                return thisObject.StartsWith(searchString);
+            position = Math.Min(Math.Max(0, position), thisObject.Length);
+            if (position + searchString.Length > thisObject.Length)
+                return false;
+            return thisObject.Substring(position, searchString.Length) == searchString;
+        }
+
+        /// <summary>
+        /// Determines whether a string ends with the characters of another string.
+        /// </summary>
+        /// <param name="searchString"> The characters to be searched for at the end of this string. </param>
+        /// <param name="position"> Search within the string as if the string were only this long.
+        /// Defaults to the string's actual length. </param>
+        /// <returns> <c>true</c> if this string ends with the given string, <c>false</c> otherwise. </returns>
+        [JSInternalFunction(Name = "endsWith", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static bool EndsWith(string thisObject, string searchString, [DefaultParameterValue(int.MaxValue)] int position = int.MaxValue)
+        {
+            if (position == int.MaxValue)
+                return thisObject.EndsWith(searchString);
+            position = Math.Min(Math.Max(0, position), thisObject.Length);
+            if (searchString.Length > position)
+                return false;
+            return thisObject.Substring(position - searchString.Length, searchString.Length) == searchString;
+        }
+
+        /// <summary>
+        /// Determines whether a string contains the characters of another string.
+        /// </summary>
+        /// <param name="searchString"> The characters to be searched for. </param>
+        /// <param name="position"> The position at which to begin searching.  Defaults to zero. </param>
+        /// <returns> <c>true</c> if this string contains the given string, <c>false</c> otherwise. </returns>
+        [JSInternalFunction(Name = "contains", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static bool Contains(string thisObject, string searchString, [DefaultParameterValue(0)] int position = 0)
+        {
+            position = Math.Min(Math.Max(0, position), thisObject.Length);
+            return thisObject.IndexOf(searchString, position) >= 0;
+        }
+
+        /// <summary>
+        /// Repeats this string a number of times and returns the result.
+        /// </summary>
+        /// <param name="count"> The number of times to repeat the string.  Must be zero or higher. </param>
+        /// <returns> A repeated string. </returns>
+        [JSInternalFunction(Name = "repeat", Flags = JSFunctionFlags.HasThisObject)]
+        public static string Repeat(string thisObject, int count)
+        {
+            var result = new StringBuilder();
+            for (int i = 0; i < count; i ++)
+                result.Append(thisObject);
+            return result.ToString();
         }
 
 
