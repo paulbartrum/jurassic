@@ -25,7 +25,7 @@
     </SccAuxPath>
     <SccProvider>
     </SccProvider>
-    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <FileUpgradeFlags>0</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\Paul\Documents\Visual Studio 2012\Projects\jurassic\Backup1\JurassicSL\</UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
   </PropertyGroup>
