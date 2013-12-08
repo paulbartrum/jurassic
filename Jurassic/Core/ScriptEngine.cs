@@ -97,6 +97,7 @@ namespace Jurassic
             this.dateConstructor.InstancePrototype.PopulateFunctions();
             this.numberConstructor.InstancePrototype.PopulateFunctions();
             this.numberConstructor.PopulateFields();
+            this.numberConstructor.PopulateFunctions();
             this.regExpConstructor.InstancePrototype.PopulateFunctions();
             this.stringConstructor.PopulateFunctions();
             this.stringConstructor.InstancePrototype.PopulateFunctions();
