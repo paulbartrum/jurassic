@@ -103,7 +103,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "abs")]
         public static double Abs(double number)
         {
-            return System.Math.Abs(number);
+            return Math.Abs(number);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "acos")]
         public static double Acos(double number)
         {
-            return System.Math.Acos(number);
+            return Math.Acos(number);
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "asin")]
         public static double Asin(double number)
         {
-            return System.Math.Asin(number);
+            return Math.Asin(number);
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "atan")]
         public static double Atan(double number)
         {
-            return System.Math.Atan(number);
+            return Math.Atan(number);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Jurassic.Library
                 if (double.IsNegativeInfinity(y) && double.IsNegativeInfinity(x))
                     return -3.0 * PI / 4.0;
             }
-            return System.Math.Atan2(y, x);
+            return Math.Atan2(y, x);
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "ceil")]
         public static double Ceil(double number)
         {
-            return System.Math.Ceiling(number);
+            return Math.Ceiling(number);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "cos")]
         public static double Cos(double angle)
         {
-            return System.Math.Cos(angle);
+            return Math.Cos(angle);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "exp")]
         public static double Exp(double number)
         {
-            return System.Math.Exp(number);
+            return Math.Exp(number);
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "floor")]
         public static double Floor(double number)
         {
-            return System.Math.Floor(number);
+            return Math.Floor(number);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "log")]
         public static double Log(double number)
         {
-            return System.Math.Log(number);
+            return Math.Log(number);
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace Jurassic.Library
                 return double.NaN;
             if (double.IsNaN(@base) && exponent == 0.0)
                 return 1.0;
-            return System.Math.Pow(@base, exponent);
+            return Math.Pow(@base, exponent);
         }
 
         private static object randomNumberGeneratorLock = new object();
@@ -310,7 +310,7 @@ namespace Jurassic.Library
         public static double Round(double number)
         {
             if (number > 0.0)
-                return System.Math.Floor(number + 0.5);
+                return Math.Floor(number + 0.5);
             if (number >= -0.5)
             {
                 // BitConverter is used to distinguish positive and negative zero.
@@ -318,7 +318,7 @@ namespace Jurassic.Library
                     return 0.0;
                 return -0.0;
             }
-            return System.Math.Floor(number + 0.5);
+            return Math.Floor(number + 0.5);
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "sin")]
         public static double Sin(double angle)
         {
-            return System.Math.Sin(angle);
+            return Math.Sin(angle);
         }
 
         /// <summary>
@@ -340,7 +340,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "sqrt")]
         public static double Sqrt(double number)
         {
-            return System.Math.Sqrt(number);
+            return Math.Sqrt(number);
         }
 
         /// <summary>
@@ -351,7 +351,235 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "tan")]
         public static double Tan(double angle)
         {
-            return System.Math.Tan(angle);
+            return Math.Tan(angle);
+        }
+
+        /// <summary>
+        /// Returns the base 10 logarithm of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The base 10 logarithm of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "log10")]
+        public static double Log10(double number)
+        {
+            return Math.Log10(number);
+        }
+
+        /// <summary>
+        /// Returns the base 2 logarithm of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The base 2 logarithm of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "log2")]
+        public static double Log2(double number)
+        {
+            return Math.Log(number) / LN2;
+        }
+
+        /// <summary>
+        /// Returns the natural logarithm (base E) of one plus a number.  The result is calculated
+        /// in such a way that the result is accurate even if the number is close to zero.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The natural logarithm (base E) of one plus the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "log1p")]
+        public static double Log1p(double number)
+        {
+            if (Math.Abs(number) < 0.01)
+            {
+                // For small numbers, use a taylor series approximation.
+                return number * (1.0 + number * (-1.0 / 2.0 + number * (1.0 / 3.0 + number *
+                    (-1.0 / 4.0 + number * (1.0 / 5.0 + number * (-1.0 / 6.0 + number * (1.0 / 7.0)))))));
+            }
+            else
+            {
+                // Otherwise just use the normal log function.
+                return Math.Log(1.0 + number);
+            }
+        }
+
+        /// <summary>
+        /// Returns E to the power of a number minus 1.  The result is calculated in such a way
+        /// that the result is accurate even if the number is close to zero.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> E to the power of the <paramref name="number"/> parameter minus 1. </returns>
+        [JSInternalFunction(Name = "expm1")]
+        public static double Expm1(double number)
+        {
+            if (Math.Abs(number) < 0.01)
+            {
+                // For small numbers, use a taylor series approximation.
+                return number * (1.0 + number * (1.0 / 2.0 + number * (1.0 / 6.0 + number *
+                    (1.0 / 24.0 + number * (1.0 / 120.0 + number * (1.0 / 720.0 + number * (1.0 / 5040.0))))))); ;
+            }
+            else
+            {
+                // Otherwise just use the normal exp function.
+                return Math.Exp(number) - 1.0;
+            }
+        }
+
+        /// <summary>
+        /// Returns the hyperbolic cosine of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The hyperbolic cosine of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "cosh")]
+        public static double Cosh(double number)
+        {
+            return Math.Cosh(number);
+        }
+
+        /// <summary>
+        /// Returns the hyperbolic sine of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The hyperbolic sine of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "sinh")]
+        public static double Sinh(double number)
+        {
+            return Math.Sinh(number);
+        }
+
+        /// <summary>
+        /// Returns the hyperbolic tangent of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The hyperbolic tangent of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "tanh")]
+        public static double Tanh(double number)
+        {
+            return Math.Tanh(number);
+        }
+
+        /// <summary>
+        /// Returns the inverse hyperbolic cosine of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The inverse hyperbolic cosine of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "acosh")]
+        public static double Acosh(double number)
+        {
+            return Math.Log(number + Math.Sqrt((number * number) - 1.0));
+        }
+
+        /// <summary>
+        /// Returns the inverse hyperbolic sine of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The inverse hyperbolic sine of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "asinh")]
+        public static double Asinh(double number)
+        {
+            if (number == 0.0 || double.IsNegativeInfinity(number))
+                return number;
+            return Math.Log(number + Math.Sqrt(number * number + 1.0));
+        }
+
+        /// <summary>
+        /// Returns the inverse hyperbolic tangent of a number.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The inverse hyperbolic tangent of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "atanh")]
+        public static double Atanh(double number)
+        {
+            if (number == 0.0)
+                return number;
+            return Math.Log((1.0 + number) / (1.0 - number)) / 2.0;
+        }
+
+
+        /// <summary>
+        /// Returns the square root of the sum of squares of the provided numbers.
+        /// </summary>
+        /// <param name="numbers"> The numbers to operate on. </param>
+        /// <returns> The square root of the sum of squares of <paramref name="numbers"/>. </returns>
+        [JSInternalFunction(Name = "hypot", Length = 2)]
+        public static double Hypot(params double[] numbers)
+        {
+            if (numbers.Length == 0)
+                return 0;
+            if (numbers.Length == 1)
+                return numbers[0];
+            if (numbers.Length == 2)
+                return Hypot(numbers[0], numbers[1]);
+
+            double result = Hypot(numbers[0], numbers[1]);
+            for (int i = 2; i < numbers.Length; i++)
+                result = Hypot(result, numbers[i]);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the square root of the sum of squares of the provided numbers.
+        /// </summary>
+        /// <param name="number1"> The first number to operate on. </param>
+        /// <param name="number2"> The second number to operate on. </param>
+        /// <returns> The square root of the sum of squares of <paramref name="number1"/> and
+        /// <paramref name="number2"/>. </returns>
+        public static double Hypot(double number1, double number2)
+        {
+            double abs1 = Math.Abs(number1);
+            double abs2 = Math.Abs(number2);
+            double min = Math.Min(abs1, abs2);
+            double max = Math.Max(abs1, abs2);
+            double u = min / max;
+            if (min == 0)
+                return max;
+            return max * Math.Sqrt(1 + u * u);
+        }
+
+        /// <summary>
+        /// Returns the integral part of a number, removing any fractional digits.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The integral part of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "trunc")]
+        public static double Trunc(double number)
+        {
+            return Math.Truncate(number);
+        }
+
+        /// <summary>
+        /// Returns the sign of the x, indicating whether x is positive, negative or zero.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The sign of the <paramref name="number"/> parameter. </returns>
+        [JSInternalFunction(Name = "sign")]
+        public static double Sign(double number)
+        {
+            // If the input is negative zero, we should return negative zero.
+            // If the input is NaN, we should return NaN.
+            if (number == -0.0 || double.IsNaN(number))
+                return number;
+            return Math.Sign(number);
+        }
+
+        /// <summary>
+        /// Returns the result of the 32-bit multiplication of the two parameters.
+        /// </summary>
+        /// <param name="number1"> The first value to multiply. </param>
+        /// <param name="number2"> The second value to multiply. </param>
+        /// <returns> The result of multiplying the two numbers as if they were 32-bit integers. </returns>
+        [JSInternalFunction(Name = "imul")]
+        public static int IMul(double number1, double number2)
+        {
+            return (int)(TypeConverter.ToUint32(number1) * TypeConverter.ToUint32(number2));
+        }
+
+        /// <summary>
+        /// Returns the result of converting the double precision number to the nearest single
+        /// precision equivalent.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The result of converting the double precision number to the nearest single
+        /// precision equivalent. </returns>
+        [JSInternalFunction(Name = "fround")]
+        public static double Fround(double number)
+        {
+            return (double)(float)number;
         }
     }
 }
