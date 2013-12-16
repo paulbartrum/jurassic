@@ -108,6 +108,20 @@ namespace Jurassic.Library
         [JSField]
         public const double EPSILON = 2.2204460492503130808472633361816e-16;
 
+        /// <summary>
+        /// The maximum integer within the range of integers that can be represented exactly.
+        /// Outside the safe range multiple integers are mapped to a single value.
+        /// </summary>
+        [JSField]
+        public const double MAX_SAFE_INTEGER = 9007199254740991;
+
+        /// <summary>
+        /// The minimum integer within the range of integers that can be represented exactly.
+        /// Outside the safe range multiple integers are mapped to a single value.
+        /// </summary>
+        [JSField]
+        public const double MIN_SAFE_INTEGER = -9007199254740991;
+        
 
 
         /// <summary>
@@ -155,6 +169,26 @@ namespace Jurassic.Library
                 if (double.IsInfinity(number))
                     return false;
                 return Math.Floor(number) == number;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the given number is within the "safe" integer range.
+        /// </summary>
+        /// <param name="value"> The number to test. </param>
+        /// <returns> <c>true</c> if the number is a safe integer, <c>false</c> otherwise. </returns>
+        [JSInternalFunction(Name = "isSafeInteger")]
+        public static bool IsSafeInteger(object value)
+        {
+            if (value is int || value is uint)
+                return true;
+            if (value is double)
+            {
+                double number = (double)value;
+                if (double.IsInfinity(number))
+                    return false;
+                return (Math.Floor(number) == number) && number >= MIN_SAFE_INTEGER && number <= MAX_SAFE_INTEGER;
             }
             return false;
         }

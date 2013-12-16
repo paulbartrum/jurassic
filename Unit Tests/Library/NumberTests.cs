@@ -59,6 +59,8 @@ namespace UnitTests
             Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Number.NEGATIVE_INFINITY"));
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Number.POSITIVE_INFINITY"));
             Assert.AreEqual(2.2204460492503130808472633361816e-16, TestUtils.Evaluate("Number.EPSILON"));
+            Assert.AreEqual(9007199254740991.0, TestUtils.Evaluate("Number.MAX_SAFE_INTEGER"));
+            Assert.AreEqual(-9007199254740991.0, TestUtils.Evaluate("Number.MIN_SAFE_INTEGER"));
 
             // Constants are non-enumerable, non-configurable, non-writable.
             Assert.AreEqual(double.MaxValue, TestUtils.Evaluate("Number.MAX_VALUE = 5; Number.MAX_VALUE"));
@@ -399,6 +401,23 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void isSafeInteger()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(0)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(9007199254740994)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(9007199254740991)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(-9007199254740994)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(-9007199254740991)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(12)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(-12)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(123.456)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(-Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(NaN)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger('0')"));
+        }
+
+        [TestMethod]
         public void parseFloat()
         {
             Assert.AreEqual(34, TestUtils.Evaluate("Number.parseFloat('34')"));
@@ -542,6 +561,19 @@ namespace UnitTests
             // Large numbers.
             Assert.AreEqual(9214843084008499.0, TestUtils.Evaluate("Number.parseInt('9214843084008499')"));
             Assert.AreEqual(18014398509481993.0, TestUtils.Evaluate("Number.parseInt('18014398509481993')"));
+        }
+
+        [TestMethod]
+        public void clz()
+        {
+            Assert.AreEqual(32, TestUtils.Evaluate("0 .clz()"));
+            Assert.AreEqual(31, TestUtils.Evaluate("1 .clz()"));
+            Assert.AreEqual(28, TestUtils.Evaluate("12 .clz()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("4294967275 .clz()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("4294967295 .clz()"));
+            Assert.AreEqual(16, TestUtils.Evaluate("60000 .clz()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("(-1).clz()"));
+            Assert.AreEqual(31, TestUtils.Evaluate("1.9.clz()"));
         }
     }
 }
