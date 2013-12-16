@@ -26,7 +26,7 @@
     <SccProvider>
     </SccProvider>
     <FileUpgradeFlags>0</FileUpgradeFlags>
-    <UpgradeBackupLocation>C:\Users\Paul\Documents\Visual Studio 2012\Projects\jurassic\Backup1\JurassicSL\</UpgradeBackupLocation>
+    <UpgradeBackupLocation>C:\Users\Paul\Documents\Visual Studio 2013\Projects\jurassic\Backup\JurassicSL\</UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
   </PropertyGroup>
   <!-- This property group is only here to support building this project using the 
