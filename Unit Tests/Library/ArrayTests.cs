@@ -31,7 +31,9 @@ namespace UnitTests
             // new Array(length)
             Assert.AreEqual(5, TestUtils.Evaluate("new Array(5).length"));
             Assert.AreEqual(false, TestUtils.Evaluate("new Array(5).hasOwnProperty(0)"));
+            Assert.AreEqual(3, TestUtils.Evaluate("a = [1, 2, 3]; new Array(a.length).length"));
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(-1)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(-1.5)"));
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(4294967296)"));
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(1.5)"));
             Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("new Array(NaN)"));
