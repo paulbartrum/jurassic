@@ -74,20 +74,13 @@ namespace Jurassic.Library
         {
             if (elements.Length == 1)
             {
-                if (elements[0] is double)
+                if (TypeUtilities.IsNumeric(elements[0]))
                 {
-                    double length = (double)elements[0];
-                    uint length32 = TypeConverter.ToUint32(length);
-                    if (length != (double)length32)
+                    double specifiedLength = TypeConverter.ToNumber(elements[0]);
+                    uint actualLength = TypeConverter.ToUint32(elements[0]);
+                    if (specifiedLength != (double)actualLength)
                         throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
-                    return new ArrayInstance(this.InstancePrototype, length32, length32);
-                }
-                else if (elements[0] is int)
-                {
-                    int length = (int)elements[0];
-                    if (length < 0)
-                        throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
-                    return new ArrayInstance(this.InstancePrototype, (uint)length, (uint)length);
+                    return new ArrayInstance(this.InstancePrototype, actualLength, actualLength);
                 }
             }
 
