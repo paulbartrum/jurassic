@@ -164,6 +164,9 @@ namespace UnitTests
                 Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 12, 34, 0, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('2010-02-05T12:34')"));
                 Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 12, 34, 56, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('2010-02-05T12:34:56Z')"));
                 Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 12, 34, 56, 12, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('2010-02-05T12:34:56.012Z')"));
+                Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 12, 34, 56, 100, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('2010-02-05T12:34:56.1Z')"));
+                Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 12, 34, 56, 120, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('2010-02-05T12:34:56.12Z')"));
+                Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 12, 34, 56, 123, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('2010-02-05T12:34:56.1234567890123456789Z')"));
                 Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 3, 34, 56, DateTimeKind.Utc)), TestUtils.Evaluate("Date.parse('2010-02-05T12:34:56+09:00')"));
             }
 
@@ -226,9 +229,7 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('1970-01-01T5:34')"));                   // hours must be 2 digits.
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('1970-01-01T05:3')"));                   // minutes must be 2 digits.
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('1970-01-01T05:34:2')"));                // seconds must be 2 digits.
-            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('1970-01-01T05:34:22.')"));              // milliseconds must be 3 digits.
-            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('1970-01-01T05:34:22.1')"));             // milliseconds must be 3 digits.
-            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('1970-01-01T05:34:22.1234567890')"));    // milliseconds must be 3 digits.
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('1970-01-01T05:34:22.')"));              // milliseconds must have at least one digit.
 
             // Time-only forms should not be supported (see addendum).
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Date.parse('T12:34Z')"));
