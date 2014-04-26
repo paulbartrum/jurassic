@@ -32,6 +32,8 @@ namespace Jurassic.Library
              * 2010-02T12:34:56+09:00
              * 2010-02-07T12:34:56.012-09:00
              * 2010-02-05T12:34:56.012
+             * 2010-02-05T12:34:56.1
+             * 2010-02-05T12:34:56.123456
              * 
              * And these should fail:
              * 201
@@ -41,8 +43,7 @@ namespace Jurassic.Library
              * 2010-02T1:34:56
              * 2010-02T12:3:56
              * 2010-02T12:53:1
-             * 2010-02T12:53:12.1
-             * 2010-02T12:53:12.12
+             * 2010-02T12:53:12.
              */
 
             var regex = new Regex(
@@ -52,7 +53,7 @@ namespace Jurassic.Library
                    (T (?<hour> [0-9]{2} )
                     : (?<minute> [0-9]{2} )
                    (: (?<second> [0-9]{2} )
-                  (\. (?<millisecond> [0-9]{3} ))?)?
+                  (\. (?<millisecond> [0-9]{1,3} ) [0-9]* )?)?
                       (?<zone> Z | (?<zoneHours> [+-][0-9]{2} ) : (?<zoneMinutes> [0-9]{2} ) )?)?$",
                 RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
             
@@ -72,6 +73,12 @@ namespace Jurassic.Library
                 int.TryParse(match.Groups["minute"].Value, out minute);
                 int.TryParse(match.Groups["second"].Value, out second);
                 int.TryParse(match.Groups["millisecond"].Value, out millisecond);
+
+                // Milliseconds can be any number of digits, but any digits after the first three are not captured.
+                if (match.Groups["millisecond"].Value.Length == 1)
+                    millisecond *= 100;
+                if (match.Groups["millisecond"].Value.Length == 2)
+                    millisecond *= 10;
 
                 // Validate the components.
                 if (month < 1 || month > 12)
