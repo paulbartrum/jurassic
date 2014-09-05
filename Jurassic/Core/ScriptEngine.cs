@@ -515,6 +515,38 @@ namespace Jurassic
 
         //     EXECUTION
         //_________________________________________________________________________________________
+        
+        /// <summary>
+        /// Compiles the given source code and returns it in a form that can be executed many
+        /// times.
+        /// </summary>
+        /// <param name="source"> The javascript source code to execute. </param>
+        /// <returns> A CompiledScript instance, which can be executed as many times as needed. </returns>
+        public CompiledScript Compile(ScriptSource source)
+        {
+            var methodGen = new Jurassic.Compiler.GlobalMethodGenerator(
+                this,                               // The script engine
+                source,                             // The source code.
+                CreateOptions());                   // The compiler options.
+
+            // Parse
+            if (this.ParsingStarted != null)
+                this.ParsingStarted(this, EventArgs.Empty);
+            methodGen.Parse();
+
+            // Optimize
+            if (this.OptimizationStarted != null)
+                this.OptimizationStarted(this, EventArgs.Empty);
+            methodGen.Optimize();
+
+            // Generate code
+            if (this.CodeGenerationStarted != null)
+                this.CodeGenerationStarted(this, EventArgs.Empty);
+            methodGen.GenerateCode();
+            VerifyGeneratedCode();
+
+            return new CompiledScript(methodGen);
+        }
 
         /// <summary>
         /// Executes the given source code.  Execution is bound to the global scope.
@@ -633,31 +665,13 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="code"/> is a <c>null</c> reference. </exception>
         public void Execute(ScriptSource source)
         {
-            var methodGen = new Jurassic.Compiler.GlobalMethodGenerator(
-                this,                               // The script engine
-                source,                             // The source code.
-                CreateOptions());                   // The compiler options.
+            // Compile the script.
+            var compiledScript = Compile(source);
 
-            // Parse
-            if (this.ParsingStarted != null)
-                this.ParsingStarted(this, EventArgs.Empty);
-            methodGen.Parse();
-
-            // Optimize
-            if (this.OptimizationStarted != null)
-                this.OptimizationStarted(this, EventArgs.Empty);
-            methodGen.Optimize();
-
-            // Generate code
-            if (this.CodeGenerationStarted != null)
-                this.CodeGenerationStarted(this, EventArgs.Empty);
-            methodGen.GenerateCode();
-            VerifyGeneratedCode();
-
-            // Execute
+            // ...and execute it.
             if (this.ExecutionStarted != null)
                 this.ExecutionStarted(this, EventArgs.Empty);
-            methodGen.Execute();
+            compiledScript.Execute();
         }
 
         /// <summary>
