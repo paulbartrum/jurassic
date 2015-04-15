@@ -96,6 +96,24 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void fromCodePoint()
+        {
+            Assert.AreEqual("", TestUtils.Evaluate("String.fromCodePoint()"));
+            Assert.AreEqual("ha", TestUtils.Evaluate("String.fromCodePoint(104, 97)"));
+            Assert.AreEqual("𠮷", TestUtils.Evaluate("String.fromCodePoint(134071)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("String.fromCodePoint(1.5)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("String.fromCodePoint(-5)"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType("String.fromCodePoint(5999951905)"));
+
+            // length
+            if (TestUtils.Engine != JSEngine.JScript)
+                Assert.AreEqual(1, TestUtils.Evaluate("String.fromCodePoint.length"));
+
+            // No this object is required.
+            Assert.AreEqual("ha", TestUtils.Evaluate("var f = String.fromCodePoint; f(104, 97)"));
+        }
+
+        [TestMethod]
         public void anchor()
         {
             Assert.AreEqual(@"<a name=""undefined"">haha</a>", (string)TestUtils.Evaluate("'haha'.anchor()"), true);
@@ -166,6 +184,29 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("'haha'.charCodeAt(4)"));
             Assert.AreEqual(104, TestUtils.Evaluate("'haha'.charCodeAt()"));
             Assert.AreEqual(1, TestUtils.Evaluate("''.charCodeAt.length"));
+
+            // Strings must be UTF-16 in ECMAScript 6.
+            Assert.AreEqual(55362, TestUtils.Evaluate("'𠮷a'.charCodeAt(0)"));
+            Assert.AreEqual(57271, TestUtils.Evaluate("'𠮷a'.charCodeAt(1)"));
+            Assert.AreEqual(97, TestUtils.Evaluate("'𠮷a'.charCodeAt(2)"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("''.charCodeAt.length"));
+
+            // charCodeAt is generic.
+            Assert.AreEqual(50, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.charCodeAt; x.f(3)"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.charCodeAt.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.charCodeAt.call(null)"));
+        }
+
+        [TestMethod]
+        public void codePointAt()
+        {
+            Assert.AreEqual(134071, TestUtils.Evaluate("'𠮷a'.codePointAt(0)"));
+            Assert.AreEqual(57271, TestUtils.Evaluate("'𠮷a'.codePointAt(1)"));
+            Assert.AreEqual(97, TestUtils.Evaluate("'𠮷a'.codePointAt(2)"));
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("''.charCodeAt.length"));
