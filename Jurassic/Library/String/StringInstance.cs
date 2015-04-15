@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace Jurassic.Library
@@ -133,7 +134,7 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Returns a number indicating the Unicode value of the character at the given index.
+        /// Returns a number indicating the 16-bit UTF-16 character code at the given index.
         /// </summary>
         /// <param name="thisObject"> The string that is being operated on. </param>
         /// <param name="index"> The character position (starts at 0). </param>
@@ -144,6 +145,26 @@ namespace Jurassic.Library
             if (index < 0 || index >= thisObject.Length)
                 return double.NaN;
             return (double)(int)thisObject[index];
+        }
+
+        /// <summary>
+        /// Returns a number indicating the Unicode code point of the character at the given index.
+        /// </summary>
+        /// <param name="thisObject"> The string that is being operated on. </param>
+        /// <param name="index"> The character position (starts at 0). </param>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "codePointAt", Flags = JSFunctionFlags.HasThisObject)]
+        public static double CodePointAt(string thisObject, int index)
+        {
+            if (index < 0 || index >= thisObject.Length)
+                return double.NaN;
+            int firstCodePoint = (int) thisObject[index];
+            if (firstCodePoint < 0xD800 || firstCodePoint > 0xDBFF || index + 1 == thisObject.Length)
+                return firstCodePoint;
+            int secondCodePoint = (int) thisObject[index + 1];
+            if (secondCodePoint < 0xDC00 || secondCodePoint > 0xDFFF)
+                return firstCodePoint;
+            return (double)((firstCodePoint - 0xD800) * 1024 + (secondCodePoint - 0xDC00) + 0x10000);
         }
 
         /// <summary>
