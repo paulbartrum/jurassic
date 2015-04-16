@@ -62,8 +62,12 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("x.lastIndex"));
 
             // RegExp(regExp, flags)
-            Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "RegExpError" : "TypeError",
-                TestUtils.EvaluateExceptionType("RegExp(new RegExp('abc', 'g'), 'i')"));
+            TestUtils.Evaluate("var x = RegExp(new RegExp('abc', 'g'), 'i')");
+            Assert.AreEqual("abc", TestUtils.Evaluate("x.source"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x.global"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x.ignoreCase"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x.multiline"));
+            Assert.AreEqual(0, TestUtils.Evaluate("x.lastIndex"));
         }
 
         [TestMethod]
@@ -99,9 +103,12 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("x.lastIndex"));
 
             // new RegExp(regExp, flags)
-            Assert.AreEqual(TestUtils.Engine == JSEngine.JScript ? "RegExpError" : "TypeError",
-                TestUtils.EvaluateExceptionType("new RegExp(new RegExp('abc', 'g'), 'i')"));
-            Assert.AreEqual("abc", TestUtils.Evaluate("new RegExp(/abc/, undefined).source"));
+            TestUtils.Evaluate("var x = new RegExp(new RegExp('abc', 'g'), 'i')");
+            Assert.AreEqual("abc", TestUtils.Evaluate("x.source"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x.global"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x.ignoreCase"));
+            Assert.AreEqual(false, TestUtils.Evaluate("x.multiline"));
+            Assert.AreEqual(0, TestUtils.Evaluate("x.lastIndex"));
 
             // Flags must be known and unique.
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("new RegExp('abc', 'gg')"));
@@ -120,6 +127,19 @@ namespace UnitTests
             Assert.AreEqual("abc", TestUtils.Evaluate("var x = new RegExp('abc'); x.source = 'test'; x.source"));
             Assert.AreEqual(false, TestUtils.Evaluate("var x = new RegExp('abc'); delete x.source"));
             Assert.AreEqual("abc", TestUtils.Evaluate("var x = new RegExp('abc'); delete x.source; x.source"));
+        }
+
+        [TestMethod]
+        public void flags()
+        {
+            Assert.AreEqual("g", TestUtils.Evaluate("new RegExp('abc', 'g').flags"));
+            Assert.AreEqual("g", TestUtils.Evaluate("(/abc/g).flags"));
+            Assert.AreEqual("", TestUtils.Evaluate("(/abc/).flags"));
+
+            // This property is non-writable, non-configurable and non-enumerable.
+            Assert.AreEqual("g", TestUtils.Evaluate("var x = new RegExp('abc', 'g'); x.flags = 'test'; x.flags"));
+            Assert.AreEqual(false, TestUtils.Evaluate("var x = new RegExp('abc', 'g'); delete x.flags"));
+            Assert.AreEqual("g", TestUtils.Evaluate("var x = new RegExp('abc', 'g'); delete x.flags; x.flags"));
         }
 
         [TestMethod]

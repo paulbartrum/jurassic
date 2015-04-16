@@ -283,6 +283,37 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void includes()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("'onetwothree'.includes('two')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'onetwothree'.includes('t')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'onetwothree'.includes('two', 2)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'onetwothree'.includes('two', 3)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'onetwothree'.includes('two', 4)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("'onetwothree'.includes('two', -400)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'onetwothree'.includes('two', 400)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'onetwothree'.includes('no')"));
+            Assert.AreEqual(false, TestUtils.Evaluate("'onetwothree'.includes('e', 400)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("''.includes('no')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("''.includes('')"));
+
+            // The substring cannot be a regular expression.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'onetwothree'.includes(/two/)"));
+
+            // length
+            if (TestUtils.Engine != JSEngine.JScript)
+                Assert.AreEqual(1, TestUtils.Evaluate("''.includes.length"));
+
+            // includes is generic.
+            Assert.AreEqual(true, TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.includes; x.f('123')"));
+            Assert.AreEqual(true, TestUtils.Evaluate("x = new Date(0); x.f = ''.includes; x.getTimezoneOffset() > 0 ? x.f('31') : x.f('01')"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.includes.call(undefined)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("''.includes.call(null)"));
+        }
+
+        [TestMethod]
         public void indexOf()
         {
             Assert.AreEqual(3, TestUtils.Evaluate("'onetwothree'.indexOf('two')"));
@@ -536,6 +567,84 @@ namespace UnitTests
             Assert.AreEqual("honey ", TestUtils.Evaluate("RegExp['$`']"));
             Assert.AreEqual("", TestUtils.Evaluate("RegExp.rightContext"));
             Assert.AreEqual("", TestUtils.Evaluate("RegExp[\"$'\"]"));
+        }
+
+        [TestMethod]
+        public void normalize()
+        {
+            // Default is NFC
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u1EAF'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u1EAF'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u0103\u0301'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0103\u0301'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(50, TestUtils.Evaluate(@"'\u0032\u2075'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(8309, TestUtils.Evaluate(@"'\u0032\u2075'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0032\u2075'.normalize().charCodeAt(2)"));
+
+            // NFC
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(50, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(8309, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFC').charCodeAt(2)"));
+
+            // NFD
+            Assert.AreEqual(97, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(774, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(769, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(3)"));
+            Assert.AreEqual(97, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(774, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(769, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(3)"));
+            Assert.AreEqual(97, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(774, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(769, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(3)"));
+            Assert.AreEqual(50, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(8309, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFD').charCodeAt(2)"));
+
+            // NFKC
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(7855, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(50, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(53, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFKC').charCodeAt(2)"));
+
+            // NFKD
+            Assert.AreEqual(97, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(774, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(769, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(3)"));
+            Assert.AreEqual(97, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(774, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(769, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(3)"));
+            Assert.AreEqual(97, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(774, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(769, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(3)"));
+            Assert.AreEqual(50, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(53, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate(@"'\u0032\u2075'.normalize('NFKD').charCodeAt(2)"));
+
+            // Valid parameter values are: NFC, NFD, NFKC, NFKD
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType(@"'\u1EAF'.normalize('abc')"));
+            Assert.AreEqual("RangeError", TestUtils.EvaluateExceptionType(@"'\u1EAF'.normalize('nfc')"));
+
+            // normalize is generic.
+            Assert.AreEqual("6.1234", TestUtils.Evaluate("x = new Number(6.1234); x.f = ''.normalize; x.f()"));
         }
 
         [TestMethod]
@@ -1106,6 +1215,9 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.startsWith('bc', 1)"));
             Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.startsWith('BCD', 1)"));
 
+            // The substring cannot be a regular expression.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'onetwothree'.startsWith(/two/)"));
+
             // Length
             Assert.AreEqual(1, TestUtils.Evaluate("'To be, or not to be, that is the question.'.startsWith.length"));
         }
@@ -1127,6 +1239,9 @@ namespace UnitTests
             Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('C', 1)"));
             Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('C', 0)"));
             Assert.AreEqual(false, TestUtils.Evaluate("'ABC'.endsWith('C', -1)"));
+
+            // The substring cannot be a regular expression.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("'onetwothree'.endsWith(/two/)"));
 
             // Length
             Assert.AreEqual(1, TestUtils.Evaluate("'To be, or not to be, that is the question.'.endsWith.length"));
