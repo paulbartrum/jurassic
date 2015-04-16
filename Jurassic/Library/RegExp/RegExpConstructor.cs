@@ -267,9 +267,9 @@ namespace Jurassic.Library
         {
             if (patternOrRegExp is RegExpInstance)
             {
-                // RegExp(/abc/)
+                // RegExp(/abc/) or RegExp(/abc/, "g")
                 if (flags != null)
-                    throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
+                    return new RegExpInstance(this.InstancePrototype, ((RegExpInstance)patternOrRegExp).Source, flags);
                 return (RegExpInstance)patternOrRegExp;
             }
             else
@@ -299,7 +299,7 @@ namespace Jurassic.Library
             {
                 // new RegExp(regExp, flags)
                 if (flags != null)
-                    throw new JavaScriptException(this.Engine, "TypeError", "Cannot supply flags when constructing one RegExp from another");
+                    return new RegExpInstance(this.InstancePrototype, ((RegExpInstance)patternOrRegExp).Source, flags);
                 return new RegExpInstance(this.InstancePrototype, (RegExpInstance)patternOrRegExp);
             }
             else
