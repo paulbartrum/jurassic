@@ -865,7 +865,15 @@ namespace Jurassic
 
             // Base-2 exponent is however much we shifted, plus 52 (because the decimal point is
             // effectively at the 52nd bit), plus 1023 (the bias).
-            doubleBits |= (ulong)(bitCount - 53 + 52 + 1023) << 52;
+            int biasedExponent = bitCount - 53 + 52 + 1023;
+
+            // The biased exponent must be between 0 and 2047, since there are 11 bits available,
+            // otherwise bad things happen.
+            if (biasedExponent >= 2048)
+                return double.PositiveInfinity;
+
+            // Move the exponent to the right position.
+            doubleBits |= (ulong)(biasedExponent) << 52;
 
             // Handle the sign bit.
             if (this.sign == -1)
