@@ -74,7 +74,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string created by using the specified sequence of Unicode values.
         /// </summary>
-        /// <param name="charCodes"></param>
+        /// <param name="charCodes"> An array of 16-bit character codes. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "fromCharCode")]
         public static string FromCharCode(params double[] charCodes)
@@ -85,6 +85,35 @@ namespace Jurassic.Library
             var result = new System.Text.StringBuilder(charCodes.Length);
             foreach (double charCode in charCodes)
                 result.Append((char)TypeConverter.ToUint16(charCode));
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Returns a string created by using the specified sequence of Unicode codepoints.
+        /// </summary>
+        /// <param name="scriptEngine"> The script engine. </param>
+        /// <param name="codePoints"> An array of unicode code points. </param>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "fromCodePoint", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static string FromCodePoint(ScriptEngine scriptEngine, params double[] codePoints)
+        {
+            // Note: charCodes must be an array of doubles, because the default marshalling
+            // rule to int uses ToInteger() and ToInteger() does not throw a RangeError if the
+            // input value is not an integer.
+            var result = new System.Text.StringBuilder(codePoints.Length);
+            foreach (double codePointDouble in codePoints)
+            {
+                int codePoint = (int) codePointDouble;
+                if (codePoint < 0 || codePoint > 0x10FFFF || (double)codePoint != codePointDouble)
+                    throw new JavaScriptException(scriptEngine, "RangeError", string.Format("Invalid code point {0}", codePointDouble));
+                if (codePoint <= 65535)
+                    result.Append((char)codePoint);
+                else
+                {
+                    result.Append((char)((codePoint - 65536)/1024 + 0xD800));
+                    result.Append((char)((codePoint - 65536) % 1024 + 0xDC00));
+                }
+            }
             return result.ToString();
         }
 

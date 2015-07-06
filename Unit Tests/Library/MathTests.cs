@@ -370,5 +370,219 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.tan(undefined)"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.tan('bob')"));
         }
+
+        [TestMethod]
+        public void log10()
+        {
+            Assert.AreEqual(0, TestUtils.Evaluate("Math.log10(1)"));
+            Assert.AreEqual(Math.Log10(1.5), TestUtils.Evaluate("Math.log10(1.5)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log10(-1)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.log10(0)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.log10(-0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.log10(Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log10(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log10(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log10(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log10('bob')"));
+        }
+
+        [TestMethod]
+        public void log2()
+        {
+            Assert.AreEqual(0, TestUtils.Evaluate("Math.log2(1)"));
+            Assert.AreEqual(Math.Log(1.5) / Math.Log(2), TestUtils.Evaluate("Math.log2(1.5)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log2(-1)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.log2(0)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.log2(-0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.log2(Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log2(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log2(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log2(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log2('bob')"));
+        }
+
+        [TestMethod]
+        public void log1p()
+        {
+            Assert.AreEqual(0.00000000999999995, (double)TestUtils.Evaluate("Math.log1p(0.00000001)"), 0.0000000000001);
+            Assert.AreEqual(Math.Log(2), TestUtils.Evaluate("Math.log1p(1)"));
+            Assert.AreEqual(Math.Log(2.5), TestUtils.Evaluate("Math.log1p(1.5)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.log1p(-1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.log1p(0), 0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.log1p(-0), -0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.log1p(Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log1p(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log1p(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log1p(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.log1p('bob')"));
+        }
+
+        [TestMethod]
+        public void expm1()
+        {
+            Assert.AreEqual(0.00000000999999995, (double)TestUtils.Evaluate("Math.expm1(0.00000001)"), 0.0000000000001);
+            Assert.AreEqual(Math.E - 1.0, TestUtils.Evaluate("Math.expm1(1)"));
+            Assert.AreEqual(Math.Pow(Math.E, 1.5) - 1.0, TestUtils.Evaluate("Math.expm1(1.5)"));
+            Assert.AreEqual(1 / Math.E - 1.0, TestUtils.Evaluate("Math.expm1(-1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.expm1(0), 0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.expm1(-0), -0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.expm1(Infinity)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.expm1(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.expm1(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.expm1(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.expm1('bob')"));
+        }
+
+        [TestMethod]
+        public void cosh()
+        {
+            Assert.AreEqual(Math.Cosh(1), TestUtils.Evaluate("Math.cosh(1)"));
+            Assert.AreEqual(Math.Cosh(-1), TestUtils.Evaluate("Math.cosh(-1)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.cosh(0)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.cosh(-0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.cosh(Infinity)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.cosh(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.cosh(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.cosh(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.cosh('bob')"));
+        }
+
+        [TestMethod]
+        public void sinh()
+        {
+            Assert.AreEqual(Math.Sinh(1), TestUtils.Evaluate("Math.sinh(1)"));
+            Assert.AreEqual(Math.Sinh(-1), TestUtils.Evaluate("Math.sinh(-1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(0, Math.sinh(0))"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(-0, Math.sinh(-0))"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.sinh(Infinity)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.sinh(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.sinh(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.sinh(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.sinh('bob')"));
+        }
+
+        [TestMethod]
+        public void tanh()
+        {
+            Assert.AreEqual(Math.Tanh(1), TestUtils.Evaluate("Math.tanh(1)"));
+            Assert.AreEqual(Math.Tanh(-1), TestUtils.Evaluate("Math.tanh(-1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(0, Math.tanh(0))"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(-0, Math.tanh(-0))"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.tanh(Infinity)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.tanh(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.tanh(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.tanh(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.tanh('bob')"));
+        }
+
+        [TestMethod]
+        public void acosh()
+        {
+            Assert.AreEqual(0.96242365011920689499, (double)TestUtils.Evaluate("Math.acosh(1.5)"), 0.000000000001);
+            Assert.AreEqual(0, TestUtils.Evaluate("Math.acosh(1)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.acosh(-1)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.acosh(0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.acosh(-0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.acosh(Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.acosh(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.acosh(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.acosh(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.acosh('bob')"));
+        }
+
+        [TestMethod]
+        public void asinh()
+        {
+            Assert.AreEqual(0.48121182505960344749775, (double)TestUtils.Evaluate("Math.asinh(0.5)"), 0.000000000001);
+            Assert.AreEqual(0.88137358701954302523260932, (double)TestUtils.Evaluate("Math.asinh(1)"), 0.000000000001);
+            Assert.AreEqual(-0.88137358701954302523260932, (double)TestUtils.Evaluate("Math.asinh(-1)"), 0.000000000001);
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(0, Math.asinh(0))"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(-0, Math.asinh(-0))"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.asinh(Infinity)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.asinh(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.asinh(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.asinh(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.asinh('bob')"));
+        }
+
+        [TestMethod]
+        public void atanh()
+        {
+            Assert.AreEqual(0.549306144334054845697, (double)TestUtils.Evaluate("Math.atanh(0.5)"), 0.000000000001);
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.atanh(1)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.atanh(-1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(0, Math.atanh(0))"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(-0, Math.atanh(-0))"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.atanh(Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.atanh(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.atanh(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.atanh(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.atanh('bob')"));
+        }
+
+        [TestMethod]
+        public void trunc()
+        {
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.trunc(1)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.trunc(1.5)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.trunc(-1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.trunc(0), 0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.trunc(-0), -0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.trunc(Infinity)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.trunc(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.trunc(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.trunc(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.trunc('bob')"));
+        }
+
+        [TestMethod]
+        public void sign()
+        {
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.sign(1)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.sign(1.5)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.sign(-1)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.sign(0), 0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.sign(-0), -0)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.sign(Infinity)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.sign(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.sign(NaN)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.sign(undefined)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.sign('bob')"));
+        }
+
+        [TestMethod]
+        public void hypot()
+        {
+            Assert.AreEqual(5, TestUtils.Evaluate("Math.hypot(3, 4)"));
+            Assert.AreEqual(Math.Sqrt(50), TestUtils.Evaluate("Math.hypot(3, 4, 5)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Math.hypot()"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.hypot(5, NaN)"));
+            Assert.AreEqual(1.4142135623730952e+300, TestUtils.Evaluate("Math.hypot(1e300, 1e300)"));
+            Assert.AreEqual(1.414213562373095e-300, (double)TestUtils.Evaluate("Math.hypot(1e-300, 1e-300)"), 1e-315);
+            Assert.AreEqual(1000.0000000005, TestUtils.Evaluate("Math.hypot(1e3, 1e-3)"));
+        }
+
+        [TestMethod]
+        public void imul()
+        {
+            Assert.AreEqual(8, TestUtils.Evaluate("Math.imul(2, 4)"));
+            Assert.AreEqual(-8, TestUtils.Evaluate("Math.imul(-1, 8)"));
+            Assert.AreEqual(4, TestUtils.Evaluate("Math.imul(-2, -2)"));
+            Assert.AreEqual(-5, TestUtils.Evaluate("Math.imul(0xffffffff, 5)"));
+            Assert.AreEqual(-10, TestUtils.Evaluate("Math.imul(0xfffffffe, 5)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Math.imul(NaN, 5)"));
+        }
+
+        [TestMethod]
+        public void fround()
+        {
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.fround(1.0000000001)"));
+            Assert.AreEqual(1.25, TestUtils.Evaluate("Math.fround(1.25)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.fround(0), 0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.fround(-0), -0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.fround(Infinity)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.fround(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.fround(NaN)"));
+        }
     }
 }

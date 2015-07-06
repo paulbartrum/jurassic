@@ -58,6 +58,9 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number.NaN"));
             Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Number.NEGATIVE_INFINITY"));
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Number.POSITIVE_INFINITY"));
+            Assert.AreEqual(2.2204460492503130808472633361816e-16, TestUtils.Evaluate("Number.EPSILON"));
+            Assert.AreEqual(9007199254740991.0, TestUtils.Evaluate("Number.MAX_SAFE_INTEGER"));
+            Assert.AreEqual(-9007199254740991.0, TestUtils.Evaluate("Number.MIN_SAFE_INTEGER"));
 
             // Constants are non-enumerable, non-configurable, non-writable.
             Assert.AreEqual(double.MaxValue, TestUtils.Evaluate("Number.MAX_VALUE = 5; Number.MAX_VALUE"));
@@ -361,6 +364,216 @@ namespace UnitTests
             output.Append(exponent);
 
             return output.ToString();
+        }
+
+        [TestMethod]
+        public void isFinite()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isFinite(0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isFinite(123.456)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isFinite(Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isFinite(-Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isFinite(NaN)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isFinite('0')"));
+        }
+
+        [TestMethod]
+        public void isNaN()
+        {
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isNaN(0)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isNaN(123.456)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isNaN(Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isNaN(-Infinity)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isNaN(NaN)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isNaN('0')"));
+        }
+
+        [TestMethod]
+        public void isInteger()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isInteger(0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isInteger(9007199254740994)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isInteger(123.456)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isInteger(Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isInteger(-Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isInteger(NaN)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isInteger('0')"));
+        }
+
+        [TestMethod]
+        public void isSafeInteger()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(0)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(9007199254740994)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(9007199254740991)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(-9007199254740994)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(-9007199254740991)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(12)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(-12)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(123.456)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(-Infinity)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(NaN)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger('0')"));
+        }
+
+        [TestMethod]
+        public void parseFloat()
+        {
+            Assert.AreEqual(34, TestUtils.Evaluate("Number.parseFloat('34')"));
+            Assert.AreEqual(34.5, TestUtils.Evaluate("Number.parseFloat('34.5')"));
+            Assert.AreEqual(3400, TestUtils.Evaluate("Number.parseFloat('34e2')"));
+            Assert.AreEqual(3.45, TestUtils.Evaluate("Number.parseFloat('34.5e-1')"));
+            Assert.AreEqual(0.345, TestUtils.Evaluate("Number.parseFloat('34.5E-2')"));
+            Assert.AreEqual(-34, TestUtils.Evaluate("Number.parseFloat('-34')"));
+            Assert.AreEqual(34, TestUtils.Evaluate("Number.parseFloat('+34')"));
+            Assert.AreEqual(11, TestUtils.Evaluate("Number.parseFloat('011')"));
+            Assert.AreEqual(11, TestUtils.Evaluate("Number.parseFloat(' 11')"));
+            Assert.AreEqual(0.5, TestUtils.Evaluate("Number.parseFloat('.5')"));
+            Assert.AreEqual(0.1, TestUtils.Evaluate("Number.parseFloat('.1')"));
+            Assert.AreEqual(0.01, TestUtils.Evaluate("Number.parseFloat('.01')"));
+            Assert.AreEqual(0.07, TestUtils.Evaluate("Number.parseFloat('.7e-1')"));
+            Assert.AreEqual(-0.5, TestUtils.Evaluate("Number.parseFloat('-.5')"));
+            Assert.AreEqual(5, TestUtils.Evaluate("Number.parseFloat('5e')"));
+            Assert.AreEqual(5, TestUtils.Evaluate("Number.parseFloat('5.e')"));
+            Assert.AreEqual(5, TestUtils.Evaluate("Number.parseFloat('5e.5')"));
+            Assert.AreEqual(12, TestUtils.Evaluate("Number.parseFloat('12x3')"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number.parseFloat('')"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Number.parseFloat('Infinity')"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Number.parseFloat('-Infinity')"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Number.parseFloat(' Infinity')"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Number.parseFloat('InfinityZ')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Number.parseFloat('0xff')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Number.parseFloat('0x')"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Number.parseFloat('0zff')"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number.parseFloat('infinity')"));
+            Assert.AreEqual(-1.1, TestUtils.Evaluate("Number.parseFloat('\u205F -1.1')"));
+
+            // Very large numbers.
+            Assert.AreEqual(18446744073709551616d, TestUtils.Evaluate("Number.parseFloat('18446744073709551616')"));
+            Assert.AreEqual(295147905179352825856d, TestUtils.Evaluate("Number.parseFloat('295147905179352825856')"));
+            Assert.AreEqual(4722366482869645213696d, TestUtils.Evaluate("Number.parseFloat('4722366482869645213696')"));
+            Assert.AreEqual(75557863725914323419136d, TestUtils.Evaluate("Number.parseFloat('75557863725914323419136')"));
+        }
+
+        [TestMethod]
+        public void parseInt()
+        {
+            Assert.AreEqual(1, TestUtils.Evaluate("Number.parseInt('1')"));
+            Assert.AreEqual(123, TestUtils.Evaluate("Number.parseInt('123')"));
+            Assert.AreEqual(65, TestUtils.Evaluate("Number.parseInt('65')"));
+            Assert.AreEqual(987654, TestUtils.Evaluate("Number.parseInt('987654')"));
+            Assert.AreEqual(10000000, TestUtils.Evaluate("Number.parseInt('10000000')"));
+            Assert.AreEqual(10000001, TestUtils.Evaluate("Number.parseInt('10000001')"));
+            Assert.AreEqual(987654321, TestUtils.Evaluate("Number.parseInt('987654321')"));
+            Assert.AreEqual(9876543212d, TestUtils.Evaluate("Number.parseInt('9876543212')"));
+            Assert.AreEqual(987654321234d, TestUtils.Evaluate("Number.parseInt('987654321234')"));
+            Assert.AreEqual(-987654321234d, TestUtils.Evaluate("Number.parseInt('-987654321234')"));
+            Assert.AreEqual(9876543212345d, TestUtils.Evaluate("Number.parseInt('9876543212345')"));
+            Assert.AreEqual(98765432123456d, TestUtils.Evaluate("Number.parseInt('98765432123456')"));
+            Assert.AreEqual(987654321234567d, TestUtils.Evaluate("Number.parseInt('987654321234567')"));
+            Assert.AreEqual(9876543212345678d, TestUtils.Evaluate("Number.parseInt('9876543212345678')"));
+            Assert.AreEqual(98765432123456789d, TestUtils.Evaluate("Number.parseInt('98765432123456789')"));
+            Assert.AreEqual(-98765432123456789d, TestUtils.Evaluate("Number.parseInt('-98765432123456789')"));
+            Assert.AreEqual(18446744073709551616d, TestUtils.Evaluate("Number.parseInt('18446744073709551616')"));
+            Assert.AreEqual(295147905179352825856d, TestUtils.Evaluate("Number.parseInt('295147905179352825856')"));
+            Assert.AreEqual(4722366482869645213696d, TestUtils.Evaluate("Number.parseInt('4722366482869645213696')"));
+            Assert.AreEqual(75557863725914323419136d, TestUtils.Evaluate("Number.parseInt('75557863725914323419136')"));
+
+            // Sign.
+            Assert.AreEqual(-123, TestUtils.Evaluate("Number.parseInt('-123')"));
+            Assert.AreEqual(123, TestUtils.Evaluate("Number.parseInt('+123')"));
+
+            // Empty string should produce NaN.
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number.parseInt('')"));
+
+            // Leading whitespace should be skipped.
+            Assert.AreEqual(1, TestUtils.Evaluate("Number.parseInt('  1')"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Number.parseInt('  1.5')"));
+            Assert.AreEqual(35, TestUtils.Evaluate("Number.parseInt('\t35')"));
+
+            // Hex prefix should be respected.
+            Assert.AreEqual(17, TestUtils.Evaluate("Number.parseInt('0x11')"));
+            Assert.AreEqual(1.512366075204171e+36, TestUtils.Evaluate("Number.parseInt('0x123456789abcdef0123456789abcdef')"));
+
+            // Bases.
+            Assert.AreEqual(17, TestUtils.Evaluate("Number.parseInt('0x11', 16)"));
+            Assert.AreEqual(90, TestUtils.Evaluate("Number.parseInt('0X5a', 16)"));
+            Assert.AreEqual(17, TestUtils.Evaluate("Number.parseInt('11', 16)"));
+            Assert.AreEqual(2748, TestUtils.Evaluate("Number.parseInt('abc', 16)"));
+            Assert.AreEqual(3, TestUtils.Evaluate("Number.parseInt('11', 2)"));
+            Assert.AreEqual(16, TestUtils.Evaluate("Number.parseInt('0x10')"));
+            Assert.AreEqual(4096, TestUtils.Evaluate("Number.parseInt('0x1000')"));
+            Assert.AreEqual(1048576, TestUtils.Evaluate("Number.parseInt('0x100000')"));
+            Assert.AreEqual(268435456, TestUtils.Evaluate("Number.parseInt('0x10000000')"));
+            Assert.AreEqual(68719476736d, TestUtils.Evaluate("Number.parseInt('0x1000000000')"));
+            Assert.AreEqual(17592186044416d, TestUtils.Evaluate("Number.parseInt('0x100000000000')"));
+            Assert.AreEqual(4503599627370496d, TestUtils.Evaluate("Number.parseInt('0x10000000000000')"));
+            Assert.AreEqual(1152921504606847000d, TestUtils.Evaluate("Number.parseInt('0x1000000000000000')"));
+            Assert.AreEqual(295147905179352830000d, TestUtils.Evaluate("Number.parseInt('0x100000000000000000')"));
+            Assert.AreEqual(7.555786372591432e+22, TestUtils.Evaluate("Number.parseInt('0x10000000000000000000')"));
+            Assert.AreEqual(1.9342813113834067e+25, TestUtils.Evaluate("Number.parseInt('0x1000000000000000000000')"));
+
+            // Base out of range.
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number.parseInt('11', 1)"));
+            Assert.AreEqual(11, TestUtils.Evaluate("Number.parseInt('11', 0)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number.parseInt('11', -1)"));
+
+            // Hex prefix should not be respected if base is specified explicitly.
+            Assert.AreEqual(0, TestUtils.Evaluate("Number.parseInt('0x11', 10)"));
+
+            // Junk characters and out of range characters should stop parsing
+            Assert.AreEqual(123, TestUtils.Evaluate("Number.parseInt('123x456')"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Number.parseInt('1a')"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Number.parseInt('a')"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Number.parseInt('19', 8)"));
+
+            // Invalid prefix.
+            Assert.AreEqual(0, TestUtils.Evaluate("Number.parseInt('0z11', 10)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Number.parseInt('0z11')"));
+
+            // Radix uses ToInt32() so has weird wrapping issues.
+            Assert.AreEqual(19, TestUtils.Evaluate("Number.parseInt('23', 4294967304)"));
+
+            // Octal parsing (only works in compatibility mode).
+            TestUtils.CompatibilityMode = Jurassic.CompatibilityMode.ECMAScript3;
+            try
+            {
+                Assert.AreEqual(9, TestUtils.Evaluate("Number.parseInt('011')"));
+                Assert.AreEqual(0, TestUtils.Evaluate("Number.parseInt('08')"));
+                Assert.AreEqual(1, TestUtils.Evaluate("Number.parseInt('018')"));
+                Assert.AreEqual(11, TestUtils.Evaluate("Number.parseInt('011', 10)"));
+            }
+            finally
+            {
+                TestUtils.CompatibilityMode = Jurassic.CompatibilityMode.Latest;
+            }
+
+            // Octal parsing was removed from ES5.
+            if (TestUtils.Engine != JSEngine.JScript)
+            {
+                Assert.AreEqual(11, TestUtils.Evaluate("Number.parseInt('011')"));
+                Assert.AreEqual(8, TestUtils.Evaluate("Number.parseInt('08')"));
+                Assert.AreEqual(18, TestUtils.Evaluate("Number.parseInt('018')"));
+                Assert.AreEqual(11, TestUtils.Evaluate("Number.parseInt('011', 10)"));
+            }
+
+            // Large numbers.
+            Assert.AreEqual(9214843084008499.0, TestUtils.Evaluate("Number.parseInt('9214843084008499')"));
+            Assert.AreEqual(18014398509481993.0, TestUtils.Evaluate("Number.parseInt('18014398509481993')"));
+        }
+
+        [TestMethod]
+        public void clz()
+        {
+            Assert.AreEqual(32, TestUtils.Evaluate("0 .clz()"));
+            Assert.AreEqual(31, TestUtils.Evaluate("1 .clz()"));
+            Assert.AreEqual(28, TestUtils.Evaluate("12 .clz()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("4294967275 .clz()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("4294967295 .clz()"));
+            Assert.AreEqual(16, TestUtils.Evaluate("60000 .clz()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("(-1).clz()"));
+            Assert.AreEqual(31, TestUtils.Evaluate("1.9.clz()"));
         }
     }
 }
