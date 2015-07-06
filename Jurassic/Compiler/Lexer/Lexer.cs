@@ -349,14 +349,16 @@ namespace Jurassic.Compiler
                 case NumberParser.ParseCoreStatus.NoExponent:
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal constant.", this.lineNumber, this.Source.Path);
-                case NumberParser.ParseCoreStatus.OctalLiteral:
-                    // Octal number are not supported in strict mode.
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal literal.", this.lineNumber, this.Source.Path);
+                case NumberParser.ParseCoreStatus.ES3OctalLiteral:
+                    // ES3 octal literals are not supported in strict mode.
                     if (this.StrictMode)
                         throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not allowed in strict mode.", this.lineNumber, this.Source.Path);
                     break;
                 case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal constant.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal literal.", this.lineNumber, this.Source.Path);
+                case NumberParser.ParseCoreStatus.InvalidBinaryLiteral:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid binary literal.", this.lineNumber, this.Source.Path);
             }
 
             // Return the result as an integer if possible, otherwise return it as a double.

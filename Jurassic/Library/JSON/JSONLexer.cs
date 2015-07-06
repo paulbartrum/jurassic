@@ -159,9 +159,13 @@ namespace Jurassic.Library
                 case NumberParser.ParseCoreStatus.HexLiteral:
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:
                     throw new JavaScriptException(this.engine, "SyntaxError", "Hexidecimal literals are not supported in JSON.");
-                case NumberParser.ParseCoreStatus.OctalLiteral:
+                case NumberParser.ParseCoreStatus.ES3OctalLiteral:
+                case NumberParser.ParseCoreStatus.ES6OctalLiteral:
                 case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
                     throw new JavaScriptException(this.engine, "SyntaxError", "Octal literals are not supported in JSON.");
+                case NumberParser.ParseCoreStatus.BinaryLiteral:
+                case NumberParser.ParseCoreStatus.InvalidBinaryLiteral:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Binary literals are not supported in JSON.");
             }
 
             return new LiteralToken(negative ? -result : result);
