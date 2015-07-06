@@ -279,5 +279,18 @@ namespace Jurassic.Library
                     result.Push(property.Name);
             return result;
         }
+
+        /// <summary>
+        /// Determines whether two values are the same value.  Note that this method considers NaN
+        /// to be equal with itself and negative zero is considered different from positive zero.
+        /// </summary>
+        /// <param name="value1"> The first value to compare. </param>
+        /// <param name="value2"> The second value to compare. </param>
+        /// <returns> <c>true</c> if the values are the same.  </returns>
+        [JSInternalFunction(Name = "is")]
+        public static bool Is(object value1, object value2)
+        {
+            return TypeComparer.SameValue(value1, value2);
+        }
     }
 }

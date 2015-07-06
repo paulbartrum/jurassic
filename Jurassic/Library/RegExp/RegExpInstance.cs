@@ -45,6 +45,7 @@ namespace Jurassic.Library
 
             // Initialize the javascript properties.
             this.FastSetProperty("source", pattern);
+            this.FastSetProperty("flags", this.Flags);
             this.FastSetProperty("global", this.Global);
             this.FastSetProperty("multiline", this.Multiline);
             this.FastSetProperty("ignoreCase", this.IgnoreCase);
@@ -67,6 +68,7 @@ namespace Jurassic.Library
 
             // Initialize the javascript properties.
             this.FastSetProperty("source", existingInstance.Source);
+            this.FastSetProperty("flags", existingInstance.Flags);
             this.FastSetProperty("global", existingInstance.Global);
             this.FastSetProperty("multiline", existingInstance.Multiline);
             this.FastSetProperty("ignoreCase", existingInstance.IgnoreCase);
@@ -95,6 +97,19 @@ namespace Jurassic.Library
             get { return this.value; }
         }
 
+
+
+        //     JAVASCRIPT PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets the regular expression pattern.
+        /// </summary>
+        public string Source
+        {
+            get { return this.value.ToString(); }
+        }
+
         /// <summary>
         /// Gets a string that contains the flags.
         /// </summary>
@@ -111,19 +126,6 @@ namespace Jurassic.Library
                     result.Append("m");
                 return result.ToString();
             }
-        }
-
-
-
-        //     JAVASCRIPT PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the regular expression pattern.
-        /// </summary>
-        public string Source
-        {
-            get { return this.value.ToString(); }
         }
 
         /// <summary>
@@ -187,6 +189,7 @@ namespace Jurassic.Library
 
             // Update the javascript properties.
             this.FastSetProperty("source", pattern);
+            this.FastSetProperty("flags", this.Flags);
             this.FastSetProperty("global", this.Global);
             this.FastSetProperty("multiline", this.Multiline);
             this.FastSetProperty("ignoreCase", this.IgnoreCase);

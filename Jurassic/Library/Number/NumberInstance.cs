@@ -177,5 +177,40 @@ namespace Jurassic.Library
         {
             return this.value;
         }
+        
+        /// <summary>
+        /// Calculates the number of leading zero bits in the integer representation of this
+        /// number.
+        /// </summary>
+        /// <returns> The number of leading zero bits in the integer representation of this number. </returns>
+        [JSInternalFunction(Name = "clz")]
+        public int Clz()
+        {
+            uint x = (uint)this.value;
+
+            // Propagate leftmost 1-bit to the right 
+            x = x | (x >> 1); 
+            x = x | (x >> 2); 
+            x = x | (x >> 4); 
+            x = x | (x >> 8); 
+            x = x | (x >> 16);
+
+            return sizeof(int) * 8 - CountOneBits(x);
+        }
+
+        /// <summary>
+        /// Counts the number of set bits in an integer.
+        /// </summary>
+        /// <param name="x"> The integer. </param>
+        /// <returns> The number of set bits in the integer. </returns>
+        private static int CountOneBits(uint x)
+        {
+            x -= ((x >> 1) & 0x55555555);
+            x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
+            x = (((x >> 4) + x) & 0x0f0f0f0f);
+            x += (x >> 8);
+            x += (x >> 16);
+            return (int)(x & 0x0000003f);
+        }
     }
 }

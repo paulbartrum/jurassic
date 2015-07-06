@@ -668,5 +668,27 @@ namespace UnitTests
             // length
             Assert.AreEqual(0, TestUtils.Evaluate("Object.valueOf.length"));
         }
+
+        [TestMethod]
+        public void @is()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is('foo', 'foo');"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math, Math);"));
+
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.is('foo', 'bar');"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.is([], []);"));
+
+            Assert.AreEqual(true, TestUtils.Evaluate("var test = {a: 1}; Object.is(test, test);"));
+
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(null, null);"));
+
+            // Special Cases
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.is(0, -0);"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(-0, -0);"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(NaN, 0/0);"));
+
+            // length
+            Assert.AreEqual(2, TestUtils.Evaluate("Object.is.length"));
+        }
     }
 }
