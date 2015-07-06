@@ -135,6 +135,31 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Assigns enumerable properties of one or more source objects onto a destination object.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="target"> The destination object to copy properties to. </param>
+        /// <param name="sources"> One or more source objects to copy properties from. </param>
+        /// <returns> A new object instance. </returns>
+        [JSInternalFunction(Name = "assign", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static ObjectInstance Assign(ScriptEngine engine, ObjectInstance target, params object[] sources)
+        {
+            foreach (var rawSource in sources)
+            {
+                // Ignore undefined or null sources.
+                if (rawSource == null || rawSource == Undefined.Value || rawSource == Null.Value)
+                    continue;
+                var source = TypeConverter.ToObject(engine, rawSource);
+
+                // Copy the enumerable properties from the source object.
+                foreach (var property in source.Properties)
+                    if (property.IsEnumerable == true)
+                        target.SetPropertyValue(property.Name, property.Value, throwOnError: true);
+            }
+            return target;
+        }
+
+        /// <summary>
         /// Modifies the value and attributes of a property.
         /// </summary>
         /// <param name="obj"> The object to define the property on. </param>
