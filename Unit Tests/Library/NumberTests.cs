@@ -405,6 +405,7 @@ namespace UnitTests
         {
             Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(0)"));
             Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(9007199254740994)"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(9007199254740992)"));
             Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(9007199254740991)"));
             Assert.AreEqual(false, TestUtils.Evaluate("Number.isSafeInteger(-9007199254740994)"));
             Assert.AreEqual(true, TestUtils.Evaluate("Number.isSafeInteger(-9007199254740991)"));

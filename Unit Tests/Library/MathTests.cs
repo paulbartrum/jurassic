@@ -524,8 +524,13 @@ namespace UnitTests
         public void trunc()
         {
             Assert.AreEqual(1, TestUtils.Evaluate("Math.trunc(1)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.trunc(1.3)"));
             Assert.AreEqual(1, TestUtils.Evaluate("Math.trunc(1.5)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.trunc(1.7)"));
             Assert.AreEqual(-1, TestUtils.Evaluate("Math.trunc(-1)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.trunc(-1.3)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.trunc(-1.5)"));
+            Assert.AreEqual(-1, TestUtils.Evaluate("Math.trunc(-1.7)"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.trunc(0), 0)"));
             Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.trunc(-0), -0)"));
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.trunc(Infinity)"));
