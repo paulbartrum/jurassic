@@ -139,6 +139,18 @@ namespace UnitTests
             Assert.AreEqual(255, TestUtils.Evaluate("0xff"));
             Assert.AreEqual(241, TestUtils.Evaluate("0xF1"));
             Assert.AreEqual(244837814094590.0, TestUtils.Evaluate("0xdeadbeefcafe"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0xgg"));
+
+            // ES6 binary literals.
+            Assert.AreEqual(21, TestUtils.Evaluate("0b10101"));
+            Assert.AreEqual(1, TestUtils.Evaluate("0b1"));
+            Assert.AreEqual(-21, TestUtils.Evaluate("-0B10101"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0b2"));
+
+            // ES6 octal literals.
+            Assert.AreEqual(61, TestUtils.Evaluate("0o75"));
+            Assert.AreEqual(4095, TestUtils.Evaluate("0O7777"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0o80"));
 
             // Overflow and underflow.
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("1.8e+308"));
