@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E916F24E-14C2-4EC0-B84A-8B7686621F69}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Test_Suite_Files</RootNamespace>
+    <AssemblyName>Test Suite Files</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config\excludelist.xml" />
+    <Content Include="Results 2012-06-25.txt" />
+    <Content Include="harness\cth.js" />
+    <Content Include="harness\Date_constants.js" />
+    <Content Include="harness\Date_library.js" />
+    <Content Include="harness\ed.js" />
+    <Content Include="harness\environment.js" />
+    <Content Include="harness\framework.js" />
+    <Content Include="harness\gs.js" />
+    <Content Include="harness\helper.js" />
+    <Content Include="harness\jquery-1.4.2.min.js" />
+    <Content Include="harness\jquery.base64.js" />
+    <Content Include="harness\jqueryprogressbar.js" />
+    <Content Include="harness\math_isequal.js" />
+    <Content Include="harness\math_precision.js" />
+    <Content Include="harness\numeric_conversion.js" />
+    <Content Include="harness\sections.js" />
+    <Content Include="harness\sta.js" />
+    <Content Include="harness\sth.js" />
+    <Content Include="ICSharpCode.SharpZipLib.dll" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="suite\2012-05-18.zip" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B0D0F980-2741-4D85-9D82-7F09ED470EB1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UnitTests</RootNamespace>
+    <AssemblyName>Unit Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
+      <Visible>False</Visible>
+    </CodeAnalysisDependentAssemblyPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Compiler\TypeInferenceTests.cs" />
+    <Compile Include="Core\BigIntegerTests.cs" />
+    <Compile Include="Core\JsPropertyTests.cs" />
+    <Compile Include="Core\DynamicMetaObjectTests.cs" />
+    <Compile Include="Core\ObjectExtensibilityTests.cs" />
+    <Compile Include="Core\SerializationTests.cs" />
+    <Compile Include="Core\ScriptEngineTests.cs" />
+    <Compile Include="Core\DocumentationSamples.cs" />
+    <Compile Include="Core\TypeComparerTests.cs" />
+    <Compile Include="Library\ArgumentsTests.cs" />
+    <Compile Include="Library\ArrayTests.cs" />
+    <Compile Include="Library\BooleanTests.cs" />
+    <Compile Include="Library\JSONTests.cs" />
+    <Compile Include="Library\FunctionTests.cs" />
+    <Compile Include="Core\TypeConverterTests.cs" />
+    <Compile Include="Library\ObjectTests.cs" />
+    <Compile Include="Library\GlobalTests.cs" />
+    <Compile Include="Library\RegExpTests.cs" />
+    <Compile Include="Library\StringTests.cs" />
+    <Compile Include="Library\DateTests.cs" />
+    <Compile Include="Library\ErrorTests.cs" />
+    <Compile Include="Library\NumberTests.cs" />
+    <Compile Include="Compiler\StatementTests.cs" />
+    <Compile Include="Compiler\ExpressionTests.cs" />
+    <Compile Include="Compiler\ParserTests.cs" />
+    <Compile Include="Compiler\LexerTests.cs" />
+    <Compile Include="Real-world\RealWorldTests.cs" />
+    <Compile Include="Utils\DynamicCodeDebugger.cs" />
+    <Compile Include="Utils\TestUtils.cs" />
+    <Compile Include="Utils\Interop.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\ActiveScriptEngine.cs" />
+    <Compile Include="Library\MathTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jurassic\Jurassic.csproj">
+      <Project>{2CE5502D-8710-4BE3-9D90-201D526904B3}</Project>
+      <Name>Jurassic</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Core\Sample Files\execute1.js" />
+    <Content Include="Core\Sample Files\globals1.js" />
+    <Content Include="Real-world\Files\coffee-script.js" />
+    <Content Include="Real-world\Files\color-conversion.js" />
+    <Content Include="Real-world\Files\levenshtein.js" />
+    <Content Include="Real-world\Files\lzw.js" />
+    <Content Include="Real-world\Files\md5.js" />
+    <Content Include="Real-world\Files\rsa.js" />
+    <Content Include="Real-world\Files\sha1.js" />
+    <Content Include="Real-world\Files\sha256.js" />
+    <Content Include="Real-world\Files\showdown.js" />
+    <Content Include="Real-world\Files\sprintf.js" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C0B52B91-21C0-4669-9B2E-F33838BD7F65}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Performance</RootNamespace>
+    <AssemblyName>Performance</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Jint, Version=0.8.8.0, Culture=neutral, PublicKeyToken=973cde3f1cafed03, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Jint.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
+      <Visible>False</Visible>
+    </CodeAnalysisDependentAssemblyPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArrayBenchmarks.cs" />
+    <Compile Include="ConversionBenchmarks.cs" />
+    <Compile Include="CodeGenTests.cs" />
+    <Compile Include="ParserBenchmarks.cs" />
+    <Compile Include="ScriptEngineManager.cs" />
+    <Compile Include="v8.cs" />
+    <Compile Include="OperatorBenchmarks.cs" />
+    <Compile Include="JSONBenchmarks.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SunSpider.cs" />
+    <Compile Include="TestUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Arrays.htm" />
+    <Content Include="bin\Jint.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Files\coffee-script.js" />
+    <Content Include="Files\sunspider-0.9.1\3d-cube.js" />
+    <Content Include="Files\sunspider-0.9.1\3d-morph.js" />
+    <Content Include="Files\sunspider-0.9.1\3d-raytrace.js" />
+    <Content Include="Files\sunspider-0.9.1\access-binary-trees.js" />
+    <Content Include="Files\sunspider-0.9.1\access-fannkuch.js" />
+    <Content Include="Files\sunspider-0.9.1\access-nbody.js" />
+    <Content Include="Files\sunspider-0.9.1\access-nsieve.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-3bit-bits-in-byte.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-bits-in-byte.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-bitwise-and.js" />
+    <Content Include="Files\sunspider-0.9.1\bitops-nsieve-bits.js" />
+    <Content Include="Files\sunspider-0.9.1\controlflow-recursive.js" />
+    <Content Include="Files\sunspider-0.9.1\crypto-aes.js" />
+    <Content Include="Files\sunspider-0.9.1\crypto-md5.js" />
+    <Content Include="Files\sunspider-0.9.1\crypto-sha1.js" />
+    <Content Include="Files\sunspider-0.9.1\date-format-tofte.js" />
+    <Content Include="Files\sunspider-0.9.1\date-format-xparb.js" />
+    <Content Include="Files\sunspider-0.9.1\math-cordic.js" />
+    <Content Include="Files\sunspider-0.9.1\math-partial-sums.js" />
+    <Content Include="Files\sunspider-0.9.1\math-spectral-norm.js" />
+    <Content Include="Files\sunspider-0.9.1\regexp-dna.js" />
+    <Content Include="Files\sunspider-0.9.1\string-base64.js" />
+    <Content Include="Files\sunspider-0.9.1\string-fasta.js" />
+    <Content Include="Files\sunspider-0.9.1\string-tagcloud.js" />
+    <Content Include="Files\sunspider-0.9.1\string-unpack-code.js" />
+    <Content Include="Files\sunspider-0.9.1\string-validate-input.js" />
+    <Content Include="Files\ubench\function-closure.js" />
+    <Content Include="Files\ubench\function-correct-args.js" />
+    <Content Include="Files\ubench\function-empty.js" />
+    <Content Include="Files\ubench\function-excess-args.js" />
+    <Content Include="Files\ubench\function-missing-args.js" />
+    <Content Include="Files\ubench\function-sum.js" />
+    <Content Include="Files\ubench\loop-empty-resolve.js" />
+    <Content Include="Files\ubench\loop-empty.js" />
+    <Content Include="Files\ubench\loop-sum.js" />
+    <Content Include="Files\v8\crypto.js" />
+    <Content Include="Files\v8\deltablue.js" />
+    <Content Include="Files\v8\earley-boyer.js" />
+    <Content Include="Files\v8\raytrace.js" />
+    <Content Include="Files\v8\README.txt" />
+    <Content Include="Files\v8\regexp.js" />
+    <Content Include="Files\v8\richards.js" />
+    <Content Include="Files\v8\splay.js" />
+    <Content Include="JSLitmus.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jurassic\Jurassic.csproj">
+      <Project>{2CE5502D-8710-4BE3-9D90-201D526904B3}</Project>
+      <Name>Jurassic</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
