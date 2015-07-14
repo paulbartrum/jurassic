@@ -34,6 +34,7 @@ namespace Jurassic.Library
         internal ThrowTypeErrorFunction(ObjectInstance prototype, string message)
             : base(prototype)
         {
+            this.FastSetProperty("name", "ThrowTypeError");
             this.FastSetProperty("length", 0);
             this.IsExtensible = false;
             this.message = message;
@@ -52,15 +53,6 @@ namespace Jurassic.Library
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
             throw new JavaScriptException(this.Engine, "TypeError", this.message);
-        }
-
-        /// <summary>
-        /// Returns a string representing this object.
-        /// </summary>
-        /// <returns> A string representing this object. </returns>
-        public override string ToString()
-        {
-            return "function ThrowTypeError() {{ [native code] }}";
         }
     }
 }

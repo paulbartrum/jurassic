@@ -202,15 +202,6 @@ namespace Jurassic.Library
             return (ObjectInstance)this.constructBinder.Call(this.Engine, this, argumentValues);
         }
 
-        /// <summary>
-        /// Returns a string representing this object.
-        /// </summary>
-        /// <returns> A string representing this object. </returns>
-        public override string ToString()
-        {
-            return string.Format("function {0}() {{ [native code] }}", this.Name);
-        }
-
         ///// <summary>
         ///// Creates a delegate that does type conversion and calls the method represented by this
         ///// object.
