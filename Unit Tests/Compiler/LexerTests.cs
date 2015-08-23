@@ -39,6 +39,9 @@ namespace UnitTests
             Assert.AreEqual(6, TestUtils.Evaluate("delete dung; d\\u0075ng = 6; dung"));
             Assert.AreEqual(7, TestUtils.Evaluate("delete another; \\u0061nother = 7; another"));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("ident\\u0020ifier"));
+            Assert.AreEqual(12, TestUtils.Evaluate(@"delete \u{20BB7}; \u{20BB7} = 12; \u{20BB7}"));
+            Assert.AreEqual(13, TestUtils.Evaluate(@"delete Te\u{20BB7}st; Te\u{20BB7}st = 13; Te\u{20BB7}st"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType(@"ident\u{20}ifier"));
         }
 
         [TestMethod]
@@ -136,6 +139,18 @@ namespace UnitTests
             Assert.AreEqual(255, TestUtils.Evaluate("0xff"));
             Assert.AreEqual(241, TestUtils.Evaluate("0xF1"));
             Assert.AreEqual(244837814094590.0, TestUtils.Evaluate("0xdeadbeefcafe"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0xgg"));
+
+            // ES6 binary literals.
+            Assert.AreEqual(21, TestUtils.Evaluate("0b10101"));
+            Assert.AreEqual(1, TestUtils.Evaluate("0b1"));
+            Assert.AreEqual(-21, TestUtils.Evaluate("-0B10101"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0b2"));
+
+            // ES6 octal literals.
+            Assert.AreEqual(61, TestUtils.Evaluate("0o75"));
+            Assert.AreEqual(4095, TestUtils.Evaluate("0O7777"));
+            Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("0o80"));
 
             // Overflow and underflow.
             Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("1.8e+308"));
@@ -148,10 +163,6 @@ namespace UnitTests
             Assert.AreEqual(0, TestUtils.Evaluate("9e-325"));
             Assert.AreEqual(0, TestUtils.Evaluate("2.1234567890123456789e-324"));
             Assert.AreEqual(0, TestUtils.Evaluate("1e-9999999999"));
-            Assert.AreEqual(1.11111111111111111E+308, TestUtils.Evaluate("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
-            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
-            Assert.AreEqual(-1.11111111111111111E+308, TestUtils.Evaluate("-111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
-            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("-1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
 
             // Tricky cases (from http://www.exploringbinary.com/)
             Assert.AreEqual("1.0000000000000000000000000000000000000000000000000010 x 2^54", ToBinary(TestUtils.Evaluate("18014398509481993")));
@@ -198,6 +209,9 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("'test\""));
             Assert.AreEqual("SyntaxError", TestUtils.EvaluateExceptionType("\"test'"));
             Assert.AreEqual("test", TestUtils.Evaluate(@"'te\1st'"));
+
+            // ECMAScript 6
+            Assert.AreEqual("𠮷", TestUtils.Evaluate(@"'\u{20BB7}'"));
         }
 
         [TestMethod]

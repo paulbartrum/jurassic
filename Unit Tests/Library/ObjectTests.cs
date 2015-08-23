@@ -366,6 +366,23 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void assign()
+        {
+            TestUtils.Execute(@"
+                var dst  = { quux: 0 };
+                var src1 = { foo: 1, bar: 2 };
+                var src2 = { foo: 3, baz: 4 };
+                Object.assign(dst, src1, src2);");
+            Assert.AreEqual(0, TestUtils.Evaluate("dst.quux"));
+            Assert.AreEqual(3, TestUtils.Evaluate("dst.foo"));
+            Assert.AreEqual(2, TestUtils.Evaluate("dst.bar"));
+            Assert.AreEqual(4, TestUtils.Evaluate("dst.baz"));
+
+            // length
+            Assert.AreEqual(2, TestUtils.Evaluate("Object.assign.length"));
+        }
+
+        [TestMethod]
         public void defineProperties()
         {
             Assert.AreEqual(true, TestUtils.Evaluate("var x = {}; Object.defineProperties(x, {a: {value: 5}, b: {value: 10}}) === x"));
@@ -667,6 +684,28 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(0, TestUtils.Evaluate("Object.valueOf.length"));
+        }
+
+        [TestMethod]
+        public void @is()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is('foo', 'foo');"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math, Math);"));
+
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.is('foo', 'bar');"));
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.is([], []);"));
+
+            Assert.AreEqual(true, TestUtils.Evaluate("var test = {a: 1}; Object.is(test, test);"));
+
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(null, null);"));
+
+            // Special Cases
+            Assert.AreEqual(false, TestUtils.Evaluate("Object.is(0, -0);"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(-0, -0);"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(NaN, 0/0);"));
+
+            // length
+            Assert.AreEqual(2, TestUtils.Evaluate("Object.is.length"));
         }
     }
 }
