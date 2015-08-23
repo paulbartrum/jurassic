@@ -1047,6 +1047,14 @@ namespace UnitTests
                 return;
 
             Assert.AreEqual("2,3", TestUtils.Evaluate("[1, 2, 3].filter(function(value, index, array) { return value > 1; }).toString()"));
+            Assert.AreEqual("3,1,4,1", TestUtils.Evaluate("[3, 1, 4, 1, 5, 9].filter(function(value, index, array) { return value < 5; }).toString()"));
+            Assert.AreEqual(0, TestUtils.Evaluate("[3, 1, 4, 1, 5, 9].filter(function(value, index, array) { return value > 9; }).length"));
+
+            Assert.AreEqual("0,1,2", TestUtils.Evaluate("var output = []; [1, 2, 3].filter(function(value, index, array) { output.push(index); return false; }); output.toString()"));
+            Assert.AreEqual("1,2,3,1,2,3,1,2,3", TestUtils.Evaluate("var output = []; [1, 2, 3].filter(function(value, index, array) { output.push(array); return false; }); output.toString()"));
+
+            Assert.AreEqual("ho", TestUtils.Evaluate("var output = 'hi'; [1, 2, 3].filter(function(value, index, array) { output = this; return false; }, 'ho'); output.toString()"));
+            Assert.AreEqual(TestUtils.Evaluate("this"), TestUtils.Evaluate("var output = 5; [1, 2, 3].filter(function(value, index, array) { output = this; return false; }); output"));
 
             // TypeError should be thrown if the callback is not a function.
             Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].filter(true)"));
@@ -1055,6 +1063,32 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.filter.length"));
+        }
+
+        [TestMethod]
+        public void find()
+        {
+            // JScript doesn't support Array.find.
+            if (TestUtils.Engine == JSEngine.JScript)
+                return;
+
+            Assert.AreEqual("2", TestUtils.Evaluate("[1, 2, 3].find(function(value, index, array) { return value > 1; }).toString()"));
+            Assert.AreEqual("3", TestUtils.Evaluate("[3, 1, 4, 1, 5, 9].find(function(value, index, array) { return value < 5; }).toString()"));
+            Assert.AreEqual(Undefined.Value, TestUtils.Evaluate("[3, 1, 4, 1, 5, 9].find(function(value, index, array) { return value > 9; })"));
+
+            Assert.AreEqual("0,1,2", TestUtils.Evaluate("var output = []; [1, 2, 3].find(function(value, index, array) { output.push(index); return false; }); output.toString()"));
+            Assert.AreEqual("1,2,3,1,2,3,1,2,3", TestUtils.Evaluate("var output = []; [1, 2, 3].find(function(value, index, array) { output.push(array); return false; }); output.toString()"));
+
+            Assert.AreEqual("ho", TestUtils.Evaluate("var output = 'hi'; [1, 2, 3].find(function(value, index, array) { output = this; return false; }, 'ho'); output.toString()"));
+            Assert.AreEqual(TestUtils.Evaluate("this"), TestUtils.Evaluate("var output = 5; [1, 2, 3].find(function(value, index, array) { output = this; return false; }); output"));
+
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].find(true)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].find(1)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("[1, 2, 3].find({})"));
+
+            // length
+            Assert.AreEqual(1, TestUtils.Evaluate("Array.prototype.find.length"));
         }
 
         [TestMethod]
