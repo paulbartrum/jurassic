@@ -707,5 +707,28 @@ namespace UnitTests
             // length
             Assert.AreEqual(2, TestUtils.Evaluate("Object.is.length"));
         }
+
+        [TestMethod]
+        public void setPrototypeOf()
+        {
+            Assert.AreEqual(5, TestUtils.Evaluate("var a = {}; Object.setPrototypeOf(a, Math); a.abs(-5)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var a = {}; Object.setPrototypeOf(a, Math); Object.getPrototypeOf(a) === Math"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Object.setPrototypeOf(Object.preventExtensions({}), {})"));
+        }
+
+        [TestMethod]
+        public void __proto__()
+        {
+            Assert.AreEqual(true, TestUtils.Evaluate("var a = {}; a.__proto__ = Math; a.__proto__ === Math"));
+            Assert.AreEqual(true, TestUtils.Evaluate("var a = {}; a.__proto__ = Math; a.__proto__ === Object.getPrototypeOf(a)"));
+        }
+
+        [TestMethod]
+        public void getOwnPropertySymbols()
+        {
+            Assert.AreEqual(0, TestUtils.Evaluate("var a = {}; Object.getOwnPropertySymbols(a).length"));
+            Assert.AreEqual(2, TestUtils.Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(a).length"));
+            Assert.AreEqual("[Symbol(one), Symbol(two)]", TestUtils.Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(a).toString()"));
+        }
     }
 }

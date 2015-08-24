@@ -581,5 +581,46 @@ namespace Jurassic.Library
         {
             return (double)(float)number;
         }
+
+        private static readonly int[] clz32Table = new int[] {
+            32, 31,  0, 16,  0, 30,  3,  0, 15,  0,  0,  0, 29, 10,  2,  0,
+             0,  0, 12, 14, 21,  0, 19,  0,  0, 28,  0, 25,  0,  9,  1,  0,
+            17,  0,  4,  0,  0,  0, 11,  0, 13, 22, 20,  0, 26,  0,  0, 18,
+             5,  0,  0, 23,  0, 27,  0,  6,  0, 24,  7,  0,  8,  0,  0,  0
+        };
+
+        /// <summary>
+        /// Converts the input value to an unsigned 32-bit integer, then returns the number of
+        /// leading zero bits.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> The number of leading zero bits, treating the input like an unsigned 32-bit
+        /// integer. </returns>
+        [JSInternalFunction(Name = "clz32")]
+        public static double Clz32(double number)
+        {
+            var x = TypeConverter.ToUint32(number);
+            x = x | (x >> 1);       // Propagate leftmost
+            x = x | (x >> 2);       // 1-bit to the right.
+            x = x | (x >> 4);
+            x = x | (x >> 8);
+            x = x | (x >> 16);
+            x = x * 0x06EB14F9;     // Multiplier is 7*255**3.
+            return clz32Table[x >> 26];
+        }
+
+        /// <summary>
+        /// Returns an approximation to the cube root of the input value.
+        /// </summary>
+        /// <param name="number"> The number to operate on. </param>
+        /// <returns> An approximation to the cube root of the input value. </returns>
+        [JSInternalFunction(Name = "cbrt")]
+        public static double Cbrt(double number)
+        {
+            if (number == 0)
+                return number;  // Handles zero and negative zero.
+            var absResult = Math.Pow(Math.Abs(number), 1.0 / 3.0);
+            return number < 0 ? -absResult : absResult;
+        }
     }
 }
