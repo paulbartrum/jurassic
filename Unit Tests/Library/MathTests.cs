@@ -589,5 +589,33 @@ namespace UnitTests
             Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.fround(-Infinity)"));
             Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.fround(NaN)"));
         }
+
+        [TestMethod]
+        public void clz32()
+        {
+            Assert.AreEqual(32, TestUtils.Evaluate("Math.clz32(0)"));
+            Assert.AreEqual(31, TestUtils.Evaluate("Math.clz32(1)"));
+            Assert.AreEqual(5, TestUtils.Evaluate("Math.clz32(123456789)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.clz32(1234567890123456789)"));
+            Assert.AreEqual(0, TestUtils.Evaluate("Math.clz32(-1)"));
+            Assert.AreEqual(29, TestUtils.Evaluate("Math.clz32(5.8)"));
+            Assert.AreEqual(32, TestUtils.Evaluate("Math.clz32(Infinity)"));
+            Assert.AreEqual(32, TestUtils.Evaluate("Math.clz32(-Infinity)"));
+            Assert.AreEqual(32, TestUtils.Evaluate("Math.clz32(NaN)"));
+        }
+
+        [TestMethod]
+        public void cbrt()
+        {
+            Assert.AreEqual(0, TestUtils.Evaluate("Math.cbrt(0)"));
+            Assert.AreEqual(1, TestUtils.Evaluate("Math.cbrt(1)"));
+            Assert.AreEqual(3, TestUtils.Evaluate("Math.cbrt(27)"));
+            Assert.AreEqual(-3, TestUtils.Evaluate("Math.cbrt(-27)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.cbrt(0), 0)"));
+            Assert.AreEqual(true, TestUtils.Evaluate("Object.is(Math.cbrt(-0), -0)"));
+            Assert.AreEqual(double.PositiveInfinity, TestUtils.Evaluate("Math.cbrt(Infinity)"));
+            Assert.AreEqual(double.NegativeInfinity, TestUtils.Evaluate("Math.cbrt(-Infinity)"));
+            Assert.AreEqual(double.NaN, TestUtils.Evaluate("Math.cbrt(NaN)"));
+        }
     }
 }

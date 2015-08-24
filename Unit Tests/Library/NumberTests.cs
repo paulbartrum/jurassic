@@ -12,9 +12,6 @@ namespace UnitTests
     [TestClass]
     public class NumberTests
     {
-        
-
-
         [TestMethod]
         public void Constructor()
         {

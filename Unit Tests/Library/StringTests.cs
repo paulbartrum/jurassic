@@ -1284,5 +1284,15 @@ namespace UnitTests
             // Length
             Assert.AreEqual(1, TestUtils.Evaluate("'ab'.repeat.length"));
         }
+
+        [TestMethod]
+        public void raw()
+        {
+            Assert.AreEqual("t0e1s2t", TestUtils.Evaluate("String.raw({ raw: 'test' }, 0, 1, 2)"));
+
+            // The first parameter must be an object with a "raw" property.
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("String.raw({}, 0, 1, 2)"));
+            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("String.raw(5, 0, 1, 2)"));
+        }
     }
 }

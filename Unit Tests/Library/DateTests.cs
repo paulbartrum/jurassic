@@ -668,6 +668,7 @@ namespace UnitTests
                 Assert.AreEqual("Sat Apr 24 2010 23:59:57 " + GetTimezoneString(DateTime.Parse("24 Apr 2010 23:59:57")), TestUtils.Evaluate("new Date('24 Apr 2010 23:59:57').toString()"));
             Assert.AreEqual("Invalid Date", TestUtils.Evaluate("new Date(NaN).toString()"));
             Assert.AreEqual(0, TestUtils.Evaluate("new Date().toString.length"));
+            Assert.AreEqual("Invalid Date", TestUtils.Evaluate("new Date().toString.call(5)"));
         }
 
         [TestMethod]
