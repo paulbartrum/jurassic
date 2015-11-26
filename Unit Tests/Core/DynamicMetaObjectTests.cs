@@ -9,7 +9,7 @@ namespace UnitTests
     /// Test the dynamic keyword.
     /// </summary>
     [TestClass]
-    public class DynamicMetaObjectTests
+    public class DynamicMetaObjectTests : TestBase
     {
         private class DynamicMetaObjectWrapper : System.Dynamic.DynamicObject
         {
@@ -158,7 +158,7 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, obj.f());
 
             // Attempting to call an invalid function should throw an exception.
-            TestUtils.ExpectException<Microsoft.CSharp.RuntimeBinder.RuntimeBinderException>(() => obj.g(3));
+            ExpectException<Microsoft.CSharp.RuntimeBinder.RuntimeBinderException>(() => obj.g(3));
         }
     }
 }

@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
-using Jurassic.Compiler;
 
 namespace UnitTests
 {
@@ -13,7 +7,7 @@ namespace UnitTests
     /// Real-world tests.
     /// </summary>
     [TestClass]
-    public class RealWorldTests
+    public class RealWorldTests : TestBase
     {
         [TestMethod]
         public void Showdown()
@@ -22,7 +16,7 @@ namespace UnitTests
             var engine = new ScriptEngine();
             engine.ExecuteFile(@"..\..\..\Unit Tests\Real-world\Files\showdown.js");
             engine.Execute("var converter = new Showdown.converter()");
-            engine.SetGlobalValue("text", TestUtils.NormalizeText(@"
+            engine.SetGlobalValue("text", NormalizeText(@"
                 Showdown Demo
                 -------------
 
@@ -32,7 +26,7 @@ namespace UnitTests
                   - See the corresponding HTML on the right.
 
                 For a Markdown cheat-sheet, switch the right-hand window from *Preview* to *Syntax Guide*."));
-            Assert.AreEqual(TestUtils.NormalizeText(@"
+            Assert.AreEqual(NormalizeText(@"
                 <h2>Showdown Demo</h2>
 
                 <p>You can try out Showdown on this page:</p>
@@ -43,7 +37,7 @@ namespace UnitTests
                 </ul>
 
                 <p>For a Markdown cheat-sheet, switch the right-hand window from <em>Preview</em> to <em>Syntax Guide</em>.</p>"),
-                TestUtils.NormalizeText(engine.Evaluate<string>("converter.makeHtml(text)")));
+                NormalizeText(engine.Evaluate<string>("converter.makeHtml(text)")));
         }
 
         [TestMethod]
@@ -195,7 +189,7 @@ namespace UnitTests
 
                 # Array comprehensions:
                 cubes = (math.cube num for num in list)");
-            Assert.AreEqual(TestUtils.NormalizeText(@"
+            Assert.AreEqual(NormalizeText(@"
                 (function() {
                   var cubes, list, math, num, number, opposite, race, square;
                   var __slice = Array.prototype.slice;
@@ -233,7 +227,7 @@ namespace UnitTests
                     return _results;
                   })();
                 }).call(this);"),
-               TestUtils.NormalizeText(engine.Evaluate<string>("CoffeeScript.compile(script, {})")));
+               NormalizeText(engine.Evaluate<string>("CoffeeScript.compile(script, {})")));
 
 
             engine.SetGlobalValue("script", @"
@@ -673,7 +667,7 @@ namespace UnitTests
                 zappa.version = '0.1.4'
                 zappa.run = -> z.run.apply z, arguments
                 zappa.run_file = -> z.run_file.apply z, arguments");
-            Assert.AreEqual(TestUtils.NormalizeText(@"
+            Assert.AreEqual(NormalizeText(@"
                 (function() {
                   var App, MessageHandler, RequestHandler, Zappa, build_msg, coffee, coffeekup, coffeescript_support, express, fs, inspect, io, jquery, parse_msg, publish_api, puts, scoped, z, zappa;
                   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -1328,22 +1322,21 @@ namespace UnitTests
                     return z.run_file.apply(z, arguments);
                   };
                 }).call(this);"),
-               TestUtils.NormalizeText(engine.Evaluate<string>("CoffeeScript.compile(script, {})")));
-            System.IO.File.WriteAllText(@"c:\users\paul\actual.txt", TestUtils.NormalizeText(engine.Evaluate<string>("CoffeeScript.compile(script, {})")));
+               NormalizeText(engine.Evaluate<string>("CoffeeScript.compile(script, {})")));
         }
 
         [TestMethod]
         public void NoAlphaNumeric()
         {
             // From http://discogscounter.getfreehosting.co.uk/js-noalnum_com.php
-            TestUtils.Execute("var sort = Array.prototype.sort; Array.prototype.sort = function() { return 'obfuscated'; }");
+            Execute("var sort = Array.prototype.sort; Array.prototype.sort = function() { return 'obfuscated'; }");
             try
             {
-                Assert.AreEqual("obfuscated", TestUtils.Evaluate("($=[$=[]][(__=!$+$)[_=-~-~-~$]+({}+$)[_/_]+($$=($_=!''+$)[_/_]+$_[+$])])()"));
+                Assert.AreEqual("obfuscated", Evaluate("($=[$=[]][(__=!$+$)[_=-~-~-~$]+({}+$)[_/_]+($$=($_=!''+$)[_/_]+$_[+$])])()"));
             }
             finally
             {
-                TestUtils.Execute("Array.prototype.sort = sort");
+                Execute("Array.prototype.sort = sort");
             }
         }
     }

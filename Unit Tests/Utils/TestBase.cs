@@ -6,23 +6,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTests
 {
-    public enum JSEngine
-    {
-        Jurassic,
-        JScript,
-    }
-
-    public static class TestUtils
+    public abstract class TestBase
     {
         [ThreadStatic]
-        private static ActiveScriptEngine jscriptEngine;
+        public static Jurassic.ScriptEngine jurassicScriptEngine;
 
-        [ThreadStatic]
-        private static Jurassic.ScriptEngine jurassicScriptEngine;
+        public TestContext TestContext { get; set; }
 
-        public static JSEngine Engine
+        [TestInitialize]
+        public void Init()
         {
-            get { return JSEngine.Jurassic; }
+            // Each test method gets a fresh script engine instance.
+            jurassicScriptEngine = null;
         }
 
         public static Jurassic.CompatibilityMode CompatibilityMode
@@ -33,34 +28,14 @@ namespace UnitTests
 
         public static object Evaluate(string script)
         {
-            object result;
-            if (Engine == JSEngine.JScript)
-            {
-                if (jscriptEngine == null)
-                    jscriptEngine = ActiveScriptEngine.FromLanguage(ScriptLanguage.JScript);
-                result = jscriptEngine.Evaluate(script);
-                if (result == DBNull.Value)
-                    result = Jurassic.Null.Value;
-                else if (result == null)
-                    result = Jurassic.Undefined.Value;
-            }
-            else
-            {
-                InitializeJurassic();
-                result = jurassicScriptEngine.Evaluate(script);
-            }
-            return result;
+            InitializeJurassic();
+            return jurassicScriptEngine.Evaluate(script);
         }
 
         public static void Execute(string script)
         {
-            if (Engine == JSEngine.JScript)
-                throw new NotImplementedException();
-            else
-            {
-                InitializeJurassic();
-                jurassicScriptEngine.Execute(script);
-            }
+            InitializeJurassic();
+            jurassicScriptEngine.Execute(script);
         }
 
         private static void InitializeJurassic()
@@ -76,33 +51,16 @@ namespace UnitTests
 
         public static object EvaluateExceptionType(string script)
         {
-            if (Engine == JSEngine.JScript)
+            object result;
+            try
             {
-                try
-                {
-                    Evaluate("try { " + script + "; globalErrorName = 'No error was thrown' } catch(e) { globalErrorName = e.name; }");
-                }
-                catch (System.Runtime.InteropServices.COMException ex)
-                {
-                    if (ex.Message == "Syntax error")
-                        return "SyntaxError";
-                    throw;
-                }
-                return Evaluate("globalErrorName");
+                result = Evaluate(script);
             }
-            else
+            catch (Jurassic.JavaScriptException ex)
             {
-                object result;
-                try
-                {
-                    result = Evaluate(script);
-                }
-                catch (Jurassic.JavaScriptException ex)
-                {
-                    return ex.Name;
-                }
-                return string.Format("No error was thrown (result was '{0}')", result);
+                return ex.Name;
             }
+            return string.Format("No error was thrown (result was '{0}')", result);
         }
 
         public static Jurassic.Library.PropertyAttributes EvaluateAccessibility(string objectExpression, string propertyName)

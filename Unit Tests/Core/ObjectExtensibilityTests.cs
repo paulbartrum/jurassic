@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
 using Jurassic.Library;
 
@@ -9,7 +8,7 @@ namespace UnitTests
     /// Test the ObjectInstance overrides.
     /// </summary>
     [TestClass]
-    public class ObjectExtensibilityTests
+    public class ObjectExtensibilityTests : TestBase
     {
         private class TestClass1 : ObjectInstance
         {

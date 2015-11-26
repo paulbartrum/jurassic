@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
 using Jurassic.Library;
 
@@ -12,7 +8,7 @@ namespace UnitTests
     /// Test the type conversion routines.
     /// </summary>
     [TestClass]
-    public class TypeConverterTests
+    public class TypeConverterTests : TestBase
     {
         [TestMethod]
         public void ConvertTo()
@@ -105,7 +101,7 @@ namespace UnitTests
             Assert.AreEqual("",                 TypeConverter.ToString(""));
             Assert.AreEqual("false",            TypeConverter.ToString(engine.Boolean.Construct(false)));
             Assert.AreEqual("true",             TypeConverter.ToString(engine.Boolean.Construct(true)));
-            Assert.AreEqual(TestUtils.Evaluate("new Date(0).toString()"), TypeConverter.ToString(engine.Date.Construct(0.0)));  // Note: exact string is time-zone specific.
+            Assert.AreEqual(Evaluate("new Date(0).toString()"), TypeConverter.ToString(engine.Date.Construct(0.0)));  // Note: exact string is time-zone specific.
             Assert.AreEqual("Invalid Date",     TypeConverter.ToString(engine.Date.Construct(double.NaN)));
             Assert.AreEqual("0",                TypeConverter.ToString(engine.Number.Construct(0.0)));
             Assert.AreEqual("1",                TypeConverter.ToString(engine.Number.Construct(1.0)));
@@ -334,9 +330,9 @@ namespace UnitTests
         public void ToObject()
         {
             var engine = new ScriptEngine();
-            TestUtils.ExpectException<JavaScriptException>(() => TypeConverter.ToObject(engine, Undefined.Value));
-            TestUtils.ExpectException<JavaScriptException>(() => TypeConverter.ToObject(engine, Null.Value));
-            TestUtils.ExpectException<JavaScriptException>(() => TypeConverter.ToObject(engine, null));
+            ExpectException<JavaScriptException>(() => TypeConverter.ToObject(engine, Undefined.Value));
+            ExpectException<JavaScriptException>(() => TypeConverter.ToObject(engine, Null.Value));
+            ExpectException<JavaScriptException>(() => TypeConverter.ToObject(engine, null));
 
             Assert.IsInstanceOfType(TypeConverter.ToObject(engine, false), typeof(BooleanInstance));
             Assert.AreEqual(false, TypeConverter.ToObject(engine, false).CallMemberFunction("valueOf"));
