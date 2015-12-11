@@ -62,16 +62,21 @@ namespace Performance
                       ldarg      0
                       ldstr      ""TypeError""
                       ldstr      ""'a' is not a function""
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
-                L002: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                L002: ldnull
+                      ldstr      ""f""
+                      ldc.i4     2
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       ldc.i4     0
                       newarr     System.Object
-                      callvirt   System.Object CallLateBound(System.Object, System.Object[])/Jurassic.Library.FunctionInstance
+                      callvirt   System.Object CallWithStackTrace(System.String, System.String, Int32, System.Object, System.Object[])/Jurassic.Library.FunctionInstance
                       pop
                       ldnull
-                      ret
-                "),
+                      ret"),
                 GetFunctionIL(@"function f(a) {
                     a();
                 }", "f"));
@@ -98,9 +103,15 @@ namespace Performance
                       ldarg      0
                       ldstr      ""TypeError""
                       ldstr      ""'a' is not a function""
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
-                L002: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                L002: ldnull
+                      ldstr      ""f""
+                      ldc.i4     2
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       ldc.i4     1
                       newarr     System.Object
                       dup
@@ -108,11 +119,10 @@ namespace Performance
                       ldc.i4     5
                       box        System.Int32
                       stelem     System.Object
-                      callvirt   System.Object CallLateBound(System.Object, System.Object[])/Jurassic.Library.FunctionInstance
+                      callvirt   System.Object CallWithStackTrace(System.String, System.String, Int32, System.Object, System.Object[])/Jurassic.Library.FunctionInstance
                       pop
                       ldnull
-                      ret
-                "),
+                      ret"),
                 GetFunctionIL(@"function f(a) {
                     a(5);
                 }", "f"));
@@ -206,12 +216,14 @@ namespace Performance
                       ldarg      0
                       ldstr      ""ReferenceError""
                       ldstr      ""x is not defined""
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+                      ldc.i4     2
+                      ldnull
+                      ldstr      ""f""
+                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
                 L002: stloc      V3 (returnValue)
                       ldloc      V3 (returnValue)
-                      ret
-                "),
+                      ret"),
                 GetFunctionIL(@"function f() {
                     return x;
                 }", "f"));
@@ -259,7 +271,7 @@ namespace Performance
                           ldc.i4     1
                           box        System.Int32
                           stloc      V1 (returnValue)
-                          br         L012
+                          leave      L012
                     L007: ldloc      V2
                     L008: dup
                           ldc.i4     1
