@@ -144,39 +144,39 @@ namespace Performance
                       ldc.i4     10
                       conv.u4
                       clt
-                      brfalse    L012
-                      ldloc      V0 (i)
-                L002: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      brfalse    L013
+                L002: ldloc      V0 (i)
+                L003: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
                       dup
                       ldc.r8     1
                       add
                       box        System.Double
                       stloc      V0 (i)
-                L003: pop
+                L004: pop
                       ldloc      V0 (i)
-                L004: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
+                L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
                       stloc      V1
                 .try
                 {
-                    L005: ldloc      V1
-                    L006: ldc.i4     10
+                    L006: ldloc      V1
+                    L007: ldc.i4     10
                           clt
-                          brfalse    L010
-                    L007: ldloc      V1
-                    L008: dup
+                          brfalse    L011
+                    L008: ldloc      V1
+                    L009: dup
                           ldc.i4     1
                           add
                           stloc      V1
-                    L009: pop
+                    L010: pop
                           br             
                 }
                 .finally
                 {
-                    L010: ldloc      V1
-                    L011: box        System.Int32
+                    L011: ldloc      V1
+                    L012: box        System.Int32
                           stloc      V0 (i)
                 }
-                L012: ldnull
+                L013: ldnull
                       ret
                 "),
                 GetFunctionIL(@"function f() {
@@ -246,47 +246,47 @@ namespace Performance
                       ldc.i4     10
                       conv.u4
                       clt
-                      brfalse    L012
+                      brfalse    L013
                       ldc.i4     1
                       box        System.Int32
                       stloc      V1 (returnValue)
-                      br         L012
-                      ldloc      V0 (i)
-                L002: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      br         L013
+                L002: ldloc      V0 (i)
+                L003: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
                       dup
                       ldc.r8     1
                       add
                       box        System.Double
                       stloc      V0 (i)
-                L003: pop
+                L004: pop
                       ldloc      V0 (i)
-                L004: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
+                L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
                       stloc      V2
                 .try
                 {
-                    L005: ldloc      V2
-                    L006: ldc.i4     10
+                    L006: ldloc      V2
+                    L007: ldc.i4     10
                           clt
-                          brfalse    L010
+                          brfalse    L011
                           ldc.i4     1
                           box        System.Int32
                           stloc      V1 (returnValue)
-                          leave      L012
-                    L007: ldloc      V2
-                    L008: dup
+                          leave      L013
+                    L008: ldloc      V2
+                    L009: dup
                           ldc.i4     1
                           add
                           stloc      V2
-                    L009: pop
+                    L010: pop
                           br             
                 }
                 .finally
                 {
-                    L010: ldloc      V2
-                    L011: box        System.Int32
+                    L011: ldloc      V2
+                    L012: box        System.Int32
                           stloc      V0 (i)
                 }
-                L012: ldloc      V1 (returnValue)
+                L013: ldloc      V1 (returnValue)
                       ret
                 "),
                 GetFunctionIL(@"function f() {
