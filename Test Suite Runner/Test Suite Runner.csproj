@@ -57,8 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Test Suite Files\obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
-    <None Include="Test Suite Files\obj\Release\DesignTimeResolveAssemblyReferencesInput.cache" />
     <None Include="Test Suite Files\suite\2012-05-18.zip" />
   </ItemGroup>
   <ItemGroup>
@@ -85,15 +83,11 @@
     <Content Include="Test Suite Files\README.txt" />
     <Content Include="Test Suite Files\Results 2012-06-25.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Test Suite Files\obj\Debug\TempPE\" />
-    <Folder Include="Test Suite Files\obj\Release\TempPE\" />
-    <Folder Include="Test Suite Files\Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties ProjectLinkReference="96371037-f900-4e84-adb8-0cf7767ef723" ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" />
+      <UserProperties ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" ProjectLinkReference="96371037-f900-4e84-adb8-0cf7767ef723" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
