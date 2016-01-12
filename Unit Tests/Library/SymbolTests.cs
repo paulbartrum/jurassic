@@ -11,27 +11,27 @@ namespace UnitTests
     /// Test the global Symbol object.
     /// </summary>
     [TestClass]
-    public class SymbolTests
+    public class SymbolTests : TestBase
     {
         [TestMethod]
         public void Constructor()
         {
             // Call
-            Assert.AreEqual("Symbol()", TestUtils.Evaluate("Symbol().toString()"));
-            Assert.AreEqual("Symbol(one)", TestUtils.Evaluate("Symbol('one').toString()"));
+            Assert.AreEqual("Symbol()", Evaluate("Symbol().toString()"));
+            Assert.AreEqual("Symbol(one)", Evaluate("Symbol('one').toString()"));
 
             // Construct
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("new Symbol()"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("new Symbol()"));
 
             // toString and valueOf.
-            Assert.AreEqual("function Symbol() { [native code] }", TestUtils.Evaluate("Symbol.toString()"));
-            Assert.AreEqual(true, TestUtils.Evaluate("Symbol.valueOf() === Symbol"));
+            Assert.AreEqual("function Symbol() { [native code] }", Evaluate("Symbol.toString()"));
+            Assert.AreEqual(true, Evaluate("Symbol.valueOf() === Symbol"));
 
             // typeof
-            Assert.AreEqual("symbol", TestUtils.Evaluate("typeof Symbol()"));
+            Assert.AreEqual("symbol", Evaluate("typeof Symbol()"));
 
             // length
-            Assert.AreEqual(1, TestUtils.Evaluate("Symbol.length"));
+            Assert.AreEqual(1, Evaluate("Symbol.length"));
         }
 
         // TODO: Symbol.iterator, Symbol.for, Symbol.keyFor, etc.

@@ -9,7 +9,7 @@ namespace UnitTests
     /// Test the script engine class.
     /// </summary>
     [TestClass]
-    public class ScriptEngineTests
+    public class ScriptEngineTests : TestBase
     {
         private class CustomObjectInstance : ObjectInstance
         {
@@ -127,7 +127,7 @@ namespace UnitTests
         {
             var engine = new ScriptEngine();
 
-            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("Math", typeof(Math)));
+            ExpectException<JavaScriptException>(() => engine.SetGlobalValue("Math", typeof(Math)));
 
             engine.EnableExposedClrTypes = true;
 
@@ -183,28 +183,28 @@ namespace UnitTests
             Assert.AreEqual(true, engine.Evaluate("TestClass.Overload1(new Int32(1), new Int32(2))"));
 
             // Incorrect number of arguments.
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("Math.Sin()"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("Math.Sin(5, 6)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("Math.Sin()"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("Math.Sin(5, 6)"));
 
             // Cannot convert between types.
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test2(5)"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test7('test')"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test12('test')"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test15(5)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test2(5)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test7('test')"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test12('test')"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test15(5)"));
 
             // Strings are converted to characters, but only if they are exactly one character in length.
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test14('')"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test14('abc')"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test14('')"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test14('abc')"));
 
             // Undefined can only be passed as an argument if the argument is object.
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test2(undefined)"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test7(undefined)"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test12(undefined)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test2(undefined)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test7(undefined)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test12(undefined)"));
 
             // Null can only be passed if the target type is a reference type.
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test2(null)"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test7(null)"));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test12(null)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test2(null)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test7(null)"));
+            ExpectException<JavaScriptException>(() => engine.Evaluate("TestClass.Test12(null)"));
         }
 
         private class TestInstance
@@ -254,8 +254,8 @@ namespace UnitTests
             var engine = new ScriptEngine();
 
             engine.EnableExposedClrTypes = false;
-            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestInstance", typeof(TestInstance)));
-            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestInstance2", typeof(TestInstance2)));
+            ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestInstance", typeof(TestInstance)));
+            ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestInstance2", typeof(TestInstance2)));
 
             engine.EnableExposedClrTypes = true;
 
@@ -345,7 +345,7 @@ namespace UnitTests
             var engine = new ScriptEngine();
 
             engine.EnableExposedClrTypes = false;
-            TestUtils.ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestStruct", typeof(TestStruct)));
+            ExpectException<JavaScriptException>(() => engine.SetGlobalValue("TestStruct", typeof(TestStruct)));
 
             // Try setting a type.
             engine.EnableExposedClrTypes = true;

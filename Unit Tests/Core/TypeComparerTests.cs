@@ -1,10 +1,5 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
-using Jurassic.Library;
 
 namespace UnitTests
 {
@@ -12,7 +7,7 @@ namespace UnitTests
     /// Test the type comparison routines.
     /// </summary>
     [TestClass]
-    public class TypeComparerTests
+    public class TypeComparerTests : TestBase
     {
         [TestMethod]
         public void Equals()

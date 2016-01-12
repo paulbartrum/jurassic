@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
-using Jurassic.Compiler;
 
 namespace UnitTests
 {
@@ -13,14 +7,14 @@ namespace UnitTests
     /// Type inference tests.
     /// </summary>
     [TestClass]
-    public class TypeInferenceTests
+    public class TypeInferenceTests : TestBase
     {
         
         [TestMethod]
         public void TypeInference1()
         {
             // Simple type inference: both "i" and "x" can be inferred to be integers.
-            Assert.AreEqual(4, TestUtils.Evaluate(@"
+            Assert.AreEqual(4, Evaluate(@"
                 function f() {
                     var x = 5;
                     for (var i = 1; i < 10; i ++)
@@ -32,7 +26,7 @@ namespace UnitTests
             // Simple type inference:
             // "i" can be inferred to be an integer.
             // "x" can be inferred to be a number.
-            Assert.AreEqual(362880, TestUtils.Evaluate(@"
+            Assert.AreEqual(362880, Evaluate(@"
                 function f() {
                     var x = 1;
                     for (var i = 1; i < 10; i ++)
@@ -40,7 +34,7 @@ namespace UnitTests
                     return x;
                 }
                 f()"));
-            Assert.AreEqual(362880, TestUtils.Evaluate(@"
+            Assert.AreEqual(362880, Evaluate(@"
                 function f(x) {
                     for (var i = 1; i < 10; i ++)
                         x = x * i;
@@ -50,7 +44,7 @@ namespace UnitTests
 
             // "x" can be inferred to be a number, but only by analysing the whole function and
             // not just the loop.
-            Assert.AreEqual(19, TestUtils.Evaluate(@"
+            Assert.AreEqual(19, Evaluate(@"
                 function f() {
                     var x = 1;
                     for (var i = 1; i < 10; i ++)
@@ -60,7 +54,7 @@ namespace UnitTests
                 f()"));
 
             // Now "x" cannot be inferred without whole-program analysis.
-            Assert.AreEqual(19, TestUtils.Evaluate(@"
+            Assert.AreEqual(19, Evaluate(@"
                 function f(x) {
                     for (var i = 1; i < 10; i ++)
                         x = x + 2;
@@ -69,7 +63,7 @@ namespace UnitTests
                 f(1)"));
 
             // "x" can be inferred to be a string.
-            Assert.AreEqual("1*********", TestUtils.Evaluate(@"
+            Assert.AreEqual("1*********", Evaluate(@"
                 function f(x) {
                     for (var i = 1; i < 10; i ++)
                         x = x + '*';
@@ -82,7 +76,7 @@ namespace UnitTests
         public void TypeInference2()
         {
             // Here x alternates between a number and a string, so no stable type can be inferred.
-            Assert.AreEqual("401044422751291", TestUtils.Evaluate(@"
+            Assert.AreEqual("401044422751291", Evaluate(@"
                 function f(x) {
                     for (var i = 1; i < 10; i ++) {
                         x = x * i;
@@ -93,7 +87,7 @@ namespace UnitTests
                 f(1)"));
 
             // Here x can be inferred to be a number, since all assignments are compatible.
-            Assert.AreEqual(185794560, TestUtils.Evaluate(@"
+            Assert.AreEqual(185794560, Evaluate(@"
                 function f(x) {
                     for (var i = 1; i < 10; i ++) {
                         x = x * i;
@@ -105,7 +99,7 @@ namespace UnitTests
 
             // Here x can be inferred to be a number (normally the addition would be ambiguous,
             // but in this case x must be a number at the point that the addition occurs.
-            Assert.AreEqual(1609940, TestUtils.Evaluate(@"
+            Assert.AreEqual(1609940, Evaluate(@"
                 function f(x) {
                     for (var i = 1; i < 10; i ++) {
                         x = x * i;
@@ -121,7 +115,7 @@ namespace UnitTests
         {
             // x can be inferred to be a number, but only if analysis can recognise that the
             // assignment must execute at least once.
-            Assert.AreEqual(0, TestUtils.Evaluate(@"
+            Assert.AreEqual(0, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++)
@@ -132,7 +126,7 @@ namespace UnitTests
                 f()"));
 
             // In this case "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++)
@@ -143,7 +137,7 @@ namespace UnitTests
                 f()"));
 
             // Again, "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++)
@@ -153,7 +147,7 @@ namespace UnitTests
                 f()"));
 
             // Again, "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++)
@@ -164,7 +158,7 @@ namespace UnitTests
 
 
             // Again, "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++) {
@@ -176,7 +170,7 @@ namespace UnitTests
                 f()"));
 
             // Again, "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     try {
@@ -192,7 +186,7 @@ namespace UnitTests
                 f()"));
 
             // Again, "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++) {
@@ -208,7 +202,7 @@ namespace UnitTests
                 f()"));
 
             // Again, "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++) {
@@ -220,7 +214,7 @@ namespace UnitTests
                 f()"));
 
             // Again, "x" is not a number because the assignment statement never executes.
-            Assert.AreEqual(Null.Value, TestUtils.Evaluate(@"
+            Assert.AreEqual(Null.Value, Evaluate(@"
                 function f() {
                     var x = null;
                     for (var i = 1; i < 10; i ++) {

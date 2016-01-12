@@ -11,24 +11,24 @@ namespace UnitTests
     /// Test the global Promise object.
     /// </summary>
     [TestClass]
-    public class PromiseTests
+    public class PromiseTests : TestBase
     {
         [TestMethod]
         public void Constructor()
         {
             // Call
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("Promise()"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Promise()"));
 
             // Construct
-            Assert.AreEqual("TypeError", TestUtils.EvaluateExceptionType("new Promise()"));
-            Assert.AreEqual("", TestUtils.Evaluate("new Promise(function(resolve, reject) { }).toString()"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("new Promise()"));
+            Assert.AreEqual("", Evaluate("new Promise(function(resolve, reject) { }).toString()"));
 
             // toString and valueOf.
-            Assert.AreEqual("function Promise() { [native code] }", TestUtils.Evaluate("Promise.toString()"));
-            Assert.AreEqual(true, TestUtils.Evaluate("Promise.valueOf() === Promise"));
+            Assert.AreEqual("function Promise() { [native code] }", Evaluate("Promise.toString()"));
+            Assert.AreEqual(true, Evaluate("Promise.valueOf() === Promise"));
 
             // length
-            Assert.AreEqual(1, TestUtils.Evaluate("Promise.length"));
+            Assert.AreEqual(1, Evaluate("Promise.length"));
         }
 
         // TODO: Promise.all, Promise.race etc.

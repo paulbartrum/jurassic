@@ -62,16 +62,21 @@ namespace Performance
                       ldarg      0
                       ldstr      ""TypeError""
                       ldstr      ""'a' is not a function""
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
-                L002: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                L002: ldnull
+                      ldstr      ""f""
+                      ldc.i4     2
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       ldc.i4     0
                       newarr     System.Object
-                      callvirt   System.Object CallLateBound(System.Object, System.Object[])/Jurassic.Library.FunctionInstance
+                      callvirt   System.Object CallWithStackTrace(System.String, System.String, Int32, System.Object, System.Object[])/Jurassic.Library.FunctionInstance
                       pop
                       ldnull
-                      ret
-                "),
+                      ret"),
                 GetFunctionIL(@"function f(a) {
                     a();
                 }", "f"));
@@ -98,9 +103,15 @@ namespace Performance
                       ldarg      0
                       ldstr      ""TypeError""
                       ldstr      ""'a' is not a function""
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
-                L002: ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                L002: ldnull
+                      ldstr      ""f""
+                      ldc.i4     2
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       ldc.i4     1
                       newarr     System.Object
                       dup
@@ -108,11 +119,10 @@ namespace Performance
                       ldc.i4     5
                       box        System.Int32
                       stelem     System.Object
-                      callvirt   System.Object CallLateBound(System.Object, System.Object[])/Jurassic.Library.FunctionInstance
+                      callvirt   System.Object CallWithStackTrace(System.String, System.String, Int32, System.Object, System.Object[])/Jurassic.Library.FunctionInstance
                       pop
                       ldnull
-                      ret
-                "),
+                      ret"),
                 GetFunctionIL(@"function f(a) {
                     a(5);
                 }", "f"));
@@ -134,39 +144,39 @@ namespace Performance
                       ldc.i4     10
                       conv.u4
                       clt
-                      brfalse    L012
-                      ldloc      V0 (i)
-                L002: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      brfalse    L013
+                L002: ldloc      V0 (i)
+                L003: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
                       dup
                       ldc.r8     1
                       add
                       box        System.Double
                       stloc      V0 (i)
-                L003: pop
+                L004: pop
                       ldloc      V0 (i)
-                L004: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
+                L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
                       stloc      V1
                 .try
                 {
-                    L005: ldloc      V1
-                    L006: ldc.i4     10
+                    L006: ldloc      V1
+                    L007: ldc.i4     10
                           clt
-                          brfalse    L010
-                    L007: ldloc      V1
-                    L008: dup
+                          brfalse    L011
+                    L008: ldloc      V1
+                    L009: dup
                           ldc.i4     1
                           add
                           stloc      V1
-                    L009: pop
+                    L010: pop
                           br             
                 }
                 .finally
                 {
-                    L010: ldloc      V1
-                    L011: box        System.Int32
+                    L011: ldloc      V1
+                    L012: box        System.Int32
                           stloc      V0 (i)
                 }
-                L012: ldnull
+                L013: ldnull
                       ret
                 "),
                 GetFunctionIL(@"function f() {
@@ -206,12 +216,14 @@ namespace Performance
                       ldarg      0
                       ldstr      ""ReferenceError""
                       ldstr      ""x is not defined""
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String)/Jurassic.JavaScriptException
+                      ldc.i4     2
+                      ldnull
+                      ldstr      ""f""
+                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
                 L002: stloc      V3 (returnValue)
                       ldloc      V3 (returnValue)
-                      ret
-                "),
+                      ret"),
                 GetFunctionIL(@"function f() {
                     return x;
                 }", "f"));
@@ -234,47 +246,47 @@ namespace Performance
                       ldc.i4     10
                       conv.u4
                       clt
-                      brfalse    L012
+                      brfalse    L013
                       ldc.i4     1
                       box        System.Int32
                       stloc      V1 (returnValue)
-                      br         L012
-                      ldloc      V0 (i)
-                L002: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      br         L013
+                L002: ldloc      V0 (i)
+                L003: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
                       dup
                       ldc.r8     1
                       add
                       box        System.Double
                       stloc      V0 (i)
-                L003: pop
+                L004: pop
                       ldloc      V0 (i)
-                L004: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
+                L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
                       stloc      V2
                 .try
                 {
-                    L005: ldloc      V2
-                    L006: ldc.i4     10
+                    L006: ldloc      V2
+                    L007: ldc.i4     10
                           clt
-                          brfalse    L010
+                          brfalse    L011
                           ldc.i4     1
                           box        System.Int32
                           stloc      V1 (returnValue)
-                          br         L012
-                    L007: ldloc      V2
-                    L008: dup
+                          leave      L013
+                    L008: ldloc      V2
+                    L009: dup
                           ldc.i4     1
                           add
                           stloc      V2
-                    L009: pop
+                    L010: pop
                           br             
                 }
                 .finally
                 {
-                    L010: ldloc      V2
-                    L011: box        System.Int32
+                    L011: ldloc      V2
+                    L012: box        System.Int32
                           stloc      V0 (i)
                 }
-                L012: ldloc      V1 (returnValue)
+                L013: ldloc      V1 (returnValue)
                       ret
                 "),
                 GetFunctionIL(@"function f() {

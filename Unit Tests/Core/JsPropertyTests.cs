@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
 using Jurassic.Library;
 
@@ -9,7 +8,7 @@ namespace UnitTests
     /// Test the [JsProperty] attribute.
     /// </summary>
     [TestClass]
-    public class JsPropertyTests
+    public class JsPropertyTests : TestBase
     {
         public class ClassWithProperty : ObjectInstance
         {

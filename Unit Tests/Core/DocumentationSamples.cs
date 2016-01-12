@@ -10,7 +10,7 @@ namespace UnitTests
     /// also updating the documentation.
     /// </summary>
     [TestClass]
-    public class DocumentationSamples
+    public class DocumentationSamples : TestBase
     {
         [TestMethod]
         public void EvaluateExpression1()
