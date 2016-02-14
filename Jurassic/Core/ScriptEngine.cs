@@ -42,6 +42,9 @@ namespace Jurassic
         private ErrorConstructor evalErrorConstructor;
         private ErrorConstructor referenceErrorConstructor;
 
+        // Mono check.
+        internal static bool IsMonoRuntime = Type.GetType("Mono.Runtime") != null;
+
 
         public ScriptEngine()
         {

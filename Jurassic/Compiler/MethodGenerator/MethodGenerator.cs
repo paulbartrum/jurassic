@@ -197,7 +197,7 @@ namespace Jurassic.Compiler
                         typeof(MethodGenerator),                                // Owner type.
                         true);                                                  // Skip visibility checks.
                     // TODO: Figure out why long methods give BadImageFormatException in .NET 3.5 when generated using DynamicILInfo.
-                    if (Environment.Version.Major >= 4)
+                    if (Environment.Version.Major >= 4 && !ScriptEngine.IsMonoRuntime)
                         generator = new DynamicILGenerator(dynamicMethod);
                     else
                         generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
