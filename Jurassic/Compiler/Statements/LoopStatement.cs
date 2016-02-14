@@ -130,7 +130,8 @@ namespace Jurassic.Compiler
             // break-target:
 
             // Set up some labels.
-            var continueTarget = generator.CreateLabel();
+            var continueTarget1 = generator.CreateLabel();
+            var continueTarget2 = generator.CreateLabel();
             var breakTarget1 = generator.CreateLabel();
             var breakTarget2 = generator.CreateLabel();
 
@@ -148,9 +149,12 @@ namespace Jurassic.Compiler
             }
 
             // Emit the loop body.
-            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget1, continueTarget, false);
+            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget1, continueTarget1, false);
             this.Body.GenerateCode(generator, optimizationInfo);
             optimizationInfo.PopBreakOrContinueInfo();
+
+            // The continue statement jumps here.
+            generator.DefineLabelPosition(continueTarget1);
 
             // Increment the loop variable.
             if (this.IncrementStatement != null)
@@ -210,12 +214,12 @@ namespace Jurassic.Compiler
             }
 
             // Emit the loop body.
-            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget2, continueTarget, labelledOnly: false);
+            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget2, continueTarget2, labelledOnly: false);
             this.Body.GenerateCode(generator, optimizationInfo);
             optimizationInfo.PopBreakOrContinueInfo();
 
             // The continue statement jumps here.
-            generator.DefineLabelPosition(continueTarget);
+            generator.DefineLabelPosition(continueTarget2);
 
             // Increment the loop variable.
             if (this.IncrementStatement != null)
@@ -427,7 +431,7 @@ namespace Jurassic.Compiler
                     }
                 }
             }
-            
+
             // Determine whether the child nodes are conditional.
             conditional = conditional == true ||
                 continueEncountered == true ||
