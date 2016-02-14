@@ -147,6 +147,8 @@ publish/
 
 # NuGet Packages
 *.nupkg
+# NuGet package build files
+NuGet/nuget.*
 # The packages folder can be ignored because of Package Restore
 **/packages/*
 # except build/, which is used as an MSBuild target.
