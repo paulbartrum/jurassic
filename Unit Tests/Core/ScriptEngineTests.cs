@@ -382,6 +382,10 @@ namespace UnitTests
             engine.Execute("instance2 = new TestStruct(instance)");
             Assert.AreEqual(17, engine.Evaluate("instance2.Value"));
 
+            // Constructor without parameters.
+            engine.Execute("var instance3 = new TestStruct()");
+            Assert.AreEqual(0, engine.Evaluate("instance3.Value"));
+
             // Try dates.
             engine.SetGlobalValue("DateTime", typeof(DateTime));
             engine.Execute("date = new DateTime(2011, 3, 9, 7, 49, 0)");
