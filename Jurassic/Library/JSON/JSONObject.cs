@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents the built-in JSON object.
     /// </summary>
     [Serializable]
-    public class JSONObject : ObjectInstance
+    public partial class JSONObject : ObjectInstance
     {
 
         //     INITIALIZATION
@@ -20,6 +20,7 @@ namespace Jurassic.Library
         internal JSONObject(ObjectInstance prototype)
             : base(prototype)
         {
+            FastSetProperties(GetDeclarativeProperties());
         }
 
 

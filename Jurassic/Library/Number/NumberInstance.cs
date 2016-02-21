@@ -12,7 +12,7 @@ namespace Jurassic.Library
     /// if the <c>this</c> value is not a Number object or a number primitive.
     /// </remarks>
     [Serializable]
-    public class NumberInstance : ObjectInstance
+    public partial class NumberInstance : ObjectInstance
     {
         /// <summary>
         /// The primitive value.

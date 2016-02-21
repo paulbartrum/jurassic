@@ -64,6 +64,11 @@ namespace Jurassic
             this.objectConstructor = new ObjectConstructor(baseFunction, baseObject);
             this.functionConstructor = new FunctionConstructor(baseFunction, baseFunction);
 
+            // Initialize the properties for Global, Object and Function.
+            this.globalObject.InitializeProperties();
+            this.objectConstructor.InitializeProperties();
+            this.functionConstructor.InitializeProperties();
+
             // Create all the built-in objects.
             this.mathObject = new MathObject(baseObject);
             this.jsonObject = new JSONObject(baseObject);
@@ -86,24 +91,42 @@ namespace Jurassic
             this.referenceErrorConstructor = new ErrorConstructor(baseFunction, "ReferenceError");
 
             // Populate the instance prototypes (TODO: optimize this, currently takes about 15ms).
-            this.globalObject.PopulateFunctions();
-            this.objectConstructor.PopulateFunctions();
-            this.objectConstructor.InstancePrototype.PopulateFunctions();
-            this.functionConstructor.InstancePrototype.PopulateFunctions(typeof(FunctionInstance));
-            this.mathObject.PopulateFunctions();
-            this.mathObject.PopulateFields();
-            this.jsonObject.PopulateFunctions();
-            this.arrayConstructor.PopulateFunctions();
-            this.arrayConstructor.InstancePrototype.PopulateFunctions();
-            this.booleanConstructor.InstancePrototype.PopulateFunctions();
-            this.dateConstructor.PopulateFunctions();
-            this.dateConstructor.InstancePrototype.PopulateFunctions();
-            this.numberConstructor.InstancePrototype.PopulateFunctions();
-            this.numberConstructor.PopulateFields();
-            this.regExpConstructor.InstancePrototype.PopulateFunctions();
-            this.stringConstructor.PopulateFunctions();
-            this.stringConstructor.InstancePrototype.PopulateFunctions();
-            this.errorConstructor.InstancePrototype.PopulateFunctions();
+            
+            //this.objectConstructor.FastSetProperties(this.objectConstructor.GetDeclarativeProperties());
+            //this.objectConstructor.InstancePrototype.FastSetProperties(this.objectConstructor.InstancePrototype.GetDeclarativeProperties());
+            //this.functionConstructor.InstancePrototype.FastSetProperties(((FunctionInstance)this.functionConstructor.InstancePrototype).GetDeclarativeProperties());
+            //this.mathObject.FastSetProperties(this.mathObject.GetDeclarativeProperties());
+            //this.jsonObject.FastSetProperties(this.jsonObject.GetDeclarativeProperties());
+            //this.arrayConstructor.FastSetProperties(this.arrayConstructor.GetDeclarativeProperties());
+            //this.arrayConstructor.InstancePrototype.FastSetProperties(((ArrayInstance)this.arrayConstructor.InstancePrototype).GetDeclarativeProperties());
+            //this.booleanConstructor.InstancePrototype.FastSetProperties(((BooleanInstance)this.booleanConstructor.InstancePrototype).GetDeclarativeProperties());
+            //this.dateConstructor.FastSetProperties(this.dateConstructor.GetDeclarativeProperties());
+            //this.dateConstructor.InstancePrototype.FastSetProperties(((DateInstance)this.dateConstructor.InstancePrototype).GetDeclarativeProperties());
+            //this.numberConstructor.FastSetProperties(this.numberConstructor.GetDeclarativeProperties());
+            //this.numberConstructor.InstancePrototype.FastSetProperties(((NumberInstance)this.numberConstructor.InstancePrototype).GetDeclarativeProperties());
+            //this.regExpConstructor.InstancePrototype.FastSetProperties(((RegExpInstance)this.regExpConstructor.InstancePrototype).GetDeclarativeProperties());
+            //this.stringConstructor.FastSetProperties(this.stringConstructor.GetDeclarativeProperties());
+            //this.stringConstructor.InstancePrototype.FastSetProperties(((StringInstance)this.stringConstructor.InstancePrototype).GetDeclarativeProperties());
+            //this.errorConstructor.InstancePrototype.FastSetProperties(((ErrorInstance)this.errorConstructor.InstancePrototype).GetDeclarativeProperties());
+
+            //this.globalObject.PopulateFunctions();
+            //this.objectConstructor.PopulateFunctions();
+            //this.objectConstructor.InstancePrototype.PopulateFunctions();
+            //this.functionConstructor.InstancePrototype.PopulateFunctions(typeof(FunctionInstance));
+            //this.mathObject.PopulateFunctions();
+            //this.mathObject.PopulateFields();
+            //this.jsonObject.PopulateFunctions();
+            //this.arrayConstructor.PopulateFunctions();
+            //this.arrayConstructor.InstancePrototype.PopulateFunctions();
+            //this.booleanConstructor.InstancePrototype.PopulateFunctions();
+            //this.dateConstructor.PopulateFunctions();
+            //this.dateConstructor.InstancePrototype.PopulateFunctions();
+            //this.numberConstructor.InstancePrototype.PopulateFunctions();
+            //this.numberConstructor.PopulateFields();
+            //this.regExpConstructor.InstancePrototype.PopulateFunctions();
+            //this.stringConstructor.PopulateFunctions();
+            //this.stringConstructor.InstancePrototype.PopulateFunctions();
+            //this.errorConstructor.InstancePrototype.PopulateFunctions();
 
             // Add them as JavaScript-accessible properties of the global instance.
             this.globalObject.FastSetProperty("Array", this.arrayConstructor, PropertyAttributes.NonEnumerable);

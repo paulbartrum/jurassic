@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Jurassic.Compiler;
+using System.Linq;
 
 namespace Jurassic.Library
 {
@@ -9,7 +10,7 @@ namespace Jurassic.Library
     /// Provides functionality common to all JavaScript objects.
     /// </summary>
     [Serializable]
-    public class ObjectInstance
+    public partial class ObjectInstance
 #if !SILVERLIGHT
         : System.Runtime.Serialization.IDeserializationCallback
 #endif
@@ -921,6 +922,34 @@ namespace Jurassic.Library
             this.propertyValues[index] = value;
         }
 
+        /// <summary>
+        /// Sets up multiple properties at once.
+        /// </summary>
+        /// <param name="properties"> The list of properties to set. </param>
+        internal void FastSetProperties(IEnumerable<PropertyNameAndValue> properties)
+        {
+            if (this.schema.NextValueIndex == 0)
+            {
+                if (this.propertyValues.Length < properties.Count())
+                    this.propertyValues = new object[properties.Count()];
+                var propertyDictionary = new Dictionary<string, SchemaProperty>(properties.Count());
+                int nextValueIndex = 0;
+                foreach (var property in properties)
+                {
+                    this.propertyValues[nextValueIndex] = property.Value;
+                    propertyDictionary.Add(property.Name, new SchemaProperty(nextValueIndex++, property.Attributes));
+                }
+                this.schema = new HiddenClassSchema(propertyDictionary, nextValueIndex);
+            }
+            else
+            {
+                System.Diagnostics.Debugger.Log(0, "", $"{this.GetType()} {this.schema.PropertyCount}\r\n");
+                foreach (var property in properties)
+                {
+                    FastSetProperty(property.Name, property.Value, property.Attributes);
+                }
+            }
+        }
 
 
         //     OTHERS

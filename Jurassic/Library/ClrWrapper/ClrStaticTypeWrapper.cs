@@ -68,9 +68,9 @@ namespace Jurassic.Library
                 }
             }
 
-            this.FastSetProperty("name", type.Name);
+            this.FastSetProperty("name", type.Name, PropertyAttributes.Configurable);
             if (this.constructBinder != null)
-                this.FastSetProperty("length", this.constructBinder.FunctionLength);
+                this.FastSetProperty("length", this.constructBinder.FunctionLength, PropertyAttributes.Configurable);
 
             // Populate the fields, properties and methods.
             PopulateMembers(this, type, BindingFlags.Static);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Jurassic.Library
 {
@@ -34,7 +35,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a new HiddenClassSchema instance from a modify or delete operation.
         /// </summary>
-        private HiddenClassSchema(Dictionary<string, SchemaProperty> properties, int nextValueIndex)
+        internal HiddenClassSchema(Dictionary<string, SchemaProperty> properties, int nextValueIndex)
         {
             this.properties = properties;
             this.addTransitions = null;
@@ -94,7 +95,7 @@ namespace Jurassic.Library
                 this.properties = CreatePropertiesDictionary();
             this.parent = null;     // Prevents the properties dictionary from being stolen while an enumeration is in progress.
             foreach (var pair in this.properties)
-                yield return new PropertyNameAndValue(pair.Key, new PropertyDescriptor(values[pair.Value.Index], pair.Value.Attributes));
+                yield return new PropertyNameAndValue(pair.Key, values[pair.Value.Index], pair.Value.Attributes);
         }
 
         /// <summary>
@@ -169,6 +170,31 @@ namespace Jurassic.Library
             }
 
             return newSchema;
+        }
+
+        /// <summary>
+        /// Adds multiple properties to the schema.
+        /// </summary>
+        /// <param name="properties"> The properties to add. </param>
+        /// <returns> A new schema with the extra properties. </returns>
+        public HiddenClassSchema AddProperties(IEnumerable<PropertyNameAndValue> properties)
+        {
+            if (this.properties == null)
+            {
+                var propertyDictionary = new Dictionary<string, SchemaProperty>(properties.Count());
+                int nextValueIndex = 0;
+                foreach (var property in properties)
+                    propertyDictionary.Add(property.Name, new SchemaProperty(nextValueIndex ++, property.Attributes));
+                return new HiddenClassSchema(propertyDictionary, nextValueIndex);
+            }
+            else
+            {
+                // There are already properties in the schema.  Just add them one by one.
+                HiddenClassSchema newSchema = this;
+                foreach (var property in properties)
+                    newSchema = AddProperty(property.Name, property.Attributes);
+                return newSchema;
+            }
         }
 
         /// <summary>

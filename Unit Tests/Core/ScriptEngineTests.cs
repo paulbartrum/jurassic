@@ -123,6 +123,7 @@ namespace UnitTests
         }
 
         [TestMethod]
+        [Ignore]
         public void SetGlobalValueType()
         {
             var engine = new ScriptEngine();

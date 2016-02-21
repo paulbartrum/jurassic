@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// Represents a constructor for one of the error types: Error, RangeError, SyntaxError, etc.
     /// </summary>
     [Serializable]
-    public class ErrorConstructor : ClrFunction
+    public partial class ErrorConstructor : ClrStubFunction
     {
 
         //     INITIALIZATION
@@ -20,8 +20,20 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
         internal ErrorConstructor(ObjectInstance prototype, string typeName)
-            : base(prototype, typeName, GetInstancePrototype(prototype.Engine, typeName))
+            : base(prototype, typeName, 1, GetInstancePrototype(prototype.Engine, typeName), __STUB__Call, __STUB__Construct)
         {
+            // Initialize the constructor properties.
+            var properties = GetDeclarativeProperties();
+            AddFunctionProperties(properties);
+            FastSetProperties(properties);
+
+            // Initialize the prototype properties.
+            var instancePrototype = (ErrorInstance)InstancePrototype;
+            properties = instancePrototype.GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("name", typeName, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
+            instancePrototype.FastSetProperties(properties);
         }
 
         /// <summary>
@@ -36,13 +48,13 @@ namespace Jurassic.Library
             {
                 // This constructor is for regular Error objects.
                 // Prototype chain: Error instance -> Error prototype -> Object prototype
-                return new ErrorInstance(engine.Object.InstancePrototype, typeName, string.Empty);
+                return new ErrorInstance(engine.Object.InstancePrototype);
             }
             else
             {
                 // This constructor is for derived Error objects like RangeError, etc.
                 // Prototype chain: XXXError instance -> XXXError prototype -> Error prototype -> Object prototype
-                return new ErrorInstance(engine.Error.InstancePrototype, typeName, string.Empty);
+                return new ErrorInstance(engine.Error.InstancePrototype);
             }
         }
 

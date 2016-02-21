@@ -82,9 +82,9 @@ namespace Jurassic.Library
                 this.constructBinder = new JSBinder(new JSBinderMethod(new Func<ObjectInstance>(() => this.Engine.Object.Construct()).Method));
 
             // Add function properties.
-            this.FastSetProperty("name", name);
-            this.FastSetProperty("length", this.callBinder.FunctionLength);
-            this.FastSetProperty("prototype", instancePrototype);
+            this.FastSetProperty("name", name, PropertyAttributes.Configurable);
+            this.FastSetProperty("length", this.callBinder.FunctionLength, PropertyAttributes.Configurable);
+            this.FastSetProperty("prototype", instancePrototype, PropertyAttributes.Sealed);
             instancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
@@ -107,8 +107,8 @@ namespace Jurassic.Library
             this.thisBinding = delegateToCall.Target;
 
             // Add function properties.
-            this.FastSetProperty("name", name != null ? name : this.callBinder.Name);
-            this.FastSetProperty("length", length >= 0 ? length : this.callBinder.FunctionLength);
+            this.FastSetProperty("name", name != null ? name : this.callBinder.Name, PropertyAttributes.Configurable);
+            this.FastSetProperty("length", length >= 0 ? length : this.callBinder.FunctionLength, PropertyAttributes.Configurable);
             //this.FastSetProperty("prototype", this.Engine.Object.Construct());
             //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
@@ -130,8 +130,8 @@ namespace Jurassic.Library
             this.callBinder = new JSBinder(methods);
 
             // Add function properties.
-            this.FastSetProperty("name", name == null ? this.callBinder.Name : name);
-            this.FastSetProperty("length", length >= 0 ? length : this.callBinder.FunctionLength);
+            this.FastSetProperty("name", name == null ? this.callBinder.Name : name, PropertyAttributes.Configurable);
+            this.FastSetProperty("length", length >= 0 ? length : this.callBinder.FunctionLength, PropertyAttributes.Configurable);
             //this.FastSetProperty("prototype", this.Engine.Object.Construct());
             //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
@@ -147,8 +147,8 @@ namespace Jurassic.Library
             this.callBinder = binder;
 
             // Add function properties.
-            this.FastSetProperty("name", binder.Name);
-            this.FastSetProperty("length", binder.FunctionLength);
+            this.FastSetProperty("name", binder.Name, PropertyAttributes.Configurable);
+            this.FastSetProperty("length", binder.FunctionLength, PropertyAttributes.Configurable);
             //this.FastSetProperty("prototype", this.Engine.Object.Construct());
             //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }

@@ -181,31 +181,8 @@ namespace Jurassic.Compiler
                             generator.LoadInt32(argument.InputParameterIndex);
                             generator.LoadArrayElement(typeof(object));
 
-                            // Get some flags that apply to the parameter.
-                            var parameterFlags = JSParameterFlags.None;
-                            var parameterAttribute = argument.GetCustomAttribute<JSParameterAttribute>();
-                            if (parameterAttribute != null)
-                            {
-                                if (argument.Type != typeof(ObjectInstance))
-                                    throw new NotImplementedException("[JSParameter] is only supported for arguments of type ObjectInstance.");
-                                parameterFlags = parameterAttribute.Flags;
-                            }
-
-                            if ((parameterFlags & JSParameterFlags.DoNotConvert) == 0)
-                            {
-                                // Convert the input parameter to the correct type.
-                                EmitTypeConversion(generator, typeof(object), argument);
-                            }
-                            else
-                            {
-                                // Don't do argument conversion.
-                                var endOfThrowLabel = generator.CreateLabel();
-                                generator.IsInstance(typeof(ObjectInstance));
-                                generator.Duplicate();
-                                generator.BranchIfNotNull(endOfThrowLabel);
-                                EmitHelpers.EmitThrow(generator, "TypeError", string.Format("Parameter {1} parameter of '{0}' must be an object", binderMethod.Name, argument.InputParameterIndex));
-                                generator.DefineLabelPosition(endOfThrowLabel);
-                            }
+                            // Convert the input parameter to the correct type.
+                            EmitTypeConversion(generator, typeof(object), argument);
                         }
                         else
                         {

@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents an instance of the JavaScript Boolean object.
     /// </summary>
     [Serializable]
-    public class BooleanInstance : ObjectInstance
+    public partial class BooleanInstance : ObjectInstance
     {
         private bool value;
 

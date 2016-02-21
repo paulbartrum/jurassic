@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents an instance of the JavaScript string object.
     /// </summary>
     [Serializable]
-    public class StringInstance : ObjectInstance
+    public partial class StringInstance : ObjectInstance
     {
         private string value;
 
@@ -103,8 +103,7 @@ namespace Jurassic.Library
             {
                 // Enumerate array indices.
                 for (int i = 0; i < this.value.Length; i++)
-                    yield return new PropertyNameAndValue(i.ToString(),
-                        new PropertyDescriptor(this.value[i].ToString(), PropertyAttributes.Enumerable));
+                    yield return new PropertyNameAndValue(i.ToString(), this.value[i].ToString(), PropertyAttributes.Enumerable);
 
                 // Delegate to the base implementation.
                 foreach (var nameAndValue in base.Properties)

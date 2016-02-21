@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// Represents an instance of the RegExp object.
     /// </summary>
     [Serializable]
-    public class RegExpInstance : ObjectInstance
+    public partial class RegExpInstance : ObjectInstance
     {
         private Regex value;
         private bool globalSearch;
@@ -17,6 +17,16 @@ namespace Jurassic.Library
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates an empty regular expression instance.
+        /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        internal RegExpInstance(ObjectInstance prototype)
+            : base(prototype)
+        {
+            this.value = new Regex("", ParseFlags(null));
+        }
 
         /// <summary>
         /// Creates a new regular expression instance.
@@ -44,11 +54,9 @@ namespace Jurassic.Library
             }
 
             // Initialize the javascript properties.
-            this.FastSetProperty("source", pattern);
-            this.FastSetProperty("global", this.Global);
-            this.FastSetProperty("multiline", this.Multiline);
-            this.FastSetProperty("ignoreCase", this.IgnoreCase);
-            this.FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+            var properties = new List<PropertyNameAndValue>(5);
+            AddProperties(properties);
+            FastSetProperties(properties);
         }
 
         /// <summary>
@@ -71,6 +79,19 @@ namespace Jurassic.Library
             this.FastSetProperty("multiline", existingInstance.Multiline);
             this.FastSetProperty("ignoreCase", existingInstance.IgnoreCase);
             this.FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+        }
+
+        /// <summary>
+        /// Adds the instance RegExp properties to the given list.
+        /// </summary>
+        /// <param name="properties"> The list to add to. </param>
+        internal void AddProperties(List<PropertyNameAndValue> properties)
+        {
+            properties.Add(new PropertyNameAndValue("source", this.Source.ToString(), PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("global", this.Global, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("multiline", this.Multiline, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("ignoreCase", this.IgnoreCase, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable));
         }
 
 

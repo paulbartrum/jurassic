@@ -60,8 +60,19 @@ namespace Jurassic
         /// <returns> A primitive boolean value. </returns>
         public static bool ToBoolean(object value)
         {
+            return ToBoolean(value, false);
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to a primitive boolean value.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
+        /// <returns> A primitive boolean value. </returns>
+        internal static bool ToBoolean(object value, bool undefinedValue)
+        {
             if (value == null || value == Null.Value)
-                return false;
+                return undefinedValue;
             if (value == Undefined.Value)
                 return false;
             if (value is bool)
@@ -88,6 +99,17 @@ namespace Jurassic
         /// <returns> A primitive number value. </returns>
         public static double ToNumber(object value)
         {
+            return ToNumber(value, double.NaN);
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to a primitive number value.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
+        /// <returns> A primitive number value. </returns>
+        internal static double ToNumber(object value, double undefinedValue)
+        {
             if (value is double)
                 return (double)value;
             if (value is int)
@@ -95,7 +117,7 @@ namespace Jurassic
             if (value is uint)
                 return (double)(uint)value;
             if (value == null || value == Undefined.Value)
-                return double.NaN;
+                return undefinedValue;
             if (value == Null.Value)
                 return +0;
             if (value is bool)
@@ -124,8 +146,19 @@ namespace Jurassic
         /// <returns> A primitive string value. </returns>
         public static string ToString(object value)
         {
+            return ToString(value, "undefined");
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to a primitive string value.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
+        /// <returns> A primitive string value. </returns>
+        internal static string ToString(object value, string undefinedValue)
+        {
             if (value == null || value == Undefined.Value)
-                return "undefined";
+                return undefinedValue;
             if (value == Null.Value)
                 return "null";
             if (value is bool)
@@ -188,6 +221,19 @@ namespace Jurassic
         /// </summary>
         /// <param name="engine"> The script engine used to create new objects. </param>
         /// <param name="value"> The value to convert. </param>
+        /// <returns> An object. </returns>
+        internal static ObjectInstance ToObject(ScriptEngine engine, object value, ObjectInstance undefinedValue)
+        {
+            if (value == null || value == Undefined.Value)
+                return undefinedValue;
+            return ToObject(engine, value, 0, null, null);
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to an object.
+        /// </summary>
+        /// <param name="engine"> The script engine used to create new objects. </param>
+        /// <param name="value"> The value to convert. </param>
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
         /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
@@ -202,19 +248,24 @@ namespace Jurassic
                 throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object", lineNumber, sourcePath, functionName);
             if (value == Null.Value)
                 throw new JavaScriptException(engine, "TypeError", "null cannot be converted to an object", lineNumber, sourcePath, functionName);
+
+            ObjectInstance result;
             if (value is bool)
-                return engine.Boolean.Construct((bool)value);
-            if (value is int)
-                return engine.Number.Construct((int)value);
-            if (value is uint)
-                return engine.Number.Construct((uint)value);
-            if (value is double)
-                return engine.Number.Construct((double)value);
-            if (value is string)
-                return engine.String.Construct((string)value);
-            if (value is ConcatenatedString)
-                return engine.String.Construct(value.ToString());
-            throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), "value");
+                result = engine.Boolean.Construct((bool)value);
+            else if (value is int)
+                result = engine.Number.Construct((int)value);
+            else if (value is uint)
+                result = engine.Number.Construct((uint)value);
+            else if (value is double)
+                result = engine.Number.Construct((double)value);
+            else if (value is string)
+                result = engine.String.Construct((string)value);
+            else if (value is ConcatenatedString)
+                result = engine.String.Construct(value.ToString());
+            else
+                throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), "value");
+            result.IsExtensible = false;
+            return result;
         }
 
         /// <summary>
@@ -239,8 +290,19 @@ namespace Jurassic
         /// <returns> An integer value. </returns>
         public static int ToInteger(object value)
         {
+            return ToInteger(value, 0);
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to an integer.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
+        /// <returns> An integer value. </returns>
+        public static int ToInteger(object value, int undefinedValue)
+        {
             if (value == null || value is Undefined)
-                return 0;
+                return undefinedValue;
             double num = ToNumber(value);
             if (num > 2147483647.0)
                 return 2147483647;
@@ -285,6 +347,25 @@ namespace Jurassic
             return (ushort)(uint)ToNumber(value);
         }
 
+        /// <summary>
+        /// Utility method to convert an object array to a typed array.
+        /// </summary>
+        /// <typeparam name="T"> The type to convert to. </typeparam>
+        /// <param name="engine"> The script engine used to create new objects. </param>
+        /// <param name="args"> The array to convert. </param>
+        /// <param name="offset"> The number of elements to skip at the beginning of the array. </param>
+        /// <returns> A typed array. </returns>
+        internal static T[] ConvertParameterArrayTo<T>(ScriptEngine engine, object[] args, int offset)
+        {
+            if (offset >= args.Length)
+                return new T[0];
+            var result = new T[args.Length - offset];
+            for (int i = 0; i < result.Length; i ++)
+            {
+                result[i] = ConvertTo<T>(engine, args[offset + i]);
+            }
+            return result;
+        }
     }
 
 }

@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents a JavaScript function.
     /// </summary>
     [Serializable]
-    public abstract class FunctionInstance : ObjectInstance
+    public abstract partial class FunctionInstance : ObjectInstance
     {
         // Used to speed up access to the prototype property.
         private int cachedInstancePrototypeIndex;

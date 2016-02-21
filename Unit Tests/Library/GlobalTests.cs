@@ -69,7 +69,7 @@ namespace UnitTests
             Assert.AreEqual(PropertyAttributes.NonEnumerable, EvaluateAccessibility("this", "decodeURI"));
 
             // length is sealed.
-            Assert.AreEqual(PropertyAttributes.Sealed, EvaluateAccessibility("this.decodeURI", "length"));
+            Assert.AreEqual(PropertyAttributes.Configurable, EvaluateAccessibility("this.decodeURI", "length"));
         }
 
         [TestMethod]

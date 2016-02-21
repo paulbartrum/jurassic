@@ -8,11 +8,20 @@ namespace Jurassic.Library
     /// Represents the base class of all the javascript errors.
     /// </summary>
     [Serializable]
-    public class ErrorInstance : ObjectInstance
+    public partial class ErrorInstance : ObjectInstance
     {
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates an empty Error instance.
+        /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        internal ErrorInstance(ObjectInstance prototype)
+            : base(prototype)
+        {
+        }
 
         /// <summary>
         /// Creates a new Error instance with the given name, message and optionally a stack trace.
@@ -26,9 +35,9 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (name != null)
-                this.FastSetProperty("name", name, PropertyAttributes.FullAccess);
+                this.FastSetProperty("name", name, PropertyAttributes.NonEnumerable);
             if (message != null)
-                this.FastSetProperty("message", message, PropertyAttributes.FullAccess);
+                this.FastSetProperty("message", message, PropertyAttributes.NonEnumerable);
         }
 
 

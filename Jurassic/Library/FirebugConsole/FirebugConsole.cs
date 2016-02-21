@@ -11,7 +11,7 @@ namespace Jurassic.Library
     /// (http://getfirebug.com/wiki/index.php/Console_API).
     /// </summary>
     [Serializable]
-    public class FirebugConsole : ObjectInstance
+    public partial class FirebugConsole : ObjectInstance
     {
         private IFirebugConsoleOutput output;
         private Dictionary<string, Stopwatch> timers;

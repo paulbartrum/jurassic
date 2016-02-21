@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents the built-in javascript String object.
     /// </summary>
     [Serializable]
-    public class StringConstructor : ClrFunction
+    public partial class StringConstructor : ClrStubFunction
     {
         
         //     INITIALIZATION
@@ -18,8 +18,18 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal StringConstructor(ObjectInstance prototype)
-            : base(prototype, "String", new StringInstance(prototype.Engine.Object.InstancePrototype, string.Empty))
+            : base(prototype, "String", 1, new StringInstance(prototype.Engine.Object.InstancePrototype, string.Empty), __STUB__Call, __STUB__Construct)
         {
+            // Initialize the constructor properties.
+            var properties = GetDeclarativeProperties();
+            AddFunctionProperties(properties);
+            FastSetProperties(properties);
+
+            // Initialize the prototype properties.
+            var instancePrototype = (StringInstance)InstancePrototype;
+            properties = instancePrototype.GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
+            instancePrototype.FastSetProperties(properties);
         }
 
 

@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents an instance of the JavaScript Array object.
     /// </summary>
     [Serializable]
-    public class ArrayInstance : ObjectInstance
+    public partial class ArrayInstance : ObjectInstance
     {
         // The array, if it is dense.
         private object[] dense;
@@ -387,7 +387,7 @@ namespace Jurassic.Library
                     {
                         object arrayElementValue = this.dense[i];
                         if (arrayElementValue != null)
-                            yield return new PropertyNameAndValue(i.ToString(), new PropertyDescriptor(arrayElementValue, PropertyAttributes.FullAccess));
+                            yield return new PropertyNameAndValue(i.ToString(), arrayElementValue, PropertyAttributes.FullAccess);
                     }
                 }
                 else
@@ -398,7 +398,7 @@ namespace Jurassic.Library
                         {
                             object arrayElementValue = this.sparse[i];
                             if (arrayElementValue != null)
-                                yield return new PropertyNameAndValue(i.ToString(), new PropertyDescriptor(arrayElementValue, PropertyAttributes.FullAccess));
+                                yield return new PropertyNameAndValue(i.ToString(), arrayElementValue, PropertyAttributes.FullAccess);
                         }
                 }
 
@@ -570,8 +570,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array to operate on. </param>
         /// <returns> The last element from the array. </returns>
-        [JSInternalFunction(Name = "pop", Flags = JSFunctionFlags.HasThisObject)]
-        public static object Pop([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj)
+        [JSInternalFunction(Name = "pop", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static object Pop(ObjectInstance thisObj)
         {
             // If the "this" object is an array, use the fast version of this method.
             if (thisObj is ArrayInstance)
@@ -657,8 +657,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="items"> The items to append to the array. </param>
-        [JSInternalFunction(Name = "push", Flags = JSFunctionFlags.HasThisObject)]
-        public static double Push([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, params object[] items)
+        [JSInternalFunction(Name = "push", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static double Push(ObjectInstance thisObj, params object[] items)
         {
             // If the "this" object is an array, use the fast version of this method.
             if (thisObj is ArrayInstance && items.Length == 1)
@@ -735,8 +735,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> The array that is being operated on. </returns>
-        [JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.HasThisObject)]
-        public static ObjectInstance Reverse([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj)
+        [JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static ObjectInstance Reverse(ObjectInstance thisObj)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -768,8 +768,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> The first element in the array. </returns>
-        [JSInternalFunction(Name = "shift", Flags = JSFunctionFlags.HasThisObject)]
-        public static object Shift([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj)
+        [JSInternalFunction(Name = "shift", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static object Shift(ObjectInstance thisObj)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -853,8 +853,8 @@ namespace Jurassic.Library
         /// less than the second argument, zero if the arguments are equal or a number greater than
         /// zero if the first argument is greater than Defaults to an ascending ASCII ordering. </param>
         /// <returns> The array that was sorted. </returns>
-        [JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.HasThisObject)]
-        public static ObjectInstance Sort([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, [DefaultParameterValue(null)] FunctionInstance comparisonFunction = null)
+        [JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static ObjectInstance Sort(ObjectInstance thisObj, [DefaultParameterValue(null)] FunctionInstance comparisonFunction = null)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -921,8 +921,8 @@ namespace Jurassic.Library
         /// <param name="deleteCount"> The number of elements to delete. </param>
         /// <param name="items"> The items to insert. </param>
         /// <returns> An array containing the deleted elements, if any. </returns>
-        [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject, Length = 2)]
-        public static ArrayInstance Splice([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, int start, int deleteCount, params object[] items)
+        [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 2)]
+        public static ArrayInstance Splice(ObjectInstance thisObj, int start, int deleteCount, params object[] items)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -976,8 +976,8 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="items"> The items to prepend. </param>
         /// <returns> The new length of the array. </returns>
-        [JSInternalFunction(Name = "unshift", Flags = JSFunctionFlags.HasThisObject)]
-        public static uint Unshift([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, params object[] items)
+        [JSInternalFunction(Name = "unshift", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static uint Unshift(ObjectInstance thisObj, params object[] items)
         {
             // If the "this" object is an array and the array is dense, use the fast version of this method.
             var array = thisObj as ArrayInstance;

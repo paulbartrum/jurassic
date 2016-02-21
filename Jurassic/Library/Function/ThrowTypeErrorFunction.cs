@@ -34,8 +34,8 @@ namespace Jurassic.Library
         internal ThrowTypeErrorFunction(ObjectInstance prototype, string message)
             : base(prototype)
         {
-            this.FastSetProperty("name", "ThrowTypeError");
-            this.FastSetProperty("length", 0);
+            this.FastSetProperty("name", "ThrowTypeError", PropertyAttributes.Configurable);
+            this.FastSetProperty("length", 0, PropertyAttributes.Configurable);
             this.IsExtensible = false;
             this.message = message;
         }

@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents the built-in javascript Number object.
     /// </summary>
     [Serializable]
-    public class NumberConstructor : ClrFunction
+    public partial class NumberConstructor : ClrStubFunction
     {
 
         //     INITIALIZATION
@@ -18,8 +18,18 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal NumberConstructor(ObjectInstance prototype)
-            : base(prototype, "Number", new NumberInstance(prototype.Engine.Object.InstancePrototype, 0))
+            : base(prototype, "Number", 1, new NumberInstance(prototype.Engine.Object.InstancePrototype, 0), __STUB__Call, __STUB__Construct)
         {
+            // Initialize the constructor properties.
+            var properties = GetDeclarativeProperties();
+            AddFunctionProperties(properties);
+            FastSetProperties(properties);
+
+            // Initialize the prototype properties.
+            var instancePrototype = (NumberInstance)InstancePrototype;
+            properties = instancePrototype.GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
+            instancePrototype.FastSetProperties(properties);
         }
 
 

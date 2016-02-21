@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// Represents functions and properties within the global scope.
     /// </summary>
     [Serializable]
-    public class GlobalObject : ObjectInstance
+    public partial class GlobalObject : ObjectInstance
     {
 
         //     INITIALIZATION
@@ -21,11 +21,20 @@ namespace Jurassic.Library
         internal GlobalObject(ObjectInstance prototype)
             : base(prototype)
         {
+        }
+
+        /// <summary>
+        /// Sets up object properties.  This must be done after the constructor due to dependency chain issues.
+        /// </summary>
+        internal void InitializeProperties()
+        {
             // Add the global constants.
             // Infinity, NaN and undefined are read-only in ECMAScript 5.
-            this.FastSetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed);
-            this.FastSetProperty("NaN", double.NaN, PropertyAttributes.Sealed);
-            this.FastSetProperty("undefined", Undefined.Value, PropertyAttributes.Sealed);
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("NaN", double.NaN, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("undefined", Undefined.Value, PropertyAttributes.Sealed));
+            FastSetProperties(properties);
         }
 
 

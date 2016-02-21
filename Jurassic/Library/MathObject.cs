@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// Represents the built-in Math class that has mathematical constants and functions.
     /// </summary>
     [Serializable]
-    public class MathObject : ObjectInstance
+    public partial class MathObject : ObjectInstance
     {
 
         //     INITIALIZATION
@@ -21,6 +21,7 @@ namespace Jurassic.Library
         internal MathObject(ObjectInstance prototype)
             : base(prototype)
         {
+            FastSetProperties(GetDeclarativeProperties());
         }
 
 

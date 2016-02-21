@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// The prototype for the Date object.
     /// </summary>
     [Serializable]
-    public class DateInstance : ObjectInstance
+    public partial class DateInstance : ObjectInstance
     {
         /// <summary>
         /// The underlying DateTime value.

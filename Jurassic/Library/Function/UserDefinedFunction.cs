@@ -135,8 +135,8 @@ namespace Jurassic.Library
             this.StrictMode = strictMode;
 
             // Add function properties.
-            this.FastSetProperty("name", name);
-            this.FastSetProperty("length", argumentNames.Count);
+            this.FastSetProperty("name", name, PropertyAttributes.Configurable);
+            this.FastSetProperty("length", argumentNames.Count, PropertyAttributes.Configurable);
 
             // The empty function doesn't have an instance prototype.
             if (hasInstancePrototype == true)

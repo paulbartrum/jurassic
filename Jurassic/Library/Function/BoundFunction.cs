@@ -33,8 +33,8 @@ namespace Jurassic.Library
             this.BoundArguments = boundArguments;
 
             // Add function properties.
-            this.FastSetProperty("name", targetFunction.Name);
-            this.FastSetProperty("length", Math.Max(targetFunction.Length - boundArguments.Length, 0));
+            this.FastSetProperty("name", targetFunction.Name, PropertyAttributes.Configurable);
+            this.FastSetProperty("length", Math.Max(targetFunction.Length - boundArguments.Length, 0), PropertyAttributes.Configurable);
             this.FastSetProperty("prototype", this.Engine.Object.Construct(), PropertyAttributes.Writable);
             this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
             

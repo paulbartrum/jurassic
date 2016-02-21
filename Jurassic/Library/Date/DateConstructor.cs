@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents the built-in javascript Date object.
     /// </summary>
     [Serializable]
-    public class DateConstructor : ClrFunction
+    public partial class DateConstructor : ClrStubFunction
     {
         //     INITIALIZATION
         //_________________________________________________________________________________________
@@ -18,9 +18,18 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal DateConstructor(ObjectInstance prototype)
-            : base(prototype, "Date", new DateInstance(prototype.Engine.Object.InstancePrototype, double.NaN))
+            : base(prototype, "Date", 7, new DateInstance(prototype.Engine.Object.InstancePrototype, double.NaN), __STUB__Call, __STUB__Construct)
         {
-            this.Length = 7;
+            // Initialize the constructor properties.
+            var properties = GetDeclarativeProperties();
+            AddFunctionProperties(properties);
+            FastSetProperties(properties);
+
+            // Initialize the prototype properties.
+            var instancePrototype = (DateInstance)InstancePrototype;
+            properties = instancePrototype.GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
+            instancePrototype.FastSetProperties(properties);
         }
 
 
@@ -87,13 +96,8 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a new Date object from various date components, expressed in local time.
         /// </summary>
-        /// <param name="year"> The full year. </param>
-        /// <param name="month"> The month as an integer between 0 and 11 (january to december). </param>
-        /// <param name="day"> The day of the month, from 1 to 31.  Defaults to 1. </param>
-        /// <param name="hour"> The number of hours since midnight, from 0 to 23.  Defaults to 0. </param>
-        /// <param name="minute"> The number of minutes, from 0 to 59.  Defaults to 0. </param>
-        /// <param name="second"> The number of seconds, from 0 to 59.  Defaults to 0. </param>
-        /// <param name="millisecond"> The number of milliseconds, from 0 to 999.  Defaults to 0. </param>
+        /// <param name="components"> An array containing date components, in the following order:
+        /// year, month, day, hour, minute, second and millisecond. </param>
         /// <remarks>
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
