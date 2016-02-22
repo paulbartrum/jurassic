@@ -358,6 +358,7 @@ namespace Jurassic
         /// <summary>
         /// Converts a string to an integer (used by parseInt).
         /// </summary>
+        /// <param name="input"> The input text to parse. </param>
         /// <param name="radix"> The numeric base to use for parsing.  Pass zero to use base 10
         /// except when the input string starts with '0' in which case base 16 or base 8 are used
         /// instead. </param>

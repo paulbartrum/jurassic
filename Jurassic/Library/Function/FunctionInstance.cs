@@ -46,6 +46,20 @@ namespace Jurassic.Library
         {
         }
 
+        /// <summary>
+        /// Initializes the prototype properties.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal void InitializePrototypeProperties(FunctionConstructor constructor)
+        {
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("name", "Empty", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue("length", 0, PropertyAttributes.Configurable));
+            FastSetProperties(properties);
+        }
+
 
 
         //     .NET ACCESSOR PROPERTIES
@@ -230,7 +244,7 @@ namespace Jurassic.Library
         /// Calls the function, passing in parameters from the given array.
         /// </summary>
         /// <param name="thisObj"> The value of <c>this</c> in the context of the function. </param>
-        /// <param name="argumentArray"> The arguments passed to the function, as an array. </param>
+        /// <param name="arguments"> The arguments passed to the function, as an array. </param>
         /// <returns> The result from the function call. </returns>
         [JSInternalFunction(Name = "apply")]
         public object Apply(object thisObj, object arguments)

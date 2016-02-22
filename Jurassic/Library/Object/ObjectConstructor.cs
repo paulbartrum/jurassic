@@ -19,25 +19,12 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="instancePrototype"> The prototype for instances created by this function. </param>
         internal ObjectConstructor(ObjectInstance prototype, ObjectInstance instancePrototype)
-            : base(prototype, "Object", 1, instancePrototype, __STUB__Call, __STUB__Construct)
-        {
-        }
-
-        /// <summary>
-        /// Sets up object properties.  This must be done after the constructor due to dependency chain issues.
-        /// </summary>
-        internal void InitializeProperties()
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties();
-            AddFunctionProperties(properties);
+            InitializeConstructorProperties(properties, "Object", 1, instancePrototype);
             FastSetProperties(properties);
-
-            // Initialize the prototype properties.
-            var instancePrototype = (ObjectInstance)InstancePrototype;
-            properties = instancePrototype.GetDeclarativeProperties();
-            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
-            instancePrototype.FastSetProperties(properties);
         }
 
 
@@ -138,7 +125,7 @@ namespace Jurassic.Library
         /// <param name="properties"> An object containing one or more property descriptors. </param>
         /// <returns> A new object instance. </returns>
         [JSInternalFunction(Name = "create", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static ObjectInstance Create(ScriptEngine engine, object prototype, [DefaultParameterValue(null)] ObjectInstance properties = null)
+        public static ObjectInstance Create(ScriptEngine engine, object prototype, ObjectInstance properties = null)
         {
             if ((prototype is ObjectInstance) == false && prototype != Null.Value)
                 throw new JavaScriptException(engine, "TypeError", "object prototype must be an object or null");

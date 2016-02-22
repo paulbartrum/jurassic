@@ -223,7 +223,6 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Retrieves a delegate for the generated method.
         /// </summary>
-        /// <param name="types"> The parameter types. </param>
         /// <returns> The delegate type that matches the method parameters. </returns>
         protected override Type GetDelegate()
         {

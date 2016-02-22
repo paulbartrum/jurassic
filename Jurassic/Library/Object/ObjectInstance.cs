@@ -101,6 +101,17 @@ namespace Jurassic.Library
             return new ObjectInstance(prototype);
         }
 
+        /// <summary>
+        /// Initializes the prototype properties.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal void InitializePrototypeProperties(ObjectConstructor constructor)
+        {
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            FastSetProperties(properties);
+        }
 
 
         //     SERIALIZATION
@@ -571,7 +582,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a descriptor for the property with the given array index.
         /// </summary>
-        /// <param name="propertyName"> The array index of the property. </param>
+        /// <param name="index"> The array index of the property. </param>
         /// <returns> A property descriptor containing the property value and attributes. </returns>
         /// <remarks> The prototype chain is not searched. </remarks>
         public virtual PropertyDescriptor GetOwnPropertyDescriptor(uint index)
@@ -668,8 +679,8 @@ namespace Jurassic.Library
         /// <c>false</c>.  This method is used to set the value of a variable reference within a
         /// with statement.
         /// </summary>
-        /// <param name="name"> The name of the property to set.  Cannot be an array index. </param>
-        /// <param name="value"> The desired value of the property.  This must be a javascript
+        /// <param name="propertyName"> The name of the property to set. Cannot be an array index. </param>
+        /// <param name="value"> The desired value of the property. This must be a javascript
         /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set (i.e. if the property is read-only or if the object is not extensible and a new
@@ -928,27 +939,19 @@ namespace Jurassic.Library
         /// <param name="properties"> The list of properties to set. </param>
         internal void FastSetProperties(IEnumerable<PropertyNameAndValue> properties)
         {
-            if (this.schema.NextValueIndex == 0)
+            if (this.schema.NextValueIndex != 0)
+                throw new InvalidOperationException("This method can only be called on a virgin object (one with no properties).");
+
+            if (this.propertyValues.Length < properties.Count())
+                this.propertyValues = new object[properties.Count()];
+            var propertyDictionary = new Dictionary<string, SchemaProperty>(properties.Count());
+            int nextValueIndex = 0;
+            foreach (var property in properties)
             {
-                if (this.propertyValues.Length < properties.Count())
-                    this.propertyValues = new object[properties.Count()];
-                var propertyDictionary = new Dictionary<string, SchemaProperty>(properties.Count());
-                int nextValueIndex = 0;
-                foreach (var property in properties)
-                {
-                    this.propertyValues[nextValueIndex] = property.Value;
-                    propertyDictionary.Add(property.Name, new SchemaProperty(nextValueIndex++, property.Attributes));
-                }
-                this.schema = new HiddenClassSchema(propertyDictionary, nextValueIndex);
+                this.propertyValues[nextValueIndex] = property.Value;
+                propertyDictionary.Add(property.Name, new SchemaProperty(nextValueIndex++, property.Attributes));
             }
-            else
-            {
-                System.Diagnostics.Debugger.Log(0, "", $"{this.GetType()} {this.schema.PropertyCount}\r\n");
-                foreach (var property in properties)
-                {
-                    FastSetProperty(property.Name, property.Value, property.Attributes);
-                }
-            }
+            this.schema = new HiddenClassSchema(propertyDictionary, nextValueIndex);
         }
 
 
@@ -959,9 +962,9 @@ namespace Jurassic.Library
         /// Returns a primitive value that represents the current object.  Used by the addition and
         /// equality operators.
         /// </summary>
-        /// <param name="hint"> Indicates the preferred type of the result. </param>
+        /// <param name="typeHint"> Indicates the preferred type of the result. </param>
         /// <returns> A primitive value that represents the current object. </returns>
-        protected internal virtual object GetPrimitiveValue(PrimitiveTypeHint typeHint)
+        internal virtual object GetPrimitiveValue(PrimitiveTypeHint typeHint)
         {
             if (typeHint == PrimitiveTypeHint.None || typeHint == PrimitiveTypeHint.Number)
             {
@@ -1092,6 +1095,7 @@ namespace Jurassic.Library
         /// Determines if a property with the given name exists on this object.
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="propertyName"> The name of the property. </param>
         /// <returns> <c>true</c> if a property with the given name exists on this object,
         /// <c>false</c> otherwise. </returns>
@@ -1107,6 +1111,7 @@ namespace Jurassic.Library
         /// Determines if this object is in the prototype chain of the given object.
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if this object is in the prototype chain of the given object;
         /// <c>false</c> otherwise. </returns>
@@ -1131,6 +1136,7 @@ namespace Jurassic.Library
         /// Determines if a property with the given name exists on this object and is enumerable.
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="propertyName"> The name of the property. </param>
         /// <returns> <c>true</c> if a property with the given name exists on this object and is
         /// enumerable, <c>false</c> otherwise. </returns>
@@ -1166,6 +1172,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string representing the current object.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="thisObject"> The value of the "this" keyword. </param>
         /// <returns> A string representing the current object. </returns>
         [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]

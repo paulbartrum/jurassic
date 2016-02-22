@@ -5,14 +5,11 @@ namespace Jurassic.Library
 {
     /// <summary>
     /// Represents a function that is implemented with a .NET static method.
-    /// Replacement for ClrFunction.  Now used by all the built-in constructors and functions.
+    /// Faster, but less flexible version of ClrFunction.  Now used by all the built-in constructors and functions.
     /// </summary>
     [Serializable]
     public class ClrStubFunction : FunctionInstance
     {
-        private string name;
-        private int length;
-        private ObjectInstance instancePrototype;
         private Func<ScriptEngine, object, object[], object> callBinder;
         private Func<ScriptEngine, object, object[], ObjectInstance> constructBinder;
 
@@ -28,6 +25,8 @@ namespace Jurassic.Library
         internal ClrStubFunction(ObjectInstance prototype, Func<ScriptEngine, object, object[], object> call)
             : base(prototype)
         {
+            // Let's not even bother with setting the name and length!
+            // Use sparingly.
             this.callBinder = call;
         }
 
@@ -38,69 +37,70 @@ namespace Jurassic.Library
         /// <param name="name"> The name of the function. </param>
         /// <param name="length"> The "typical" number of arguments expected by the function. </param>
         /// <param name="call"> The delegate to call when calling the JS method. </param>
-        internal ClrStubFunction(ObjectInstance prototype, string name, int length, Func<ScriptEngine, object, object[], object> call)
+        public ClrStubFunction(ObjectInstance prototype, string name, int length, Func<ScriptEngine, object, object[], object> call)
             : base(prototype)
         {
-            
-            this.name = name;
-            this.length = length;
             this.callBinder = call;
 
-            // Add function properties.
+            // Set name and length properties.
             var properties = new List<PropertyNameAndValue>(2);
-            AddFunctionProperties(properties);
+            properties.Add(new PropertyNameAndValue("name", name, PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue("length", length, PropertyAttributes.Configurable));
             FastSetProperties(properties);
         }
 
         /// <summary>
-        /// Creates a new instance of a function which implements a constructor.
+        /// Creates a new constructor function.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        /// <param name="name"> The name of the function. </param>
-        /// <param name="length"> The "typical" number of arguments expected by the function. </param>
-        /// <param name="instancePrototype"> The value of the "prototype" property. </param>
-        /// <param name="call"> The delegate to call when calling the JS method. </param>
         /// <param name="construct"> The delegate to call when calling the JS method as a constructor. </param>
-        internal ClrStubFunction(ObjectInstance prototype, string name, int length, ObjectInstance instancePrototype,
-            Func<ScriptEngine, object, object[], object> call, Func<ScriptEngine, object, object[], ObjectInstance> construct)
+        /// <param name="call"> The delegate to call when function is called. </param>
+        internal ClrStubFunction(ObjectInstance prototype,
+            Func<ScriptEngine, object, object[], ObjectInstance> construct,
+            Func<ScriptEngine, object, object[], object> call)
             : base(prototype)
         {
-            this.name = name;
-            this.length = length;
-            this.instancePrototype = instancePrototype;
             this.callBinder = call;
             this.constructBinder = construct;
-            //this.FastSetProperty("name", name, PropertyAttributes.Configurable);
-            //this.FastSetProperty("length", 1, PropertyAttributes.Configurable);
-            //this.FastSetProperty("prototype", instancePrototype, PropertyAttributes.Sealed);
-            //instancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
         /// <summary>
         /// Adds properties needed by the function to the list of properties.
         /// </summary>
         /// <param name="properties"> The list of properties to add to. </param>
-        protected void AddFunctionProperties(List<PropertyNameAndValue> properties)
+        /// <param name="name"> The name of the function. </param>
+        /// <param name="length"> The "typical" number of arguments expected by the function. </param>
+        /// <param name="instancePrototype"> The value of the "prototype" property. </param>
+        protected void InitializeConstructorProperties(List<PropertyNameAndValue> properties, string name, int length, ObjectInstance instancePrototype)
         {
-            properties.Add(new PropertyNameAndValue("name", this.name, PropertyAttributes.Configurable));
-            properties.Add(new PropertyNameAndValue("length", this.length, PropertyAttributes.Configurable));
-            if (this.instancePrototype != null)
-                properties.Add(new PropertyNameAndValue("prototype", this.instancePrototype, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("name", name, PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue("length", length, PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue("prototype", instancePrototype, PropertyAttributes.Sealed));
         }
-
-
-
-        //     PROPERTIES
-        //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the prototype of objects constructed using this function.  Equivalent to
-        /// the Function.prototype property.
+        /// Creates a new constructor function.
         /// </summary>
-        public new ObjectInstance InstancePrototype
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        /// <param name="name"> The name of the function. </param>
+        /// <param name="length"> The "typical" number of arguments expected by the function. </param>
+        /// <param name="instancePrototype"> The value of the "prototype" property. </param>
+        /// <param name="construct"> The delegate to call when calling the JS method as a constructor. </param>
+        /// <param name="call"> The delegate to call when function is called. </param>
+        protected ClrStubFunction(ObjectInstance prototype,
+            string name, int length, ObjectInstance instancePrototype,
+            Func<ScriptEngine, object, object[], ObjectInstance> construct,
+            Func<ScriptEngine, object, object[], object> call)
+            : base(prototype)
         {
-            get { return this.instancePrototype; }
+            this.callBinder = call;
+            this.constructBinder = construct;
+
+            var properties = new List<PropertyNameAndValue>(3);
+            InitializeConstructorProperties(properties, name, length, instancePrototype);
+            FastSetProperties(properties);
         }
+
 
 
         //     OVERRIDES

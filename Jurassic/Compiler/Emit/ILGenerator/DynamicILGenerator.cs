@@ -479,7 +479,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets a metadata token for the given string.
         /// </summary>
-        /// <param name="string"> The string to get a token for. </param>
+        /// <param name="str"> The string to get a token for. </param>
         /// <returns> A metadata token. </returns>
         private int GetToken(string str)
         {
@@ -838,8 +838,6 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
         /// <param name="opCode"> The one-byte operation identifier. </param>
-        /// <param name="popCount"> The number of operands to pop from the stack. </param>
-        /// <param name="popType"> The type of operand to pop from the stack. </param>
         private void BranchCore(ILLabel label, byte opCode)
         {
             // Emit the branch opcode.
@@ -875,7 +873,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
         /// <param name="opCode"> The one-byte operation identifier. </param>
-        /// <param name="@operator"> The type of comparison operation. </param>
+        /// <param name="operator"> The type of comparison operation. </param>
         private void BranchCore(ILLabel label, byte opCode, ComparisonOperator @operator)
         {
             // Emit the branch opcode.
@@ -1792,8 +1790,9 @@ namespace Jurassic.Compiler
         /// Pops the method arguments off the stack, calls the given method, then pushes the result
         /// to the stack (if there was one).
         /// </summary>
+        /// <param name="opCode"> The opcode to emit. </param>
         /// <param name="method"> The method to call. </param>
-        private void EmitCall(byte opcode, System.Reflection.MethodBase method)
+        private void EmitCall(byte opCode, System.Reflection.MethodBase method)
         {
             // Get the argument and return type details.
             var parameters = method.GetParameters();
@@ -1809,7 +1808,7 @@ namespace Jurassic.Compiler
             int token = this.GetToken(method);
 
             // Call the method.
-            Emit1ByteOpCodeInt32(opcode, parameters.Length + (method.IsStatic ? 0 : 1), returnType == typeof(void) ? 0 : 1, token);
+            Emit1ByteOpCodeInt32(opCode, parameters.Length + (method.IsStatic ? 0 : 1), returnType == typeof(void) ? 0 : 1, token);
 
 #if DEBUG
             // Check the stack.

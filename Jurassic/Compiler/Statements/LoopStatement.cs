@@ -280,8 +280,6 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Finds variables that were assigned to and determines their types.
         /// </summary>
-        /// <param name="root"> The root of the abstract syntax tree to search. </param>
-        /// <param name="variableTypes"> A dictionary containing the variables that were assigned to. </param>
         private Dictionary<Scope.DeclaredVariable, InferredTypeInfo> FindTypedVariables()
         {
             var result = new Dictionary<Scope.DeclaredVariable, InferredTypeInfo>();

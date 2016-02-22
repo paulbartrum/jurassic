@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+
 
 namespace Jurassic.Library
 {
@@ -18,18 +18,12 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal StringConstructor(ObjectInstance prototype)
-            : base(prototype, "String", 1, new StringInstance(prototype.Engine.Object.InstancePrototype, string.Empty), __STUB__Call, __STUB__Construct)
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties();
-            AddFunctionProperties(properties);
+            InitializeConstructorProperties(properties, "String", 1, new StringInstance(this));
             FastSetProperties(properties);
-
-            // Initialize the prototype properties.
-            var instancePrototype = (StringInstance)InstancePrototype;
-            properties = instancePrototype.GetDeclarativeProperties();
-            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
-            instancePrototype.FastSetProperties(properties);
         }
 
 
@@ -63,7 +57,7 @@ namespace Jurassic.Library
         [JSConstructorFunction]
         public StringInstance Construct()
         {
-            return new StringInstance(this.InstancePrototype);
+            return new StringInstance(this.InstancePrototype, "");
         }
 
         /// <summary>

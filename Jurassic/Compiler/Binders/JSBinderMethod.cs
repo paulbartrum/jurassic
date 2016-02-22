@@ -32,7 +32,6 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new FunctionBinderMethod instance.
         /// </summary>
-        /// <param name="method"> The method to call. </param>
         /// <param name="flags"> Flags that modify the binding process. </param>
         private void Init(JSFunctionFlags flags)
         {

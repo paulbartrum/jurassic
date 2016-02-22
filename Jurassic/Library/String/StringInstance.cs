@@ -17,14 +17,19 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates a new empty string instance.
+        /// Creates an empty string instance for use as a prototype.
         /// </summary>
-        /// <param name="prototype"> The next object in the prototype chain. </param>
-        public StringInstance(ObjectInstance prototype)
-            : base(prototype)
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal StringInstance(StringConstructor constructor)
+            : base(constructor.Engine.Object.InstancePrototype)
         {
             this.value = string.Empty;
-            this.FastSetProperty("length", 0);
+
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("length", 0, PropertyAttributes.Sealed));
+            FastSetProperties(properties);
         }
 
         /// <summary>
@@ -79,7 +84,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a descriptor for the property with the given array index.
         /// </summary>
-        /// <param name="propertyName"> The array index of the property. </param>
+        /// <param name="index"> The array index of the property. </param>
         /// <returns> A property descriptor containing the property value and attributes. </returns>
         /// <remarks> The prototype chain is not searched. </remarks>
         public override PropertyDescriptor GetOwnPropertyDescriptor(uint index)
@@ -112,13 +117,14 @@ namespace Jurassic.Library
         }
 
 
-        
+
         //     JAVASCRIPT FUNCTIONS
         //_________________________________________________________________________________________
 
         /// <summary>
         /// Returns the character at the specified index.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="index"> The character position (starts at 0). </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "charAt", Flags = JSFunctionFlags.HasThisObject)]
@@ -132,6 +138,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a number indicating the Unicode value of the character at the given index.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="index"> The character position (starts at 0). </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "charCodeAt", Flags = JSFunctionFlags.HasThisObject)]
@@ -145,6 +152,8 @@ namespace Jurassic.Library
         /// <summary>
         /// Combines the text of two or more strings and returns a new string.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="strings"> The strings to concatenate with this string. </param>
         /// <returns> The result of combining this string with the given strings. </returns>
         [JSInternalFunction(Name = "concat", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
@@ -182,27 +191,29 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns the index within the calling String object of the first occurrence of the specified value, or -1 if not found.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="substring"> The substring to search for. </param>
         /// <param name="startIndex"> The character position to start searching from.  Defaults to 0. </param>
         /// <returns> The character position of the start of the substring, if it was found, or -1 if it wasn't. </returns>
         [JSInternalFunction(Name = "indexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static int IndexOf(string thisObject, string substring, [DefaultParameterValue(0)] int startIndex = 0)
+        public static int IndexOf(string thisObject, string substring, int startIndex = 0)
         {
             startIndex = Math.Min(Math.Max(startIndex, 0), thisObject.Length);
             return thisObject.IndexOf(substring, startIndex, StringComparison.Ordinal);
         }
 
-        
+
 
         /// <summary>
         /// Returns the index within the calling String object of the specified value, searching
         /// backwards from the end of the string.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="substring"> The substring to search for. </param>
         /// <param name="startIndex"> The index of the character to start searching. </param>
         /// <returns> The index of the substring, or <c>-1</c> if not found. </returns>
         [JSInternalFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static int LastIndexOf(string thisObject, string substring, [DefaultParameterValue(double.NaN)] double startIndex = double.NaN)
+        public static int LastIndexOf(string thisObject, string substring, double startIndex = double.NaN)
         {
             // Limit startIndex to the length of the string.  This must be done first otherwise
             // when startIndex = MaxValue it wraps around to negative.
@@ -222,6 +233,7 @@ namespace Jurassic.Library
         /// Returns a number indicating whether a reference string comes before or after or is the
         /// same as the given string in sort order.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="str"> The string to compare with. </param>
         /// <returns> -1, 0 or 1 depending on whether the given string comes before or after or is
         /// the same as the given string in sort order. </returns>
@@ -234,7 +246,9 @@ namespace Jurassic.Library
         /// <summary>
         /// Finds the first match of the given substring within this string.
         /// </summary>
-        /// <param name="substr"> The substring to search for. </param>
+        /// <param name="engine"> The current script environment. </param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
+        /// <param name="substrOrRegExp"> The substring or regular expression to search for. </param>
         /// <returns> An array containing the matched strings. </returns>
         [JSInternalFunction(Name = "match", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static object Match(ScriptEngine engine, string thisObject, object substrOrRegExp)
@@ -278,6 +292,7 @@ namespace Jurassic.Library
         /// Substitutes the given string or regular expression with the given text or the result
         /// of a replacement function.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="substrOrRegExp"> The substring to replace -or- a regular expression that
         /// matches the text to replace. </param>
         /// <param name="replaceTextOrFunction"> The text to substitute -or- a function that
@@ -307,6 +322,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a copy of this string with text replaced.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="substr"> The text to search for. </param>
         /// <param name="replaceText"> A string containing the text to replace for every successful
         /// match. </param>
@@ -330,6 +346,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a copy of this string with text replaced using a replacement function.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="substr"> The text to search for. </param>
         /// <param name="replaceFunction"> A function that is called to produce the text to replace
         /// for every successful match. </param>
@@ -356,6 +373,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a copy of this string with text replaced using a regular expression.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="regExp"> The regular expression to search for. </param>
         /// <param name="replaceText"> A string containing the text to replace for every successful match. </param>
         /// <returns> A copy of this string with text replaced using a regular expression. </returns>
@@ -368,6 +386,7 @@ namespace Jurassic.Library
         /// Returns a copy of this string with text replaced using a regular expression and a
         /// replacement function.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="regExp"> The regular expression to search for. </param>
         /// <param name="replaceFunction"> A function that is called to produce the text to replace
         /// for every successful match. </param>
@@ -380,6 +399,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns the position of the first substring match.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="substrOrRegExp"> The string or regular expression to search for. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
         [JSInternalFunction(Name = "search", Flags = JSFunctionFlags.HasThisObject)]
@@ -400,11 +420,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Extracts a section of the string and returns a new string.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="start"> The character position to start extracting. </param>
         /// <param name="end"> The character position to stop extacting. </param>
         /// <returns> A section of the string. </returns>
         [JSInternalFunction(Name = "slice", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Slice(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int end = int.MaxValue)
+        public static string Slice(string thisObject, int start, int end = int.MaxValue)
         {
             // Negative offsets are measured from the end of the string.
             if (start < 0)
@@ -424,11 +445,13 @@ namespace Jurassic.Library
         /// <summary>
         /// Splits this string into an array of strings by separating the string into substrings.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="separator"> A string or regular expression that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
         [JSInternalFunction(Name = "split", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, [DefaultParameterValue(4294967295.0)] double limit = uint.MaxValue)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, double limit = uint.MaxValue)
         {
             // Limit defaults to unlimited.  Note the ToUint32() conversion.
             uint limit2 = uint.MaxValue;
@@ -445,10 +468,11 @@ namespace Jurassic.Library
         /// <summary>
         /// Splits this string into an array of strings by separating the string into substrings.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="regExp"> A regular expression that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, [DefaultParameterValue(uint.MaxValue)] uint limit = uint.MaxValue)
+        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, uint limit = uint.MaxValue)
         {
             return regExp.Split(thisObject, limit);
         }
@@ -456,10 +480,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Splits this string into an array of strings by separating the string into substrings.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="separator"> A string that indicates where to split the string. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, string separator, [DefaultParameterValue(uint.MaxValue)] uint limit = uint.MaxValue)
+        public static ArrayInstance Split(ScriptEngine engine, string thisObject, string separator, uint limit = uint.MaxValue)
         {
             if (string.IsNullOrEmpty(separator))
             {
@@ -482,11 +508,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns the characters in a string beginning at the specified location through the specified number of characters.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="start"> The character position to start extracting. </param>
         /// <param name="length"> The number of characters to extract. </param>
         /// <returns> A substring of this string. </returns>
         [JSInternalFunction(Name = "substr", Flags = JSFunctionFlags.HasThisObject, Deprecated = true)]
-        public static string Substr(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int length = int.MaxValue)
+        public static string Substr(string thisObject, int start, int length = int.MaxValue)
         {
             // If start is less than zero, it is measured from the end of the string.
             if (start < 0)
@@ -504,11 +531,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns the characters in a string between two indexes into the string.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="start"> The character position to start extracting. </param>
         /// <param name="end"> The character position to stop extracting. </param>
         /// <returns> A substring of this string. </returns>
         [JSInternalFunction(Name = "substring", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Substring(string thisObject, int start, [DefaultParameterValue(int.MaxValue)] int end = int.MaxValue)
+        public static string Substring(string thisObject, int start, int end = int.MaxValue)
         {
             return Slice(thisObject, Math.Max(Math.Min(start, end), 0), Math.Max(Math.Max(start, end), 0));
         }
@@ -627,6 +655,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Wraps the string with an anchor tag.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="name"> The name of the anchor. </param>
         /// <returns> </returns>
         [JSInternalFunction(Name = "anchor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
@@ -678,6 +707,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Wraps the string with a font tag that specifies the given color.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="colorValue"> The color value or name. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "fontcolor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
@@ -689,6 +719,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Wraps the string with a font tag that specifies the given font size.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="size"> The font size, specified as an integer. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "fontsize", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
@@ -710,7 +741,8 @@ namespace Jurassic.Library
         /// <summary>
         /// Wraps the string with a hyperlink.
         /// </summary>
-        /// <param name="href"></param>
+        /// <param name="thisObject"> The object that is being operated on. </param>
+        /// <param name="href"> The hyperlink URL. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "link", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Link(string thisObject, string href)

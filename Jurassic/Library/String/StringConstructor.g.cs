@@ -10,11 +10,11 @@ namespace Jurassic.Library
 
 	public partial class StringConstructor
 	{
-		internal new List<PropertyNameAndValue> GetDeclarativeProperties()
+		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(this.Engine.Function.InstancePrototype, "fromCharCode", 1, __STUB__fromCharCode), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(Engine.FunctionInstancePrototype, "fromCharCode", 1, __STUB__fromCharCode), PropertyAttributes.NonEnumerable),
 			};
 		}
 

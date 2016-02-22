@@ -10,21 +10,21 @@ namespace Jurassic.Library
 
 	public partial class GlobalObject
 	{
-		internal new List<PropertyNameAndValue> GetDeclarativeProperties()
+		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
 			return new List<PropertyNameAndValue>(15)
 			{
-				new PropertyNameAndValue("decodeURI", new ClrStubFunction(this.Engine.Function.InstancePrototype, "decodeURI", 1, __STUB__decodeURI), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("decodeURIComponent", new ClrStubFunction(this.Engine.Function.InstancePrototype, "decodeURIComponent", 1, __STUB__decodeURIComponent), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("encodeURI", new ClrStubFunction(this.Engine.Function.InstancePrototype, "encodeURI", 1, __STUB__encodeURI), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("encodeURIComponent", new ClrStubFunction(this.Engine.Function.InstancePrototype, "encodeURIComponent", 1, __STUB__encodeURIComponent), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("escape", new ClrStubFunction(this.Engine.Function.InstancePrototype, "escape", 1, __STUB__escape), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("eval", new ClrStubFunction(this.Engine.Function.InstancePrototype, "eval", 1, __STUB__eval), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isFinite", new ClrStubFunction(this.Engine.Function.InstancePrototype, "isFinite", 1, __STUB__isFinite), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isNaN", new ClrStubFunction(this.Engine.Function.InstancePrototype, "isNaN", 1, __STUB__isNaN), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseFloat", new ClrStubFunction(this.Engine.Function.InstancePrototype, "parseFloat", 1, __STUB__parseFloat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseInt", new ClrStubFunction(this.Engine.Function.InstancePrototype, "parseInt", 2, __STUB__parseInt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("unescape", new ClrStubFunction(this.Engine.Function.InstancePrototype, "unescape", 1, __STUB__unescape), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("decodeURI", new ClrStubFunction(Engine.FunctionInstancePrototype, "decodeURI", 1, __STUB__decodeURI), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("decodeURIComponent", new ClrStubFunction(Engine.FunctionInstancePrototype, "decodeURIComponent", 1, __STUB__decodeURIComponent), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("encodeURI", new ClrStubFunction(Engine.FunctionInstancePrototype, "encodeURI", 1, __STUB__encodeURI), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("encodeURIComponent", new ClrStubFunction(Engine.FunctionInstancePrototype, "encodeURIComponent", 1, __STUB__encodeURIComponent), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("escape", new ClrStubFunction(Engine.FunctionInstancePrototype, "escape", 1, __STUB__escape), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("eval", new ClrStubFunction(Engine.FunctionInstancePrototype, "eval", 1, __STUB__eval), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFinite", new ClrStubFunction(Engine.FunctionInstancePrototype, "isFinite", 1, __STUB__isFinite), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isNaN", new ClrStubFunction(Engine.FunctionInstancePrototype, "isNaN", 1, __STUB__isNaN), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseFloat", new ClrStubFunction(Engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__parseFloat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseInt", new ClrStubFunction(Engine.FunctionInstancePrototype, "parseInt", 2, __STUB__parseInt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("unescape", new ClrStubFunction(Engine.FunctionInstancePrototype, "unescape", 1, __STUB__unescape), PropertyAttributes.NonEnumerable),
 			};
 		}
 

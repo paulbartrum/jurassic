@@ -246,7 +246,7 @@ namespace UnitTests
 
         private class TestInstance2
         {
-            public int value;
+            public int value = 7;
         }
 
         [TestMethod]
@@ -301,7 +301,7 @@ namespace UnitTests
 
             // Class with no constructors.
             engine.Execute("var instance2 = new TestInstance2()");
-            Assert.AreEqual(0, engine.Evaluate("instance2.value"));
+            Assert.AreEqual(7, engine.Evaluate("instance2.value"));
         }
 
         private struct TestStruct

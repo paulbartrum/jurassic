@@ -44,8 +44,6 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="type"> The CLR type to wrap. </param>
-        /// <param name="flags"> <c>BindingFlags.Static</c> to populate static methods;
-        /// <c>BindingFlags.Instance</c> to populate instance methods. </param>
         private ClrStaticTypeWrapper(ScriptEngine engine, Type type)
             : base(engine, GetPrototypeObject(engine, type))
         {

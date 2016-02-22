@@ -5,10 +5,24 @@ using Jurassic.Library;
 
 namespace Jurassic
 {
+    /// <summary>
+    /// Provides a hint on how to do the conversion when converting to a primitive.
+    /// </summary>
     public enum PrimitiveTypeHint
     {
+        /// <summary>
+        /// Use the default behaviour.
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Prefer converting to a number.
+        /// </summary>
         Number,
+
+        /// <summary>
+        /// Prefer converting to a string.
+        /// </summary>
         String,
     }
 
@@ -221,6 +235,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="engine"> The script engine used to create new objects. </param>
         /// <param name="value"> The value to convert. </param>
+        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
         /// <returns> An object. </returns>
         internal static ObjectInstance ToObject(ScriptEngine engine, object value, ObjectInstance undefinedValue)
         {

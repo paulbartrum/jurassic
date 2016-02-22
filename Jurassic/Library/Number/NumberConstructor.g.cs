@@ -10,7 +10,7 @@ namespace Jurassic.Library
 
 	public partial class NumberConstructor
 	{
-		internal new List<PropertyNameAndValue> GetDeclarativeProperties()
+		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
 			return new List<PropertyNameAndValue>(9)
 			{

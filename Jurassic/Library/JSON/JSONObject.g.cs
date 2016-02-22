@@ -10,12 +10,12 @@ namespace Jurassic.Library
 
 	public partial class JSONObject
 	{
-		internal new List<PropertyNameAndValue> GetDeclarativeProperties()
+		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("parse", new ClrStubFunction(this.Engine.Function.InstancePrototype, "parse", 2, __STUB__parse), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("stringify", new ClrStubFunction(this.Engine.Function.InstancePrototype, "stringify", 3, __STUB__stringify), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parse", new ClrStubFunction(Engine.FunctionInstancePrototype, "parse", 2, __STUB__parse), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("stringify", new ClrStubFunction(Engine.FunctionInstancePrototype, "stringify", 3, __STUB__stringify), PropertyAttributes.NonEnumerable),
 			};
 		}
 

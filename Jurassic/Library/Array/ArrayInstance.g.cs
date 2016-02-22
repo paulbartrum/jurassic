@@ -10,31 +10,31 @@ namespace Jurassic.Library
 
 	public partial class ArrayInstance
 	{
-		internal new List<PropertyNameAndValue> GetDeclarativeProperties()
+		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
 			return new List<PropertyNameAndValue>(26)
 			{
-				new PropertyNameAndValue("concat", new ClrStubFunction(this.Engine.Function.InstancePrototype, "concat", 1, __STUB__concat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("join", new ClrStubFunction(this.Engine.Function.InstancePrototype, "join", 1, __STUB__join), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("pop", new ClrStubFunction(this.Engine.Function.InstancePrototype, "pop", 0, __STUB__pop), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("push", new ClrStubFunction(this.Engine.Function.InstancePrototype, "push", 1, __STUB__push), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("reverse", new ClrStubFunction(this.Engine.Function.InstancePrototype, "reverse", 0, __STUB__reverse), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("shift", new ClrStubFunction(this.Engine.Function.InstancePrototype, "shift", 0, __STUB__shift), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("slice", new ClrStubFunction(this.Engine.Function.InstancePrototype, "slice", 2, __STUB__slice), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sort", new ClrStubFunction(this.Engine.Function.InstancePrototype, "sort", 1, __STUB__sort), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("splice", new ClrStubFunction(this.Engine.Function.InstancePrototype, "splice", 2, __STUB__splice), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("unshift", new ClrStubFunction(this.Engine.Function.InstancePrototype, "unshift", 1, __STUB__unshift), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(this.Engine.Function.InstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(this.Engine.Function.InstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("indexOf", new ClrStubFunction(this.Engine.Function.InstancePrototype, "indexOf", 1, __STUB__indexOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("lastIndexOf", new ClrStubFunction(this.Engine.Function.InstancePrototype, "lastIndexOf", 1, __STUB__lastIndexOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("every", new ClrStubFunction(this.Engine.Function.InstancePrototype, "every", 1, __STUB__every), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("some", new ClrStubFunction(this.Engine.Function.InstancePrototype, "some", 1, __STUB__some), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("forEach", new ClrStubFunction(this.Engine.Function.InstancePrototype, "forEach", 1, __STUB__forEach), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("map", new ClrStubFunction(this.Engine.Function.InstancePrototype, "map", 1, __STUB__map), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("filter", new ClrStubFunction(this.Engine.Function.InstancePrototype, "filter", 1, __STUB__filter), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("reduce", new ClrStubFunction(this.Engine.Function.InstancePrototype, "reduce", 1, __STUB__reduce), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("reduceRight", new ClrStubFunction(this.Engine.Function.InstancePrototype, "reduceRight", 1, __STUB__reduceRight), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("concat", new ClrStubFunction(Engine.FunctionInstancePrototype, "concat", 1, __STUB__concat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("join", new ClrStubFunction(Engine.FunctionInstancePrototype, "join", 1, __STUB__join), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("pop", new ClrStubFunction(Engine.FunctionInstancePrototype, "pop", 0, __STUB__pop), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("push", new ClrStubFunction(Engine.FunctionInstancePrototype, "push", 1, __STUB__push), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("reverse", new ClrStubFunction(Engine.FunctionInstancePrototype, "reverse", 0, __STUB__reverse), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("shift", new ClrStubFunction(Engine.FunctionInstancePrototype, "shift", 0, __STUB__shift), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("slice", new ClrStubFunction(Engine.FunctionInstancePrototype, "slice", 2, __STUB__slice), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sort", new ClrStubFunction(Engine.FunctionInstancePrototype, "sort", 1, __STUB__sort), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("splice", new ClrStubFunction(Engine.FunctionInstancePrototype, "splice", 2, __STUB__splice), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("unshift", new ClrStubFunction(Engine.FunctionInstancePrototype, "unshift", 1, __STUB__unshift), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("indexOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "indexOf", 1, __STUB__indexOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("lastIndexOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "lastIndexOf", 1, __STUB__lastIndexOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("every", new ClrStubFunction(Engine.FunctionInstancePrototype, "every", 1, __STUB__every), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("some", new ClrStubFunction(Engine.FunctionInstancePrototype, "some", 1, __STUB__some), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("forEach", new ClrStubFunction(Engine.FunctionInstancePrototype, "forEach", 1, __STUB__forEach), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("map", new ClrStubFunction(Engine.FunctionInstancePrototype, "map", 1, __STUB__map), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("filter", new ClrStubFunction(Engine.FunctionInstancePrototype, "filter", 1, __STUB__filter), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("reduce", new ClrStubFunction(Engine.FunctionInstancePrototype, "reduce", 1, __STUB__reduce), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("reduceRight", new ClrStubFunction(Engine.FunctionInstancePrototype, "reduceRight", 1, __STUB__reduceRight), PropertyAttributes.NonEnumerable),
 			};
 		}
 

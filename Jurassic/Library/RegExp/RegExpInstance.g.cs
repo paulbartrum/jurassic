@@ -10,14 +10,14 @@ namespace Jurassic.Library
 
 	public partial class RegExpInstance
 	{
-		internal new List<PropertyNameAndValue> GetDeclarativeProperties()
+		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue("compile", new ClrStubFunction(this.Engine.Function.InstancePrototype, "compile", 2, __STUB__compile), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("test", new ClrStubFunction(this.Engine.Function.InstancePrototype, "test", 1, __STUB__test), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("exec", new ClrStubFunction(this.Engine.Function.InstancePrototype, "exec", 1, __STUB__exec), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(this.Engine.Function.InstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("compile", new ClrStubFunction(Engine.FunctionInstancePrototype, "compile", 2, __STUB__compile), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("test", new ClrStubFunction(Engine.FunctionInstancePrototype, "test", 1, __STUB__test), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("exec", new ClrStubFunction(Engine.FunctionInstancePrototype, "exec", 1, __STUB__exec), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
 			};
 		}
 

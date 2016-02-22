@@ -45,11 +45,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Parses the JSON source text and transforms it into a value.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="text"> The JSON text to parse. </param>
         /// <param name="reviver"> A function that will be called for each value. </param>
         /// <returns> The value of the JSON text. </returns>
         [JSInternalFunction(Name = "parse", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static object Parse(ScriptEngine engine, string text, [DefaultParameterValue(null)] object reviver = null)
+        public static object Parse(ScriptEngine engine, string text, object reviver = null)
         {
             var parser = new JSONParser(engine, new JSONLexer(engine, new System.IO.StringReader(text)));
             parser.ReviverFunction = reviver as FunctionInstance;
@@ -59,6 +60,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Serializes a value into a JSON string.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="value"> The value to serialize. </param>
         /// <param name="replacer"> Either a function that can transform each value before it is
         /// serialized, or an array of the names of the properties to serialize. </param>
@@ -66,7 +68,7 @@ namespace Jurassic.Library
         /// that is used for indentation. </param>
         /// <returns> The JSON string representing the value. </returns>
         [JSInternalFunction(Name = "stringify", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static string Stringify(ScriptEngine engine, object value, [DefaultParameterValue(null)] object replacer = null, [DefaultParameterValue(null)] object spacer = null)
+        public static string Stringify(ScriptEngine engine, object value, object replacer = null, object spacer = null)
         {
             var serializer = new JSONSerializer(engine);
 

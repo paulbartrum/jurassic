@@ -9,7 +9,6 @@ namespace Jurassic.Library
     [Serializable]
     public partial class FunctionConstructor : ClrStubFunction
     {
-
         //     INITIALIZATION
         //_________________________________________________________________________________________
 
@@ -19,25 +18,12 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="instancePrototype"> The prototype for instances created by this function. </param>
         internal FunctionConstructor(ObjectInstance prototype, FunctionInstance instancePrototype)
-            : base(prototype, "Function", 1, instancePrototype, __STUB__Call, __STUB__Construct)
-        {
-        }
-
-        /// <summary>
-        /// Sets up object properties.  This must be done after the constructor due to dependency chain issues.
-        /// </summary>
-        internal void InitializeProperties()
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>(3);
-            AddFunctionProperties(properties);
+            InitializeConstructorProperties(properties, "Function", 1, instancePrototype);
             FastSetProperties(properties);
-
-            // Initialize the prototype properties.
-            var instancePrototype = (FunctionInstance)InstancePrototype;
-            properties = instancePrototype.GetDeclarativeProperties();
-            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
-            instancePrototype.FastSetProperties(properties);
         }
 
 

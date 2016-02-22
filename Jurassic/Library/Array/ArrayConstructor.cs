@@ -18,18 +18,12 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal ArrayConstructor(ObjectInstance prototype)
-            : base(prototype, "Array", 1, new ArrayInstance(prototype.Engine.Object.InstancePrototype, 0, 0), __STUB__Call, __STUB__Construct)
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties();
-            AddFunctionProperties(properties);
+            InitializeConstructorProperties(properties, "Array", 1, new ArrayInstance(this));
             FastSetProperties(properties);
-
-            // Initialize the prototype properties.
-            var instancePrototype = (ArrayInstance)InstancePrototype;
-            properties = instancePrototype.GetDeclarativeProperties();
-            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
-            instancePrototype.FastSetProperties(properties);
         }
 
 

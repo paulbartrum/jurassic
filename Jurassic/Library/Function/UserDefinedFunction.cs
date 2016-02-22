@@ -82,29 +82,6 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Creates an empty function that is used as the prototype for all the built-in
-        /// global function objects (Object, Function, Number, etc).
-        /// </summary>
-        /// <param name="prototype"> The prototype of the function. </param>
-        /// <returns> An empty function that is used as the prototype for all the built-in
-        /// global function objects. </returns>
-        internal static UserDefinedFunction CreateEmptyFunction(ObjectInstance prototype)
-        {
-            return new UserDefinedFunction(prototype);
-        }
-
-        /// <summary>
-        /// Creates an empty function.
-        /// </summary>
-        /// <param name="prototype"> The next object in the prototype chain. </param>
-        private UserDefinedFunction(ObjectInstance prototype)
-            : base(prototype)
-        {
-            var body = new FunctionDelegate((engine, scope, functionObject, thisObject, argumentValues) => Undefined.Value);
-            Init("Empty", new string[0], this.Engine.CreateGlobalScope(), "return undefined", new GeneratedMethod(body, null), true, false);
-        }
-
-        /// <summary>
         /// Initializes a user-defined function.
         /// </summary>
         /// <param name="name"> The name of the function. </param>

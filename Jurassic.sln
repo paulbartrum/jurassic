@@ -10,8 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Documentation\ECMA-335 (CLI).pdf = Documentation\ECMA-335 (CLI).pdf
 		NuGet\Jurassic.nuspec = NuGet\Jurassic.nuspec
 		LICENSE.txt = LICENSE.txt
-		Performance1.psess = Performance1.psess
-		Performance2.psess = Performance2.psess
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unit Tests", "Unit Tests\Unit Tests.csproj", "{B0D0F980-2741-4D85-9D82-7F09ED470EB1}"

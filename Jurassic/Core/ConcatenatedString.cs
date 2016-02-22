@@ -36,6 +36,7 @@ namespace Jurassic
         /// Creates a new ConcatenatedString instance by concatenating the given strings.
         /// </summary>
         /// <param name="left"> The left-most string to concatenate. </param>
+        /// <param name="right"> The right-most string to concatenate. </param>
         public ConcatenatedString(string left, string right)
         {
             if (left == null)

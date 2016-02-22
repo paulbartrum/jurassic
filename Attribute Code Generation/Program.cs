@@ -47,6 +47,8 @@ namespace Attribute_Code_Generation
                         memberCollector.JSFields.Any() == false)
                         continue;
 
+                    Console.WriteLine($"Generating stubs for {classSyntax.Identifier.ToString()}");
+
                     outputFile = true;
                     var methodGroups = JSMethodGroup.FromMethods(memberCollector.JSInternalFunctionMethods);
 
@@ -57,7 +59,7 @@ namespace Attribute_Code_Generation
                     if (memberCollector.JSInternalFunctionMethods.Any() ||
                         memberCollector.JSFields.Any())
                     {
-                        output.AppendLine("\t\tinternal new List<PropertyNameAndValue> GetDeclarativeProperties()");
+                        output.AppendLine("\t\tprivate List<PropertyNameAndValue> GetDeclarativeProperties()");
                         output.AppendLine("\t\t{");
                         output.AppendLine($"\t\t\treturn new List<PropertyNameAndValue>({memberCollector.JSInternalFunctionMethods.Count + memberCollector.JSFields.Count + 4})");
                         output.AppendLine("\t\t\t{");
@@ -72,7 +74,7 @@ namespace Attribute_Code_Generation
                         foreach (var methodGroup in methodGroups)
                         {
                             output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{methodGroup.JSName}\", " +
-                                $"new ClrStubFunction(this.Engine.Function.InstancePrototype, \"{methodGroup.JSName}\", " +
+                                $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"{methodGroup.JSName}\", " +
                                 $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
                         }
                         output.AppendLine("\t\t\t};");

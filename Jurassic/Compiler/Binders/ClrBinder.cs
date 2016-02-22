@@ -20,7 +20,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new ClrBinder instance.
         /// </summary>
-        /// <param name="targetMethods"> A method to bind to. </param>
+        /// <param name="targetMethod"> A method to bind to. </param>
         public ClrBinder(MethodBase targetMethod)
             : this(new BinderMethod[] { new BinderMethod(targetMethod) })
         {

@@ -10,7 +10,7 @@ namespace Jurassic.Library
 
 	public partial class MathObject
 	{
-		internal new List<PropertyNameAndValue> GetDeclarativeProperties()
+		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
 			return new List<PropertyNameAndValue>(30)
 			{
@@ -22,24 +22,24 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("PI", PI, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("SQRT1_2", SQRT1_2, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("SQRT2", SQRT2, PropertyAttributes.Sealed),
-				new PropertyNameAndValue("abs", new ClrStubFunction(this.Engine.Function.InstancePrototype, "abs", 1, __STUB__abs), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("acos", new ClrStubFunction(this.Engine.Function.InstancePrototype, "acos", 1, __STUB__acos), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("asin", new ClrStubFunction(this.Engine.Function.InstancePrototype, "asin", 1, __STUB__asin), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("atan", new ClrStubFunction(this.Engine.Function.InstancePrototype, "atan", 1, __STUB__atan), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("atan2", new ClrStubFunction(this.Engine.Function.InstancePrototype, "atan2", 2, __STUB__atan2), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("ceil", new ClrStubFunction(this.Engine.Function.InstancePrototype, "ceil", 1, __STUB__ceil), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("cos", new ClrStubFunction(this.Engine.Function.InstancePrototype, "cos", 1, __STUB__cos), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("exp", new ClrStubFunction(this.Engine.Function.InstancePrototype, "exp", 1, __STUB__exp), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("floor", new ClrStubFunction(this.Engine.Function.InstancePrototype, "floor", 1, __STUB__floor), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("log", new ClrStubFunction(this.Engine.Function.InstancePrototype, "log", 1, __STUB__log), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("max", new ClrStubFunction(this.Engine.Function.InstancePrototype, "max", 2, __STUB__max), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("min", new ClrStubFunction(this.Engine.Function.InstancePrototype, "min", 2, __STUB__min), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("pow", new ClrStubFunction(this.Engine.Function.InstancePrototype, "pow", 2, __STUB__pow), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("random", new ClrStubFunction(this.Engine.Function.InstancePrototype, "random", 0, __STUB__random), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("round", new ClrStubFunction(this.Engine.Function.InstancePrototype, "round", 1, __STUB__round), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sin", new ClrStubFunction(this.Engine.Function.InstancePrototype, "sin", 1, __STUB__sin), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sqrt", new ClrStubFunction(this.Engine.Function.InstancePrototype, "sqrt", 1, __STUB__sqrt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("tan", new ClrStubFunction(this.Engine.Function.InstancePrototype, "tan", 1, __STUB__tan), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("abs", new ClrStubFunction(Engine.FunctionInstancePrototype, "abs", 1, __STUB__abs), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("acos", new ClrStubFunction(Engine.FunctionInstancePrototype, "acos", 1, __STUB__acos), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("asin", new ClrStubFunction(Engine.FunctionInstancePrototype, "asin", 1, __STUB__asin), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("atan", new ClrStubFunction(Engine.FunctionInstancePrototype, "atan", 1, __STUB__atan), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("atan2", new ClrStubFunction(Engine.FunctionInstancePrototype, "atan2", 2, __STUB__atan2), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("ceil", new ClrStubFunction(Engine.FunctionInstancePrototype, "ceil", 1, __STUB__ceil), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("cos", new ClrStubFunction(Engine.FunctionInstancePrototype, "cos", 1, __STUB__cos), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("exp", new ClrStubFunction(Engine.FunctionInstancePrototype, "exp", 1, __STUB__exp), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("floor", new ClrStubFunction(Engine.FunctionInstancePrototype, "floor", 1, __STUB__floor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("log", new ClrStubFunction(Engine.FunctionInstancePrototype, "log", 1, __STUB__log), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("max", new ClrStubFunction(Engine.FunctionInstancePrototype, "max", 2, __STUB__max), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("min", new ClrStubFunction(Engine.FunctionInstancePrototype, "min", 2, __STUB__min), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("pow", new ClrStubFunction(Engine.FunctionInstancePrototype, "pow", 2, __STUB__pow), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("random", new ClrStubFunction(Engine.FunctionInstancePrototype, "random", 0, __STUB__random), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("round", new ClrStubFunction(Engine.FunctionInstancePrototype, "round", 1, __STUB__round), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sin", new ClrStubFunction(Engine.FunctionInstancePrototype, "sin", 1, __STUB__sin), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sqrt", new ClrStubFunction(Engine.FunctionInstancePrototype, "sqrt", 1, __STUB__sqrt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("tan", new ClrStubFunction(Engine.FunctionInstancePrototype, "tan", 1, __STUB__tan), PropertyAttributes.NonEnumerable),
 			};
 		}
 

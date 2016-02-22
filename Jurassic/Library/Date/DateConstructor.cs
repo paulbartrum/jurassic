@@ -18,18 +18,12 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal DateConstructor(ObjectInstance prototype)
-            : base(prototype, "Date", 7, new DateInstance(prototype.Engine.Object.InstancePrototype, double.NaN), __STUB__Call, __STUB__Construct)
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties();
-            AddFunctionProperties(properties);
+            InitializeConstructorProperties(properties, "Date", 7, new DateInstance(this));
             FastSetProperties(properties);
-
-            // Initialize the prototype properties.
-            var instancePrototype = (DateInstance)InstancePrototype;
-            properties = instancePrototype.GetDeclarativeProperties();
-            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
-            instancePrototype.FastSetProperties(properties);
         }
 
 
@@ -87,8 +81,8 @@ namespace Jurassic.Library
         /// <remarks>
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        public DateInstance Construct(int year, int month, [DefaultParameterValue(1)] int day = 1, [DefaultParameterValue(0)] int hour = 0,
-            [DefaultParameterValue(0)] int minute = 0, [DefaultParameterValue(0)] int second = 0, [DefaultParameterValue(0)] int millisecond = 0)
+        public DateInstance Construct(int year, int month, int day = 1, int hour = 0,
+            int minute = 0, int second = 0, int millisecond = 0)
         {
             return new DateInstance(this.InstancePrototype, year, month, day, hour, minute, second, millisecond);
         }
@@ -170,8 +164,8 @@ namespace Jurassic.Library
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
         [JSInternalFunction(Name = "UTC")]
-        public static double UTC(int year, int month, [DefaultParameterValue(1)] int day = 1, [DefaultParameterValue(0)] int hour = 0,
-            [DefaultParameterValue(0)] int minute = 0, [DefaultParameterValue(0)] int second = 0, [DefaultParameterValue(0)] int millisecond = 0)
+        public static double UTC(int year, int month, int day = 1, int hour = 0,
+            int minute = 0, int second = 0, int millisecond = 0)
         {
             return DateInstance.UTC(year, month, day, hour, minute, second, millisecond);
         }

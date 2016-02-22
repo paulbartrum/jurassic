@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
+    /// <summary>
+    /// A set of flags which controls the accessibility of properties.
+    /// </summary>
     [Flags]
     public enum PropertyAttributes
     {

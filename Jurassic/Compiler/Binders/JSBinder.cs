@@ -225,7 +225,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The IL generator. </param>
         /// <param name="fromType"> The type to convert from. </param>
-        /// <param name="targetParameter"> The type to convert to and the default value, if there is one. </param>
+        /// <param name="argument"> The type and default value of the target parameter. </param>
         private static void EmitTypeConversion(ILGenerator generator, Type fromType, BinderArgument argument)
         {
             // Emit either the default value if there is one, otherwise emit "undefined".
@@ -296,7 +296,7 @@ namespace Jurassic.Compiler
         /// Pushes the result of converting <c>undefined</c> to the given type onto the stack.
         /// </summary>
         /// <param name="il"> The IL generator. </param>
-        /// <param name="targetParameter"> The type to convert to, and optionally a default value. </param>
+        /// <param name="argument"> The type to convert to, and optionally a default value. </param>
         private static void EmitUndefined(ILGenerator il, BinderArgument argument)
         {
             // Emit either the default value if there is one, otherwise emit "undefined".

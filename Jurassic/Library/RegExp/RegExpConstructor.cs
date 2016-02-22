@@ -21,20 +21,13 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal RegExpConstructor(ObjectInstance prototype)
-            : base(prototype, "RegExp", 2, new RegExpInstance(prototype.Engine.Object.InstancePrototype), __STUB__Call, __STUB__Construct)
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
-            var properties = GetDeclarativeProperties();
-            AddFunctionProperties(properties);
+            var properties = new List<PropertyNameAndValue>(3);
+            InitializeConstructorProperties(properties, "RegExp", 2, new RegExpInstance(this));
             AddDeprecatedProperties(properties);
             FastSetProperties(properties);
-
-            // Initialize the prototype properties.
-            var instancePrototype = (RegExpInstance)InstancePrototype;
-            properties = instancePrototype.GetDeclarativeProperties();
-            instancePrototype.AddProperties(properties);
-            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
-            instancePrototype.FastSetProperties(properties);
         }
 
 
@@ -334,9 +327,9 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets the value of RegExp.lastMatch and RegExp.$&.
+        /// Gets the value of RegExp.lastMatch and RegExp.$&amp;.
         /// </summary>
-        /// <returns> The value of RegExp.lastMatch and RegExp.$&. </returns>
+        /// <returns> The value of RegExp.lastMatch and RegExp.$&amp;. </returns>
         public string GetLastMatch()
         {
             if (this.lastMatch == null)
@@ -445,7 +438,7 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSCallFunction]
-        public RegExpInstance Call(object patternOrRegExp, [DefaultParameterValue(null)] string flags = null)
+        public RegExpInstance Call(object patternOrRegExp, string flags = null)
         {
             if (patternOrRegExp is RegExpInstance)
             {
@@ -475,7 +468,7 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSConstructorFunction]
-        public RegExpInstance Construct(object patternOrRegExp, [DefaultParameterValue(null)] string flags = null)
+        public RegExpInstance Construct(object patternOrRegExp, string flags = null)
         {
             if (patternOrRegExp is RegExpInstance)
             {

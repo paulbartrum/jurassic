@@ -20,42 +20,12 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
         internal ErrorConstructor(ObjectInstance prototype, string typeName)
-            : base(prototype, typeName, 1, GetInstancePrototype(prototype.Engine, typeName), __STUB__Call, __STUB__Construct)
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
-            var properties = GetDeclarativeProperties();
-            AddFunctionProperties(properties);
+            var properties = new List<PropertyNameAndValue>(3);
+            InitializeConstructorProperties(properties, typeName, 1, new ErrorInstance(this, typeName));
             FastSetProperties(properties);
-
-            // Initialize the prototype properties.
-            var instancePrototype = (ErrorInstance)InstancePrototype;
-            properties = instancePrototype.GetDeclarativeProperties();
-            properties.Add(new PropertyNameAndValue("name", typeName, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable));
-            instancePrototype.FastSetProperties(properties);
-        }
-
-        /// <summary>
-        /// Determine the instance prototype for the given error type.
-        /// </summary>
-        /// <param name="engine"> The script engine associated with this object. </param>
-        /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
-        /// <returns> The instance prototype. </returns>
-        private static ObjectInstance GetInstancePrototype(ScriptEngine engine, string typeName)
-        {
-            if (typeName == "Error")
-            {
-                // This constructor is for regular Error objects.
-                // Prototype chain: Error instance -> Error prototype -> Object prototype
-                return new ErrorInstance(engine.Object.InstancePrototype);
-            }
-            else
-            {
-                // This constructor is for derived Error objects like RangeError, etc.
-                // Prototype chain: XXXError instance -> XXXError prototype -> Error prototype -> Object prototype
-                return new ErrorInstance(engine.Error.InstancePrototype);
-            }
         }
 
 
@@ -69,7 +39,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="message"> A description of the error. </param>
         [JSCallFunction]
-        public ErrorInstance Call([DefaultParameterValue("")] string message = "")
+        public ErrorInstance Call(string message = "")
         {
             return new ErrorInstance(this.InstancePrototype, null, message);
         }
@@ -79,7 +49,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="message"> A description of the error. </param>
         [JSConstructorFunction]
-        public ErrorInstance Construct([DefaultParameterValue("")] string message = "")
+        public ErrorInstance Construct(string message = "")
         {
             return new ErrorInstance(this.InstancePrototype, null, message);
         }

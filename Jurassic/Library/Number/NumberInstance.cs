@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 
 namespace Jurassic.Library
@@ -22,6 +21,21 @@ namespace Jurassic.Library
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates a number instance for use as a prototype.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal NumberInstance(NumberConstructor constructor)
+            : base(constructor.Engine.Object.InstancePrototype)
+        {
+            this.value = 0;
+
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            FastSetProperties(properties);
+        }
 
         /// <summary>
         /// Creates a new Number instance and initializes it to the given value.
@@ -99,7 +113,7 @@ namespace Jurassic.Library
         /// If fractionDigits is not supplied or undefined, the toFixed method assumes the value
         /// is zero. </returns>
         [JSInternalFunction(Name = "toFixed")]
-        public string ToFixed([DefaultParameterValue(0)] int fractionDigits = 0)
+        public string ToFixed(int fractionDigits = 0)
         {
             // Check the parameter is within range.
             if (fractionDigits < 0 || fractionDigits > 20)
@@ -158,7 +172,7 @@ namespace Jurassic.Library
         /// <param name="radix"> Specifies a radix for converting numeric values to strings. </param>
         /// <returns> The textual representation of the number. </returns>
         [JSInternalFunction(Name = "toString")]
-        public string ToStringJS([DefaultParameterValue(10)] int radix = 10)
+        public string ToStringJS(int radix = 10)
         {
             // Check the parameter is in range.
             if (radix < 2 || radix > 36)

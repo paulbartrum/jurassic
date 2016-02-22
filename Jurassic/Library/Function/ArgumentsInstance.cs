@@ -113,7 +113,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Used to retrieve the value of an argument.
         /// </summary>
-        /// <param name="scriptEngine"> The associated script engine. </param>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="scope"> The scope (global or eval context) or the parent scope (function
         /// context). </param>
         /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
@@ -129,7 +129,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Used to set the value of an argument.
         /// </summary>
-        /// <param name="scriptEngine"> The associated script engine. </param>
+        /// <param name="engine"> The associated script engine. </param>
         /// <param name="scope"> The scope (global or eval context) or the parent scope (function
         /// context). </param>
         /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>

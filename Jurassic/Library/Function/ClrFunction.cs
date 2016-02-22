@@ -153,7 +153,7 @@ namespace Jurassic.Library
             //this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
         }
 
-        
+
 
         //     OVERRIDES
         //_________________________________________________________________________________________
@@ -162,7 +162,7 @@ namespace Jurassic.Library
         /// Calls this function, passing in the given "this" value and zero or more arguments.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
-        /// <param name="argumentValues"> An array of argument values. </param>
+        /// <param name="arguments"> An array of argument values. </param>
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] arguments)
         {

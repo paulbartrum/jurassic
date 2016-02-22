@@ -325,7 +325,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Indicates that the given temporary variable is no longer needed.
         /// </summary>
-        /// <param name="variable"> The temporary variable created using CreateTemporaryVariable(). </param>
+        /// <param name="temporaryVariable"> The temporary variable created using CreateTemporaryVariable(). </param>
         public void ReleaseTemporaryVariable(ILLocalVariable temporaryVariable)
         {
             if (temporaryVariable == null)

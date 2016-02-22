@@ -2,6 +2,9 @@
 
 namespace Jurassic.Library
 {
+    /// <summary>
+    /// A set of flags that controls stub generation.
+    /// </summary>
     [Flags]
     public enum JSFunctionFlags
     {
