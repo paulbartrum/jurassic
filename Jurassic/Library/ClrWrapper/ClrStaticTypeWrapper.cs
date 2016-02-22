@@ -130,9 +130,19 @@ namespace Jurassic.Library
         /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {
-            if (this.constructBinder == null)
-                throw new JavaScriptException(this.Engine, "TypeError", string.Format("The type '{0}' has no public constructors", this.WrappedType));
-            var result = this.constructBinder.Call(this.Engine, this, argumentValues);
+            object result;
+
+            if (argumentValues.Length == 0 && this.WrappedType.IsValueType)
+            {
+                result = Activator.CreateInstance(this.WrappedType);
+            }
+            else
+            {
+                if (this.constructBinder == null)
+                    throw new JavaScriptException(this.Engine, "TypeError", string.Format("The type '{0}' has no public constructors", this.WrappedType));
+                result = this.constructBinder.Call(this.Engine, this, argumentValues);
+            }
+
             if (result is ObjectInstance)
                 return (ObjectInstance)result;
             return new ClrInstanceWrapper(this.Engine, result);
