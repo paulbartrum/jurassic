@@ -42,10 +42,54 @@ namespace Benchmarker
             }
         }
 
+        // Init took 61.3242ms
+        // Init took 102.1342ms
+        // 
+        // 3d-cube - 331.0ms ± 2.4ms
+        // 3d-morph - 168.8ms ± 5.9ms
+        // 3d-raytrace - 343.2ms ± 10.9ms
+        // access-binary-trees - 213.3ms ± 1.2ms
+        // access-fannkuch - 391.3ms ± 1.2ms
+        // access-nbody - 177.3ms ± 2.1ms
+        // access-nsieve - 336.9ms ± 19.2ms
+        // bitops-3bit-bits-in-byte - 24.4ms ± 0.9ms
+        // bitops-bits-in-byte - 22.9ms ± 0.2ms
+        // bitops-bitwise-and - 40.5ms ± 0.4ms
+        // bitops-nsieve-bits - 222.6ms ± 2.5ms
+        // controlflow-recursive - 39.4ms ± 1.4ms
+        // crypto-aes - 310.7ms ± 2.2ms
+        // crypto-md5 - 202.9ms ± 1.1ms
+        // crypto-sha1 - 113.4ms ± 1.6ms
+        // date-format-tofte - 2,508.9ms ± 14.3ms
+        // date-format-xparb - 143.6ms ± 1.6ms
+        // math-cordic - 122.5ms ± 1.5ms
+        // math-partial-sums - 65.9ms ± 0.2ms
+        // math-spectral-norm - 104.9ms ± 0.9ms
+        // regexp-dna - 465.3ms ± 6.0ms
+        // string-base64 - 260.1ms ± 0.8ms
+        // string-fasta - 176.8ms ± 1.1ms
+        // string-tagcloud - 416.7ms ± 2.3ms
+        // string-unpack-code - 555.2ms ± 22.6ms
+        // string-validate-input - 163.0ms ± 6.9ms
+        // Total elapsed time: 7,921.4ms
+
         static void Main(string[] args)
         {
             // Up the thread priority so nothing gets in the way of the benchmarking.
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+
+            // 61.3242ms
+            var stopWatch = System.Diagnostics.Stopwatch.StartNew();
+            var initEngine = new ScriptEngine();
+            Console.WriteLine($"Init took {stopWatch.Elapsed.TotalMilliseconds}ms");
+
+            // 144.1342ms.
+            stopWatch = System.Diagnostics.Stopwatch.StartNew();
+            for (int i = 0; i < 1000; i++)
+            {
+                initEngine = new ScriptEngine();
+            }
+            Console.WriteLine($"Init x 1000 took {stopWatch.Elapsed.TotalMilliseconds}ms");
 
             // Sunspider.
             var files = Directory.GetFiles(@"..\..\Files\sunspider-0.9.1", "*.js");
