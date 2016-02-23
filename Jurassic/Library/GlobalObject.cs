@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// Represents functions and properties within the global scope.
     /// </summary>
     [Serializable]
-    public class GlobalObject : ObjectInstance
+    public partial class GlobalObject : ObjectInstance
     {
 
         //     INITIALIZATION
@@ -21,11 +21,19 @@ namespace Jurassic.Library
         internal GlobalObject(ObjectInstance prototype)
             : base(prototype)
         {
-            // Add the global constants.
+        }
+
+        /// <summary>
+        /// Retrieves a list of properties to apply to the global object.
+        /// </summary>
+        internal List<PropertyNameAndValue> GetGlobalProperties()
+        {
             // Infinity, NaN and undefined are read-only in ECMAScript 5.
-            this.FastSetProperty("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed);
-            this.FastSetProperty("NaN", double.NaN, PropertyAttributes.Sealed);
-            this.FastSetProperty("undefined", Undefined.Value, PropertyAttributes.Sealed);
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("NaN", double.NaN, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("undefined", Undefined.Value, PropertyAttributes.Sealed));
+            return properties;
         }
 
 
@@ -57,6 +65,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Decodes a string that was encoded with the encodeURI function.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="input"> The associated script engine. </param>
         /// <returns> The string, as it was before encoding. </returns>
         [JSInternalFunction(Name = "decodeURI", Flags = JSFunctionFlags.HasEngineParameter)]
@@ -231,7 +240,7 @@ namespace Jurassic.Library
         /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
         /// character, at which point parsing stops.  No error is returned in this case. </remarks>
         [JSInternalFunction(Name = "parseInt", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static double ParseInt(ScriptEngine engine, string input, [DefaultParameterValue(0.0)] double radix = 0)
+        public static double ParseInt(ScriptEngine engine, string input, double radix = 0.0)
         {
             // Check for a valid radix.
             // Note: this is the only function that uses TypeConverter.ToInt32() for parameter
@@ -303,7 +312,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The script engine used to create the error objects. </param>
         /// <param name="input"> The string to decode. </param>
-        /// <param name="unescapedSet"> A string containing the set of characters that should not
+        /// <param name="reservedSet"> A string containing the set of characters that should not
         /// be escaped.  Alphanumeric characters should not be included. </param>
         /// <returns> A copy of the given string with the escape sequences decoded. </returns>
         private static string Decode(ScriptEngine engine, string input, bool[] reservedSet)

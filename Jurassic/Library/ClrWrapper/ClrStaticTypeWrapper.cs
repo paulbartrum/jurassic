@@ -44,8 +44,6 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="type"> The CLR type to wrap. </param>
-        /// <param name="flags"> <c>BindingFlags.Static</c> to populate static methods;
-        /// <c>BindingFlags.Instance</c> to populate instance methods. </param>
         private ClrStaticTypeWrapper(ScriptEngine engine, Type type)
             : base(engine, GetPrototypeObject(engine, type))
         {
@@ -68,9 +66,9 @@ namespace Jurassic.Library
                 }
             }
 
-            this.FastSetProperty("name", type.Name);
+            this.FastSetProperty("name", type.Name, PropertyAttributes.Configurable);
             if (this.constructBinder != null)
-                this.FastSetProperty("length", this.constructBinder.FunctionLength);
+                this.FastSetProperty("length", this.constructBinder.FunctionLength, PropertyAttributes.Configurable);
 
             // Populate the fields, properties and methods.
             PopulateMembers(this, type, BindingFlags.Static);
@@ -132,9 +130,19 @@ namespace Jurassic.Library
         /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {
-            if (this.constructBinder == null)
-                throw new JavaScriptException(this.Engine, "TypeError", string.Format("The type '{0}' has no public constructors", this.WrappedType));
-            var result = this.constructBinder.Call(this.Engine, this, argumentValues);
+            object result;
+
+            if (argumentValues.Length == 0 && this.WrappedType.IsValueType)
+            {
+                result = Activator.CreateInstance(this.WrappedType);
+            }
+            else
+            {
+                if (this.constructBinder == null)
+                    throw new JavaScriptException(this.Engine, "TypeError", string.Format("The type '{0}' has no public constructors", this.WrappedType));
+                result = this.constructBinder.Call(this.Engine, this, argumentValues);
+            }
+
             if (result is ObjectInstance)
                 return (ObjectInstance)result;
             return new ClrInstanceWrapper(this.Engine, result);

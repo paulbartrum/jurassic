@@ -464,6 +464,8 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 0, 0, 5)), Evaluate("x.valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 0, 0, 7, 4)), Evaluate("x.setSeconds(7, 4)"));
             Assert.AreEqual(double.NaN, Evaluate("x.setSeconds(NaN)"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 7, 0)), Evaluate("new Date('24 Apr 2010 23:59:57').setSeconds(7, null)"));
+            Assert.AreEqual(double.NaN, Evaluate("new Date('24 Apr 2010 23:59:57').setSeconds(7, undefined)"));
             Assert.AreEqual(2, Evaluate("x.setSeconds.length"));
         }
 

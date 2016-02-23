@@ -1467,7 +1467,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Parses a javascript expression.
         /// </summary>
-        /// <param name="endToken"> A token that indicates the end of the expression. </param>
+        /// <param name="endTokens"> One or more tokens that indicate the end of the expression. </param>
         /// <returns> An expression tree that represents the expression. </returns>
         private Expression ParseExpression(params Token[] endTokens)
         {

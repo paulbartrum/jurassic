@@ -133,7 +133,6 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Converts the statement to a string.
         /// </summary>
-        /// <param name="indentLevel"> The number of tabs to include before the statement. </param>
         /// <returns> A string representing this statement. </returns>
         public override string ToString()
         {

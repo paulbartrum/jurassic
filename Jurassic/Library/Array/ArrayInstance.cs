@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents an instance of the JavaScript Array object.
     /// </summary>
     [Serializable]
-    public class ArrayInstance : ObjectInstance
+    public partial class ArrayInstance : ObjectInstance
     {
         // The array, if it is dense.
         private object[] dense;
@@ -25,6 +25,22 @@ namespace Jurassic.Library
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates an array instance for use as a prototype.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal ArrayInstance(ArrayConstructor constructor)
+            : base(constructor.Engine.Object.InstancePrototype)
+        {
+            this.dense = new object[0];
+
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("length", -1, PropertyAttributes.Writable | PropertyAttributes.IsLengthProperty));
+            FastSetProperties(properties);
+        }
 
         /// <summary>
         /// Creates a new array with the given length and capacity.
@@ -231,7 +247,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a descriptor for the property with the given array index.
         /// </summary>
-        /// <param name="propertyName"> The array index of the property. </param>
+        /// <param name="index"> The array index of the property. </param>
         /// <returns> A property descriptor containing the property value and attributes. </returns>
         /// <remarks> The prototype chain is not searched. </remarks>
         public override PropertyDescriptor GetOwnPropertyDescriptor(uint index)
@@ -387,7 +403,7 @@ namespace Jurassic.Library
                     {
                         object arrayElementValue = this.dense[i];
                         if (arrayElementValue != null)
-                            yield return new PropertyNameAndValue(i.ToString(), new PropertyDescriptor(arrayElementValue, PropertyAttributes.FullAccess));
+                            yield return new PropertyNameAndValue(i.ToString(), arrayElementValue, PropertyAttributes.FullAccess);
                     }
                 }
                 else
@@ -398,7 +414,7 @@ namespace Jurassic.Library
                         {
                             object arrayElementValue = this.sparse[i];
                             if (arrayElementValue != null)
-                                yield return new PropertyNameAndValue(i.ToString(), new PropertyDescriptor(arrayElementValue, PropertyAttributes.FullAccess));
+                                yield return new PropertyNameAndValue(i.ToString(), arrayElementValue, PropertyAttributes.FullAccess);
                         }
                 }
 
@@ -535,7 +551,7 @@ namespace Jurassic.Library
         /// <param name="separator"> The string to use as a separator. </param>
         /// <returns> A string that consists of the element values separated by the separator string. </returns>
         [JSInternalFunction(Name = "join", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Join(ObjectInstance thisObj, [DefaultParameterValue(",")] string separator = ",")
+        public static string Join(ObjectInstance thisObj, string separator = ",")
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -570,8 +586,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array to operate on. </param>
         /// <returns> The last element from the array. </returns>
-        [JSInternalFunction(Name = "pop", Flags = JSFunctionFlags.HasThisObject)]
-        public static object Pop([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj)
+        [JSInternalFunction(Name = "pop", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static object Pop(ObjectInstance thisObj)
         {
             // If the "this" object is an array, use the fast version of this method.
             if (thisObj is ArrayInstance)
@@ -657,8 +673,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="items"> The items to append to the array. </param>
-        [JSInternalFunction(Name = "push", Flags = JSFunctionFlags.HasThisObject)]
-        public static double Push([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, params object[] items)
+        [JSInternalFunction(Name = "push", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static double Push(ObjectInstance thisObj, params object[] items)
         {
             // If the "this" object is an array, use the fast version of this method.
             if (thisObj is ArrayInstance && items.Length == 1)
@@ -735,8 +751,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> The array that is being operated on. </returns>
-        [JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.HasThisObject)]
-        public static ObjectInstance Reverse([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj)
+        [JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static ObjectInstance Reverse(ObjectInstance thisObj)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -768,8 +784,8 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> The first element in the array. </returns>
-        [JSInternalFunction(Name = "shift", Flags = JSFunctionFlags.HasThisObject)]
-        public static object Shift([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj)
+        [JSInternalFunction(Name = "shift", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static object Shift(ObjectInstance thisObj)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -816,7 +832,7 @@ namespace Jurassic.Library
         /// array is returned. </param>
         /// <returns> A section of an array. </returns>
         [JSInternalFunction(Name = "slice", Flags = JSFunctionFlags.HasThisObject, Length = 2)]
-        public static ArrayInstance Slice(ObjectInstance thisObj, int start, [DefaultParameterValue(int.MaxValue)] int end = int.MaxValue)
+        public static ArrayInstance Slice(ObjectInstance thisObj, int start, int end = int.MaxValue)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -853,8 +869,8 @@ namespace Jurassic.Library
         /// less than the second argument, zero if the arguments are equal or a number greater than
         /// zero if the first argument is greater than Defaults to an ascending ASCII ordering. </param>
         /// <returns> The array that was sorted. </returns>
-        [JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.HasThisObject)]
-        public static ObjectInstance Sort([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, [DefaultParameterValue(null)] FunctionInstance comparisonFunction = null)
+        [JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static ObjectInstance Sort(ObjectInstance thisObj, FunctionInstance comparisonFunction = null)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -921,8 +937,8 @@ namespace Jurassic.Library
         /// <param name="deleteCount"> The number of elements to delete. </param>
         /// <param name="items"> The items to insert. </param>
         /// <returns> An array containing the deleted elements, if any. </returns>
-        [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject, Length = 2)]
-        public static ArrayInstance Splice([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, int start, int deleteCount, params object[] items)
+        [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 2)]
+        public static ArrayInstance Splice(ObjectInstance thisObj, int start, int deleteCount, params object[] items)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -976,8 +992,8 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="items"> The items to prepend. </param>
         /// <returns> The new length of the array. </returns>
-        [JSInternalFunction(Name = "unshift", Flags = JSFunctionFlags.HasThisObject)]
-        public static uint Unshift([JSParameter(JSParameterFlags.Mutated)] ObjectInstance thisObj, params object[] items)
+        [JSInternalFunction(Name = "unshift", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
+        public static uint Unshift(ObjectInstance thisObj, params object[] items)
         {
             // If the "this" object is an array and the array is dense, use the fast version of this method.
             var array = thisObj as ArrayInstance;
@@ -1113,7 +1129,7 @@ namespace Jurassic.Library
         /// <returns> The index of the given search element in the array, or <c>-1</c> if the
         /// element wasn't found. </returns>
         [JSInternalFunction(Name = "indexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static int IndexOf(ObjectInstance thisObj, object searchElement, [DefaultParameterValue(0)] int fromIndex = 0)
+        public static int IndexOf(ObjectInstance thisObj, object searchElement, int fromIndex = 0)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -1146,7 +1162,6 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="searchElement"> The value to search for. </param>
-        /// <param name="fromIndex"> The array index to start searching. </param>
         /// <returns> The index of the given search element in the array, or <c>-1</c> if the
         /// element wasn't found. </returns>
         [JSInternalFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
@@ -1197,7 +1212,7 @@ namespace Jurassic.Library
         /// defined function.
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
-        /// <param name="function"> A user-defined function that is called for each element in the
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
         /// array.  This function is called with three arguments: the value of the element, the
         /// index of the element, and the array that is being operated on.  The function should
         /// return <c>true</c> or <c>false</c>. </param>
@@ -1205,7 +1220,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if every element of the array matches criteria defined by the
         /// given user-defined function; <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "every", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool Every(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] ObjectInstance context = null)
+        public static bool Every(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
@@ -1239,7 +1254,7 @@ namespace Jurassic.Library
         /// user-defined function.
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
-        /// <param name="function"> A user-defined function that is called for each element in the
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
         /// array.  This function is called with three arguments: the value of the element, the
         /// index of the element, and the array that is being operated on.  The function should
         /// return <c>true</c> or <c>false</c>. </param>
@@ -1247,7 +1262,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if at least one element of the array matches criteria defined by
         /// the given user-defined function; <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "some", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool Some(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] ObjectInstance context = null)
+        public static bool Some(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
@@ -1280,12 +1295,12 @@ namespace Jurassic.Library
         /// Calls the given user-defined function once per element in the array.
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
-        /// <param name="function"> A user-defined function that is called for each element in the
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
         /// array.  This function is called with three arguments: the value of the element, the
         /// index of the element, and the array that is being operated on. </param>
         /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
         [JSInternalFunction(Name = "forEach", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static void ForEach(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] ObjectInstance context = null)
+        public static void ForEach(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
@@ -1325,7 +1340,7 @@ namespace Jurassic.Library
         /// <returns> A new array with the results of calling the given function on every element
         /// in the array. </returns>
         [JSInternalFunction(Name = "map", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static ArrayInstance Map(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] ObjectInstance context = null)
+        public static ArrayInstance Map(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
@@ -1420,7 +1435,7 @@ namespace Jurassic.Library
         /// <returns> A copy of this array but with only those elements which produce <c>true</c>
         /// when passed to the provided function. </returns>
         [JSInternalFunction(Name = "filter", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static ArrayInstance Filter(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] ObjectInstance context = null)
+        public static ArrayInstance Filter(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
@@ -1468,7 +1483,7 @@ namespace Jurassic.Library
         /// <returns> The accumulated value returned from the last invocation of the callback
         /// function. </returns>
         [JSInternalFunction(Name = "reduce", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static object Reduce(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] object initialValue = null)
+        public static object Reduce(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
@@ -1530,7 +1545,7 @@ namespace Jurassic.Library
         /// <returns> The accumulated value returned from the last invocation of the callback
         /// function. </returns>
         [JSInternalFunction(Name = "reduceRight", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static object ReduceRight(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] object initialValue = null)
+        public static object ReduceRight(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)

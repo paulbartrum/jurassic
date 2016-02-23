@@ -20,8 +20,6 @@ namespace Jurassic.TestSuite
             }
 
             var timer = System.Diagnostics.Stopwatch.StartNew();
-            var engine = new Jurassic.ScriptEngine();
-            Console.WriteLine("Start-up time: {0}ms", timer.ElapsedMilliseconds);
             using (var testSuite = new TestSuite(testSuiteFilesDir))
             {
                 //testSuite.RunInSandbox = true;

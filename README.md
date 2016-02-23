@@ -1,4 +1,4 @@
-# Jurassic
+![Jurassic](https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/logo.png)
 
 ## What is Jurassic?
 

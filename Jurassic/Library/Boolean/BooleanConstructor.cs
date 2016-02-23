@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents the built-in javascript Boolean object.
     /// </summary>
     [Serializable]
-    public class BooleanConstructor : ClrFunction
+    public partial class BooleanConstructor : ClrStubFunction
     {
 
         //     INITIALIZATION
@@ -18,8 +18,12 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal BooleanConstructor(ObjectInstance prototype)
-            : base(prototype, "Boolean", new BooleanInstance(prototype.Engine.Object.InstancePrototype, false))
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            // Initialize the constructor properties.
+            var properties = new List<PropertyNameAndValue>(3);
+            InitializeConstructorProperties(properties, "Boolean", 1, new BooleanInstance(this));
+            FastSetProperties(properties);
         }
 
 
@@ -43,7 +47,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="value"> The value to initialize to.  Defaults to false. </param>
         [JSConstructorFunction]
-        public BooleanInstance Construct([DefaultParameterValue(false)] bool value = false)
+        public BooleanInstance Construct(bool value = false)
         {
             return new BooleanInstance(this.InstancePrototype, value);
         }

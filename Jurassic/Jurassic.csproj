@@ -124,15 +124,29 @@
     <Compile Include="Core\ScriptSource\StringScriptSource.cs" />
     <Compile Include="Core\ScriptSource\FileScriptSource.cs" />
     <Compile Include="Core\ScriptSource\ScriptSource.cs" />
+    <Compile Include="Library\Array\ArrayConstructor.g.cs" />
+    <Compile Include="Library\Array\ArrayInstance.g.cs" />
+    <Compile Include="Library\Boolean\BooleanConstructor.g.cs" />
+    <Compile Include="Library\Boolean\BooleanInstance.g.cs" />
     <Compile Include="Library\ClrWrapper\ClrInstanceWrapper.cs" />
     <Compile Include="Library\ClrWrapper\ClrStaticTypeWrapper.cs" />
     <Compile Include="Compiler\Binders\ClrBinder.cs" />
     <Compile Include="Library\ClrWrapper\ClrInstanceTypeWrapper.cs" />
+    <Compile Include="Library\Date\DateConstructor.g.cs" />
+    <Compile Include="Library\Date\DateInstance.g.cs" />
+    <Compile Include="Library\Error\ErrorConstructor.g.cs" />
+    <Compile Include="Library\Error\ErrorInstance.g.cs" />
+    <Compile Include="Library\FirebugConsole\FirebugConsole.g.cs" />
     <Compile Include="Library\FirebugConsole\StandardConsoleOutput.cs" />
     <Compile Include="Library\FirebugConsole\FirebugConsole.cs" />
     <Compile Include="Library\FirebugConsole\IFirebugConsoleOutput.cs" />
     <Compile Include="Library\Function\BoundFunction.cs" />
+    <Compile Include="Library\Function\ClrStubFunction.cs" />
+    <Compile Include="Library\Function\FunctionConstructor.g.cs" />
+    <Compile Include="Library\Function\FunctionInstance.g.cs" />
     <Compile Include="Library\Function\ThrowTypeErrorFunction.cs" />
+    <Compile Include="Library\GlobalObject.g.cs" />
+    <Compile Include="Library\JSON\JSONObject.g.cs" />
     <Compile Include="Library\JSON\JSONParser.cs" />
     <Compile Include="Library\JSON\JSONSerializer.cs" />
     <Compile Include="Library\JSON\JSONLexer.cs" />
@@ -152,11 +166,16 @@
     <Compile Include="Library\Date\DateParser.cs" />
     <Compile Include="Library\Function\ArgumentsInstance.cs" />
     <Compile Include="Library\Function\UserDefinedFunction.cs" />
+    <Compile Include="Library\MathObject.g.cs" />
+    <Compile Include="Library\Number\NumberConstructor.g.cs" />
+    <Compile Include="Library\Number\NumberInstance.g.cs" />
     <Compile Include="Library\Object\JSFunctionFlags.cs" />
     <Compile Include="Library\Function\ClrFunction.cs" />
     <Compile Include="Compiler\Binders\JSBinderMethod.cs" />
     <Compile Include="Compiler\Binders\JSBinder.cs" />
     <Compile Include="Library\JSON\JSONObject.cs" />
+    <Compile Include="Library\Object\ObjectConstructor.g.cs" />
+    <Compile Include="Library\Object\ObjectInstance.g.cs" />
     <Compile Include="Library\Object\PropertyAccessorValue.cs" />
     <Compile Include="Library\Object\SchemaProperty.cs" />
     <Compile Include="Library\Object\HiddenClassSchema.cs" />
@@ -188,7 +207,10 @@
     <Compile Include="Library\Object\ObjectConstructor.cs" />
     <Compile Include="Library\GlobalObject.cs" />
     <Compile Include="Library\RegExp\RegExpConstructor.cs" />
+    <Compile Include="Library\RegExp\RegExpConstructor.g.cs" />
     <Compile Include="Library\RegExp\RegExpInstance.cs" />
+    <Compile Include="Library\RegExp\RegExpInstance.g.cs" />
+    <Compile Include="Library\String\StringConstructor.g.cs" />
     <Compile Include="Library\String\StringInstance.cs" />
     <Compile Include="Library\Function\FunctionInstance.cs" />
     <Compile Include="Library\Date\DateConstructor.cs" />
@@ -199,14 +221,12 @@
     <Compile Include="Library\Number\NumberConstructor.cs" />
     <Compile Include="Library\MathObject.cs" />
     <Compile Include="Library\Object\ObjectInstance.cs" />
+    <Compile Include="Library\String\StringInstance.g.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Library\Object\Attributes.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Compiler\Emit\Optimizations.txt" />
-    <Content Include="License.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

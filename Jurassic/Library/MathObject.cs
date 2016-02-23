@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// Represents the built-in Math class that has mathematical constants and functions.
     /// </summary>
     [Serializable]
-    public class MathObject : ObjectInstance
+    public partial class MathObject : ObjectInstance
     {
 
         //     INITIALIZATION
@@ -21,6 +21,7 @@ namespace Jurassic.Library
         internal MathObject(ObjectInstance prototype)
             : base(prototype)
         {
+            FastSetProperties(GetDeclarativeProperties());
         }
 
 
@@ -148,8 +149,8 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns the counter-clockwise angle (in radians) from the X axis to the point (x,y).
         /// </summary>
-        /// <param name="number"> A numeric expression representing the cartesian x-coordinate. </param>
-        /// <param name="number"> A numeric expression representing the cartesian y-coordinate. </param>
+        /// <param name="x"> A numeric expression representing the cartesian x-coordinate. </param>
+        /// <param name="y"> A numeric expression representing the cartesian y-coordinate. </param>
         /// <returns> The angle (in radians) from the X axis to a point (x,y) (between -pi and pi). </returns>
         [JSInternalFunction(Name = "atan2")]
         public static double Atan2(double y, double x)

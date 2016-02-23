@@ -126,7 +126,10 @@ namespace Jurassic.Compiler
                     new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },                          // Parameter types of the generated method.
                     typeof(JSBinder),                                                                               // Owner type.
                     true);                                                                                          // Skips visibility checks.
-                generator = new DynamicILGenerator(dm);
+                if (Environment.Version.Major >= 4 && !ScriptEngine.IsMonoRuntime)
+                    generator = new DynamicILGenerator(dm);
+                else
+                    generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
             }
             else
             {

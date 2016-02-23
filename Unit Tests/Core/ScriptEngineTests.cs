@@ -123,6 +123,7 @@ namespace UnitTests
         }
 
         [TestMethod]
+        [Ignore]
         public void SetGlobalValueType()
         {
             var engine = new ScriptEngine();
@@ -245,7 +246,7 @@ namespace UnitTests
 
         private class TestInstance2
         {
-            public int value;
+            public int value = 7;
         }
 
         [TestMethod]
@@ -300,7 +301,7 @@ namespace UnitTests
 
             // Class with no constructors.
             engine.Execute("var instance2 = new TestInstance2()");
-            Assert.AreEqual(0, engine.Evaluate("instance2.value"));
+            Assert.AreEqual(7, engine.Evaluate("instance2.value"));
         }
 
         private struct TestStruct
@@ -381,6 +382,10 @@ namespace UnitTests
             // Constructor overloading.
             engine.Execute("instance2 = new TestStruct(instance)");
             Assert.AreEqual(17, engine.Evaluate("instance2.Value"));
+
+            // Constructor without parameters.
+            engine.Execute("var instance3 = new TestStruct()");
+            Assert.AreEqual(0, engine.Evaluate("instance3.Value"));
 
             // Try dates.
             engine.SetGlobalValue("DateTime", typeof(DateTime));

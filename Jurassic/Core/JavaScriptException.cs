@@ -63,6 +63,7 @@ namespace Jurassic
         /// <summary>
         /// Creates a new JavaScriptException instance.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="name"> The name of the error, e.g "RangeError". </param>
         /// <param name="message"> A description of the error. </param>
         /// <param name="innerException"> The exception that is the cause of the current exception,
@@ -77,6 +78,7 @@ namespace Jurassic
         /// <summary>
         /// Creates a new JavaScriptException instance.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="name"> The name of the error, e.g "RangeError". </param>
         /// <param name="message"> A description of the error. </param>
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
@@ -93,6 +95,7 @@ namespace Jurassic
         /// <summary>
         /// Creates a new JavaScriptException instance.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="name"> The name of the error, e.g "RangeError". </param>
         /// <param name="message"> A description of the error. </param>
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+
 
 namespace Jurassic.Library
 {
@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents the built-in javascript String object.
     /// </summary>
     [Serializable]
-    public class StringConstructor : ClrFunction
+    public partial class StringConstructor : ClrStubFunction
     {
         
         //     INITIALIZATION
@@ -18,8 +18,12 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal StringConstructor(ObjectInstance prototype)
-            : base(prototype, "String", new StringInstance(prototype.Engine.Object.InstancePrototype, string.Empty))
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            // Initialize the constructor properties.
+            var properties = GetDeclarativeProperties();
+            InitializeConstructorProperties(properties, "String", 1, new StringInstance(this));
+            FastSetProperties(properties);
         }
 
 
@@ -53,7 +57,7 @@ namespace Jurassic.Library
         [JSConstructorFunction]
         public StringInstance Construct()
         {
-            return new StringInstance(this.InstancePrototype);
+            return new StringInstance(this.InstancePrototype, "");
         }
 
         /// <summary>

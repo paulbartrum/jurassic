@@ -7,9 +7,8 @@ namespace Jurassic.Library
     /// Represents the built-in JavaScript Function object.
     /// </summary>
     [Serializable]
-    public class FunctionConstructor : ClrFunction
+    public partial class FunctionConstructor : ClrStubFunction
     {
-
         //     INITIALIZATION
         //_________________________________________________________________________________________
 
@@ -19,8 +18,12 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="instancePrototype"> The prototype for instances created by this function. </param>
         internal FunctionConstructor(ObjectInstance prototype, FunctionInstance instancePrototype)
-            : base(prototype, "Function", instancePrototype)
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            // Initialize the constructor properties.
+            var properties = new List<PropertyNameAndValue>(3);
+            InitializeConstructorProperties(properties, "Function", 1, instancePrototype);
+            FastSetProperties(properties);
         }
 
 

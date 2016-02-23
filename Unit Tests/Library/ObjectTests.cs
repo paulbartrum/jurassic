@@ -63,15 +63,15 @@ namespace UnitTests
         {
             Assert.AreEqual(true, Evaluate("Object.getPrototypeOf(new Number(55)) === Number.prototype"));
             Assert.AreEqual(true, Evaluate("Object.getPrototypeOf(new String('test')) === String.prototype"));
+            Assert.AreEqual(true, Evaluate("Object.getPrototypeOf(true) == Boolean.prototype"));
+            Assert.AreEqual(true, Evaluate("Object.getPrototypeOf(5) == Number.prototype"));
+            Assert.AreEqual(true, Evaluate("Object.getPrototypeOf('test') == String.prototype"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.getPrototypeOf.length"));
 
             // Argument must be an object.
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getPrototypeOf()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getPrototypeOf(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getPrototypeOf(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getPrototypeOf('test')"));
         }
 
         [TestMethod]
@@ -131,14 +131,15 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("descriptor.hasOwnProperty('get')"));
             Assert.AreEqual(false, Evaluate("descriptor.hasOwnProperty('set')"));
 
+            Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor(true, 'toString')"));
+            Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor(5, 'toString')"));
+            Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor('test', 'toString')"));
+
             // length
             Assert.AreEqual(2, Evaluate("Object.getOwnPropertyDescriptor.length"));
 
             // Argument must be an object.
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyDescriptor()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyDescriptor(true, 'toString')"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyDescriptor(5, 'toString')"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyDescriptor('test', 'toString')"));
         }
 
         [TestMethod]
@@ -147,15 +148,15 @@ namespace UnitTests
             Assert.AreEqual("", Evaluate("Object.getOwnPropertyNames({}).toString()"));
             Assert.AreEqual("a", Evaluate("Object.getOwnPropertyNames({a: 'hello'}).toString()"));
             Assert.AreEqual("0,1,length", Evaluate("Object.getOwnPropertyNames([15, 16]).toString()"));
+            Assert.AreEqual("", Evaluate("Object.getOwnPropertyNames(true).toString()"));
+            Assert.AreEqual("", Evaluate("Object.getOwnPropertyNames(5).toString()"));
+            Assert.AreEqual("0,1,2,3,length", Evaluate("Object.getOwnPropertyNames('test').toString()"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.getOwnPropertyNames.length"));
 
             // Argument must be an object.
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyNames()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyNames(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyNames(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.getOwnPropertyNames('test')"));
         }
 
         [TestMethod]
@@ -412,6 +413,9 @@ namespace UnitTests
             Assert.AreEqual(2, Evaluate("x.a = 2; x.a"));
             Assert.AreEqual(Undefined.Value, Evaluate("x.b = 6; x.b"));
             Assert.AreEqual(PropertyAttributes.Enumerable | PropertyAttributes.Writable, EvaluateAccessibility("x", "a"));
+            Assert.AreEqual(true, Evaluate("Object.seal(true).valueOf()"));
+            Assert.AreEqual(5, Evaluate("Object.seal(5).valueOf()"));
+            Assert.AreEqual("test", Evaluate("Object.seal('test').valueOf()"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.seal.length"));
@@ -420,9 +424,6 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal(null)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal('test')"));
         }
 
         [TestMethod]
@@ -434,6 +435,9 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("x.a = 2; x.a"));
             Assert.AreEqual(Undefined.Value, Evaluate("x.b = 6; x.b"));
             Assert.AreEqual(PropertyAttributes.Enumerable, EvaluateAccessibility("x", "a"));
+            Assert.AreEqual(true, Evaluate("Object.freeze(true).valueOf()"));
+            Assert.AreEqual(5, Evaluate("Object.freeze(5).valueOf()"));
+            Assert.AreEqual("test", Evaluate("Object.freeze('test').valueOf()"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.freeze.length"));
@@ -442,9 +446,6 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze(null)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze('test')"));
         }
 
         [TestMethod]
@@ -456,6 +457,9 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("delete x.a"));
             Assert.AreEqual(Undefined.Value, Evaluate("x.b = 6; x.b"));
             Assert.AreEqual(PropertyAttributes.FullAccess, EvaluateAccessibility("x", "c"));
+            Assert.AreEqual(true, Evaluate("Object.preventExtensions(true).valueOf()"));
+            Assert.AreEqual(5, Evaluate("Object.preventExtensions(5).valueOf()"));
+            Assert.AreEqual("test", Evaluate("Object.preventExtensions('test').valueOf()"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.preventExtensions.length"));
@@ -464,9 +468,6 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions(null)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions('test')"));
         }
 
         [TestMethod]
@@ -478,6 +479,10 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("Object.isSealed(Object.freeze({a: 1}))"));
             Assert.AreEqual(true, Evaluate("Object.isSealed(Object.preventExtensions({}))"));
             Assert.AreEqual(false, Evaluate("Object.isSealed(Object.preventExtensions({a: 1}))"));
+            Assert.AreEqual(false, Evaluate("Object.isSealed(new Boolean(true))"));
+            Assert.AreEqual(true, Evaluate("Object.isSealed(true)"));
+            Assert.AreEqual(true, Evaluate("Object.isSealed(5)"));
+            Assert.AreEqual(true, Evaluate("Object.isSealed('test')"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.isSealed.length"));
@@ -486,9 +491,6 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isSealed()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isSealed(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isSealed(null)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isSealed(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isSealed(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isSealed('test')"));
         }
 
         [TestMethod]
@@ -499,6 +501,10 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("Object.isFrozen(Object.seal({a: 1}))"));
             Assert.AreEqual(true, Evaluate("Object.isFrozen(Object.freeze({a: 1}))"));
             Assert.AreEqual(true, Evaluate("Object.isFrozen(Object.preventExtensions({}))"));
+            Assert.AreEqual(false, Evaluate("Object.isFrozen(new Boolean(true))"));
+            Assert.AreEqual(true, Evaluate("Object.isFrozen(true)"));
+            Assert.AreEqual(true, Evaluate("Object.isFrozen(5)"));
+            Assert.AreEqual(true, Evaluate("Object.isFrozen('test')"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.isFrozen.length"));
@@ -507,9 +513,6 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isFrozen()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isFrozen(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isFrozen(null)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isFrozen(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isFrozen(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isFrozen('test')"));
         }
 
         [TestMethod]
@@ -520,6 +523,10 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("Object.isExtensible(Object.seal({a: 1}))"));
             Assert.AreEqual(false, Evaluate("Object.isExtensible(Object.freeze({a: 1}))"));
             Assert.AreEqual(false, Evaluate("Object.isExtensible(Object.preventExtensions({}))"));
+            Assert.AreEqual(true, Evaluate("Object.isExtensible(new Boolean(true))"));
+            Assert.AreEqual(false, Evaluate("Object.isExtensible(true)"));
+            Assert.AreEqual(false, Evaluate("Object.isExtensible(5)"));
+            Assert.AreEqual(false, Evaluate("Object.isExtensible('test')"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.isExtensible.length"));
@@ -528,9 +535,7 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isExtensible()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isExtensible(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isExtensible(null)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isExtensible(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isExtensible(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.isExtensible('test')"));
+            
         }
 
         [TestMethod]
@@ -549,9 +554,9 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.keys()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.keys(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.keys(null)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.keys(true)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.keys(5)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.keys('test')"));
+            Assert.AreEqual("", Evaluate("Object.keys(true).toString()"));
+            Assert.AreEqual("", Evaluate("Object.keys(5).toString()"));
+            Assert.AreEqual("0,1,2,3", Evaluate("Object.keys('test').toString()"));
         }
 
 

@@ -36,6 +36,10 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("x"));
             Assert.AreEqual(1, Evaluate("y"));
 
+            // Do while.
+            Assert.AreEqual(true, Evaluate("do { } while (false) true"));
+            Assert.AreEqual(true, Evaluate("do; while \r\n (false) true"));
+
             // Ambiguity.
             Assert.AreEqual("TypeError", EvaluateExceptionType(@"
                 var a = 1, b = 2, c = 3, d = 4, e = 5;

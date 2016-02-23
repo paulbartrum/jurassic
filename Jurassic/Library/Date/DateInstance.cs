@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// The prototype for the Date object.
     /// </summary>
     [Serializable]
-    public class DateInstance : ObjectInstance
+    public partial class DateInstance : ObjectInstance
     {
         /// <summary>
         /// The underlying DateTime value.
@@ -23,6 +23,21 @@ namespace Jurassic.Library
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates an invalid date instance for use as a prototype.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal DateInstance(DateConstructor constructor)
+            : base(constructor.Engine.Object.InstancePrototype)
+        {
+            this.value = InvalidDate;
+
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            FastSetProperties(properties);
+        }
 
         /// <summary>
         /// Creates a new Date instance and initializes it to the current time.
@@ -67,8 +82,8 @@ namespace Jurassic.Library
         /// <remarks>
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        public DateInstance(ObjectInstance prototype, int year, int month, [DefaultParameterValue(1)] int day = 1, [DefaultParameterValue(0)] int hour = 0,
-            [DefaultParameterValue(0)] int minute = 0, [DefaultParameterValue(0)] int second = 0, [DefaultParameterValue(0)] int millisecond = 0)
+        public DateInstance(ObjectInstance prototype, int year, int month, int day = 1, int hour = 0,
+            int minute = 0, int second = 0, int millisecond = 0)
             : this(prototype, DateInstance.ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
         {
         }
@@ -133,9 +148,9 @@ namespace Jurassic.Library
         /// Returns a primitive value that represents the current object.  Used by the addition and
         /// equality operators.
         /// </summary>
-        /// <param name="hint"> Indicates the preferred type of the result. </param>
+        /// <param name="typeHint"> Indicates the preferred type of the result. </param>
         /// <returns> A primitive value that represents the current object. </returns>
-        protected internal override object GetPrimitiveValue(PrimitiveTypeHint typeHint)
+        internal override object GetPrimitiveValue(PrimitiveTypeHint typeHint)
         {
             if (typeHint == PrimitiveTypeHint.None)
                 return base.GetPrimitiveValue(PrimitiveTypeHint.String);
@@ -816,6 +831,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Used by the JSON.stringify to transform objects prior to serialization.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <param name="key"> Unused. </param>
         /// <returns> The date as a serializable string. </returns>
         [JSInternalFunction(Name = "toJSON", Flags = JSFunctionFlags.HasThisObject)]
@@ -956,8 +972,8 @@ namespace Jurassic.Library
         /// 
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        public static double UTC(int year, int month, [DefaultParameterValue(1)] int day = 1, [DefaultParameterValue(0)] int hour = 0,
-            [DefaultParameterValue(0)] int minute = 0, [DefaultParameterValue(0)] int second = 0, [DefaultParameterValue(0)] int millisecond = 0)
+        public static double UTC(int year, int month, int day = 1, int hour = 0,
+            int minute = 0, int second = 0, int millisecond = 0)
         {
             return ToJSDate(ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc));
         }

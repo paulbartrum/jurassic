@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents the built-in javascript Array object.
     /// </summary>
     [Serializable]
-    public class ArrayConstructor : ClrFunction
+    public partial class ArrayConstructor : ClrStubFunction
     {
 
         //     INITIALIZATION
@@ -18,8 +18,12 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal ArrayConstructor(ObjectInstance prototype)
-            : base(prototype, "Array", new ArrayInstance(prototype.Engine.Object.InstancePrototype, 0, 0))
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            // Initialize the constructor properties.
+            var properties = GetDeclarativeProperties();
+            InitializeConstructorProperties(properties, "Array", 1, new ArrayInstance(this));
+            FastSetProperties(properties);
         }
 
 

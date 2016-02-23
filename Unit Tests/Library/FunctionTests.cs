@@ -85,9 +85,9 @@ namespace UnitTests
             Assert.AreEqual(2, Evaluate("new Function('a,b', 'return a / b').length"));
             Assert.AreEqual(2, Evaluate("(function(a, b) {}).length"));
             
-            // length is non-enumerable, non-writable and non-configurable.
-            Assert.AreEqual(PropertyAttributes.Sealed, EvaluateAccessibility("Function", "length"));
-            Assert.AreEqual(PropertyAttributes.Sealed, EvaluateAccessibility("new Function", "length"));
+            // length is non-enumerable, non-writable and configurable.
+            Assert.AreEqual(PropertyAttributes.Configurable, EvaluateAccessibility("Function", "length"));
+            Assert.AreEqual(PropertyAttributes.Configurable, EvaluateAccessibility("new Function", "length"));
         }
 
         [TestMethod]

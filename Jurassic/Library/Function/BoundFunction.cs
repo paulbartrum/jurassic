@@ -17,7 +17,6 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a new instance of a user-defined function.
         /// </summary>
-        /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="targetFunction"> The function that was bound. </param>
         /// <param name="boundThis"> The value of the "this" parameter when the target function is called. </param>
         /// <param name="boundArguments"> Zero or more bound argument values. </param>
@@ -33,8 +32,8 @@ namespace Jurassic.Library
             this.BoundArguments = boundArguments;
 
             // Add function properties.
-            this.FastSetProperty("name", targetFunction.Name);
-            this.FastSetProperty("length", Math.Max(targetFunction.Length - boundArguments.Length, 0));
+            this.FastSetProperty("name", targetFunction.Name, PropertyAttributes.Configurable);
+            this.FastSetProperty("length", Math.Max(targetFunction.Length - boundArguments.Length, 0), PropertyAttributes.Configurable);
             this.FastSetProperty("prototype", this.Engine.Object.Construct(), PropertyAttributes.Writable);
             this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
             
@@ -99,7 +98,7 @@ namespace Jurassic.Library
         /// Calls this function, passing in the given "this" value and zero or more arguments.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <param name="argumentValues"> An array of argument values to pass to the function. </param>
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
@@ -124,7 +123,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
-        /// <param name="arguments"> An array of argument values to pass to the function. </param>
+        /// <param name="argumentValues"> An array of argument values to pass to the function. </param>
         /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {

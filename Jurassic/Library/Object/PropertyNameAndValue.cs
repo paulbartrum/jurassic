@@ -11,10 +11,27 @@ namespace Jurassic.Library
         private string name;
         private PropertyDescriptor descriptor;
 
+        /// <summary>
+        /// Initializes a property with any descriptor.
+        /// </summary>
+        /// <param name="name"> The name of the property. </param>
+        /// <param name="descriptor"> A descriptor describing the property. </param>
         public PropertyNameAndValue(string name, PropertyDescriptor descriptor)
         {
             this.name = name;
             this.descriptor = descriptor;
+        }
+
+        /// <summary>
+        /// Initializes a simple property.
+        /// </summary>
+        /// <param name="name"> The name of the property. </param>
+        /// <param name="value"> The property value. </param>
+        /// <param name="attributes"> Indicates whether the property is readable, writable and/or enumerable. </param>
+        public PropertyNameAndValue(string name, object value, PropertyAttributes attributes)
+        {
+            this.name = name;
+            this.descriptor = new PropertyDescriptor(value, attributes);
         }
 
         /// <summary>

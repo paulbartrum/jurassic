@@ -7,7 +7,7 @@ namespace Jurassic.Library
     /// Represents an instance of the JavaScript Boolean object.
     /// </summary>
     [Serializable]
-    public class BooleanInstance : ObjectInstance
+    public partial class BooleanInstance : ObjectInstance
     {
         private bool value;
 
@@ -15,6 +15,19 @@ namespace Jurassic.Library
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates a boolean instance for use as a prototype.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal BooleanInstance(BooleanConstructor constructor)
+            : base(constructor.Engine.Object.InstancePrototype)
+        {
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            FastSetProperties(properties);
+        }
 
         /// <summary>
         /// Creates a new boolean instance.

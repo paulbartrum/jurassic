@@ -8,7 +8,7 @@ namespace Jurassic.Library
     /// Represents an instance of the RegExp object.
     /// </summary>
     [Serializable]
-    public class RegExpInstance : ObjectInstance
+    public partial class RegExpInstance : ObjectInstance
     {
         private Regex value;
         private bool globalSearch;
@@ -17,6 +17,26 @@ namespace Jurassic.Library
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates an empty RegExp instance for use as a prototype.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal RegExpInstance(RegExpConstructor constructor)
+            : base(constructor.Engine.Object.InstancePrototype)
+        {
+            this.value = new Regex("", ParseFlags(null));
+
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("source", this.Source.ToString(), PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("global", this.Global, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("multiline", this.Multiline, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("ignoreCase", this.IgnoreCase, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable));
+            FastSetProperties(properties);
+        }
 
         /// <summary>
         /// Creates a new regular expression instance.
@@ -44,12 +64,14 @@ namespace Jurassic.Library
             }
 
             // Initialize the javascript properties.
-            this.FastSetProperty("source", pattern);
-            this.FastSetProperty("flags", this.Flags);
-            this.FastSetProperty("global", this.Global);
-            this.FastSetProperty("multiline", this.Multiline);
-            this.FastSetProperty("ignoreCase", this.IgnoreCase);
-            this.FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+            var properties = new List<PropertyNameAndValue>(6);
+            properties.Add(new PropertyNameAndValue("source", pattern, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("flags", this.Flags, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("global", this.Global, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("multiline", this.Multiline, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("ignoreCase", this.IgnoreCase, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable));
+            FastSetProperties(properties);
         }
 
         /// <summary>
@@ -67,11 +89,11 @@ namespace Jurassic.Library
             this.globalSearch = existingInstance.globalSearch;
 
             // Initialize the javascript properties.
-            this.FastSetProperty("source", existingInstance.Source);
-            this.FastSetProperty("flags", existingInstance.Flags);
-            this.FastSetProperty("global", existingInstance.Global);
-            this.FastSetProperty("multiline", existingInstance.Multiline);
-            this.FastSetProperty("ignoreCase", existingInstance.IgnoreCase);
+            this.FastSetProperty("source", existingInstance.Source, PropertyAttributes.Sealed);
+            this.FastSetProperty("flags", existingInstance.Flags, PropertyAttributes.Sealed);
+            this.FastSetProperty("global", existingInstance.Global, PropertyAttributes.Sealed);
+            this.FastSetProperty("multiline", existingInstance.Multiline, PropertyAttributes.Sealed);
+            this.FastSetProperty("ignoreCase", existingInstance.IgnoreCase, PropertyAttributes.Sealed);
             this.FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
         }
 
@@ -181,7 +203,7 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSInternalFunction(Deprecated = true, Name = "compile")]
-        public void Compile(string pattern, [DefaultParameterValue(null)] string flags = null)
+        public void Compile(string pattern, string flags = null)
         {
 #if !SILVERLIGHT
             this.value = new Regex(pattern, ParseFlags(flags) | RegexOptions.Compiled);
@@ -452,7 +474,7 @@ namespace Jurassic.Library
         /// <param name="input"> The string to split. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
-        public ArrayInstance Split(string input, [DefaultParameterValue(uint.MaxValue)] uint limit = uint.MaxValue)
+        public ArrayInstance Split(string input, uint limit = uint.MaxValue)
         {
             // Return an empty array if limit = 0.
             if (limit == 0)

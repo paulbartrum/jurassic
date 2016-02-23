@@ -8,11 +8,49 @@ namespace Jurassic.Library
     /// Represents the base class of all the javascript errors.
     /// </summary>
     [Serializable]
-    public class ErrorInstance : ObjectInstance
+    public partial class ErrorInstance : ObjectInstance
     {
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates an empty Error instance for use as a prototype.
+        /// </summary>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
+        internal ErrorInstance(ErrorConstructor constructor, string typeName)
+            : base(GetPrototype(constructor.Engine, typeName))
+        {
+            // Initialize the prototype properties.
+            var properties = GetDeclarativeProperties();
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("name", typeName, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
+            FastSetProperties(properties);
+        }
+
+        /// <summary>
+        /// Determine the prototype for the given error type.
+        /// </summary>
+        /// <param name="engine"> The script engine associated with this object. </param>
+        /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
+        /// <returns> The prototype. </returns>
+        private static ObjectInstance GetPrototype(ScriptEngine engine, string typeName)
+        {
+            if (typeName == "Error")
+            {
+                // This constructor is for regular Error objects.
+                // Prototype chain: Error instance -> Error prototype -> Object prototype
+                return engine.Object.InstancePrototype;
+            }
+            else
+            {
+                // This constructor is for derived Error objects like RangeError, etc.
+                // Prototype chain: XXXError instance -> XXXError prototype -> Error prototype -> Object prototype
+                return engine.Error.InstancePrototype;
+            }
+        }
 
         /// <summary>
         /// Creates a new Error instance with the given name, message and optionally a stack trace.
@@ -26,9 +64,9 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (name != null)
-                this.FastSetProperty("name", name, PropertyAttributes.FullAccess);
+                this.FastSetProperty("name", name, PropertyAttributes.NonEnumerable);
             if (message != null)
-                this.FastSetProperty("message", message, PropertyAttributes.FullAccess);
+                this.FastSetProperty("message", message, PropertyAttributes.NonEnumerable);
         }
 
 
@@ -73,8 +111,6 @@ namespace Jurassic.Library
         /// <summary>
         /// Sets the stack trace information.
         /// </summary>
-        /// <param name="errorName"> The name of the error (e.g. "ReferenceError"). </param>
-        /// <param name="message"> The error message. </param>
         /// <param name="path"> The path of the javascript source file that is currently executing. </param>
         /// <param name="function"> The name of the currently executing function. </param>
         /// <param name="line"> The line number of the statement that is currently executing. </param>

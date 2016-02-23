@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Jurassic</id>
+    <version>2.2.1</version>
+    <authors>Paul Bartrum</authors>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/paulbartrum/jurassic</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/nuget-logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Jurassic is an implementation of the ECMAScript (JavaScript) language and runtime.</description>
+    <releaseNotes>Fixed codegen problem with the continue statement.</releaseNotes>
+    <tags>JavaScript ECMAScript</tags>
+  </metadata>
+  <files>
+    <file src="..\Jurassic\bin\Release\*.dll" target="lib\net35" />
+    <file src="..\Jurassic\bin\Release\*.pdb" target="lib\net35" />
+    <file src="..\Jurassic\**\*.cs" target="src" />
+  </files>
+</package>

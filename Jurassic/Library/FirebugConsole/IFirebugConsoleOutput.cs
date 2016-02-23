@@ -2,11 +2,29 @@
 
 namespace Jurassic.Library
 {
+    /// <summary>
+    /// Indicates the level of severity.
+    /// </summary>
     public enum FirebugConsoleMessageStyle
     {
+        /// <summary>
+        /// Log text, without any indication of the severity.
+        /// </summary>
         Regular,
+
+        /// <summary>
+        /// Log informational text.
+        /// </summary>
         Information,
+
+        /// <summary>
+        /// Log warnings.
+        /// </summary>
         Warning,
+
+        /// <summary>
+        /// Log errors.
+        /// </summary>
         Error,
     }
 

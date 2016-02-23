@@ -183,15 +183,15 @@ namespace Jurassic.Compiler
             EmitHelpers.StoreScope(generator);
         }
 
-        /// <summary>
-        /// Get the value of the variable with the given name.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="name"> The name of the variable to get. </param>
-        /// <param name="scope"> A variable that holds the current scope.  This variable is of
-        /// type Scope.  Can be <c>null</c>. </param>
-        /// <param name="endOfMemberLookup"> A label that points to the end the member lookup code.
-        /// Can be <c>null</c>. </param>
+        ///// <summary>
+        ///// Get the value of the variable with the given name.
+        ///// </summary>
+        ///// <param name="generator"> The generator to output the CIL to. </param>
+        ///// <param name="name"> The name of the variable to get. </param>
+        ///// <param name="scope"> A variable that holds the current scope.  This variable is of
+        ///// type Scope.  Can be <c>null</c>. </param>
+        ///// <param name="endOfMemberLookup"> A label that points to the end the member lookup code.
+        ///// Can be <c>null</c>. </param>
         //internal override void GenerateGetCore(ILGenerator generator, string name, ILLocalVariable scope, ILLabel endOfMemberLookup)
         //{
             // Pseudo-code for getting the value of a variable
@@ -297,18 +297,18 @@ namespace Jurassic.Compiler
             //    generator.DefineLabelPosition(endOfMemberLookup);
         //}
 
-        /// <summary>
-        /// Stores a value in the variable with the given name.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="name"> The name of the variable to set. </param>
-        /// <param name="valueType"> The type of value to store. </param>
-        /// <param name="value"> A variable that holds the value to store.  This variable is of
-        /// type System.Object.  Can be <c>null</c>. </param>
-        /// <param name="scope"> A variable that holds the current scope.  This variable is of
-        /// type Scope.  Can be <c>null</c>. </param>
-        /// <param name="endOfMemberLookup"> A label that points to the end the member lookup code.
-        /// Can be <c>null</c>. </param>
+        ///// <summary>
+        ///// Stores a value in the variable with the given name.
+        ///// </summary>
+        ///// <param name="generator"> The generator to output the CIL to. </param>
+        ///// <param name="name"> The name of the variable to set. </param>
+        ///// <param name="valueType"> The type of value to store. </param>
+        ///// <param name="value"> A variable that holds the value to store.  This variable is of
+        ///// type System.Object.  Can be <c>null</c>. </param>
+        ///// <param name="scope"> A variable that holds the current scope.  This variable is of
+        ///// type Scope.  Can be <c>null</c>. </param>
+        ///// <param name="endOfMemberLookup"> A label that points to the end the member lookup code.
+        ///// Can be <c>null</c>. </param>
         //internal override void GenerateSetCore(ILGenerator generator, string name, PrimitiveType valueType, ILLocalVariable value, ILLocalVariable scope, ILLabel endOfMemberLookup)
         //{
             // Pseudo-code for setting "property"

@@ -14,7 +14,7 @@ namespace Jurassic.Library
         /// Creates a new SchemaProperty instance.
         /// </summary>
         /// <param name="index"> The index of the property in the
-        /// <see cref="ObjectInstance.Values"/> array. </param>
+        /// <see cref="ObjectInstance.InlinePropertyValues"/> array. </param>
         /// <param name="attributes"> The property attributes.  These attributes describe how the
         /// property can be modified. </param>
         public SchemaProperty(int index, PropertyAttributes attributes)
@@ -30,7 +30,7 @@ namespace Jurassic.Library
         public readonly static SchemaProperty Undefined = new SchemaProperty(-1, PropertyAttributes.Sealed);
 
         /// <summary>
-        /// Gets the index of the property in the <see cref="ObjectInstance.Values"/> array.
+        /// Gets the index of the property in the <see cref="ObjectInstance.InlinePropertyValues"/> array.
         /// </summary>
         public int Index
         {

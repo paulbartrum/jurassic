@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -7,7 +6,7 @@ namespace Jurassic.Library
     /// Represents the built-in javascript Number object.
     /// </summary>
     [Serializable]
-    public class NumberConstructor : ClrFunction
+    public partial class NumberConstructor : ClrStubFunction
     {
 
         //     INITIALIZATION
@@ -18,8 +17,12 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal NumberConstructor(ObjectInstance prototype)
-            : base(prototype, "Number", new NumberInstance(prototype.Engine.Object.InstancePrototype, 0))
+            : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            // Initialize the constructor properties.
+            var properties = GetDeclarativeProperties();
+            InitializeConstructorProperties(properties, "Number", 1, new NumberInstance(this));
+            FastSetProperties(properties);
         }
 
 

@@ -662,8 +662,8 @@ namespace Jurassic
         /// <summary>
         /// Gets the absolute value of a BigInteger object.
         /// </summary>
-        /// <param name="value"> A number. </param>
-        /// <returns> The absolute value of <paramref name="value"/> </returns>
+        /// <param name="b"> A number. </param>
+        /// <returns> The absolute value of <paramref name="b"/>. </returns>
         public static BigInteger Abs(BigInteger b)
         {
             return new BigInteger(b.bits, b.wordCount, Math.Abs(b.sign));
@@ -739,7 +739,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="str"> A string that contains the number to convert. </param>
         /// <returns> A value that is equivalent to the number specified in the
-        /// <paramref name="value"/> parameter. </returns>
+        /// <paramref name="str"/> parameter. </returns>
         public static BigInteger Parse(string str)
         {
             BigInteger result = BigInteger.Zero;
@@ -845,11 +845,9 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Returns a new instance BigInteger structure from a 64-bit double precision floating
-        /// point value.
+        /// Returns a double that corresponds to the BigInteger value.
         /// </summary>
-        /// <param name="value"> A 64-bit double precision floating point value. </param>
-        /// <returns> The corresponding BigInteger value. </returns>
+        /// <returns> A double that corresponds to the BigInteger value. </returns>
         public double ToDouble()
         {
             // Special case: zero.

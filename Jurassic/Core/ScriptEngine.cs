@@ -42,7 +42,13 @@ namespace Jurassic
         private ErrorConstructor evalErrorConstructor;
         private ErrorConstructor referenceErrorConstructor;
 
+        // Mono check.
+        internal static bool IsMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
+
+        /// <summary>
+        /// Initializes a new scripting environment.
+        /// </summary>
         public ScriptEngine()
         {
             // Create the initial hidden class schema.  This must be done first.
@@ -51,21 +57,18 @@ namespace Jurassic
             // Create the base of the prototype chain.
             var baseObject = ObjectInstance.CreateRootObject(this);
 
-            // Create the global object.
-            this.globalObject = new GlobalObject(baseObject);
-
             // Create the function object that second to last in the prototype chain.
-            var baseFunction = UserDefinedFunction.CreateEmptyFunction(baseObject);
-
-            // Object must be created first, then function.
-            this.objectConstructor = new ObjectConstructor(baseFunction, baseObject);
-            this.functionConstructor = new FunctionConstructor(baseFunction, baseFunction);
+            var baseFunction = new ClrStubFunction(baseObject, BaseFunctionImplementation);
+            FunctionInstancePrototype = baseFunction;
 
             // Create all the built-in objects.
+            this.globalObject = new GlobalObject(baseObject);
             this.mathObject = new MathObject(baseObject);
             this.jsonObject = new JSONObject(baseObject);
 
             // Create all the built-in functions.
+            this.objectConstructor = new ObjectConstructor(baseFunction, baseObject);
+            this.functionConstructor = new FunctionConstructor(baseFunction, baseFunction);
             this.arrayConstructor = new ArrayConstructor(baseFunction);
             this.booleanConstructor = new BooleanConstructor(baseFunction);
             this.dateConstructor = new DateConstructor(baseFunction);
@@ -82,47 +85,42 @@ namespace Jurassic
             this.evalErrorConstructor = new ErrorConstructor(baseFunction, "EvalError");
             this.referenceErrorConstructor = new ErrorConstructor(baseFunction, "ReferenceError");
 
-            // Populate the instance prototypes (TODO: optimize this, currently takes about 15ms).
-            this.globalObject.PopulateFunctions();
-            this.objectConstructor.PopulateFunctions();
-            this.objectConstructor.InstancePrototype.PopulateFunctions();
-            this.functionConstructor.InstancePrototype.PopulateFunctions(typeof(FunctionInstance));
-            this.mathObject.PopulateFunctions();
-            this.mathObject.PopulateFields();
-            this.jsonObject.PopulateFunctions();
-            this.arrayConstructor.PopulateFunctions();
-            this.arrayConstructor.InstancePrototype.PopulateFunctions();
-            this.booleanConstructor.InstancePrototype.PopulateFunctions();
-            this.dateConstructor.PopulateFunctions();
-            this.dateConstructor.InstancePrototype.PopulateFunctions();
-            this.numberConstructor.InstancePrototype.PopulateFunctions();
-            this.numberConstructor.PopulateFields();
-            this.numberConstructor.PopulateFunctions();
-            this.regExpConstructor.InstancePrototype.PopulateFunctions();
-            this.stringConstructor.PopulateFunctions();
-            this.stringConstructor.InstancePrototype.PopulateFunctions();
-            this.errorConstructor.InstancePrototype.PopulateFunctions();
+            // Initialize the prototypes for the base of the prototype chain.
+            baseObject.InitializePrototypeProperties(this.objectConstructor);
+            baseFunction.InitializePrototypeProperties(this.functionConstructor);
 
             // Add them as JavaScript-accessible properties of the global instance.
-            this.globalObject.FastSetProperty("Array", this.arrayConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("Boolean", this.booleanConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("Date", this.dateConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("Function", this.functionConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("JSON", this.jsonObject, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("Math", this.mathObject, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("Number", this.numberConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("Object", this.objectConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("RegExp", this.regExpConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("String", this.stringConstructor, PropertyAttributes.NonEnumerable);
+            var globalProperties = this.globalObject.GetGlobalProperties();
+            globalProperties.Add(new PropertyNameAndValue("Array", this.arrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Boolean", this.booleanConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Date", this.dateConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Function", this.functionConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("JSON", this.jsonObject, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Math", this.mathObject, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Number", this.numberConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Object", this.objectConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("RegExp", this.regExpConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("String", this.stringConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Error", this.errorConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("RangeError", this.rangeErrorConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("TypeError", this.typeErrorConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("SyntaxError", this.syntaxErrorConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("URIError", this.uriErrorConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("EvalError", this.evalErrorConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("ReferenceError", this.referenceErrorConstructor, PropertyAttributes.NonEnumerable));
+            this.globalObject.FastSetProperties(globalProperties);
+        }
 
-            // And the errors.
-            this.globalObject.FastSetProperty("Error", this.errorConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("RangeError", this.rangeErrorConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("TypeError", this.typeErrorConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("SyntaxError", this.syntaxErrorConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("URIError", this.uriErrorConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("EvalError", this.evalErrorConstructor, PropertyAttributes.NonEnumerable);
-            this.globalObject.FastSetProperty("ReferenceError", this.referenceErrorConstructor, PropertyAttributes.NonEnumerable);
+        /// <summary>
+        /// Implements the behaviour of the function that is the prototype of the Function object.
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <param name="thisObj"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private object BaseFunctionImplementation(ScriptEngine engine, object thisObj, object[] args)
+        {
+            return Undefined.Value;
         }
 
 
@@ -320,6 +318,19 @@ namespace Jurassic
         {
             get { return deserializationEnvironment; }
             set { deserializationEnvironment = value; }
+        }
+
+        /// <summary>
+        /// The instance prototype of the Function object (i.e. Function.InstancePrototype).
+        /// </summary>
+        /// <remarks>
+        /// This property solves a circular reference in the initialization, plus it speeds up
+        /// initialization.
+        /// </remarks>
+        internal FunctionInstance FunctionInstancePrototype
+        {
+            get;
+            private set;
         }
 
 
@@ -523,6 +534,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="source"> The javascript source code to execute. </param>
         /// <returns> A CompiledScript instance, which can be executed as many times as needed. </returns>
+        /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public CompiledScript Compile(ScriptSource source)
         {
             var methodGen = new Jurassic.Compiler.GlobalMethodGenerator(
@@ -577,7 +589,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="source"> The javascript source code to execute. </param>
         /// <returns> The result of executing the source code. </returns>
-        /// <exception cref="ArgumentNullException"> <paramref name="code"/> is a <c>null</c> reference. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public object Evaluate(ScriptSource source)
         {
             var methodGen = new Jurassic.Compiler.EvalMethodGenerator(
@@ -618,7 +630,7 @@ namespace Jurassic
         /// <typeparam name="T"> The type to convert the result to. </typeparam>
         /// <param name="source"> The javascript source code to execute. </param>
         /// <returns> The result of executing the source code. </returns>
-        /// <exception cref="ArgumentNullException"> <paramref name="code"/> is a <c>null</c> reference. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public T Evaluate<T>(ScriptSource source)
         {
             return TypeConverter.ConvertTo<T>(this, Evaluate(source));
@@ -628,7 +640,6 @@ namespace Jurassic
         /// Executes the given source code.  Execution is bound to the global scope.
         /// </summary>
         /// <param name="code"> The javascript source code to execute. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="path"/> is a <c>null</c> reference. </exception>
         public void Execute(string code)
         {
             Execute(new StringScriptSource(code));
@@ -663,7 +674,7 @@ namespace Jurassic
         /// Executes the given source code.  Execution is bound to the global scope.
         /// </summary>
         /// <param name="source"> The javascript source code to execute. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="code"/> is a <c>null</c> reference. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public void Execute(ScriptSource source)
         {
             // Compile the script.

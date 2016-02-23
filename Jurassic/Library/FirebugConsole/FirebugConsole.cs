@@ -11,7 +11,7 @@ namespace Jurassic.Library
     /// (http://getfirebug.com/wiki/index.php/Console_API).
     /// </summary>
     [Serializable]
-    public class FirebugConsole : ObjectInstance
+    public partial class FirebugConsole : ObjectInstance
     {
         private IFirebugConsoleOutput output;
         private Dictionary<string, Stopwatch> timers;
@@ -221,7 +221,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="name"> The name of the time to create. </param>
         [JSInternalFunction(Name = "time", Flags = JSFunctionFlags.MutatesThisObject)]
-        public void Time([DefaultParameterValue("")] string name = "")
+        public void Time(string name = "")
         {
             if (name == null)
                 name = string.Empty;
@@ -237,7 +237,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="name"> The name of the timer to stop. </param>
         [JSInternalFunction(Name = "timeEnd", Flags = JSFunctionFlags.MutatesThisObject)]
-        public void TimeEnd([DefaultParameterValue("")] string name = "")
+        public void TimeEnd(string name = "")
         {
             if (name == null)
                 name = string.Empty;

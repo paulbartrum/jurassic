@@ -210,6 +210,24 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Utility method for create a slice of an array.
+        /// </summary>
+        /// <param name="args"> The array to slice. </param>
+        /// <param name="offset"> The offset to begin the resulting array. </param>
+        /// <returns> An array containing the input array elements, excluding the first
+        /// <paramref name="offset"/> entries. </returns>
+        internal static object[] SliceArray(object[] args, int offset)
+        {
+            if (offset == 0)
+                return args;
+            if (offset >= args.Length)
+                return new object[0];
+            var result = new object[args.Length - offset];
+            Array.Copy(args, offset, result, 0, args.Length - offset);
+            return result;
+        }
+
+        /// <summary>
         /// Determines if the given value is a regular expression.
         /// </summary>
         /// <param name="value"> The value to test. </param>
