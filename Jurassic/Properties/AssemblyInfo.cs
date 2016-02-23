@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Paul Bartrum")]
 [assembly: AssemblyProduct("Jurassic")]
-[assembly: AssemblyCopyright("Copyright © Paul Bartrum 2010")]
+[assembly: AssemblyCopyright("Copyright © Paul Bartrum 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -26,16 +26,19 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-[assembly: AssemblyVersion("2.1.0.0")]
+
+// This is the version that is used for binding.
+[assembly: AssemblyVersion("3.0.0.0")]
+
+// This is the version that appears in Explorer.
+[assembly: AssemblyFileVersion("3.0.0.0")]
 
 // The AllowPartiallyTrustedCallersAttribute requires the assembly to be signed with a strong name
 // key.
 [assembly: System.Security.AllowPartiallyTrustedCallers]
 
 // Unit tests and performance tests need access to internal members.
-[assembly: InternalsVisibleTo("Unit Tests")]
-//[assembly: InternalsVisibleTo("Performance")]
-//[assembly: InternalsVisibleTo("JavaScript")]
-//[assembly: InternalsVisibleTo("DebuggerTest")]
+[assembly: InternalsVisibleTo("Unit Tests, PublicKey=00240000048000009400000006020000002400005253" +
+    "413100040000010001000d9e3222b4ac5e04d6ea884cd918e62997c023dec31205991d186bb880b34edc455cb14b" +
+    "50c9751b42605c51c36b869df29b9f17ff2b5a44332ba06d52aebd58cf04a1366018cf14907ed9fc6e4ab979a791" +
+    "e283dfe1b5f55b1b3fb13bfa9456d7cfda968f442cadeb73586edc7594e3251965eb2ee14ad753355e9207d89ba4")]
