@@ -1388,7 +1388,7 @@ namespace Jurassic.Library
         /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
         /// <returns> The first element that results in the callback returning <c>true</c>. </returns>
         [JSInternalFunction(Name = "find", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static object Find(ObjectInstance thisObj, FunctionInstance callbackFunction, [DefaultParameterValue(null)] ObjectInstance context = null)
+        public static object Find(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)

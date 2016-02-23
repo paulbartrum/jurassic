@@ -216,7 +216,7 @@ namespace Jurassic.Library
         /// <param name="startIndex"> The character position within the string to start searching. </param>
         /// <returns> <c>true</c> if the substring was found; <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "includes", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool Includes(ScriptEngine engine, string thisObject, object substring, [DefaultParameterValue(0)] int startIndex = 0)
+        public static bool Includes(ScriptEngine engine, string thisObject, object substring, int startIndex = 0)
         {
             if (TypeUtilities.IsRegularExpression(substring))
                 throw new JavaScriptException(engine, "TypeError", "Substring argument must not be a regular expression.");
@@ -309,7 +309,7 @@ namespace Jurassic.Library
         /// <param name="form"> A Unicode normalization form. </param>
         /// <returns> A new string whose binary representation is in a particular Unicode normalization form. </returns>
         [JSInternalFunction(Name = "normalize", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static string Normalize(ScriptEngine engine, string thisObject, [DefaultParameterValue("NFC")] string form = "NFC")
+        public static string Normalize(ScriptEngine engine, string thisObject, string form = "NFC")
         {
             switch (form)
             {
@@ -721,7 +721,7 @@ namespace Jurassic.Library
         /// <param name="position"> The position at which to begin searching.  Defaults to zero. </param>
         /// <returns> <c>true</c> if this string starts with the given string, <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "startsWith", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool StartsWith(ScriptEngine engine, string thisObject, object searchStringObj, [DefaultParameterValue(0)] int position = 0)
+        public static bool StartsWith(ScriptEngine engine, string thisObject, object searchStringObj, int position = 0)
         {
             if (TypeUtilities.IsRegularExpression(searchStringObj))
                 throw new JavaScriptException(engine, "TypeError", "Substring argument must not be a regular expression.");
@@ -744,7 +744,7 @@ namespace Jurassic.Library
         /// Defaults to the string's actual length. </param>
         /// <returns> <c>true</c> if this string ends with the given string, <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "endsWith", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool EndsWith(ScriptEngine engine, string thisObject, object searchStringObj, [DefaultParameterValue(int.MaxValue)] int position = int.MaxValue)
+        public static bool EndsWith(ScriptEngine engine, string thisObject, object searchStringObj, int position = int.MaxValue)
         {
             if (TypeUtilities.IsRegularExpression(searchStringObj))
                 throw new JavaScriptException(engine, "TypeError", "Substring argument must not be a regular expression.");
@@ -765,7 +765,7 @@ namespace Jurassic.Library
         /// <param name="position"> The position at which to begin searching.  Defaults to zero. </param>
         /// <returns> <c>true</c> if this string contains the given string, <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "contains", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool Contains(string thisObject, string searchString, [DefaultParameterValue(0)] int position = 0)
+        public static bool Contains(string thisObject, string searchString, int position = 0)
         {
             position = Math.Min(Math.Max(0, position), thisObject.Length);
             return thisObject.IndexOf(searchString, position) >= 0;

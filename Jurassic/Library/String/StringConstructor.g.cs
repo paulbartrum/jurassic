@@ -12,9 +12,10 @@ namespace Jurassic.Library
 	{
 		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
-			return new List<PropertyNameAndValue>(5)
+			return new List<PropertyNameAndValue>(6)
 			{
 				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(Engine.FunctionInstancePrototype, "fromCharCode", 1, __STUB__fromCharCode), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fromCodePoint", new ClrStubFunction(Engine.FunctionInstancePrototype, "fromCodePoint", 1, __STUB__fromCodePoint), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -54,6 +55,17 @@ namespace Jurassic.Library
 					return FromCharCode(new double[0]);
 				default:
 					return FromCharCode(TypeConverter.ConvertParameterArrayTo<double>(engine, args, 0));
+			}
+		}
+
+		private static object __STUB__fromCodePoint(ScriptEngine engine, object thisObj, object[] args)
+		{
+			switch (args.Length)
+			{
+				case 0:
+					return FromCodePoint(engine, new double[0]);
+				default:
+					return FromCodePoint(engine, TypeConverter.ConvertParameterArrayTo<double>(engine, args, 0));
 			}
 		}
 	}

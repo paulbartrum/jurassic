@@ -132,11 +132,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return ParseInt(engine, "undefined", 0);
+					return ParseInt(engine, "undefined", 0.0);
 				case 1:
-					return ParseInt(engine, TypeConverter.ToString(args[0]), 0);
+					return ParseInt(engine, TypeConverter.ToString(args[0]), 0.0);
 				default:
-					return ParseInt(engine, TypeConverter.ToString(args[0]), TypeConverter.ToNumber(args[1], 0));
+					return ParseInt(engine, TypeConverter.ToString(args[0]), TypeConverter.ToNumber(args[1], 0.0));
 			}
 		}
 

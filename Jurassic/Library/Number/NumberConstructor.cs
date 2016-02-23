@@ -208,7 +208,7 @@ namespace Jurassic.Library
         /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
         /// character, at which point parsing stops.  No error is returned in this case. </remarks>
         [JSInternalFunction(Name = "parseInt", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static double ParseInt(ScriptEngine engine, string input, [DefaultParameterValue(0.0)] double radix = 0)
+        public static double ParseInt(ScriptEngine engine, string input, double radix = 0.0)
         {
             return GlobalObject.ParseInt(engine, input, radix);
         }

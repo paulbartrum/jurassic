@@ -538,10 +538,7 @@ namespace Jurassic.Library
 
 		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toString' is not generic.");
-			return ((DateInstance)thisObj).ToStringJS();
+			return ToString(thisObj);
 		}
 
 		private static object __STUB__toTimeString(ScriptEngine engine, object thisObj, object[] args)
