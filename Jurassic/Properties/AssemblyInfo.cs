@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Paul Bartrum")]
 [assembly: AssemblyProduct("Jurassic")]
-[assembly: AssemblyCopyright("Copyright © Paul Bartrum 2010")]
+[assembly: AssemblyCopyright("Copyright © Paul Bartrum 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -26,9 +26,12 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-[assembly: AssemblyVersion("2.1.0.0")]
+
+// This is the version that is used for binding.
+[assembly: AssemblyVersion("3.0.0.0")]
+
+// This is the version that appears in Explorer.
+[assembly: AssemblyFileVersion("3.0.0.0")]
 
 // The AllowPartiallyTrustedCallersAttribute requires the assembly to be signed with a strong name
 // key.
@@ -36,6 +39,3 @@ using System.Runtime.InteropServices;
 
 // Unit tests and performance tests need access to internal members.
 [assembly: InternalsVisibleTo("Unit Tests")]
-//[assembly: InternalsVisibleTo("Performance")]
-//[assembly: InternalsVisibleTo("JavaScript")]
-//[assembly: InternalsVisibleTo("DebuggerTest")]
