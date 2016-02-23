@@ -226,6 +226,17 @@ namespace Jurassic
             Array.Copy(args, offset, result, 0, args.Length - offset);
             return result;
         }
+
+        /// <summary>
+        /// Determines if the given value is a regular expression.
+        /// </summary>
+        /// <param name="value"> The value to test. </param>
+        /// <returns> <c>true</c> if the given value is a regular expression; <c>false</c> otherwise. </returns>
+        public static bool IsRegularExpression(object value)
+        {
+            // TODO: ECMAScript 6 defines IsRegExp in terms of a predefined symbol @@match.
+            return value is RegExpInstance;
+        }
     }
 
 }

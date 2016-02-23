@@ -527,7 +527,7 @@ namespace Jurassic
 
         //     EXECUTION
         //_________________________________________________________________________________________
-
+        
         /// <summary>
         /// Compiles the given source code and returns it in a form that can be executed many
         /// times.

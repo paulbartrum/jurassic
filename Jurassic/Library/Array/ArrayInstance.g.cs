@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private List<PropertyNameAndValue> GetDeclarativeProperties()
 		{
-			return new List<PropertyNameAndValue>(26)
+			return new List<PropertyNameAndValue>(27)
 			{
 				new PropertyNameAndValue("concat", new ClrStubFunction(Engine.FunctionInstancePrototype, "concat", 1, __STUB__concat), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("join", new ClrStubFunction(Engine.FunctionInstancePrototype, "join", 1, __STUB__join), PropertyAttributes.NonEnumerable),
@@ -32,6 +32,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("some", new ClrStubFunction(Engine.FunctionInstancePrototype, "some", 1, __STUB__some), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("forEach", new ClrStubFunction(Engine.FunctionInstancePrototype, "forEach", 1, __STUB__forEach), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("map", new ClrStubFunction(Engine.FunctionInstancePrototype, "map", 1, __STUB__map), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("find", new ClrStubFunction(Engine.FunctionInstancePrototype, "find", 1, __STUB__find), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("filter", new ClrStubFunction(Engine.FunctionInstancePrototype, "filter", 1, __STUB__filter), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("reduce", new ClrStubFunction(Engine.FunctionInstancePrototype, "reduce", 1, __STUB__reduce), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("reduceRight", new ClrStubFunction(Engine.FunctionInstancePrototype, "reduceRight", 1, __STUB__reduceRight), PropertyAttributes.NonEnumerable),
@@ -257,6 +258,21 @@ namespace Jurassic.Library
 					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
 				default:
 					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeConverter.ToObject(engine, args[1], null));
+			}
+		}
+
+		private static object __STUB__find(ScriptEngine engine, object thisObj, object[] args)
+		{
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(engine, "TypeError", "Cannot convert undefined or null to object.");
+			switch (args.Length)
+			{
+				case 0:
+					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+				case 1:
+					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+				default:
+					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeConverter.ToObject(engine, args[1], null));
 			}
 		}
 

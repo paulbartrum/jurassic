@@ -47,18 +47,11 @@ namespace Jurassic.Compiler
             using (var lexer = new Lexer(this.Engine, this.Source))
             {
                 var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Eval);
-
-                // If the eval() is running strict mode, create a new scope.
-                parser.DirectivePrologueProcessedCallback = parser2 =>
-                {
-                    if (parser2.StrictMode == true)
-                        parser2.InitialScope = parser2.Scope = DeclarativeScope.CreateEvalScope(parser2.Scope);
-                };
-
+                
                 this.AbstractSyntaxTree = parser.Parse();
 
                 this.StrictMode = parser.StrictMode;
-                this.InitialScope = parser.Scope;
+                this.InitialScope = parser.BaseScope;
                 this.MethodOptimizationHints = parser.MethodOptimizationHints;
             }
         }

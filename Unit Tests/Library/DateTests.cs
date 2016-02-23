@@ -73,16 +73,16 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2010, 3, 12, 1, 3, 0)), Evaluate("new Date(2010, 2, 12, 0, 63).valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 3, 12, 0, 1, 3)), Evaluate("new Date(2010, 2, 12, 0, 0, 63).valueOf()"));
 
-            // Date() returns the current date as a string - this test assumes the running time is less than 1s.
+                // Date() returns the current date as a string - this test assumes the running time is less than 1s.
             var str = (string)Evaluate("Date()");
-            var formatString = "ddd MMM dd yyyy HH:mm:ss";
-            Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
-                string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString), str));
+                var formatString = "ddd MMM dd yyyy HH:mm:ss";
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
+                    string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString), str));
 
-            // Any arguments provided are ignored.
+                // Any arguments provided are ignored.
             str = (string)Evaluate("Date(2009)");
-            Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss")) ||
-                str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss")));
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss")) ||
+                    str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss")));
 
             // toString and valueOf.
             Assert.AreEqual("function Date() { [native code] }", Evaluate("Date.toString()"));
@@ -129,12 +129,12 @@ namespace UnitTests
         [TestMethod]
         public void parse()
         {
-            // ECMAScript format - date-only forms.
+                // ECMAScript format - date-only forms.
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.parse('2010')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.parse('2010-02')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.parse('2010-02-05')"));
 
-            // ECMAScript format - date and time forms.
+                // ECMAScript format - date and time forms.
             Assert.AreEqual(45240000, Evaluate("Date.parse('1970-01-01T12:34')"));
             Assert.AreEqual(ToJSDate(new DateTime(1970, 1, 1, 12, 34, 56, DateTimeKind.Utc)), Evaluate("Date.parse('1970-01-01T12:34:56')"));
             Assert.AreEqual(ToJSDate(new DateTime(1970, 1, 1, 12, 34, 56, 123, DateTimeKind.Utc)), Evaluate("Date.parse('1970-01-01T12:34:56.123')"));
@@ -646,6 +646,7 @@ namespace UnitTests
             Assert.AreEqual("Sat Apr 24 2010 23:59:57 " + GetTimezoneString(DateTime.Parse("24 Apr 2010 23:59:57")), Evaluate("new Date('24 Apr 2010 23:59:57').toString()"));
             Assert.AreEqual("Invalid Date", Evaluate("new Date(NaN).toString()"));
             Assert.AreEqual(0, Evaluate("new Date().toString.length"));
+            Assert.AreEqual("Invalid Date", Evaluate("new Date().toString.call(5)"));
         }
 
         [TestMethod]

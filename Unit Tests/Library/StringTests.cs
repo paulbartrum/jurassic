@@ -86,6 +86,23 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void fromCodePoint()
+        {
+            Assert.AreEqual("", Evaluate("String.fromCodePoint()"));
+            Assert.AreEqual("ha", Evaluate("String.fromCodePoint(104, 97)"));
+            Assert.AreEqual("𠮷", Evaluate("String.fromCodePoint(134071)"));
+            Assert.AreEqual("RangeError", EvaluateExceptionType("String.fromCodePoint(1.5)"));
+            Assert.AreEqual("RangeError", EvaluateExceptionType("String.fromCodePoint(-5)"));
+            Assert.AreEqual("RangeError", EvaluateExceptionType("String.fromCodePoint(5999951905)"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("String.fromCodePoint.length"));
+
+            // No this object is required.
+            Assert.AreEqual("ha", Evaluate("var f = String.fromCodePoint; f(104, 97)"));
+        }
+
+        [TestMethod]
         public void anchor()
         {
             Assert.AreEqual(@"<a name=""undefined"">haha</a>", (string)Evaluate("'haha'.anchor()"), true);
@@ -156,6 +173,29 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, Evaluate("'haha'.charCodeAt(4)"));
             Assert.AreEqual(104, Evaluate("'haha'.charCodeAt()"));
             Assert.AreEqual(1, Evaluate("''.charCodeAt.length"));
+
+            // Strings must be UTF-16 in ECMAScript 6.
+            Assert.AreEqual(55362, Evaluate("'𠮷a'.charCodeAt(0)"));
+            Assert.AreEqual(57271, Evaluate("'𠮷a'.charCodeAt(1)"));
+            Assert.AreEqual(97, Evaluate("'𠮷a'.charCodeAt(2)"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("''.charCodeAt.length"));
+
+            // charCodeAt is generic.
+            Assert.AreEqual(50, Evaluate("x = new Number(6.1234); x.f = ''.charCodeAt; x.f(3)"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.charCodeAt.call(undefined)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.charCodeAt.call(null)"));
+        }
+
+        [TestMethod]
+        public void codePointAt()
+        {
+            Assert.AreEqual(134071, Evaluate("'𠮷a'.codePointAt(0)"));
+            Assert.AreEqual(57271, Evaluate("'𠮷a'.codePointAt(1)"));
+            Assert.AreEqual(97, Evaluate("'𠮷a'.codePointAt(2)"));
 
             // length
             Assert.AreEqual(1, Evaluate("''.charCodeAt.length"));
@@ -229,6 +269,36 @@ namespace UnitTests
             Assert.AreEqual(@"<font size=""abc"">haha</font>", (string)Evaluate("'haha'.fontsize('abc')"), true);
             Assert.AreEqual(@"<font size=""undefined"">haha</font>", (string)Evaluate("'haha'.fontsize()"), true);
             Assert.AreEqual(1, Evaluate("''.fontsize.length"));
+        }
+
+        [TestMethod]
+        public void includes()
+        {
+            Assert.AreEqual(true, Evaluate("'onetwothree'.includes('two')"));
+            Assert.AreEqual(true, Evaluate("'onetwothree'.includes('t')"));
+            Assert.AreEqual(true, Evaluate("'onetwothree'.includes('two', 2)"));
+            Assert.AreEqual(true, Evaluate("'onetwothree'.includes('two', 3)"));
+            Assert.AreEqual(false, Evaluate("'onetwothree'.includes('two', 4)"));
+            Assert.AreEqual(true, Evaluate("'onetwothree'.includes('two', -400)"));
+            Assert.AreEqual(false, Evaluate("'onetwothree'.includes('two', 400)"));
+            Assert.AreEqual(false, Evaluate("'onetwothree'.includes('no')"));
+            Assert.AreEqual(false, Evaluate("'onetwothree'.includes('e', 400)"));
+            Assert.AreEqual(false, Evaluate("''.includes('no')"));
+            Assert.AreEqual(true, Evaluate("''.includes('')"));
+
+            // The substring cannot be a regular expression.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("'onetwothree'.includes(/two/)"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("''.includes.length"));
+
+            // includes is generic.
+            Assert.AreEqual(true, Evaluate("x = new Number(6.1234); x.f = ''.includes; x.f('123')"));
+            Assert.AreEqual(true, Evaluate("x = new Date(0); x.f = ''.includes; x.getTimezoneOffset() > 0 ? x.f('31') : x.f('01')"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.includes.call(undefined)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.includes.call(null)"));
         }
 
         [TestMethod]
@@ -472,6 +542,84 @@ namespace UnitTests
             Assert.AreEqual("honey ", Evaluate("RegExp['$`']"));
             Assert.AreEqual("", Evaluate("RegExp.rightContext"));
             Assert.AreEqual("", Evaluate("RegExp[\"$'\"]"));
+        }
+
+        [TestMethod]
+        public void normalize()
+        {
+            // Default is NFC
+            Assert.AreEqual(7855, Evaluate(@"'\u1EAF'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u1EAF'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(7855, Evaluate(@"'\u0103\u0301'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0103\u0301'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(7855, Evaluate(@"'\u0061\u0306\u0301'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0061\u0306\u0301'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(50, Evaluate(@"'\u0032\u2075'.normalize().charCodeAt(0)"));
+            Assert.AreEqual(8309, Evaluate(@"'\u0032\u2075'.normalize().charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0032\u2075'.normalize().charCodeAt(2)"));
+
+            // NFC
+            Assert.AreEqual(7855, Evaluate(@"'\u1EAF'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u1EAF'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(7855, Evaluate(@"'\u0103\u0301'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0103\u0301'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(7855, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(50, Evaluate(@"'\u0032\u2075'.normalize('NFC').charCodeAt(0)"));
+            Assert.AreEqual(8309, Evaluate(@"'\u0032\u2075'.normalize('NFC').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0032\u2075'.normalize('NFC').charCodeAt(2)"));
+
+            // NFD
+            Assert.AreEqual(97, Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(774, Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(769, Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u1EAF'.normalize('NFD').charCodeAt(3)"));
+            Assert.AreEqual(97, Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(774, Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(769, Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0103\u0301'.normalize('NFD').charCodeAt(3)"));
+            Assert.AreEqual(97, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(774, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(769, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFD').charCodeAt(3)"));
+            Assert.AreEqual(50, Evaluate(@"'\u0032\u2075'.normalize('NFD').charCodeAt(0)"));
+            Assert.AreEqual(8309, Evaluate(@"'\u0032\u2075'.normalize('NFD').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0032\u2075'.normalize('NFD').charCodeAt(2)"));
+
+            // NFKC
+            Assert.AreEqual(7855, Evaluate(@"'\u1EAF'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u1EAF'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(7855, Evaluate(@"'\u0103\u0301'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0103\u0301'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(7855, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(50, Evaluate(@"'\u0032\u2075'.normalize('NFKC').charCodeAt(0)"));
+            Assert.AreEqual(53, Evaluate(@"'\u0032\u2075'.normalize('NFKC').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0032\u2075'.normalize('NFKC').charCodeAt(2)"));
+
+            // NFKD
+            Assert.AreEqual(97, Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(774, Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(769, Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u1EAF'.normalize('NFKD').charCodeAt(3)"));
+            Assert.AreEqual(97, Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(774, Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(769, Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0103\u0301'.normalize('NFKD').charCodeAt(3)"));
+            Assert.AreEqual(97, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(774, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(769, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(2)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0061\u0306\u0301'.normalize('NFKD').charCodeAt(3)"));
+            Assert.AreEqual(50, Evaluate(@"'\u0032\u2075'.normalize('NFKD').charCodeAt(0)"));
+            Assert.AreEqual(53, Evaluate(@"'\u0032\u2075'.normalize('NFKD').charCodeAt(1)"));
+            Assert.AreEqual(double.NaN, Evaluate(@"'\u0032\u2075'.normalize('NFKD').charCodeAt(2)"));
+
+            // Valid parameter values are: NFC, NFD, NFKC, NFKD
+            Assert.AreEqual("RangeError", EvaluateExceptionType(@"'\u1EAF'.normalize('abc')"));
+            Assert.AreEqual("RangeError", EvaluateExceptionType(@"'\u1EAF'.normalize('nfc')"));
+
+            // normalize is generic.
+            Assert.AreEqual("6.1234", Evaluate("x = new Number(6.1234); x.f = ''.normalize; x.f()"));
         }
 
         [TestMethod]
@@ -1014,6 +1162,100 @@ namespace UnitTests
 
             // valueOf is not generic.
             Assert.AreEqual("TypeError", EvaluateExceptionType("''.valueOf.call(5)"));
+        }
+
+        [TestMethod]
+        public void startsWith()
+        {
+            Assert.AreEqual(true, Evaluate("'To be, or not to be, that is the question.'.startsWith('To be')"));
+            Assert.AreEqual(false, Evaluate("'To be, or not to be, that is the question.'.startsWith('not to be')"));
+            Assert.AreEqual(true, Evaluate("'To be, or not to be, that is the question.'.startsWith('not to be', 10)"));
+
+            Assert.AreEqual(true, Evaluate("'ABC'.startsWith('AB')"));
+            Assert.AreEqual(false, Evaluate("'ABC'.startsWith('abc')"));
+            Assert.AreEqual(false, Evaluate("'ABC'.startsWith('ABCD')"));
+            Assert.AreEqual(true, Evaluate("'ABC'.startsWith('B', 1)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.startsWith('bc', 1)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.startsWith('BCD', 1)"));
+
+            // The substring cannot be a regular expression.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("'onetwothree'.startsWith(/two/)"));
+
+            // Length
+            Assert.AreEqual(1, Evaluate("'To be, or not to be, that is the question.'.startsWith.length"));
+        }
+
+        [TestMethod]
+        public void endsWith()
+        {
+            Assert.AreEqual(true, Evaluate("'To be, or not to be, that is the question.'.endsWith('question.')"));
+            Assert.AreEqual(false, Evaluate("'To be, or not to be, that is the question.'.endsWith('not to be')"));
+            Assert.AreEqual(true, Evaluate("'To be, or not to be, that is the question.'.endsWith('not to be', 19)"));
+
+            Assert.AreEqual(true, Evaluate("'ABC'.endsWith('BC')"));
+            Assert.AreEqual(false, Evaluate("'ABC'.endsWith('bc')"));
+            Assert.AreEqual(false, Evaluate("'ABC'.endsWith('ABCD')"));
+            Assert.AreEqual(true, Evaluate("'ABC'.endsWith('B', 2)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.endsWith('bc', 3)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.endsWith('BCD', 2)"));
+            Assert.AreEqual(true, Evaluate("'ABC'.endsWith('C', 100)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.endsWith('C', 1)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.endsWith('C', 0)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.endsWith('C', -1)"));
+
+            // The substring cannot be a regular expression.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("'onetwothree'.endsWith(/two/)"));
+
+            // Length
+            Assert.AreEqual(1, Evaluate("'To be, or not to be, that is the question.'.endsWith.length"));
+        }
+
+        [TestMethod]
+        public void contains()
+        {
+            Assert.AreEqual(true, Evaluate("'To be, or not to be, that is the question.'.contains('question.')"));
+            Assert.AreEqual(true, Evaluate("'To be, or not to be, that is the question.'.contains('not to be')"));
+            Assert.AreEqual(false, Evaluate("'To be, or not to be, that is the question.'.contains('NOT')"));
+            Assert.AreEqual(false, Evaluate("'To be, or not to be, that is the question.'.contains('not to be', 19)"));
+
+            Assert.AreEqual(true, Evaluate("'ABC'.contains('BC')"));
+            Assert.AreEqual(false, Evaluate("'ABC'.contains('bc')"));
+            Assert.AreEqual(false, Evaluate("'ABC'.contains('ABCD')"));
+            Assert.AreEqual(false, Evaluate("'ABC'.contains('B', 2)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.contains('bc', 3)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.contains('BCD', 2)"));
+            Assert.AreEqual(false, Evaluate("'ABC'.contains('C', 100)"));
+            Assert.AreEqual(true, Evaluate("'ABC'.contains('C', 1)"));
+            Assert.AreEqual(true, Evaluate("'ABC'.contains('C', 0)"));
+            Assert.AreEqual(true, Evaluate("'ABC'.contains('C', -1)"));
+
+            // Length
+            Assert.AreEqual(1, Evaluate("'To be, or not to be, that is the question.'.contains.length"));
+        }
+
+        [TestMethod]
+        public void repeat()
+        {
+            Assert.AreEqual("", Evaluate("''.repeat(0)"));
+            Assert.AreEqual("ab", Evaluate("'ab'.repeat(1)"));
+            Assert.AreEqual("abab", Evaluate("'ab'.repeat(2)"));
+            Assert.AreEqual("ababab", Evaluate("'ab'.repeat(3)"));
+
+            Assert.AreEqual("RangeError", EvaluateExceptionType("'ABC'.repeat(-1)"));
+            Assert.AreEqual("RangeError", EvaluateExceptionType("'ABC'.repeat(Infinity)"));
+
+            // Length
+            Assert.AreEqual(1, Evaluate("'ab'.repeat.length"));
+        }
+
+        [TestMethod]
+        public void raw()
+        {
+            Assert.AreEqual("t0e1s2t", Evaluate("String.raw({ raw: 'test' }, 0, 1, 2)"));
+
+            // The first parameter must be an object with a "raw" property.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("String.raw({}, 0, 1, 2)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("String.raw(5, 0, 1, 2)"));
         }
     }
 }

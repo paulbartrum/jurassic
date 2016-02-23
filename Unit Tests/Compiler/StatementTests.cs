@@ -191,9 +191,35 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("var x = 1, y = 2; x"));
             Assert.AreEqual(2, Evaluate("var x = 1, y = 2; y"));
             Assert.AreEqual(2, Evaluate("var x = Math.max(1, 2); x"));
+            Assert.AreEqual(2, Evaluate("(function() { for (var i = 0; i < 2; i ++) { } return i; })();"));
+            Assert.AreEqual("undefined", Evaluate("delete i; (function() { i = 5; var i = 3; })(); typeof(i);"));
+
+            // Duplicate names are allowed.
+            Assert.AreEqual(5, Evaluate("var x = 3, x = 5; x"));
+            Assert.AreEqual(5, Evaluate("var x = 3; var x = 5; x"));
+            Assert.AreEqual(5, Evaluate("'use strict'; var x = 3, x = 5; x"));
 
             // Strict mode: the name "eval" is not allowed in strict mode.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; var eval = 5"));
+        }
+
+        [TestMethod]
+        public void Let()
+        {
+            Assert.AreEqual(Undefined.Value, Evaluate("let x"));
+            Assert.AreEqual(Undefined.Value, Evaluate("let x; x"));
+            Assert.AreEqual(Undefined.Value, Evaluate("let x, y"));
+            Assert.AreEqual(5, Evaluate("let x = 5; x"));
+            Assert.AreEqual(6, Evaluate("let x, y = 6; y"));
+            Assert.AreEqual(1, Evaluate("let x = 1, y = 2; x"));
+            Assert.AreEqual(2, Evaluate("let x = 1, y = 2; y"));
+            Assert.AreEqual(2, Evaluate("let x = Math.max(1, 2); x"));
+            Assert.AreEqual("ReferenceError", EvaluateExceptionType("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
+            Assert.AreEqual("undefined", Evaluate("delete i; (function() { i = 5; var i = 3; })(); typeof(i);"));
+
+            // Duplicate names are not allowed.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("let x = 3, x = 5; x"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("let x = 3; let x = 5; x"));
         }
 
         [TestMethod]
@@ -329,6 +355,7 @@ namespace UnitTests
 
             // Can declare a function inside a catch block.
             Assert.AreEqual(2, Evaluate("try { throw 6; } catch (e) { function foo() { return 2; } foo() }"));
+            Assert.AreEqual(2, Evaluate("try { throw 6; } catch (e) { function foo() { return 2; } } foo()"));
 
             // Try using continue within try, catch and finally blocks.
             Assert.AreEqual(3, Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { j ++; continue; } catch (e) { j = 0; } j = 0; } j"));

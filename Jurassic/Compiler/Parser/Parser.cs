@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Jurassic.Library;
 
 namespace Jurassic.Compiler
 {
@@ -17,7 +16,8 @@ namespace Jurassic.Compiler
         private bool consumedLineTerminator;
         private ParserExpressionState expressionState;
         private Scope initialScope;
-        private Scope currentScope;
+        private Scope currentVarScope;
+        private Scope currentLetScope;
         private MethodOptimizationHints methodOptimizationHints;
         private List<string> labelsForCurrentStatement = new List<string>();
         private Token endToken;
@@ -49,7 +49,7 @@ namespace Jurassic.Compiler
             this.engine = engine;
             this.lexer = lexer;
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
-            this.currentScope = this.initialScope = initialScope;
+            SetInitialScope(initialScope);
             this.methodOptimizationHints = new MethodOptimizationHints();
             this.options = options;
             this.context = context;
@@ -66,11 +66,10 @@ namespace Jurassic.Compiler
         private static Parser CreateFunctionBodyParser(Parser parser, Scope scope)
         {
             var result = (Parser)parser.MemberwiseClone();
-            result.currentScope = result.initialScope = scope;
+            result.SetInitialScope(scope);
             result.methodOptimizationHints = new MethodOptimizationHints();
             result.context = CodeContext.Function;
             result.endToken = PunctuatorToken.RightBrace;
-            result.DirectivePrologueProcessedCallback = null;
             return result;
         }
 
@@ -112,24 +111,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets or sets the scope that variables are declared in.
-        /// </summary>
-        public Scope Scope
-        {
-            get { return this.currentScope; }
-            set { this.currentScope = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the scope that function declarations are declared in.
-        /// </summary>
-        public Scope InitialScope
-        {
-            get { return this.initialScope; }
-            set { this.initialScope = value; }
-        }
-
-        /// <summary>
         /// Gets or sets a value that indicates whether the parser is operating in strict mode.
         /// </summary>
         public bool StrictMode
@@ -143,13 +124,11 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets or sets a callback that is called after the directive prologue has been processed.
-        /// This callback will be called even if no directive prologue exists.
+        /// The top-level scope.
         /// </summary>
-        public Action<Parser> DirectivePrologueProcessedCallback
+        public Scope BaseScope
         {
-            get;
-            set;
+            get { return this.initialScope; }
         }
 
         /// <summary>
@@ -285,6 +264,61 @@ namespace Jurassic.Compiler
             }
         }
 
+        //     SCOPE HELPERS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Sets the initial scope.
+        /// </summary>
+        /// <param name="initialScope"> The initial scope </param>
+        private void SetInitialScope(Scope initialScope)
+        {
+            if (initialScope == null)
+                throw new ArgumentNullException("initialScope");
+            this.currentLetScope = this.currentVarScope = this.initialScope = initialScope;
+        }
+
+        /// <summary>
+        /// Helper class to help manage scopes.
+        /// </summary>
+        private class ScopeContext : IDisposable
+        {
+            private readonly Parser parser;
+            private readonly Scope previousLetScope;
+            private readonly Scope previousVarScope;
+
+            public ScopeContext(Parser parser)
+            {
+                this.parser = parser;
+                previousLetScope = parser.currentLetScope;
+                previousVarScope = parser.currentVarScope;
+            }
+
+            public void Dispose()
+            {
+                parser.currentLetScope = previousLetScope;
+                parser.currentVarScope = previousVarScope;
+            }
+        }
+
+        /// <summary>
+        /// Sets the current scope and returns an object which can be disposed to restore the
+        /// previous scope.
+        /// </summary>
+        /// <param name="letScope"> The new let scope. </param>
+        /// <param name="varScope"> The new var scope. </param>
+        /// <returns> An object which can be disposed to restore the previous scope. </returns>
+        private ScopeContext CreateScopeContext(Scope letScope, Scope varScope = null)
+        {
+            if (letScope == null)
+                throw new ArgumentNullException("letScope");
+            var result = new ScopeContext(this);
+            this.currentLetScope = letScope;
+            if (varScope != null)
+                this.currentVarScope = varScope;
+            return result;
+        }
+
 
 
         //     PARSE METHODS
@@ -338,9 +372,9 @@ namespace Jurassic.Compiler
                 ExpectEndOfStatement();
             }
 
-            // Call the directive prologue callback.
-            if (this.DirectivePrologueProcessedCallback != null)
-                this.DirectivePrologueProcessedCallback(this);
+            // If this is an eval, and strict mode is on, redefine the scope.
+            if (this.StrictMode == true && this.context == CodeContext.Eval)
+                SetInitialScope(DeclarativeScope.CreateEvalScope(this.initialScope));
 
             // Read zero or more regular statements.
             while (true)
@@ -380,8 +414,8 @@ namespace Jurassic.Compiler
         {
             if (this.nextToken == PunctuatorToken.LeftBrace)
                 return ParseBlock();
-            if (this.nextToken == KeywordToken.Var)
-                return ParseVar();
+            if (this.nextToken == KeywordToken.Var || this.nextToken == KeywordToken.Let || this.nextToken == KeywordToken.Const)
+                return ParseVarLetOrConst((KeywordToken)this.nextToken);
             if (this.nextToken == PunctuatorToken.Semicolon)
                 return ParseEmpty();
             if (this.nextToken == KeywordToken.If)
@@ -446,15 +480,17 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Parses a var statement.
+        /// Parses a var, let or const statement.
         /// </summary>
-        /// <returns> A var statement. </returns>
-        private VarStatement ParseVar()
+        /// <param name="keyword"> Indicates which type of statement is being parsed.  Must be var,
+        /// let or const. </param>
+        /// <returns> A variable declaration statement. </returns>
+        private VarStatement ParseVarLetOrConst(KeywordToken keyword)
         {
-            var result = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
+            var result = new VarStatement(this.labelsForCurrentStatement, keyword == KeywordToken.Var ? this.currentVarScope : this.currentLetScope);
 
-            // Read past the var token.
-            this.Expect(KeywordToken.Var);
+            // Read past the first token (var, let or const).
+            this.Expect(keyword);
 
             // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
@@ -469,7 +505,7 @@ namespace Jurassic.Compiler
                 ValidateVariableName(declaration.VariableName);
 
                 // Add the variable to the current function's list of local variables.
-                this.currentScope.DeclareVariable(declaration.VariableName,
+                this.currentVarScope.DeclareVariable(declaration.VariableName,
                     this.context == CodeContext.Function ? null : new LiteralExpression(Undefined.Value),
                     writable: true, deletable: this.context == CodeContext.Eval);
 
@@ -663,7 +699,7 @@ namespace Jurassic.Compiler
                 this.Expect(KeywordToken.Var);
 
                 // There can be multiple initializers (but not for for-in statements).
-                var varStatement = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
+                var varStatement = new VarStatement(this.labelsForCurrentStatement, this.currentVarScope);
                 initializationStatement = varStatement;
 
                 // Only a simple variable name is allowed for for-in statements.
@@ -678,7 +714,7 @@ namespace Jurassic.Compiler
                     ValidateVariableName(declaration.VariableName);
 
                     // Add the variable to the current function's list of local variables.
-                    this.currentScope.DeclareVariable(declaration.VariableName,
+                    this.currentVarScope.DeclareVariable(declaration.VariableName,
                         this.context == CodeContext.Function ? null : new LiteralExpression(Undefined.Value),
                         writable: true, deletable: this.context == CodeContext.Eval);
 
@@ -709,7 +745,7 @@ namespace Jurassic.Compiler
                     else if (this.nextToken == KeywordToken.In && cannotBeForIn == false)
                     {
                         // This is a for-in statement.
-                        forInReference = new NameExpression(this.currentScope, declaration.VariableName);
+                        forInReference = new NameExpression(this.currentVarScope, declaration.VariableName);
                         break;
                     }
                     else if (this.nextToken != PunctuatorToken.Comma)
@@ -945,14 +981,12 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Create a new scope and assign variables within the with statement to the scope.
-            result.Scope = ObjectScope.CreateWithScope(this.currentScope, objectEnvironment);
-            this.currentScope = result.Scope;
-
-            // Read the body of the with statement.
-            result.Body = ParseStatement();
-
-            // Revert the scope.
-            this.currentScope = this.currentScope.ParentScope;
+            result.Scope = ObjectScope.CreateWithScope(this.currentLetScope, objectEnvironment);
+            using (CreateScopeContext(letScope: result.Scope, varScope: result.Scope))
+            {
+                // Read the body of the with statement.
+                result.Body = ParseStatement();
+            }
 
             return result;
         }
@@ -1108,13 +1142,12 @@ namespace Jurassic.Compiler
                 this.Expect(PunctuatorToken.RightParenthesis);
 
                 // Create a new scope for the catch variable.
-                this.currentScope = result.CatchScope = DeclarativeScope.CreateCatchScope(this.currentScope, result.CatchVariableName);
-
-                // Parse the statements inside the catch block.
-                result.CatchBlock = ParseBlock();
-
-                // Revert the scope.
-                this.currentScope = this.currentScope.ParentScope;
+                result.CatchScope = DeclarativeScope.CreateCatchScope(this.currentLetScope, result.CatchVariableName);
+                using (CreateScopeContext(letScope: result.CatchScope, varScope: result.CatchScope))
+                {
+                    // Parse the statements inside the catch block.
+                    result.CatchBlock = ParseBlock();
+                }
             }
 
             if (this.nextToken == KeywordToken.Finally)
@@ -1482,7 +1515,7 @@ namespace Jurassic.Compiler
                     {
                         // If the token is an identifier, convert it to a NameExpression.
                         var identifierName = ((IdentifierToken)this.nextToken).Name;
-                        terminal = new NameExpression(this.currentScope, identifierName);
+                        terminal = new NameExpression(this.currentVarScope, identifierName);
 
                         // Record each occurance of a variable name.
                         if (unboundOperator == null || unboundOperator.OperatorType != OperatorType.MemberAccess)
@@ -1811,7 +1844,7 @@ namespace Jurassic.Compiler
                 if (this.nextToken != PunctuatorToken.Colon && mightBeGetOrSet == true && (propertyName == "get" || propertyName == "set"))
                 {
                     // Parse the function name and body.
-                    var function = ParseFunction(propertyName == "get" ? FunctionType.Getter : FunctionType.Setter, this.currentScope);
+                    var function = ParseFunction(propertyName == "get" ? FunctionType.Getter : FunctionType.Setter, this.currentVarScope);
 
                     // Get the function name.
                     var getOrSet = propertyName;
@@ -1944,7 +1977,7 @@ namespace Jurassic.Compiler
         /// <returns> A function expression. </returns>
         private FunctionExpression ParseFunctionExpression()
         {
-            return ParseFunction(FunctionType.Expression, this.currentScope);
+            return ParseFunction(FunctionType.Expression, this.currentVarScope);
         }
     }
 

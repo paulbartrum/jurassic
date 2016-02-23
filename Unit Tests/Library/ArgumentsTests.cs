@@ -40,7 +40,7 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("(function(a, b, c) { delete arguments[0]; arguments[0] = 9; return a })(1, 2, 3)"));
 
             // However, deleting the parameter doesn't break the mapping.
-            //if (TestUtils.Engine != JSEngine.JScript)   // JScript bug?
+            //if (Engine != JSEngine.JScript)   // JScript bug?
             //{
                 Assert.AreEqual(1, Evaluate("(function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
                 Assert.AreEqual(1, Evaluate("a = 5; (function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));

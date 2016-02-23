@@ -140,6 +140,31 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Assigns enumerable properties of one or more source objects onto a destination object.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="target"> The destination object to copy properties to. </param>
+        /// <param name="sources"> One or more source objects to copy properties from. </param>
+        /// <returns> A new object instance. </returns>
+        [JSInternalFunction(Name = "assign", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static ObjectInstance Assign(ScriptEngine engine, ObjectInstance target, params object[] sources)
+        {
+            foreach (var rawSource in sources)
+            {
+                // Ignore undefined or null sources.
+                if (rawSource == null || rawSource == Undefined.Value || rawSource == Null.Value)
+                    continue;
+                var source = TypeConverter.ToObject(engine, rawSource);
+
+                // Copy the enumerable properties from the source object.
+                foreach (var property in source.Properties)
+                    if (property.IsEnumerable == true)
+                        target.SetPropertyValue(property.Name, property.Value, throwOnError: true);
+            }
+            return target;
+        }
+
+        /// <summary>
         /// Modifies the value and attributes of a property.
         /// </summary>
         /// <param name="obj"> The object to define the property on. </param>
@@ -283,6 +308,19 @@ namespace Jurassic.Library
                 if (property.IsEnumerable == true)
                     result.Push(property.Name);
             return result;
+        }
+
+        /// <summary>
+        /// Determines whether two values are the same value.  Note that this method considers NaN
+        /// to be equal with itself and negative zero is considered different from positive zero.
+        /// </summary>
+        /// <param name="value1"> The first value to compare. </param>
+        /// <param name="value2"> The second value to compare. </param>
+        /// <returns> <c>true</c> if the values are the same.  </returns>
+        [JSInternalFunction(Name = "is")]
+        public static bool Is(object value1, object value2)
+        {
+            return TypeComparer.SameValue(value1, value2);
         }
     }
 }

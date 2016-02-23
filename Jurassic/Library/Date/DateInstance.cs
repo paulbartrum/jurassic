@@ -883,13 +883,18 @@ namespace Jurassic.Library
         /// Returns a string representing the date and time.
         /// </summary>
         /// <returns> A string representing the date and time. </returns>
-        [JSInternalFunction(Name = "toString")]
-        public string ToStringJS()
+        [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
+        public static string ToString(object thisRef)
         {
-            if (this.value == InvalidDate)
+            // As of ES6, this method is generic.
+            if ((thisRef is DateInstance) == false)
                 return "Invalid Date";
-            
-            var dateTime = this.value.ToLocalTime();
+
+            var instance = (DateInstance)thisRef;
+            if (instance.value == InvalidDate)
+                return "Invalid Date";
+
+            var dateTime = instance.value.ToLocalTime();
             return dateTime.ToString("ddd MMM dd yyyy HH:mm:ss ", System.Globalization.DateTimeFormatInfo.InvariantInfo) +
                 ToTimeZoneString(dateTime);
         }

@@ -207,11 +207,25 @@ namespace Jurassic.Compiler
                 // Unicode escape sequence.
                 if (ReadNextChar() != 'u')
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
-                firstChar = ReadHexEscapeSequence(4);
-                if (IsIdentifierChar(firstChar) == false)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                firstChar = this.reader.Peek();
+                if (firstChar == '{')
+                {
+                    // ECMAScript 6 extended unicode escape sequence.
+                    string extendedCharacter = ReadExtendedUnicodeSequence();
+                    if (extendedCharacter.Length == 1 && IsIdentifierChar(extendedCharacter[0]) == false)
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                    name.Append(extendedCharacter);
+                }
+                else
+                {
+                    firstChar = ReadHexEscapeSequence(4);
+                    if (IsIdentifierChar(firstChar) == false)
+                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                    name.Append((char)firstChar);
+                }
             }
-            name.Append((char)firstChar);
+            else
+                name.Append((char)firstChar);
 
             // Read characters until we hit the first non-identifier character.
             while (true)
@@ -226,10 +240,22 @@ namespace Jurassic.Compiler
                     ReadNextChar();
                     if (ReadNextChar() != 'u')
                         throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
-                    c = ReadHexEscapeSequence(4);
-                    if (IsIdentifierChar(c) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
-                    name.Append((char)c);
+                    c = this.reader.Peek();
+                    if (c == '{')
+                    {
+                        // ECMAScript 6 extended unicode escape sequence.
+                        string extendedCharacter = ReadExtendedUnicodeSequence();
+                        if (extendedCharacter.Length == 1 && IsIdentifierChar(extendedCharacter[0]) == false)
+                            throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                        name.Append(extendedCharacter);
+                    }
+                    else
+                    { 
+                        c = ReadHexEscapeSequence(4);
+                        if (IsIdentifierChar(c) == false)
+                            throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                        name.Append((char)c);
+                    }
                 }
                 else
                 {
@@ -323,14 +349,16 @@ namespace Jurassic.Compiler
                 case NumberParser.ParseCoreStatus.NoExponent:
                     throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal constant.", this.lineNumber, this.Source.Path);
-                case NumberParser.ParseCoreStatus.OctalLiteral:
-                    // Octal number are not supported in strict mode.
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal literal.", this.lineNumber, this.Source.Path);
+                case NumberParser.ParseCoreStatus.ES3OctalLiteral:
+                    // ES3 octal literals are not supported in strict mode.
                     if (this.StrictMode)
                         throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not allowed in strict mode.", this.lineNumber, this.Source.Path);
                     break;
                 case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal constant.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal literal.", this.lineNumber, this.Source.Path);
+                case NumberParser.ParseCoreStatus.InvalidBinaryLiteral:
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid binary literal.", this.lineNumber, this.Source.Path);
             }
 
             // Return the result as an integer if possible, otherwise return it as a double.
@@ -435,7 +463,12 @@ namespace Jurassic.Compiler
                                 break;
                             case 'u':
                                 // Unicode escape.
-                                contents.Append(ReadHexEscapeSequence(4));
+                                c = this.reader.Peek();
+                                if (c == '{')
+                                    // ECMAScript 6 hex escape sequence.
+                                    contents.Append(ReadExtendedUnicodeSequence());
+                                else
+                                    contents.Append(ReadHexEscapeSequence(4));
                                 break;
                             case '0':
                                 // Null character or octal escape sequence.
@@ -516,6 +549,38 @@ namespace Jurassic.Compiler
                     break;
             }
             return (char)numericValue;
+        }
+
+        /// <summary>
+        /// Reads an extended unicode escape sequence in the form "\u{20BB7}".
+        /// </summary>
+        /// <returns> The character or characters corresponding to the escape sequence. </returns>
+        private string ReadExtendedUnicodeSequence()
+        {
+            // Skip the first curly bracket.
+            int c = ReadNextChar();
+            if (c != '{')
+                throw new InvalidOperationException("Expected '{' character.");
+
+            // Read hex digits.
+            var contents = new StringBuilder(6);
+            while (true)
+            {
+                c = ReadNextChar();
+                if (c == '}')
+                    break;
+                if (contents.Length >= 6)
+                    throw new JavaScriptException(this.engine, "SyntaxError", "Escape sequence too long.", this.lineNumber, this.Source.Path);
+                contents.Append((char)c);
+                if (IsHexDigit(c) == false)
+                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
+            }
+
+            // Convert the number into a string.
+            int codePoint = int.Parse(contents.ToString(), System.Globalization.NumberStyles.HexNumber);
+            if (codePoint <= 65535)
+                return new string((char)codePoint, 1);
+            return new string(new char[] { (char)((codePoint - 65536) / 1024 + 0xD800), (char)((codePoint - 65536) % 1024 + 0xDC00) });
         }
 
         /// <summary>

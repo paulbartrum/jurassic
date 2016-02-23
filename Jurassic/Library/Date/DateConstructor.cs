@@ -39,7 +39,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public string Call()
         {
-            return new DateInstance(this.InstancePrototype).ToStringJS();
+            return DateInstance.ToString(new DateInstance(this.InstancePrototype));
         }
 
         /// <summary>

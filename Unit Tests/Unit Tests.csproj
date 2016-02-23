@@ -78,7 +78,10 @@
     <Compile Include="Core\TypeConverterTests.cs" />
     <Compile Include="Library\ObjectTests.cs" />
     <Compile Include="Library\GlobalTests.cs" />
+    <Compile Include="Library\ReflectTests.cs" />
     <Compile Include="Library\RegExpTests.cs" />
+    <Compile Include="Library\PromiseTests.cs" />
+    <Compile Include="Library\SymbolTests.cs" />
     <Compile Include="Library\StringTests.cs" />
     <Compile Include="Library\DateTests.cs" />
     <Compile Include="Library\ErrorTests.cs" />

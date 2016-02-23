@@ -363,6 +363,23 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void assign()
+        {
+            Execute(@"
+                var dst  = { quux: 0 };
+                var src1 = { foo: 1, bar: 2 };
+                var src2 = { foo: 3, baz: 4 };
+                Object.assign(dst, src1, src2);");
+            Assert.AreEqual(0, Evaluate("dst.quux"));
+            Assert.AreEqual(3, Evaluate("dst.foo"));
+            Assert.AreEqual(2, Evaluate("dst.bar"));
+            Assert.AreEqual(4, Evaluate("dst.baz"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Object.assign.length"));
+        }
+
+        [TestMethod]
         public void defineProperties()
         {
             Assert.AreEqual(true, Evaluate("var x = {}; Object.defineProperties(x, {a: {value: 5}, b: {value: 10}}) === x"));
@@ -668,6 +685,51 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(0, Evaluate("Object.valueOf.length"));
+        }
+
+        [TestMethod]
+        public void @is()
+        {
+            Assert.AreEqual(true, Evaluate("Object.is('foo', 'foo');"));
+            Assert.AreEqual(true, Evaluate("Object.is(Math, Math);"));
+
+            Assert.AreEqual(false, Evaluate("Object.is('foo', 'bar');"));
+            Assert.AreEqual(false, Evaluate("Object.is([], []);"));
+
+            Assert.AreEqual(true, Evaluate("var test = {a: 1}; Object.is(test, test);"));
+
+            Assert.AreEqual(true, Evaluate("Object.is(null, null);"));
+
+            // Special Cases
+            Assert.AreEqual(false, Evaluate("Object.is(0, -0);"));
+            Assert.AreEqual(true, Evaluate("Object.is(-0, -0);"));
+            Assert.AreEqual(true, Evaluate("Object.is(NaN, 0/0);"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Object.is.length"));
+        }
+
+        [TestMethod]
+        public void setPrototypeOf()
+        {
+            Assert.AreEqual(5, Evaluate("var a = {}; Object.setPrototypeOf(a, Math); a.abs(-5)"));
+            Assert.AreEqual(true, Evaluate("var a = {}; Object.setPrototypeOf(a, Math); Object.getPrototypeOf(a) === Math"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.setPrototypeOf(Object.preventExtensions({}), {})"));
+        }
+
+        [TestMethod]
+        public void __proto__()
+        {
+            Assert.AreEqual(true, Evaluate("var a = {}; a.__proto__ = Math; a.__proto__ === Math"));
+            Assert.AreEqual(true, Evaluate("var a = {}; a.__proto__ = Math; a.__proto__ === Object.getPrototypeOf(a)"));
+        }
+
+        [TestMethod]
+        public void getOwnPropertySymbols()
+        {
+            Assert.AreEqual(0, Evaluate("var a = {}; Object.getOwnPropertySymbols(a).length"));
+            Assert.AreEqual(2, Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(a).length"));
+            Assert.AreEqual("[Symbol(one), Symbol(two)]", Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(a).toString()"));
         }
     }
 }

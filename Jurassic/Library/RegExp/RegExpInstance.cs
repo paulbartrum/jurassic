@@ -64,8 +64,9 @@ namespace Jurassic.Library
             }
 
             // Initialize the javascript properties.
-            var properties = new List<PropertyNameAndValue>(5);
+            var properties = new List<PropertyNameAndValue>(6);
             properties.Add(new PropertyNameAndValue("source", pattern, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("flags", this.Flags, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("global", this.Global, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("multiline", this.Multiline, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("ignoreCase", this.IgnoreCase, PropertyAttributes.Sealed));
@@ -89,6 +90,7 @@ namespace Jurassic.Library
 
             // Initialize the javascript properties.
             this.FastSetProperty("source", existingInstance.Source, PropertyAttributes.Sealed);
+            this.FastSetProperty("flags", existingInstance.Flags, PropertyAttributes.Sealed);
             this.FastSetProperty("global", existingInstance.Global, PropertyAttributes.Sealed);
             this.FastSetProperty("multiline", existingInstance.Multiline, PropertyAttributes.Sealed);
             this.FastSetProperty("ignoreCase", existingInstance.IgnoreCase, PropertyAttributes.Sealed);
@@ -117,6 +119,19 @@ namespace Jurassic.Library
             get { return this.value; }
         }
 
+
+
+        //     JAVASCRIPT PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets the regular expression pattern.
+        /// </summary>
+        public string Source
+        {
+            get { return this.value.ToString(); }
+        }
+
         /// <summary>
         /// Gets a string that contains the flags.
         /// </summary>
@@ -133,19 +148,6 @@ namespace Jurassic.Library
                     result.Append("m");
                 return result.ToString();
             }
-        }
-
-
-
-        //     JAVASCRIPT PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the regular expression pattern.
-        /// </summary>
-        public string Source
-        {
-            get { return this.value.ToString(); }
         }
 
         /// <summary>
@@ -209,6 +211,7 @@ namespace Jurassic.Library
 
             // Update the javascript properties.
             this.FastSetProperty("source", pattern);
+            this.FastSetProperty("flags", this.Flags);
             this.FastSetProperty("global", this.Global);
             this.FastSetProperty("multiline", this.Multiline);
             this.FastSetProperty("ignoreCase", this.IgnoreCase);

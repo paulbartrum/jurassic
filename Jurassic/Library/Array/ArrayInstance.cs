@@ -1377,6 +1377,52 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Returns the first element in the given array that passes the test implemented by the
+        /// given function.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
+        /// array.  This function is called with three arguments: the value of the element, the
+        /// index of the element, and the array that is being operated on.  The function should
+        /// return <c>true</c> or <c>false</c>. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        /// <returns> The first element that results in the callback returning <c>true</c>. </returns>
+        [JSInternalFunction(Name = "find", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static object Find(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            // callbackFunction must be a valid function.
+            if (callbackFunction == null)
+                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+
+            // Get the length of the array.
+            uint arrayLength = GetLength(thisObj);
+
+            // This method only supports arrays of length up to 2^31-1.
+            if (arrayLength > int.MaxValue)
+                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+
+            for (int i = 0; i < arrayLength; i++)
+            {
+                // Get the value of the array element.
+                object elementValue = thisObj[(uint)i];
+
+                // Only call the callback function for array elements that exist in the array.
+                if (elementValue != null)
+                {
+                    // Call the callback function.
+                    bool result = TypeConverter.ToBoolean(callbackFunction.CallFromNative("filter", context, elementValue, i, thisObj));
+
+                    // Return if the result was true.
+                    if (result == true)
+                        return elementValue;
+                }
+            }
+
+            // No matches, return undefined.
+            return Undefined.Value;
+        }
+
+        /// <summary>
         /// Creates a new array with the elements from this array that pass the test implemented by
         /// the given function.
         /// </summary>

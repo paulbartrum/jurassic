@@ -34,6 +34,9 @@ namespace UnitTests
             Assert.AreEqual(6, Evaluate("delete dung; d\\u0075ng = 6; dung"));
             Assert.AreEqual(7, Evaluate("delete another; \\u0061nother = 7; another"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("ident\\u0020ifier"));
+            Assert.AreEqual(12, Evaluate(@"delete \u{20BB7}; \u{20BB7} = 12; \u{20BB7}"));
+            Assert.AreEqual(13, Evaluate(@"delete Te\u{20BB7}st; Te\u{20BB7}st = 13; Te\u{20BB7}st"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"ident\u{20}ifier"));
         }
 
         [TestMethod]
@@ -131,6 +134,18 @@ namespace UnitTests
             Assert.AreEqual(255, Evaluate("0xff"));
             Assert.AreEqual(241, Evaluate("0xF1"));
             Assert.AreEqual(244837814094590.0, Evaluate("0xdeadbeefcafe"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("0xgg"));
+
+            // ES6 binary literals.
+            Assert.AreEqual(21, Evaluate("0b10101"));
+            Assert.AreEqual(1, Evaluate("0b1"));
+            Assert.AreEqual(-21, Evaluate("-0B10101"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("0b2"));
+
+            // ES6 octal literals.
+            Assert.AreEqual(61, Evaluate("0o75"));
+            Assert.AreEqual(4095, Evaluate("0O7777"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("0o80"));
 
             // Overflow and underflow.
             Assert.AreEqual(double.PositiveInfinity, Evaluate("1.8e+308"));
@@ -143,10 +158,6 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("9e-325"));
             Assert.AreEqual(0, Evaluate("2.1234567890123456789e-324"));
             Assert.AreEqual(0, Evaluate("1e-9999999999"));
-            Assert.AreEqual(1.11111111111111111E+308, Evaluate("111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
-            Assert.AreEqual(double.PositiveInfinity, Evaluate("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
-            Assert.AreEqual(-1.11111111111111111E+308, Evaluate("-111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
-            Assert.AreEqual(double.NegativeInfinity, Evaluate("-1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
 
             // Tricky cases (from http://www.exploringbinary.com/)
             Assert.AreEqual("1.0000000000000000000000000000000000000000000000000010 x 2^54", ToBinary(Evaluate("18014398509481993")));
@@ -193,6 +204,9 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'test\""));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("\"test'"));
             Assert.AreEqual("test", Evaluate(@"'te\1st'"));
+
+            // ECMAScript 6
+            Assert.AreEqual("𠮷", Evaluate(@"'\u{20BB7}'"));
         }
 
         [TestMethod]

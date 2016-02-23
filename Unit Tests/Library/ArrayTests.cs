@@ -1015,6 +1015,14 @@ namespace UnitTests
         public void filter()
         {
             Assert.AreEqual("2,3", Evaluate("[1, 2, 3].filter(function(value, index, array) { return value > 1; }).toString()"));
+            Assert.AreEqual("3,1,4,1", Evaluate("[3, 1, 4, 1, 5, 9].filter(function(value, index, array) { return value < 5; }).toString()"));
+            Assert.AreEqual(0, Evaluate("[3, 1, 4, 1, 5, 9].filter(function(value, index, array) { return value > 9; }).length"));
+
+            Assert.AreEqual("0,1,2", Evaluate("var output = []; [1, 2, 3].filter(function(value, index, array) { output.push(index); return false; }); output.toString()"));
+            Assert.AreEqual("1,2,3,1,2,3,1,2,3", Evaluate("var output = []; [1, 2, 3].filter(function(value, index, array) { output.push(array); return false; }); output.toString()"));
+
+            Assert.AreEqual("ho", Evaluate("var output = 'hi'; [1, 2, 3].filter(function(value, index, array) { output = this; return false; }, 'ho'); output.toString()"));
+            Assert.AreEqual(Evaluate("this"), Evaluate("var output = 5; [1, 2, 3].filter(function(value, index, array) { output = this; return false; }); output"));
 
             // TypeError should be thrown if the callback is not a function.
             Assert.AreEqual("TypeError", EvaluateExceptionType("[1, 2, 3].filter(true)"));
@@ -1023,6 +1031,28 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(1, Evaluate("Array.prototype.filter.length"));
+        }
+
+        [TestMethod]
+        public void find()
+        {
+            Assert.AreEqual("2", Evaluate("[1, 2, 3].find(function(value, index, array) { return value > 1; }).toString()"));
+            Assert.AreEqual("3", Evaluate("[3, 1, 4, 1, 5, 9].find(function(value, index, array) { return value < 5; }).toString()"));
+            Assert.AreEqual(Undefined.Value, Evaluate("[3, 1, 4, 1, 5, 9].find(function(value, index, array) { return value > 9; })"));
+
+            Assert.AreEqual("0,1,2", Evaluate("var output = []; [1, 2, 3].find(function(value, index, array) { output.push(index); return false; }); output.toString()"));
+            Assert.AreEqual("1,2,3,1,2,3,1,2,3", Evaluate("var output = []; [1, 2, 3].find(function(value, index, array) { output.push(array); return false; }); output.toString()"));
+
+            Assert.AreEqual("ho", Evaluate("var output = 'hi'; [1, 2, 3].find(function(value, index, array) { output = this; return false; }, 'ho'); output.toString()"));
+            Assert.AreEqual(Evaluate("this"), Evaluate("var output = 5; [1, 2, 3].find(function(value, index, array) { output = this; return false; }); output"));
+
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("[1, 2, 3].find(true)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("[1, 2, 3].find(1)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("[1, 2, 3].find({})"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Array.prototype.find.length"));
         }
 
         [TestMethod]
