@@ -18,6 +18,10 @@ execute JavaScript code.
 * Uses light-weight code generation, so generated code is fully garbage collected
 * Tested on .NET 3.5, .NET 4 and Silverlight
 
+## How do I get it?
+
+Install the [NuGet package](https://www.nuget.org/packages/Jurassic/).
+
 ## Usage
 
 See the [wiki](https://github.com/paulbartrum/jurassic/wiki) for full usage details.
