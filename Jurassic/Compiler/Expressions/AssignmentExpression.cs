@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Jurassic.Compiler
 {
     /// <summary>
-    /// Represents an assignment expression (++, --, =, +=, -=, *=, /=, %=, &=, |=, ^=, &lt;&lt;=, &gt;&gt;=, &gt;&gt;&gt;=).
+    /// Represents an assignment expression (++, --, =, +=, -=, *=, /=, %=, &amp;=, |=, ^=, &lt;&lt;=, &gt;&gt;=, &gt;&gt;&gt;=).
     /// </summary>
     internal class AssignmentExpression : OperatorExpression
     {
