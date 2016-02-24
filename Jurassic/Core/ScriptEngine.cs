@@ -42,6 +42,18 @@ namespace Jurassic
         private ErrorConstructor evalErrorConstructor;
         private ErrorConstructor referenceErrorConstructor;
 
+        // The built-in typed array objects.
+        private ArrayBufferConstructor arrayBufferConstructor;
+        private TypedArrayConstructor int8ArrayConstructor;
+        private TypedArrayConstructor uint8ArrayConstructor;
+        private TypedArrayConstructor uint8ClampedArrayConstructor;
+        private TypedArrayConstructor int16ArrayConstructor;
+        private TypedArrayConstructor uint16ArrayConstructor;
+        private TypedArrayConstructor int32ArrayConstructor;
+        private TypedArrayConstructor uint32ArrayConstructor;
+        private TypedArrayConstructor float32ArrayConstructor;
+        private TypedArrayConstructor float64ArrayConstructor;
+
         // Mono check.
         internal static bool IsMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
@@ -85,6 +97,18 @@ namespace Jurassic
             this.evalErrorConstructor = new ErrorConstructor(baseFunction, "EvalError");
             this.referenceErrorConstructor = new ErrorConstructor(baseFunction, "ReferenceError");
 
+            // Create the typed array functions.
+            this.arrayBufferConstructor = new ArrayBufferConstructor(baseFunction);
+            this.int8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Int8Array);
+            this.uint8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Uint8Array);
+            this.uint8ClampedArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Uint8ClampedArray);
+            this.int16ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Int16Array);
+            this.uint16ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Uint16Array);
+            this.int32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Int32Array);
+            this.uint32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Uint32Array);
+            this.float32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Float32Array);
+            this.float64ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Float64Array);
+
             // Initialize the prototypes for the base of the prototype chain.
             baseObject.InitializePrototypeProperties(this.objectConstructor);
             baseFunction.InitializePrototypeProperties(this.functionConstructor);
@@ -108,6 +132,17 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("URIError", this.uriErrorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("EvalError", this.evalErrorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("ReferenceError", this.referenceErrorConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("ArrayBuffer", this.arrayBufferConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Int8Array", this.int8ArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Uint8Array", this.uint8ArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Uint8ClampedArray", this.uint8ClampedArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Int16Array", this.int16ArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Uint16Array", this.uint16ArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Int32Array", this.int32ArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Uint32Array", this.uint32ArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Float32Array", this.float32ArrayConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Float64Array", this.float64ArrayConstructor, PropertyAttributes.NonEnumerable));
+
             this.globalObject.FastSetProperties(globalProperties);
         }
 
@@ -474,6 +509,86 @@ namespace Jurassic
         public ErrorConstructor ReferenceError
         {
             get { return this.referenceErrorConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in ArrayBuffer object.
+        /// </summary>
+        public ArrayBufferConstructor ArrayBuffer
+        {
+            get { return this.arrayBufferConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Int8Array object.
+        /// </summary>
+        public TypedArrayConstructor Int8Array
+        {
+            get { return this.int8ArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Uint8Array object.
+        /// </summary>
+        public TypedArrayConstructor Uint8Array
+        {
+            get { return this.uint8ArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Uint8ClampedArray object.
+        /// </summary>
+        public TypedArrayConstructor Uint8ClampedArray
+        {
+            get { return this.uint8ClampedArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Int16Array object.
+        /// </summary>
+        public TypedArrayConstructor Int16Array
+        {
+            get { return this.int16ArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Uint16Array object.
+        /// </summary>
+        public TypedArrayConstructor Uint16Array
+        {
+            get { return this.uint16ArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Int32Array object.
+        /// </summary>
+        public TypedArrayConstructor Int32Array
+        {
+            get { return this.int32ArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Uint32Array object.
+        /// </summary>
+        public TypedArrayConstructor Uint32Array
+        {
+            get { return this.uint32ArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Float32Array object.
+        /// </summary>
+        public TypedArrayConstructor Float32Array
+        {
+            get { return this.float32ArrayConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Float64Array object.
+        /// </summary>
+        public TypedArrayConstructor Float64Array
+        {
+            get { return this.float64ArrayConstructor; }
         }
 
 
