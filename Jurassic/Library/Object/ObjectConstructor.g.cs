@@ -104,7 +104,7 @@ namespace Jurassic.Library
 				case 1:
 					return Create(engine, args[0], null);
 				default:
-					return Create(engine, args[0], TypeConverter.ToObject(engine, args[1], null));
+					return Create(engine, args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 

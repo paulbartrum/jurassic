@@ -33,7 +33,7 @@ namespace Jurassic.Library
 				case 1:
 					((RegExpInstance)thisObj).Compile(TypeConverter.ToString(args[0]), null); return Undefined.Value;
 				default:
-					((RegExpInstance)thisObj).Compile(TypeConverter.ToString(args[0]), TypeConverter.ToString(args[1], null)); return Undefined.Value;
+					((RegExpInstance)thisObj).Compile(TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToString(args[1])); return Undefined.Value;
 			}
 		}
 

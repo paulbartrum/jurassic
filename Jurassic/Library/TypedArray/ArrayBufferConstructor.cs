@@ -39,7 +39,7 @@ namespace Jurassic.Library
         /// Throws an error.
         /// </summary>
         [JSCallFunction]
-        public string Call()
+        public object Call()
         {
             throw new JavaScriptException(Engine, "TypeError", "Constructor ArrayBuffer requires 'new'");
         }
@@ -72,7 +72,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "isView")]
         public static bool IsView(object arg)
         {
-            throw new NotImplementedException();
+            return arg is DataViewInstance || arg is TypedArrayInstance;
         }
     }
 }

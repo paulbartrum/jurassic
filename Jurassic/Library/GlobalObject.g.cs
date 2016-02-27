@@ -136,7 +136,7 @@ namespace Jurassic.Library
 				case 1:
 					return ParseInt(engine, TypeConverter.ToString(args[0]), 0.0);
 				default:
-					return ParseInt(engine, TypeConverter.ToString(args[0]), TypeConverter.ToNumber(args[1], 0.0));
+					return ParseInt(engine, TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? 0.0 : TypeConverter.ToNumber(args[1]));
 			}
 		}
 

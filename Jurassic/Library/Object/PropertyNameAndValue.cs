@@ -35,6 +35,19 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Initializes a getter/setter property.
+        /// </summary>
+        /// <param name="name"> The name of the property. </param>
+        /// <param name="getter"> The function to call to retrieve the property value. </param>
+        /// <param name="setter"> The function to call to set the property value. </param>
+        /// <param name="attributes"> Indicates whether the property is readable, writable and/or enumerable. </param>
+        public PropertyNameAndValue(string name, FunctionInstance getter, FunctionInstance setter, PropertyAttributes attributes)
+        {
+            this.name = name;
+            this.descriptor = new PropertyDescriptor(getter, setter, attributes);
+        }
+
+        /// <summary>
         /// Gets the name of the property.
         /// </summary>
         public string Name

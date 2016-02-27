@@ -288,42 +288,166 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void ToInt16()
+        {
+            var engine = new ScriptEngine();
+            Assert.AreEqual(0, TypeConverter.ToInt16(Null.Value));
+            Assert.AreEqual(0, TypeConverter.ToInt16(Undefined.Value));
+            Assert.AreEqual(0, TypeConverter.ToInt16(null));
+            Assert.AreEqual(0, TypeConverter.ToInt16(false));
+            Assert.AreEqual(1, TypeConverter.ToInt16(true));
+            Assert.AreEqual(0, TypeConverter.ToInt16(+0.0));
+            Assert.AreEqual(0, TypeConverter.ToInt16(-0.0));
+            Assert.AreEqual(1, TypeConverter.ToInt16(1.0));
+            Assert.AreEqual(1, TypeConverter.ToInt16(1.9));
+            Assert.AreEqual(-1, TypeConverter.ToInt16(-1.9));
+            Assert.AreEqual(0, TypeConverter.ToInt16(double.PositiveInfinity));
+            Assert.AreEqual(0, TypeConverter.ToInt16(double.NegativeInfinity));
+            Assert.AreEqual(0, TypeConverter.ToInt16(double.NaN));
+            Assert.AreEqual(0, TypeConverter.ToInt16(""));
+            Assert.AreEqual(1, TypeConverter.ToInt16("1.6"));
+            Assert.AreEqual(-1, TypeConverter.ToInt16("-1.6"));
+            Assert.AreEqual(1, TypeConverter.ToInt16("1"));
+            Assert.AreEqual(1, TypeConverter.ToInt16("+1.0"));
+            Assert.AreEqual(-1, TypeConverter.ToInt16("-1.0"));
+            Assert.AreEqual(100, TypeConverter.ToInt16("1.0e2"));
+            Assert.AreEqual(-32768, TypeConverter.ToInt16("32768"));
+            Assert.AreEqual(30, TypeConverter.ToInt16("65566"));
+            Assert.AreEqual(7616, TypeConverter.ToInt16("-123456"));
+            Assert.AreEqual(-17408, TypeConverter.ToInt16("6000000000"));
+            Assert.AreEqual(0, TypeConverter.ToInt16(engine.Boolean.Construct(false)));
+            Assert.AreEqual(1, TypeConverter.ToInt16(engine.Boolean.Construct(true)));
+            Assert.AreEqual(1, TypeConverter.ToInt16(engine.Date.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToInt16(engine.Date.Construct(double.NaN)));
+            Assert.AreEqual(0, TypeConverter.ToInt16(engine.Number.Construct(0.0)));
+            Assert.AreEqual(1, TypeConverter.ToInt16(engine.Number.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToInt16(engine.Object.Construct()));
+            Assert.AreEqual(0, TypeConverter.ToInt16(engine.String.Construct("")));
+            Assert.AreEqual(0, TypeConverter.ToInt16(engine.String.Construct("test")));
+            Assert.AreEqual(1, TypeConverter.ToInt16(engine.String.Construct("1.9")));
+        }
+
+        [TestMethod]
         public void ToUint16()
         {
             var engine = new ScriptEngine();
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(Null.Value));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(Undefined.Value));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(null));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(false));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16(true));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(+0.0));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(-0.0));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16(1.0));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16(1.9));
-            Assert.AreEqual((uint)65535, TypeConverter.ToUint16(-1.9));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(double.PositiveInfinity));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(double.NegativeInfinity));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(double.NaN));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(""));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16("1.6"));
-            Assert.AreEqual((uint)65535, TypeConverter.ToUint16("-1.6"));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16("1"));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16("+1.0"));
-            Assert.AreEqual((uint)65535, TypeConverter.ToUint16("-1.0"));
-            Assert.AreEqual((uint)100, TypeConverter.ToUint16("1.0e2"));
-            Assert.AreEqual((uint)30, TypeConverter.ToUint16("65566"));
-            Assert.AreEqual((uint)7616, TypeConverter.ToUint16("-123456"));
-            Assert.AreEqual((uint)48128, TypeConverter.ToUint16("6000000000"));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(engine.Boolean.Construct(false)));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16(engine.Boolean.Construct(true)));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16(engine.Date.Construct(1.0)));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(engine.Date.Construct(double.NaN)));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(engine.Number.Construct(0.0)));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16(engine.Number.Construct(1.0)));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(engine.Object.Construct()));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(engine.String.Construct("")));
-            Assert.AreEqual((uint)0, TypeConverter.ToUint16(engine.String.Construct("test")));
-            Assert.AreEqual((uint)1, TypeConverter.ToUint16(engine.String.Construct("1.9")));
+            Assert.AreEqual(0, TypeConverter.ToUint16(Null.Value));
+            Assert.AreEqual(0, TypeConverter.ToUint16(Undefined.Value));
+            Assert.AreEqual(0, TypeConverter.ToUint16(null));
+            Assert.AreEqual(0, TypeConverter.ToUint16(false));
+            Assert.AreEqual(1, TypeConverter.ToUint16(true));
+            Assert.AreEqual(0, TypeConverter.ToUint16(+0.0));
+            Assert.AreEqual(0, TypeConverter.ToUint16(-0.0));
+            Assert.AreEqual(1, TypeConverter.ToUint16(1.0));
+            Assert.AreEqual(1, TypeConverter.ToUint16(1.9));
+            Assert.AreEqual(65535, TypeConverter.ToUint16(-1.9));
+            Assert.AreEqual(0, TypeConverter.ToUint16(double.PositiveInfinity));
+            Assert.AreEqual(0, TypeConverter.ToUint16(double.NegativeInfinity));
+            Assert.AreEqual(0, TypeConverter.ToUint16(double.NaN));
+            Assert.AreEqual(0, TypeConverter.ToUint16(""));
+            Assert.AreEqual(1, TypeConverter.ToUint16("1.6"));
+            Assert.AreEqual(65535, TypeConverter.ToUint16("-1.6"));
+            Assert.AreEqual(1, TypeConverter.ToUint16("1"));
+            Assert.AreEqual(1, TypeConverter.ToUint16("+1.0"));
+            Assert.AreEqual(65535, TypeConverter.ToUint16("-1.0"));
+            Assert.AreEqual(100, TypeConverter.ToUint16("1.0e2"));
+            Assert.AreEqual(30, TypeConverter.ToUint16("65566"));
+            Assert.AreEqual(7616, TypeConverter.ToUint16("-123456"));
+            Assert.AreEqual(48128, TypeConverter.ToUint16("6000000000"));
+            Assert.AreEqual(0, TypeConverter.ToUint16(engine.Boolean.Construct(false)));
+            Assert.AreEqual(1, TypeConverter.ToUint16(engine.Boolean.Construct(true)));
+            Assert.AreEqual(1, TypeConverter.ToUint16(engine.Date.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToUint16(engine.Date.Construct(double.NaN)));
+            Assert.AreEqual(0, TypeConverter.ToUint16(engine.Number.Construct(0.0)));
+            Assert.AreEqual(1, TypeConverter.ToUint16(engine.Number.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToUint16(engine.Object.Construct()));
+            Assert.AreEqual(0, TypeConverter.ToUint16(engine.String.Construct("")));
+            Assert.AreEqual(0, TypeConverter.ToUint16(engine.String.Construct("test")));
+            Assert.AreEqual(1, TypeConverter.ToUint16(engine.String.Construct("1.9")));
+        }
+
+        [TestMethod]
+        public void ToInt8()
+        {
+            var engine = new ScriptEngine();
+            Assert.AreEqual(0, TypeConverter.ToInt8(Null.Value));
+            Assert.AreEqual(0, TypeConverter.ToInt8(Undefined.Value));
+            Assert.AreEqual(0, TypeConverter.ToInt8(null));
+            Assert.AreEqual(0, TypeConverter.ToInt8(false));
+            Assert.AreEqual(1, TypeConverter.ToInt8(true));
+            Assert.AreEqual(0, TypeConverter.ToInt8(+0.0));
+            Assert.AreEqual(0, TypeConverter.ToInt8(-0.0));
+            Assert.AreEqual(1, TypeConverter.ToInt8(1.0));
+            Assert.AreEqual(1, TypeConverter.ToInt8(1.9));
+            Assert.AreEqual(-1, TypeConverter.ToInt8(-1.9));
+            Assert.AreEqual(0, TypeConverter.ToInt8(double.PositiveInfinity));
+            Assert.AreEqual(0, TypeConverter.ToInt8(double.NegativeInfinity));
+            Assert.AreEqual(0, TypeConverter.ToInt8(double.NaN));
+            Assert.AreEqual(0, TypeConverter.ToInt8(""));
+            Assert.AreEqual(1, TypeConverter.ToInt8("1.6"));
+            Assert.AreEqual(-1, TypeConverter.ToInt8("-1.6"));
+            Assert.AreEqual(1, TypeConverter.ToInt8("1"));
+            Assert.AreEqual(1, TypeConverter.ToInt8("+1.0"));
+            Assert.AreEqual(-1, TypeConverter.ToInt8("-1.0"));
+            Assert.AreEqual(100, TypeConverter.ToInt8("1.0e2"));
+            Assert.AreEqual(-128, TypeConverter.ToInt8("128"));
+            Assert.AreEqual(-127, TypeConverter.ToInt8("129"));
+            Assert.AreEqual(0, TypeConverter.ToInt8("256"));
+            Assert.AreEqual(1, TypeConverter.ToInt8("257"));
+            Assert.AreEqual(-64, TypeConverter.ToInt8("-123456"));
+            Assert.AreEqual(0, TypeConverter.ToInt8("6000000000"));
+            Assert.AreEqual(0, TypeConverter.ToInt8(engine.Boolean.Construct(false)));
+            Assert.AreEqual(1, TypeConverter.ToInt8(engine.Boolean.Construct(true)));
+            Assert.AreEqual(1, TypeConverter.ToInt8(engine.Date.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToInt8(engine.Date.Construct(double.NaN)));
+            Assert.AreEqual(0, TypeConverter.ToInt8(engine.Number.Construct(0.0)));
+            Assert.AreEqual(1, TypeConverter.ToInt8(engine.Number.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToInt8(engine.Object.Construct()));
+            Assert.AreEqual(0, TypeConverter.ToInt8(engine.String.Construct("")));
+            Assert.AreEqual(0, TypeConverter.ToInt8(engine.String.Construct("test")));
+            Assert.AreEqual(1, TypeConverter.ToInt8(engine.String.Construct("1.9")));
+        }
+
+        [TestMethod]
+        public void ToUint8()
+        {
+            var engine = new ScriptEngine();
+            Assert.AreEqual(0, TypeConverter.ToUint8(Null.Value));
+            Assert.AreEqual(0, TypeConverter.ToUint8(Undefined.Value));
+            Assert.AreEqual(0, TypeConverter.ToUint8(null));
+            Assert.AreEqual(0, TypeConverter.ToUint8(false));
+            Assert.AreEqual(1, TypeConverter.ToUint8(true));
+            Assert.AreEqual(0, TypeConverter.ToUint8(+0.0));
+            Assert.AreEqual(0, TypeConverter.ToUint8(-0.0));
+            Assert.AreEqual(1, TypeConverter.ToUint8(1.0));
+            Assert.AreEqual(1, TypeConverter.ToUint8(1.9));
+            Assert.AreEqual(255, TypeConverter.ToUint8(-1.9));
+            Assert.AreEqual(0, TypeConverter.ToUint8(double.PositiveInfinity));
+            Assert.AreEqual(0, TypeConverter.ToUint8(double.NegativeInfinity));
+            Assert.AreEqual(0, TypeConverter.ToUint8(double.NaN));
+            Assert.AreEqual(0, TypeConverter.ToUint8(""));
+            Assert.AreEqual(1, TypeConverter.ToUint8("1.6"));
+            Assert.AreEqual(255, TypeConverter.ToUint8("-1.6"));
+            Assert.AreEqual(1, TypeConverter.ToUint8("1"));
+            Assert.AreEqual(1, TypeConverter.ToUint8("+1.0"));
+            Assert.AreEqual(255, TypeConverter.ToUint8("-1.0"));
+            Assert.AreEqual(100, TypeConverter.ToUint8("1.0e2"));
+            Assert.AreEqual(128, TypeConverter.ToUint8("128"));
+            Assert.AreEqual(129, TypeConverter.ToUint8("129"));
+            Assert.AreEqual(0, TypeConverter.ToUint8("256"));
+            Assert.AreEqual(1, TypeConverter.ToUint8("257"));
+            Assert.AreEqual(192, TypeConverter.ToUint8("-123456"));
+            Assert.AreEqual(0, TypeConverter.ToUint8("6000000000"));
+            Assert.AreEqual(0, TypeConverter.ToUint8(engine.Boolean.Construct(false)));
+            Assert.AreEqual(1, TypeConverter.ToUint8(engine.Boolean.Construct(true)));
+            Assert.AreEqual(1, TypeConverter.ToUint8(engine.Date.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToUint8(engine.Date.Construct(double.NaN)));
+            Assert.AreEqual(0, TypeConverter.ToUint8(engine.Number.Construct(0.0)));
+            Assert.AreEqual(1, TypeConverter.ToUint8(engine.Number.Construct(1.0)));
+            Assert.AreEqual(0, TypeConverter.ToUint8(engine.Object.Construct()));
+            Assert.AreEqual(0, TypeConverter.ToUint8(engine.String.Construct("")));
+            Assert.AreEqual(0, TypeConverter.ToUint8(engine.String.Construct("test")));
+            Assert.AreEqual(1, TypeConverter.ToUint8(engine.String.Construct("1.9")));
         }
 
         [TestMethod]

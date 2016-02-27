@@ -21,7 +21,7 @@ namespace Jurassic.Library
 				case 0:
 					return ((ErrorConstructor)thisObj).Call("");
 				default:
-					return ((ErrorConstructor)thisObj).Call(TypeConverter.ToString(args[0], ""));
+					return ((ErrorConstructor)thisObj).Call(TypeUtilities.IsUndefined(args[0]) ? "" : TypeConverter.ToString(args[0]));
 			}
 		}
 
@@ -35,7 +35,7 @@ namespace Jurassic.Library
 				case 0:
 					return ((ErrorConstructor)thisObj).Construct("");
 				default:
-					return ((ErrorConstructor)thisObj).Construct(TypeConverter.ToString(args[0], ""));
+					return ((ErrorConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? "" : TypeConverter.ToString(args[0]));
 			}
 		}
 	}

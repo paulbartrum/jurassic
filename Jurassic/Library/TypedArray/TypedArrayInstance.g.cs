@@ -27,9 +27,9 @@ namespace Jurassic.Library
 				case 1:
 					return Fill(args[0], 0, -1);
 				case 2:
-					return Fill(args[0], TypeConverter.ToInteger(args[1], 0), -1);
+					return Fill(args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]), -1);
 				default:
-					return Fill(args[0], TypeConverter.ToInteger(args[1], 0), TypeConverter.ToInteger(args[2], -1));
+					return Fill(args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? -1 : TypeConverter.ToInteger(args[2]));
 			}
 		}
 	}

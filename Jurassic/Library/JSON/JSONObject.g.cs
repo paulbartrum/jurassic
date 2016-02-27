@@ -28,7 +28,7 @@ namespace Jurassic.Library
 				case 1:
 					return Parse(engine, TypeConverter.ToString(args[0]), null);
 				default:
-					return Parse(engine, TypeConverter.ToString(args[0]), args[1]);
+					return Parse(engine, TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
 			}
 		}
 
@@ -41,9 +41,9 @@ namespace Jurassic.Library
 				case 1:
 					return Stringify(engine, args[0], null, null);
 				case 2:
-					return Stringify(engine, args[0], args[1], null);
+					return Stringify(engine, args[0], TypeUtilities.IsUndefined(args[1]) ? null : args[1], null);
 				default:
-					return Stringify(engine, args[0], args[1], args[2]);
+					return Stringify(engine, args[0], TypeUtilities.IsUndefined(args[1]) ? null : args[1], TypeUtilities.IsUndefined(args[2]) ? null : args[2]);
 			}
 		}
 	}

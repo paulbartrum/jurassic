@@ -121,7 +121,7 @@ namespace Jurassic.Library
 				case 1:
 					return Includes(engine, TypeConverter.ToString(thisObj), args[0], 0);
 				default:
-					return Includes(engine, TypeConverter.ToString(thisObj), args[0], TypeConverter.ToInteger(args[1], 0));
+					return Includes(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -136,7 +136,7 @@ namespace Jurassic.Library
 				case 1:
 					return IndexOf(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), 0);
 				default:
-					return IndexOf(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), TypeConverter.ToInteger(args[1], 0));
+					return IndexOf(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -151,7 +151,7 @@ namespace Jurassic.Library
 				case 1:
 					return LastIndexOf(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), double.NaN);
 				default:
-					return LastIndexOf(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), TypeConverter.ToNumber(args[1], double.NaN));
+					return LastIndexOf(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? double.NaN : TypeConverter.ToNumber(args[1]));
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace Jurassic.Library
 				case 0:
 					return Normalize(engine, TypeConverter.ToString(thisObj), "NFC");
 				default:
-					return Normalize(engine, TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0], "NFC"));
+					return Normalize(engine, TypeConverter.ToString(thisObj), TypeUtilities.IsUndefined(args[0]) ? "NFC" : TypeConverter.ToString(args[0]));
 			}
 		}
 
@@ -240,7 +240,7 @@ namespace Jurassic.Library
 				case 1:
 					return Slice(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), int.MaxValue);
 				default:
-					return Slice(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1], int.MaxValue));
+					return Slice(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -255,7 +255,7 @@ namespace Jurassic.Library
 				case 1:
 					return Split(engine, TypeConverter.ToString(thisObj), args[0], uint.MaxValue);
 				default:
-					return Split(engine, TypeConverter.ToString(thisObj), args[0], TypeConverter.ToNumber(args[1], uint.MaxValue));
+					return Split(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? uint.MaxValue : TypeConverter.ToNumber(args[1]));
 			}
 		}
 
@@ -270,7 +270,7 @@ namespace Jurassic.Library
 				case 1:
 					return Substr(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), int.MaxValue);
 				default:
-					return Substr(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1], int.MaxValue));
+					return Substr(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -285,7 +285,7 @@ namespace Jurassic.Library
 				case 1:
 					return Substring(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), int.MaxValue);
 				default:
-					return Substring(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1], int.MaxValue));
+					return Substring(TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]), TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -365,7 +365,7 @@ namespace Jurassic.Library
 				case 1:
 					return StartsWith(engine, TypeConverter.ToString(thisObj), args[0], 0);
 				default:
-					return StartsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeConverter.ToInteger(args[1], 0));
+					return StartsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -380,7 +380,7 @@ namespace Jurassic.Library
 				case 1:
 					return EndsWith(engine, TypeConverter.ToString(thisObj), args[0], int.MaxValue);
 				default:
-					return EndsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeConverter.ToInteger(args[1], int.MaxValue));
+					return EndsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -395,7 +395,7 @@ namespace Jurassic.Library
 				case 1:
 					return Contains(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), 0);
 				default:
-					return Contains(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), TypeConverter.ToInteger(args[1], 0));
+					return Contains(TypeConverter.ToString(thisObj), TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
 			}
 		}
 

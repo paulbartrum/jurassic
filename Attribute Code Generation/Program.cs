@@ -38,12 +38,13 @@ namespace Attribute_Code_Generation
                 classCollector.Visit(root);
                 foreach (var classSyntax in classCollector.Classes)
                 {
-                    // Find all the methods with [JSInternalFunction], [JSCallFunction] or [JSConstructorFunction].
+                    // Find all the methods with [JSInternalFunction], [JSCallFunction], [JSConstructorFunction], [JSProperty] or [JSField].
                     var memberCollector = new ClassMembersCollector();
                     memberCollector.Visit(classSyntax);
                     if (memberCollector.JSInternalFunctionMethods.Any() == false &&
                         memberCollector.JSCallFunctionMethods.Any() == false &&
                         memberCollector.JSConstructorFunctionMethods.Any() == false &&
+                        memberCollector.JSProperties.Any() == false &&
                         memberCollector.JSFields.Any() == false)
                         continue;
 
@@ -57,6 +58,7 @@ namespace Attribute_Code_Generation
 
                     // Output the PopulateStubs method.
                     if (memberCollector.JSInternalFunctionMethods.Any() ||
+                        memberCollector.JSProperties.Any() ||
                         memberCollector.JSFields.Any())
                     {
                         output.AppendLine("\t\tprivate List<PropertyNameAndValue> GetDeclarativeProperties()");
@@ -69,6 +71,22 @@ namespace Attribute_Code_Generation
                             foreach (var variable in field.Declaration.Variables)
                             {
                                 output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{variable.Identifier.ToString()}\", {variable.Identifier.ToString()}, PropertyAttributes.Sealed),");
+                            }
+                        }
+                        foreach (var property in memberCollector.JSProperties.Select(p => new JSProperty(p)))
+                        {
+                            if (property.SetterStubName == null)
+                            {
+                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{property.JSName}\", new PropertyDescriptor(" +
+                                    $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
+                                    $"null, {property.JSPropertyAttributes})),");
+                            }
+                            else
+                            {
+                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{property.JSName}\", new PropertyDescriptor(" +
+                                    $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"set {property.JSName}\", 0, {property.GetterStubName}), " +
+                                    $"{property.JSPropertyAttributes})),");
                             }
                         }
                         foreach (var methodGroup in methodGroups)
@@ -85,6 +103,29 @@ namespace Attribute_Code_Generation
                         GenerateMethodStub(output, classSyntax, new JSMethodGroup(memberCollector.JSCallFunctionMethods.Select(mds => new JSMethod(mds))));
                     if (memberCollector.JSConstructorFunctionMethods.Any())
                         GenerateMethodStub(output, classSyntax, new JSMethodGroup(memberCollector.JSConstructorFunctionMethods.Select(mds => new JSMethod(mds))), "ObjectInstance");
+                    foreach (var property in memberCollector.JSProperties.Select(p => new JSProperty(p)))
+                    {
+                        output.AppendLine();
+                        output.AppendLine($"\t\tobject {property.GetterStubName}(ScriptEngine engine, object thisObj, object[] args)");
+                        output.AppendLine("\t\t{");
+                        output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
+                        output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
+                        output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, \"TypeError\", \"The method 'get {property.JSName}' is not generic.\");");
+                        output.AppendLine($"\t\t\treturn (({classSyntax.Identifier.ToString()})thisObj).{property.Name};");
+                        output.AppendLine("\t\t}");
+
+                        if (property.SetterStubName != null)
+                        {
+                            output.AppendLine();
+                            output.AppendLine($"\t\tobject {property.SetterStubName}(ScriptEngine engine, object thisObj, object[] args)");
+                            output.AppendLine("\t\t{");
+                            output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
+                            output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
+                            output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, \"TypeError\", \"The method 'set {property.JSName}' is not generic.\");");
+                            output.AppendLine($"\t\t\t(({classSyntax.Identifier.ToString()})thisObj).{property.Name} = {ConvertTo("args.Length > 0 ? args[0] : Undefined.Value", property.ReturnType, null)};");
+                            output.AppendLine("\t\t}");
+                        }
+                    }
                     foreach (var methodGroup in methodGroups)
                     {
                         GenerateMethodStub(output, classSyntax, methodGroup);
@@ -119,6 +160,7 @@ namespace Attribute_Code_Generation
             public List<MethodDeclarationSyntax> JSInternalFunctionMethods { get; } = new List<MethodDeclarationSyntax>();
             public List<MethodDeclarationSyntax> JSCallFunctionMethods { get; } = new List<MethodDeclarationSyntax>();
             public List<MethodDeclarationSyntax> JSConstructorFunctionMethods { get; } = new List<MethodDeclarationSyntax>();
+            public List<PropertyDeclarationSyntax> JSProperties { get; } = new List<PropertyDeclarationSyntax>();
             public List<FieldDeclarationSyntax> JSFields { get; } = new List<FieldDeclarationSyntax>();
 
             public override void VisitAttribute(AttributeSyntax node)
@@ -139,6 +181,10 @@ namespace Attribute_Code_Generation
                     JSConstructorFunctionMethods.Add((MethodDeclarationSyntax)node.Parent.Parent);
                     if (node.ArgumentList != null)
                         throw new InvalidOperationException("Arguments are not supported for [JSConstructorFunction].");
+                }
+                else if (name == "JSProperty")
+                {
+                    JSProperties.Add((PropertyDeclarationSyntax)node.Parent.Parent);
                 }
                 else if (name == "JSField")
                 {
@@ -174,6 +220,9 @@ namespace Attribute_Code_Generation
                 IsStatic = this.First().IsStatic;
                 if (!this.All(m => m.IsStatic == IsStatic))
                     throw new InvalidOperationException($"All {JSName} methods must all be static or instance methods.");
+                RequiredArgumentCount = this.First().RequiredArgumentCount;
+                if (!this.All(m => m.RequiredArgumentCount == RequiredArgumentCount))
+                    throw new InvalidOperationException($"All {JSName} methods must all have the same RequiredArgumentCount.");
             }
 
             public string JSName { get; private set; }
@@ -181,6 +230,7 @@ namespace Attribute_Code_Generation
             public string JSPropertyAttributes { get; private set; }
             public string StubName { get; private set; }
             public bool IsStatic { get; private set; }
+            public int RequiredArgumentCount { get; private set; }
         }
 
         public class JSMethod
@@ -259,6 +309,14 @@ namespace Attribute_Code_Generation
                 {
                     JSLength = int.Parse(lengthParameter.Expression.ToString());
                 }
+
+                // Determine the required argument count.
+                var requiredArgumentCountParameter = jsAttribute?.ArgumentList?.Arguments.SingleOrDefault(arg =>
+                    arg.NameEquals != null && arg.NameEquals.Name.ToString() == "RequiredArgumentCount");
+                if (requiredArgumentCountParameter != null)
+                    RequiredArgumentCount = (int)((LiteralExpressionSyntax)requiredArgumentCountParameter.Expression).Token.Value;
+                if (RequiredArgumentCount > Parameters.Count())
+                    throw new InvalidOperationException("RequiredArgumentCount must be less than or equal to the number of parameters.");
             }
 
             private bool GetBooleanAttributeFlag(AttributeSyntax jsAttribute, string name, bool defaultValue)
@@ -274,6 +332,7 @@ namespace Attribute_Code_Generation
             public bool HasThisObject { get; private set; }
             public string ThisObjectParameterType { get; private set; }
             public bool IsStatic { get; private set; }
+            public int RequiredArgumentCount { get; private set; }
             public string Name { get; private set; }
             public string JSName { get; private set; }
             public int JSLength { get; private set; }
@@ -286,12 +345,71 @@ namespace Attribute_Code_Generation
         {
             public MethodParameter(ParameterSyntax param)
             {
+                Name = param.Identifier.ToString();
                 Type = param.Type.ToString();
                 DefaultValue = param.Default?.Value?.ToString();
             }
 
+            public string Name { get; private set; }
             public string Type { get; private set; }
             public string DefaultValue { get; private set; }
+        }
+
+        public class JSProperty
+        {
+            public JSProperty(PropertyDeclarationSyntax propertySyntax)
+            {
+                Name = propertySyntax.Identifier.ToString();
+                ReturnType = propertySyntax.Type.ToString();
+                if (propertySyntax.Modifiers.Any(m => m.ToString() == "static"))
+                    throw new NotImplementedException("Static properties are not supported.");
+
+                var jsAttribute = propertySyntax.AttributeLists.SelectMany(al => al.Attributes).Single(att =>
+                    att.Name.ToString() == "JSProperty");
+
+                // Determine the PropertyAttributes.
+                bool isEnumerable = GetBooleanAttributeFlag(jsAttribute, "IsEnumerable", false);
+                bool isConfigurable = GetBooleanAttributeFlag(jsAttribute, "IsConfigurable", true);
+                if (!isEnumerable && !isConfigurable)
+                    JSPropertyAttributes = "PropertyAttributes.Sealed";
+                else
+                {
+                    var propertyAttributes = new List<string>();
+                    if (isEnumerable)
+                        propertyAttributes.Add("PropertyAttributes.Enumerable");
+                    if (isConfigurable)
+                        propertyAttributes.Add("PropertyAttributes.Configurable");
+                    JSPropertyAttributes = string.Join(" | ", propertyAttributes);
+                }
+
+                // Determine the name of the javascript function.
+                JSName = Name;
+                var nameParameter = jsAttribute?.ArgumentList?.Arguments.SingleOrDefault(arg =>
+                    arg.NameEquals != null && arg.NameEquals.Name.ToString() == "Name");
+                if (nameParameter != null)
+                    JSName = ((LiteralExpressionSyntax)nameParameter.Expression).Token.ValueText;
+
+                // Determine the stub names.
+                GetterStubName = "__GETTER__" + JSName;
+                if (propertySyntax.AccessorList.Accessors.Any(a => a.Keyword.ToString() == "set"))
+                    SetterStubName = "__SETTER__" + JSName;
+            }
+
+            private bool GetBooleanAttributeFlag(AttributeSyntax jsAttribute, string name, bool defaultValue)
+            {
+                var boolParameter = jsAttribute?.ArgumentList?.Arguments.SingleOrDefault(arg =>
+                    arg.NameEquals != null && arg.NameEquals.Name.ToString() == name);
+                if (boolParameter == null)
+                    return defaultValue;
+                return (bool)((LiteralExpressionSyntax)boolParameter.Expression).Token.Value;
+            }
+
+            public string Name { get; private set; }
+            public string JSName { get; private set; }
+            public string ReturnType { get; private set; }
+            public string JSPropertyAttributes { get; private set; }
+            public string GetterStubName { get; private set; }
+            public string SetterStubName { get; private set; }
         }
 
         private static void GenerateMethodStub(StringBuilder output, ClassDeclarationSyntax classSyntax, JSMethodGroup methodGroup, string returnType = "object")
@@ -331,7 +449,10 @@ namespace Attribute_Code_Generation
                     else
                         output.AppendLine($"\t\t\t\tdefault:");
                     output.Append("\t\t\t\t\t");
-                    output.AppendLine(GenerateMethodCall(classSyntax, method, i));
+                    if (i < methodGroup.RequiredArgumentCount)
+                        output.AppendLine($"throw new JavaScriptException(engine, \"TypeError\", \"Required argument '{method.Parameters.Skip(i).First().Name}' was not specified.\");");
+                    else
+                        output.AppendLine(GenerateMethodCall(classSyntax, method, i));
                 }
                 output.AppendLine("\t\t\t}");
             }
@@ -406,6 +527,7 @@ namespace Attribute_Code_Generation
                                 break;
                             case "ObjectInstance":
                             case "FunctionInstance":
+                            case "ArrayBufferInstance":
                                 return "throw new JavaScriptException(engine, \"TypeError\", \"undefined cannot be converted to an object\");";
 
                             case "object[]":
@@ -436,27 +558,13 @@ namespace Attribute_Code_Generation
         {
             if (defaultValue != null)
             {
-                switch (type)
-                {
-                    case "object":
-                        return arg;
-                    case "bool":
-                        return $"TypeConverter.ToBoolean({arg}, {defaultValue})";
-                    case "int":
-                        return $"TypeConverter.ToInteger({arg}, {defaultValue})";
-                    case "string":
-                        return $"TypeConverter.ToString({arg}, {defaultValue})";
-                    case "double":
-                        return $"TypeConverter.ToNumber({arg}, {defaultValue})";
-                    case "ObjectInstance":
-                        return $"TypeConverter.ToObject(engine, {arg}, {defaultValue})";
-                    case "FunctionInstance":
-                        return $"TypeConverter.ToObject(engine, {arg}, {defaultValue}) as FunctionInstance";
-                    default:
-                        throw new InvalidOperationException($"Unsupported parameter type {type}");
-                }
+                if (defaultValue == "null" && type.EndsWith("?"))
+                    return $"TypeUtilities.IsUndefined({arg}) ? ({type})null : {ConvertTo(arg, type, null)}";
+                return $"TypeUtilities.IsUndefined({arg}) ? {defaultValue} : {ConvertTo(arg, type, null)}";
             }
 
+            if (type.EndsWith("?"))
+                type = type.Substring(0, type.Length - 1);
             switch (type)
             {
                 case "object":
@@ -473,6 +581,8 @@ namespace Attribute_Code_Generation
                     return $"TypeConverter.ToObject(engine, {arg})";
                 case "FunctionInstance":
                     return $"TypeConverter.ToObject(engine, {arg}) as FunctionInstance";
+                case "ArrayBufferInstance":
+                    return $"TypeConverter.ToObject(engine, {arg}) as ArrayBufferInstance";
                 case "object[]":
                     if (arrayIndex < 0)
                         throw new InvalidOperationException("Cannot convert to array.");

@@ -221,9 +221,13 @@
     <Compile Include="Library\MathObject.cs" />
     <Compile Include="Library\Object\ObjectInstance.cs" />
     <Compile Include="Library\String\StringInstance.g.cs" />
+    <Compile Include="Library\TypedArray\DataViewConstructor.cs" />
     <Compile Include="Library\TypedArray\ArrayBufferConstructor.cs" />
     <Compile Include="Library\TypedArray\ArrayBufferConstructor.g.cs" />
+    <Compile Include="Library\TypedArray\DataViewConstructor.g.cs" />
+    <Compile Include="Library\TypedArray\DataViewInstance.cs" />
     <Compile Include="Library\TypedArray\ArrayBufferInstance.g.cs" />
+    <Compile Include="Library\TypedArray\DataViewInstance.g.cs" />
     <Compile Include="Library\TypedArray\TypedArrayConstructor.g.cs" />
     <Compile Include="Library\TypedArray\ArrayBufferInstance.cs" />
     <Compile Include="Library\TypedArray\TypedArrayInstance.cs" />

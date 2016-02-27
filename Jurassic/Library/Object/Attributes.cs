@@ -130,6 +130,15 @@ namespace Jurassic.Library
     /// </summary>
     internal class JSInternalFunctionAttribute : JSFunctionAttribute
     {
+        /// <summary>
+        /// Gets or sets the number of parameters that are required.  If the function is called
+        /// with fewer than this number of arguments, then a TypeError will be thrown.
+        /// </summary>
+        public int RequiredArgumentCount
+        {
+            get;
+            set;
+        }
     }
 
     /// <summary>
@@ -143,7 +152,7 @@ namespace Jurassic.Library
         /// </summary>
         public JSPropertyAttribute()
         {
-            this.IsEnumerable = true;
+            this.IsConfigurable = true;
         }
 
         /// <summary>
@@ -158,7 +167,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets or sets whether the property should be enumerable (exposed via the 
         /// <c>for...in</c> construct) in JavaScript code.  The default value of this
-        /// property is <c>true</c>.
+        /// property is <c>false</c>.
         /// </summary>
         /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
         public bool IsEnumerable
@@ -170,7 +179,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets or sets whether the property should be configurable, that is, whether
         /// the property may be changed or have its descriptor changed by JavaScript
-        /// code.  The default value of this property is <c>false</c>.
+        /// code.  The default value of this property is <c>true</c>.
         /// </summary>
         /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
         public bool IsConfigurable

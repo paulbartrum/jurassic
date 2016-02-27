@@ -48,7 +48,7 @@ namespace Jurassic.Library
 				case 0:
 					return ((NumberInstance)thisObj).ToFixed(0);
 				default:
-					return ((NumberInstance)thisObj).ToFixed(TypeConverter.ToInteger(args[0], 0));
+					return ((NumberInstance)thisObj).ToFixed(TypeUtilities.IsUndefined(args[0]) ? 0 : TypeConverter.ToInteger(args[0]));
 			}
 		}
 
@@ -84,7 +84,7 @@ namespace Jurassic.Library
 				case 0:
 					return ((NumberInstance)thisObj).ToStringJS(10);
 				default:
-					return ((NumberInstance)thisObj).ToStringJS(TypeConverter.ToInteger(args[0], 10));
+					return ((NumberInstance)thisObj).ToStringJS(TypeUtilities.IsUndefined(args[0]) ? 10 : TypeConverter.ToInteger(args[0]));
 			}
 		}
 

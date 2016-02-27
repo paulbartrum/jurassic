@@ -74,19 +74,8 @@ namespace Jurassic
         /// <returns> A primitive boolean value. </returns>
         public static bool ToBoolean(object value)
         {
-            return ToBoolean(value, false);
-        }
-
-        /// <summary>
-        /// Converts any JavaScript value to a primitive boolean value.
-        /// </summary>
-        /// <param name="value"> The value to convert. </param>
-        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
-        /// <returns> A primitive boolean value. </returns>
-        internal static bool ToBoolean(object value, bool undefinedValue)
-        {
             if (value == null || value == Null.Value)
-                return undefinedValue;
+                return false;
             if (value == Undefined.Value)
                 return false;
             if (value is bool)
@@ -113,17 +102,6 @@ namespace Jurassic
         /// <returns> A primitive number value. </returns>
         public static double ToNumber(object value)
         {
-            return ToNumber(value, double.NaN);
-        }
-
-        /// <summary>
-        /// Converts any JavaScript value to a primitive number value.
-        /// </summary>
-        /// <param name="value"> The value to convert. </param>
-        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
-        /// <returns> A primitive number value. </returns>
-        internal static double ToNumber(object value, double undefinedValue)
-        {
             if (value is double)
                 return (double)value;
             if (value is int)
@@ -131,7 +109,7 @@ namespace Jurassic
             if (value is uint)
                 return (double)(uint)value;
             if (value == null || value == Undefined.Value)
-                return undefinedValue;
+                return double.NaN;
             if (value == Null.Value)
                 return +0;
             if (value is bool)
@@ -160,19 +138,8 @@ namespace Jurassic
         /// <returns> A primitive string value. </returns>
         public static string ToString(object value)
         {
-            return ToString(value, "undefined");
-        }
-
-        /// <summary>
-        /// Converts any JavaScript value to a primitive string value.
-        /// </summary>
-        /// <param name="value"> The value to convert. </param>
-        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
-        /// <returns> A primitive string value. </returns>
-        internal static string ToString(object value, string undefinedValue)
-        {
             if (value == null || value == Undefined.Value)
-                return undefinedValue;
+                return "undefined";
             if (value == Null.Value)
                 return "null";
             if (value is bool)
@@ -227,20 +194,6 @@ namespace Jurassic
         /// <returns> An object. </returns>
         public static ObjectInstance ToObject(ScriptEngine engine, object value)
         {
-            return ToObject(engine, value, 0, null, null);
-        }
-
-        /// <summary>
-        /// Converts any JavaScript value to an object.
-        /// </summary>
-        /// <param name="engine"> The script engine used to create new objects. </param>
-        /// <param name="value"> The value to convert. </param>
-        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
-        /// <returns> An object. </returns>
-        internal static ObjectInstance ToObject(ScriptEngine engine, object value, ObjectInstance undefinedValue)
-        {
-            if (value == null || value == Undefined.Value)
-                return undefinedValue;
             return ToObject(engine, value, 0, null, null);
         }
 
@@ -305,19 +258,8 @@ namespace Jurassic
         /// <returns> An integer value. </returns>
         public static int ToInteger(object value)
         {
-            return ToInteger(value, 0);
-        }
-
-        /// <summary>
-        /// Converts any JavaScript value to an integer.
-        /// </summary>
-        /// <param name="value"> The value to convert. </param>
-        /// <param name="undefinedValue"> The value to return if the input value is undefined. </param>
-        /// <returns> An integer value. </returns>
-        public static int ToInteger(object value, int undefinedValue)
-        {
             if (value == null || value is Undefined)
-                return undefinedValue;
+                return 0;
             double num = ToNumber(value);
             if (num > 2147483647.0)
                 return 2147483647;
@@ -353,6 +295,16 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Converts any JavaScript value to a signed 16-bit integer.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <returns> A signed 16-bit integer value. </returns>
+        public static short ToInt16(object value)
+        {
+            return (short)(uint)ToNumber(value);
+        }
+
+        /// <summary>
         /// Converts any JavaScript value to an unsigned 16-bit integer.
         /// </summary>
         /// <param name="value"> The value to convert. </param>
@@ -360,6 +312,26 @@ namespace Jurassic
         public static ushort ToUint16(object value)
         {
             return (ushort)(uint)ToNumber(value);
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to a signed 8-bit integer.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <returns> A signed 8-bit integer value. </returns>
+        public static sbyte ToInt8(object value)
+        {
+            return (sbyte)(uint)ToNumber(value);
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to an unsigned 8-bit integer.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <returns> An unsigned 8-bit integer value. </returns>
+        public static byte ToUint8(object value)
+        {
+            return (byte)(uint)ToNumber(value);
         }
 
         /// <summary>

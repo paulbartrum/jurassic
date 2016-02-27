@@ -35,7 +35,7 @@ namespace Jurassic.Library
 				case 0:
 					return ((BooleanConstructor)thisObj).Construct(false);
 				default:
-					return ((BooleanConstructor)thisObj).Construct(TypeConverter.ToBoolean(args[0], false));
+					return ((BooleanConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? false : TypeConverter.ToBoolean(args[0]));
 			}
 		}
 	}

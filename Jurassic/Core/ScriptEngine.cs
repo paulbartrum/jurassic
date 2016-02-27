@@ -44,6 +44,7 @@ namespace Jurassic
 
         // The built-in typed array objects.
         private ArrayBufferConstructor arrayBufferConstructor;
+        private DataViewConstructor dataViewConstructor;
         private TypedArrayConstructor int8ArrayConstructor;
         private TypedArrayConstructor uint8ArrayConstructor;
         private TypedArrayConstructor uint8ClampedArrayConstructor;
@@ -99,6 +100,7 @@ namespace Jurassic
 
             // Create the typed array functions.
             this.arrayBufferConstructor = new ArrayBufferConstructor(baseFunction);
+            this.dataViewConstructor = new DataViewConstructor(baseFunction);
             this.int8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Int8Array);
             this.uint8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Uint8Array);
             this.uint8ClampedArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Uint8ClampedArray);
@@ -133,6 +135,7 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("EvalError", this.evalErrorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("ReferenceError", this.referenceErrorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("ArrayBuffer", this.arrayBufferConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("DataView", this.dataViewConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Int8Array", this.int8ArrayConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Uint8Array", this.uint8ArrayConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Uint8ClampedArray", this.uint8ClampedArrayConstructor, PropertyAttributes.NonEnumerable));
@@ -207,6 +210,20 @@ namespace Jurassic
             this.uriErrorConstructor = (ErrorConstructor)info.GetValue("uriErrorConstructor", typeof(ErrorConstructor));
             this.evalErrorConstructor = (ErrorConstructor)info.GetValue("evalErrorConstructor", typeof(ErrorConstructor));
             this.referenceErrorConstructor = (ErrorConstructor)info.GetValue("referenceErrorConstructor", typeof(ErrorConstructor));
+
+            // Deserialize the built-in typed array objects.
+            this.arrayBufferConstructor = (ArrayBufferConstructor)info.GetValue("arrayBufferConstructor", typeof(ArrayBufferConstructor));
+            this.dataViewConstructor = (DataViewConstructor)info.GetValue("dataViewConstructor", typeof(DataViewConstructor));
+            this.int8ArrayConstructor = (TypedArrayConstructor)info.GetValue("int8ArrayConstructor", typeof(TypedArrayConstructor));
+            this.uint8ArrayConstructor = (TypedArrayConstructor)info.GetValue("uint8ArrayConstructor", typeof(TypedArrayConstructor));
+            this.uint8ClampedArrayConstructor = (TypedArrayConstructor)info.GetValue("uint8ClampedArrayConstructor", typeof(TypedArrayConstructor));
+            this.int16ArrayConstructor = (TypedArrayConstructor)info.GetValue("int16ArrayConstructor", typeof(TypedArrayConstructor));
+            this.uint16ArrayConstructor = (TypedArrayConstructor)info.GetValue("uint16ArrayConstructor", typeof(TypedArrayConstructor));
+            this.int32ArrayConstructor = (TypedArrayConstructor)info.GetValue("int32ArrayConstructor", typeof(TypedArrayConstructor));
+            this.uint32ArrayConstructor = (TypedArrayConstructor)info.GetValue("uint32ArrayConstructor", typeof(TypedArrayConstructor));
+            this.float32ArrayConstructor = (TypedArrayConstructor)info.GetValue("float32ArrayConstructor", typeof(TypedArrayConstructor));
+            this.float64ArrayConstructor = (TypedArrayConstructor)info.GetValue("float64ArrayConstructor", typeof(TypedArrayConstructor));
+
         }
 
         /// <summary>
@@ -245,6 +262,19 @@ namespace Jurassic
             info.AddValue("uriErrorConstructor", this.uriErrorConstructor);
             info.AddValue("evalErrorConstructor", this.evalErrorConstructor);
             info.AddValue("referenceErrorConstructor", this.referenceErrorConstructor);
+
+            // Serialize the built-in typed array objects.
+            info.AddValue("arrayBufferConstructor", this.arrayBufferConstructor);
+            info.AddValue("dataViewConstructor", this.dataViewConstructor);
+            info.AddValue("int8ArrayConstructor", this.int8ArrayConstructor);
+            info.AddValue("uint8ArrayConstructor", this.uint8ArrayConstructor);
+            info.AddValue("uint8ClampedArrayConstructor ", this.uint8ClampedArrayConstructor);
+            info.AddValue("int16ArrayConstructor", this.int16ArrayConstructor);
+            info.AddValue("uint16ArrayConstructor", this.uint16ArrayConstructor);
+            info.AddValue("int32ArrayConstructor", this.int32ArrayConstructor);
+            info.AddValue("uint32ArrayConstructor", this.uint32ArrayConstructor);
+            info.AddValue("float32ArrayConstructor", this.float32ArrayConstructor);
+            info.AddValue("float64ArrayConstructor", this.float64ArrayConstructor);
         }
 
 #endif
@@ -517,6 +547,14 @@ namespace Jurassic
         public ArrayBufferConstructor ArrayBuffer
         {
             get { return this.arrayBufferConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in DataView object.
+        /// </summary>
+        public DataViewConstructor DataView
+        {
+            get { return this.dataViewConstructor; }
         }
 
         /// <summary>

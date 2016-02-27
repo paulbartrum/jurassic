@@ -23,7 +23,7 @@ namespace Jurassic.Library
 				case 1:
 					return ((RegExpConstructor)thisObj).Call(args[0], null);
 				default:
-					return ((RegExpConstructor)thisObj).Call(args[0], TypeConverter.ToString(args[1], null));
+					return ((RegExpConstructor)thisObj).Call(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToString(args[1]));
 			}
 		}
 
@@ -39,7 +39,7 @@ namespace Jurassic.Library
 				case 1:
 					return ((RegExpConstructor)thisObj).Construct(args[0], null);
 				default:
-					return ((RegExpConstructor)thisObj).Construct(args[0], TypeConverter.ToString(args[1], null));
+					return ((RegExpConstructor)thisObj).Construct(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToString(args[1]));
 			}
 		}
 	}

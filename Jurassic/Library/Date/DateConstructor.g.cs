@@ -58,15 +58,15 @@ namespace Jurassic.Library
 				case 2:
 					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), 1, 0, 0, 0, 0);
 				case 3:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeConverter.ToInteger(args[2], 1), 0, 0, 0, 0);
+					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), 0, 0, 0, 0);
 				case 4:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeConverter.ToInteger(args[2], 1), TypeConverter.ToInteger(args[3], 0), 0, 0, 0);
+					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), 0, 0, 0);
 				case 5:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeConverter.ToInteger(args[2], 1), TypeConverter.ToInteger(args[3], 0), TypeConverter.ToInteger(args[4], 0), 0, 0);
+					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), 0, 0);
 				case 6:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeConverter.ToInteger(args[2], 1), TypeConverter.ToInteger(args[3], 0), TypeConverter.ToInteger(args[4], 0), TypeConverter.ToInteger(args[5], 0), 0);
+					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), TypeUtilities.IsUndefined(args[5]) ? 0 : TypeConverter.ToInteger(args[5]), 0);
 				default:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeConverter.ToInteger(args[2], 1), TypeConverter.ToInteger(args[3], 0), TypeConverter.ToInteger(args[4], 0), TypeConverter.ToInteger(args[5], 0), TypeConverter.ToInteger(args[6], 0));
+					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), TypeUtilities.IsUndefined(args[5]) ? 0 : TypeConverter.ToInteger(args[5]), TypeUtilities.IsUndefined(args[6]) ? 0 : TypeConverter.ToInteger(args[6]));
 			}
 		}
 

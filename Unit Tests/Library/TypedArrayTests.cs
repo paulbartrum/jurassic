@@ -4,7 +4,7 @@ using Jurassic;
 namespace UnitTests
 {
     /// <summary>
-    /// Test the global TypedArray objects.
+    /// Test the global TypedArray object.
     /// </summary>
     [TestClass]
     public class TypedArrayTests : TestBase

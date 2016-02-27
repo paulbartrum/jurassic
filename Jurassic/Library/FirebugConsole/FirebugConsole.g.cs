@@ -175,7 +175,7 @@ namespace Jurassic.Library
 				case 0:
 					((FirebugConsole)thisObj).Time(""); return Undefined.Value;
 				default:
-					((FirebugConsole)thisObj).Time(TypeConverter.ToString(args[0], "")); return Undefined.Value;
+					((FirebugConsole)thisObj).Time(TypeUtilities.IsUndefined(args[0]) ? "" : TypeConverter.ToString(args[0])); return Undefined.Value;
 			}
 		}
 
@@ -189,7 +189,7 @@ namespace Jurassic.Library
 				case 0:
 					((FirebugConsole)thisObj).TimeEnd(""); return Undefined.Value;
 				default:
-					((FirebugConsole)thisObj).TimeEnd(TypeConverter.ToString(args[0], "")); return Undefined.Value;
+					((FirebugConsole)thisObj).TimeEnd(TypeUtilities.IsUndefined(args[0]) ? "" : TypeConverter.ToString(args[0])); return Undefined.Value;
 			}
 		}
 	}

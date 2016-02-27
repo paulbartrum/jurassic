@@ -71,6 +71,7 @@
     <Compile Include="Core\DocumentationSamples.cs" />
     <Compile Include="Core\TypeComparerTests.cs" />
     <Compile Include="Library\ArgumentsTests.cs" />
+    <Compile Include="Library\DataViewTests.cs" />
     <Compile Include="Library\ArrayTests.cs" />
     <Compile Include="Library\BooleanTests.cs" />
     <Compile Include="Library\JSONTests.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Library\ReflectTests.cs" />
     <Compile Include="Library\RegExpTests.cs" />
     <Compile Include="Library\PromiseTests.cs" />
+    <Compile Include="Library\ArrayBufferTests.cs" />
     <Compile Include="Library\TypedArrayTests.cs" />
     <Compile Include="Library\SymbolTests.cs" />
     <Compile Include="Library\StringTests.cs" />
