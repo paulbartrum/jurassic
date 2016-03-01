@@ -25,7 +25,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'compile' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'compile' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -41,7 +41,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'test' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'test' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -55,7 +55,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'exec' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'exec' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -69,7 +69,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toString' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
 			return ((RegExpInstance)thisObj).ToString();
 		}
 	}

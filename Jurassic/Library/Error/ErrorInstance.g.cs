@@ -22,7 +22,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ErrorInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toString' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
 			return ((ErrorInstance)thisObj).ToStringJS();
 		}
 	}

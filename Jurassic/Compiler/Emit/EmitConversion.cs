@@ -1,4 +1,5 @@
 ﻿using System;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -496,12 +497,12 @@ namespace Jurassic.Compiler
             {
                 case PrimitiveType.Undefined:
                     // Converting from undefined always throws an exception.
-                    EmitHelpers.EmitThrow(generator, "TypeError", "Undefined cannot be converted to an object", path, function, line);
+                    EmitHelpers.EmitThrow(generator, ErrorType.TypeError, "Undefined cannot be converted to an object", path, function, line);
                     break;
 
                 case PrimitiveType.Null:
                     // Converting from null always throws an exception.
-                    EmitHelpers.EmitThrow(generator, "TypeError", "Null cannot be converted to an object", path, function, line);
+                    EmitHelpers.EmitThrow(generator, ErrorType.TypeError, "Null cannot be converted to an object", path, function, line);
                     break;
 
                 case PrimitiveType.Bool:

@@ -73,7 +73,7 @@ namespace Jurassic.Library
             if (this.nextToken == token)
                 Consume();
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected '{0}'", token.Text));
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected '{0}'", token.Text));
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Jurassic.Library
             }
             else
             {
-                throw new JavaScriptException(this.engine, "SyntaxError", "Expected identifier");
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected identifier");
             }
         }
 
@@ -112,7 +112,7 @@ namespace Jurassic.Library
 
             // We should now be at the end of the input.
             if (this.nextToken != null)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Expected end of input");
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected end of input");
 
             // Apply the reviver function, if there is one.
             if (this.ReviverFunction != null)
@@ -146,9 +146,9 @@ namespace Jurassic.Library
                 result = ParseArrayLiteral();
             }
             else if (this.nextToken == null)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input");
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input");
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0}", this.nextToken));
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Unexpected token {0}", this.nextToken));
             return result;
         }
 
@@ -228,11 +228,11 @@ namespace Jurassic.Library
                     // The property name must be a string.
                     object literalValue = ((LiteralToken)this.nextToken).Value;
                     if ((literalValue is string) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Expected property name");
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected property name");
                     propertyName = (string)literalValue;
                 }
                 else
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Expected property name");
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected property name");
                 this.Consume();
 
                 // Read the colon.

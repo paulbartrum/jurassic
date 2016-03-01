@@ -146,7 +146,7 @@ namespace Jurassic.Library
         public override ObjectInstance ConstructLateBound(params object[] argumentValues)
         {
             if (this.constructBinder == null)
-                throw new JavaScriptException(this.Engine, "TypeError", "Objects cannot be constructed from built-in functions.");
+                throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Objects cannot be constructed from built-in functions.");
             return (ObjectInstance)this.constructBinder(this.Engine, this, argumentValues);
         }
     }

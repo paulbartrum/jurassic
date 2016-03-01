@@ -213,9 +213,9 @@ namespace Jurassic
             if (value is ObjectInstance)
                 return (ObjectInstance)value;
             if (value == null || value == Undefined.Value)
-                throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object", lineNumber, sourcePath, functionName);
+                throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object", lineNumber, sourcePath, functionName);
             if (value == Null.Value)
-                throw new JavaScriptException(engine, "TypeError", "null cannot be converted to an object", lineNumber, sourcePath, functionName);
+                throw new JavaScriptException(engine, ErrorType.TypeError, "null cannot be converted to an object", lineNumber, sourcePath, functionName);
 
             ObjectInstance result;
             if (value is bool)

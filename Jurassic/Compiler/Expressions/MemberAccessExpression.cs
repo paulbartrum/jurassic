@@ -1,4 +1,4 @@
-﻿using System;
+﻿using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -69,7 +69,7 @@ namespace Jurassic.Compiler
             {
                 var rhs = this.GetOperand(1) as NameExpression;
                 if (rhs == null)
-                    throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "Invalid member access", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+                    throw new JavaScriptException(optimizationInfo.Engine, ErrorType.SyntaxError, "Invalid member access", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
                 propertyName = rhs.Name;
             }
 
@@ -212,7 +212,7 @@ namespace Jurassic.Compiler
             {
                 var rhs = this.GetOperand(1) as NameExpression;
                 if (rhs == null)
-                    throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", "Invalid member access", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+                    throw new JavaScriptException(optimizationInfo.Engine, ErrorType.SyntaxError, "Invalid member access", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
                 propertyName = rhs.Name;
             }
 

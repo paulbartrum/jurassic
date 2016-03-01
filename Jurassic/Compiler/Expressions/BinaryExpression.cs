@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -723,7 +723,7 @@ namespace Jurassic.Compiler
             var rightValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(rightValue);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadString("TypeError");
+            generator.LoadInt32((int)ErrorType.TypeError);
             generator.LoadString("The instanceof operator expected a function, but found '{0}' instead");
             generator.LoadInt32(1);
             generator.NewArray(typeof(object));
@@ -780,7 +780,7 @@ namespace Jurassic.Compiler
             var rightValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(rightValue);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadString("TypeError");
+            generator.LoadInt32((int)ErrorType.TypeError);
             generator.LoadString("The in operator expected an object, but found '{0}' instead");
             generator.LoadInt32(1);
             generator.NewArray(typeof(object));

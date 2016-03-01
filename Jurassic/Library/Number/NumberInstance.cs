@@ -96,7 +96,7 @@ namespace Jurassic.Library
 
             // Check the parameter is within range.
             if (fractionDigits2 < 0 || fractionDigits2 > 20)
-                throw new JavaScriptException(this.Engine, "RangeError", "toExponential() argument must be between 0 and 20.");
+                throw new JavaScriptException(this.Engine, ErrorType.RangeError, "toExponential() argument must be between 0 and 20.");
 
             // NumberFormatter does the hard work.
             return NumberFormatter.ToString(this.value, 10, NumberFormatter.Style.Exponential, fractionDigits2);
@@ -117,7 +117,7 @@ namespace Jurassic.Library
         {
             // Check the parameter is within range.
             if (fractionDigits < 0 || fractionDigits > 20)
-                throw new JavaScriptException(this.Engine, "RangeError", "toFixed() argument must be between 0 and 20.");
+                throw new JavaScriptException(this.Engine, ErrorType.RangeError, "toFixed() argument must be between 0 and 20.");
 
             // NumberFormatter does the hard work.
             return NumberFormatter.ToString(this.value, 10, NumberFormatter.Style.Fixed, fractionDigits);
@@ -160,7 +160,7 @@ namespace Jurassic.Library
 
             // Check the precision is in range.
             if (precision2 < 1 || precision2 > 21)
-                throw new JavaScriptException(this.Engine, "RangeError", "toPrecision() argument must be between 0 and 21.");
+                throw new JavaScriptException(this.Engine, ErrorType.RangeError, "toPrecision() argument must be between 0 and 21.");
 
             // NumberFormatter does the hard work.
             return NumberFormatter.ToString(this.value, 10, NumberFormatter.Style.Precision, precision2);
@@ -176,7 +176,7 @@ namespace Jurassic.Library
         {
             // Check the parameter is in range.
             if (radix < 2 || radix > 36)
-                throw new JavaScriptException(this.Engine, "RangeError", "The radix must be between 2 and 36, inclusive.");
+                throw new JavaScriptException(this.Engine, ErrorType.RangeError, "The radix must be between 2 and 36, inclusive.");
 
             // NumberFormatter does the hard work.
             return NumberFormatter.ToString(this.value, radix, NumberFormatter.Style.Regular);

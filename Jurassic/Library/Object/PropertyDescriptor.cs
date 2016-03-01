@@ -226,15 +226,15 @@ namespace Jurassic.Library
             if (obj.HasProperty("get"))
             {
                 if (obj.HasProperty("value"))
-                    throw new JavaScriptException(obj.Engine, "TypeError", "Property descriptors cannot have both 'get' and 'value' set");
+                    throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Property descriptors cannot have both 'get' and 'value' set");
                 if (obj.HasProperty("writable"))
-                    throw new JavaScriptException(obj.Engine, "TypeError", "Property descriptors with 'get' or 'set' defined must not have 'writable' set");
+                    throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Property descriptors with 'get' or 'set' defined must not have 'writable' set");
                 if (obj["get"] is FunctionInstance)
                     getter = (FunctionInstance)obj["get"];
                 else if (TypeUtilities.IsUndefined(obj["get"]) == true)
                     getter = null;
                 else
-                    throw new JavaScriptException(obj.Engine, "TypeError", "Property descriptor 'get' must be a function");
+                    throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Property descriptor 'get' must be a function");
                 isAccessor = true;
             }
 
@@ -243,15 +243,15 @@ namespace Jurassic.Library
             if (obj.HasProperty("set"))
             {
                 if (obj.HasProperty("value"))
-                    throw new JavaScriptException(obj.Engine, "TypeError", "Property descriptors cannot have both 'set' and 'value' set");
+                    throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Property descriptors cannot have both 'set' and 'value' set");
                 if (obj.HasProperty("writable"))
-                    throw new JavaScriptException(obj.Engine, "TypeError", "Property descriptors with 'get' or 'set' defined must not have 'writable' set");
+                    throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Property descriptors with 'get' or 'set' defined must not have 'writable' set");
                 if (obj["set"] is FunctionInstance)
                     setter = (FunctionInstance)obj["set"];
                 else if (TypeUtilities.IsUndefined(obj["set"]) == true)
                     setter = null;
                 else
-                    throw new JavaScriptException(obj.Engine, "TypeError", "Property descriptor 'set' must be a function");
+                    throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Property descriptor 'set' must be a function");
                 isAccessor = true;
             }
 

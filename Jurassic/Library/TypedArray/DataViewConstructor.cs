@@ -39,7 +39,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public object Call()
         {
-            throw new JavaScriptException(Engine, "TypeError", "Constructor DataView requires 'new'");
+            throw new JavaScriptException(Engine, ErrorType.TypeError, "Constructor DataView requires 'new'");
         }
 
         /// <summary>
@@ -57,12 +57,12 @@ namespace Jurassic.Library
         public DataViewInstance Construct(ArrayBufferInstance buffer = null, int byteOffset = 0, int? byteLength = null)
         {
             if (buffer == null)
-                throw new JavaScriptException(Engine, "TypeError", "First argument to DataView constructor must be an ArrayBuffer.");
+                throw new JavaScriptException(Engine, ErrorType.TypeError, "First argument to DataView constructor must be an ArrayBuffer.");
             if (byteOffset >= buffer.ByteLength)
-                throw new JavaScriptException(Engine, "RangeError", "Start offset is outside the bounds of the buffer.");
+                throw new JavaScriptException(Engine, ErrorType.RangeError, "Start offset is outside the bounds of the buffer.");
             int byteLengthValue = byteLength ?? buffer.ByteLength - byteOffset;
             if (byteOffset + byteLengthValue > buffer.ByteLength)
-                throw new JavaScriptException(Engine, "RangeError", "Invalid data view length.");
+                throw new JavaScriptException(Engine, ErrorType.RangeError, "Invalid data view length.");
             return new DataViewInstance(this.InstancePrototype, buffer, byteOffset, byteLengthValue);
         }
     }

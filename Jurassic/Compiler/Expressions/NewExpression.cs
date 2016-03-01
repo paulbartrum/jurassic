@@ -1,4 +1,4 @@
-﻿using System;
+﻿using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -79,7 +79,7 @@ namespace Jurassic.Compiler
             var targetValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(targetValue);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadString("TypeError");
+            generator.LoadInt32((int)ErrorType.TypeError);
             generator.LoadString("The new operator requires a function, found a '{0}' instead");
             generator.LoadInt32(1);
             generator.NewArray(typeof(object));

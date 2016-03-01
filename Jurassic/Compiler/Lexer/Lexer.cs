@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -190,7 +190,7 @@ namespace Jurassic.Compiler
                 return null;
             }
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected character '{0}'.", (char)c1), this.lineNumber, this.Source.Path);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Unexpected character '{0}'.", (char)c1), this.lineNumber, this.Source.Path);
         }
 
         /// <summary>
@@ -206,21 +206,21 @@ namespace Jurassic.Compiler
             {
                 // Unicode escape sequence.
                 if (ReadNextChar() != 'u')
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
                 firstChar = this.reader.Peek();
                 if (firstChar == '{')
                 {
                     // ECMAScript 6 extended unicode escape sequence.
                     string extendedCharacter = ReadExtendedUnicodeSequence();
                     if (extendedCharacter.Length == 1 && IsIdentifierChar(extendedCharacter[0]) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid character in identifier.", this.lineNumber, this.Source.Path);
                     name.Append(extendedCharacter);
                 }
                 else
                 {
                     firstChar = ReadHexEscapeSequence(4);
                     if (IsIdentifierChar(firstChar) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid character in identifier.", this.lineNumber, this.Source.Path);
                     name.Append((char)firstChar);
                 }
             }
@@ -239,21 +239,21 @@ namespace Jurassic.Compiler
                     // Unicode escape sequence.
                     ReadNextChar();
                     if (ReadNextChar() != 'u')
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
                     c = this.reader.Peek();
                     if (c == '{')
                     {
                         // ECMAScript 6 extended unicode escape sequence.
                         string extendedCharacter = ReadExtendedUnicodeSequence();
                         if (extendedCharacter.Length == 1 && IsIdentifierChar(extendedCharacter[0]) == false)
-                            throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid character in identifier.", this.lineNumber, this.Source.Path);
                         name.Append(extendedCharacter);
                     }
                     else
                     { 
                         c = ReadHexEscapeSequence(4);
                         if (IsIdentifierChar(c) == false)
-                            throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid character in identifier.", this.lineNumber, this.Source.Path);
                         name.Append((char)c);
                     }
                 }
@@ -347,18 +347,18 @@ namespace Jurassic.Compiler
                     // If the number consists solely of a period, return that as a token.
                     return PunctuatorToken.Dot;
                 case NumberParser.ParseCoreStatus.NoExponent:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid number.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid number.", this.lineNumber, this.Source.Path);
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid hexidecimal literal.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid hexidecimal literal.", this.lineNumber, this.Source.Path);
                 case NumberParser.ParseCoreStatus.ES3OctalLiteral:
                     // ES3 octal literals are not supported in strict mode.
                     if (this.StrictMode)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Octal numbers are not allowed in strict mode.", this.lineNumber, this.Source.Path);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Octal numbers are not allowed in strict mode.", this.lineNumber, this.Source.Path);
                     break;
                 case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal literal.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid octal literal.", this.lineNumber, this.Source.Path);
                 case NumberParser.ParseCoreStatus.InvalidBinaryLiteral:
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid binary literal.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid binary literal.", this.lineNumber, this.Source.Path);
             }
 
             // Return the result as an integer if possible, otherwise return it as a double.
@@ -408,9 +408,9 @@ namespace Jurassic.Compiler
                 if (c == firstChar)
                     break;
                 if (c == -1)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in string literal.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in string literal.", this.lineNumber, this.Source.Path);
                 if (IsLineTerminator(c))
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected line terminator in string literal.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected line terminator in string literal.", this.lineNumber, this.Source.Path);
                 if (c == '\\')
                 {
                     // Escape sequence or line continuation.
@@ -490,7 +490,7 @@ namespace Jurassic.Compiler
                                 break;
                             case '8':
                             case '9':
-                                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal escape sequence.", this.lineNumber, this.Source.Path);
+                                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid octal escape sequence.", this.lineNumber, this.Source.Path);
                             default:
                                 contents.Append((char)c);
                                 break;
@@ -519,7 +519,7 @@ namespace Jurassic.Compiler
                 int c = ReadNextChar();
                 contents.Append((char)c);
                 if (IsHexDigit(c) == false)
-                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
             }
             return (char)int.Parse(contents.ToString(), System.Globalization.NumberStyles.HexNumber);
         }
@@ -533,7 +533,7 @@ namespace Jurassic.Compiler
         {
             // Octal escape sequences are only supported in ECMAScript 3 compatibility mode.
             if (this.StrictMode)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Octal escape sequences are not allowed in strict mode.", this.lineNumber, this.Source.Path);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Octal escape sequences are not allowed in strict mode.", this.lineNumber, this.Source.Path);
 
             int numericValue = firstDigit;
             for (int i = 0; i < 2; i++)
@@ -542,7 +542,7 @@ namespace Jurassic.Compiler
                 if (c < '0' || c > '9')
                     break;
                 if (c == '8' || c == '9')
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid octal escape sequence.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid octal escape sequence.", this.lineNumber, this.Source.Path);
                 numericValue = numericValue * 8 + (c - '0');
                 ReadNextChar();
                 if (numericValue * 8 > 255)
@@ -570,10 +570,10 @@ namespace Jurassic.Compiler
                 if (c == '}')
                     break;
                 if (contents.Length >= 6)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Escape sequence too long.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Escape sequence too long.", this.lineNumber, this.Source.Path);
                 contents.Append((char)c);
                 if (IsHexDigit(c) == false)
-                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
             }
 
             // Convert the number into a string.
@@ -617,7 +617,7 @@ namespace Jurassic.Compiler
             // Read the first character.
             int c1 = ReadNextChar();
             if (c1 == -1)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in multi-line comment.", this.lineNumber, this.Source.Path);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in multi-line comment.", this.lineNumber, this.Source.Path);
 
             // Read all the characters up to the "*/".
             while (true)
@@ -639,7 +639,7 @@ namespace Jurassic.Compiler
                         c1 = c2 = ReadNextChar();
                 }
                 else if (c2 == -1)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in multi-line comment.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in multi-line comment.", this.lineNumber, this.Source.Path);
 
                 // Look for */ combination.
                 if (c1 == '*' && c2 == '/')
@@ -799,9 +799,9 @@ namespace Jurassic.Compiler
                 // it is escaped with a backslash.  Therefore, these checks have to come after the
                 // checks above.
                 if (IsLineTerminator(c))
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected line terminator in regular expression literal.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected line terminator in regular expression literal.", this.lineNumber, this.Source.Path);
                 else if (c == -1)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input in regular expression literal.", this.lineNumber, this.Source.Path);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in regular expression literal.", this.lineNumber, this.Source.Path);
 
                 // Append the character to the regular expression.
                 body.Append((char)c);
@@ -820,10 +820,10 @@ namespace Jurassic.Compiler
                     // Unicode escape sequence.
                     ReadNextChar();
                     if (ReadNextChar() != 'u')
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid escape sequence in identifier.", this.lineNumber, this.Source.Path);
                     c = ReadHexEscapeSequence(4);
                     if (IsIdentifierChar(c) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Invalid character in identifier.", this.lineNumber, this.Source.Path);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid character in identifier.", this.lineNumber, this.Source.Path);
                     flags.Append((char)c);
                 }
                 else

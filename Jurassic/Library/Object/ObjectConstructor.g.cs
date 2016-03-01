@@ -36,7 +36,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ObjectConstructor))
-				throw new JavaScriptException(engine, "TypeError", "The method 'Call' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Call' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -50,7 +50,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ObjectConstructor))
-				throw new JavaScriptException(engine, "TypeError", "The method 'Construct' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -65,7 +65,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return GetPrototypeOf(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -76,7 +76,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return GetOwnPropertyDescriptor(TypeConverter.ToObject(engine, args[0]), "undefined");
 				default:
@@ -89,7 +89,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return GetOwnPropertyNames(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -113,7 +113,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return Assign(engine, TypeConverter.ToObject(engine, args[0]), new object[0]);
 				default:
@@ -126,7 +126,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return DefineProperty(TypeConverter.ToObject(engine, args[0]), "undefined", Undefined.Value);
 				case 2:
@@ -141,9 +141,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return DefineProperties(args[0], TypeConverter.ToObject(engine, args[1]));
 			}
@@ -154,7 +154,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return Seal(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -165,7 +165,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return Freeze(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -176,7 +176,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return PreventExtensions(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -187,7 +187,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return IsSealed(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -198,7 +198,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return IsFrozen(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -209,7 +209,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return IsExtensible(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -220,7 +220,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return Keys(TypeConverter.ToObject(engine, args[0]));
 			}

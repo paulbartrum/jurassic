@@ -23,7 +23,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayConstructor))
-				throw new JavaScriptException(engine, "TypeError", "The method 'Call' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Call' is not generic.");
 			return ((TypedArrayConstructor)thisObj).Call();
 		}
 
@@ -31,7 +31,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayConstructor))
-				throw new JavaScriptException(engine, "TypeError", "The method 'Construct' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -46,9 +46,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					throw new JavaScriptException(engine, "TypeError", "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 2:
 					return From(args[0], TypeConverter.ToObject(engine, args[1]) as FunctionInstance, Undefined.Value);
 				default:

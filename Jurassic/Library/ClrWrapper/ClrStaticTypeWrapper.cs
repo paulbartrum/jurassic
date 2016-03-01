@@ -29,7 +29,7 @@ namespace Jurassic.Library
         public static ClrStaticTypeWrapper FromCache(ScriptEngine engine, Type type)
         {
             if (!engine.EnableExposedClrTypes)
-                throw new JavaScriptException(engine, "TypeError", "Unsupported type: CLR types are not supported.  Enable CLR types by setting the ScriptEngine's EnableExposedClrTypes property to true.");
+                throw new JavaScriptException(engine, ErrorType.TypeError, "Unsupported type: CLR types are not supported.  Enable CLR types by setting the ScriptEngine's EnableExposedClrTypes property to true.");
 
             ClrStaticTypeWrapper cachedInstance;
             if (engine.StaticTypeWrapperCache.TryGetValue(type, out cachedInstance) == true)
@@ -120,7 +120,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            throw new JavaScriptException(this.Engine, "TypeError", "CLR types cannot be called like methods");
+            throw new JavaScriptException(this.Engine, ErrorType.TypeError, "CLR types cannot be called like methods");
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Jurassic.Library
             else
             {
                 if (this.constructBinder == null)
-                    throw new JavaScriptException(this.Engine, "TypeError", string.Format("The type '{0}' has no public constructors", this.WrappedType));
+                    throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The type '{0}' has no public constructors", this.WrappedType));
                 result = this.constructBinder.Call(this.Engine, this, argumentValues);
             }
 

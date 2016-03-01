@@ -114,7 +114,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public object Call()
         {
-            throw new JavaScriptException(Engine, "TypeError", $"Constructor {this["name"]} requires 'new'");
+            throw new JavaScriptException(Engine, ErrorType.TypeError, $"Constructor {this["name"]} requires 'new'");
         }
 
         /// <summary>

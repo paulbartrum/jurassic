@@ -52,7 +52,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            throw new JavaScriptException(this.Engine, "TypeError", this.message);
+            throw new JavaScriptException(this.Engine, ErrorType.TypeError, this.message);
         }
     }
 }

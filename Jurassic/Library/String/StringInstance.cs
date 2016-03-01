@@ -219,7 +219,7 @@ namespace Jurassic.Library
         public static bool Includes(ScriptEngine engine, string thisObject, object substring, int startIndex = 0)
         {
             if (TypeUtilities.IsRegularExpression(substring))
-                throw new JavaScriptException(engine, "TypeError", "Substring argument must not be a regular expression.");
+                throw new JavaScriptException(engine, ErrorType.TypeError, "Substring argument must not be a regular expression.");
             return IndexOf(thisObject, TypeConverter.ToString(substring), startIndex) >= 0;
         }
 
@@ -322,7 +322,7 @@ namespace Jurassic.Library
                 case "NFKD":
                     return thisObject.Normalize(NormalizationForm.FormKD);
             }
-            throw new JavaScriptException(engine, "RangeError", "The normalization form should be one of NFC, NFD, NFKC, NFKD.");
+            throw new JavaScriptException(engine, ErrorType.RangeError, "The normalization form should be one of NFC, NFD, NFKC, NFKD.");
         }
 
         /// <summary>
@@ -724,7 +724,7 @@ namespace Jurassic.Library
         public static bool StartsWith(ScriptEngine engine, string thisObject, object searchStringObj, int position = 0)
         {
             if (TypeUtilities.IsRegularExpression(searchStringObj))
-                throw new JavaScriptException(engine, "TypeError", "Substring argument must not be a regular expression.");
+                throw new JavaScriptException(engine, ErrorType.TypeError, "Substring argument must not be a regular expression.");
             string searchString = TypeConverter.ToString(searchStringObj);
             if (position == 0)
                 return thisObject.StartsWith(searchString);
@@ -747,7 +747,7 @@ namespace Jurassic.Library
         public static bool EndsWith(ScriptEngine engine, string thisObject, object searchStringObj, int position = int.MaxValue)
         {
             if (TypeUtilities.IsRegularExpression(searchStringObj))
-                throw new JavaScriptException(engine, "TypeError", "Substring argument must not be a regular expression.");
+                throw new JavaScriptException(engine, ErrorType.TypeError, "Substring argument must not be a regular expression.");
             string searchString = TypeConverter.ToString(searchStringObj);
             if (position == int.MaxValue)
                 return thisObject.EndsWith(searchString);
@@ -782,7 +782,7 @@ namespace Jurassic.Library
         public static string Repeat(ScriptEngine engine, string thisObject, int count)
         {
             if (count < 0 || count == int.MaxValue)
-                throw new JavaScriptException(engine, "RangeError", "The count parameter is out of range.");
+                throw new JavaScriptException(engine, ErrorType.RangeError, "The count parameter is out of range.");
             var result = new StringBuilder();
             for (int i = 0; i < count; i ++)
                 result.Append(thisObject);

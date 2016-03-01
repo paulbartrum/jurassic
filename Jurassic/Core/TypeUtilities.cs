@@ -204,9 +204,9 @@ namespace Jurassic
         public static void VerifyThisObject(ScriptEngine engine, object value, string functionName)
         {
             if (value == null || value == Undefined.Value)
-                throw new JavaScriptException(engine, "TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
+                throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
             if (value == Null.Value)
-                throw new JavaScriptException(engine, "TypeError", string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
+                throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
         }
 
         /// <summary>

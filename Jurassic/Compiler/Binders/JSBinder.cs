@@ -167,7 +167,7 @@ namespace Jurassic.Compiler
                                 generator.Duplicate();
                                 generator.BranchIfNotNull(endOfThrowLabel);
                                 generator.LoadArgument(0);
-                                EmitHelpers.EmitThrow(generator, "TypeError", string.Format("The method '{0}' is not generic", binderMethod.Name));
+                                EmitHelpers.EmitThrow(generator, ErrorType.TypeError, string.Format("The method '{0}' is not generic", binderMethod.Name));
                                 generator.DefineLabelPosition(endOfThrowLabel);
                             }
                         }

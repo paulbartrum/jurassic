@@ -364,7 +364,7 @@ namespace Jurassic.Library
                 if (descriptor.IsAccessor == true)
                 {
                     if (throwOnError == true)
-                        throw new JavaScriptException(this.Engine, "TypeError", string.Format("Accessors are not supported for array elements.", propertyName));
+                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("Accessors are not supported for array elements.", propertyName));
                     return false;
                 }
 
@@ -372,7 +372,7 @@ namespace Jurassic.Library
                 if (descriptor.Attributes != PropertyAttributes.FullAccess)
                 {
                     if (throwOnError == true)
-                        throw new JavaScriptException(this.Engine, "TypeError", string.Format("Non-accessible array elements are not supported.", propertyName));
+                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("Non-accessible array elements are not supported.", propertyName));
                     return false;
                 }
 
@@ -460,7 +460,7 @@ namespace Jurassic.Library
 
             // This method only supports arrays of length up to 2^31-1, rather than 2^32-1.
             if (length > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The resulting array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The resulting array is too long");
 
             if (dense == true)
             {
@@ -558,7 +558,7 @@ namespace Jurassic.Library
 
             // This method only supports strings of length up to 2^31-1.
             if (arrayLength > int.MaxValue / 2)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             var result = new System.Text.StringBuilder((int)arrayLength * 2);
             try
@@ -576,7 +576,7 @@ namespace Jurassic.Library
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
             }
             return result.ToString();
         }
@@ -695,7 +695,7 @@ namespace Jurassic.Library
                     thisObj.SetPropertyValue((arrayLength2++).ToString(), items[i], true);
                 }
                 SetLength(thisObj, uint.MaxValue);
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "Invalid array length");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "Invalid array length");
             }
 
             // For each item to append.
@@ -724,7 +724,7 @@ namespace Jurassic.Library
                 // error, the items are still pushed correctly (but the length is stuck at the
                 // maximum).
                 SetPropertyValue(this.length.ToString(), item, false);
-                throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
+                throw new JavaScriptException(this.Engine, ErrorType.RangeError, "Invalid array length");
             }
 
             if (this.dense != null)
@@ -839,7 +839,7 @@ namespace Jurassic.Library
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // Fix the arguments so they are positive and within the bounds of the array.
             if (start < 0)
@@ -923,7 +923,7 @@ namespace Jurassic.Library
             }
             catch (IndexOutOfRangeException)
             {
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid comparison function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid comparison function");
             }
 
             return thisObj;
@@ -945,7 +945,7 @@ namespace Jurassic.Library
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // Fix the arguments so they are positive and within the bounds of the array.
             if (start < 0)
@@ -1001,7 +1001,7 @@ namespace Jurassic.Library
             {
                 // Dense arrays are supported up to 2^32-1.
                 if (array.length + items.Length > int.MaxValue)
-                    throw new JavaScriptException(thisObj.Engine, "RangeError", "Invalid array length");
+                    throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "Invalid array length");
 
                 if (array.denseMayContainHoles == true && array.Prototype != null)
                 {
@@ -1034,7 +1034,7 @@ namespace Jurassic.Library
 
             // This method supports arrays of length up to 2^32-1.
             if (uint.MaxValue - arrayLength < items.Length)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "Invalid array length");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "Invalid array length");
 
             // Update the length property.
             SetLength(thisObj, arrayLength + (uint)items.Length);
@@ -1064,7 +1064,7 @@ namespace Jurassic.Library
 
             // This method only supports arrays of length up to 2^30-1.
             if (arrayLength > int.MaxValue / 2)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             var result = new System.Text.StringBuilder((int)arrayLength * 2);
 
@@ -1091,7 +1091,7 @@ namespace Jurassic.Library
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
             }
 
             return result.ToString();
@@ -1136,7 +1136,7 @@ namespace Jurassic.Library
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // If fromIndex is less than zero, it is an offset from the end of the array.
             if (fromIndex < 0)
@@ -1187,7 +1187,7 @@ namespace Jurassic.Library
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // If fromIndex is less than zero, it is an offset from the end of the array.
             if (fromIndex < 0)
@@ -1224,14 +1224,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             for (int i = 0; i < arrayLength; i ++)
             {
@@ -1266,14 +1266,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             for (int i = 0; i < arrayLength; i++)
             {
@@ -1304,14 +1304,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             for (int i = 0; i < arrayLength; i++)
             {
@@ -1344,14 +1344,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // Create a new array to hold the new values.
             // The length of the output array is always equal to the length of the input array.
@@ -1392,14 +1392,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             for (int i = 0; i < arrayLength; i++)
             {
@@ -1439,14 +1439,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // Create a new array to hold the new values.
             var result = thisObj.Engine.Array.New();
@@ -1487,14 +1487,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // If an initial value is not provided, the initial value is the first (defined) element.
             int i = 0;
@@ -1511,7 +1511,7 @@ namespace Jurassic.Library
                     }
                 }
                 if (accumulatedValue == null)
-                    throw new JavaScriptException(thisObj.Engine, "TypeError", "Reduce of empty array with no initial value");
+                    throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Reduce of empty array with no initial value");
             }
 
             // Scan from low to high.
@@ -1549,14 +1549,14 @@ namespace Jurassic.Library
         {
             // callbackFunction must be a valid function.
             if (callbackFunction == null)
-                throw new JavaScriptException(thisObj.Engine, "TypeError", "Invalid callback function");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Invalid callback function");
 
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
 
             // This method only supports arrays of length up to 2^31-1.
             if (arrayLength > int.MaxValue)
-                throw new JavaScriptException(thisObj.Engine, "RangeError", "The array is too long");
+                throw new JavaScriptException(thisObj.Engine, ErrorType.RangeError, "The array is too long");
 
             // If an initial value is not provided, the initial value is the last (defined) element.
             int i = (int)arrayLength - 1;
@@ -1573,7 +1573,7 @@ namespace Jurassic.Library
                     }
                 }
                 if (accumulatedValue == null)
-                    throw new JavaScriptException(thisObj.Engine, "TypeError", "Reduce of empty array with no initial value");
+                    throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "Reduce of empty array with no initial value");
             }
 
             // Scan from high to to low.

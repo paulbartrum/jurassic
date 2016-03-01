@@ -83,7 +83,7 @@ namespace Jurassic.Library
                     double specifiedLength = TypeConverter.ToNumber(elements[0]);
                     uint actualLength = TypeConverter.ToUint32(elements[0]);
                     if (specifiedLength != (double)actualLength)
-                        throw new JavaScriptException(this.Engine, "RangeError", "Invalid array length");
+                        throw new JavaScriptException(this.Engine, ErrorType.RangeError, "Invalid array length");
                     return new ArrayInstance(this.InstancePrototype, actualLength, actualLength);
                 }
             }

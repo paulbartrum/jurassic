@@ -135,6 +135,7 @@
     <Compile Include="Library\Date\DateInstance.g.cs" />
     <Compile Include="Library\Error\ErrorConstructor.g.cs" />
     <Compile Include="Library\Error\ErrorInstance.g.cs" />
+    <Compile Include="Library\Error\ErrorType.cs" />
     <Compile Include="Library\FirebugConsole\FirebugConsole.g.cs" />
     <Compile Include="Library\FirebugConsole\StandardConsoleOutput.cs" />
     <Compile Include="Library\FirebugConsole\FirebugConsole.cs" />

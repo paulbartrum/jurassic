@@ -824,7 +824,7 @@ namespace Jurassic.Library
         public string ToISOString()
         {
             if (this.value == InvalidDate)
-                throw new JavaScriptException(this.Engine, "RangeError", "The date is invalid");
+                throw new JavaScriptException(this.Engine, ErrorType.RangeError, "The date is invalid");
             return this.value.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
         }
 

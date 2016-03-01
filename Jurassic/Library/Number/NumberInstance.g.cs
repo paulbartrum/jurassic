@@ -28,7 +28,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toExponential' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toExponential' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -42,7 +42,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toFixed' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toFixed' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -56,7 +56,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toLocaleString' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toLocaleString' is not generic.");
 			return ((NumberInstance)thisObj).ToLocaleString();
 		}
 
@@ -64,7 +64,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toPrecision' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toPrecision' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -78,7 +78,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'toString' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -92,7 +92,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'valueOf' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((NumberInstance)thisObj).ValueOf();
 		}
 
@@ -100,7 +100,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(engine, "TypeError", "The method 'clz' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'clz' is not generic.");
 			return ((NumberInstance)thisObj).Clz();
 		}
 	}

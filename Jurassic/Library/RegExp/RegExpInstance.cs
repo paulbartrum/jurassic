@@ -60,7 +60,7 @@ namespace Jurassic.Library
             catch (ArgumentException ex)
             {
                 // Wrap the exception so that it can be caught within javascript code.
-                throw new JavaScriptException(this.Engine, "SyntaxError", "Invalid regular expression - " + ex.Message);
+                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "Invalid regular expression - " + ex.Message);
             }
 
             // Initialize the javascript properties.
@@ -564,24 +564,24 @@ namespace Jurassic.Library
                     if (flag == 'g')
                     {
                         if (this.globalSearch == true)
-                            throw new JavaScriptException(this.Engine, "SyntaxError", "The 'g' flag cannot be specified twice");
+                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "The 'g' flag cannot be specified twice");
                         this.globalSearch = true;
                     }
                     else if (flag == 'i')
                     {
                         if ((options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase)
-                            throw new JavaScriptException(this.Engine, "SyntaxError", "The 'i' flag cannot be specified twice");
+                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "The 'i' flag cannot be specified twice");
                         options |= RegexOptions.IgnoreCase;
                     }
                     else if (flag == 'm')
                     {
                         if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
-                            throw new JavaScriptException(this.Engine, "SyntaxError", "The 'm' flag cannot be specified twice");
+                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "The 'm' flag cannot be specified twice");
                         options |= RegexOptions.Multiline;
                     }
                     else
                     {
-                        throw new JavaScriptException(this.Engine, "SyntaxError", string.Format("Unknown flag '{0}'", flag));
+                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Unknown flag '{0}'", flag));
                     }
                 }
             }

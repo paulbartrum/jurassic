@@ -128,7 +128,7 @@ namespace Jurassic.Library
         public static ObjectInstance Create(ScriptEngine engine, object prototype, ObjectInstance properties = null)
         {
             if ((prototype is ObjectInstance) == false && prototype != Null.Value)
-                throw new JavaScriptException(engine, "TypeError", "object prototype must be an object or null");
+                throw new JavaScriptException(engine, ErrorType.TypeError, "object prototype must be an object or null");
             ObjectInstance result;
             if (prototype == Null.Value)
                 result = ObjectInstance.CreateRootObject(engine);
@@ -177,7 +177,7 @@ namespace Jurassic.Library
         {
             var defaults = obj.GetOwnPropertyDescriptor(propertyName);
             if (!(attributes is ObjectInstance))
-                throw new JavaScriptException(obj.Engine, "TypeError", "Invalid descriptor for property '{propertyName}'.");
+                throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Invalid descriptor for property '{propertyName}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
             obj.DefineProperty(propertyName, descriptor, true);
             return obj;
@@ -193,7 +193,7 @@ namespace Jurassic.Library
         public static ObjectInstance DefineProperties(object obj, ObjectInstance properties)
         {
             if (!(obj is ObjectInstance))
-                throw new JavaScriptException(properties.Engine, "TypeError", "Object.defineProperties called on non-object.");
+                throw new JavaScriptException(properties.Engine, ErrorType.TypeError, "Object.defineProperties called on non-object.");
             var obj2 = (ObjectInstance)obj;
             foreach (var property in properties.Properties)
                 if (property.IsEnumerable == true)

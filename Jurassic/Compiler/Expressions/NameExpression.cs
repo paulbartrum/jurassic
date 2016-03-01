@@ -1,4 +1,5 @@
 ﻿using System;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -289,7 +290,7 @@ namespace Jurassic.Compiler
 
             // Throw an error if the name does not exist and throwIfUnresolvable is true.
             if (scope == null && throwIfUnresolvable == true)
-                EmitHelpers.EmitThrow(generator, "ReferenceError", this.Name + " is not defined", optimizationInfo);
+                EmitHelpers.EmitThrow(generator, ErrorType.ReferenceError, this.Name + " is not defined", optimizationInfo);
 
             // Release the temporary variable.
             if (scopeVariable != null)
@@ -575,7 +576,7 @@ namespace Jurassic.Compiler
 
             // Throw an error if the name does not exist and throwIfUnresolvable is true.
             if (scope == null && throwIfUnresolvable == true)
-                EmitHelpers.EmitThrow(generator, "ReferenceError", this.Name + " is not defined", optimizationInfo);
+                EmitHelpers.EmitThrow(generator, ErrorType.ReferenceError, this.Name + " is not defined", optimizationInfo);
 
             // Release the temporary variables.
             if (value != null)
@@ -597,7 +598,7 @@ namespace Jurassic.Compiler
         {
             // Deleting a variable is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
-                throw new JavaScriptException(optimizationInfo.Engine, "SyntaxError", string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name), optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+                throw new JavaScriptException(optimizationInfo.Engine, ErrorType.SyntaxError, string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name), optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
 
             var endOfDelete = generator.CreateLabel();
             var scope = this.Scope;

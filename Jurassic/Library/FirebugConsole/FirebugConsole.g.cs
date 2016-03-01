@@ -33,7 +33,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'log' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'log' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -47,7 +47,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'debug' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'debug' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -61,7 +61,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'info' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'info' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -75,7 +75,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'warn' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'warn' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -89,7 +89,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'error' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'error' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -103,7 +103,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'assert' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'assert' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -119,7 +119,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'clear' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'clear' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -133,7 +133,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'group' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'group' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -147,7 +147,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'groupCollapsed' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'groupCollapsed' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -161,7 +161,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'groupEnd' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'groupEnd' is not generic.");
 			((FirebugConsole)thisObj).GroupEnd(); return Undefined.Value;
 		}
 
@@ -169,7 +169,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'time' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'time' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -183,7 +183,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FirebugConsole))
-				throw new JavaScriptException(engine, "TypeError", "The method 'timeEnd' is not generic.");
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'timeEnd' is not generic.");
 			switch (args.Length)
 			{
 				case 0:

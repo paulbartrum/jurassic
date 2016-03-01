@@ -110,7 +110,7 @@ namespace Attribute_Code_Generation
                         output.AppendLine("\t\t{");
                         output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                         output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
-                        output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, \"TypeError\", \"The method 'get {property.JSName}' is not generic.\");");
+                        output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method 'get {property.JSName}' is not generic.\");");
                         output.AppendLine($"\t\t\treturn (({classSyntax.Identifier.ToString()})thisObj).{property.Name};");
                         output.AppendLine("\t\t}");
 
@@ -121,7 +121,7 @@ namespace Attribute_Code_Generation
                             output.AppendLine("\t\t{");
                             output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                             output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
-                            output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, \"TypeError\", \"The method 'set {property.JSName}' is not generic.\");");
+                            output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method 'set {property.JSName}' is not generic.\");");
                             output.AppendLine($"\t\t\t(({classSyntax.Identifier.ToString()})thisObj).{property.Name} = {ConvertTo("args.Length > 0 ? args[0] : Undefined.Value", property.ReturnType, null)};");
                             output.AppendLine("\t\t}");
                         }
@@ -422,12 +422,12 @@ namespace Attribute_Code_Generation
             {
                 output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                 output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
-                output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, \"TypeError\", \"The method '{methodGroup.First().JSName}' is not generic.\");");
+                output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method '{methodGroup.First().JSName}' is not generic.\");");
             }
             else if (methodGroup.Any(m => m.HasThisObject && m.ThisObjectParameterType != "object"))
             {
                 output.AppendLine("\t\t\tif (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)");
-                output.AppendLine("\t\t\t\tthrow new JavaScriptException(engine, \"TypeError\", \"Cannot convert undefined or null to object.\");");
+                output.AppendLine("\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"Cannot convert undefined or null to object.\");");
             }
 
             int maxParameterCount = methodGroup.Max(mds => mds.Parameters.Count());
@@ -450,7 +450,7 @@ namespace Attribute_Code_Generation
                         output.AppendLine($"\t\t\t\tdefault:");
                     output.Append("\t\t\t\t\t");
                     if (i < methodGroup.RequiredArgumentCount)
-                        output.AppendLine($"throw new JavaScriptException(engine, \"TypeError\", \"Required argument '{method.Parameters.Skip(i).First().Name}' was not specified.\");");
+                        output.AppendLine($"throw new JavaScriptException(engine, ErrorType.TypeError, \"Required argument '{method.Parameters.Skip(i).First().Name}' was not specified.\");");
                     else
                         output.AppendLine(GenerateMethodCall(classSyntax, method, i));
                 }
@@ -528,7 +528,7 @@ namespace Attribute_Code_Generation
                             case "ObjectInstance":
                             case "FunctionInstance":
                             case "ArrayBufferInstance":
-                                return "throw new JavaScriptException(engine, \"TypeError\", \"undefined cannot be converted to an object\");";
+                                return "throw new JavaScriptException(engine, ErrorType.TypeError, \"undefined cannot be converted to an object\");";
 
                             case "object[]":
                                 result.Append("new object[0]");

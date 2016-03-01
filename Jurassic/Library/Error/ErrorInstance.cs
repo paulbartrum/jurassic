@@ -18,14 +18,14 @@ namespace Jurassic.Library
         /// Creates an empty Error instance for use as a prototype.
         /// </summary>
         /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
-        internal ErrorInstance(ErrorConstructor constructor, string typeName)
-            : base(GetPrototype(constructor.Engine, typeName))
+        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
+        internal ErrorInstance(ErrorConstructor constructor, ErrorType type)
+            : base(GetPrototype(constructor.Engine, type))
         {
             // Initialize the prototype properties.
             var properties = GetDeclarativeProperties();
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("name", typeName, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("name", type.ToString(), PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
             FastSetProperties(properties);
         }
@@ -34,11 +34,11 @@ namespace Jurassic.Library
         /// Determine the prototype for the given error type.
         /// </summary>
         /// <param name="engine"> The script engine associated with this object. </param>
-        /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
+        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
         /// <returns> The prototype. </returns>
-        private static ObjectInstance GetPrototype(ScriptEngine engine, string typeName)
+        private static ObjectInstance GetPrototype(ScriptEngine engine, ErrorType type)
         {
-            if (typeName == "Error")
+            if (type == ErrorType.Error)
             {
                 // This constructor is for regular Error objects.
                 // Prototype chain: Error instance -> Error prototype -> Object prototype
@@ -53,20 +53,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Creates a new Error instance with the given name, message and optionally a stack trace.
+        /// Creates a new Error instance with the given message.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        /// <param name="name"> The initial value of the name property.  Pass <c>null</c> to avoid
-        /// creating this property. </param>
         /// <param name="message"> The initial value of the message property.  Pass <c>null</c> to
         /// avoid creating this property. </param>
-        internal ErrorInstance(ObjectInstance prototype, string name, string message)
+        internal ErrorInstance(ObjectInstance prototype, string message)
             : base(prototype)
         {
-            if (name != null)
-                this.FastSetProperty("name", name, PropertyAttributes.NonEnumerable);
-            if (message != null)
-                this.FastSetProperty("message", message, PropertyAttributes.NonEnumerable);
+            FastSetProperty("message", message, PropertyAttributes.NonEnumerable);
         }
 
 

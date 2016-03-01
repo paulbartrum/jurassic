@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -153,7 +154,7 @@ namespace Jurassic.Compiler
         {
             // In strict mode, the variable name cannot be "eval" or "arguments".
             if (this.StrictMode == true && (name == "eval" || name == "arguments"))
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The variable name cannot be '{0}' in strict mode.", name), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("The variable name cannot be '{0}' in strict mode.", name), this.LineNumber, this.SourcePath);
 
             // Record each occurance of a variable name.
             this.methodOptimizationHints.EncounteredVariable(name);
@@ -197,7 +198,7 @@ namespace Jurassic.Compiler
             if (this.nextToken == token)
                 Consume();
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected '{0}' but found {1}", token.Text, Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected '{0}' but found {1}", token.Text, Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
         }
 
         /// <summary>
@@ -215,7 +216,7 @@ namespace Jurassic.Compiler
             }
             else
             {
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected identifier but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected identifier but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
             }
         }
 
@@ -260,7 +261,7 @@ namespace Jurassic.Compiler
                     return;
 
                 // Otherwise, throw an error.
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected ';' but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected ';' but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
             }
         }
 
@@ -445,7 +446,7 @@ namespace Jurassic.Compiler
             if (this.nextToken == KeywordToken.Function)
                 return ParseFunctionDeclaration();
             if (this.nextToken == null)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Unexpected end of input", this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input", this.LineNumber, this.SourcePath);
 
             // The statement is either a label or an expression.
             return ParseLabelOrExpressionStatement();
@@ -749,7 +750,7 @@ namespace Jurassic.Compiler
                         break;
                     }
                     else if (this.nextToken != PunctuatorToken.Comma)
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Unexpected token {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
                     // Read past the comma token.
                     this.Expect(PunctuatorToken.Comma);
@@ -781,7 +782,7 @@ namespace Jurassic.Compiler
                     {
                         // This is a for-in statement.
                         if ((initializationExpression is IReferenceExpression) == false)
-                            throw new JavaScriptException(this.engine, "ReferenceError", "Invalid left-hand side in for-in", this.LineNumber, this.SourcePath);
+                            throw new JavaScriptException(this.engine, ErrorType.ReferenceError, "Invalid left-hand side in for-in", this.LineNumber, this.SourcePath);
                         forInReference = (IReferenceExpression)initializationExpression;
                     }
                 }
@@ -925,7 +926,7 @@ namespace Jurassic.Compiler
         private ReturnStatement ParseReturn()
         {
             if (this.context != CodeContext.Function)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Return statements are only allowed inside functions", this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Return statements are only allowed inside functions", this.LineNumber, this.SourcePath);
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
 
@@ -958,7 +959,7 @@ namespace Jurassic.Compiler
         {
             // This statement is not allowed in strict mode.
             if (this.StrictMode == true)
-                throw new JavaScriptException(this.engine, "SyntaxError", "The with statement is not supported in strict mode", this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "The with statement is not supported in strict mode", this.LineNumber, this.SourcePath);
 
             var result = new WithStatement(this.labelsForCurrentStatement);
 
@@ -1047,7 +1048,7 @@ namespace Jurassic.Compiler
                 {
                     // Make sure this is the only default clause.
                     if (defaultClause != null)
-                        throw new JavaScriptException(this.engine, "SyntaxError", "Only one default clause is allowed.", this.LineNumber, this.SourcePath);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Only one default clause is allowed.", this.LineNumber, this.SourcePath);
 
                     defaultClause = new SwitchCase();
 
@@ -1071,7 +1072,7 @@ namespace Jurassic.Compiler
                 else
                 {
                     // Statements cannot be added directly after the switch.
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Expected 'case' or 'default'.", this.LineNumber, this.SourcePath);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected 'case' or 'default'.", this.LineNumber, this.SourcePath);
                 }
             }
 
@@ -1097,7 +1098,7 @@ namespace Jurassic.Compiler
 
             // A line terminator is not allowed here.
             if (this.consumedLineTerminator == true)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Illegal newline after throw", this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Illegal newline after throw", this.LineNumber, this.SourcePath);
 
             // Parse the expression to throw.
             result.Value = ParseExpression(PunctuatorToken.Semicolon);
@@ -1161,7 +1162,7 @@ namespace Jurassic.Compiler
 
             // There must be a catch or finally block.
             if (result.CatchBlock == null && result.FinallyBlock == null)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Missing catch or finally after try", this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Missing catch or finally after try", this.LineNumber, this.SourcePath);
 
             return result;
         }
@@ -1279,16 +1280,16 @@ namespace Jurassic.Compiler
                 else if (this.nextToken == PunctuatorToken.RightParenthesis)
                     break;
                 else
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Expected ',' or ')'", this.LineNumber, this.SourcePath);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected ',' or ')'", this.LineNumber, this.SourcePath);
             }
 
             // Getters must have zero arguments.
             if (functionType == FunctionType.Getter && argumentNames.Count != 0)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Getters cannot have arguments", this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Getters cannot have arguments", this.LineNumber, this.SourcePath);
 
             // Setters must have one argument.
             if (functionType == FunctionType.Setter && argumentNames.Count != 1)
-                throw new JavaScriptException(this.engine, "SyntaxError", "Setters must have a single argument", this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Setters must have a single argument", this.LineNumber, this.SourcePath);
 
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
@@ -1327,7 +1328,7 @@ namespace Jurassic.Compiler
             {
                 // The end token '}' will be consumed by the parent function.
                 if (this.nextToken != PunctuatorToken.RightBrace)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Expected '}'", this.LineNumber, this.SourcePath);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected '}'", this.LineNumber, this.SourcePath);
 
                 // Record the end of the function body.
                 endPosition = new SourceCodePosition(this.PositionAfterWhitespace.Line, this.PositionAfterWhitespace.Column + 1);
@@ -1495,7 +1496,7 @@ namespace Jurassic.Compiler
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                             break;
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected operator but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected operator but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
                     // New in ECMAScript 5 is the ability to use keywords as property names.
@@ -1567,7 +1568,7 @@ namespace Jurassic.Compiler
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && (this.consumedLineTerminator == true || this.nextToken == PunctuatorToken.RightBrace))
                             break;
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0} in expression.", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Unexpected token {0} in expression.", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
                     // Post-fix increment and decrement cannot have a line terminator in between
@@ -1605,7 +1606,7 @@ namespace Jurassic.Compiler
                             // Check for automatic semi-colon insertion.
                             if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                                 break;
-                            throw new JavaScriptException(this.engine, "SyntaxError", "Mismatched closing token in expression.", this.LineNumber, this.SourcePath);
+                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Mismatched closing token in expression.", this.LineNumber, this.SourcePath);
                         }
 
                         // Mark that we have seen the closing token.
@@ -1657,7 +1658,7 @@ namespace Jurassic.Compiler
                                 // Check for automatic semi-colon insertion.
                                 if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                                     break;
-                                throw new JavaScriptException(this.engine, "SyntaxError", "Invalid use of prefix operator.", this.LineNumber, this.SourcePath);
+                                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid use of prefix operator.", this.LineNumber, this.SourcePath);
                             }
                         }
                         else
@@ -1706,7 +1707,7 @@ namespace Jurassic.Compiler
                                     // Check for automatic semi-colon insertion.
                                     if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                                         break;
-                                    throw new JavaScriptException(this.engine, "SyntaxError", "Invalid use of prefix operator.", this.LineNumber, this.SourcePath);
+                                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid use of prefix operator.", this.LineNumber, this.SourcePath);
                                 }
                                 newExpression.Push(lowPrecedenceOperator.Pop());
                                 lowPrecedenceOperator.Push(newExpression);
@@ -1718,7 +1719,7 @@ namespace Jurassic.Compiler
                 }
                 else
                 {
-                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Unexpected token {0} in expression", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Unexpected token {0} in expression", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                 }
 
                 // Read the next token.
@@ -1727,7 +1728,7 @@ namespace Jurassic.Compiler
 
             // Empty expressions are invalid.
             if (root == null)
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Check the AST is valid.
             CheckASTValidity(root);
@@ -1761,11 +1762,11 @@ namespace Jurassic.Compiler
 
                 // Check the operator expression has the right number of operands.
                 if (expression.Operator.IsValidNumberOfOperands(expression.OperandCount) == false)
-                    throw new JavaScriptException(this.engine, "SyntaxError", "Wrong number of operands", this.LineNumber, this.SourcePath);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Wrong number of operands", this.LineNumber, this.SourcePath);
 
                 // Check the operator expression is closed.
                 if (expression.Operator.SecondaryToken != null && expression.SecondTokenEncountered == false)
-                    throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Missing closing token '{0}'", expression.Operator.SecondaryToken.Text), this.LineNumber, this.SourcePath);
+                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Missing closing token '{0}'", expression.Operator.SecondaryToken.Text), this.LineNumber, this.SourcePath);
 
                 // Check the child nodes.
                 for (int i = 0; i < expression.OperandCount; i++)
@@ -1862,9 +1863,9 @@ namespace Jurassic.Compiler
                             // Add to the existing property.
                             var existingAccessor = existingValue as ObjectLiteralAccessor;
                             if (existingAccessor == null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter", propertyName), this.LineNumber, this.SourcePath);
+                                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("The property '{0}' cannot have both a data property and a getter", propertyName), this.LineNumber, this.SourcePath);
                             if (existingAccessor.Getter != null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have multiple getters", propertyName), this.LineNumber, this.SourcePath);
+                                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("The property '{0}' cannot have multiple getters", propertyName), this.LineNumber, this.SourcePath);
                             existingAccessor.Getter = function;
                         }
                     }
@@ -1880,9 +1881,9 @@ namespace Jurassic.Compiler
                             // Add to the existing property.
                             var existingAccessor = existingValue as ObjectLiteralAccessor;
                             if (existingAccessor == null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a setter", propertyName), this.LineNumber, this.SourcePath);
+                                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("The property '{0}' cannot have both a data property and a setter", propertyName), this.LineNumber, this.SourcePath);
                             if (existingAccessor.Setter != null)
-                                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have multiple setters", propertyName), this.LineNumber, this.SourcePath);
+                                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("The property '{0}' cannot have multiple setters", propertyName), this.LineNumber, this.SourcePath);
                             existingAccessor.Setter = function;
                         }
                     }
@@ -1902,9 +1903,9 @@ namespace Jurassic.Compiler
                     if (properties.TryGetValue(propertyName, out existingValue) == true)
                     {
                         if (existingValue is ObjectLiteralAccessor)
-                            throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' cannot have both a data property and a getter/setter", propertyName), this.LineNumber, this.SourcePath);
+                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("The property '{0}' cannot have both a data property and a getter/setter", propertyName), this.LineNumber, this.SourcePath);
                         if (this.StrictMode == true)
-                            throw new JavaScriptException(this.engine, "SyntaxError", string.Format("The property '{0}' already has a value", propertyName), this.LineNumber, this.SourcePath);
+                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("The property '{0}' already has a value", propertyName), this.LineNumber, this.SourcePath);
                     }
 
                     // Add the property setter to the list.
@@ -1944,7 +1945,7 @@ namespace Jurassic.Compiler
                 {
                     object literalValue = ((LiteralToken)this.nextToken).Value;
                     if ((literalValue is string || literalValue is double || literalValue is int) == false)
-                        throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     propertyName = ((LiteralToken)this.nextToken).Value.ToString();
                 }
                 wasIdentifier = false;
@@ -1962,7 +1963,7 @@ namespace Jurassic.Compiler
                 wasIdentifier = false;
             }
             else
-                throw new JavaScriptException(this.engine, "SyntaxError", string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Consume the token.
             this.Consume();

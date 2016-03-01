@@ -90,13 +90,13 @@ namespace Jurassic
             this.stringConstructor = new StringConstructor(baseFunction);
 
             // Create the error functions.
-            this.errorConstructor = new ErrorConstructor(baseFunction, "Error");
-            this.rangeErrorConstructor = new ErrorConstructor(baseFunction, "RangeError");
-            this.typeErrorConstructor = new ErrorConstructor(baseFunction, "TypeError");
-            this.syntaxErrorConstructor = new ErrorConstructor(baseFunction, "SyntaxError");
-            this.uriErrorConstructor = new ErrorConstructor(baseFunction, "URIError");
-            this.evalErrorConstructor = new ErrorConstructor(baseFunction, "EvalError");
-            this.referenceErrorConstructor = new ErrorConstructor(baseFunction, "ReferenceError");
+            this.errorConstructor = new ErrorConstructor(baseFunction, ErrorType.Error);
+            this.rangeErrorConstructor = new ErrorConstructor(baseFunction, ErrorType.RangeError);
+            this.typeErrorConstructor = new ErrorConstructor(baseFunction, ErrorType.TypeError);
+            this.syntaxErrorConstructor = new ErrorConstructor(baseFunction, ErrorType.SyntaxError);
+            this.uriErrorConstructor = new ErrorConstructor(baseFunction, ErrorType.URIError);
+            this.evalErrorConstructor = new ErrorConstructor(baseFunction, ErrorType.EvalError);
+            this.referenceErrorConstructor = new ErrorConstructor(baseFunction, ErrorType.ReferenceError);
 
             // Create the typed array functions.
             this.arrayBufferConstructor = new ArrayBufferConstructor(baseFunction);
@@ -268,7 +268,7 @@ namespace Jurassic
             info.AddValue("dataViewConstructor", this.dataViewConstructor);
             info.AddValue("int8ArrayConstructor", this.int8ArrayConstructor);
             info.AddValue("uint8ArrayConstructor", this.uint8ArrayConstructor);
-            info.AddValue("uint8ClampedArrayConstructor ", this.uint8ClampedArrayConstructor);
+            info.AddValue("uint8ClampedArrayConstructor", this.uint8ClampedArrayConstructor);
             info.AddValue("int16ArrayConstructor", this.int16ArrayConstructor);
             info.AddValue("uint16ArrayConstructor", this.uint16ArrayConstructor);
             info.AddValue("int32ArrayConstructor", this.int32ArrayConstructor);

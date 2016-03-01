@@ -109,7 +109,7 @@ namespace Jurassic.Library
             {
                 int codePoint = (int) codePointDouble;
                 if (codePoint < 0 || codePoint > 0x10FFFF || (double)codePoint != codePointDouble)
-                    throw new JavaScriptException(scriptEngine, "RangeError", string.Format("Invalid code point {0}", codePointDouble));
+                    throw new JavaScriptException(scriptEngine, ErrorType.RangeError, string.Format("Invalid code point {0}", codePointDouble));
                 if (codePoint <= 65535)
                     result.Append((char)codePoint);
                 else

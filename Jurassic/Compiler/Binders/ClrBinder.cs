@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Jurassic;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -66,7 +66,7 @@ namespace Jurassic.Compiler
             // Zero candidates means no overload had the correct number of arguments.
             if (candidateMethods.Count == 0)
             {
-                EmitHelpers.EmitThrow(generator, "TypeError", string.Format("No overload for method '{0}' takes {1} arguments", this.Name, argumentCount));
+                EmitHelpers.EmitThrow(generator, ErrorType.TypeError, string.Format("No overload for method '{0}' takes {1} arguments", this.Name, argumentCount));
                 EmitHelpers.EmitDefaultValue(generator, PrimitiveType.Any);
                 generator.Complete();
                 return;
@@ -187,7 +187,7 @@ namespace Jurassic.Compiler
                     generator.LoadInt32(1);
                     var endOfCharCheck = generator.CreateLabel();
                     generator.BranchIfEqual(endOfCharCheck);
-                    EmitHelpers.EmitThrow(generator, "TypeError", "Cannot convert string to char - the string must be exactly one character long");
+                    EmitHelpers.EmitThrow(generator, ErrorType.TypeError, "Cannot convert string to char - the string must be exactly one character long");
                     generator.DefineLabelPosition(endOfCharCheck);
                     generator.LoadInt32(0);
                     generator.Call(ReflectionHelpers.String_GetChars);

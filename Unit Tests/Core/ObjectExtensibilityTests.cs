@@ -44,7 +44,7 @@ namespace UnitTests
                 public override object CallLateBound(object thisObject, params object[] argumentValues)
                 {
                     if ((thisObject is TestClass2) == false)
-                        throw new JavaScriptException(this.Engine, "TypeError", "Invalid 'this' value.");
+                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Invalid 'this' value.");
                     return ((TestClass2)thisObject).CallFunction(this.name, argumentValues);
                 }
             }

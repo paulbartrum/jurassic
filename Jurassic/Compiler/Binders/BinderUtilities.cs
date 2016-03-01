@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -141,12 +142,12 @@ namespace Jurassic.Compiler
                 var ambiguousMethods = new List<BinderMethod>(lowestIndices.Count);
                 foreach (var index in lowestIndices)
                     ambiguousMethods.Add(methods[index]);
-                throw new JavaScriptException(engine, "TypeError", "The method call is ambiguous between the following methods: " + StringHelpers.Join(", ", ambiguousMethods));
+                throw new JavaScriptException(engine, ErrorType.TypeError, "The method call is ambiguous between the following methods: " + StringHelpers.Join(", ", ambiguousMethods));
             }
 
             // Throw an error is there is an invalid argument.
             if (lowestIndices.Count == 1 && lowestScore >= disqualification)
-                throw new JavaScriptException(engine, "TypeError", string.Format("The best method overload {0} has some invalid arguments", methods[lowestIndices[0]]));
+                throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The best method overload {0} has some invalid arguments", methods[lowestIndices[0]]));
 
             return lowestIndices[0];
         }

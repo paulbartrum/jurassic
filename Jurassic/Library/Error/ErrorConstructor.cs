@@ -18,13 +18,13 @@ namespace Jurassic.Library
         /// Creates a new derived error function.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        /// <param name="typeName"> The name of the error object, e.g. "Error", "RangeError", etc. </param>
-        internal ErrorConstructor(ObjectInstance prototype, string typeName)
+        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
+        internal ErrorConstructor(ObjectInstance prototype, ErrorType type)
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>(3);
-            InitializeConstructorProperties(properties, typeName, 1, new ErrorInstance(this, typeName));
+            InitializeConstructorProperties(properties, type.ToString(), 1, new ErrorInstance(this, type));
             FastSetProperties(properties);
         }
 
@@ -41,7 +41,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public ErrorInstance Call(string message = "")
         {
-            return new ErrorInstance(this.InstancePrototype, null, message);
+            return new ErrorInstance(this.InstancePrototype, message);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Jurassic.Library
         [JSConstructorFunction]
         public ErrorInstance Construct(string message = "")
         {
-            return new ErrorInstance(this.InstancePrototype, null, message);
+            return new ErrorInstance(this.InstancePrototype, message);
         }
 
     }

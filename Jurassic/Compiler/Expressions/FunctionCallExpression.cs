@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -105,7 +105,7 @@ namespace Jurassic.Compiler
 
             // Throw an nicely formatted exception.
             generator.Pop();
-            EmitHelpers.EmitThrow(generator, "TypeError", string.Format("'{0}' is not a function", this.Target.ToString()));
+            EmitHelpers.EmitThrow(generator, ErrorType.TypeError, string.Format("'{0}' is not a function", this.Target.ToString()));
             generator.DefineLabelPosition(endOfTypeCheck);
 
             // Pass in the path, function name and line.
