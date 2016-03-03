@@ -33,7 +33,7 @@ Support for ECMAScript 6 is in progress. See http://kangax.github.io/compat-tabl
 Feature|Status
 -------|------
 **Optimization**|
-proper tail calls (tail call optimisation)|:x:
+&nbsp;&nbsp;proper tail calls (tail call optimisation)|:x:
 **Syntax**|
 &nbsp;&nbsp;default function parameters|:x:
 &nbsp;&nbsp;rest parameters|:x:
@@ -66,7 +66,7 @@ proper tail calls (tail call optimisation)|:x:
 &nbsp;&nbsp;Proxy|:x:
 &nbsp;&nbsp;Reflect|:x:
 &nbsp;&nbsp;Promise|:x:
-&nbsp;&nbsp;&nbsp;&nbsp;Symbol|:x:
+&nbsp;&nbsp;Symbol|:x:
 &nbsp;&nbsp;well-known symbols|:x:
 **Built-in extensions**|
 &nbsp;&nbsp;Object static methods|2/4
@@ -85,7 +85,7 @@ proper tail calls (tail call optimisation)|:x:
 &nbsp;&nbsp;Promise is subclassable|:x:
 &nbsp;&nbsp;miscellaneous subclassables|:x:
 **Misc**|
-&nbsp;&nbsp;&nbsp;&nbsp;prototype of bound functions|:x:
+&nbsp;&nbsp;prototype of bound functions|:x:
 &nbsp;&nbsp;Proxy, internal 'get' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'set' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'defineProperty' calls|:x:
