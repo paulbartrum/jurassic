@@ -56,6 +56,9 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 GMT+1100').valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 GMT+1100 (Zone Name)').valueOf()"));
 
+            // This date doesn't actually exist.
+            Assert.AreEqual(ToJSDate(new DateTime(2011, 3, 1, 0, 0, 0)), Evaluate("new Date('29 Feb 2011').valueOf()"));
+
             // new Date(year, month, [day], [hour], [minute], [second], [millisecond])
             // Note: month is 0-11 is javascript but 1-12 in .NET.
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1)), Evaluate("new Date(2010, 0).valueOf()"));
@@ -73,13 +76,13 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2010, 3, 12, 1, 3, 0)), Evaluate("new Date(2010, 2, 12, 0, 63).valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 3, 12, 0, 1, 3)), Evaluate("new Date(2010, 2, 12, 0, 0, 63).valueOf()"));
 
-                // Date() returns the current date as a string - this test assumes the running time is less than 1s.
+            // Date() returns the current date as a string - this test assumes the running time is less than 1s.
             var str = (string)Evaluate("Date()");
                 var formatString = "ddd MMM dd yyyy HH:mm:ss";
                 Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
                     string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString), str));
 
-                // Any arguments provided are ignored.
+            // Any arguments provided are ignored.
             str = (string)Evaluate("Date(2009)");
                 Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss")) ||
                     str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss")));
@@ -129,12 +132,12 @@ namespace UnitTests
         [TestMethod]
         public void parse()
         {
-                // ECMAScript format - date-only forms.
+            // ECMAScript format - date-only forms.
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.parse('2010')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.parse('2010-02')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 5, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.parse('2010-02-05')"));
 
-                // ECMAScript format - date and time forms.
+            // ECMAScript format - date and time forms.
             Assert.AreEqual(45240000, Evaluate("Date.parse('1970-01-01T12:34')"));
             Assert.AreEqual(ToJSDate(new DateTime(1970, 1, 1, 12, 34, 56, DateTimeKind.Utc)), Evaluate("Date.parse('1970-01-01T12:34:56')"));
             Assert.AreEqual(ToJSDate(new DateTime(1970, 1, 1, 12, 34, 56, 123, DateTimeKind.Utc)), Evaluate("Date.parse('1970-01-01T12:34:56.123')"));
@@ -214,6 +217,7 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('1970-01-01T05:3')"));                   // minutes must be 2 digits.
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('1970-01-01T05:34:2')"));                // seconds must be 2 digits.
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('1970-01-01T05:34:22.')"));              // milliseconds must have at least one digit.
+            Assert.AreEqual(double.NaN, Evaluate("Date.parse('2011-02-29T12:00:00.000Z')"));          // 29 Feb did not exist in 2011.
 
             // Time-only forms should not be supported (see addendum).
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('T12:34Z')"));

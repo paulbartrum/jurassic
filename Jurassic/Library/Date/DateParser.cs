@@ -119,11 +119,20 @@ namespace Jurassic.Library
                     offsetInMinutes -= zoneHours < 0 ? zoneHours * 60 - zoneMinutes : zoneHours * 60 + zoneMinutes;
                 }
 
-                // Create a date from the components.
-                var result = new DateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc);
-                if (offsetInMinutes != 0)
-                    result = result.AddMinutes(offsetInMinutes);
-                return result;
+                try
+                {
+                    // Create a date from the components.
+                    var result = new DateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc);
+                    if (offsetInMinutes != 0)
+                        result = result.AddMinutes(offsetInMinutes);
+                    return result;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // Passing in 29 Feb 2011 ("2011-02-29") results in the following error:
+                    // "ArgumentOutOfRangeException: Year, Month, and Day parameters describe an un-representable DateTime."
+                    return DateTime.MinValue;
+                }
             }
 
             // Otherwise, parse as an unstructured string.
