@@ -22,6 +22,8 @@ namespace UnitTests
             Assert.AreEqual(5.1, Evaluate("new Number(5.1).valueOf()"));
             Assert.AreEqual(double.NaN, Evaluate("new Number(NaN).valueOf()"));
             Assert.AreEqual(123, Evaluate("new Number('123').valueOf()"));
+            Assert.AreEqual(9, Evaluate("new Number('0o11').valueOf()"));
+            Assert.AreEqual(3, Evaluate("new Number('0b11').valueOf()"));
 
             // Call
             Assert.AreEqual(0, Evaluate("Number()"));
@@ -35,6 +37,8 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("Number('')"));
             Assert.AreEqual(0, Evaluate("Number(' ')"));
             Assert.AreEqual(0, Evaluate("Number('\u00A0')"));
+            Assert.AreEqual(9, Evaluate("Number('0o11')"));
+            Assert.AreEqual(3, Evaluate("Number('0b11')"));
 
             // toString and valueOf.
             Assert.AreEqual("function Number() { [native code] }", Evaluate("Number.toString()"));
