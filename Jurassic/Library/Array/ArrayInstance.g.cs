@@ -123,7 +123,7 @@ namespace Jurassic.Library
 				case 0:
 					return Sort(TypeConverter.ToObject(engine, thisObj), null);
 				default:
-					return Sort(TypeConverter.ToObject(engine, thisObj), TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject(engine, args[0]) as FunctionInstance);
+					return Sort(TypeConverter.ToObject(engine, thisObj), TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToFunction(engine, args[0]));
 			}
 		}
 
@@ -210,9 +210,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
 				default:
-					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -225,9 +225,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
 				default:
-					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -240,9 +240,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null); return Undefined.Value;
+					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null); return Undefined.Value;
 				default:
-					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1])); return Undefined.Value;
+					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1])); return Undefined.Value;
 			}
 		}
 
@@ -255,9 +255,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
 				default:
-					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -270,9 +270,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
 				default:
-					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -285,9 +285,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
 				default:
-					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -300,9 +300,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
 				default:
-					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
+					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
 			}
 		}
 
@@ -315,9 +315,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, null);
+					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
 				default:
-					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject(engine, args[0]) as FunctionInstance, TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
+					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
 			}
 		}
 	}

@@ -580,7 +580,7 @@ namespace Attribute_Code_Generation
                 case "ObjectInstance":
                     return $"TypeConverter.ToObject(engine, {arg})";
                 case "FunctionInstance":
-                    return $"TypeConverter.ToObject(engine, {arg}) as FunctionInstance";
+                    return $"TypeConverter.ToFunction(engine, {arg})";
                 case "ArrayBufferInstance":
                     return $"TypeConverter.ToObject(engine, {arg}) as ArrayBufferInstance";
                 case "object[]":

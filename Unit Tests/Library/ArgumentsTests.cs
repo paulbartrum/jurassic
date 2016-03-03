@@ -111,6 +111,7 @@ namespace UnitTests
         public void toString()
         {
             Assert.AreEqual("[object Arguments]", Evaluate("(function() { return arguments.toString(); })()"));
+            Assert.AreEqual("[object Arguments]", Evaluate("(function() { return Object.prototype.toString.call(arguments); })()"));
         }
     }
 }

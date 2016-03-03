@@ -655,7 +655,11 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate(@"x[0]"));
             Assert.AreEqual(Undefined.Value, Evaluate(@"x[1]"));
 
+            // Passing in undefined as the sort function is okay.
             Assert.AreEqual("1,2", Evaluate(@"[2,1].sort(undefined).toString()"));
+
+            // But passing in anything else is not.
+            Assert.AreEqual("TypeError", EvaluateExceptionType(@"[2,1].sort(true)"));
 
             // length
             Assert.AreEqual(1, Evaluate("Array.prototype.sort.length"));

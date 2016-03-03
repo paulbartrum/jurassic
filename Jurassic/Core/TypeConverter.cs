@@ -237,6 +237,19 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Converts any JavaScript value to an object.
+        /// </summary>
+        /// <param name="engine"> The script engine used to create new objects. </param>
+        /// <param name="value"> The value to convert. </param>
+        /// <returns> An object. </returns>
+        public static FunctionInstance ToFunction(ScriptEngine engine, object value)
+        {
+            if (value is FunctionInstance)
+                return (FunctionInstance)value;
+            throw new JavaScriptException(engine, ErrorType.TypeError, "Argument is not a function.");
+        }
+
+        /// <summary>
         /// Converts any JavaScript value to a primitive value.
         /// </summary>
         /// <param name="value"> The value to convert. </param>
