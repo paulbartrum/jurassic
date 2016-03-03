@@ -35,71 +35,71 @@ Feature|Status
 **Optimization**|
 proper tail calls (tail call optimisation)|:x:
 **Syntax**|
-default function parameters|:x:
-rest parameters|:x:
-spread (...) operator|:x:
-object literal extensions|:x:
-for..of loops|:x:
-§octal and binary literals|:x:
-template literals|:x:
-RegExp "y" and "u" flags|:x:
-destructuring, declarations|:x:
-destructuring, assignment|:x:
-destructuring, parameters|:x:
-Unicode code point escapes|:x:
-new.target|:x:
+&nbsp;&nbsp;default function parameters|:x:
+&nbsp;&nbsp;rest parameters|:x:
+&nbsp;&nbsp;spread (...) operator|:x:
+&nbsp;&nbsp;object literal extensions|:x:
+&nbsp;&nbsp;for..of loops|:x:
+&nbsp;&nbsp;octal and binary literals|:white_check_mark: 4/4
+&nbsp;&nbsp;template literals|:x:
+&nbsp;&nbsp;RegExp "y" and "u" flags|:x:
+&nbsp;&nbsp;destructuring, declarations|:x:
+&nbsp;&nbsp;destructuring, assignment|:x:
+&nbsp;&nbsp;destructuring, parameters|:x:
+&nbsp;&nbsp;Unicode code point escapes|:x:
+&nbsp;&nbsp;new.target|:x:
 **Bindings**|
-const|:x:
-let|:x:
-block-level function declaration|:x:
+&nbsp;&nbsp;const|:x:
+&nbsp;&nbsp;let|:x:
+&nbsp;&nbsp;block-level function declaration|:x:
 **Functions**|
-arrow functions|:x:
-class|:x:
-super|:x:
-generators|:x:
+&nbsp;&nbsp;arrow functions|:x:
+&nbsp;&nbsp;class|:x:
+&nbsp;&nbsp;super|:x:
+&nbsp;&nbsp;generators|:x:
 **Built-ins**|
-typed arrays|10/46
-Map|:x:
-Set|:x:
-WeakMap|:x:
-WeakSet|:x:
-Proxy|:x:
-Reflect|:x:
-Promise|:x:
-Symbol|:x:
-well-known symbols|:x:
+&nbsp;&nbsp;typed arrays|10/46
+&nbsp;&nbsp;Map|:x:
+&nbsp;&nbsp;Set|:x:
+&nbsp;&nbsp;WeakMap|:x:
+&nbsp;&nbsp;WeakSet|:x:
+&nbsp;&nbsp;Proxy|:x:
+&nbsp;&nbsp;Reflect|:x:
+&nbsp;&nbsp;Promise|:x:
+&nbsp;&nbsp;&nbsp;&nbsp;Symbol|:x:
+&nbsp;&nbsp;well-known symbols|:x:
 **Built-in extensions**|
-Object static methods|2/4
-function "name" property|:x:
-String static methods|1/2
-String.prototype methods|6/8
-RegExp.prototype properties|1/6
-Array static methods|:x:
-Array.prototype methods|1/10
-Number properties|:white_check_mark: 7/7
-Math methods|:white_check_mark: 17/17
+&nbsp;&nbsp;Object static methods|2/4
+&nbsp;&nbsp;function "name" property|:x:
+&nbsp;&nbsp;String static methods|1/2
+&nbsp;&nbsp;String.prototype methods|6/8
+&nbsp;&nbsp;RegExp.prototype properties|1/6
+&nbsp;&nbsp;Array static methods|:x:
+&nbsp;&nbsp;Array.prototype methods|1/10
+&nbsp;&nbsp;Number properties|:white_check_mark: 7/7
+&nbsp;&nbsp;Math methods|:white_check_mark: 17/17
 **Subclassing**|
-Array is subclassable|:x:
-RegExp is subclassable|:x:
-Function is subclassable|:x:
-Promise is subclassable|:x:
-miscellaneous subclassables|:x:
+&nbsp;&nbsp;Array is subclassable|:x:
+&nbsp;&nbsp;RegExp is subclassable|:x:
+&nbsp;&nbsp;Function is subclassable|:x:
+&nbsp;&nbsp;Promise is subclassable|:x:
+&nbsp;&nbsp;miscellaneous subclassables|:x:
 **Misc**|
-prototype of bound functions|:x:
-Proxy, internal 'get' calls|:x:
-Proxy, internal 'set' calls|:x:
-Proxy, internal 'defineProperty' calls|:x:
-Proxy, internal 'deleteProperty' calls|:x:
-Proxy, internal 'getOwnPropertyDescriptor' calls|:x:
-Proxy, internal 'ownKeys' calls|:x:
-Object static methods accept primitives|:white_check_mark: 10/10
-own property order|:x:
-miscellaneous|2/10
+&nbsp;&nbsp;&nbsp;&nbsp;prototype of bound functions|:x:
+&nbsp;&nbsp;Proxy, internal 'get' calls|:x:
+&nbsp;&nbsp;Proxy, internal 'set' calls|:x:
+&nbsp;&nbsp;Proxy, internal 'defineProperty' calls|:x:
+&nbsp;&nbsp;Proxy, internal 'deleteProperty' calls|:x:
+&nbsp;&nbsp;Proxy, internal 'getOwnPropertyDescriptor' calls|:x:
+&nbsp;&nbsp;Proxy, internal 'ownKeys' calls|:x:
+&nbsp;&nbsp;Object static methods accept primitives|:white_check_mark: 10/10
+&nbsp;&nbsp;own property order|:x:
+&nbsp;&nbsp;miscellaneous|2/10
 **Annex B**|
-non-strict function semantics|:x:
-\__proto\__ in object literals|:x:
-Object.prototype.\__proto\__|:x:
-String.prototype HTML methods|:white_check_mark: 3/3
-RegExp.prototype.compile|:white_check_mark: 1/1
-RegExp syntax extensions|:x:
-HTML-style comments|:x:
+&nbsp;&nbsp;non-strict function semantics|:x:
+&nbsp;&nbsp;\__proto\__ in object literals|:x:
+&nbsp;&nbsp;Object.prototype.\__proto\__|:x:
+&nbsp;&nbsp;String.prototype HTML methods|:white_check_mark: 3/3
+&nbsp;&nbsp;RegExp.prototype.compile|:white_check_mark: 1/1
+&nbsp;&nbsp;RegExp syntax extensions|:x:
+&nbsp;&nbsp;HTML-style comments|:x:
