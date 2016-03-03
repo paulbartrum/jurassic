@@ -37,6 +37,7 @@ namespace UnitTests
             Assert.AreEqual(12, Evaluate(@"delete \u{20BB7}; \u{20BB7} = 12; \u{20BB7}"));
             Assert.AreEqual(13, Evaluate(@"delete Te\u{20BB7}st; Te\u{20BB7}st = 13; Te\u{20BB7}st"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"ident\u{20}ifier"));
+            Assert.AreEqual(3, Evaluate("delete _\u200c\u200d; _\u200c\u200d = 3; _\u200c\u200d"));
         }
 
         [TestMethod]
@@ -54,6 +55,9 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("const = 1"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("export = 1"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("import = 1"));
+
+            // These are not reserved words.
+            Assert.AreEqual(true, Evaluate("var abstract, boolean, byte, char, double, final, float, goto, int, long, native, short, synchronized, transient, volatile; true; "));
 
             // Future reserved words.
             Assert.AreEqual(1, Evaluate("implements = 1"));
