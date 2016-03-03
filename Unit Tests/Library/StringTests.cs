@@ -105,29 +105,30 @@ namespace UnitTests
         [TestMethod]
         public void anchor()
         {
-            Assert.AreEqual(@"<a name=""undefined"">haha</a>", (string)Evaluate("'haha'.anchor()"), true);
-            Assert.AreEqual(@"<a name=""test"">haha</a>", (string)Evaluate("'haha'.anchor('test')"), true);
+            Assert.AreEqual(@"<a name=""undefined"">haha</a>", (string)Evaluate("'haha'.anchor()"));
+            Assert.AreEqual(@"<a name=""test"">haha</a>", (string)Evaluate("'haha'.anchor('test')"));
+            Assert.AreEqual(@"<a name=""te&quot;st"">haha</a>", (string)Evaluate("'haha'.anchor('te\"st')"));
             Assert.AreEqual(1, Evaluate("''.anchor.length"));
         }
 
         [TestMethod]
         public void big()
         {
-            Assert.AreEqual("<big>haha</big>", (string)Evaluate("'haha'.big()"), true);
+            Assert.AreEqual("<big>haha</big>", (string)Evaluate("'haha'.big()"));
             Assert.AreEqual(0, Evaluate("''.big.length"));
         }
 
         [TestMethod]
         public void blink()
         {
-            Assert.AreEqual("<blink>haha</blink>", (string)Evaluate("'haha'.blink()"), true);
+            Assert.AreEqual("<blink>haha</blink>", (string)Evaluate("'haha'.blink()"));
             Assert.AreEqual(0, Evaluate("''.blink.length"));
         }
 
         [TestMethod]
         public void bold()
         {
-            Assert.AreEqual("<b>haha</b>", (string)Evaluate("'haha'.bold()"), true);
+            Assert.AreEqual("<b>haha</b>", (string)Evaluate("'haha'.bold()"));
             Assert.AreEqual(0, Evaluate("''.bold.length"));
         }
 
@@ -250,24 +251,26 @@ namespace UnitTests
         [TestMethod]
         public void @fixed()
         {
-            Assert.AreEqual("<tt>haha</tt>", (string)Evaluate("'haha'.fixed()"), true);
+            Assert.AreEqual("<tt>haha</tt>", (string)Evaluate("'haha'.fixed()"));
             Assert.AreEqual(0, Evaluate("''.fixed.length"));
         }
 
         [TestMethod]
         public void fontcolor()
         {
-            Assert.AreEqual(@"<font color=""undefined"">haha</font>", (string)Evaluate("'haha'.fontcolor()"), true);
-            Assert.AreEqual(@"<font color=""red"">haha</font>", (string)Evaluate("'haha'.fontcolor('red')"), true);
+            Assert.AreEqual(@"<font color=""undefined"">haha</font>", (string)Evaluate("'haha'.fontcolor()"));
+            Assert.AreEqual(@"<font color=""red"">haha</font>", (string)Evaluate("'haha'.fontcolor('red')"));
+            Assert.AreEqual(@"<font color=""r&quot;ed"">haha</font>", (string)Evaluate("'haha'.fontcolor('r\"ed')"));
             Assert.AreEqual(1, Evaluate("''.fontcolor.length"));
         }
 
         [TestMethod]
         public void fontsize()
         {
-            Assert.AreEqual(@"<font size=""5"">haha</font>", (string)Evaluate("'haha'.fontsize(5)"), true);
-            Assert.AreEqual(@"<font size=""abc"">haha</font>", (string)Evaluate("'haha'.fontsize('abc')"), true);
-            Assert.AreEqual(@"<font size=""undefined"">haha</font>", (string)Evaluate("'haha'.fontsize()"), true);
+            Assert.AreEqual(@"<font size=""5"">haha</font>", (string)Evaluate("'haha'.fontsize(5)"));
+            Assert.AreEqual(@"<font size=""abc"">haha</font>", (string)Evaluate("'haha'.fontsize('abc')"));
+            Assert.AreEqual(@"<font size=""undefined"">haha</font>", (string)Evaluate("'haha'.fontsize()"));
+            Assert.AreEqual(@"<font size=""a&quot;bc"">haha</font>", (string)Evaluate("'haha'.fontsize('a\"bc')"));
             Assert.AreEqual(1, Evaluate("''.fontsize.length"));
         }
 
@@ -371,8 +374,10 @@ namespace UnitTests
         [TestMethod]
         public void link()
         {
-            Assert.AreEqual(@"<a href=""undefined"">haha</a>", (string)Evaluate("'haha'.link()"), true);
-            Assert.AreEqual(@"<a href=""http://www.beer.com"">haha</a>", (string)Evaluate("'haha'.link('http://www.beer.com')"), true);
+            Assert.AreEqual(@"<a href=""undefined"">haha</a>", (string)Evaluate("'haha'.link()"));
+            Assert.AreEqual(@"<a href=""http://www.beer.com"">haha</a>", (string)Evaluate("'haha'.link('http://www.beer.com')"));
+            Assert.AreEqual(@"<a href=""test"">haha</a>", (string)Evaluate("'haha'.link('test')"));
+            Assert.AreEqual(@"<a href=""te&quot;st"">haha</a>", (string)Evaluate("'haha'.link('te\"st')"));
             Assert.AreEqual(1, Evaluate("''.link.length"));
         }
 
@@ -889,7 +894,7 @@ namespace UnitTests
         [TestMethod]
         public void small()
         {
-            Assert.AreEqual("<small>haha</small>", (string)Evaluate("'haha'.small()"), true);
+            Assert.AreEqual("<small>haha</small>", (string)Evaluate("'haha'.small()"));
             Assert.AreEqual(0, Evaluate("''.small.length"));
         }
 
@@ -1015,14 +1020,14 @@ namespace UnitTests
         [TestMethod]
         public void strike()
         {
-            Assert.AreEqual("<strike>haha</strike>", (string)Evaluate("'haha'.strike()"), true);
+            Assert.AreEqual("<strike>haha</strike>", (string)Evaluate("'haha'.strike()"));
             Assert.AreEqual(0, Evaluate("''.strike.length"));
         }
 
         [TestMethod]
         public void sub()
         {
-            Assert.AreEqual("<sub>haha</sub>", (string)Evaluate("'haha'.sub()"), true);
+            Assert.AreEqual("<sub>haha</sub>", (string)Evaluate("'haha'.sub()"));
             Assert.AreEqual(0, Evaluate("''.sub.length"));
         }
 
@@ -1080,7 +1085,7 @@ namespace UnitTests
         [TestMethod]
         public void sup()
         {
-            Assert.AreEqual("<sup>haha</sup>", (string)Evaluate("'haha'.sup()"), true);
+            Assert.AreEqual("<sup>haha</sup>", (string)Evaluate("'haha'.sup()"));
             Assert.AreEqual(0, Evaluate("''.sup.length"));
         }
 

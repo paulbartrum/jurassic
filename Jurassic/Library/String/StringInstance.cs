@@ -803,7 +803,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "anchor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Anchor(string thisObject, string name)
         {
-            return string.Format(@"<a name=""{1}"">{0}</a>", thisObject, name);
+            return string.Format(@"<a name=""{1}"">{0}</a>", thisObject, name.Replace("\"", "&quot;"));
         }
 
         /// <summary>
@@ -858,7 +858,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "fontcolor", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string FontColor(string thisObject, string colorValue)
         {
-            return string.Format(@"<font color=""{1}"">{0}</font>", thisObject, colorValue);
+            return string.Format(@"<font color=""{1}"">{0}</font>", thisObject, colorValue.Replace("\"", "&quot;"));
         }
 
         /// <summary>
@@ -870,7 +870,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "fontsize", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string FontSize(string thisObject, string size)
         {
-            return string.Format(@"<font size=""{1}"">{0}</font>", thisObject, size);
+            return string.Format(@"<font size=""{1}"">{0}</font>", thisObject, size.Replace("\"", "&quot;"));
         }
 
         /// <summary>
@@ -893,7 +893,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "link", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Link(string thisObject, string href)
         {
-            return string.Format(@"<a href=""{1}"">{0}</a>", thisObject, href);
+            return string.Format(@"<a href=""{1}"">{0}</a>", thisObject, href.Replace("\"", "&quot;"));
         }
 
         /// <summary>
