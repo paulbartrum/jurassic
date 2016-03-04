@@ -94,6 +94,7 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(engine.Symbol.ToPrimitive, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toPrimitive]", 1, ToPrimitive), PropertyAttributes.NonEnumerable));
             result.FastSetProperties(properties);
             return result;
         }
@@ -138,24 +139,6 @@ namespace Jurassic.Library
             get { return this.value == InvalidDate; }
         }
 
-
-
-        //     JAVASCRIPT INTERNAL FUNCTIONS
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Returns a primitive value that represents the current object.  Used by the addition and
-        /// equality operators.
-        /// </summary>
-        /// <param name="typeHint"> Indicates the preferred type of the result. </param>
-        /// <returns> A primitive value that represents the current object. </returns>
-        internal override object GetPrimitiveValue(PrimitiveTypeHint typeHint)
-        {
-            if (typeHint == PrimitiveTypeHint.None)
-                return base.GetPrimitiveValue(PrimitiveTypeHint.String);
-            return base.GetPrimitiveValue(typeHint);
-        }
-        
 
 
         //     JAVASCRIPT FUNCTIONS
@@ -881,6 +864,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string representing the date and time.
         /// </summary>
+        /// <param name="thisRef"> The object that is being operated on. </param>
         /// <returns> A string representing the date and time. </returns>
         [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToString(object thisRef)
@@ -933,6 +917,28 @@ namespace Jurassic.Library
         public new double ValueOf()
         {
             return this.ValueInMilliseconds;
+        }
+
+        /// <summary>
+        /// Returns a primitive value that represents the current object.  Used by the addition and
+        /// equality operators.
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <param name="thisObj"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private static object ToPrimitive(ScriptEngine engine, object thisObj, object[] args)
+        {
+            if (!(thisObj is ObjectInstance))
+                throw new JavaScriptException(engine, ErrorType.TypeError, "this is not an object.");
+            if (args.Length == 0)
+                throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'hint' was not specified.");
+            var hint = TypeConverter.ToString(args[0]);
+            if (hint == "default" || hint == "string")
+                return ((ObjectInstance)thisObj).ToPrimitivePreES6(PrimitiveTypeHint.String);
+            if (hint == "number")
+                return ((ObjectInstance)thisObj).ToPrimitivePreES6(PrimitiveTypeHint.Number);
+            throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid type hint.");
         }
 
 

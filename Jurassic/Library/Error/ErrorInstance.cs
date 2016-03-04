@@ -15,28 +15,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Determine the prototype for the given error type.
-        /// </summary>
-        /// <param name="engine"> The script engine associated with this object. </param>
-        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
-        /// <returns> The prototype. </returns>
-        private static ObjectInstance GetPrototype(ScriptEngine engine, ErrorType type)
-        {
-            if (type == ErrorType.Error)
-            {
-                // This constructor is for regular Error objects.
-                // Prototype chain: Error instance -> Error prototype -> Object prototype
-                return engine.Object.InstancePrototype;
-            }
-            else
-            {
-                // This constructor is for derived Error objects like RangeError, etc.
-                // Prototype chain: XXXError instance -> XXXError prototype -> Error prototype -> Object prototype
-                return engine.Error.InstancePrototype;
-            }
-        }
-
-        /// <summary>
         /// Creates a new Error instance with the given message.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -56,13 +34,35 @@ namespace Jurassic.Library
         /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
         internal static ObjectInstance CreatePrototype(ScriptEngine engine, ErrorConstructor constructor, ErrorType type)
         {
-            var result = engine.Object.Construct();
+            var result = CreateRawObject(GetPrototype(engine, type));
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("name", type.ToString(), PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
             result.FastSetProperties(properties);
             return result;
+        }
+
+        /// <summary>
+        /// Determine the prototype for the given error type.
+        /// </summary>
+        /// <param name="engine"> The script engine associated with this object. </param>
+        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
+        /// <returns> The prototype. </returns>
+        private static ObjectInstance GetPrototype(ScriptEngine engine, ErrorType type)
+        {
+            if (type == ErrorType.Error)
+            {
+                // This constructor is for regular Error objects.
+                // Prototype chain: Error instance -> Error prototype -> Object prototype
+                return engine.Object.InstancePrototype;
+            }
+            else
+            {
+                // This constructor is for derived Error objects like RangeError, etc.
+                // Prototype chain: XXXError instance -> XXXError prototype -> Error prototype -> Object prototype
+                return engine.Error.InstancePrototype;
+            }
         }
 
 
@@ -124,16 +124,30 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string representing the current object.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
+        /// <param name="thisRef"> The object that is being operated on. </param>
         /// <returns> A string representing the current object. </returns>
-        [JSInternalFunction(Name = "toString")]
-        public string ToStringJS()
+        [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        public static string ToString(ScriptEngine engine, object thisObj)
         {
-            if (string.IsNullOrEmpty(this.Message))
-                return this.Name;
-            else if (string.IsNullOrEmpty(this.Name))
-                return this.Message;
-            else
-                return string.Format("{0}: {1}", this.Name, this.Message);
+            if (!(thisObj is ObjectInstance))
+                throw new JavaScriptException(engine, ErrorType.TypeError, "this is not an object.");
+
+            // Get the relevant properties.
+            var obj = (ObjectInstance)thisObj;
+            var nameObj = obj["name"];
+            var messageObj = obj["message"];
+
+            // Convert them to strings.
+            var name = TypeUtilities.IsUndefined(nameObj) ? "Error" : TypeConverter.ToString(nameObj);
+            var message = TypeUtilities.IsUndefined(messageObj) ? "" : TypeConverter.ToString(messageObj);
+
+            // Concatenate them.
+            if (string.IsNullOrEmpty(name))
+                return message;
+            if (string.IsNullOrEmpty(message))
+                return name;
+            return string.Format("{0}: {1}", name, message);
         }
     }
 }

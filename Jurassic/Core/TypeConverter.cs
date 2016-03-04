@@ -118,6 +118,8 @@ namespace Jurassic
                 return NumberParser.CoerceToNumber((string)value);
             if (value is ConcatenatedString)
                 return NumberParser.CoerceToNumber(value.ToString());
+            if (value is SymbolInstance)
+                throw new JavaScriptException(((SymbolInstance)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a number.");
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), "value");
@@ -169,6 +171,8 @@ namespace Jurassic
                 return (string)value;
             if (value is ConcatenatedString)
                 return value.ToString();
+            if (value is SymbolInstance)
+                throw new JavaScriptException(((SymbolInstance)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a string.");
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), "value");
@@ -259,9 +263,21 @@ namespace Jurassic
         public static object ToPrimitive(object value, PrimitiveTypeHint preferredType)
         {
             if (value is ObjectInstance)
-                return ((ObjectInstance)value).GetPrimitiveValue(preferredType);
+                return ((ObjectInstance)value).ToPrimitive(preferredType);
             else
                 return value;
+        }
+
+        /// <summary>
+        /// Converts a value to a property key (either a string or a symbol).
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <returns> A property key value. </returns>
+        public static object ToPropertyKey(object value)
+        {
+            if (value is SymbolInstance)
+                return value;
+            return ToString(value);
         }
 
         /// <summary>

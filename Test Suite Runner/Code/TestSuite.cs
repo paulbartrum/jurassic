@@ -18,7 +18,7 @@ namespace Jurassic.TestSuite
         private ZipFile zipFile;
         private List<string> skippedTestNames = new List<string>();
         private string includes;
-        private static Dictionary<string, object> includeProperties;
+        private static Dictionary<object, object> includeProperties;
         private int successfulTestCount;
         private int failedTestCount;
         private int skippedTestCount;
@@ -296,18 +296,18 @@ namespace Jurassic.TestSuite
             var engine = new ScriptEngine();
 
             // Record all the global properties.
-            var standardGlobals = new HashSet<string>();
+            var standardGlobals = new HashSet<object>();
             foreach (var property in engine.Global.Properties)
-                standardGlobals.Add(property.Name);
+                standardGlobals.Add(property.Key);
 
             // Execute the includes file.
             engine.Execute(this.includes);
 
             // Record all new properties.
-            var additionalProperties = new Dictionary<string, object>();
+            var additionalProperties = new Dictionary<object, object>();
             foreach (var property in engine.Global.Properties)
-                if (standardGlobals.Contains(property.Name) == false)
-                    additionalProperties.Add(property.Name, property.Value);
+                if (standardGlobals.Contains(property.Key) == false)
+                    additionalProperties.Add(property.Key, property.Value);
             includeProperties = additionalProperties;
         }
 

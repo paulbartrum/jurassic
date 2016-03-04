@@ -183,13 +183,13 @@ namespace Jurassic.Compiler
                 lhs.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
-                // Load the property name and convert to a string.
+                // Load the value and convert it to a property key.
                 var rhs = this.GetOperand(1);
                 rhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToString(generator, rhs.ResultType);
+                EmitConversion.ToPropertyKey(generator, rhs.ResultType);
 
-                // Call Get(string)
-                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_String);
+                // Call Get(object)
+                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
             }
         }
 
@@ -338,15 +338,15 @@ namespace Jurassic.Compiler
                 lhs.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
-                // Load the property name and convert to a string.
+                // Load the value and convert it to a property key.
                 var rhs = this.GetOperand(1);
                 rhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToString(generator, rhs.ResultType);
+                EmitConversion.ToPropertyKey(generator, rhs.ResultType);
 
                 // Call the indexer.
                 generator.LoadVariable(value);
                 generator.LoadBoolean(optimizationInfo.StrictMode);
-                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
+                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
             }
 
             // The temporary variable is no longer needed.

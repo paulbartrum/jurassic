@@ -205,7 +205,7 @@ namespace Jurassic.Compiler
                             ((FunctionExpression)dataPropertyValue).GenerateDisplayName(generator, optimizationInfo, propertyName, false);
                         EmitConversion.ToAny(generator, dataPropertyValue.ResultType);
                         generator.LoadBoolean(optimizationInfo.StrictMode);
-                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
+                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
                     }
                     else if (propertyValue is Parser.ObjectLiteralAccessor)
                     {

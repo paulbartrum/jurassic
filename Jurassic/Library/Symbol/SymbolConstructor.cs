@@ -17,12 +17,15 @@ namespace Jurassic.Library
         /// Creates a new Symbol object.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        internal SymbolConstructor(ObjectInstance prototype)
+        /// <param name="instancePrototype"> The prototype for instances created by this function. </param>
+        internal SymbolConstructor(ObjectInstance prototype, ObjectInstance instancePrototype)
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            ToPrimitive = new SymbolInstance(instancePrototype, "Symbol.toPrimitive");
+
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>(3);
-            InitializeConstructorProperties(properties, "Symbol", 0, SymbolInstance.CreatePrototype(Engine, this));
+            InitializeConstructorProperties(properties, "Symbol", 0, instancePrototype);
             //properties.Add(new PropertyNameAndValue("hasInstance", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("isConcatSpreadable", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("iterator", null, PropertyAttributes.Sealed));
@@ -31,11 +34,21 @@ namespace Jurassic.Library
             //properties.Add(new PropertyNameAndValue("search", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("species", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("split", null, PropertyAttributes.Sealed));
-            //properties.Add(new PropertyNameAndValue("toPrimitive", null, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("toPrimitive", ToPrimitive, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("toStringTag", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("unscopables", null, PropertyAttributes.Sealed));
             FastSetProperties(properties);
         }
+
+
+
+        //     .NET ACCESSOR PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Used to override ToPrimitive behaviour.
+        /// </summary>
+        public SymbolInstance ToPrimitive { get; internal set; }
 
 
 

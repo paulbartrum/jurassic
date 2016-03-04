@@ -49,15 +49,16 @@ namespace Jurassic.Library
         /// <summary>
         /// Initializes the prototype properties.
         /// </summary>
+        /// <param name="obj"> The object to set the properties on. </param>
         /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal void InitializePrototypeProperties(FunctionConstructor constructor)
+        internal static void InitializePrototypeProperties(ObjectInstance obj, FunctionConstructor constructor)
         {
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
+            var engine = obj.Engine;
+            var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("name", "Empty", PropertyAttributes.Configurable));
             properties.Add(new PropertyNameAndValue("length", 0, PropertyAttributes.Configurable));
-            FastSetProperties(properties);
+            obj.FastSetProperties(properties);
         }
 
 

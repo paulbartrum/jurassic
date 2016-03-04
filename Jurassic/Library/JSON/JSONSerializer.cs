@@ -299,13 +299,14 @@ namespace Jurassic.Library
             this.objectStack.Push(value);
 
             // Create a list of property names to serialize.
+            // Only properties that are enumerable and have property names are serialized.
             var propertiesToSerialize = this.SerializableProperties;
             if (propertiesToSerialize == null)
             {
                 propertiesToSerialize = new List<string>();
                 foreach (var property in value.Properties)
-                    if (property.IsEnumerable == true)
-                        propertiesToSerialize.Add(property.Name);
+                    if (property.IsEnumerable == true && property.Key is string)
+                        propertiesToSerialize.Add((string)property.Key);
             }
 
             result.Append('{');

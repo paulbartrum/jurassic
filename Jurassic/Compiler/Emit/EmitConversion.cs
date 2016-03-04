@@ -453,19 +453,6 @@ namespace Jurassic.Compiler
             
         }
 
-        //        /// <summary>
-        ///// Pops the value on the stack, converts it to a javascript object, then pushes the result
-        ///// onto the stack.
-        ///// </summary>
-        ///// <param name="generator"> The IL generator. </param>
-        ///// <param name="fromType"> The type to convert from. </param>
-        ///// <param name="path"> The path of the javascript source file that is currently executing. </param>
-        ///// <param name="function"> The name of the currently executing function. </param>
-        ///// <param name="line"> The line number of the statement that is currently executing. </param>
-        //public static void ToObject(ILGenerator generator, PrimitiveType fromType, string path, string function, int line)
-        //{
-        //}
-
         /// <summary>
         /// Pops the value on the stack, converts it to a javascript object, then pushes the result
         /// onto the stack.
@@ -556,8 +543,6 @@ namespace Jurassic.Compiler
                 case PrimitiveType.Any:
                 case PrimitiveType.Object:
                     // Otherwise, fall back to calling TypeConverter.ToPrimitive()
-                    if (PrimitiveTypeUtilities.IsValueType(fromType))
-                        generator.Box(fromType);
                     generator.LoadInt32((int)preferredType);
                     generator.Call(ReflectionHelpers.TypeConverter_ToPrimitive);
                     break;
@@ -577,6 +562,25 @@ namespace Jurassic.Compiler
         {
             if (PrimitiveTypeUtilities.IsValueType(fromType))
                 generator.Box(fromType);
+        }
+
+        /// <summary>
+        /// Pops the value on the stack, converts it to a property key (either a symbol or a
+        /// string), then pushes the result onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        /// <param name="fromType"> The type to convert from. </param>
+        public static void ToPropertyKey(ILGenerator generator, PrimitiveType fromType)
+        {
+            // Symbols are of type object.
+            if (fromType == PrimitiveType.Object || fromType == PrimitiveType.Any)
+            {
+                generator.Call(ReflectionHelpers.TypeConverter_ToPropertyKey);
+                return;
+            }
+
+            // Fall back to calling ToString().
+            ToString(generator, fromType);
         }
     }
 

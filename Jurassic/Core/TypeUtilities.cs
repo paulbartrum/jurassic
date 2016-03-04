@@ -117,21 +117,26 @@ namespace Jurassic
             {
                 foreach (var property in obj2.Properties)
                 {
+                    // Only enumerate string-based property keys, not symbols.
+                    if (!(property.Key is string))
+                        continue;
+                    string propertyName = (string)property.Key;
+
                     // Check whether the property is shadowed.
-                    if (names.Contains(property.Name) == false)
+                    if (names.Contains(propertyName) == false)
                     {
                         // Only return enumerable properties.
                         if (property.IsEnumerable == true)
                         {
                             // Make sure the property still exists.
-                            if (obj2.HasProperty(property.Name) == true)
+                            if (obj2.HasProperty(propertyName) == true)
                             {
-                                yield return property.Name;
+                                yield return propertyName;
                             }
                         }
                         
                         // Record the name so we can check if it was shadowed.
-                        names.Add(property.Name);
+                        names.Add(propertyName);
                     }
                 }
                 obj2 = obj2.Prototype;
@@ -175,7 +180,8 @@ namespace Jurassic
             return type == typeof(bool) ||
                 type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
                 type == typeof(string) || type == typeof(ConcatenatedString) ||
-                type == typeof(Null) || type == typeof(Undefined);
+                type == typeof(Null) || type == typeof(Undefined) ||
+                type == typeof(SymbolInstance);
         }
 
         /// <summary>

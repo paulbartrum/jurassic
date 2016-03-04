@@ -34,6 +34,13 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("Symbol.length"));
         }
 
+        [TestMethod]
+        public void toPrimitive()
+        {
+            Assert.AreEqual("1default2", Evaluate("var x = { a: 1 }; x[Symbol.toPrimitive] = function (hint) { return this.a + hint; }; x + 2"));
+            Assert.AreEqual("1defaulttest", Evaluate("var x = { a: 1 }; x[Symbol.toPrimitive] = function (hint) { return this.a + hint; }; x + 'test'"));
+        }
+
         // TODO: Symbol.iterator, Symbol.for, Symbol.keyFor, etc.
     }
 }

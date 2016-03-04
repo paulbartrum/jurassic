@@ -201,7 +201,7 @@ namespace UnitTests
             Assert.AreEqual(@"""te'st""", Evaluate("JSON.stringify('te\\'st')"));
 
             // Dates.
-            Assert.AreEqual("null", Evaluate("JSON.stringify(Date.prototype)"));
+            Assert.AreEqual("null", Evaluate("JSON.stringify(new Date(NaN))"));
             Assert.AreEqual(@"""1970-01-01T00:00:00.005Z""", Evaluate("JSON.stringify(new Date(5))"));
 
             // Arrays.

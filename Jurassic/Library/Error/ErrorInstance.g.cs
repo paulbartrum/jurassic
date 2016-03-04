@@ -20,10 +20,7 @@ namespace Jurassic.Library
 
 		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is ErrorInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
-			return ((ErrorInstance)thisObj).ToStringJS();
+			return ToString(engine, thisObj);
 		}
 	}
 

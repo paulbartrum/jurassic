@@ -208,11 +208,14 @@ namespace Jurassic.Library
         /// <summary>
         /// Attempts to parse a string into a valid array index.
         /// </summary>
-        /// <param name="propertyName"> The property name to parse. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <returns> The array index value, or <c>uint.MaxValue</c> if the property name does not reference
         /// an array index. </returns>
-        internal static uint ParseArrayIndex(string propertyName)
+        internal static uint ParseArrayIndex(object key)
         {
+            if (key is SymbolInstance)
+                return uint.MaxValue;
+            var propertyName = (string)key;
             if (propertyName.Length == 0)
                 return uint.MaxValue;
             int digit = propertyName[0] - '0';
@@ -347,22 +350,22 @@ namespace Jurassic.Library
         /// not searched so if the property exists but only in the prototype chain a new property
         /// will be created.
         /// </summary>
-        /// <param name="propertyName"> The name of the property to modify. </param>
+        /// <param name="key"> The property key of the property to modify. </param>
         /// <param name="descriptor"> The property value and attributes. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is not configurable or the object is sealed. </param>
         /// <returns> <c>true</c> if the property was successfully modified; <c>false</c> otherwise. </returns>
-        public override bool DefineProperty(string propertyName, PropertyDescriptor descriptor, bool throwOnError)
+        public override bool DefineProperty(object key, PropertyDescriptor descriptor, bool throwOnError)
         {
             // Make sure the property name isn't actually an array index.
-            uint arrayIndex = ParseArrayIndex(propertyName);
+            uint arrayIndex = ParseArrayIndex(key);
             if (arrayIndex != uint.MaxValue)
             {
                 // Spec violation: array elements are never accessor properties.
                 if (descriptor.IsAccessor == true)
                 {
                     if (throwOnError == true)
-                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("Accessors are not supported for array elements.", propertyName));
+                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Accessors are not supported for array elements.");
                     return false;
                 }
 
@@ -370,7 +373,7 @@ namespace Jurassic.Library
                 if (descriptor.Attributes != PropertyAttributes.FullAccess)
                 {
                     if (throwOnError == true)
-                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("Non-accessible array elements are not supported.", propertyName));
+                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Non-accessible array elements are not supported.");
                     return false;
                 }
 
@@ -384,7 +387,7 @@ namespace Jurassic.Library
             }
 
             // Delegate to the base class.
-            return base.DefineProperty(propertyName, descriptor, throwOnError);
+            return base.DefineProperty(key, descriptor, throwOnError);
         }
 
         /// <summary>

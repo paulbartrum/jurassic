@@ -12,11 +12,12 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(19)
+			return new List<PropertyNameAndValue>(20)
 			{
 				new PropertyNameAndValue("getPrototypeOf", new ClrStubFunction(engine.FunctionInstancePrototype, "getPrototypeOf", 1, __STUB__getPrototypeOf), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("getOwnPropertyDescriptor", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyDescriptor", 2, __STUB__getOwnPropertyDescriptor), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("getOwnPropertyNames", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyNames", 1, __STUB__getOwnPropertyNames), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getOwnPropertySymbols", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertySymbols", 1, __STUB__getOwnPropertySymbols), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("create", new ClrStubFunction(engine.FunctionInstancePrototype, "create", 2, __STUB__create), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("assign", new ClrStubFunction(engine.FunctionInstancePrototype, "assign", 2, __STUB__assign), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("defineProperty", new ClrStubFunction(engine.FunctionInstancePrototype, "defineProperty", 3, __STUB__defineProperty), PropertyAttributes.NonEnumerable),
@@ -78,9 +79,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return GetOwnPropertyDescriptor(TypeConverter.ToObject(engine, args[0]), "undefined");
+					return GetOwnPropertyDescriptor(TypeConverter.ToObject(engine, args[0]), Undefined.Value);
 				default:
-					return GetOwnPropertyDescriptor(TypeConverter.ToObject(engine, args[0]), TypeConverter.ToString(args[1]));
+					return GetOwnPropertyDescriptor(TypeConverter.ToObject(engine, args[0]), args[1]);
 			}
 		}
 
@@ -92,6 +93,17 @@ namespace Jurassic.Library
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return GetOwnPropertyNames(TypeConverter.ToObject(engine, args[0]));
+			}
+		}
+
+		private static object __STUB__getOwnPropertySymbols(ScriptEngine engine, object thisObj, object[] args)
+		{
+			switch (args.Length)
+			{
+				case 0:
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+				default:
+					return GetOwnPropertySymbols(TypeConverter.ToObject(engine, args[0]));
 			}
 		}
 
@@ -128,11 +140,11 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return DefineProperty(TypeConverter.ToObject(engine, args[0]), "undefined", Undefined.Value);
+					return DefineProperty(TypeConverter.ToObject(engine, args[0]), Undefined.Value, Undefined.Value);
 				case 2:
-					return DefineProperty(TypeConverter.ToObject(engine, args[0]), TypeConverter.ToString(args[1]), Undefined.Value);
+					return DefineProperty(TypeConverter.ToObject(engine, args[0]), args[1], Undefined.Value);
 				default:
-					return DefineProperty(TypeConverter.ToObject(engine, args[0]), TypeConverter.ToString(args[1]), args[2]);
+					return DefineProperty(TypeConverter.ToObject(engine, args[0]), args[1], args[2]);
 			}
 		}
 

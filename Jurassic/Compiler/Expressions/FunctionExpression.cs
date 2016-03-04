@@ -141,7 +141,7 @@ namespace Jurassic.Compiler
                 generator.LoadString("displayName");
                 generator.LoadString(displayName);
                 generator.LoadBoolean(false);
-                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_String);
+                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
             }
         }
 

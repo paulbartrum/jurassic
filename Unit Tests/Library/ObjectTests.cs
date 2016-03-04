@@ -135,6 +135,15 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor(5, 'toString')"));
             Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor('test', 'toString')"));
 
+            // Symbol properties should work ok.
+            Evaluate("var descriptor = Object.getOwnPropertyDescriptor({p: 15}, 'p')");
+            Assert.AreEqual(true, Evaluate("descriptor.configurable"));
+            Assert.AreEqual(true, Evaluate("descriptor.enumerable"));
+            Assert.AreEqual(true, Evaluate("descriptor.writable"));
+            Assert.AreEqual(15, Evaluate("descriptor.value"));
+            Assert.AreEqual(Undefined.Value, Evaluate("descriptor.get"));
+            Assert.AreEqual(Undefined.Value, Evaluate("descriptor.set"));
+
             // length
             Assert.AreEqual(2, Evaluate("Object.getOwnPropertyDescriptor.length"));
 
@@ -151,6 +160,9 @@ namespace UnitTests
             Assert.AreEqual("", Evaluate("Object.getOwnPropertyNames(true).toString()"));
             Assert.AreEqual("", Evaluate("Object.getOwnPropertyNames(5).toString()"));
             Assert.AreEqual("0,1,2,3,length", Evaluate("Object.getOwnPropertyNames('test').toString()"));
+
+            // Symbols are ignored.
+            Assert.AreEqual("a", Evaluate("var x = {a: 5}; x[Symbol('test')] = 6; Object.getOwnPropertyNames(x).toString()"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.getOwnPropertyNames.length"));
@@ -728,8 +740,8 @@ namespace UnitTests
         public void getOwnPropertySymbols()
         {
             Assert.AreEqual(0, Evaluate("var a = {}; Object.getOwnPropertySymbols(a).length"));
-            Assert.AreEqual(2, Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(a).length"));
-            Assert.AreEqual("[Symbol(one), Symbol(two)]", Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(a).toString()"));
+            Assert.AreEqual(2, Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(b).length"));
+            Assert.AreEqual("Symbol(one)", Evaluate("var b = {}; b[Symbol('one')] = 1; b[Symbol('two')] = 2; Object.getOwnPropertySymbols(b)[0].toString()"));
         }
     }
 }

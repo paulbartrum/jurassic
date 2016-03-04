@@ -30,17 +30,17 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Creates the symbol prototype object.
+        /// Initializes the prototype properties.
         /// </summary>
-        /// <param name="engine"> The script environment. </param>
+        /// <param name="obj"> The object to set the properties on. </param>
         /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal static ObjectInstance CreatePrototype(ScriptEngine engine, SymbolConstructor constructor)
+        internal static void InitializePrototypeProperties(ObjectInstance obj, SymbolConstructor constructor)
         {
-            var result = engine.Object.Construct();
+            var engine = obj.Engine;
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            result.FastSetProperties(properties);
-            return result;
+            properties.Add(new PropertyNameAndValue(constructor.ToPrimitive, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toPrimitive]", 1, __STUB__valueOf), PropertyAttributes.NonEnumerable));
+            obj.FastSetProperties(properties);
         }
 
 

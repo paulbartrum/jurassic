@@ -1,58 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Jurassic.Library
+﻿namespace Jurassic.Library
 {
     /// <summary>
     /// Represents a property name and value.
     /// </summary>
     public sealed class PropertyNameAndValue
     {
-        private string name;
+        private object key;
         private PropertyDescriptor descriptor;
 
         /// <summary>
         /// Initializes a property with any descriptor.
         /// </summary>
-        /// <param name="name"> The name of the property. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <param name="descriptor"> A descriptor describing the property. </param>
-        public PropertyNameAndValue(string name, PropertyDescriptor descriptor)
+        public PropertyNameAndValue(object key, PropertyDescriptor descriptor)
         {
-            this.name = name;
+            this.key = key;
             this.descriptor = descriptor;
         }
 
         /// <summary>
         /// Initializes a simple property.
         /// </summary>
-        /// <param name="name"> The name of the property. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <param name="value"> The property value. </param>
         /// <param name="attributes"> Indicates whether the property is readable, writable and/or enumerable. </param>
-        public PropertyNameAndValue(string name, object value, PropertyAttributes attributes)
+        public PropertyNameAndValue(object key, object value, PropertyAttributes attributes)
         {
-            this.name = name;
+            this.key = key;
             this.descriptor = new PropertyDescriptor(value, attributes);
         }
 
         /// <summary>
         /// Initializes a getter/setter property.
         /// </summary>
-        /// <param name="name"> The name of the property. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <param name="getter"> The function to call to retrieve the property value. </param>
         /// <param name="setter"> The function to call to set the property value. </param>
         /// <param name="attributes"> Indicates whether the property is readable, writable and/or enumerable. </param>
-        public PropertyNameAndValue(string name, FunctionInstance getter, FunctionInstance setter, PropertyAttributes attributes)
+        public PropertyNameAndValue(object key, FunctionInstance getter, FunctionInstance setter, PropertyAttributes attributes)
         {
-            this.name = name;
+            this.key = key;
             this.descriptor = new PropertyDescriptor(getter, setter, attributes);
         }
 
         /// <summary>
-        /// Gets the name of the property.
+        /// Gets the property key.
         /// </summary>
-        public string Name
+        public object Key
         {
-            get { return this.name; }
+            get { return this.key; }
         }
 
         /// <summary>

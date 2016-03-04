@@ -65,7 +65,6 @@
     <Compile Include="Core\BigIntegerTests.cs" />
     <Compile Include="Core\JsPropertyTests.cs" />
     <Compile Include="Core\DynamicMetaObjectTests.cs" />
-    <Compile Include="Core\ObjectExtensibilityTests.cs" />
     <Compile Include="Core\SerializationTests.cs" />
     <Compile Include="Core\ScriptEngineTests.cs" />
     <Compile Include="Core\DocumentationSamples.cs" />

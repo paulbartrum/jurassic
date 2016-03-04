@@ -21,6 +21,7 @@ namespace UnitTests
             Assert.AreEqual(3.1415, Evaluate("+3.1415"));
             Assert.AreEqual(5, Evaluate("+new Date(5)"));
             Assert.AreEqual(double.NaN, Evaluate("+new Object()"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("+Symbol()"));
         }
 
         [TestMethod]
@@ -35,6 +36,7 @@ namespace UnitTests
             Assert.AreEqual(-3.1415, Evaluate("-3.1415"));
             Assert.AreEqual(-5, Evaluate("-new Date(5)"));
             Assert.AreEqual(double.NaN, Evaluate("-new Object()"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("-Symbol()"));
         }
 
         [TestMethod]
@@ -76,6 +78,7 @@ namespace UnitTests
 
             // Objects
             Assert.AreEqual(false, Evaluate("!new Number(5)"));
+            Assert.AreEqual(false, Evaluate("!Symbol()"));
 
             // Variables
             Assert.AreEqual(true, Evaluate("x = false; !x"));
@@ -113,6 +116,9 @@ namespace UnitTests
             Assert.AreEqual("test1", Evaluate("'test' + {valueOf: function() {return 1}, toString: function() {return 0}}"));
             Assert.AreEqual(3, Evaluate("1 + {valueOf: function() {return 2}, toString: function() {return 3}}"));
             Assert.AreEqual("12", Evaluate("1 + {valueOf: function() {return '2'}, toString: function() {return '3'}}"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("1 + Symbol()"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Symbol() + 1"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Symbol() + new Number(6)"));
 
             // Variables
             Assert.AreEqual(35, Evaluate("x = 15; x + 20"));
@@ -126,6 +132,7 @@ namespace UnitTests
             StringAssert.StartsWith((string)Evaluate("x = 5; x + new Date(10)"), "5");
             Assert.AreEqual("5/abc/g", Evaluate("x = 5; x + /abc/g"));
             Assert.AreEqual("5[object Object]", Evaluate("x = 5; x + {}"));
+            StringAssert.StartsWith((string)Evaluate("new Date('24 Apr 2010 23:59:57') + new Date('24 Apr 2010 23:59:57')"), "Sat Apr 24");
 
             // String concatenation.
             Assert.AreEqual("123456123789", Evaluate(@"
@@ -165,6 +172,7 @@ namespace UnitTests
                 DeclCE = ""--("" + CommentCE + "")?|\\[CDATA\\[("" + CDATA_CE + "")?|DOCTYPE("" + DocTypeCE + "")?"";
                 PI_CE = Name + ""("" + PI_Tail + "")?"";
                 PI_CE"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Symbol() + 'test'"));
         }
 
         [TestMethod]
@@ -183,6 +191,7 @@ namespace UnitTests
             Assert.AreEqual(-1, Evaluate("new Number(5) - new Number(6)"));
             Assert.AreEqual(double.NaN, Evaluate("'test' - new Number(6)"));
             Assert.AreEqual(double.NaN, Evaluate("new Number(5) - 'test'"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("new Number(5) - Symbol()"));
 
             // Variables
             Assert.AreEqual(-5, Evaluate("x = 15; x - 20"));
@@ -401,6 +410,10 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("Math.abcdef == undefined"));
             Assert.AreEqual(false, Evaluate("null == 5"));
 
+            // Symbols.
+            Assert.AreEqual(false, Evaluate("Symbol() == Symbol()"));
+            Assert.AreEqual(false, Evaluate("Symbol('test') == Symbol('test')"));
+
             // NaN
             Assert.AreEqual(false, Evaluate("NaN == NaN"));
 
@@ -455,6 +468,10 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("Math.abcdef != undefined"));
             Assert.AreEqual(true, Evaluate("null != 5"));
 
+            // Symbols.
+            Assert.AreEqual(true, Evaluate("Symbol() != Symbol()"));
+            Assert.AreEqual(true, Evaluate("Symbol('test') != Symbol('test')"));
+
             // NaN
             Assert.AreEqual(true, Evaluate("NaN != NaN"));
 
@@ -495,6 +512,10 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("Math.abcdef === undefined"));
             Assert.AreEqual(false, Evaluate("null === 5"));
 
+            // Symbols.
+            Assert.AreEqual(false, Evaluate("Symbol() === Symbol()"));
+            Assert.AreEqual(false, Evaluate("Symbol('test') === Symbol('test')"));
+
             // NaN
             Assert.AreEqual(false, Evaluate("NaN === NaN"));
 
@@ -533,6 +554,10 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("Math.abcdef !== Math.abcdefghi"));
             Assert.AreEqual(false, Evaluate("Math.abcdef !== undefined"));
             Assert.AreEqual(true, Evaluate("null !== 5"));
+
+            // Symbols.
+            Assert.AreEqual(true, Evaluate("Symbol() !== Symbol()"));
+            Assert.AreEqual(true, Evaluate("Symbol('test') !== Symbol('test')"));
 
             // NaN
             Assert.AreEqual(true, Evaluate("NaN !== NaN"));
@@ -1181,6 +1206,10 @@ namespace UnitTests
             Assert.AreEqual(4, Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b = 4; y.b"));
             Assert.AreEqual(3, Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b = 4; delete y.b; y.a"));
             Assert.AreEqual(Undefined.Value, Evaluate("x = {}; x.a = 6; x.b = 2; y = {}; y.a = 3; y.b = 4; delete y.b; y.b"));
+
+            // Symbols.
+            Assert.AreEqual(7, Evaluate("var obj = { }; var symbol = Symbol(); obj[symbol] = 7; obj[symbol]"));
+            Assert.AreEqual(8, Evaluate("var obj = { }; var sym1 = Symbol(); obj[sym1] = 8; var sym2 = Symbol(); obj[sym2] = 9; obj[sym1]"));
 
             // Ensure you can create at least 16384 properties.
             Assert.AreEqual(16383, Evaluate(@"

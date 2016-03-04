@@ -118,7 +118,7 @@ namespace UnitTests
         [TestMethod]
         public void prototype()
         {
-            Assert.AreEqual(double.NaN, Evaluate("Date.prototype.valueOf()"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Date.prototype.valueOf()"));
             Assert.AreEqual(true, Evaluate("Object.getPrototypeOf(new Date()) === Date.prototype"));
         }
 

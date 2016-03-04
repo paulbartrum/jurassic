@@ -88,38 +88,55 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets an object that contains details of the property with the given name.
         /// </summary>
-        /// <param name="obj"> The object to retrieve property details for. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <param name="propertyName"> The name of the property to retrieve details for. </param>
         /// <returns> An object containing some of the following properties: configurable,
         /// writable, enumerable, value, get and set. </returns>
         [JSInternalFunction(Name = "getOwnPropertyDescriptor")]
-        public static ObjectInstance GetOwnPropertyDescriptor(ObjectInstance obj, string propertyName)
+        public static ObjectInstance GetOwnPropertyDescriptor(ObjectInstance obj, object key)
         {
-            var descriptor = obj.GetOwnPropertyDescriptor(propertyName);
+            var descriptor = obj.GetOwnPropertyDescriptor(TypeConverter.ToPropertyKey(key));
             if (descriptor.Exists == false)
                 return null;
             return descriptor.ToObject(obj.Engine);
         }
 
         /// <summary>
-        /// Creates an array containing the names of all the properties on the object (even the
-        /// non-enumerable ones).
+        /// Creates an array containing the names of all the named properties on the object (even
+        /// the non-enumerable ones).
         /// </summary>
         /// <param name="obj"> The object to retrieve the property names for. </param>
-        /// <returns> An array containing the names of all the properties on the object. </returns>
+        /// <returns> An array containing property names. </returns>
         [JSInternalFunction(Name = "getOwnPropertyNames")]
         public static ArrayInstance GetOwnPropertyNames(ObjectInstance obj)
         {
             var result = obj.Engine.Array.New();
-            foreach (var property in ((ObjectInstance)obj).Properties)
-                result.Push(property.Name);
+            foreach (var property in obj.Properties)
+                if (property.Key is string)
+                    result.Push(property.Key);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates an array containing the symbols of all the symbol-based properties on the
+        /// object (even the non-enumerable ones).
+        /// </summary>
+        /// <param name="obj"> The object to retrieve the property symbols for. </param>
+        /// <returns> An array containing symbols. </returns>
+        [JSInternalFunction(Name = "getOwnPropertySymbols")]
+        public static ArrayInstance GetOwnPropertySymbols(ObjectInstance obj)
+        {
+            var result = obj.Engine.Array.New();
+            foreach (var property in obj.Properties)
+                if (property.Key is SymbolInstance)
+                    result.Push(property.Key);
             return result;
         }
 
         /// <summary>
         /// Creates an object with the given prototype and, optionally, a set of properties.
         /// </summary>
-        /// <param name="engine">  </param>
+        /// <param name="engine"> The script engine. </param>
         /// <param name="prototype"> A reference to the next object in the prototype chain for the
         /// created object. </param>
         /// <param name="properties"> An object containing one or more property descriptors. </param>
@@ -159,7 +176,7 @@ namespace Jurassic.Library
                 // Copy the enumerable properties from the source object.
                 foreach (var property in source.Properties)
                     if (property.IsEnumerable == true)
-                        target.SetPropertyValue(property.Name, property.Value, throwOnError: true);
+                        target.SetPropertyValue(property.Key, property.Value, throwOnError: true);
             }
             return target;
         }
@@ -168,18 +185,19 @@ namespace Jurassic.Library
         /// Modifies the value and attributes of a property.
         /// </summary>
         /// <param name="obj"> The object to define the property on. </param>
-        /// <param name="propertyName"> The name of the property to modify. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <param name="attributes"> A property descriptor containing some of the following
         /// properties: configurable, writable, enumerable, value, get and set. </param>
         /// <returns> The object with the property. </returns>
         [JSInternalFunction(Name = "defineProperty")]
-        public static ObjectInstance DefineProperty(ObjectInstance obj, string propertyName, object attributes)
+        public static ObjectInstance DefineProperty(ObjectInstance obj, object key, object attributes)
         {
-            var defaults = obj.GetOwnPropertyDescriptor(propertyName);
+            key = TypeConverter.ToPropertyKey(key);
+            var defaults = obj.GetOwnPropertyDescriptor(key);
             if (!(attributes is ObjectInstance))
                 throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Invalid descriptor for property '{propertyName}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
-            obj.DefineProperty(propertyName, descriptor, true);
+            obj.DefineProperty(key, descriptor, true);
             return obj;
         }
 
@@ -197,7 +215,7 @@ namespace Jurassic.Library
             var obj2 = (ObjectInstance)obj;
             foreach (var property in properties.Properties)
                 if (property.IsEnumerable == true)
-                    DefineProperty(obj2, property.Name, property.Value);
+                    DefineProperty(obj2, property.Key, property.Value);
             return obj2;
         }
 
@@ -214,7 +232,7 @@ namespace Jurassic.Library
                 properties.Add(property);
             foreach (var property in properties)
             {
-                obj.FastSetProperty(property.Name, property.Value,
+                obj.FastSetProperty(property.Key, property.Value,
                     property.Attributes & ~PropertyAttributes.Configurable, overwriteAttributes: true);
             }
             obj.IsExtensible = false;
@@ -234,7 +252,7 @@ namespace Jurassic.Library
                 properties.Add(property);
             foreach (var property in properties)
             {
-                obj.FastSetProperty(property.Name, property.Value,
+                obj.FastSetProperty(property.Key, property.Value,
                     property.Attributes & ~(PropertyAttributes.NonEnumerable), overwriteAttributes: true);
             }
             obj.IsExtensible = false;
@@ -305,8 +323,8 @@ namespace Jurassic.Library
         {
             var result = obj.Engine.Array.New();
             foreach (var property in obj.Properties)
-                if (property.IsEnumerable == true)
-                    result.Push(property.Name);
+                if (property.IsEnumerable == true && property.Key is string)
+                    result.Push(property.Key);
             return result;
         }
 

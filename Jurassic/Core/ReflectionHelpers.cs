@@ -22,6 +22,7 @@ namespace Jurassic
         internal static MethodInfo TypeConverter_ToInt32;
         internal static MethodInfo TypeConverter_ToUint32;
         internal static MethodInfo TypeConverter_ToPrimitive;
+        internal static MethodInfo TypeConverter_ToPropertyKey;
 
         internal static MethodInfo TypeComparer_Equals;
         internal static MethodInfo TypeComparer_StrictEquals;
@@ -90,9 +91,9 @@ namespace Jurassic
         internal static MethodInfo ObjectInstance_Delete;
         internal static MethodInfo ObjectInstance_DefineProperty;
         internal static MethodInfo ObjectInstance_HasProperty;
-        internal static MethodInfo ObjectInstance_GetPropertyValue_String;
+        internal static MethodInfo ObjectInstance_GetPropertyValue_Object;
         internal static MethodInfo ObjectInstance_GetPropertyValue_Int;
-        internal static MethodInfo ObjectInstance_SetPropertyValue_String;
+        internal static MethodInfo ObjectInstance_SetPropertyValue_Object;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Int;
         internal static MethodInfo ObjectInstance_SetPropertyValueIfExists;
         internal static MethodInfo ObjectInstance_InlinePropertyValues;
@@ -142,6 +143,7 @@ namespace Jurassic
             TypeConverter_ToInt32 = GetStaticMethod(typeof(TypeConverter), "ToInt32", typeof(object));
             TypeConverter_ToUint32 = GetStaticMethod(typeof(TypeConverter), "ToUint32", typeof(object));
             TypeConverter_ToPrimitive = GetStaticMethod(typeof(TypeConverter), "ToPrimitive", typeof(object), typeof(PrimitiveTypeHint));
+            TypeConverter_ToPropertyKey = GetStaticMethod(typeof(TypeConverter), "ToPropertyKey", typeof(object));
 
             TypeComparer_Equals = GetStaticMethod(typeof(TypeComparer), "Equals", typeof(object), typeof(object));
             TypeComparer_StrictEquals = GetStaticMethod(typeof(TypeComparer), "StrictEquals", typeof(object), typeof(object));
@@ -156,14 +158,14 @@ namespace Jurassic
             TypeUtilities_IsPrimitiveOrObject = GetStaticMethod(typeof(TypeUtilities), "IsPrimitiveOrObject", typeof(object));
             TypeUtilities_VerifyThisObject = GetStaticMethod(typeof(TypeUtilities), "VerifyThisObject", typeof(ScriptEngine), typeof(object), typeof(string));
 
-            ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(string), typeof(bool));
-            ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(string), typeof(PropertyDescriptor), typeof(bool));
-            ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(string));
-            ObjectInstance_GetPropertyValue_String = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(string));
+            ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(object), typeof(bool));
+            ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(object), typeof(PropertyDescriptor), typeof(bool));
+            ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(object));
+            ObjectInstance_GetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(object));
             ObjectInstance_GetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(uint));
-            ObjectInstance_SetPropertyValue_String = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(string), typeof(object), typeof(bool));
+            ObjectInstance_SetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
-            ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(string), typeof(object), typeof(bool));
+            ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_InlinePropertyValues = GetInstanceMethod(typeof(ObjectInstance), "get_InlinePropertyValues");
             ObjectInstance_InlineCacheKey = GetInstanceMethod(typeof(ObjectInstance), "get_InlineCacheKey");
             ObjectInstance_InlineGetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineGetPropertyValue",
@@ -231,7 +233,7 @@ namespace Jurassic
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));
             Type_GetTypeFromHandle = GetStaticMethod(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
-            FunctionDelegate_Constructor = GetConstructor(typeof(Library.FunctionDelegate), typeof(object), typeof(IntPtr));
+            FunctionDelegate_Constructor = GetConstructor(typeof(FunctionDelegate), typeof(object), typeof(IntPtr));
             Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
             PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(Library.PropertyAttributes));
             PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));

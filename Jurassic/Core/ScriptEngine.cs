@@ -75,12 +75,16 @@ namespace Jurassic
             var baseFunction = new ClrStubFunction(baseObject, BaseFunctionImplementation);
             FunctionInstancePrototype = baseFunction;
 
-            // Create all the built-in objects.
+            // Create the symbol prototype object.
+            var baseSymbol = ObjectInstance.CreateRawObject(baseObject);
+
+            // Create the built-in Symbol function first.
+            this.symbolConstructor = new SymbolConstructor(baseFunction, baseSymbol);
+
+            // Create the rest of the built-ins.
             this.globalObject = new GlobalObject(baseObject);
             this.mathObject = new MathObject(baseObject);
             this.jsonObject = new JSONObject(baseObject);
-
-            // Create all the built-in functions.
             this.objectConstructor = new ObjectConstructor(baseFunction, baseObject);
             this.functionConstructor = new FunctionConstructor(baseFunction, baseFunction);
             this.arrayConstructor = new ArrayConstructor(baseFunction);
@@ -89,7 +93,6 @@ namespace Jurassic
             this.numberConstructor = new NumberConstructor(baseFunction);
             this.regExpConstructor = new RegExpConstructor(baseFunction);
             this.stringConstructor = new StringConstructor(baseFunction);
-            this.symbolConstructor = new SymbolConstructor(baseFunction);
 
             // Create the error functions.
             this.errorConstructor = new ErrorConstructor(baseFunction, ErrorType.Error);
@@ -114,8 +117,9 @@ namespace Jurassic
             this.float64ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayStyle.Float64Array);
 
             // Initialize the prototypes for the base of the prototype chain.
-            baseObject.InitializePrototypeProperties(this.objectConstructor);
-            baseFunction.InitializePrototypeProperties(this.functionConstructor);
+            ObjectInstance.InitializePrototypeProperties(baseObject, this.objectConstructor);
+            FunctionInstance.InitializePrototypeProperties(baseFunction, this.functionConstructor);
+            SymbolInstance.InitializePrototypeProperties(baseSymbol, this.symbolConstructor);
 
             // Add them as JavaScript-accessible properties of the global instance.
             var globalProperties = this.globalObject.GetGlobalProperties();
@@ -489,6 +493,13 @@ namespace Jurassic
             get { return this.stringConstructor; }
         }
 
+        /// <summary>
+        /// Gets the built-in Symbol object.
+        /// </summary>
+        public SymbolConstructor Symbol
+        {
+            get { return this.symbolConstructor; }
+        }
 
         /// <summary>
         /// Gets the built-in Error object.
