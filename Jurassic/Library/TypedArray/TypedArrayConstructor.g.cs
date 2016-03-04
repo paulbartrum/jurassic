@@ -10,12 +10,12 @@ namespace Jurassic.Library
 
 	public partial class TypedArrayConstructor
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("from", new ClrStubFunction(Engine.FunctionInstancePrototype, "from", 3, __STUB__from), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("of", new ClrStubFunction(Engine.FunctionInstancePrototype, "of", 1, __STUB__of), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("from", new ClrStubFunction(engine.FunctionInstancePrototype, "from", 3, __STUB__from), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("of", new ClrStubFunction(engine.FunctionInstancePrototype, "of", 1, __STUB__of), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -50,9 +50,9 @@ namespace Jurassic.Library
 				case 1:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 2:
-					return From(args[0], TypeConverter.ToFunction(engine, args[1]), Undefined.Value);
+					return From(args[0], TypeConverter.ToObject<FunctionInstance>(engine, args[1]), Undefined.Value);
 				default:
-					return From(args[0], TypeConverter.ToFunction(engine, args[1]), args[2]);
+					return From(args[0], TypeConverter.ToObject<FunctionInstance>(engine, args[1]), args[2]);
 			}
 		}
 

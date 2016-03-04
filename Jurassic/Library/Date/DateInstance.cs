@@ -34,7 +34,7 @@ namespace Jurassic.Library
             this.value = InvalidDate;
 
             // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             FastSetProperties(properties);
         }

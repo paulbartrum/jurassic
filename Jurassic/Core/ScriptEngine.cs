@@ -32,6 +32,7 @@ namespace Jurassic
         private ObjectConstructor objectConstructor;
         private RegExpConstructor regExpConstructor;
         private StringConstructor stringConstructor;
+        private SymbolConstructor symbolConstructor;
 
         // The built-in error objects.
         private ErrorConstructor errorConstructor;
@@ -88,6 +89,7 @@ namespace Jurassic
             this.numberConstructor = new NumberConstructor(baseFunction);
             this.regExpConstructor = new RegExpConstructor(baseFunction);
             this.stringConstructor = new StringConstructor(baseFunction);
+            this.symbolConstructor = new SymbolConstructor(baseFunction);
 
             // Create the error functions.
             this.errorConstructor = new ErrorConstructor(baseFunction, ErrorType.Error);
@@ -127,6 +129,7 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Object", this.objectConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("RegExp", this.regExpConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("String", this.stringConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Symbol", this.symbolConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Error", this.errorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("RangeError", this.rangeErrorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("TypeError", this.typeErrorConstructor, PropertyAttributes.NonEnumerable));
@@ -201,6 +204,7 @@ namespace Jurassic
             this.objectConstructor = (ObjectConstructor)info.GetValue("objectConstructor", typeof(ObjectConstructor));
             this.regExpConstructor = (RegExpConstructor)info.GetValue("regExpConstructor", typeof(RegExpConstructor));
             this.stringConstructor = (StringConstructor)info.GetValue("stringConstructor", typeof(StringConstructor));
+            this.symbolConstructor = (SymbolConstructor)info.GetValue("symbolConstructor", typeof(SymbolConstructor));
 
             // Deserialize the built-in error objects.
             this.errorConstructor = (ErrorConstructor)info.GetValue("errorConstructor", typeof(ErrorConstructor));
@@ -253,6 +257,7 @@ namespace Jurassic
             info.AddValue("objectConstructor", this.objectConstructor);
             info.AddValue("regExpConstructor", this.regExpConstructor);
             info.AddValue("stringConstructor", this.stringConstructor);
+            info.AddValue("symbolConstructor", this.symbolConstructor);
 
             // Serialize the built-in error objects.
             info.AddValue("errorConstructor", this.errorConstructor);

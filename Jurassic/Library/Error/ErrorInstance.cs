@@ -23,7 +23,7 @@ namespace Jurassic.Library
             : base(GetPrototype(constructor.Engine, type))
         {
             // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("name", type.ToString(), PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));

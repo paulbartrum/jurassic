@@ -10,17 +10,17 @@ namespace Jurassic.Library
 
 	public partial class NumberInstance
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(11)
 			{
-				new PropertyNameAndValue("toExponential", new ClrStubFunction(Engine.FunctionInstancePrototype, "toExponential", 1, __STUB__toExponential), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toFixed", new ClrStubFunction(Engine.FunctionInstancePrototype, "toFixed", 1, __STUB__toFixed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toPrecision", new ClrStubFunction(Engine.FunctionInstancePrototype, "toPrecision", 1, __STUB__toPrecision), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toString", 1, __STUB__toString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("valueOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clz", new ClrStubFunction(Engine.FunctionInstancePrototype, "clz", 0, __STUB__clz), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toExponential", new ClrStubFunction(engine.FunctionInstancePrototype, "toExponential", 1, __STUB__toExponential), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toFixed", new ClrStubFunction(engine.FunctionInstancePrototype, "toFixed", 1, __STUB__toFixed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toPrecision", new ClrStubFunction(engine.FunctionInstancePrototype, "toPrecision", 1, __STUB__toPrecision), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 1, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("clz", new ClrStubFunction(engine.FunctionInstancePrototype, "clz", 0, __STUB__clz), PropertyAttributes.NonEnumerable),
 			};
 		}
 

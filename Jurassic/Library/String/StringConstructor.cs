@@ -21,7 +21,7 @@ namespace Jurassic.Library
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "String", 1, new StringInstance(this));
             FastSetProperties(properties);
         }

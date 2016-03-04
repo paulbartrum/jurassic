@@ -30,6 +30,8 @@ namespace Jurassic
                 return "string";
             if (obj is FunctionInstance)
                 return "function";
+            if (obj is SymbolInstance)
+                return "symbol";
             if (obj is ObjectInstance)
                 return "object";
             throw new InvalidOperationException("Unsupported object type.");

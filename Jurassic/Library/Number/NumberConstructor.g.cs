@@ -10,7 +10,7 @@ namespace Jurassic.Library
 
 	public partial class NumberConstructor
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(18)
 			{
@@ -22,12 +22,12 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("EPSILON", EPSILON, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("MAX_SAFE_INTEGER", MAX_SAFE_INTEGER, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("MIN_SAFE_INTEGER", MIN_SAFE_INTEGER, PropertyAttributes.Sealed),
-				new PropertyNameAndValue("isFinite", new ClrStubFunction(Engine.FunctionInstancePrototype, "isFinite", 1, __STUB__isFinite), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isNaN", new ClrStubFunction(Engine.FunctionInstancePrototype, "isNaN", 1, __STUB__isNaN), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isInteger", new ClrStubFunction(Engine.FunctionInstancePrototype, "isInteger", 1, __STUB__isInteger), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isSafeInteger", new ClrStubFunction(Engine.FunctionInstancePrototype, "isSafeInteger", 1, __STUB__isSafeInteger), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseInt", new ClrStubFunction(Engine.FunctionInstancePrototype, "parseInt", 2, __STUB__parseInt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseFloat", new ClrStubFunction(Engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__parseFloat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine.FunctionInstancePrototype, "isFinite", 1, __STUB__isFinite), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine.FunctionInstancePrototype, "isNaN", 1, __STUB__isNaN), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isInteger", 1, __STUB__isInteger), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isSafeInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isSafeInteger", 1, __STUB__isSafeInteger), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine.FunctionInstancePrototype, "parseInt", 2, __STUB__parseInt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__parseFloat), PropertyAttributes.NonEnumerable),
 			};
 		}
 

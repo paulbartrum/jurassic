@@ -242,11 +242,11 @@ namespace Jurassic
         /// <param name="engine"> The script engine used to create new objects. </param>
         /// <param name="value"> The value to convert. </param>
         /// <returns> An object. </returns>
-        public static FunctionInstance ToFunction(ScriptEngine engine, object value)
+        public static T ToObject<T>(ScriptEngine engine, object value) where T : ObjectInstance
         {
-            if (value is FunctionInstance)
-                return (FunctionInstance)value;
-            throw new JavaScriptException(engine, ErrorType.TypeError, "Argument is not a function.");
+            if (value is T)
+                return (T)value;
+            throw new JavaScriptException(engine, ErrorType.TypeError, "Incorrect argument type.");
         }
 
         /// <summary>

@@ -20,7 +20,7 @@ namespace Jurassic.Library
         internal JSONObject(ObjectInstance prototype)
             : base(prototype)
         {
-            FastSetProperties(GetDeclarativeProperties());
+            FastSetProperties(GetDeclarativeProperties(Engine));
         }
 
 

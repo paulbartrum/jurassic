@@ -10,16 +10,16 @@ namespace Jurassic.Library
 
 	public partial class ArrayBufferInstance
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("byteLength", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get byteLength", 0, __GETTER__byteLength), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("slice", new ClrStubFunction(Engine.FunctionInstancePrototype, "slice", 2, __STUB__slice), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("byteLength", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get byteLength", 0, __GETTER__byteLength), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("slice", new ClrStubFunction(engine.FunctionInstancePrototype, "slice", 2, __STUB__slice), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		object __GETTER__byteLength(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__byteLength(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ArrayBufferInstance))

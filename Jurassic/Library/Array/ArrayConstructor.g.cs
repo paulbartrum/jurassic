@@ -10,11 +10,11 @@ namespace Jurassic.Library
 
 	public partial class ArrayConstructor
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue("isArray", new ClrStubFunction(Engine.FunctionInstancePrototype, "isArray", 1, __STUB__isArray), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isArray", new ClrStubFunction(engine.FunctionInstancePrototype, "isArray", 1, __STUB__isArray), PropertyAttributes.NonEnumerable),
 			};
 		}
 

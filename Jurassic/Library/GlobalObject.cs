@@ -29,7 +29,7 @@ namespace Jurassic.Library
         internal List<PropertyNameAndValue> GetGlobalProperties()
         {
             // Infinity, NaN and undefined are read-only in ECMAScript 5.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("NaN", double.NaN, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("undefined", Undefined.Value, PropertyAttributes.Sealed));

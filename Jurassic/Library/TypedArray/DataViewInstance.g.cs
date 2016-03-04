@@ -10,33 +10,33 @@ namespace Jurassic.Library
 
 	public partial class DataViewInstance
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(20)
 			{
-				new PropertyNameAndValue("buffer", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get buffer", 0, __GETTER__buffer), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("byteOffset", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get byteOffset", 0, __GETTER__byteOffset), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("byteLength", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get byteLength", 0, __GETTER__byteLength), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("getFloat32", new ClrStubFunction(Engine.FunctionInstancePrototype, "getFloat32", 2, __STUB__getFloat32), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getFloat64", new ClrStubFunction(Engine.FunctionInstancePrototype, "getFloat64", 2, __STUB__getFloat64), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getInt16", new ClrStubFunction(Engine.FunctionInstancePrototype, "getInt16", 2, __STUB__getInt16), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getInt32", new ClrStubFunction(Engine.FunctionInstancePrototype, "getInt32", 2, __STUB__getInt32), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getInt8", new ClrStubFunction(Engine.FunctionInstancePrototype, "getInt8", 1, __STUB__getInt8), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getUint16", new ClrStubFunction(Engine.FunctionInstancePrototype, "getUint16", 2, __STUB__getUint16), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getUint32", new ClrStubFunction(Engine.FunctionInstancePrototype, "getUint32", 2, __STUB__getUint32), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getUint8", new ClrStubFunction(Engine.FunctionInstancePrototype, "getUint8", 1, __STUB__getUint8), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setFloat32", new ClrStubFunction(Engine.FunctionInstancePrototype, "setFloat32", 3, __STUB__setFloat32), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setFloat64", new ClrStubFunction(Engine.FunctionInstancePrototype, "setFloat64", 3, __STUB__setFloat64), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setInt16", new ClrStubFunction(Engine.FunctionInstancePrototype, "setInt16", 3, __STUB__setInt16), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setInt32", new ClrStubFunction(Engine.FunctionInstancePrototype, "setInt32", 3, __STUB__setInt32), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setInt8", new ClrStubFunction(Engine.FunctionInstancePrototype, "setInt8", 2, __STUB__setInt8), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setUint16", new ClrStubFunction(Engine.FunctionInstancePrototype, "setUint16", 3, __STUB__setUint16), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setUint32", new ClrStubFunction(Engine.FunctionInstancePrototype, "setUint32", 3, __STUB__setUint32), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("setUint8", new ClrStubFunction(Engine.FunctionInstancePrototype, "setUint8", 2, __STUB__setUint8), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("buffer", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get buffer", 0, __GETTER__buffer), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("byteOffset", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get byteOffset", 0, __GETTER__byteOffset), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("byteLength", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get byteLength", 0, __GETTER__byteLength), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("getFloat32", new ClrStubFunction(engine.FunctionInstancePrototype, "getFloat32", 2, __STUB__getFloat32), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getFloat64", new ClrStubFunction(engine.FunctionInstancePrototype, "getFloat64", 2, __STUB__getFloat64), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getInt16", new ClrStubFunction(engine.FunctionInstancePrototype, "getInt16", 2, __STUB__getInt16), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getInt32", new ClrStubFunction(engine.FunctionInstancePrototype, "getInt32", 2, __STUB__getInt32), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getInt8", new ClrStubFunction(engine.FunctionInstancePrototype, "getInt8", 1, __STUB__getInt8), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getUint16", new ClrStubFunction(engine.FunctionInstancePrototype, "getUint16", 2, __STUB__getUint16), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getUint32", new ClrStubFunction(engine.FunctionInstancePrototype, "getUint32", 2, __STUB__getUint32), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getUint8", new ClrStubFunction(engine.FunctionInstancePrototype, "getUint8", 1, __STUB__getUint8), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setFloat32", new ClrStubFunction(engine.FunctionInstancePrototype, "setFloat32", 3, __STUB__setFloat32), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setFloat64", new ClrStubFunction(engine.FunctionInstancePrototype, "setFloat64", 3, __STUB__setFloat64), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setInt16", new ClrStubFunction(engine.FunctionInstancePrototype, "setInt16", 3, __STUB__setInt16), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setInt32", new ClrStubFunction(engine.FunctionInstancePrototype, "setInt32", 3, __STUB__setInt32), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setInt8", new ClrStubFunction(engine.FunctionInstancePrototype, "setInt8", 2, __STUB__setInt8), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setUint16", new ClrStubFunction(engine.FunctionInstancePrototype, "setUint16", 3, __STUB__setUint16), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setUint32", new ClrStubFunction(engine.FunctionInstancePrototype, "setUint32", 3, __STUB__setUint32), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("setUint8", new ClrStubFunction(engine.FunctionInstancePrototype, "setUint8", 2, __STUB__setUint8), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		object __GETTER__buffer(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__buffer(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
@@ -44,7 +44,7 @@ namespace Jurassic.Library
 			return ((DataViewInstance)thisObj).Buffer;
 		}
 
-		object __GETTER__byteOffset(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__byteOffset(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
@@ -52,7 +52,7 @@ namespace Jurassic.Library
 			return ((DataViewInstance)thisObj).ByteOffset;
 		}
 
-		object __GETTER__byteLength(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__byteLength(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))

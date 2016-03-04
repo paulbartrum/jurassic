@@ -10,13 +10,13 @@ namespace Jurassic.Library
 
 	public partial class DateConstructor
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(7)
 			{
-				new PropertyNameAndValue("now", new ClrStubFunction(Engine.FunctionInstancePrototype, "now", 0, __STUB__now), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("UTC", new ClrStubFunction(Engine.FunctionInstancePrototype, "UTC", 7, __STUB__UTC), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parse", new ClrStubFunction(Engine.FunctionInstancePrototype, "parse", 1, __STUB__parse), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("now", new ClrStubFunction(engine.FunctionInstancePrototype, "now", 0, __STUB__now), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("UTC", new ClrStubFunction(engine.FunctionInstancePrototype, "UTC", 7, __STUB__UTC), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parse", new ClrStubFunction(engine.FunctionInstancePrototype, "parse", 1, __STUB__parse), PropertyAttributes.NonEnumerable),
 			};
 		}
 

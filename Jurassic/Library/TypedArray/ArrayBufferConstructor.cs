@@ -24,7 +24,7 @@ namespace Jurassic.Library
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "ArrayBuffer", 1, new ArrayBufferInstance(this));
             FastSetProperties(properties);
         }

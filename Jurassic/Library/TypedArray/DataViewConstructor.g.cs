@@ -29,11 +29,11 @@ namespace Jurassic.Library
 				case 0:
 					return ((DataViewConstructor)thisObj).Construct(null, 0, null);
 				case 1:
-					return ((DataViewConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject(engine, args[0]) as ArrayBufferInstance, 0, null);
+					return ((DataViewConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject<ArrayBufferInstance>(engine, args[0]), 0, null);
 				case 2:
-					return ((DataViewConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject(engine, args[0]) as ArrayBufferInstance, TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]), null);
+					return ((DataViewConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject<ArrayBufferInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]), null);
 				default:
-					return ((DataViewConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject(engine, args[0]) as ArrayBufferInstance, TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? (int?)null : TypeConverter.ToInteger(args[2]));
+					return ((DataViewConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject<ArrayBufferInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? (int?)null : TypeConverter.ToInteger(args[2]));
 			}
 		}
 	}

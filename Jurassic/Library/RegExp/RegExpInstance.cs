@@ -28,7 +28,7 @@ namespace Jurassic.Library
             this.value = new Regex("", ParseFlags(null));
 
             // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable));
             FastSetProperties(properties);

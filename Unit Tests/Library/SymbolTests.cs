@@ -31,7 +31,7 @@ namespace UnitTests
             Assert.AreEqual("symbol", Evaluate("typeof Symbol()"));
 
             // length
-            Assert.AreEqual(1, Evaluate("Symbol.length"));
+            Assert.AreEqual(0, Evaluate("Symbol.length"));
         }
 
         // TODO: Symbol.iterator, Symbol.for, Symbol.keyFor, etc.

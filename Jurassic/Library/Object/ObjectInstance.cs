@@ -108,7 +108,7 @@ namespace Jurassic.Library
         internal void InitializePrototypeProperties(ObjectConstructor constructor)
         {
             // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             FastSetProperties(properties);
         }

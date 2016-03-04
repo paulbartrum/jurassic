@@ -10,16 +10,16 @@ namespace Jurassic.Library
 
 	public partial class ObjectInstance
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(10)
 			{
-				new PropertyNameAndValue("hasOwnProperty", new ClrStubFunction(Engine.FunctionInstancePrototype, "hasOwnProperty", 1, __STUB__hasOwnProperty), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isPrototypeOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "isPrototypeOf", 1, __STUB__isPrototypeOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("propertyIsEnumerable", new ClrStubFunction(Engine.FunctionInstancePrototype, "propertyIsEnumerable", 1, __STUB__propertyIsEnumerable), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("valueOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("hasOwnProperty", new ClrStubFunction(engine.FunctionInstancePrototype, "hasOwnProperty", 1, __STUB__hasOwnProperty), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isPrototypeOf", new ClrStubFunction(engine.FunctionInstancePrototype, "isPrototypeOf", 1, __STUB__isPrototypeOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("propertyIsEnumerable", new ClrStubFunction(engine.FunctionInstancePrototype, "propertyIsEnumerable", 1, __STUB__propertyIsEnumerable), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
 			};
 		}
 

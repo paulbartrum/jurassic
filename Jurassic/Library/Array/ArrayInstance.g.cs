@@ -10,32 +10,32 @@ namespace Jurassic.Library
 
 	public partial class ArrayInstance
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(27)
 			{
-				new PropertyNameAndValue("concat", new ClrStubFunction(Engine.FunctionInstancePrototype, "concat", 1, __STUB__concat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("join", new ClrStubFunction(Engine.FunctionInstancePrototype, "join", 1, __STUB__join), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("pop", new ClrStubFunction(Engine.FunctionInstancePrototype, "pop", 0, __STUB__pop), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("push", new ClrStubFunction(Engine.FunctionInstancePrototype, "push", 1, __STUB__push), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("reverse", new ClrStubFunction(Engine.FunctionInstancePrototype, "reverse", 0, __STUB__reverse), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("shift", new ClrStubFunction(Engine.FunctionInstancePrototype, "shift", 0, __STUB__shift), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("slice", new ClrStubFunction(Engine.FunctionInstancePrototype, "slice", 2, __STUB__slice), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sort", new ClrStubFunction(Engine.FunctionInstancePrototype, "sort", 1, __STUB__sort), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("splice", new ClrStubFunction(Engine.FunctionInstancePrototype, "splice", 2, __STUB__splice), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("unshift", new ClrStubFunction(Engine.FunctionInstancePrototype, "unshift", 1, __STUB__unshift), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("indexOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "indexOf", 1, __STUB__indexOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("lastIndexOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "lastIndexOf", 1, __STUB__lastIndexOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("every", new ClrStubFunction(Engine.FunctionInstancePrototype, "every", 1, __STUB__every), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("some", new ClrStubFunction(Engine.FunctionInstancePrototype, "some", 1, __STUB__some), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("forEach", new ClrStubFunction(Engine.FunctionInstancePrototype, "forEach", 1, __STUB__forEach), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("map", new ClrStubFunction(Engine.FunctionInstancePrototype, "map", 1, __STUB__map), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("find", new ClrStubFunction(Engine.FunctionInstancePrototype, "find", 1, __STUB__find), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("filter", new ClrStubFunction(Engine.FunctionInstancePrototype, "filter", 1, __STUB__filter), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("reduce", new ClrStubFunction(Engine.FunctionInstancePrototype, "reduce", 1, __STUB__reduce), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("reduceRight", new ClrStubFunction(Engine.FunctionInstancePrototype, "reduceRight", 1, __STUB__reduceRight), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("concat", new ClrStubFunction(engine.FunctionInstancePrototype, "concat", 1, __STUB__concat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("join", new ClrStubFunction(engine.FunctionInstancePrototype, "join", 1, __STUB__join), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("pop", new ClrStubFunction(engine.FunctionInstancePrototype, "pop", 0, __STUB__pop), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("push", new ClrStubFunction(engine.FunctionInstancePrototype, "push", 1, __STUB__push), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("reverse", new ClrStubFunction(engine.FunctionInstancePrototype, "reverse", 0, __STUB__reverse), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("shift", new ClrStubFunction(engine.FunctionInstancePrototype, "shift", 0, __STUB__shift), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("slice", new ClrStubFunction(engine.FunctionInstancePrototype, "slice", 2, __STUB__slice), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sort", new ClrStubFunction(engine.FunctionInstancePrototype, "sort", 1, __STUB__sort), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("splice", new ClrStubFunction(engine.FunctionInstancePrototype, "splice", 2, __STUB__splice), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("unshift", new ClrStubFunction(engine.FunctionInstancePrototype, "unshift", 1, __STUB__unshift), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("indexOf", new ClrStubFunction(engine.FunctionInstancePrototype, "indexOf", 1, __STUB__indexOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("lastIndexOf", new ClrStubFunction(engine.FunctionInstancePrototype, "lastIndexOf", 1, __STUB__lastIndexOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("every", new ClrStubFunction(engine.FunctionInstancePrototype, "every", 1, __STUB__every), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("some", new ClrStubFunction(engine.FunctionInstancePrototype, "some", 1, __STUB__some), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("forEach", new ClrStubFunction(engine.FunctionInstancePrototype, "forEach", 1, __STUB__forEach), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("map", new ClrStubFunction(engine.FunctionInstancePrototype, "map", 1, __STUB__map), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("find", new ClrStubFunction(engine.FunctionInstancePrototype, "find", 1, __STUB__find), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("filter", new ClrStubFunction(engine.FunctionInstancePrototype, "filter", 1, __STUB__filter), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("reduce", new ClrStubFunction(engine.FunctionInstancePrototype, "reduce", 1, __STUB__reduce), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("reduceRight", new ClrStubFunction(engine.FunctionInstancePrototype, "reduceRight", 1, __STUB__reduceRight), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -123,7 +123,7 @@ namespace Jurassic.Library
 				case 0:
 					return Sort(TypeConverter.ToObject(engine, thisObj), null);
 				default:
-					return Sort(TypeConverter.ToObject(engine, thisObj), TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToFunction(engine, args[0]));
+					return Sort(TypeConverter.ToObject(engine, thisObj), TypeUtilities.IsUndefined(args[0]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[0]));
 			}
 		}
 
@@ -210,9 +210,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
+					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
-					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Every(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -225,9 +225,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
+					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
-					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Some(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -240,9 +240,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null); return Undefined.Value;
+					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null); return Undefined.Value;
 				default:
-					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1])); return Undefined.Value;
+					ForEach(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1])); return Undefined.Value;
 			}
 		}
 
@@ -255,9 +255,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
+					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
-					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Map(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -270,9 +270,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
+					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
-					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Find(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -285,9 +285,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
+					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
-					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
+					return Filter(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 
@@ -300,9 +300,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
+					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
-					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
+					return Reduce(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
 			}
 		}
 
@@ -315,9 +315,9 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), null);
+					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
-					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToFunction(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
+					return ReduceRight(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : args[1]);
 			}
 		}
 	}

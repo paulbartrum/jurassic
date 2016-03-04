@@ -10,25 +10,25 @@ namespace Jurassic.Library
 
 	public partial class ObjectConstructor
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(19)
 			{
-				new PropertyNameAndValue("getPrototypeOf", new ClrStubFunction(Engine.FunctionInstancePrototype, "getPrototypeOf", 1, __STUB__getPrototypeOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getOwnPropertyDescriptor", new ClrStubFunction(Engine.FunctionInstancePrototype, "getOwnPropertyDescriptor", 2, __STUB__getOwnPropertyDescriptor), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getOwnPropertyNames", new ClrStubFunction(Engine.FunctionInstancePrototype, "getOwnPropertyNames", 1, __STUB__getOwnPropertyNames), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("create", new ClrStubFunction(Engine.FunctionInstancePrototype, "create", 2, __STUB__create), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("assign", new ClrStubFunction(Engine.FunctionInstancePrototype, "assign", 2, __STUB__assign), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("defineProperty", new ClrStubFunction(Engine.FunctionInstancePrototype, "defineProperty", 3, __STUB__defineProperty), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("defineProperties", new ClrStubFunction(Engine.FunctionInstancePrototype, "defineProperties", 2, __STUB__defineProperties), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("seal", new ClrStubFunction(Engine.FunctionInstancePrototype, "seal", 1, __STUB__seal), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("freeze", new ClrStubFunction(Engine.FunctionInstancePrototype, "freeze", 1, __STUB__freeze), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("preventExtensions", new ClrStubFunction(Engine.FunctionInstancePrototype, "preventExtensions", 1, __STUB__preventExtensions), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isSealed", new ClrStubFunction(Engine.FunctionInstancePrototype, "isSealed", 1, __STUB__isSealed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isFrozen", new ClrStubFunction(Engine.FunctionInstancePrototype, "isFrozen", 1, __STUB__isFrozen), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isExtensible", new ClrStubFunction(Engine.FunctionInstancePrototype, "isExtensible", 1, __STUB__isExtensible), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("keys", new ClrStubFunction(Engine.FunctionInstancePrototype, "keys", 1, __STUB__keys), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("is", new ClrStubFunction(Engine.FunctionInstancePrototype, "is", 2, __STUB__is), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getPrototypeOf", new ClrStubFunction(engine.FunctionInstancePrototype, "getPrototypeOf", 1, __STUB__getPrototypeOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getOwnPropertyDescriptor", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyDescriptor", 2, __STUB__getOwnPropertyDescriptor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getOwnPropertyNames", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyNames", 1, __STUB__getOwnPropertyNames), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("create", new ClrStubFunction(engine.FunctionInstancePrototype, "create", 2, __STUB__create), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("assign", new ClrStubFunction(engine.FunctionInstancePrototype, "assign", 2, __STUB__assign), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("defineProperty", new ClrStubFunction(engine.FunctionInstancePrototype, "defineProperty", 3, __STUB__defineProperty), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("defineProperties", new ClrStubFunction(engine.FunctionInstancePrototype, "defineProperties", 2, __STUB__defineProperties), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("seal", new ClrStubFunction(engine.FunctionInstancePrototype, "seal", 1, __STUB__seal), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("freeze", new ClrStubFunction(engine.FunctionInstancePrototype, "freeze", 1, __STUB__freeze), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("preventExtensions", new ClrStubFunction(engine.FunctionInstancePrototype, "preventExtensions", 1, __STUB__preventExtensions), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isSealed", new ClrStubFunction(engine.FunctionInstancePrototype, "isSealed", 1, __STUB__isSealed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFrozen", new ClrStubFunction(engine.FunctionInstancePrototype, "isFrozen", 1, __STUB__isFrozen), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isExtensible", new ClrStubFunction(engine.FunctionInstancePrototype, "isExtensible", 1, __STUB__isExtensible), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("keys", new ClrStubFunction(engine.FunctionInstancePrototype, "keys", 1, __STUB__keys), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("is", new ClrStubFunction(engine.FunctionInstancePrototype, "is", 2, __STUB__is), PropertyAttributes.NonEnumerable),
 			};
 		}
 

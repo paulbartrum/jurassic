@@ -10,11 +10,11 @@ namespace Jurassic.Library
 
 	public partial class ArrayBufferConstructor
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue("isView", new ClrStubFunction(Engine.FunctionInstancePrototype, "isView", 1, __STUB__isView), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isView", new ClrStubFunction(engine.FunctionInstancePrototype, "isView", 1, __STUB__isView), PropertyAttributes.NonEnumerable),
 			};
 		}
 

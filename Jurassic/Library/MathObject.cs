@@ -21,7 +21,7 @@ namespace Jurassic.Library
         internal MathObject(ObjectInstance prototype)
             : base(prototype)
         {
-            FastSetProperties(GetDeclarativeProperties());
+            FastSetProperties(GetDeclarativeProperties(Engine));
         }
 
 

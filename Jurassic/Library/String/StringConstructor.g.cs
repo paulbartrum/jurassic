@@ -10,12 +10,12 @@ namespace Jurassic.Library
 
 	public partial class StringConstructor
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(Engine.FunctionInstancePrototype, "fromCharCode", 1, __STUB__fromCharCode), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("fromCodePoint", new ClrStubFunction(Engine.FunctionInstancePrototype, "fromCodePoint", 1, __STUB__fromCodePoint), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCharCode", 1, __STUB__fromCharCode), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fromCodePoint", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCodePoint", 1, __STUB__fromCodePoint), PropertyAttributes.NonEnumerable),
 			};
 		}
 

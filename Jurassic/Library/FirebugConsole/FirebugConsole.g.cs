@@ -10,22 +10,22 @@ namespace Jurassic.Library
 
 	public partial class FirebugConsole
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(16)
 			{
-				new PropertyNameAndValue("log", new ClrStubFunction(Engine.FunctionInstancePrototype, "log", 1, __STUB__log), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("debug", new ClrStubFunction(Engine.FunctionInstancePrototype, "debug", 1, __STUB__debug), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("info", new ClrStubFunction(Engine.FunctionInstancePrototype, "info", 1, __STUB__info), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("warn", new ClrStubFunction(Engine.FunctionInstancePrototype, "warn", 1, __STUB__warn), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("error", new ClrStubFunction(Engine.FunctionInstancePrototype, "error", 1, __STUB__error), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("assert", new ClrStubFunction(Engine.FunctionInstancePrototype, "assert", 2, __STUB__assert), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clear", new ClrStubFunction(Engine.FunctionInstancePrototype, "clear", 1, __STUB__clear), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("group", new ClrStubFunction(Engine.FunctionInstancePrototype, "group", 1, __STUB__group), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("groupCollapsed", new ClrStubFunction(Engine.FunctionInstancePrototype, "groupCollapsed", 1, __STUB__groupCollapsed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("groupEnd", new ClrStubFunction(Engine.FunctionInstancePrototype, "groupEnd", 0, __STUB__groupEnd), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("time", new ClrStubFunction(Engine.FunctionInstancePrototype, "time", 1, __STUB__time), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("timeEnd", new ClrStubFunction(Engine.FunctionInstancePrototype, "timeEnd", 1, __STUB__timeEnd), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("log", new ClrStubFunction(engine.FunctionInstancePrototype, "log", 1, __STUB__log), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("debug", new ClrStubFunction(engine.FunctionInstancePrototype, "debug", 1, __STUB__debug), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("info", new ClrStubFunction(engine.FunctionInstancePrototype, "info", 1, __STUB__info), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("warn", new ClrStubFunction(engine.FunctionInstancePrototype, "warn", 1, __STUB__warn), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("error", new ClrStubFunction(engine.FunctionInstancePrototype, "error", 1, __STUB__error), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("assert", new ClrStubFunction(engine.FunctionInstancePrototype, "assert", 2, __STUB__assert), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("clear", new ClrStubFunction(engine.FunctionInstancePrototype, "clear", 1, __STUB__clear), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("group", new ClrStubFunction(engine.FunctionInstancePrototype, "group", 1, __STUB__group), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("groupCollapsed", new ClrStubFunction(engine.FunctionInstancePrototype, "groupCollapsed", 1, __STUB__groupCollapsed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("groupEnd", new ClrStubFunction(engine.FunctionInstancePrototype, "groupEnd", 0, __STUB__groupEnd), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("time", new ClrStubFunction(engine.FunctionInstancePrototype, "time", 1, __STUB__time), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("timeEnd", new ClrStubFunction(engine.FunctionInstancePrototype, "timeEnd", 1, __STUB__timeEnd), PropertyAttributes.NonEnumerable),
 			};
 		}
 

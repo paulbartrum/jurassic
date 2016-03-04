@@ -36,7 +36,7 @@ namespace Jurassic.Library
             this.dense = new object[0];
 
             // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties();
+            var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("length", -1, PropertyAttributes.Writable | PropertyAttributes.IsLengthProperty));
             FastSetProperties(properties);

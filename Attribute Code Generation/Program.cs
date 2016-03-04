@@ -61,7 +61,7 @@ namespace Attribute_Code_Generation
                         memberCollector.JSProperties.Any() ||
                         memberCollector.JSFields.Any())
                     {
-                        output.AppendLine("\t\tprivate List<PropertyNameAndValue> GetDeclarativeProperties()");
+                        output.AppendLine("\t\tprivate static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)");
                         output.AppendLine("\t\t{");
                         output.AppendLine($"\t\t\treturn new List<PropertyNameAndValue>({memberCollector.JSInternalFunctionMethods.Count + memberCollector.JSFields.Count + 4})");
                         output.AppendLine("\t\t\t{");
@@ -78,21 +78,21 @@ namespace Attribute_Code_Generation
                             if (property.SetterStubName == null)
                             {
                                 output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{property.JSName}\", new PropertyDescriptor(" +
-                                    $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
                                     $"null, {property.JSPropertyAttributes})),");
                             }
                             else
                             {
                                 output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{property.JSName}\", new PropertyDescriptor(" +
-                                    $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
-                                    $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"set {property.JSName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"set {property.JSName}\", 0, {property.GetterStubName}), " +
                                     $"{property.JSPropertyAttributes})),");
                             }
                         }
                         foreach (var methodGroup in methodGroups)
                         {
                             output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{methodGroup.JSName}\", " +
-                                $"new ClrStubFunction(Engine.FunctionInstancePrototype, \"{methodGroup.JSName}\", " +
+                                $"new ClrStubFunction(engine.FunctionInstancePrototype, \"{methodGroup.JSName}\", " +
                                 $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
                         }
                         output.AppendLine("\t\t\t};");
@@ -106,7 +106,7 @@ namespace Attribute_Code_Generation
                     foreach (var property in memberCollector.JSProperties.Select(p => new JSProperty(p)))
                     {
                         output.AppendLine();
-                        output.AppendLine($"\t\tobject {property.GetterStubName}(ScriptEngine engine, object thisObj, object[] args)");
+                        output.AppendLine($"\t\tprivate static object {property.GetterStubName}(ScriptEngine engine, object thisObj, object[] args)");
                         output.AppendLine("\t\t{");
                         output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                         output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
@@ -117,7 +117,7 @@ namespace Attribute_Code_Generation
                         if (property.SetterStubName != null)
                         {
                             output.AppendLine();
-                            output.AppendLine($"\t\tobject {property.SetterStubName}(ScriptEngine engine, object thisObj, object[] args)");
+                            output.AppendLine($"\t\tprivate static object {property.SetterStubName}(ScriptEngine engine, object thisObj, object[] args)");
                             output.AppendLine("\t\t{");
                             output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                             output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
@@ -528,6 +528,7 @@ namespace Attribute_Code_Generation
                             case "ObjectInstance":
                             case "FunctionInstance":
                             case "ArrayBufferInstance":
+                            case "SymbolInstance":
                                 return "throw new JavaScriptException(engine, ErrorType.TypeError, \"undefined cannot be converted to an object\");";
 
                             case "object[]":
@@ -580,9 +581,9 @@ namespace Attribute_Code_Generation
                 case "ObjectInstance":
                     return $"TypeConverter.ToObject(engine, {arg})";
                 case "FunctionInstance":
-                    return $"TypeConverter.ToFunction(engine, {arg})";
                 case "ArrayBufferInstance":
-                    return $"TypeConverter.ToObject(engine, {arg}) as ArrayBufferInstance";
+                case "SymbolInstance":
+                    return $"TypeConverter.ToObject<{type}>(engine, {arg})";
                 case "object[]":
                     if (arrayIndex < 0)
                         throw new InvalidOperationException("Cannot convert to array.");

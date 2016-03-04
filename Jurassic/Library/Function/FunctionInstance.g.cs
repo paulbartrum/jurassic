@@ -10,14 +10,14 @@ namespace Jurassic.Library
 
 	public abstract partial class FunctionInstance
 	{
-		private List<PropertyNameAndValue> GetDeclarativeProperties()
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue("apply", new ClrStubFunction(Engine.FunctionInstancePrototype, "apply", 2, __STUB__apply), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("call", new ClrStubFunction(Engine.FunctionInstancePrototype, "call", 1, __STUB__call), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("bind", new ClrStubFunction(Engine.FunctionInstancePrototype, "bind", 1, __STUB__bind), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("apply", new ClrStubFunction(engine.FunctionInstancePrototype, "apply", 2, __STUB__apply), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("call", new ClrStubFunction(engine.FunctionInstancePrototype, "call", 1, __STUB__call), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("bind", new ClrStubFunction(engine.FunctionInstancePrototype, "bind", 1, __STUB__bind), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
 			};
 		}
 
