@@ -19,22 +19,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an empty string instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal StringInstance(StringConstructor constructor)
-            : base(constructor.Engine.Object.InstancePrototype)
-        {
-            this.value = string.Empty;
-
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("length", 0, PropertyAttributes.Sealed));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Creates a new string instance.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -46,6 +30,20 @@ namespace Jurassic.Library
                 throw new ArgumentNullException("value");
             this.value = value;
             this.FastSetProperty("length", value.Length);
+        }
+
+        /// <summary>
+        /// Creates the string prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, StringConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 

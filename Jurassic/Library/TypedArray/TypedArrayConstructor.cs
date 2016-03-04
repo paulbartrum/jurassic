@@ -97,7 +97,7 @@ namespace Jurassic.Library
 
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties(Engine);
-            InitializeConstructorProperties(properties, style.ToString(), 3, new TypedArrayInstance(this));
+            InitializeConstructorProperties(properties, style.ToString(), 3, TypedArrayInstance.CreatePrototype(Engine, this));
             properties.Add(new PropertyNameAndValue("BYTES_PER_ELEMENT", bytesPerElement, PropertyAttributes.Sealed));
             FastSetProperties(properties);
         }

@@ -15,22 +15,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an empty Error instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
-        internal ErrorInstance(ErrorConstructor constructor, ErrorType type)
-            : base(GetPrototype(constructor.Engine, type))
-        {
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("name", type.ToString(), PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Determine the prototype for the given error type.
         /// </summary>
         /// <param name="engine"> The script engine associated with this object. </param>
@@ -62,6 +46,23 @@ namespace Jurassic.Library
             : base(prototype)
         {
             FastSetProperty("message", message, PropertyAttributes.NonEnumerable);
+        }
+
+        /// <summary>
+        /// Creates the Error prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, ErrorConstructor constructor, ErrorType type)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("name", type.ToString(), PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 

@@ -22,7 +22,7 @@ namespace Jurassic.Library
         {
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties(Engine);
-            InitializeConstructorProperties(properties, "Date", 7, new DateInstance(this));
+            InitializeConstructorProperties(properties, "Date", 7, DateInstance.CreatePrototype(Engine, this));
             FastSetProperties(properties);
         }
 

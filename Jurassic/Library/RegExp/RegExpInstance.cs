@@ -19,22 +19,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an empty RegExp instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal RegExpInstance(RegExpConstructor constructor)
-            : base(constructor.Engine.Object.InstancePrototype)
-        {
-            this.value = new Regex("", ParseFlags(null));
-
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Creates a new regular expression instance.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -79,6 +63,20 @@ namespace Jurassic.Library
 
             // Initialize the javascript properties.
             FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+        }
+
+        /// <summary>
+        /// Creates the RegExp prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, RegExpConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 

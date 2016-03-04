@@ -22,7 +22,7 @@ namespace Jurassic.Library
         {
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>(3);
-            InitializeConstructorProperties(properties, "Boolean", 1, new BooleanInstance(this));
+            InitializeConstructorProperties(properties, "Boolean", 1, BooleanInstance.CreatePrototype(Engine, this));
             FastSetProperties(properties);
         }
 

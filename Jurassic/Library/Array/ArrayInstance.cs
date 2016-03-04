@@ -27,22 +27,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an array instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal ArrayInstance(ArrayConstructor constructor)
-            : base(constructor.Engine.Object.InstancePrototype)
-        {
-            this.dense = new object[0];
-
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("length", -1, PropertyAttributes.Writable | PropertyAttributes.IsLengthProperty));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Creates a new array with the given length and capacity.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -103,6 +87,20 @@ namespace Jurassic.Library
             // Create a fake property for length plus initialize the real length property.
             this.length = length;
             FastSetProperty("length", -1, PropertyAttributes.Writable | PropertyAttributes.IsLengthProperty);
+        }
+
+        /// <summary>
+        /// Creates the Array prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, ArrayConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 

@@ -25,21 +25,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an invalid date instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal DateInstance(DateConstructor constructor)
-            : base(constructor.Engine.Object.InstancePrototype)
-        {
-            this.value = InvalidDate;
-
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Creates a new Date instance and initializes it to the current time.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -97,6 +82,20 @@ namespace Jurassic.Library
             : base(prototype)
         {
             this.value = dateTime;
+        }
+
+        /// <summary>
+        /// Creates the Date prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, DateConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 

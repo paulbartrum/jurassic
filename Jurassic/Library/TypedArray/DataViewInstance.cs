@@ -18,19 +18,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an empty DataView instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal DataViewInstance(DataViewConstructor constructor)
-            : base(constructor.Engine.Object.InstancePrototype)
-        {
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Creates a new DataView instance.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -47,6 +34,20 @@ namespace Jurassic.Library
             this.buffer = buffer;
             this.byteOffset = byteOffset;
             this.byteLength = byteLength;
+        }
+
+        /// <summary>
+        /// Creates the DataView prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, DataViewConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 

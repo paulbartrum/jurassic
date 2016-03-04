@@ -22,7 +22,7 @@ namespace Jurassic.Library
         {
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties(Engine);
-            InitializeConstructorProperties(properties, "Array", 1, new ArrayInstance(this));
+            InitializeConstructorProperties(properties, "Array", 1, ArrayInstance.CreatePrototype(Engine, this));
             FastSetProperties(properties);
         }
 

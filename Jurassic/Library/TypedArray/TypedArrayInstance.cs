@@ -18,25 +18,26 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates an empty typed array instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal TypedArrayInstance(TypedArrayConstructor constructor)
-            : base(constructor.Engine.Object.InstancePrototype)
-        {
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Creates a new typed array instance.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         public TypedArrayInstance(ObjectInstance prototype)
             : base(prototype)
         {
+        }
+
+        /// <summary>
+        /// Creates the TypedArray prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, TypedArrayConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 

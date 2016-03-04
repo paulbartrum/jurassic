@@ -17,19 +17,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates a boolean instance for use as a prototype.
-        /// </summary>
-        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal BooleanInstance(BooleanConstructor constructor)
-            : base(constructor.Engine.Object.InstancePrototype)
-        {
-            // Initialize the prototype properties.
-            var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            FastSetProperties(properties);
-        }
-
-        /// <summary>
         /// Creates a new boolean instance.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -38,6 +25,20 @@ namespace Jurassic.Library
             : base(prototype)
         {
             this.value = value;
+        }
+
+        /// <summary>
+        /// Creates the Boolean prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, BooleanConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            result.FastSetProperties(properties);
+            return result;
         }
 
 
