@@ -14,11 +14,56 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
+				new PropertyNameAndValue("source", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get source", 0, __GETTER__source), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("flags", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get flags", 0, __GETTER__flags), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("global", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get global", 0, __GETTER__global), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("multiline", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get multiline", 0, __GETTER__multiline), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("ignoreCase", new PropertyDescriptor(new ClrStubFunction(Engine.FunctionInstancePrototype, "get ignoreCase", 0, __GETTER__ignoreCase), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("compile", new ClrStubFunction(Engine.FunctionInstancePrototype, "compile", 2, __STUB__compile), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("test", new ClrStubFunction(Engine.FunctionInstancePrototype, "test", 1, __STUB__test), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("exec", new ClrStubFunction(Engine.FunctionInstancePrototype, "exec", 1, __STUB__exec), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toString", new ClrStubFunction(Engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
 			};
+		}
+
+		object __GETTER__source(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get source' is not generic.");
+			return ((RegExpInstance)thisObj).Source;
+		}
+
+		object __GETTER__flags(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get flags' is not generic.");
+			return ((RegExpInstance)thisObj).Flags;
+		}
+
+		object __GETTER__global(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get global' is not generic.");
+			return ((RegExpInstance)thisObj).Global;
+		}
+
+		object __GETTER__multiline(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get multiline' is not generic.");
+			return ((RegExpInstance)thisObj).Multiline;
+		}
+
+		object __GETTER__ignoreCase(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get ignoreCase' is not generic.");
+			return ((RegExpInstance)thisObj).IgnoreCase;
 		}
 
 		private static object __STUB__compile(ScriptEngine engine, object thisObj, object[] args)

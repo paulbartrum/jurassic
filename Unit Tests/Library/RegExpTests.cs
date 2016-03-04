@@ -120,7 +120,7 @@ namespace UnitTests
 
             // This property is non-writable, non-configurable and non-enumerable.
             Assert.AreEqual("abc", Evaluate("var x = new RegExp('abc'); x.source = 'test'; x.source"));
-            Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); delete x.source"));
+            Assert.AreEqual(true, Evaluate("var x = new RegExp('abc'); delete x.source"));
             Assert.AreEqual("abc", Evaluate("var x = new RegExp('abc'); delete x.source; x.source"));
         }
 
@@ -131,9 +131,9 @@ namespace UnitTests
             Assert.AreEqual("g", Evaluate("(/abc/g).flags"));
             Assert.AreEqual("", Evaluate("(/abc/).flags"));
 
-            // This property is non-writable, non-configurable and non-enumerable.
+            // This property is non-writable, configurable and non-enumerable.
             Assert.AreEqual("g", Evaluate("var x = new RegExp('abc', 'g'); x.flags = 'test'; x.flags"));
-            Assert.AreEqual(false, Evaluate("var x = new RegExp('abc', 'g'); delete x.flags"));
+            Assert.AreEqual(true, Evaluate("var x = new RegExp('abc', 'g'); delete x.flags"));
             Assert.AreEqual("g", Evaluate("var x = new RegExp('abc', 'g'); delete x.flags; x.flags"));
         }
 
@@ -145,9 +145,9 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("/abc/.global"));
             Assert.AreEqual(true, Evaluate("/abc/g.global"));
 
-            // This property is non-writable, non-configurable and non-enumerable.
+            // This property is non-writable, configurable and non-enumerable.
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.global = true; x.global"));
-            Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.global = true; delete x.global"));
+            Assert.AreEqual(true, Evaluate("var x = new RegExp('abc'); x.global = true; delete x.global"));
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.global = true; delete x.global; x.global"));
         }
 
@@ -159,9 +159,9 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("/abc/.ignoreCase"));
             Assert.AreEqual(true, Evaluate("/abc/i.ignoreCase"));
 
-            // This property is non-writable, non-configurable and non-enumerable.
+            // This property is non-writable, configurable and non-enumerable.
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.ignoreCase = true; x.ignoreCase"));
-            Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.ignoreCase = true; delete x.ignoreCase"));
+            Assert.AreEqual(true, Evaluate("var x = new RegExp('abc'); x.ignoreCase = true; delete x.ignoreCase"));
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.ignoreCase = true; delete x.ignoreCase; x.ignoreCase"));
         }
 
@@ -173,9 +173,9 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("/abc/.multiline"));
             Assert.AreEqual(true, Evaluate("/abc/m.multiline"));
 
-            // This property is non-writable, non-configurable and non-enumerable.
+            // This property is non-writable, configurable and non-enumerable.
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.multiline = true; x.multiline"));
-            Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.multiline = true; delete x.multiline"));
+            Assert.AreEqual(true, Evaluate("var x = new RegExp('abc'); x.multiline = true; delete x.multiline"));
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.multiline = true; delete x.multiline; x.multiline"));
         }
 

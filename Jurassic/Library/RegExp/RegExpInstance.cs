@@ -30,10 +30,6 @@ namespace Jurassic.Library
             // Initialize the prototype properties.
             var properties = GetDeclarativeProperties();
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue("source", this.Source.ToString(), PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("global", this.Global, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("multiline", this.Multiline, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("ignoreCase", this.IgnoreCase, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable));
             FastSetProperties(properties);
         }
@@ -64,14 +60,7 @@ namespace Jurassic.Library
             }
 
             // Initialize the javascript properties.
-            var properties = new List<PropertyNameAndValue>(6);
-            properties.Add(new PropertyNameAndValue("source", pattern, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("flags", this.Flags, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("global", this.Global, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("multiline", this.Multiline, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("ignoreCase", this.IgnoreCase, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable));
-            FastSetProperties(properties);
+            FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
         }
 
         /// <summary>
@@ -89,12 +78,7 @@ namespace Jurassic.Library
             this.globalSearch = existingInstance.globalSearch;
 
             // Initialize the javascript properties.
-            this.FastSetProperty("source", existingInstance.Source, PropertyAttributes.Sealed);
-            this.FastSetProperty("flags", existingInstance.Flags, PropertyAttributes.Sealed);
-            this.FastSetProperty("global", existingInstance.Global, PropertyAttributes.Sealed);
-            this.FastSetProperty("multiline", existingInstance.Multiline, PropertyAttributes.Sealed);
-            this.FastSetProperty("ignoreCase", existingInstance.IgnoreCase, PropertyAttributes.Sealed);
-            this.FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+            FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
         }
 
 
@@ -127,6 +111,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the regular expression pattern.
         /// </summary>
+        [JSProperty(Name = "source")]
         public string Source
         {
             get { return this.value.ToString(); }
@@ -135,6 +120,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a string that contains the flags.
         /// </summary>
+        [JSProperty(Name = "flags")]
         public string Flags
         {
             get
@@ -155,6 +141,7 @@ namespace Jurassic.Library
         /// indicates that a search should find all occurrences of the pattern within the searched
         /// string, not just the first one.
         /// </summary>
+        [JSProperty(Name = "global")]
         public bool Global
         {
             get { return this.globalSearch; }
@@ -165,6 +152,7 @@ namespace Jurassic.Library
         /// indicates that the ^ and $ tokens should match the start and end of lines and not just
         /// the start and end of the string.
         /// </summary>
+        [JSProperty(Name = "multiline")]
         public bool Multiline
         {
             get { return (this.value.Options & RegexOptions.Multiline) != 0;}
@@ -175,6 +163,7 @@ namespace Jurassic.Library
         /// indicates that a search should ignore differences in case between the pattern and the
         /// matched string.
         /// </summary>
+        [JSProperty(Name = "ignoreCase")]
         public bool IgnoreCase
         {
             get { return (this.value.Options & RegexOptions.IgnoreCase) != 0; }
