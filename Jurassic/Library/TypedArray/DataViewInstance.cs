@@ -52,20 +52,6 @@ namespace Jurassic.Library
 
 
 
-        //     .NET ACCESSOR PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "DataView"; }
-        }
-
-
-
         //     JAVASCRIPT PROPERTIES
         //_________________________________________________________________________________________
 
@@ -404,6 +390,16 @@ namespace Jurassic.Library
             if (byteOffset < 0 || byteOffset > this.byteLength - 1)
                 throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             buffer.Buffer[this.byteOffset + byteOffset] = TypeConverter.ToUint8(value);
+        }
+
+        /// <summary>
+        /// Determines the result of Object.prototype.toString().
+        /// </summary>
+        /// <returns> The name of the object. </returns>
+        [JSInternalFunction(Name = "@@toStringTag")]
+        public static string ToStringTag()
+        {
+            return "DataView";
         }
 
 

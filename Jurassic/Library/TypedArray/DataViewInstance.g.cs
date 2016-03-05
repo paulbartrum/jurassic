@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(20)
+			return new List<PropertyNameAndValue>(21)
 			{
 				new PropertyNameAndValue("buffer", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get buffer", 0, __GETTER__buffer), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("byteOffset", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get byteOffset", 0, __GETTER__byteOffset), null, PropertyAttributes.Configurable)),
@@ -33,6 +33,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("setUint16", new ClrStubFunction(engine.FunctionInstancePrototype, "setUint16", 3, __STUB__setUint16), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("setUint32", new ClrStubFunction(engine.FunctionInstancePrototype, "setUint32", 3, __STUB__setUint32), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("setUint8", new ClrStubFunction(engine.FunctionInstancePrototype, "setUint8", 2, __STUB__setUint8), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.ToStringTag, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toStringTag]", 0, __STUB__toStringTag), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -322,6 +323,11 @@ namespace Jurassic.Library
 				default:
 					((DataViewInstance)thisObj).SetUint8(TypeConverter.ToInteger(args[0]), args[1]); return Undefined.Value;
 			}
+		}
+
+		private static object __STUB__toStringTag(ScriptEngine engine, object thisObj, object[] args)
+		{
+			return ToStringTag();
 		}
 	}
 

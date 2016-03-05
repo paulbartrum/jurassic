@@ -109,15 +109,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Array"; }
-        }
-
-        /// <summary>
         /// Gets or sets the number of elements in the array.  Equivalent to the javascript
         /// Array.prototype.length property.
         /// </summary>

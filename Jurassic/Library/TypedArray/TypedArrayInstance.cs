@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 
 namespace Jurassic.Library
 {
     /// <summary>
-    /// 
+    /// Represents a typed array instance.
     /// </summary>
     [Serializable]
     public partial class TypedArrayInstance : ObjectInstance
     {
-
-
-
         //     INITIALIZATION
         //_________________________________________________________________________________________
 
@@ -38,20 +32,6 @@ namespace Jurassic.Library
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             result.FastSetProperties(properties);
             return result;
-        }
-
-
-
-        //     .NET ACCESSOR PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return ((TypedArrayConstructor)this["constructor"]).Name; }
         }
 
 

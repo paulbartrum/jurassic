@@ -263,7 +263,7 @@ namespace Jurassic
         public static object ToPrimitive(object value, PrimitiveTypeHint preferredType)
         {
             if (value is ObjectInstance)
-                return ((ObjectInstance)value).ToPrimitive(preferredType);
+                return ((ObjectInstance)value).GetPrimitiveValue(preferredType);
             else
                 return value;
         }

@@ -47,15 +47,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Boolean"; }
-        }
-
-        /// <summary>
         /// Gets the primitive value of this object.
         /// </summary>
         public bool Value

@@ -60,15 +60,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "ArrayBuffer"; }
-        }
-
-        /// <summary>
         /// Gets the internal array for this ArrayBuffer.
         /// </summary>
         internal byte[] Buffer
@@ -158,6 +149,16 @@ namespace Jurassic.Library
             byte[] newBuffer = new byte[end - begin];
             Array.Copy(this.buffer, begin, newBuffer, 0, end - begin);
             return new ArrayBufferInstance(this.Prototype, newBuffer);
+        }
+
+        /// <summary>
+        /// Determines the result of Object.prototype.toString().
+        /// </summary>
+        /// <returns> The name of the object. </returns>
+        [JSInternalFunction(Name = "@@toStringTag")]
+        public static string ToStringTag()
+        {
+            return "ArrayBuffer";
         }
     }
 }

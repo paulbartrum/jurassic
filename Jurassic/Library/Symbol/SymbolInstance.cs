@@ -39,22 +39,7 @@ namespace Jurassic.Library
             var engine = obj.Engine;
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue(constructor.ToPrimitive, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toPrimitive]", 1, __STUB__valueOf), PropertyAttributes.NonEnumerable));
             obj.FastSetProperties(properties);
-        }
-
-
-
-        //     .NET ACCESSOR PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Symbol"; }
         }
 
 
@@ -80,6 +65,27 @@ namespace Jurassic.Library
         public new SymbolInstance ValueOf()
         {
             return this;
+        }
+
+        /// <summary>
+        /// Converts a Symbol object to a primitive value.
+        /// </summary>
+        /// <param name="hint"> Specifies the conversion behaviour.  Must be "default", "string" or "number". </param>
+        /// <returns> The primitive value of a Symbol object. </returns>
+        [JSInternalFunction(Name = "@@toPrimitive")]
+        public SymbolInstance ToPrimitive(string hint)
+        {
+            return this;
+        }
+
+        /// <summary>
+        /// Determines the result of Object.prototype.toString().
+        /// </summary>
+        /// <returns> The name of the object. </returns>
+        [JSInternalFunction(Name = "@@toStringTag")]
+        public static string ToStringTag()
+        {
+            return "Symbol";
         }
     }
 }

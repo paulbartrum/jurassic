@@ -22,6 +22,7 @@ namespace Jurassic.Library
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             ToPrimitive = new SymbolInstance(instancePrototype, "Symbol.toPrimitive");
+            ToStringTag = new SymbolInstance(instancePrototype, "Symbol.toStringTag");
 
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>(3);
@@ -35,7 +36,7 @@ namespace Jurassic.Library
             //properties.Add(new PropertyNameAndValue("species", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("split", null, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("toPrimitive", ToPrimitive, PropertyAttributes.Sealed));
-            //properties.Add(new PropertyNameAndValue("toStringTag", null, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("toStringTag", ToStringTag, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("unscopables", null, PropertyAttributes.Sealed));
             FastSetProperties(properties);
         }
@@ -49,6 +50,11 @@ namespace Jurassic.Library
         /// Used to override ToPrimitive behaviour.
         /// </summary>
         public SymbolInstance ToPrimitive { get; internal set; }
+
+        /// <summary>
+        /// Used to customize the behaviour of Object.prototype.toString().
+        /// </summary>
+        public SymbolInstance ToStringTag { get; internal set; }
 
 
 

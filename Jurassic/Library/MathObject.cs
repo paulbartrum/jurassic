@@ -26,20 +26,6 @@ namespace Jurassic.Library
 
 
 
-        //     .NET ACCESSOR PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Math"; }
-        }
-
-
-
         //     JAVASCRIPT FIELDS
         //_________________________________________________________________________________________
 
@@ -622,6 +608,16 @@ namespace Jurassic.Library
                 return number;  // Handles zero and negative zero.
             var absResult = Math.Pow(Math.Abs(number), 1.0 / 3.0);
             return number < 0 ? -absResult : absResult;
+        }
+
+        /// <summary>
+        /// Determines the result of Object.prototype.toString().
+        /// </summary>
+        /// <returns> The name of the object. </returns>
+        [JSInternalFunction(Name = "@@toStringTag")]
+        public static string ToStringTag()
+        {
+            return "Math";
         }
     }
 }

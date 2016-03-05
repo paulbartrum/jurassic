@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(68)
+			return new List<PropertyNameAndValue>(69)
 			{
 				new PropertyNameAndValue("getFullYear", new ClrStubFunction(engine.FunctionInstancePrototype, "getFullYear", 0, __STUB__getFullYear), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("getYear", new ClrStubFunction(engine.FunctionInstancePrototype, "getYear", 0, __STUB__getYear), PropertyAttributes.NonEnumerable),
@@ -60,6 +60,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("toTimeString", new ClrStubFunction(engine.FunctionInstancePrototype, "toTimeString", 0, __STUB__toTimeString), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toUTCString", new ClrStubFunction(engine.FunctionInstancePrototype, "toUTCString", 0, __STUB__toUTCString), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.ToPrimitive, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toPrimitive]", 1, __STUB__toPrimitive), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -563,6 +564,19 @@ namespace Jurassic.Library
 			if (!(thisObj is DateInstance))
 				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((DateInstance)thisObj).ValueOf();
+		}
+
+		private static object __STUB__toPrimitive(ScriptEngine engine, object thisObj, object[] args)
+		{
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			switch (args.Length)
+			{
+				case 0:
+					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'hint' was not specified.");
+				default:
+					return ToPrimitive(engine, TypeConverter.ToObject(engine, thisObj), TypeConverter.ToString(args[0]));
+			}
 		}
 	}
 

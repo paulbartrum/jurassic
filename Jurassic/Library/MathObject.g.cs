@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(47)
+			return new List<PropertyNameAndValue>(48)
 			{
 				new PropertyNameAndValue("E", E, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("LN2", LN2, PropertyAttributes.Sealed),
@@ -57,6 +57,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("fround", new ClrStubFunction(engine.FunctionInstancePrototype, "fround", 1, __STUB__fround), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("clz32", new ClrStubFunction(engine.FunctionInstancePrototype, "clz32", 1, __STUB__clz32), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("cbrt", new ClrStubFunction(engine.FunctionInstancePrototype, "cbrt", 1, __STUB__cbrt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.ToStringTag, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toStringTag]", 0, __STUB__toStringTag), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -443,6 +444,11 @@ namespace Jurassic.Library
 				default:
 					return Cbrt(TypeConverter.ToNumber(args[0]));
 			}
+		}
+
+		private static object __STUB__toStringTag(ScriptEngine engine, object thisObj, object[] args)
+		{
+			return ToStringTag();
 		}
 	}
 

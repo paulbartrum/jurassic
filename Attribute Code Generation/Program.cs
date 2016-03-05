@@ -91,9 +91,18 @@ namespace Attribute_Code_Generation
                         }
                         foreach (var methodGroup in methodGroups)
                         {
-                            output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{methodGroup.JSName}\", " +
-                                $"new ClrStubFunction(engine.FunctionInstancePrototype, \"{methodGroup.JSName}\", " +
-                                $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
+                            if (methodGroup.NameIsSymbol)
+                            {
+                                var symbolName = new StringBuilder(methodGroup.JSName);
+                                symbolName[0] = char.ToUpper(symbolName[0]);
+                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(engine.Symbol.{symbolName}, " +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"[Symbol.{methodGroup.JSName}]\", " +
+                                    $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
+                            }
+                            else
+                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{methodGroup.JSName}\", " +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"{methodGroup.JSName}\", " +
+                                    $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
                         }
                         output.AppendLine("\t\t\t};");
                         output.AppendLine("\t\t}");
@@ -208,6 +217,11 @@ namespace Attribute_Code_Generation
                 JSName = this.First().JSName;
                 if (!this.All(m => m.JSName == JSName))
                     throw new InvalidOperationException("All methods must have the same name.");
+                if (JSName.StartsWith("@@"))
+                {
+                    JSName = JSName.Substring(2);
+                    NameIsSymbol = true;
+                }
                 JSLength = this.First().JSLength;
                 if (!this.All(m => m.JSLength == JSLength))
                     throw new InvalidOperationException($"All {JSName} methods must have the same length.");
@@ -226,6 +240,7 @@ namespace Attribute_Code_Generation
             }
 
             public string JSName { get; private set; }
+            public bool NameIsSymbol { get; private set; }
             public int JSLength { get; private set; }
             public string JSPropertyAttributes { get; private set; }
             public string StubName { get; private set; }

@@ -71,15 +71,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Error"; }
-        }
-
-        /// <summary>
         /// Gets the name for the type of error.
         /// </summary>
         public string Name

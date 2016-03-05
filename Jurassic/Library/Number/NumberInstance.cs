@@ -53,15 +53,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Number"; }
-        }
-
-        /// <summary>
         /// Gets the primitive value of the number.
         /// </summary>
         public double Value

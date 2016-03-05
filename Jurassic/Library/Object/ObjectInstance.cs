@@ -158,15 +158,6 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected virtual string InternalClassName
-        {
-            get { return this is ObjectInstance ? "Object" : this.GetType().Name; }
-        }
-
-        /// <summary>
         /// Gets the next object in the prototype chain.  There is no corresponding property in
         /// javascript (it is is *not* the same as the prototype property), instead use
         /// Object.getPrototypeOf().
@@ -926,7 +917,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="typeHint"> Indicates the preferred type of the result. </param>
         /// <returns> A primitive value that represents the current object. </returns>
-        internal object ToPrimitive(PrimitiveTypeHint typeHint)
+        internal object GetPrimitiveValue(PrimitiveTypeHint typeHint)
         {
             // The first step is to try calling the @@toPrimitive symbol.
             string hintStr;
@@ -954,7 +945,7 @@ namespace Jurassic.Library
             }
 
             // If that didn't work.
-            return ToPrimitivePreES6(typeHint);
+            return GetPrimitiveValuePreES6(typeHint);
         }
 
         /// <summary>
@@ -963,7 +954,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="typeHint"> Indicates the preferred type of the result. </param>
         /// <returns> A primitive value that represents the current object. </returns>
-        internal object ToPrimitivePreES6(PrimitiveTypeHint typeHint)
+        internal object GetPrimitiveValuePreES6(PrimitiveTypeHint typeHint)
         {
             if (typeHint == PrimitiveTypeHint.None || typeHint == PrimitiveTypeHint.Number)
             {
@@ -1181,7 +1172,33 @@ namespace Jurassic.Library
                 return "[object Undefined]";
             if (thisObject == Null.Value)
                 return "[object Null]";
-            return string.Format("[object {0}]", TypeConverter.ToObject(engine, thisObject).InternalClassName);
+            var obj = TypeConverter.ToObject(engine, thisObject);
+
+            // ES6 - try calling the @@toStringTag function.
+            object result;
+            if (obj.TryCallMemberFunction(out result, engine.Symbol.ToStringTag) && result is string)
+                return $"[object {result}]";
+
+            // Fall back to previous behaviour.
+            if (obj is ArrayInstance)
+                return "[object Array]";
+            if (obj is StringInstance)
+                return "[object String]";
+            if (obj is ArgumentsInstance)
+                return "[object Arguments]";
+            if (obj is FunctionInstance)
+                return "[object Function]";
+            if (obj is ErrorInstance)
+                return "[object Error]";
+            if (obj is BooleanInstance)
+                return "[object Boolean]";
+            if (obj is NumberInstance)
+                return "[object Number]";
+            if (obj is DateInstance)
+                return "[object Date]";
+            if (obj is RegExpInstance)
+                return "[object RegExp]";
+            return "[object Object]";
         }
 
 

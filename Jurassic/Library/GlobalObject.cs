@@ -38,22 +38,6 @@ namespace Jurassic.Library
 
 
 
-        //     .NET ACCESSOR PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Global"; }
-        }
-
-
-
-
-
         //     JAVASCRIPT FUNCTIONS
         //_________________________________________________________________________________________
 

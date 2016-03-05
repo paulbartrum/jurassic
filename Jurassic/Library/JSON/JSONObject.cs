@@ -25,20 +25,6 @@ namespace Jurassic.Library
 
 
 
-        //     .NET ACCESSOR PROPERTIES
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "JSON"; }
-        }
-
-
-
         //     JAVASCRIPT FUNCTIONS
         //_________________________________________________________________________________________
 
@@ -102,5 +88,14 @@ namespace Jurassic.Library
             return serializer.Serialize(value);
         }
 
+        /// <summary>
+        /// Determines the result of Object.prototype.toString().
+        /// </summary>
+        /// <returns> The name of the object. </returns>
+        [JSInternalFunction(Name = "@@toStringTag")]
+        public static string ToStringTag()
+        {
+            return "JSON";
+        }
     }
 }

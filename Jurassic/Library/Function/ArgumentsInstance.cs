@@ -102,15 +102,6 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Arguments"; }
-        }
-
-        /// <summary>
         /// Used to retrieve the value of an argument.
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>

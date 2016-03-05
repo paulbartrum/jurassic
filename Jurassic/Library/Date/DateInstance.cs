@@ -94,7 +94,6 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue(engine.Symbol.ToPrimitive, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toPrimitive]", 1, ToPrimitive), PropertyAttributes.NonEnumerable));
             result.FastSetProperties(properties);
             return result;
         }
@@ -103,15 +102,6 @@ namespace Jurassic.Library
 
         //     .NET ACCESSOR PROPERTIES
         //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets the internal class name of the object.  Used by the default toString()
-        /// implementation.
-        /// </summary>
-        protected override string InternalClassName
-        {
-            get { return "Date"; }
-        }
 
         /// <summary>
         /// Gets the date represented by this object in standard .NET DateTime format.
@@ -923,21 +913,19 @@ namespace Jurassic.Library
         /// Returns a primitive value that represents the current object.  Used by the addition and
         /// equality operators.
         /// </summary>
-        /// <param name="engine"></param>
-        /// <param name="thisObj"></param>
-        /// <param name="args"></param>
+        /// <param name="engine"> The current script environment. </param>
+        /// <param name="thisObj"> The object to operate on. </param>
+        /// <param name="hint"> Specifies the conversion behaviour.  Must be "default", "string" or "number". </param>
         /// <returns></returns>
-        private static object ToPrimitive(ScriptEngine engine, object thisObj, object[] args)
+        [JSInternalFunction(Name = "@@toPrimitive", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject, RequiredArgumentCount = 1)]
+        private static object ToPrimitive(ScriptEngine engine, ObjectInstance thisObj, string hint)
         {
-            if (!(thisObj is ObjectInstance))
-                throw new JavaScriptException(engine, ErrorType.TypeError, "this is not an object.");
-            if (args.Length == 0)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'hint' was not specified.");
-            var hint = TypeConverter.ToString(args[0]);
+            // This behaviour differs from the standard behaviour only in that the "default" hint
+            // results in a conversion to a string, not a number.
             if (hint == "default" || hint == "string")
-                return ((ObjectInstance)thisObj).ToPrimitivePreES6(PrimitiveTypeHint.String);
+                return thisObj.GetPrimitiveValuePreES6(PrimitiveTypeHint.String);
             if (hint == "number")
-                return ((ObjectInstance)thisObj).ToPrimitivePreES6(PrimitiveTypeHint.Number);
+                return thisObj.GetPrimitiveValuePreES6(PrimitiveTypeHint.Number);
             throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid type hint.");
         }
 

@@ -14,7 +14,7 @@ namespace UnitTests
         public void Constructor()
         {
             // toString
-            Assert.AreEqual("[object Global]", Evaluate("this.toString()"));
+            Assert.AreEqual("[object Object]", Evaluate("this.toString()"));
 
             // valueOf()
             Assert.AreEqual(true, Evaluate("this.valueOf() === this"));
