@@ -39,6 +39,7 @@ namespace Jurassic.Library
             var engine = obj.Engine;
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Symbol", PropertyAttributes.Configurable));
             obj.FastSetProperties(properties);
         }
 
@@ -76,16 +77,6 @@ namespace Jurassic.Library
         public SymbolInstance ToPrimitive(string hint)
         {
             return this;
-        }
-
-        /// <summary>
-        /// Determines the result of Object.prototype.toString().
-        /// </summary>
-        /// <returns> The name of the object. </returns>
-        [JSInternalFunction(Name = "@@toStringTag")]
-        public static string ToStringTag()
-        {
-            return "Symbol";
         }
     }
 }

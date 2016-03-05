@@ -18,6 +18,7 @@ namespace UnitTests
 
             // Test the object overrides.
             Assert.AreEqual("[object Math]", Evaluate("Math.toString()"));
+            Assert.AreEqual("Math", Evaluate("Math[Symbol.toStringTag]"));
             Assert.AreEqual(true, Evaluate("Math.valueOf() === Math"));
 
             // Test the Math constants.

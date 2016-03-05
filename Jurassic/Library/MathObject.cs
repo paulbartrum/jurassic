@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Jurassic.Library
 {
@@ -21,7 +19,9 @@ namespace Jurassic.Library
         internal MathObject(ObjectInstance prototype)
             : base(prototype)
         {
-            FastSetProperties(GetDeclarativeProperties(Engine));
+            var properties = GetDeclarativeProperties(Engine);
+            properties.Add(new PropertyNameAndValue(Engine.Symbol.ToStringTag, "Math", PropertyAttributes.Configurable));
+            FastSetProperties(properties);
         }
 
 
@@ -608,16 +608,6 @@ namespace Jurassic.Library
                 return number;  // Handles zero and negative zero.
             var absResult = Math.Pow(Math.Abs(number), 1.0 / 3.0);
             return number < 0 ? -absResult : absResult;
-        }
-
-        /// <summary>
-        /// Determines the result of Object.prototype.toString().
-        /// </summary>
-        /// <returns> The name of the object. </returns>
-        [JSInternalFunction(Name = "@@toStringTag")]
-        public static string ToStringTag()
-        {
-            return "Math";
         }
     }
 }

@@ -20,7 +20,9 @@ namespace Jurassic.Library
         internal JSONObject(ObjectInstance prototype)
             : base(prototype)
         {
-            FastSetProperties(GetDeclarativeProperties(Engine));
+            var properties = GetDeclarativeProperties(Engine);
+            properties.Add(new PropertyNameAndValue(Engine.Symbol.ToStringTag, "JSON", PropertyAttributes.Configurable));
+            FastSetProperties(properties);
         }
 
 
@@ -86,16 +88,6 @@ namespace Jurassic.Library
 
             // Serialize the value.
             return serializer.Serialize(value);
-        }
-
-        /// <summary>
-        /// Determines the result of Object.prototype.toString().
-        /// </summary>
-        /// <returns> The name of the object. </returns>
-        [JSInternalFunction(Name = "@@toStringTag")]
-        public static string ToStringTag()
-        {
-            return "JSON";
         }
     }
 }

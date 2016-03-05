@@ -50,6 +50,7 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "ArrayBuffer", PropertyAttributes.Configurable));
             result.FastSetProperties(properties);
             return result;
         }
@@ -149,16 +150,6 @@ namespace Jurassic.Library
             byte[] newBuffer = new byte[end - begin];
             Array.Copy(this.buffer, begin, newBuffer, 0, end - begin);
             return new ArrayBufferInstance(this.Prototype, newBuffer);
-        }
-
-        /// <summary>
-        /// Determines the result of Object.prototype.toString().
-        /// </summary>
-        /// <returns> The name of the object. </returns>
-        [JSInternalFunction(Name = "@@toStringTag")]
-        public static string ToStringTag()
-        {
-            return "ArrayBuffer";
         }
     }
 }

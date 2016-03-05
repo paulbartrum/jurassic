@@ -46,6 +46,7 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "DataView", PropertyAttributes.Configurable));
             result.FastSetProperties(properties);
             return result;
         }
@@ -390,16 +391,6 @@ namespace Jurassic.Library
             if (byteOffset < 0 || byteOffset > this.byteLength - 1)
                 throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             buffer.Buffer[this.byteOffset + byteOffset] = TypeConverter.ToUint8(value);
-        }
-
-        /// <summary>
-        /// Determines the result of Object.prototype.toString().
-        /// </summary>
-        /// <returns> The name of the object. </returns>
-        [JSInternalFunction(Name = "@@toStringTag")]
-        public static string ToStringTag()
-        {
-            return "DataView";
         }
 
 

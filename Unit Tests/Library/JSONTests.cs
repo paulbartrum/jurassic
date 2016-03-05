@@ -10,6 +10,19 @@ namespace UnitTests
     public class JSONTests : TestBase
     {
         [TestMethod]
+        public void Initialization()
+        {
+            // JSON is not a function.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("new JSON"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("JSON()"));
+
+            // Test the object overrides.
+            Assert.AreEqual("[object JSON]", Evaluate("JSON.toString()"));
+            Assert.AreEqual("JSON", Evaluate("JSON[Symbol.toStringTag]"));
+            Assert.AreEqual(true, Evaluate("JSON.valueOf() === JSON"));
+        }
+
+        [TestMethod]
         public void parse()
         {
             Assert.AreEqual(5, Evaluate("JSON.parse(5, 5)"));

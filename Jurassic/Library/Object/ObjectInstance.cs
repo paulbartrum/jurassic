@@ -1174,10 +1174,10 @@ namespace Jurassic.Library
                 return "[object Null]";
             var obj = TypeConverter.ToObject(engine, thisObject);
 
-            // ES6 - try calling the @@toStringTag function.
-            object result;
-            if (obj.TryCallMemberFunction(out result, engine.Symbol.ToStringTag) && result is string)
-                return $"[object {result}]";
+            // ES6 - if the value of @@toStringTag is a string, use it to form the result.
+            object tag = obj.GetPropertyValue(engine.Symbol.ToStringTag);
+            if (tag is string)
+                return $"[object {tag}]";
 
             // Fall back to previous behaviour.
             if (obj is ArrayInstance)
