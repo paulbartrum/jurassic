@@ -1123,7 +1123,7 @@ namespace Jurassic.Library
         private static DateTime ToDateTime(double milliseconds)
         {
             // Check if the milliseconds value is out of range.
-            if (double.IsNaN(milliseconds) || milliseconds < -31557600000000 || milliseconds > 31557600000000)
+            if (double.IsNaN(milliseconds))
                 return InvalidDate;
 
             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)

@@ -59,6 +59,10 @@ namespace UnitTests
             // This date doesn't actually exist.
             Assert.AreEqual(ToJSDate(new DateTime(2011, 3, 1, 0, 0, 0)), Evaluate("new Date('29 Feb 2011').valueOf()"));
 
+            // Dates before 1970 should work.
+            Assert.AreEqual(-31585783380000d, Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()"));
+            Assert.AreEqual(true, Evaluate("new Date(new Date(969, 01, 01, 8, 17, 0)).getTime() == new Date(969, 01, 01, 8, 17, 0).getTime()"));
+
             // new Date(year, month, [day], [hour], [minute], [second], [millisecond])
             // Note: month is 0-11 is javascript but 1-12 in .NET.
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1)), Evaluate("new Date(2010, 0).valueOf()"));
