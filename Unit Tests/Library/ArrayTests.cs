@@ -934,6 +934,8 @@ namespace UnitTests
             Assert.AreEqual(-1, Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', -10)"));
             Assert.AreEqual(3, Evaluate("['a', 'b', 'c', 'a'].lastIndexOf('a', 10)"));
             Assert.AreEqual(-1, Evaluate("[3, 2, 1].lastIndexOf(1, undefined)"));
+            Assert.AreEqual(-1, Evaluate("[3, 2, 1].lastIndexOf(2, undefined)"));
+            Assert.AreEqual(0, Evaluate("[3, 2, 1].lastIndexOf(3, undefined)"));
 
             // lastIndexOf(undefined)
             Assert.AreEqual(6, Evaluate("[0, false, , null, 'undefined', , undefined, 0].lastIndexOf(undefined)"));
@@ -1149,6 +1151,68 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(0, Evaluate("Array.prototype.toString.length"));
+        }
+
+        [TestMethod]
+        public void copyWithin()
+        {
+            // Check basic copies.
+            Assert.AreEqual("1,2,3,1,2,3", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(3, 0, 3).toString()"));
+            Assert.AreEqual("1,2,3,1,2,3", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(3, 0).toString()"));
+            Assert.AreEqual("4,5,6,4,5,6", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(0, 3).toString()"));
+            Assert.AreEqual("3,4,5,6,5,6", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(0, 2).toString()"));
+            Assert.AreEqual("1,2,3,4,1,2", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(4, 0).toString()"));
+            Assert.AreEqual("1,2,3,2,3,4", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(3, 1, 4).toString()"));
+
+            // Check bounds.
+            Assert.AreEqual("1,2,5,4,5,6", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(-4, -2, -1).toString()"));
+            Assert.AreEqual("1,2,3,4,5,6", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(3, 20, 21).toString()"));
+            Assert.AreEqual("1,2,3,1,2,3", Evaluate("[1, 2, 3, 4, 5, 6].copyWithin(3, -20).toString()"));
+
+            // Check heterogenous values and null, undefined and missing values.
+            Assert.AreEqual(",,test,,,test", Evaluate("[null, undefined, 'test', 4, 5, 6].copyWithin(3, 0, 3).toString()"));
+            Assert.AreEqual(Null.Value, Evaluate("[null, undefined, 5].copyWithin(2, 0, 1)[2]"));
+            Assert.AreEqual(Undefined.Value, Evaluate("[null, undefined, 5].copyWithin(2, 1, 2)[2]"));
+            Assert.AreEqual(Undefined.Value, Evaluate("[, undefined, 5].copyWithin(2, 0, 1)[2]"));
+            Assert.AreEqual("1,3", Evaluate("Object.keys([, undefined, 1, 2].copyWithin(2, 0, 2)).toString()"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Array.prototype.copyWithin.length"));
+        }
+
+        [TestMethod]
+        public void fill()
+        {
+            Assert.AreEqual("0,0,0,0,0,0", Evaluate("[1, 2, 3, 4, 5, 6].fill(0).toString()"));
+            Assert.AreEqual("1,0,0,0,0,0", Evaluate("[1, 2, 3, 4, 5, 6].fill(0, 1).toString()"));
+            Assert.AreEqual("1,3,3,3,5,6", Evaluate("[1, 2, 3, 4, 5, 6].fill(3, 1, 4).toString()"));
+            Assert.AreEqual("1,test,test,test,5,6", Evaluate("[1, 2, 3, 4, 5, 6].fill('test', 1, 4).toString()"));
+            Assert.AreEqual("1,2,3,0,0,6", Evaluate("[1, 2, 3, 4, 5, 6].fill(0, -3, -1).toString()"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Array.prototype.fill.length"));
+        }
+
+        [TestMethod]
+        public void findIndex()
+        {
+            Assert.AreEqual(1, Evaluate("[1, 2, 3].findIndex(function(value, index, array) { return value > 1; })"));
+            Assert.AreEqual(0, Evaluate("[3, 1, 4, 1, 5, 9].findIndex(function(value, index, array) { return value < 5; })"));
+            Assert.AreEqual(-1, Evaluate("[3, 1, 4, 1, 5, 9].findIndex(function(value, index, array) { return value > 9; })"));
+
+            Assert.AreEqual("0,1,2", Evaluate("var output = []; [1, 2, 3].findIndex(function(value, index, array) { output.push(index); return false; }); output.toString()"));
+            Assert.AreEqual("1,2,3,1,2,3,1,2,3", Evaluate("var output = []; [1, 2, 3].findIndex(function(value, index, array) { output.push(array); return false; }); output.toString()"));
+
+            Assert.AreEqual("ho", Evaluate("var output = 'hi'; [1, 2, 3].findIndex(function(value, index, array) { output = this; return false; }, 'ho'); output.toString()"));
+            Assert.AreEqual(Evaluate("this"), Evaluate("var output = 5; [1, 2, 3].findIndex(function(value, index, array) { output = this; return false; }); output"));
+
+            // TypeError should be thrown if the callback is not a function.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("[1, 2, 3].findIndex(true)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("[1, 2, 3].findIndex(1)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("[1, 2, 3].findIndex({})"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Array.prototype.findIndex.length"));
         }
     }
 }

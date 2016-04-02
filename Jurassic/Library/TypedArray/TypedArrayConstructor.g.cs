@@ -14,8 +14,8 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("from", new ClrStubFunction(engine.FunctionInstancePrototype, "from", 3, __STUB__from), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("of", new ClrStubFunction(engine.FunctionInstancePrototype, "of", 1, __STUB__of), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("from", new ClrStubFunction(engine.FunctionInstancePrototype, "from", 3, __STUB__From), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("of", new ClrStubFunction(engine.FunctionInstancePrototype, "of", 1, __STUB__Of), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -41,22 +41,22 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__from(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__From(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return From(Undefined.Value, null, null);
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return From(args[0], null, null);
 				case 2:
-					return From(args[0], TypeConverter.ToObject<FunctionInstance>(engine, args[1]), Undefined.Value);
+					return From(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[1]), null);
 				default:
-					return From(args[0], TypeConverter.ToObject<FunctionInstance>(engine, args[1]), args[2]);
+					return From(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[1]), TypeUtilities.IsUndefined(args[2]) ? null : args[2]);
 			}
 		}
 
-		private static object __STUB__of(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Of(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{

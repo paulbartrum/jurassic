@@ -14,53 +14,53 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(47)
 			{
-				new PropertyNameAndValue("charAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charAt", 1, __STUB__charAt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("charCodeAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charCodeAt", 1, __STUB__charCodeAt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("codePointAt", new ClrStubFunction(engine.FunctionInstancePrototype, "codePointAt", 1, __STUB__codePointAt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("concat", new ClrStubFunction(engine.FunctionInstancePrototype, "concat", 1, __STUB__concat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("includes", new ClrStubFunction(engine.FunctionInstancePrototype, "includes", 1, __STUB__includes), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("indexOf", new ClrStubFunction(engine.FunctionInstancePrototype, "indexOf", 1, __STUB__indexOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("lastIndexOf", new ClrStubFunction(engine.FunctionInstancePrototype, "lastIndexOf", 1, __STUB__lastIndexOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("localeCompare", new ClrStubFunction(engine.FunctionInstancePrototype, "localeCompare", 1, __STUB__localeCompare), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("match", new ClrStubFunction(engine.FunctionInstancePrototype, "match", 1, __STUB__match), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("normalize", new ClrStubFunction(engine.FunctionInstancePrototype, "normalize", 1, __STUB__normalize), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("quote", new ClrStubFunction(engine.FunctionInstancePrototype, "quote", 0, __STUB__quote), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("replace", new ClrStubFunction(engine.FunctionInstancePrototype, "replace", 2, __STUB__replace), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("search", new ClrStubFunction(engine.FunctionInstancePrototype, "search", 1, __STUB__search), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("slice", new ClrStubFunction(engine.FunctionInstancePrototype, "slice", 2, __STUB__slice), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("split", new ClrStubFunction(engine.FunctionInstancePrototype, "split", 2, __STUB__split), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("substr", new ClrStubFunction(engine.FunctionInstancePrototype, "substr", 2, __STUB__substr), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("substring", new ClrStubFunction(engine.FunctionInstancePrototype, "substring", 2, __STUB__substring), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleLowerCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleLowerCase", 0, __STUB__toLocaleLowerCase), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleUpperCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleUpperCase", 0, __STUB__toLocaleUpperCase), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLowerCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toLowerCase", 0, __STUB__toLowerCase), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toUpperCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toUpperCase", 0, __STUB__toUpperCase), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("trim", new ClrStubFunction(engine.FunctionInstancePrototype, "trim", 0, __STUB__trim), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("trimLeft", new ClrStubFunction(engine.FunctionInstancePrototype, "trimLeft", 0, __STUB__trimLeft), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("trimRight", new ClrStubFunction(engine.FunctionInstancePrototype, "trimRight", 0, __STUB__trimRight), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("startsWith", new ClrStubFunction(engine.FunctionInstancePrototype, "startsWith", 1, __STUB__startsWith), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("endsWith", new ClrStubFunction(engine.FunctionInstancePrototype, "endsWith", 1, __STUB__endsWith), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("contains", new ClrStubFunction(engine.FunctionInstancePrototype, "contains", 1, __STUB__contains), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("repeat", new ClrStubFunction(engine.FunctionInstancePrototype, "repeat", 1, __STUB__repeat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("anchor", new ClrStubFunction(engine.FunctionInstancePrototype, "anchor", 1, __STUB__anchor), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("big", new ClrStubFunction(engine.FunctionInstancePrototype, "big", 0, __STUB__big), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("blink", new ClrStubFunction(engine.FunctionInstancePrototype, "blink", 0, __STUB__blink), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("bold", new ClrStubFunction(engine.FunctionInstancePrototype, "bold", 0, __STUB__bold), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("fixed", new ClrStubFunction(engine.FunctionInstancePrototype, "fixed", 0, __STUB__fixed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("fontcolor", new ClrStubFunction(engine.FunctionInstancePrototype, "fontcolor", 1, __STUB__fontcolor), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("fontsize", new ClrStubFunction(engine.FunctionInstancePrototype, "fontsize", 1, __STUB__fontsize), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("italics", new ClrStubFunction(engine.FunctionInstancePrototype, "italics", 0, __STUB__italics), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("link", new ClrStubFunction(engine.FunctionInstancePrototype, "link", 1, __STUB__link), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("small", new ClrStubFunction(engine.FunctionInstancePrototype, "small", 0, __STUB__small), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("strike", new ClrStubFunction(engine.FunctionInstancePrototype, "strike", 0, __STUB__strike), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sub", new ClrStubFunction(engine.FunctionInstancePrototype, "sub", 0, __STUB__sub), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sup", new ClrStubFunction(engine.FunctionInstancePrototype, "sup", 0, __STUB__sup), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("charAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charAt", 1, __STUB__CharAt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("charCodeAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charCodeAt", 1, __STUB__CharCodeAt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("codePointAt", new ClrStubFunction(engine.FunctionInstancePrototype, "codePointAt", 1, __STUB__CodePointAt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("concat", new ClrStubFunction(engine.FunctionInstancePrototype, "concat", 1, __STUB__Concat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("includes", new ClrStubFunction(engine.FunctionInstancePrototype, "includes", 1, __STUB__Includes), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("indexOf", new ClrStubFunction(engine.FunctionInstancePrototype, "indexOf", 1, __STUB__IndexOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("lastIndexOf", new ClrStubFunction(engine.FunctionInstancePrototype, "lastIndexOf", 1, __STUB__LastIndexOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("localeCompare", new ClrStubFunction(engine.FunctionInstancePrototype, "localeCompare", 1, __STUB__LocaleCompare), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("match", new ClrStubFunction(engine.FunctionInstancePrototype, "match", 1, __STUB__Match), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("normalize", new ClrStubFunction(engine.FunctionInstancePrototype, "normalize", 1, __STUB__Normalize), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("quote", new ClrStubFunction(engine.FunctionInstancePrototype, "quote", 0, __STUB__Quote), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("replace", new ClrStubFunction(engine.FunctionInstancePrototype, "replace", 2, __STUB__Replace), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("search", new ClrStubFunction(engine.FunctionInstancePrototype, "search", 1, __STUB__Search), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("slice", new ClrStubFunction(engine.FunctionInstancePrototype, "slice", 2, __STUB__Slice), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("split", new ClrStubFunction(engine.FunctionInstancePrototype, "split", 2, __STUB__Split), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("substr", new ClrStubFunction(engine.FunctionInstancePrototype, "substr", 2, __STUB__Substr), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("substring", new ClrStubFunction(engine.FunctionInstancePrototype, "substring", 2, __STUB__Substring), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleLowerCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleLowerCase", 0, __STUB__ToLocaleLowerCase), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleUpperCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleUpperCase", 0, __STUB__ToLocaleUpperCase), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLowerCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toLowerCase", 0, __STUB__ToLowerCase), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toUpperCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toUpperCase", 0, __STUB__ToUpperCase), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("trim", new ClrStubFunction(engine.FunctionInstancePrototype, "trim", 0, __STUB__Trim), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("trimLeft", new ClrStubFunction(engine.FunctionInstancePrototype, "trimLeft", 0, __STUB__TrimLeft), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("trimRight", new ClrStubFunction(engine.FunctionInstancePrototype, "trimRight", 0, __STUB__TrimRight), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("startsWith", new ClrStubFunction(engine.FunctionInstancePrototype, "startsWith", 1, __STUB__StartsWith), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("endsWith", new ClrStubFunction(engine.FunctionInstancePrototype, "endsWith", 1, __STUB__EndsWith), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("contains", new ClrStubFunction(engine.FunctionInstancePrototype, "contains", 1, __STUB__Contains), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("repeat", new ClrStubFunction(engine.FunctionInstancePrototype, "repeat", 1, __STUB__Repeat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("anchor", new ClrStubFunction(engine.FunctionInstancePrototype, "anchor", 1, __STUB__Anchor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("big", new ClrStubFunction(engine.FunctionInstancePrototype, "big", 0, __STUB__Big), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("blink", new ClrStubFunction(engine.FunctionInstancePrototype, "blink", 0, __STUB__Blink), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("bold", new ClrStubFunction(engine.FunctionInstancePrototype, "bold", 0, __STUB__Bold), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fixed", new ClrStubFunction(engine.FunctionInstancePrototype, "fixed", 0, __STUB__Fixed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fontcolor", new ClrStubFunction(engine.FunctionInstancePrototype, "fontcolor", 1, __STUB__FontColor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fontsize", new ClrStubFunction(engine.FunctionInstancePrototype, "fontsize", 1, __STUB__FontSize), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("italics", new ClrStubFunction(engine.FunctionInstancePrototype, "italics", 0, __STUB__Italics), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("link", new ClrStubFunction(engine.FunctionInstancePrototype, "link", 1, __STUB__Link), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("small", new ClrStubFunction(engine.FunctionInstancePrototype, "small", 0, __STUB__Small), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("strike", new ClrStubFunction(engine.FunctionInstancePrototype, "strike", 0, __STUB__Strike), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sub", new ClrStubFunction(engine.FunctionInstancePrototype, "sub", 0, __STUB__Sub), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sup", new ClrStubFunction(engine.FunctionInstancePrototype, "sup", 0, __STUB__Sup), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__charAt(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__CharAt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -73,7 +73,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__charCodeAt(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__CharCodeAt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -86,7 +86,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__codePointAt(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__CodePointAt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -99,7 +99,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__concat(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Concat(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -110,7 +110,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__includes(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Includes(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -125,7 +125,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__indexOf(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IndexOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -140,7 +140,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__lastIndexOf(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__LastIndexOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -155,7 +155,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__localeCompare(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__LocaleCompare(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -168,7 +168,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__match(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Match(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -181,7 +181,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__normalize(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Normalize(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -194,14 +194,14 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__quote(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Quote(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Quote(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__replace(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Replace(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -216,7 +216,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__search(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Search(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -229,7 +229,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__slice(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Slice(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -244,7 +244,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__split(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Split(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -259,7 +259,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__substr(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Substr(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -274,7 +274,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__substring(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Substring(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -289,28 +289,28 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__toLocaleLowerCase(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToLocaleLowerCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToLocaleLowerCase(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__toLocaleUpperCase(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToLocaleUpperCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToLocaleUpperCase(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__toLowerCase(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToLowerCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToLowerCase(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToString(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringInstance))
@@ -318,35 +318,35 @@ namespace Jurassic.Library
 			return ((StringInstance)thisObj).ToString();
 		}
 
-		private static object __STUB__toUpperCase(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToUpperCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToUpperCase(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__trim(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Trim(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Trim(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__trimLeft(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__TrimLeft(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return TrimLeft(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__trimRight(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__TrimRight(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return TrimRight(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__valueOf(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ValueOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringInstance))
@@ -354,7 +354,7 @@ namespace Jurassic.Library
 			return ((StringInstance)thisObj).ValueOf();
 		}
 
-		private static object __STUB__startsWith(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__StartsWith(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -369,7 +369,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__endsWith(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__EndsWith(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -384,7 +384,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__contains(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Contains(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -399,7 +399,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__repeat(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Repeat(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -412,7 +412,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__anchor(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Anchor(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -425,35 +425,35 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__big(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Big(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Big(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__blink(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Blink(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Blink(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__bold(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Bold(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Bold(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__fixed(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Fixed(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Fixed(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__fontcolor(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__FontColor(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -466,7 +466,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__fontsize(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__FontSize(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -479,14 +479,14 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__italics(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Italics(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Italics(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__link(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Link(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
@@ -499,28 +499,28 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__small(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Small(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Small(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__strike(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Strike(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Strike(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__sub(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Sub(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Sub(TypeConverter.ToString(thisObj));
 		}
 
-		private static object __STUB__sup(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Sup(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");

@@ -14,8 +14,8 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("for", new ClrStubFunction(engine.FunctionInstancePrototype, "for", 1, __STUB__for), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("keyFor", new ClrStubFunction(engine.FunctionInstancePrototype, "keyFor", 1, __STUB__keyFor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("for", new ClrStubFunction(engine.FunctionInstancePrototype, "for", 1, __STUB__For), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("keyFor", new ClrStubFunction(engine.FunctionInstancePrototype, "keyFor", 1, __STUB__KeyFor), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -41,7 +41,7 @@ namespace Jurassic.Library
 			return ((SymbolConstructor)thisObj).Construct();
 		}
 
-		private static object __STUB__for(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__For(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolConstructor))
@@ -55,7 +55,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__keyFor(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__KeyFor(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolConstructor))

@@ -92,7 +92,7 @@ namespace Jurassic.Library
         /// attempting to modify the property will fail.  The default value of this property
         /// is <c>true</c>.
         /// </summary>
-        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        /// <seealso cref="PropertyAttributes"/>
         public bool IsWritable
         {
             get;
@@ -104,7 +104,7 @@ namespace Jurassic.Library
         /// <c>for...in</c> construct) in JavaScript code.  The default value of this
         /// property is <c>false</c>.
         /// </summary>
-        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        /// <seealso cref="PropertyAttributes"/>
         public bool IsEnumerable
         {
             get;
@@ -116,7 +116,7 @@ namespace Jurassic.Library
         /// the property may be changed or have its descriptor changed by JavaScript
         /// code.  The default value of this property is <c>true</c>.
         /// </summary>
-        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        /// <seealso cref="PropertyAttributes"/>
         public bool IsConfigurable
         {
             get;
@@ -169,7 +169,7 @@ namespace Jurassic.Library
         /// <c>for...in</c> construct) in JavaScript code.  The default value of this
         /// property is <c>false</c>.
         /// </summary>
-        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        /// <seealso cref="PropertyAttributes"/>
         public bool IsEnumerable
         {
             get;
@@ -181,7 +181,7 @@ namespace Jurassic.Library
         /// the property may be changed or have its descriptor changed by JavaScript
         /// code.  The default value of this property is <c>true</c>.
         /// </summary>
-        /// <seealso cref="Jurassic.Library.PropertyAttributes"/>
+        /// <seealso cref="PropertyAttributes"/>
         public bool IsConfigurable
         {
             get;

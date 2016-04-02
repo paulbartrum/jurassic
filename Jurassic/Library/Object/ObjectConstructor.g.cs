@@ -14,22 +14,22 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(20)
 			{
-				new PropertyNameAndValue("getPrototypeOf", new ClrStubFunction(engine.FunctionInstancePrototype, "getPrototypeOf", 1, __STUB__getPrototypeOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getOwnPropertyDescriptor", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyDescriptor", 2, __STUB__getOwnPropertyDescriptor), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getOwnPropertyNames", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyNames", 1, __STUB__getOwnPropertyNames), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("getOwnPropertySymbols", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertySymbols", 1, __STUB__getOwnPropertySymbols), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("create", new ClrStubFunction(engine.FunctionInstancePrototype, "create", 2, __STUB__create), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("assign", new ClrStubFunction(engine.FunctionInstancePrototype, "assign", 2, __STUB__assign), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("defineProperty", new ClrStubFunction(engine.FunctionInstancePrototype, "defineProperty", 3, __STUB__defineProperty), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("defineProperties", new ClrStubFunction(engine.FunctionInstancePrototype, "defineProperties", 2, __STUB__defineProperties), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("seal", new ClrStubFunction(engine.FunctionInstancePrototype, "seal", 1, __STUB__seal), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("freeze", new ClrStubFunction(engine.FunctionInstancePrototype, "freeze", 1, __STUB__freeze), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("preventExtensions", new ClrStubFunction(engine.FunctionInstancePrototype, "preventExtensions", 1, __STUB__preventExtensions), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isSealed", new ClrStubFunction(engine.FunctionInstancePrototype, "isSealed", 1, __STUB__isSealed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isFrozen", new ClrStubFunction(engine.FunctionInstancePrototype, "isFrozen", 1, __STUB__isFrozen), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isExtensible", new ClrStubFunction(engine.FunctionInstancePrototype, "isExtensible", 1, __STUB__isExtensible), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("keys", new ClrStubFunction(engine.FunctionInstancePrototype, "keys", 1, __STUB__keys), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("is", new ClrStubFunction(engine.FunctionInstancePrototype, "is", 2, __STUB__is), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getPrototypeOf", new ClrStubFunction(engine.FunctionInstancePrototype, "getPrototypeOf", 1, __STUB__GetPrototypeOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getOwnPropertyDescriptor", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyDescriptor", 2, __STUB__GetOwnPropertyDescriptor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getOwnPropertyNames", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertyNames", 1, __STUB__GetOwnPropertyNames), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("getOwnPropertySymbols", new ClrStubFunction(engine.FunctionInstancePrototype, "getOwnPropertySymbols", 1, __STUB__GetOwnPropertySymbols), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("create", new ClrStubFunction(engine.FunctionInstancePrototype, "create", 2, __STUB__Create), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("assign", new ClrStubFunction(engine.FunctionInstancePrototype, "assign", 2, __STUB__Assign), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("defineProperty", new ClrStubFunction(engine.FunctionInstancePrototype, "defineProperty", 3, __STUB__DefineProperty), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("defineProperties", new ClrStubFunction(engine.FunctionInstancePrototype, "defineProperties", 2, __STUB__DefineProperties), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("seal", new ClrStubFunction(engine.FunctionInstancePrototype, "seal", 1, __STUB__Seal), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("freeze", new ClrStubFunction(engine.FunctionInstancePrototype, "freeze", 1, __STUB__Freeze), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("preventExtensions", new ClrStubFunction(engine.FunctionInstancePrototype, "preventExtensions", 1, __STUB__PreventExtensions), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isSealed", new ClrStubFunction(engine.FunctionInstancePrototype, "isSealed", 1, __STUB__IsSealed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFrozen", new ClrStubFunction(engine.FunctionInstancePrototype, "isFrozen", 1, __STUB__IsFrozen), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isExtensible", new ClrStubFunction(engine.FunctionInstancePrototype, "isExtensible", 1, __STUB__IsExtensible), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("keys", new ClrStubFunction(engine.FunctionInstancePrototype, "keys", 1, __STUB__Keys), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("is", new ClrStubFunction(engine.FunctionInstancePrototype, "is", 2, __STUB__Is), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -61,7 +61,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__getPrototypeOf(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__GetPrototypeOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -72,7 +72,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__getOwnPropertyDescriptor(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__GetOwnPropertyDescriptor(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -85,7 +85,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__getOwnPropertyNames(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__GetOwnPropertyNames(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -96,7 +96,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__getOwnPropertySymbols(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__GetOwnPropertySymbols(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -107,7 +107,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__create(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Create(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -120,7 +120,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__assign(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Assign(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -133,7 +133,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__defineProperty(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__DefineProperty(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -148,7 +148,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__defineProperties(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__DefineProperties(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -161,7 +161,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__seal(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Seal(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -172,7 +172,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__freeze(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Freeze(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -183,7 +183,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__preventExtensions(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__PreventExtensions(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -194,7 +194,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isSealed(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsSealed(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -205,7 +205,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isFrozen(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsFrozen(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -216,7 +216,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isExtensible(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsExtensible(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -227,7 +227,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__keys(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Keys(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -238,7 +238,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__is(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Is(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{

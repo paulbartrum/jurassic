@@ -4,57 +4,6 @@
 namespace Jurassic.Library
 {
     /// <summary>
-    /// Defines the element type and behaviour of typed array.
-    /// </summary>
-    public enum TypedArrayStyle
-    {
-        /// <summary>
-        /// An array of signed 8-bit elements.
-        /// </summary>
-        Int8Array,
-
-        /// <summary>
-        /// An array of unsigned 8-bit elements.
-        /// </summary>
-        Uint8Array,
-
-        /// <summary>
-        /// An array of unsigned 8-bit elements, clamped to 0-255.
-        /// </summary>
-        Uint8ClampedArray,
-
-        /// <summary>
-        /// An array of signed 16-bit elements.
-        /// </summary>
-        Int16Array,
-
-        /// <summary>
-        /// An array of unsigned 16-bit elements.
-        /// </summary>
-        Uint16Array,
-
-        /// <summary>
-        /// An array of signed 32-bit elements.
-        /// </summary>
-        Int32Array,
-
-        /// <summary>
-        /// An array of unsigned 32-bit elements.
-        /// </summary>
-        Uint32Array,
-
-        /// <summary>
-        /// An array of 32-bit floating point elements.
-        /// </summary>
-        Float32Array,
-
-        /// <summary>
-        /// An array of 64-bit floating point elements.
-        /// </summary>
-        Float64Array,
-    }
-
-    /// <summary>
     /// Represents the built-in javascript String object.
     /// </summary>
     [Serializable]
@@ -67,37 +16,37 @@ namespace Jurassic.Library
         /// Creates a new typed array constructor.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        /// <param name="style"> Defines the element type and behaviour of the typed array. </param>
-        internal TypedArrayConstructor(ObjectInstance prototype, TypedArrayStyle style)
+        /// <param name="type"> Defines the element type and behaviour of the typed array. </param>
+        internal TypedArrayConstructor(ObjectInstance prototype, TypedArrayType type)
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             int bytesPerElement;
-            switch (style)
+            switch (type)
             {
-                case TypedArrayStyle.Int8Array:
-                case TypedArrayStyle.Uint8Array:
-                case TypedArrayStyle.Uint8ClampedArray:
+                case TypedArrayType.Int8Array:
+                case TypedArrayType.Uint8Array:
+                case TypedArrayType.Uint8ClampedArray:
                     bytesPerElement = 1;
                     break;
-                case TypedArrayStyle.Int16Array:
-                case TypedArrayStyle.Uint16Array:
+                case TypedArrayType.Int16Array:
+                case TypedArrayType.Uint16Array:
                     bytesPerElement = 2;
                     break;
-                case TypedArrayStyle.Int32Array:
-                case TypedArrayStyle.Uint32Array:
-                case TypedArrayStyle.Float32Array:
+                case TypedArrayType.Int32Array:
+                case TypedArrayType.Uint32Array:
+                case TypedArrayType.Float32Array:
                     bytesPerElement = 4;
                     break;
-                case TypedArrayStyle.Float64Array:
+                case TypedArrayType.Float64Array:
                     bytesPerElement = 8;
                     break;
                 default:
-                    throw new NotSupportedException($"Unsupported TypedArray style '{style}'.");
+                    throw new NotSupportedException($"Unsupported TypedArray '{type}'.");
             }
 
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties(Engine);
-            InitializeConstructorProperties(properties, style.ToString(), 3, TypedArrayInstance.CreatePrototype(Engine, this));
+            InitializeConstructorProperties(properties, type.ToString(), 3, TypedArrayInstance.CreatePrototype(Engine, this));
             properties.Add(new PropertyNameAndValue("BYTES_PER_ELEMENT", bytesPerElement, PropertyAttributes.Sealed));
             FastSetProperties(properties);
         }
@@ -128,7 +77,6 @@ namespace Jurassic.Library
             // new Int8Array(typedArray);
             // new Int8Array(object);
             // new Int8Array(buffer[, byteOffset[, length]]);
-
             throw new NotImplementedException();
         }
 
@@ -145,7 +93,7 @@ namespace Jurassic.Library
         /// <param name="thisArg"> Optional. Value to use as this when executing mapFn. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "from")]
-        public static TypedArrayInstance From(object source, FunctionInstance mapFn, object thisArg)
+        public static TypedArrayInstance From(object source, FunctionInstance mapFn = null, object thisArg = null)
         {
             throw new NotImplementedException();
         }

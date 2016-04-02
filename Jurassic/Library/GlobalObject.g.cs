@@ -14,21 +14,21 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(15)
 			{
-				new PropertyNameAndValue("decodeURI", new ClrStubFunction(engine.FunctionInstancePrototype, "decodeURI", 1, __STUB__decodeURI), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("decodeURIComponent", new ClrStubFunction(engine.FunctionInstancePrototype, "decodeURIComponent", 1, __STUB__decodeURIComponent), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("encodeURI", new ClrStubFunction(engine.FunctionInstancePrototype, "encodeURI", 1, __STUB__encodeURI), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("encodeURIComponent", new ClrStubFunction(engine.FunctionInstancePrototype, "encodeURIComponent", 1, __STUB__encodeURIComponent), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("escape", new ClrStubFunction(engine.FunctionInstancePrototype, "escape", 1, __STUB__escape), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("eval", new ClrStubFunction(engine.FunctionInstancePrototype, "eval", 1, __STUB__eval), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine.FunctionInstancePrototype, "isFinite", 1, __STUB__isFinite), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine.FunctionInstancePrototype, "isNaN", 1, __STUB__isNaN), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__parseFloat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine.FunctionInstancePrototype, "parseInt", 2, __STUB__parseInt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("unescape", new ClrStubFunction(engine.FunctionInstancePrototype, "unescape", 1, __STUB__unescape), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("decodeURI", new ClrStubFunction(engine.FunctionInstancePrototype, "decodeURI", 1, __STUB__DecodeURI), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("decodeURIComponent", new ClrStubFunction(engine.FunctionInstancePrototype, "decodeURIComponent", 1, __STUB__DecodeURIComponent), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("encodeURI", new ClrStubFunction(engine.FunctionInstancePrototype, "encodeURI", 1, __STUB__EncodeURI), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("encodeURIComponent", new ClrStubFunction(engine.FunctionInstancePrototype, "encodeURIComponent", 1, __STUB__EncodeURIComponent), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("escape", new ClrStubFunction(engine.FunctionInstancePrototype, "escape", 1, __STUB__Escape), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("eval", new ClrStubFunction(engine.FunctionInstancePrototype, "eval", 1, __STUB__Eval), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine.FunctionInstancePrototype, "isFinite", 1, __STUB__IsFinite), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine.FunctionInstancePrototype, "isNaN", 1, __STUB__IsNaN), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__ParseFloat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine.FunctionInstancePrototype, "parseInt", 2, __STUB__ParseInt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("unescape", new ClrStubFunction(engine.FunctionInstancePrototype, "unescape", 1, __STUB__Unescape), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__decodeURI(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__DecodeURI(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -39,7 +39,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__decodeURIComponent(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__DecodeURIComponent(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -50,7 +50,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__encodeURI(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__EncodeURI(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -61,7 +61,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__encodeURIComponent(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__EncodeURIComponent(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -72,7 +72,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__escape(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Escape(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -83,7 +83,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__eval(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Eval(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -94,7 +94,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isFinite(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsFinite(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -105,7 +105,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isNaN(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsNaN(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -116,7 +116,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__parseFloat(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ParseFloat(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -127,7 +127,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__parseInt(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ParseInt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -140,7 +140,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__unescape(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Unescape(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{

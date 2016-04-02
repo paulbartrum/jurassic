@@ -124,6 +124,7 @@
     <Compile Include="Core\ScriptSource\FileScriptSource.cs" />
     <Compile Include="Core\ScriptSource\ScriptSource.cs" />
     <Compile Include="Library\Array\ArrayConstructor.g.cs" />
+    <Compile Include="Library\Array\ArrayWrapper.cs" />
     <Compile Include="Library\Array\ArrayInstance.g.cs" />
     <Compile Include="Library\Boolean\BooleanConstructor.g.cs" />
     <Compile Include="Library\Boolean\BooleanInstance.g.cs" />
@@ -233,6 +234,7 @@
     <Compile Include="Library\TypedArray\DataViewInstance.cs" />
     <Compile Include="Library\TypedArray\ArrayBufferInstance.g.cs" />
     <Compile Include="Library\TypedArray\DataViewInstance.g.cs" />
+    <Compile Include="Library\TypedArray\TypedArrayType.cs" />
     <Compile Include="Library\TypedArray\TypedArrayConstructor.g.cs" />
     <Compile Include="Library\TypedArray\ArrayBufferInstance.cs" />
     <Compile Include="Library\TypedArray\TypedArrayInstance.cs" />

@@ -14,7 +14,7 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue("isArray", new ClrStubFunction(engine.FunctionInstancePrototype, "isArray", 1, __STUB__isArray), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isArray", new ClrStubFunction(engine.FunctionInstancePrototype, "isArray", 1, __STUB__IsArray), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -46,7 +46,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isArray(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsArray(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{

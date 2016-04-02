@@ -14,9 +14,9 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(7)
 			{
-				new PropertyNameAndValue("now", new ClrStubFunction(engine.FunctionInstancePrototype, "now", 0, __STUB__now), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("now", new ClrStubFunction(engine.FunctionInstancePrototype, "now", 0, __STUB__Now), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("UTC", new ClrStubFunction(engine.FunctionInstancePrototype, "UTC", 7, __STUB__UTC), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parse", new ClrStubFunction(engine.FunctionInstancePrototype, "parse", 1, __STUB__parse), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parse", new ClrStubFunction(engine.FunctionInstancePrototype, "parse", 1, __STUB__Parse), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -42,7 +42,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__now(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Now(ScriptEngine engine, object thisObj, object[] args)
 		{
 			return Now();
 		}
@@ -70,7 +70,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__parse(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Parse(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{

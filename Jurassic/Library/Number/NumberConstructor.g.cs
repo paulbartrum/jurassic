@@ -22,12 +22,12 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("EPSILON", EPSILON, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("MAX_SAFE_INTEGER", MAX_SAFE_INTEGER, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("MIN_SAFE_INTEGER", MIN_SAFE_INTEGER, PropertyAttributes.Sealed),
-				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine.FunctionInstancePrototype, "isFinite", 1, __STUB__isFinite), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine.FunctionInstancePrototype, "isNaN", 1, __STUB__isNaN), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isInteger", 1, __STUB__isInteger), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isSafeInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isSafeInteger", 1, __STUB__isSafeInteger), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine.FunctionInstancePrototype, "parseInt", 2, __STUB__parseInt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__parseFloat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine.FunctionInstancePrototype, "isFinite", 1, __STUB__IsFinite), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine.FunctionInstancePrototype, "isNaN", 1, __STUB__IsNaN), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isInteger", 1, __STUB__IsInteger), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isSafeInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isSafeInteger", 1, __STUB__IsSafeInteger), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine.FunctionInstancePrototype, "parseInt", 2, __STUB__ParseInt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__ParseFloat), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -59,7 +59,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isFinite(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsFinite(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -70,7 +70,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isNaN(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsNaN(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -81,7 +81,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isInteger(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsInteger(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -92,7 +92,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isSafeInteger(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsSafeInteger(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -103,7 +103,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__parseInt(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ParseInt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -116,7 +116,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__parseFloat(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ParseFloat(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{

@@ -14,17 +14,17 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(11)
 			{
-				new PropertyNameAndValue("toExponential", new ClrStubFunction(engine.FunctionInstancePrototype, "toExponential", 1, __STUB__toExponential), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toFixed", new ClrStubFunction(engine.FunctionInstancePrototype, "toFixed", 1, __STUB__toFixed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toPrecision", new ClrStubFunction(engine.FunctionInstancePrototype, "toPrecision", 1, __STUB__toPrecision), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 1, __STUB__toString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clz", new ClrStubFunction(engine.FunctionInstancePrototype, "clz", 0, __STUB__clz), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toExponential", new ClrStubFunction(engine.FunctionInstancePrototype, "toExponential", 1, __STUB__ToExponential), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toFixed", new ClrStubFunction(engine.FunctionInstancePrototype, "toFixed", 1, __STUB__ToFixed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__ToLocaleString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toPrecision", new ClrStubFunction(engine.FunctionInstancePrototype, "toPrecision", 1, __STUB__ToPrecision), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 1, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("clz", new ClrStubFunction(engine.FunctionInstancePrototype, "clz", 0, __STUB__Clz), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__toExponential(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToExponential(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
@@ -38,7 +38,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__toFixed(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToFixed(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
@@ -52,7 +52,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__toLocaleString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToLocaleString(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
@@ -60,7 +60,7 @@ namespace Jurassic.Library
 			return ((NumberInstance)thisObj).ToLocaleString();
 		}
 
-		private static object __STUB__toPrecision(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToPrecision(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
@@ -74,7 +74,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToStringJS(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
@@ -88,7 +88,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__valueOf(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ValueOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))
@@ -96,7 +96,7 @@ namespace Jurassic.Library
 			return ((NumberInstance)thisObj).ValueOf();
 		}
 
-		private static object __STUB__clz(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Clz(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is NumberInstance))

@@ -14,8 +14,8 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCharCode", 1, __STUB__fromCharCode), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("fromCodePoint", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCodePoint", 1, __STUB__fromCodePoint), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCharCode", 1, __STUB__FromCharCode), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fromCodePoint", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCodePoint", 1, __STUB__FromCodePoint), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -47,7 +47,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__fromCharCode(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__FromCharCode(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -58,7 +58,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__fromCodePoint(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__FromCodePoint(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{

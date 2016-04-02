@@ -14,14 +14,14 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue("apply", new ClrStubFunction(engine.FunctionInstancePrototype, "apply", 2, __STUB__apply), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("call", new ClrStubFunction(engine.FunctionInstancePrototype, "call", 1, __STUB__call), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("bind", new ClrStubFunction(engine.FunctionInstancePrototype, "bind", 1, __STUB__bind), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("apply", new ClrStubFunction(engine.FunctionInstancePrototype, "apply", 2, __STUB__Apply), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("call", new ClrStubFunction(engine.FunctionInstancePrototype, "call", 1, __STUB__Call), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("bind", new ClrStubFunction(engine.FunctionInstancePrototype, "bind", 1, __STUB__Bind), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__apply(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Apply(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))
@@ -37,7 +37,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__call(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Call(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))
@@ -53,7 +53,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__bind(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Bind(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))
@@ -69,7 +69,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToStringJS(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))

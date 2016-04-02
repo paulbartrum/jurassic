@@ -14,11 +14,11 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToString(ScriptEngine engine, object thisObj, object[] args)
 		{
 			return ToString(engine, thisObj);
 		}

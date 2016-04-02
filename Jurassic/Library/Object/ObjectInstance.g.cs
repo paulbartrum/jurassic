@@ -14,16 +14,16 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(10)
 			{
-				new PropertyNameAndValue("hasOwnProperty", new ClrStubFunction(engine.FunctionInstancePrototype, "hasOwnProperty", 1, __STUB__hasOwnProperty), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isPrototypeOf", new ClrStubFunction(engine.FunctionInstancePrototype, "isPrototypeOf", 1, __STUB__isPrototypeOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("propertyIsEnumerable", new ClrStubFunction(engine.FunctionInstancePrototype, "propertyIsEnumerable", 1, __STUB__propertyIsEnumerable), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__toLocaleString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__valueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("hasOwnProperty", new ClrStubFunction(engine.FunctionInstancePrototype, "hasOwnProperty", 1, __STUB__HasOwnProperty), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isPrototypeOf", new ClrStubFunction(engine.FunctionInstancePrototype, "isPrototypeOf", 1, __STUB__IsPrototypeOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("propertyIsEnumerable", new ClrStubFunction(engine.FunctionInstancePrototype, "propertyIsEnumerable", 1, __STUB__PropertyIsEnumerable), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__ToLocaleString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__hasOwnProperty(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__HasOwnProperty(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -34,7 +34,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__isPrototypeOf(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IsPrototypeOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -45,7 +45,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__propertyIsEnumerable(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__PropertyIsEnumerable(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -56,7 +56,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__toLocaleString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToLocaleString(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ObjectInstance))
@@ -64,7 +64,7 @@ namespace Jurassic.Library
 			return ((ObjectInstance)thisObj).ToLocaleString();
 		}
 
-		private static object __STUB__valueOf(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ValueOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ObjectInstance))
@@ -72,7 +72,7 @@ namespace Jurassic.Library
 			return ((ObjectInstance)thisObj).ValueOf();
 		}
 
-		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToStringJS(ScriptEngine engine, object thisObj, object[] args)
 		{
 			return ToStringJS(engine, thisObj);
 		}

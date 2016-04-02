@@ -77,31 +77,22 @@ namespace Attribute_Code_Generation
                         {
                             if (property.SetterStubName == null)
                             {
-                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{property.JSName}\", new PropertyDescriptor(" +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
+                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue({property.PropertyKey}, new PropertyDescriptor(" +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.FunctionName}\", 0, {property.GetterStubName}), " +
                                     $"null, {property.JSPropertyAttributes})),");
                             }
                             else
                             {
-                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{property.JSName}\", new PropertyDescriptor(" +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.JSName}\", 0, {property.GetterStubName}), " +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"set {property.JSName}\", 0, {property.GetterStubName}), " +
+                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue({property.PropertyKey}, new PropertyDescriptor(" +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.FunctionName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"set {property.FunctionName}\", 0, {property.GetterStubName}), " +
                                     $"{property.JSPropertyAttributes})),");
                             }
                         }
                         foreach (var methodGroup in methodGroups)
                         {
-                            if (methodGroup.NameIsSymbol)
-                            {
-                                var symbolName = new StringBuilder(methodGroup.JSName);
-                                symbolName[0] = char.ToUpper(symbolName[0]);
-                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(engine.Symbol.{symbolName}, " +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"[Symbol.{methodGroup.JSName}]\", " +
-                                    $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
-                            }
-                            else
-                                output.AppendLine($"\t\t\t\tnew PropertyNameAndValue(\"{methodGroup.JSName}\", " +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"{methodGroup.JSName}\", " +
+                            output.AppendLine($"\t\t\t\tnew PropertyNameAndValue({methodGroup.PropertyKey}, " +
+                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"{methodGroup.FunctionName}\", " +
                                     $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
                         }
                         output.AppendLine("\t\t\t};");
@@ -119,8 +110,8 @@ namespace Attribute_Code_Generation
                         output.AppendLine("\t\t{");
                         output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                         output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
-                        output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method 'get {property.JSName}' is not generic.\");");
-                        output.AppendLine($"\t\t\treturn (({classSyntax.Identifier.ToString()})thisObj).{property.Name};");
+                        output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method 'get {property.FunctionName}' is not generic.\");");
+                        output.AppendLine($"\t\t\treturn (({classSyntax.Identifier.ToString()})thisObj).{property.PropertyName};");
                         output.AppendLine("\t\t}");
 
                         if (property.SetterStubName != null)
@@ -130,8 +121,8 @@ namespace Attribute_Code_Generation
                             output.AppendLine("\t\t{");
                             output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                             output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
-                            output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method 'set {property.JSName}' is not generic.\");");
-                            output.AppendLine($"\t\t\t(({classSyntax.Identifier.ToString()})thisObj).{property.Name} = {ConvertTo("args.Length > 0 ? args[0] : Undefined.Value", property.ReturnType, null)};");
+                            output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method 'set {property.FunctionName}' is not generic.\");");
+                            output.AppendLine($"\t\t\t(({classSyntax.Identifier.ToString()})thisObj).{property.PropertyName} = {ConvertTo("args.Length > 0 ? args[0] : Undefined.Value", property.ReturnType, null)};");
                             output.AppendLine("\t\t}");
                         }
                     }
@@ -208,39 +199,41 @@ namespace Attribute_Code_Generation
         {
             public static IEnumerable<JSMethodGroup> FromMethods(IEnumerable<MethodDeclarationSyntax> methods)
             {
-                return methods.Select(m => new JSMethod(m)).GroupBy(ms => ms.JSName).Select(group => new JSMethodGroup(group));
+                return methods.Select(m => new JSMethod(m)).GroupBy(ms => ms.FunctionName).Select(group => new JSMethodGroup(group));
             }
 
             public JSMethodGroup(IEnumerable<JSMethod> group)
                 : base(group)
             {
-                JSName = this.First().JSName;
-                if (!this.All(m => m.JSName == JSName))
+                MethodName = this.First().MethodName;
+                if (!this.All(m => m.MethodName == MethodName))
                     throw new InvalidOperationException("All methods must have the same name.");
-                if (JSName.StartsWith("@@"))
-                {
-                    JSName = JSName.Substring(2);
-                    NameIsSymbol = true;
-                }
+                FunctionName = this.First().FunctionName;
+                if (!this.All(m => m.FunctionName == FunctionName))
+                    throw new InvalidOperationException("All methods must have the same name.");
+                PropertyKey = this.First().PropertyKey;
+                if (!this.All(m => m.PropertyKey == PropertyKey))
+                    throw new InvalidOperationException("All methods must have the same name.");
                 JSLength = this.First().JSLength;
                 if (!this.All(m => m.JSLength == JSLength))
-                    throw new InvalidOperationException($"All {JSName} methods must have the same length.");
+                    throw new InvalidOperationException($"All {FunctionName} methods must have the same length.");
                 if (JSLength == -1)
                     JSLength = this.Max(m => m.Parameters.Count());
                 JSPropertyAttributes = this.First().JSPropertyAttributes;
                 if (!this.All(m => m.JSPropertyAttributes == JSPropertyAttributes))
-                    throw new InvalidOperationException($"All {JSName} methods must have the same PropertyAttributes.");
-                StubName = "__STUB__" + JSName;
+                    throw new InvalidOperationException($"All {FunctionName} methods must have the same PropertyAttributes.");
+                StubName = "__STUB__" + MethodName;
                 IsStatic = this.First().IsStatic;
                 if (!this.All(m => m.IsStatic == IsStatic))
-                    throw new InvalidOperationException($"All {JSName} methods must all be static or instance methods.");
+                    throw new InvalidOperationException($"All {FunctionName} methods must all be static or instance methods.");
                 RequiredArgumentCount = this.First().RequiredArgumentCount;
                 if (!this.All(m => m.RequiredArgumentCount == RequiredArgumentCount))
-                    throw new InvalidOperationException($"All {JSName} methods must all have the same RequiredArgumentCount.");
+                    throw new InvalidOperationException($"All {FunctionName} methods must all have the same RequiredArgumentCount.");
             }
 
-            public string JSName { get; private set; }
-            public bool NameIsSymbol { get; private set; }
+            public string MethodName { get; private set; }
+            public string PropertyKey { get; private set; }
+            public string FunctionName { get; private set; }
             public int JSLength { get; private set; }
             public string JSPropertyAttributes { get; private set; }
             public string StubName { get; private set; }
@@ -252,7 +245,7 @@ namespace Attribute_Code_Generation
         {
             public JSMethod(MethodDeclarationSyntax methodSyntax)
             {
-                Name = methodSyntax.Identifier.ToString();
+                MethodName = methodSyntax.Identifier.ToString();
                 ReturnType = methodSyntax.ReturnType.ToString();
                 IsStatic = methodSyntax.Modifiers.Any(m => m.ToString() == "static");
 
@@ -310,11 +303,27 @@ namespace Attribute_Code_Generation
                 Parameters = methodSyntax.ParameterList.Parameters.Skip(parameterSkipCount).Select(p => new MethodParameter(p));
 
                 // Determine the name of the javascript function.
-                JSName = Name;
+                var jsName = MethodName;
                 var nameParameter = jsAttribute?.ArgumentList?.Arguments.SingleOrDefault(arg =>
                     arg.NameEquals != null && arg.NameEquals.Name.ToString() == "Name");
                 if (nameParameter != null)
-                    JSName = ((LiteralExpressionSyntax)nameParameter.Expression).Token.ValueText;
+                    jsName = ((LiteralExpressionSyntax)nameParameter.Expression).Token.ValueText;
+
+                // Determine the property key and function name.
+                if (jsName.StartsWith("@@"))
+                {
+                    // This is a symbol.
+                    var symbolName = new StringBuilder(jsName.Substring(2));
+                    symbolName[0] = char.ToUpper(symbolName[0]);
+                    PropertyKey = $"engine.Symbol.{symbolName}";
+                    FunctionName = $"[Symbol.{jsName.Substring(2)}]";
+                }
+                else
+                {
+                    // Not a symbol.
+                    PropertyKey = $"\"{jsName}\"";
+                    FunctionName = jsName;
+                }
 
                 // Determine the "length" property of the javascript function.
                 JSLength = -1;
@@ -348,8 +357,9 @@ namespace Attribute_Code_Generation
             public string ThisObjectParameterType { get; private set; }
             public bool IsStatic { get; private set; }
             public int RequiredArgumentCount { get; private set; }
-            public string Name { get; private set; }
-            public string JSName { get; private set; }
+            public string MethodName { get; private set; }
+            public string PropertyKey { get; private set; }
+            public string FunctionName { get; private set; }
             public int JSLength { get; private set; }
             public string JSPropertyAttributes { get; private set; }
             public string ReturnType { get; private set; }
@@ -374,7 +384,7 @@ namespace Attribute_Code_Generation
         {
             public JSProperty(PropertyDeclarationSyntax propertySyntax)
             {
-                Name = propertySyntax.Identifier.ToString();
+                PropertyName = propertySyntax.Identifier.ToString();
                 ReturnType = propertySyntax.Type.ToString();
                 if (propertySyntax.Modifiers.Any(m => m.ToString() == "static"))
                     throw new NotImplementedException("Static properties are not supported.");
@@ -398,16 +408,32 @@ namespace Attribute_Code_Generation
                 }
 
                 // Determine the name of the javascript function.
-                JSName = Name;
+                var jsName = PropertyName;
                 var nameParameter = jsAttribute?.ArgumentList?.Arguments.SingleOrDefault(arg =>
                     arg.NameEquals != null && arg.NameEquals.Name.ToString() == "Name");
                 if (nameParameter != null)
-                    JSName = ((LiteralExpressionSyntax)nameParameter.Expression).Token.ValueText;
+                    jsName = ((LiteralExpressionSyntax)nameParameter.Expression).Token.ValueText;
+
+                // Determine the property key and function name.
+                if (jsName.StartsWith("@@"))
+                {
+                    // This is a symbol.
+                    var symbolName = new StringBuilder(jsName.Substring(2));
+                    symbolName[0] = char.ToUpper(symbolName[0]);
+                    PropertyKey = $"engine.Symbol.{symbolName}";
+                    FunctionName = $"[Symbol.{jsName.Substring(2)}]";
+                }
+                else
+                {
+                    // Not a symbol.
+                    PropertyKey = $"\"{jsName}\"";
+                    FunctionName = jsName;
+                }
 
                 // Determine the stub names.
-                GetterStubName = "__GETTER__" + JSName;
+                GetterStubName = "__GETTER__" + PropertyName;
                 if (propertySyntax.AccessorList.Accessors.Any(a => a.Keyword.ToString() == "set"))
-                    SetterStubName = "__SETTER__" + JSName;
+                    SetterStubName = "__SETTER__" + PropertyName;
             }
 
             private bool GetBooleanAttributeFlag(AttributeSyntax jsAttribute, string name, bool defaultValue)
@@ -419,8 +445,9 @@ namespace Attribute_Code_Generation
                 return (bool)((LiteralExpressionSyntax)boolParameter.Expression).Token.Value;
             }
 
-            public string Name { get; private set; }
-            public string JSName { get; private set; }
+            public string PropertyName { get; private set; }
+            public string PropertyKey { get; private set; }
+            public string FunctionName { get; private set; }
             public string ReturnType { get; private set; }
             public string JSPropertyAttributes { get; private set; }
             public string GetterStubName { get; private set; }
@@ -437,7 +464,7 @@ namespace Attribute_Code_Generation
             {
                 output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                 output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
-                output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method '{methodGroup.First().JSName}' is not generic.\");");
+                output.AppendLine($"\t\t\t\tthrow new JavaScriptException(engine, ErrorType.TypeError, \"The method '{methodGroup.First().FunctionName}' is not generic.\");");
             }
             else if (methodGroup.Any(m => m.HasThisObject && m.ThisObjectParameterType != "object"))
             {
@@ -482,7 +509,7 @@ namespace Attribute_Code_Generation
                 result.Append("return ");
             if (!method.IsStatic)
                 result.Append($"(({classSyntax.Identifier.ToString()})thisObj).");
-            result.Append(method.Name);
+            result.Append(method.MethodName);
             result.Append('(');
 
             int skipCount = 0;

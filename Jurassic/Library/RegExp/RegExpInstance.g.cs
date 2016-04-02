@@ -14,19 +14,19 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue("source", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get source", 0, __GETTER__source), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("flags", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get flags", 0, __GETTER__flags), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("global", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get global", 0, __GETTER__global), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("multiline", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get multiline", 0, __GETTER__multiline), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("ignoreCase", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get ignoreCase", 0, __GETTER__ignoreCase), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("compile", new ClrStubFunction(engine.FunctionInstancePrototype, "compile", 2, __STUB__compile), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("test", new ClrStubFunction(engine.FunctionInstancePrototype, "test", 1, __STUB__test), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("exec", new ClrStubFunction(engine.FunctionInstancePrototype, "exec", 1, __STUB__exec), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__toString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("source", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get source", 0, __GETTER__Source), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("flags", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get flags", 0, __GETTER__Flags), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("global", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get global", 0, __GETTER__Global), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("multiline", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get multiline", 0, __GETTER__Multiline), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("ignoreCase", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get ignoreCase", 0, __GETTER__IgnoreCase), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("compile", new ClrStubFunction(engine.FunctionInstancePrototype, "compile", 2, __STUB__Compile), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("test", new ClrStubFunction(engine.FunctionInstancePrototype, "test", 1, __STUB__Test), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("exec", new ClrStubFunction(engine.FunctionInstancePrototype, "exec", 1, __STUB__Exec), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __GETTER__source(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__Source(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -34,7 +34,7 @@ namespace Jurassic.Library
 			return ((RegExpInstance)thisObj).Source;
 		}
 
-		private static object __GETTER__flags(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__Flags(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -42,7 +42,7 @@ namespace Jurassic.Library
 			return ((RegExpInstance)thisObj).Flags;
 		}
 
-		private static object __GETTER__global(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__Global(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -50,7 +50,7 @@ namespace Jurassic.Library
 			return ((RegExpInstance)thisObj).Global;
 		}
 
-		private static object __GETTER__multiline(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__Multiline(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -58,7 +58,7 @@ namespace Jurassic.Library
 			return ((RegExpInstance)thisObj).Multiline;
 		}
 
-		private static object __GETTER__ignoreCase(ScriptEngine engine, object thisObj, object[] args)
+		private static object __GETTER__IgnoreCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -66,7 +66,7 @@ namespace Jurassic.Library
 			return ((RegExpInstance)thisObj).IgnoreCase;
 		}
 
-		private static object __STUB__compile(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Compile(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -82,7 +82,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__test(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Test(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -96,7 +96,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__exec(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Exec(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))
@@ -110,7 +110,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__toString(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToString(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is RegExpInstance))

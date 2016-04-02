@@ -22,45 +22,45 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("PI", PI, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("SQRT1_2", SQRT1_2, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("SQRT2", SQRT2, PropertyAttributes.Sealed),
-				new PropertyNameAndValue("abs", new ClrStubFunction(engine.FunctionInstancePrototype, "abs", 1, __STUB__abs), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("acos", new ClrStubFunction(engine.FunctionInstancePrototype, "acos", 1, __STUB__acos), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("asin", new ClrStubFunction(engine.FunctionInstancePrototype, "asin", 1, __STUB__asin), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("atan", new ClrStubFunction(engine.FunctionInstancePrototype, "atan", 1, __STUB__atan), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("atan2", new ClrStubFunction(engine.FunctionInstancePrototype, "atan2", 2, __STUB__atan2), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("ceil", new ClrStubFunction(engine.FunctionInstancePrototype, "ceil", 1, __STUB__ceil), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("cos", new ClrStubFunction(engine.FunctionInstancePrototype, "cos", 1, __STUB__cos), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("exp", new ClrStubFunction(engine.FunctionInstancePrototype, "exp", 1, __STUB__exp), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("floor", new ClrStubFunction(engine.FunctionInstancePrototype, "floor", 1, __STUB__floor), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("log", new ClrStubFunction(engine.FunctionInstancePrototype, "log", 1, __STUB__log), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("max", new ClrStubFunction(engine.FunctionInstancePrototype, "max", 2, __STUB__max), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("min", new ClrStubFunction(engine.FunctionInstancePrototype, "min", 2, __STUB__min), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("pow", new ClrStubFunction(engine.FunctionInstancePrototype, "pow", 2, __STUB__pow), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("random", new ClrStubFunction(engine.FunctionInstancePrototype, "random", 0, __STUB__random), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("round", new ClrStubFunction(engine.FunctionInstancePrototype, "round", 1, __STUB__round), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sin", new ClrStubFunction(engine.FunctionInstancePrototype, "sin", 1, __STUB__sin), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sqrt", new ClrStubFunction(engine.FunctionInstancePrototype, "sqrt", 1, __STUB__sqrt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("tan", new ClrStubFunction(engine.FunctionInstancePrototype, "tan", 1, __STUB__tan), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("log10", new ClrStubFunction(engine.FunctionInstancePrototype, "log10", 1, __STUB__log10), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("log2", new ClrStubFunction(engine.FunctionInstancePrototype, "log2", 1, __STUB__log2), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("log1p", new ClrStubFunction(engine.FunctionInstancePrototype, "log1p", 1, __STUB__log1p), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("expm1", new ClrStubFunction(engine.FunctionInstancePrototype, "expm1", 1, __STUB__expm1), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("cosh", new ClrStubFunction(engine.FunctionInstancePrototype, "cosh", 1, __STUB__cosh), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sinh", new ClrStubFunction(engine.FunctionInstancePrototype, "sinh", 1, __STUB__sinh), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("tanh", new ClrStubFunction(engine.FunctionInstancePrototype, "tanh", 1, __STUB__tanh), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("acosh", new ClrStubFunction(engine.FunctionInstancePrototype, "acosh", 1, __STUB__acosh), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("asinh", new ClrStubFunction(engine.FunctionInstancePrototype, "asinh", 1, __STUB__asinh), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("atanh", new ClrStubFunction(engine.FunctionInstancePrototype, "atanh", 1, __STUB__atanh), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("hypot", new ClrStubFunction(engine.FunctionInstancePrototype, "hypot", 2, __STUB__hypot), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("trunc", new ClrStubFunction(engine.FunctionInstancePrototype, "trunc", 1, __STUB__trunc), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("sign", new ClrStubFunction(engine.FunctionInstancePrototype, "sign", 1, __STUB__sign), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("imul", new ClrStubFunction(engine.FunctionInstancePrototype, "imul", 2, __STUB__imul), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("fround", new ClrStubFunction(engine.FunctionInstancePrototype, "fround", 1, __STUB__fround), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clz32", new ClrStubFunction(engine.FunctionInstancePrototype, "clz32", 1, __STUB__clz32), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("cbrt", new ClrStubFunction(engine.FunctionInstancePrototype, "cbrt", 1, __STUB__cbrt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("abs", new ClrStubFunction(engine.FunctionInstancePrototype, "abs", 1, __STUB__Abs), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("acos", new ClrStubFunction(engine.FunctionInstancePrototype, "acos", 1, __STUB__Acos), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("asin", new ClrStubFunction(engine.FunctionInstancePrototype, "asin", 1, __STUB__Asin), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("atan", new ClrStubFunction(engine.FunctionInstancePrototype, "atan", 1, __STUB__Atan), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("atan2", new ClrStubFunction(engine.FunctionInstancePrototype, "atan2", 2, __STUB__Atan2), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("ceil", new ClrStubFunction(engine.FunctionInstancePrototype, "ceil", 1, __STUB__Ceil), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("cos", new ClrStubFunction(engine.FunctionInstancePrototype, "cos", 1, __STUB__Cos), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("exp", new ClrStubFunction(engine.FunctionInstancePrototype, "exp", 1, __STUB__Exp), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("floor", new ClrStubFunction(engine.FunctionInstancePrototype, "floor", 1, __STUB__Floor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("log", new ClrStubFunction(engine.FunctionInstancePrototype, "log", 1, __STUB__Log), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("max", new ClrStubFunction(engine.FunctionInstancePrototype, "max", 2, __STUB__Max), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("min", new ClrStubFunction(engine.FunctionInstancePrototype, "min", 2, __STUB__Min), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("pow", new ClrStubFunction(engine.FunctionInstancePrototype, "pow", 2, __STUB__Pow), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("random", new ClrStubFunction(engine.FunctionInstancePrototype, "random", 0, __STUB__Random), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("round", new ClrStubFunction(engine.FunctionInstancePrototype, "round", 1, __STUB__Round), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sin", new ClrStubFunction(engine.FunctionInstancePrototype, "sin", 1, __STUB__Sin), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sqrt", new ClrStubFunction(engine.FunctionInstancePrototype, "sqrt", 1, __STUB__Sqrt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("tan", new ClrStubFunction(engine.FunctionInstancePrototype, "tan", 1, __STUB__Tan), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("log10", new ClrStubFunction(engine.FunctionInstancePrototype, "log10", 1, __STUB__Log10), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("log2", new ClrStubFunction(engine.FunctionInstancePrototype, "log2", 1, __STUB__Log2), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("log1p", new ClrStubFunction(engine.FunctionInstancePrototype, "log1p", 1, __STUB__Log1p), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("expm1", new ClrStubFunction(engine.FunctionInstancePrototype, "expm1", 1, __STUB__Expm1), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("cosh", new ClrStubFunction(engine.FunctionInstancePrototype, "cosh", 1, __STUB__Cosh), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sinh", new ClrStubFunction(engine.FunctionInstancePrototype, "sinh", 1, __STUB__Sinh), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("tanh", new ClrStubFunction(engine.FunctionInstancePrototype, "tanh", 1, __STUB__Tanh), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("acosh", new ClrStubFunction(engine.FunctionInstancePrototype, "acosh", 1, __STUB__Acosh), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("asinh", new ClrStubFunction(engine.FunctionInstancePrototype, "asinh", 1, __STUB__Asinh), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("atanh", new ClrStubFunction(engine.FunctionInstancePrototype, "atanh", 1, __STUB__Atanh), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("hypot", new ClrStubFunction(engine.FunctionInstancePrototype, "hypot", 2, __STUB__Hypot), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("trunc", new ClrStubFunction(engine.FunctionInstancePrototype, "trunc", 1, __STUB__Trunc), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("sign", new ClrStubFunction(engine.FunctionInstancePrototype, "sign", 1, __STUB__Sign), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("imul", new ClrStubFunction(engine.FunctionInstancePrototype, "imul", 2, __STUB__IMul), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fround", new ClrStubFunction(engine.FunctionInstancePrototype, "fround", 1, __STUB__Fround), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("clz32", new ClrStubFunction(engine.FunctionInstancePrototype, "clz32", 1, __STUB__Clz32), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("cbrt", new ClrStubFunction(engine.FunctionInstancePrototype, "cbrt", 1, __STUB__Cbrt), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__abs(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Abs(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -71,7 +71,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__acos(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Acos(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -82,7 +82,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__asin(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Asin(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -93,7 +93,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__atan(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Atan(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -104,7 +104,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__atan2(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Atan2(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -117,7 +117,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__ceil(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Ceil(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -128,7 +128,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__cos(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Cos(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -139,7 +139,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__exp(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Exp(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -150,7 +150,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__floor(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Floor(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -161,7 +161,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__log(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Log(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -172,7 +172,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__max(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Max(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -183,7 +183,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__min(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Min(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -194,7 +194,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__pow(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Pow(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -207,12 +207,12 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__random(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Random(ScriptEngine engine, object thisObj, object[] args)
 		{
 			return Random();
 		}
 
-		private static object __STUB__round(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Round(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -223,7 +223,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__sin(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Sin(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -234,7 +234,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__sqrt(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Sqrt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -245,7 +245,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__tan(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Tan(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -256,7 +256,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__log10(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Log10(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -267,7 +267,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__log2(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Log2(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -278,7 +278,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__log1p(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Log1p(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -289,7 +289,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__expm1(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Expm1(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -300,7 +300,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__cosh(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Cosh(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -311,7 +311,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__sinh(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Sinh(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -322,7 +322,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__tanh(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Tanh(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -333,7 +333,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__acosh(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Acosh(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -344,7 +344,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__asinh(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Asinh(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -355,7 +355,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__atanh(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Atanh(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -366,7 +366,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__hypot(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Hypot(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -377,7 +377,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__trunc(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Trunc(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -388,7 +388,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__sign(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Sign(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -399,7 +399,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__imul(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__IMul(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -412,7 +412,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__fround(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Fround(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -423,7 +423,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__clz32(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Clz32(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
@@ -434,7 +434,7 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static object __STUB__cbrt(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__Cbrt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			switch (args.Length)
 			{
