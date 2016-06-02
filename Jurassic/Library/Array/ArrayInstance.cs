@@ -1241,6 +1241,7 @@ namespace Jurassic.Library
         /// <param name="target"> Target start index position where to copy the elements to. </param>
         /// <param name="start"> Source start index position where to start copying elements from. </param>
         /// <param name="end"> Optional. Source end index position where to end copying elements from. </param>
+        /// <returns> The array that is being operated on. </returns>
         [JSInternalFunction(Name = "copyWithin", Length = 2, Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
         public static ObjectInstance CopyWithin(ObjectInstance thisObj, int target, int start, int end = int.MaxValue)
         {

@@ -52,6 +52,122 @@ namespace Jurassic.Library
 
 
 
+        //     .NET PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// The type of each element in the array.
+        /// </summary>
+        internal TypedArrayType Type
+        {
+            get { return this.type; }
+        }
+
+        /// <summary>
+        /// Gets or sets the item at the given index.
+        /// </summary>
+        /// <param name="index"> The array index. </param>
+        /// <returns> The value of the item at the given index. </returns>
+        public new object this[int index]
+        {
+            get
+            {
+                // Out of range indices return undefined.
+                if (index < 0 || index >= this.length)
+                    return Undefined.Value;
+                switch (type)
+                {
+                    case TypedArrayType.Int8Array:
+                        return (int)(sbyte)this.buffer.Buffer[this.byteOffset + index];
+                    case TypedArrayType.Uint8Array:
+                    case TypedArrayType.Uint8ClampedArray:
+                        return (int)this.buffer.Buffer[this.byteOffset + index];
+                    case TypedArrayType.Int16Array:
+                        return (int)BitConverter.ToInt16(this.buffer.Buffer, this.byteOffset + index * 2);
+                    case TypedArrayType.Uint16Array:
+                        return (int)BitConverter.ToUInt16(this.buffer.Buffer, this.byteOffset + index * 2);
+                    case TypedArrayType.Int32Array:
+                        return BitConverter.ToInt32(this.buffer.Buffer, this.byteOffset + index * 4);
+                    case TypedArrayType.Uint32Array:
+                        return BitConverter.ToUInt32(this.buffer.Buffer, this.byteOffset + index * 4);
+                    case TypedArrayType.Float32Array:
+                        return (double)BitConverter.ToSingle(this.buffer.Buffer, this.byteOffset + index * 4);
+                    case TypedArrayType.Float64Array:
+                        return BitConverter.ToDouble(this.buffer.Buffer, this.byteOffset + index * 8);
+                    default:
+                        throw new NotSupportedException($"Unsupported TypedArray '{type}'.");
+                }
+            }
+            set
+            {
+                // Out of range indices have no effect.
+                if (index < 0 || index >= this.length)
+                    return;
+                switch (type)
+                {
+                    case TypedArrayType.Int8Array:
+                        this.buffer.Buffer[this.byteOffset + index] = (byte)TypeConverter.ToInt8(value);
+                        break;
+
+                    case TypedArrayType.Uint8Array:
+                        this.buffer.Buffer[this.byteOffset + index] = TypeConverter.ToUint8(value);
+                        break;
+
+                    case TypedArrayType.Uint8ClampedArray:
+
+                        // This algorithm is defined as ToUint8Clamp in the spec.
+                        double number = TypeConverter.ToNumber(value);
+                        int result;
+                        if (number <= 0)
+                            result = 0;
+                        else if (number >= 255)
+                            result = 255;
+                        else
+                        {
+                            var f = Math.Floor(number);
+                            if (f + 0.5 < number)
+                                result = (int)f + 1;
+                            else if (number < f + 0.5)
+                                result = (int)f;
+                            else if ((int)f % 2 == 0)
+                                result = (int)f;
+                            else
+                                result = (int)f + 1;
+                        }
+                        this.buffer.Buffer[this.byteOffset + index] = (byte)result;
+                        break;
+
+                    case TypedArrayType.Int16Array:
+                        Array.Copy(BitConverter.GetBytes(TypeConverter.ToInt16(value)), 0, this.buffer.Buffer, this.byteOffset + index * 2, 2);
+                        break;
+
+                    case TypedArrayType.Uint16Array:
+                        Array.Copy(BitConverter.GetBytes(TypeConverter.ToUint16(value)), 0, this.buffer.Buffer, this.byteOffset + index * 2, 2);
+                        break;
+
+                    case TypedArrayType.Int32Array:
+                        Array.Copy(BitConverter.GetBytes(TypeConverter.ToInt32(value)), 0, this.buffer.Buffer, this.byteOffset + index * 4, 4);
+                        break;
+
+                    case TypedArrayType.Uint32Array:
+                        Array.Copy(BitConverter.GetBytes(TypeConverter.ToUint32(value)), 0, this.buffer.Buffer, this.byteOffset + index * 4, 4);
+                        break;
+
+                    case TypedArrayType.Float32Array:
+                        Array.Copy(BitConverter.GetBytes((float)TypeConverter.ToNumber(value)), 0, this.buffer.Buffer, this.byteOffset + index * 4, 4);
+                        break;
+
+                    case TypedArrayType.Float64Array:
+                        Array.Copy(BitConverter.GetBytes(TypeConverter.ToNumber(value)), 0, this.buffer.Buffer, this.byteOffset + index * 8, 8);
+                        break;
+
+                    default:
+                        throw new NotSupportedException($"Unsupported TypedArray '{type}'.");
+                }
+            }
+        }
+
+
         //     JAVASCRIPT PROPERTIES
         //_________________________________________________________________________________________
 
@@ -117,8 +233,54 @@ namespace Jurassic.Library
         [JSProperty(Name = "@@toStringTag")]
         internal string ToStringTag
         {
-            get { throw new NotImplementedException(); }
+            get { return this.type.ToString(); }
         }
+
+
+
+        //     OVERRIDES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets a descriptor for the property with the given array index.
+        /// </summary>
+        /// <param name="index"> The array index of the property. </param>
+        /// <returns> A property descriptor containing the property value and attributes. </returns>
+        /// <remarks> The prototype chain is not searched. </remarks>
+        public override PropertyDescriptor GetOwnPropertyDescriptor(uint index)
+        {
+            return new PropertyDescriptor(this[(int)index], PropertyAttributes.Writable | PropertyAttributes.Enumerable);
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given array index.  If a property with the
+        /// given index does not exist, or exists in the prototype chain (and is not a setter) then
+        /// a new property is created.
+        /// </summary>
+        /// <param name="index"> The array index of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
+        public override void SetPropertyValue(uint index, object value, bool throwOnError)
+        {
+            this[(int)index] = value;
+        }
+
+        /// <summary>
+        /// Deletes the property with the given array index.
+        /// </summary>
+        /// <param name="index"> The array index of the property to delete. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set because the property was marked as non-configurable.  </param>
+        /// <returns> <c>true</c> if the property was successfully deleted, or if the property did
+        /// not exist; <c>false</c> if the property was marked as non-configurable and
+        /// <paramref name="throwOnError"/> was <c>false</c>. </returns>
+        public override bool Delete(uint index, bool throwOnError)
+        {
+            return false;
+        }
+
 
 
         //     JAVASCRIPT FUNCTIONS
@@ -173,397 +335,423 @@ namespace Jurassic.Library
         //     ARRAY WRAPPER FUNCTIONS
         //_________________________________________________________________________________________
 
-        ///// <summary>
-        ///// Implements a wrapper for typed arrays.
-        ///// </summary>
-        //private class TypedArrayWrapper : ArrayWrapper<object>
-        //{
-        //    /// <summary>
-        //    /// Creates a new TypedArrayWrapper instance.
-        //    /// </summary>
-        //    /// <param name="wrappedInstance"> The typed array that is being wrapped. </param>
-        //    public TypedArrayWrapper(TypedArrayInstance wrappedInstance)
-        //        : base(wrappedInstance, wrappedInstance.Length)
-        //    {
-        //    }
+        /// <summary>
+        /// Implements a wrapper for typed arrays.
+        /// </summary>
+        private class TypedArrayWrapper : ArrayWrapper<object>
+        {
+            /// <summary>
+            /// Creates a new TypedArrayWrapper instance.
+            /// </summary>
+            /// <param name="wrappedInstance"> The typed array that is being wrapped. </param>
+            public TypedArrayWrapper(TypedArrayInstance wrappedInstance)
+                : base(wrappedInstance, wrappedInstance.Length)
+            {
+            }
 
-        //    /// <summary>
-        //    /// Gets or sets an array element within the range 0 .. Length-1 (inclusive).
-        //    /// </summary>
-        //    /// <param name="index"> The index to get or set. </param>
-        //    /// <returns> The value at the given index. </returns>
-        //    public override object this[int index]
-        //    {
-        //        get { return WrappedInstance[index]; }
-        //        set { WrappedInstance[index] = value; }
-        //    }
+            /// <summary>
+            /// Gets or sets an array element within the range 0 .. Length-1 (inclusive).
+            /// </summary>
+            /// <param name="index"> The index to get or set. </param>
+            /// <returns> The value at the given index. </returns>
+            public override object this[int index]
+            {
+                get { return ((TypedArrayInstance)WrappedInstance)[index]; }
+                set { ((TypedArrayInstance)WrappedInstance)[index] = value; }
+            }
 
-        //    /// <summary>
-        //    /// Deletes the value at the given array index, throwing an exception on error.
-        //    /// </summary>
-        //    /// <param name="index"> The array index to delete. </param>
-        //    public override void Delete(int index)
-        //    {
-        //        WrappedInstance.Delete((uint)index, true);
-        //    }
+            /// <summary>
+            /// Deletes the value at the given array index, throwing an exception on error.
+            /// </summary>
+            /// <param name="index"> The array index to delete. </param>
+            public override void Delete(int index)
+            {
+                WrappedInstance.Delete((uint)index, true);
+            }
 
-        //    /// <summary>
-        //    /// Creates a new array of the same type as this one.
-        //    /// </summary>
-        //    /// <param name="values"> The values in the new array. </param>
-        //    /// <returns> A new array object. </returns>
-        //    public override ArrayWrapper<object> ConstructArray(object[] values)
-        //    {
-        //        return new ArrayInstanceWrapper(new TypedArrayInstance(values));
-        //    }
+            /// <summary>
+            /// Creates a new array of the same type as this one.
+            /// </summary>
+            /// <param name="values"> The values in the new array. </param>
+            /// <returns> A new array object. </returns>
+            public override ObjectInstance ConstructArray(object[] values)
+            {
+                var typedArray = (TypedArrayInstance)WrappedInstance;
+                switch (typedArray.Type)
+                {
+                    case TypedArrayType.Int8Array:
+                        return typedArray.Engine.Int8Array.From(values);
+                    case TypedArrayType.Uint8Array:
+                        return typedArray.Engine.Uint8Array.From(values);
+                    case TypedArrayType.Uint8ClampedArray:
+                        return typedArray.Engine.Uint8ClampedArray.From(values);
+                    case TypedArrayType.Int16Array:
+                        return typedArray.Engine.Int16Array.From(values);
+                    case TypedArrayType.Uint16Array:
+                        return typedArray.Engine.Uint16Array.From(values);
+                    case TypedArrayType.Int32Array:
+                        return typedArray.Engine.Int32Array.From(values);
+                    case TypedArrayType.Uint32Array:
+                        return typedArray.Engine.Uint32Array.From(values);
+                    case TypedArrayType.Float32Array:
+                        return typedArray.Engine.Float32Array.From(values);
+                    case TypedArrayType.Float64Array:
+                        return typedArray.Engine.Float64Array.From(values);
+                    default:
+                        throw new NotSupportedException($"Unsupported TypedArray '{typedArray.Type}'.");
+                }
+            }
 
-        //    /// <summary>
-        //    /// Convert an untyped value to a typed value.
-        //    /// </summary>
-        //    /// <param name="value"> The value to convert. </param>
-        //    /// <returns> The value converted to type <typeparamref name="T"/>. </returns>
-        //    public override object ConvertValue(object value)
-        //    {
-        //        return value;
-        //    }
-        //}
+            /// <summary>
+            /// Convert an untyped value to a typed value.
+            /// </summary>
+            /// <param name="value"> The value to convert. </param>
+            /// <returns> The value converted to type <typeparamref name="T"/>. </returns>
+            public override object ConvertValue(object value)
+            {
+                return value;
+            }
+        }
 
-        ///// <summary>
-        ///// Copies the sequence of array elements within the array to the position starting at
-        ///// target. The copy is taken from the index positions of the second and third arguments
-        ///// start and end. The end argument is optional and defaults to the length of the array.
-        ///// This method has the same algorithm as Array.prototype.copyWithin.
-        ///// </summary>
-        ///// <param name="target"> Target start index position where to copy the elements to. </param>
-        ///// <param name="start"> Source start index position where to start copying elements from. </param>
-        ///// <param name="end"> Optional. Source end index position where to end copying elements from. </param>
-        //[JSInternalFunction(Name = "copyWithin", Length = 2)]
-        //public void CopyWithin(int target, int start, int end = int.MaxValue)
-        //{
-        //    return new TypedArrayWrapper(this).CopyWithin(target, start, end);
-        //}
+        /// <summary>
+        /// Copies the sequence of array elements within the array to the position starting at
+        /// target. The copy is taken from the index positions of the second and third arguments
+        /// start and end. The end argument is optional and defaults to the length of the array.
+        /// This method has the same algorithm as Array.prototype.copyWithin.
+        /// </summary>
+        /// <param name="target"> Target start index position where to copy the elements to. </param>
+        /// <param name="start"> Source start index position where to start copying elements from. </param>
+        /// <param name="end"> Optional. Source end index position where to end copying elements from. </param>
+        /// <returns> The array that was operated on. </returns>
+        [JSInternalFunction(Name = "copyWithin", Length = 2)]
+        public ObjectInstance CopyWithin(int target, int start, int end = int.MaxValue)
+        {
+            return new TypedArrayWrapper(this).CopyWithin(target, start, end);
+        }
 
-        ///// <summary>
-        ///// Determines if every element of the array matches criteria defined by the given user-
-        ///// defined function.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element in the
-        ///// array.  This function is called with three arguments: the value of the element, the
-        ///// index of the element, and the array that is being operated on.  The function should
-        ///// return <c>true</c> or <c>false</c>. </param>
-        ///// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        ///// <returns> <c>true</c> if every element of the array matches criteria defined by the
-        ///// given user-defined function; <c>false</c> otherwise. </returns>
-        //[JSInternalFunction(Name = "every", Length = 1)]
-        //public bool Every(FunctionInstance callbackFunction, ObjectInstance context = null)
-        //{
-        //    return new TypedArrayWrapper(this).Every(callbackFunction, context);
-        //}
+        /// <summary>
+        /// Determines if every element of the array matches criteria defined by the given user-
+        /// defined function.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
+        /// array.  This function is called with three arguments: the value of the element, the
+        /// index of the element, and the array that is being operated on.  The function should
+        /// return <c>true</c> or <c>false</c>. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        /// <returns> <c>true</c> if every element of the array matches criteria defined by the
+        /// given user-defined function; <c>false</c> otherwise. </returns>
+        [JSInternalFunction(Name = "every", Length = 1)]
+        public bool Every(FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            return new TypedArrayWrapper(this).Every(callbackFunction, context);
+        }
 
-        ///// <summary>
-        ///// Fills all the elements of a typed array from a start index to an end index with a
-        ///// static value.
-        ///// </summary>
-        ///// <param name="value"> The value to fill the typed array with. </param>
-        ///// <param name="start"> Optional. Start index. Defaults to 0. </param>
-        ///// <param name="end"> Optional. End index (exclusive). Defaults to the length of the array. </param>
-        ///// <returns> The array that is being operated on. </returns>
-        //[JSInternalFunction(Name = "fill", Length = 1)]
-        //public ObjectInstance Fill(object value, int start = 0, int end = int.MaxValue)
-        //{
-        //    return new TypedArrayWrapper(this).Fill(value, start, end);
-        //}
+        /// <summary>
+        /// Fills all the elements of a typed array from a start index to an end index with a
+        /// static value.
+        /// </summary>
+        /// <param name="value"> The value to fill the typed array with. </param>
+        /// <param name="start"> Optional. Start index. Defaults to 0. </param>
+        /// <param name="end"> Optional. End index (exclusive). Defaults to the length of the array. </param>
+        /// <returns> The array that is being operated on. </returns>
+        [JSInternalFunction(Name = "fill", Length = 1)]
+        public ObjectInstance Fill(object value, int start = 0, int end = int.MaxValue)
+        {
+            return new TypedArrayWrapper(this).Fill(value, start, end);
+        }
 
-        ///// <summary>
-        ///// Creates a new array with the elements from this array that pass the test implemented by
-        ///// the given function.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element in the
-        ///// array.  This function is called with three arguments: the value of the element, the
-        ///// index of the element, and the array that is being operated on.  The function should
-        ///// return <c>true</c> or <c>false</c>. </param>
-        ///// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        ///// <returns> A copy of this array but with only those elements which produce <c>true</c>
-        ///// when passed to the provided function. </returns>
-        //[JSInternalFunction(Name = "filter", Length = 1)]
-        //public TypedArrayInstance Filter(FunctionInstance callbackFunction, ObjectInstance context = null)
-        //{
-        //    return (TypedArrayInstance)new TypedArrayWrapper(this).Filter(callbackFunction, context).WrappedInstance;
-        //}
+        /// <summary>
+        /// Creates a new array with the elements from this array that pass the test implemented by
+        /// the given function.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
+        /// array.  This function is called with three arguments: the value of the element, the
+        /// index of the element, and the array that is being operated on.  The function should
+        /// return <c>true</c> or <c>false</c>. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        /// <returns> A copy of this array but with only those elements which produce <c>true</c>
+        /// when passed to the provided function. </returns>
+        [JSInternalFunction(Name = "filter", Length = 1)]
+        public TypedArrayInstance Filter(FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            return (TypedArrayInstance)new TypedArrayWrapper(this).Filter(callbackFunction, context);
+        }
 
-        ///// <summary>
-        ///// Returns the first element in the given array that passes the test implemented by the
-        ///// given function.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element in the
-        ///// array.  This function is called with three arguments: the value of the element, the
-        ///// index of the element, and the array that is being operated on.  The function should
-        ///// return <c>true</c> or <c>false</c>. </param>
-        ///// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        ///// <returns> The first element that results in the callback returning <c>true</c>. </returns>
-        //[JSInternalFunction(Name = "find", Length = 1)]
-        //public object Find(FunctionInstance callbackFunction, ObjectInstance context = null)
-        //{
-        //    return new TypedArrayWrapper(this).Find(callbackFunction, context);
-        //}
+        /// <summary>
+        /// Returns the first element in the given array that passes the test implemented by the
+        /// given function.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
+        /// array.  This function is called with three arguments: the value of the element, the
+        /// index of the element, and the array that is being operated on.  The function should
+        /// return <c>true</c> or <c>false</c>. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        /// <returns> The first element that results in the callback returning <c>true</c>. </returns>
+        [JSInternalFunction(Name = "find", Length = 1)]
+        public object Find(FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            return new TypedArrayWrapper(this).Find(callbackFunction, context);
+        }
 
-        ///// <summary>
-        ///// Returns an index in the typed array, if an element in the typed array satisfies the
-        ///// provided testing function. Otherwise -1 is returned.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element in the
-        ///// array.  This function is called with three arguments: the value of the element, the
-        ///// index of the element, and the array that is being operated on.  The function should
-        ///// return <c>true</c> or <c>false</c>. </param>
-        ///// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        ///// <returns> The first element that results in the callback returning <c>true</c>. </returns>
-        //[JSInternalFunction(Name = "findIndex", Length = 1)]
-        //public int FindIndex(FunctionInstance callbackFunction, ObjectInstance context = null)
-        //{
-        //    return new TypedArrayWrapper(this).FindIndex(callbackFunction, context);
-        //}
+        /// <summary>
+        /// Returns an index in the typed array, if an element in the typed array satisfies the
+        /// provided testing function. Otherwise -1 is returned.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
+        /// array.  This function is called with three arguments: the value of the element, the
+        /// index of the element, and the array that is being operated on.  The function should
+        /// return <c>true</c> or <c>false</c>. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        /// <returns> The first element that results in the callback returning <c>true</c>. </returns>
+        [JSInternalFunction(Name = "findIndex", Length = 1)]
+        public int FindIndex(FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            return new TypedArrayWrapper(this).FindIndex(callbackFunction, context);
+        }
 
-        ///// <summary>
-        ///// Calls the given user-defined function once per element in the array.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element in the
-        ///// array.  This function is called with three arguments: the value of the element, the
-        ///// index of the element, and the array that is being operated on. </param>
-        ///// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        //[JSInternalFunction(Name = "forEach", Length = 1)]
-        //public void ForEach(FunctionInstance callbackFunction, ObjectInstance context = null)
-        //{
-        //    new TypedArrayWrapper(this).ForEach(callbackFunction, context);
-        //}
+        /// <summary>
+        /// Calls the given user-defined function once per element in the array.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
+        /// array.  This function is called with three arguments: the value of the element, the
+        /// index of the element, and the array that is being operated on. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        [JSInternalFunction(Name = "forEach", Length = 1)]
+        public void ForEach(FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            new TypedArrayWrapper(this).ForEach(callbackFunction, context);
+        }
 
-        ///// <summary>
-        ///// Returns the index of the given search element in the array, starting from
-        ///// <paramref name="fromIndex"/>.
-        ///// </summary>
-        ///// <param name="searchElement"> The value to search for. </param>
-        ///// <param name="fromIndex"> The array index to start searching. </param>
-        ///// <returns> The index of the given search element in the array, or <c>-1</c> if the
-        ///// element wasn't found. </returns>
-        //[JSInternalFunction(Name = "indexOf", Length = 1)]
-        //public int IndexOf(object searchElement, int fromIndex = 0)
-        //{
-        //    return new TypedArrayWrapper(this).IndexOf(searchElement, fromIndex);
-        //}
+        /// <summary>
+        /// Returns the index of the given search element in the array, starting from
+        /// <paramref name="fromIndex"/>.
+        /// </summary>
+        /// <param name="searchElement"> The value to search for. </param>
+        /// <param name="fromIndex"> The array index to start searching. </param>
+        /// <returns> The index of the given search element in the array, or <c>-1</c> if the
+        /// element wasn't found. </returns>
+        [JSInternalFunction(Name = "indexOf", Length = 1)]
+        public int IndexOf(object searchElement, int fromIndex = 0)
+        {
+            return new TypedArrayWrapper(this).IndexOf(searchElement, fromIndex);
+        }
 
-        ///// <summary>
-        ///// Concatenates all the elements of the array, using the specified separator between each
-        ///// element.  If no separator is provided, a comma is used for this purpose.
-        ///// </summary>
-        ///// <param name="separator"> The string to use as a separator. </param>
-        ///// <returns> A string that consists of the element values separated by the separator string. </returns>
-        //[JSInternalFunction(Name = "join", Length = 1)]
-        //public string Join(string separator = ",")
-        //{
-        //    return new TypedArrayWrapper(this).Join(separator);
-        //}
+        /// <summary>
+        /// Concatenates all the elements of the array, using the specified separator between each
+        /// element.  If no separator is provided, a comma is used for this purpose.
+        /// </summary>
+        /// <param name="separator"> The string to use as a separator. </param>
+        /// <returns> A string that consists of the element values separated by the separator string. </returns>
+        [JSInternalFunction(Name = "join", Length = 1)]
+        public string Join(string separator = ",")
+        {
+            return new TypedArrayWrapper(this).Join(separator);
+        }
 
-        ///// <summary>
-        ///// Returns the index of the given search element in the array, searching backwards from
-        ///// <paramref name="fromIndex"/>.
-        ///// </summary>
-        ///// <param name="searchElement"> The value to search for. </param>
-        ///// <param name="fromIndex"> The array index to start searching. </param>
-        ///// <returns> The index of the given search element in the array, or <c>-1</c> if the
-        ///// element wasn't found. </returns>
-        //[JSInternalFunction(Name = "lastIndexOf", Length = 1)]
-        //public int LastIndexOf(object searchElement, int fromIndex = int.MaxValue)
-        //{
-        //    return new TypedArrayWrapper(this).LastIndexOf(searchElement, fromIndex);
-        //}
+        /// <summary>
+        /// Returns the index of the given search element in the array, searching backwards from
+        /// <paramref name="fromIndex"/>.
+        /// </summary>
+        /// <param name="searchElement"> The value to search for. </param>
+        /// <param name="fromIndex"> The array index to start searching. </param>
+        /// <returns> The index of the given search element in the array, or <c>-1</c> if the
+        /// element wasn't found. </returns>
+        [JSInternalFunction(Name = "lastIndexOf", Length = 1)]
+        public int LastIndexOf(object searchElement, int fromIndex = int.MaxValue)
+        {
+            return new TypedArrayWrapper(this).LastIndexOf(searchElement, fromIndex);
+        }
 
-        ///// <summary>
-        ///// Creates a new array with the results of calling the given function on every element in
-        ///// this array.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element
-        ///// in the array.  This function is called with three arguments: the value of the element,
-        ///// the index of the element, and the array that is being operated on.  The value that is
-        ///// returned from this function is stored in the resulting array. </param>
-        ///// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        ///// <returns> A new array with the results of calling the given function on every element
-        ///// in the array. </returns>
-        //[JSInternalFunction(Name = "map", Length = 1)]
-        //public TypedArrayInstance Map(FunctionInstance callbackFunction, ObjectInstance context = null)
-        //{
-        //    return (TypedArrayInstance)new TypedArrayWrapper(this).Map(callbackFunction, context).WrappedInstance;
-        //}
+        /// <summary>
+        /// Creates a new array with the results of calling the given function on every element in
+        /// this array.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element
+        /// in the array.  This function is called with three arguments: the value of the element,
+        /// the index of the element, and the array that is being operated on.  The value that is
+        /// returned from this function is stored in the resulting array. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        /// <returns> A new array with the results of calling the given function on every element
+        /// in the array. </returns>
+        [JSInternalFunction(Name = "map", Length = 1)]
+        public TypedArrayInstance Map(FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            return (TypedArrayInstance)new TypedArrayWrapper(this).Map(callbackFunction, context);
+        }
 
-        ///// <summary>
-        ///// Accumulates a single value by calling a user-defined function for each element.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element
-        ///// in the array.  This function is called with four arguments: the current accumulated
-        ///// value, the value of the element, the index of the element, and the array that is being
-        ///// operated on.  The return value for this function is the new accumulated value and is
-        ///// passed to the next invocation of the function. </param>
-        ///// <param name="initialValue"> The initial accumulated value. </param>
-        ///// <returns> The accumulated value returned from the last invocation of the callback
-        ///// function. </returns>
-        //[JSInternalFunction(Name = "reduce", Length = 1)]
-        //public object Reduce(FunctionInstance callbackFunction, object initialValue = null)
-        //{
-        //    return new TypedArrayWrapper(this).Reduce(callbackFunction, initialValue);
-        //}
+        /// <summary>
+        /// Accumulates a single value by calling a user-defined function for each element.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element
+        /// in the array.  This function is called with four arguments: the current accumulated
+        /// value, the value of the element, the index of the element, and the array that is being
+        /// operated on.  The return value for this function is the new accumulated value and is
+        /// passed to the next invocation of the function. </param>
+        /// <param name="initialValue"> The initial accumulated value. </param>
+        /// <returns> The accumulated value returned from the last invocation of the callback
+        /// function. </returns>
+        [JSInternalFunction(Name = "reduce", Length = 1)]
+        public object Reduce(FunctionInstance callbackFunction, object initialValue = null)
+        {
+            return new TypedArrayWrapper(this).Reduce(callbackFunction, initialValue);
+        }
 
-        ///// <summary>
-        ///// Accumulates a single value by calling a user-defined function for each element
-        ///// (starting with the last element in the array).
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element
-        ///// in the array.  This function is called with four arguments: the current accumulated
-        ///// value, the value of the element, the index of the element, and the array that is being
-        ///// operated on.  The return value for this function is the new accumulated value and is
-        ///// passed to the next invocation of the function. </param>
-        ///// <param name="initialValue"> The initial accumulated value. </param>
-        ///// <returns> The accumulated value returned from the last invocation of the callback
-        ///// function. </returns>
-        //[JSInternalFunction(Name = "reduceRight", Length = 1)]
-        //public object ReduceRight(FunctionInstance callbackFunction, object initialValue = null)
-        //{
-        //    return new TypedArrayWrapper(this).ReduceRight(callbackFunction, initialValue);
-        //}
+        /// <summary>
+        /// Accumulates a single value by calling a user-defined function for each element
+        /// (starting with the last element in the array).
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element
+        /// in the array.  This function is called with four arguments: the current accumulated
+        /// value, the value of the element, the index of the element, and the array that is being
+        /// operated on.  The return value for this function is the new accumulated value and is
+        /// passed to the next invocation of the function. </param>
+        /// <param name="initialValue"> The initial accumulated value. </param>
+        /// <returns> The accumulated value returned from the last invocation of the callback
+        /// function. </returns>
+        [JSInternalFunction(Name = "reduceRight", Length = 1)]
+        public object ReduceRight(FunctionInstance callbackFunction, object initialValue = null)
+        {
+            return new TypedArrayWrapper(this).ReduceRight(callbackFunction, initialValue);
+        }
 
-        ///// <summary>
-        ///// Reverses the order of the elements in the array.
-        ///// </summary>
-        ///// <returns> The array that is being operated on. </returns>
-        //[JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.MutatesThisObject)]
-        //public TypedArrayInstance Reverse()
-        //{
-        //    return (TypedArrayInstance)new TypedArrayWrapper(this).Reverse().WrappedInstance;
-        //}
+        /// <summary>
+        /// Reverses the order of the elements in the array.
+        /// </summary>
+        /// <returns> The array that is being operated on. </returns>
+        [JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.MutatesThisObject)]
+        public TypedArrayInstance Reverse()
+        {
+            return (TypedArrayInstance)new TypedArrayWrapper(this).Reverse();
+        }
 
-        ///// <summary>
-        ///// Stores multiple values in the typed array, reading input values from a specified array.
-        ///// </summary>
-        ///// <param name="array"> The array from which to copy values. All values from the source
-        ///// array are copied into the target array, unless the length of the source array plus the
-        ///// offset exceeds the length of the target array, in which case an exception is thrown. </param>
-        ///// <param name="offset"> The offset into the target array at which to begin writing values
-        ///// from the source array. If you omit this value, 0 is assumed (that is, the source array
-        ///// will overwrite values in the target array starting at index 0). </param>
-        //[JSInternalFunction(Name = "set", Length = 1)]
-        //public void Set(ObjectInstance array, int offset = 0)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        /// <summary>
+        /// Stores multiple values in the typed array, reading input values from a specified array.
+        /// </summary>
+        /// <param name="array"> The array from which to copy values. All values from the source
+        /// array are copied into the target array, unless the length of the source array plus the
+        /// offset exceeds the length of the target array, in which case an exception is thrown. </param>
+        /// <param name="offset"> The offset into the target array at which to begin writing values
+        /// from the source array. If you omit this value, 0 is assumed (that is, the source array
+        /// will overwrite values in the target array starting at index 0). </param>
+        [JSInternalFunction(Name = "set", Length = 1)]
+        public void Set(ObjectInstance array, int offset = 0)
+        {
+            throw new NotImplementedException();
+        }
 
-        ///// <summary>
-        ///// Returns a section of an array.
-        ///// </summary>
-        ///// <param name="start"> The index of the first element in the section.  If this value is
-        ///// negative it is treated as an offset from the end of the array. </param>
-        ///// <param name="end"> The index of the element just past the last element in the section.
-        ///// If this value is negative it is treated as an offset from the end of the array.  If
-        ///// <paramref name="end"/> is less than or equal to <paramref name="start"/> then an empty
-        ///// array is returned. </param>
-        ///// <returns> A section of an array. </returns>
-        //[JSInternalFunction(Name = "slice", Length = 2)]
-        //public TypedArrayInstance Slice(int start, int end = int.MaxValue)
-        //{
-        //    return (TypedArrayInstance)new TypedArrayWrapper(this).Slice(start, end).WrappedInstance;
-        //}
+        /// <summary>
+        /// Returns a section of an array.
+        /// </summary>
+        /// <param name="start"> The index of the first element in the section.  If this value is
+        /// negative it is treated as an offset from the end of the array. </param>
+        /// <param name="end"> The index of the element just past the last element in the section.
+        /// If this value is negative it is treated as an offset from the end of the array.  If
+        /// <paramref name="end"/> is less than or equal to <paramref name="start"/> then an empty
+        /// array is returned. </param>
+        /// <returns> A section of an array. </returns>
+        [JSInternalFunction(Name = "slice", Length = 2)]
+        public TypedArrayInstance Slice(int start, int end = int.MaxValue)
+        {
+            return (TypedArrayInstance)new TypedArrayWrapper(this).Slice(start, end);
+        }
 
-        ///// <summary>
-        ///// Determines if at least one element of the array matches criteria defined by the given
-        ///// user-defined function.
-        ///// </summary>
-        ///// <param name="callbackFunction"> A user-defined function that is called for each element in the
-        ///// array.  This function is called with three arguments: the value of the element, the
-        ///// index of the element, and the array that is being operated on.  The function should
-        ///// return <c>true</c> or <c>false</c>. </param>
-        ///// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
-        ///// <returns> <c>true</c> if at least one element of the array matches criteria defined by
-        ///// the given user-defined function; <c>false</c> otherwise. </returns>
-        //[JSInternalFunction(Name = "some", Length = 1)]
-        //public bool Some(FunctionInstance callbackFunction, ObjectInstance context = null)
-        //{
-        //    return new TypedArrayWrapper(this).Some(callbackFunction, context);
-        //}
+        /// <summary>
+        /// Determines if at least one element of the array matches criteria defined by the given
+        /// user-defined function.
+        /// </summary>
+        /// <param name="callbackFunction"> A user-defined function that is called for each element in the
+        /// array.  This function is called with three arguments: the value of the element, the
+        /// index of the element, and the array that is being operated on.  The function should
+        /// return <c>true</c> or <c>false</c>. </param>
+        /// <param name="context"> The value of <c>this</c> in the context of the callback function. </param>
+        /// <returns> <c>true</c> if at least one element of the array matches criteria defined by
+        /// the given user-defined function; <c>false</c> otherwise. </returns>
+        [JSInternalFunction(Name = "some", Length = 1)]
+        public bool Some(FunctionInstance callbackFunction, ObjectInstance context = null)
+        {
+            return new TypedArrayWrapper(this).Some(callbackFunction, context);
+        }
 
-        ///// <summary>
-        ///// Sorts the array.
-        ///// </summary>
-        ///// <param name="comparisonFunction"> A function which determines the order of the
-        ///// elements.  This function should return a number less than zero if the first argument is
-        ///// less than the second argument, zero if the arguments are equal or a number greater than
-        ///// zero if the first argument is greater than Defaults to an ascending ASCII ordering. </param>
-        ///// <returns> The array that was sorted. </returns>
-        //[JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.MutatesThisObject, Length = 1)]
-        //public TypedArrayInstance Sort(FunctionInstance comparisonFunction = null)
-        //{
-        //    Func<object, object, int> comparer;
-        //    if (comparisonFunction == null)
-        //    {
-        //        // Default comparer.
-        //        comparer = (a, b) =>
-        //        {
-        //            if (a == null && b == null)
-        //                return 0;
-        //            if (a == null)
-        //                return 1;
-        //            if (b == null)
-        //                return -1;
-        //            if (a == Undefined.Value && b == Undefined.Value)
-        //                return 0;
-        //            if (a == Undefined.Value)
-        //                return 1;
-        //            if (b == Undefined.Value)
-        //                return -1;
-        //            return string.Compare(TypeConverter.ToString(a), TypeConverter.ToString(b), StringComparison.Ordinal);
-        //        };
-        //    }
-        //    else
-        //    {
-        //        // Custom comparer.
-        //        comparer = (a, b) =>
-        //        {
-        //            if (a == null && b == null)
-        //                return 0;
-        //            if (a == null)
-        //                return 1;
-        //            if (b == null)
-        //                return -1;
-        //            if (a == Undefined.Value && b == Undefined.Value)
-        //                return 0;
-        //            if (a == Undefined.Value)
-        //                return 1;
-        //            if (b == Undefined.Value)
-        //                return -1;
-        //            var v = TypeConverter.ToNumber(comparisonFunction.CallFromNative("sort", null, a, b));
-        //            if (double.IsNaN(v))
-        //                return 0;
-        //            return Math.Sign(v);
-        //        };
-        //    }
+        /// <summary>
+        /// Sorts the array.
+        /// </summary>
+        /// <param name="comparisonFunction"> A function which determines the order of the
+        /// elements.  This function should return a number less than zero if the first argument is
+        /// less than the second argument, zero if the arguments are equal or a number greater than
+        /// zero if the first argument is greater than Defaults to an ascending ASCII ordering. </param>
+        /// <returns> The array that was sorted. </returns>
+        [JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.MutatesThisObject, Length = 1)]
+        public TypedArrayInstance Sort(FunctionInstance comparisonFunction = null)
+        {
+            Func<object, object, int> comparer;
+            if (comparisonFunction == null)
+            {
+                // Default comparer.
+                comparer = (a, b) =>
+                {
+                    if (a == null && b == null)
+                        return 0;
+                    if (a == null)
+                        return 1;
+                    if (b == null)
+                        return -1;
+                    if (a == Undefined.Value && b == Undefined.Value)
+                        return 0;
+                    if (a == Undefined.Value)
+                        return 1;
+                    if (b == Undefined.Value)
+                        return -1;
+                    return string.Compare(TypeConverter.ToString(a), TypeConverter.ToString(b), StringComparison.Ordinal);
+                };
+            }
+            else
+            {
+                // Custom comparer.
+                comparer = (a, b) =>
+                {
+                    if (a == null && b == null)
+                        return 0;
+                    if (a == null)
+                        return 1;
+                    if (b == null)
+                        return -1;
+                    if (a == Undefined.Value && b == Undefined.Value)
+                        return 0;
+                    if (a == Undefined.Value)
+                        return 1;
+                    if (b == Undefined.Value)
+                        return -1;
+                    var v = TypeConverter.ToNumber(comparisonFunction.CallFromNative("sort", null, a, b));
+                    if (double.IsNaN(v))
+                        return 0;
+                    return Math.Sign(v);
+                };
+            }
 
-        //    return (TypedArrayInstance)new TypedArrayWrapper(this).Sort(comparer).WrappedInstance;
-        //}
+            return (TypedArrayInstance)new TypedArrayWrapper(this).Sort(comparer);
+        }
 
-        ///// <summary>
-        ///// Returns a locale-specific string representing this object.
-        ///// </summary>
-        ///// <returns> A locale-specific string representing this object. </returns>
-        //[JSInternalFunction(Name = "toLocaleString")]
-        //public new string ToLocaleString()
-        //{
-        //    return new TypedArrayWrapper(this).ToLocaleString();
-        //}
+        /// <summary>
+        /// Returns a locale-specific string representing this object.
+        /// </summary>
+        /// <returns> A locale-specific string representing this object. </returns>
+        [JSInternalFunction(Name = "toLocaleString")]
+        public new string ToLocaleString()
+        {
+            return new TypedArrayWrapper(this).ToLocaleString();
+        }
 
-        ///// <summary>
-        ///// Returns a string representing this object.
-        ///// </summary>
-        ///// <param name="thisObj"> The array that is being operated on. </param>
-        ///// <returns> A string representing this object. </returns>
-        //[JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
-        //public static string ToString(ObjectInstance thisObj)
-        //{
-        //    return new TypedArrayWrapper(this).ToString();
-        //}
+        /// <summary>
+        /// Returns a string representing this object.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <returns> A string representing this object. </returns>
+        [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
+        public static string ToString(ObjectInstance thisObj)
+        {
+            if (!(thisObj is TypedArrayInstance))
+                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "This function is not generic.");
+            return new TypedArrayWrapper((TypedArrayInstance)thisObj).ToString();
+        }
     }
 }
