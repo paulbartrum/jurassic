@@ -332,19 +332,19 @@ namespace Jurassic.Library
 
 
 
-        //     ARRAY WRAPPER FUNCTIONS
+        //     ARRAY ADAPTER FUNCTIONS
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Implements a wrapper for typed arrays.
+        /// Implements an adapter for typed arrays.
         /// </summary>
-        private class TypedArrayWrapper : ArrayWrapper<object>
+        private class TypedArrayAdapter : ArrayAdapter<object>
         {
             /// <summary>
             /// Creates a new TypedArrayWrapper instance.
             /// </summary>
             /// <param name="wrappedInstance"> The typed array that is being wrapped. </param>
-            public TypedArrayWrapper(TypedArrayInstance wrappedInstance)
+            public TypedArrayAdapter(TypedArrayInstance wrappedInstance)
                 : base(wrappedInstance, wrappedInstance.Length)
             {
             }
@@ -426,7 +426,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "copyWithin", Length = 2)]
         public ObjectInstance CopyWithin(int target, int start, int end = int.MaxValue)
         {
-            return new TypedArrayWrapper(this).CopyWithin(target, start, end);
+            return new TypedArrayAdapter(this).CopyWithin(target, start, end);
         }
 
         /// <summary>
@@ -443,7 +443,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "every", Length = 1)]
         public bool Every(FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new TypedArrayWrapper(this).Every(callbackFunction, context);
+            return new TypedArrayAdapter(this).Every(callbackFunction, context);
         }
 
         /// <summary>
@@ -457,7 +457,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "fill", Length = 1)]
         public ObjectInstance Fill(object value, int start = 0, int end = int.MaxValue)
         {
-            return new TypedArrayWrapper(this).Fill(value, start, end);
+            return new TypedArrayAdapter(this).Fill(value, start, end);
         }
 
         /// <summary>
@@ -474,7 +474,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "filter", Length = 1)]
         public TypedArrayInstance Filter(FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return (TypedArrayInstance)new TypedArrayWrapper(this).Filter(callbackFunction, context);
+            return (TypedArrayInstance)new TypedArrayAdapter(this).Filter(callbackFunction, context);
         }
 
         /// <summary>
@@ -490,7 +490,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "find", Length = 1)]
         public object Find(FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new TypedArrayWrapper(this).Find(callbackFunction, context);
+            return new TypedArrayAdapter(this).Find(callbackFunction, context);
         }
 
         /// <summary>
@@ -506,7 +506,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "findIndex", Length = 1)]
         public int FindIndex(FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new TypedArrayWrapper(this).FindIndex(callbackFunction, context);
+            return new TypedArrayAdapter(this).FindIndex(callbackFunction, context);
         }
 
         /// <summary>
@@ -519,7 +519,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "forEach", Length = 1)]
         public void ForEach(FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            new TypedArrayWrapper(this).ForEach(callbackFunction, context);
+            new TypedArrayAdapter(this).ForEach(callbackFunction, context);
         }
 
         /// <summary>
@@ -533,7 +533,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "indexOf", Length = 1)]
         public int IndexOf(object searchElement, int fromIndex = 0)
         {
-            return new TypedArrayWrapper(this).IndexOf(searchElement, fromIndex);
+            return new TypedArrayAdapter(this).IndexOf(searchElement, fromIndex);
         }
 
         /// <summary>
@@ -545,7 +545,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "join", Length = 1)]
         public string Join(string separator = ",")
         {
-            return new TypedArrayWrapper(this).Join(separator);
+            return new TypedArrayAdapter(this).Join(separator);
         }
 
         /// <summary>
@@ -559,7 +559,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "lastIndexOf", Length = 1)]
         public int LastIndexOf(object searchElement, int fromIndex = int.MaxValue)
         {
-            return new TypedArrayWrapper(this).LastIndexOf(searchElement, fromIndex);
+            return new TypedArrayAdapter(this).LastIndexOf(searchElement, fromIndex);
         }
 
         /// <summary>
@@ -576,7 +576,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "map", Length = 1)]
         public TypedArrayInstance Map(FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return (TypedArrayInstance)new TypedArrayWrapper(this).Map(callbackFunction, context);
+            return (TypedArrayInstance)new TypedArrayAdapter(this).Map(callbackFunction, context);
         }
 
         /// <summary>
@@ -593,7 +593,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "reduce", Length = 1)]
         public object Reduce(FunctionInstance callbackFunction, object initialValue = null)
         {
-            return new TypedArrayWrapper(this).Reduce(callbackFunction, initialValue);
+            return new TypedArrayAdapter(this).Reduce(callbackFunction, initialValue);
         }
 
         /// <summary>
@@ -611,7 +611,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "reduceRight", Length = 1)]
         public object ReduceRight(FunctionInstance callbackFunction, object initialValue = null)
         {
-            return new TypedArrayWrapper(this).ReduceRight(callbackFunction, initialValue);
+            return new TypedArrayAdapter(this).ReduceRight(callbackFunction, initialValue);
         }
 
         /// <summary>
@@ -621,7 +621,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.MutatesThisObject)]
         public TypedArrayInstance Reverse()
         {
-            return (TypedArrayInstance)new TypedArrayWrapper(this).Reverse();
+            return (TypedArrayInstance)new TypedArrayAdapter(this).Reverse();
         }
 
         /// <summary>
@@ -652,7 +652,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "slice", Length = 2)]
         public TypedArrayInstance Slice(int start, int end = int.MaxValue)
         {
-            return (TypedArrayInstance)new TypedArrayWrapper(this).Slice(start, end);
+            return (TypedArrayInstance)new TypedArrayAdapter(this).Slice(start, end);
         }
 
         /// <summary>
@@ -669,7 +669,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "some", Length = 1)]
         public bool Some(FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new TypedArrayWrapper(this).Some(callbackFunction, context);
+            return new TypedArrayAdapter(this).Some(callbackFunction, context);
         }
 
         /// <summary>
@@ -728,7 +728,7 @@ namespace Jurassic.Library
                 };
             }
 
-            return (TypedArrayInstance)new TypedArrayWrapper(this).Sort(comparer);
+            return (TypedArrayInstance)new TypedArrayAdapter(this).Sort(comparer);
         }
 
         /// <summary>
@@ -738,7 +738,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toLocaleString")]
         public new string ToLocaleString()
         {
-            return new TypedArrayWrapper(this).ToLocaleString();
+            return new TypedArrayAdapter(this).ToLocaleString();
         }
 
         /// <summary>
@@ -751,7 +751,7 @@ namespace Jurassic.Library
         {
             if (!(thisObj is TypedArrayInstance))
                 throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "This function is not generic.");
-            return new TypedArrayWrapper((TypedArrayInstance)thisObj).ToString();
+            return new TypedArrayAdapter((TypedArrayInstance)thisObj).ToString();
         }
     }
 }
