@@ -99,6 +99,14 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+
+            // From the spec: the initial value of the @@iterator property is the same function
+            // object as the initial value of the Array.prototype.values property.
+            PropertyNameAndValue valuesProperty = properties.Find(p => "values".Equals(p.Key));
+            if (valuesProperty == null)
+                throw new InvalidOperationException("Expected values property.");
+            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
+
             result.FastSetProperties(properties);
             return result;
         }
@@ -1278,6 +1286,40 @@ namespace Jurassic.Library
         public static int FindIndex(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
             return new ArrayInstanceAdapter(thisObj).FindIndex(callbackFunction, context);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the key/value pairs for each index in
+        /// the array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the key/value pairs for each index in
+        /// the array. </returns>
+        [JSInternalFunction(Name = "entries")]
+        public ObjectInstance Entries()
+        {
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.KeyAndValue);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the keys for each index in the array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the keys for each index in the array. </returns>
+        [JSInternalFunction(Name = "keys")]
+        public ObjectInstance Keys()
+        {
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Key);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the values for each index in the
+        /// array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the values for each index in the
+        /// array. </returns>
+        [JSInternalFunction(Name = "values")]
+        public ObjectInstance Values()
+        {
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Value);
         }
 
 

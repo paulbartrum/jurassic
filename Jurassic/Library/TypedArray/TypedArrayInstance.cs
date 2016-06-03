@@ -46,6 +46,14 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+
+            // From the spec: the initial value of the @@iterator property is the same function
+            // object as the initial value of the %TypedArray%.prototype.values property.
+            PropertyNameAndValue valuesProperty = properties.Find(p => "values".Equals(p.Key));
+            if (valuesProperty == null)
+                throw new InvalidOperationException("Expected values property.");
+            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
+
             result.FastSetProperties(properties);
             return result;
         }
@@ -287,22 +295,25 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Returns a new Array Iterator object that contains the key/value pairs for each index in
+        /// Returns a new array iterator object that contains the key/value pairs for each index in
         /// the array.
         /// </summary>
+        /// <returns> An array iterator object that contains the key/value pairs for each index in
+        /// the array. </returns>
         [JSInternalFunction(Name = "entries")]
-        public void Entries()
+        public ObjectInstance Entries()
         {
-            throw new NotImplementedException();
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.KeyAndValue);
         }
 
         /// <summary>
-        /// Returns a new Array Iterator object that contains the keys for each index in the array.
+        /// Returns a new array iterator object that contains the keys for each index in the array.
         /// </summary>
+        /// <returns> An array iterator object that contains the keys for each index in the array. </returns>
         [JSInternalFunction(Name = "keys")]
-        public static void Keys()
+        public ObjectInstance Keys()
         {
-            throw new NotImplementedException();
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Key);
         }
 
         /// <summary>
@@ -321,13 +332,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Returns a new Array Iterator object that contains the values for each index in the
+        /// Returns a new array iterator object that contains the values for each index in the
         /// array.
         /// </summary>
+        /// <returns> An array iterator object that contains the values for each index in the
+        /// array. </returns>
         [JSInternalFunction(Name = "values")]
-        public void Values()
+        public ObjectInstance Values()
         {
-            throw new NotImplementedException();
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Value);
         }
 
 

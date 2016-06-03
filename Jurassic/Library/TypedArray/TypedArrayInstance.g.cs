@@ -91,12 +91,15 @@ namespace Jurassic.Library
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
 				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'entries' is not generic.");
-			((TypedArrayInstance)thisObj).Entries(); return Undefined.Value;
+			return ((TypedArrayInstance)thisObj).Entries();
 		}
 
 		private static object __STUB__Keys(ScriptEngine engine, object thisObj, object[] args)
 		{
-			Keys(); return Undefined.Value;
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is TypedArrayInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'keys' is not generic.");
+			return ((TypedArrayInstance)thisObj).Keys();
 		}
 
 		private static object __STUB__Subarray(ScriptEngine engine, object thisObj, object[] args)
@@ -120,7 +123,7 @@ namespace Jurassic.Library
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
 				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'values' is not generic.");
-			((TypedArrayInstance)thisObj).Values(); return Undefined.Value;
+			return ((TypedArrayInstance)thisObj).Values();
 		}
 
 		private static object __STUB__CopyWithin(ScriptEngine engine, object thisObj, object[] args)
