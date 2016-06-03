@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -118,8 +119,11 @@ namespace Jurassic.Library
 
             // Return the result.
             var result = Engine.Object.Construct();
-            result["value"] = value;
-            result["done"] = done;
+            result.FastSetProperties(new List<PropertyNameAndValue>(2)
+            {
+                new PropertyNameAndValue("value", value, PropertyAttributes.FullAccess),
+                new PropertyNameAndValue("done", done, PropertyAttributes.FullAccess),
+            });
             return result;
         }
     }

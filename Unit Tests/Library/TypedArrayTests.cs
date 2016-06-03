@@ -109,13 +109,42 @@ namespace UnitTests
         [TestMethod]
         public void from()
         {
-            Assert.Fail("TODO");
+            Assert.AreEqual(1, Evaluate("Int16Array.from([1, 2])[0]"));
+            Assert.AreEqual(2, Evaluate("Int16Array.from([1, 2])[1]"));
+            Assert.AreEqual(2, Evaluate("Int16Array.from([1, 2]).length"));
+            Assert.AreEqual(4, Evaluate("Int16Array.from([1, 2]).byteLength"));
+            Assert.AreEqual("9,2", Evaluate("var x = [9, 2, 6]; x.length = 2; Int16Array.from(x).toString()"));
+            Assert.AreEqual("6,2,9", Evaluate(@"
+                var x = [9, 2, 6];
+                x[Symbol.iterator] = function() {
+                    var i = 3;
+	                return {
+		                next: function() {
+                            i --;
+			                return i < 0 ? { done: true } : { value: x[i] };
+		                }
+	                };
+                };
+                Int16Array.from(x).toString()"));
+
+            // mapFn
+            Assert.AreEqual("14,503", Evaluate("Int16Array.from([11, 500], function(val, index) { return val + 3; }).toString()"));
+            Assert.AreEqual("27,516", Evaluate("Int16Array.from([11, 500], function(val, index) { return val + this; }, 16).toString()"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Int16Array.from.length"));
         }
 
         [TestMethod]
         public void of()
         {
-            Assert.Fail("TODO");
+            Assert.AreEqual(1, Evaluate("Int16Array.of(1, 2)[0]"));
+            Assert.AreEqual(2, Evaluate("Int16Array.of(1, 2)[1]"));
+            Assert.AreEqual(2, Evaluate("Int16Array.of(1, 2).length"));
+            Assert.AreEqual(4, Evaluate("Int16Array.of(1, 2).byteLength"));
+
+            // length
+            Assert.AreEqual(0, Evaluate("Int16Array.of.length"));
         }
 
         [TestMethod]

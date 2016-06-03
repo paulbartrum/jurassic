@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -160,7 +160,7 @@ namespace Jurassic.Library
                         throw new JavaScriptException(Engine, ErrorType.RangeError, $"Byte length of {this.type} should be a multiple of {BytesPerElement}");
                     actualLength = (buffer.ByteLength - byteOffset) / bytesPerElement;
                     if (actualLength < 0)
-                        throw new JavaScriptException(Engine, ErrorType.RangeError, $"Start offset is too large");
+                        throw new JavaScriptException(Engine, ErrorType.RangeError, "Start offset is too large");
                 }
                 else
                 {
@@ -179,7 +179,7 @@ namespace Jurassic.Library
             {
                 // new %TypedArray%(length);
                 if (TypeUtilities.IsUndefined(arg))
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, $"Argument cannot be undefined");
+                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Argument cannot be undefined");
                 int argLength = TypeConverter.ToInteger(arg);
                 return new TypedArrayInstance(this.InstancePrototype, this.type, Engine.ArrayBuffer.Construct(argLength * BytesPerElement), 0, argLength);
             }
@@ -197,33 +197,87 @@ namespace Jurassic.Library
         /// <param name="mapFn"> Optional. Map function to call on every element of the typed array. </param>
         /// <param name="thisArg"> Optional. Value to use as this when executing mapFn. </param>
         /// <returns> A new typed array instance. </returns>
-        [JSInternalFunction(Name = "from")]
+        [JSInternalFunction(Name = "from", Length = 1)]
         public TypedArrayInstance From(object source, FunctionInstance mapFn = null, object thisArg = null)
         {
-            // TODO: support iterators.
-
             var items = TypeConverter.ToObject(Engine, source);
-            int length = TypeConverter.ToInt32(items["length"]);
-            var result = new TypedArrayInstance(this.InstancePrototype, this.type, Engine.ArrayBuffer.Construct(length * BytesPerElement), 0, length);
-            for (int i = 0; i < length; i ++)
+
+            var getIterator = items[Engine.Symbol.Iterator];
+            if (getIterator != Undefined.Value && getIterator != Null.Value)
             {
-                if (mapFn != null)
-                    result[i] = mapFn.Call(thisArg, items[i], i);
-                else
-                    result[i] = items[i];
+                // The source object has an iterator symbol value.  Call it to get the iterator.
+                var getIteratorFunc = getIterator as FunctionInstance;
+                if (getIteratorFunc == null)
+                    throw new JavaScriptException(Engine, ErrorType.TypeError, "The iterator symbol value must be a function");
+                var iterator = getIteratorFunc.Call(items) as ObjectInstance;
+                if (iterator == null)
+                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid iterator");
+
+                // Okay, we have the iterator.  Now get a reference to the next function.
+                var nextFunc = iterator["next"] as FunctionInstance;
+                if (nextFunc == null)
+                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Missing iterator next function");
+
+                // Loop.
+                var values = new List<object>();
+                while (true)
+                {
+                    // Call the next function to get the next value.
+                    var iteratorResult = nextFunc.Call(iterator) as ObjectInstance;
+                    if (iteratorResult == null)
+                        throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid iterator next return value");
+
+                    // Check if iteration is done.
+                    if (TypeConverter.ToBoolean(iteratorResult["done"]))
+                        break;
+
+                    // Collect the values.
+                    values.Add(iteratorResult["value"]);
+                }
+
+                // Convert the values into a typed array instance.
+                var result = new TypedArrayInstance(this.InstancePrototype, this.type,
+                    Engine.ArrayBuffer.Construct(values.Count * BytesPerElement), 0, values.Count);
+                for (int i = 0; i < values.Count; i++)
+                {
+                    if (mapFn != null)
+                        result[i] = mapFn.Call(thisArg, values[i], i);
+                    else
+                        result[i] = values[i];
+                }
+                return result;
             }
-            return result;
+            else
+            {
+                // There was no iterator symbol value, so fall back on the alternate method.
+                int length = TypeConverter.ToInt32(items["length"]);
+                var result = new TypedArrayInstance(this.InstancePrototype, this.type, Engine.ArrayBuffer.Construct(length * BytesPerElement), 0, length);
+                for (int i = 0; i < length; i++)
+                {
+                    if (mapFn != null)
+                        result[i] = mapFn.Call(thisArg, items[i], i);
+                    else
+                        result[i] = items[i];
+                }
+                return result;
+            }
         }
 
         /// <summary>
-        /// Creates a new typed array with a variable number of arguments.
+        /// Creates a new typed array with a variable number of elements.
         /// </summary>
         /// <param name="elements"> Elements of which to create the typed array. </param>
-        /// <returns></returns>
-        [JSInternalFunction(Name = "of")]
+        /// <returns> A new typed array with the given elements. </returns>
+        [JSInternalFunction(Name = "of", Length = 0)]
         public TypedArrayInstance Of(params object[] elements)
         {
-            throw new NotImplementedException();
+            int length = elements.Length;
+            var result = new TypedArrayInstance(this.InstancePrototype, this.type, Engine.ArrayBuffer.Construct(length * BytesPerElement), 0, length);
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = elements[i];
+            }
+            return result;
         }
 
     }
