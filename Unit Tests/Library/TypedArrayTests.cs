@@ -475,7 +475,30 @@ namespace UnitTests
         [TestMethod]
         public void set()
         {
-            Assert.Fail("TODO");
+            // set(array)
+            Assert.AreEqual("5,6,49,4,11", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]); a.set([5, 6]); a.toString()"));
+            Assert.AreEqual("5,6,4,11", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]).subarray(1); a.set([5, 6]); a.toString()"));
+
+            // set(array, offset)
+            Assert.AreEqual("1,21,5,6,11", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]); a.set([5, 6], 2); a.toString()"));
+            Assert.AreEqual("21,49,5,6", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]).subarray(1); a.set([5, 6], 2); a.toString()"));
+
+            // set(typedArray)
+            Assert.AreEqual("5,6,49,4,11", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]); a.set(new Int8Array([5, 6])); a.toString()"));
+            Assert.AreEqual("5,6,4,11", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]).subarray(1); a.set(new Int8Array([5, 6])); a.toString()"));
+
+            // set(typedArray, offset)
+            Assert.AreEqual("1,21,5,6,11", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]); a.set(new Int8Array([5, 6]), 2); a.toString()"));
+            Assert.AreEqual("21,49,5,6", Evaluate("var a = new Int16Array([1, 21, 49, 4, 11]).subarray(1); a.set(new Int8Array([5, 6]), 2); a.toString()"));
+            Assert.AreEqual("2100,49,49,4,11", Evaluate("var a = new Int16Array([1, 2100, 49, 4, 11]); a.set(a.subarray(1, 3), 0); a.toString()"));
+            Assert.AreEqual("1,2100,2100,49,11", Evaluate("var a = new Int16Array([1, 2100, 49, 4, 11]); a.set(a.subarray(1, 3), 2); a.toString()"));
+
+            Assert.AreEqual("RangeError", EvaluateExceptionType("new Int16Array([1, 21, 49, 4, 11]).set([1, 2], -1)"));
+            Assert.AreEqual("RangeError", EvaluateExceptionType("new Int16Array([1, 21, 49, 4, 11]).set([1, 2], 4)"));
+            Assert.AreEqual("RangeError", EvaluateExceptionType("new Int16Array([1, 21, 49, 4, 11]).set([1, 2], 7)"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Int8Array.prototype.set.length"));
         }
 
         [TestMethod]
@@ -537,13 +560,39 @@ namespace UnitTests
         [TestMethod]
         public void sort()
         {
-            Assert.Fail("TODO");
+            // By default, array elements are sorted using a numeric sort.
+            Assert.AreEqual("1,4,11,21,49", Evaluate("new Int8Array([1, 21, 49, 4, 11]).sort().toString()"));
+
+            // NaN is sorted to the end.
+            Assert.AreEqual("-5,1,4,7,NaN", Evaluate("new Float64Array([1, NaN, 4, 7, -5]).sort().toString()"));
+
+            // Positive zero is sorted higher than negative zero.
+            // We invert the results so as to more easily show the results are correct.
+            Assert.AreEqual("-Infinity,-Infinity,-Infinity,Infinity,Infinity",
+                Evaluate("new Float64Array([-0, 0, -0, 0, -0]).sort().map(function (val) { return 1/val; }).toString()"));
+
+            // Comparison function.
+            Assert.AreEqual("1,4,11,21,49", Evaluate("new Int8Array([1, 21, 49, 4, 11]).sort(function (a, b) { return a - b; }).toString()"));
+            Assert.AreEqual("49,21,11,4,1", Evaluate("new Int8Array([1, 21, 49, 4, 11]).sort(function (a, b) { return b - a; }).toString()"));
+            Assert.AreEqual("1,11,21,4,49", Evaluate("new Int8Array([1, 21, 49, 4, 11]).sort(function (a, b) { return a.toString() > b.toString() ? 1 : -1; }).toString()"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Int8Array.prototype.sort.length"));
         }
 
         [TestMethod]
         public void subarray()
         {
-            Assert.Fail("TODO");
+            Assert.AreEqual("4,11", Evaluate("new Int16Array([1, 21, 49, 4, 11]).subarray(3).toString()"));
+            Assert.AreEqual("49,4", Evaluate("new Int16Array([1, 21, 49, 4, 11]).subarray(2, 4).toString()"));
+            Assert.AreEqual("49,15", Evaluate("new Int16Array([1, 21, 49, 15, 4, 11]).subarray(1, 5).subarray(1, 3).toString()"));
+
+            // Subarrays share the same buffer.
+            Assert.AreEqual("1,21,99,4,11", Evaluate("var a1 = new Int16Array([1, 21, 49, 4, 11]); var a2 = a1.subarray(2); a2[0] = 99; a1.toString()"));
+            Assert.AreEqual("49,99,11", Evaluate("var a1 = new Int16Array([1, 21, 49, 4, 11]); var a2 = a1.subarray(2); a1[3] = 99; a2.toString()"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Int8Array.prototype.subarray.length"));
         }
 
         [TestMethod]

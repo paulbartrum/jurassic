@@ -175,6 +175,34 @@ namespace Jurassic.Library
             }
         }
 
+        /// <summary>
+        /// The data storage size, in bytes, of each array element.
+        /// </summary>
+        private int BytesPerElement
+        {
+            get
+            {
+                switch (type)
+                {
+                    case TypedArrayType.Int8Array:
+                    case TypedArrayType.Uint8Array:
+                    case TypedArrayType.Uint8ClampedArray:
+                        return 1;
+                    case TypedArrayType.Int16Array:
+                    case TypedArrayType.Uint16Array:
+                        return 2;
+                    case TypedArrayType.Int32Array:
+                    case TypedArrayType.Uint32Array:
+                    case TypedArrayType.Float32Array:
+                        return 4;
+                    case TypedArrayType.Float64Array:
+                        return 8;
+                    default:
+                        throw new NotSupportedException($"Unsupported TypedArray '{type}'.");
+                }
+            }
+        }
+
 
         //     JAVASCRIPT PROPERTIES
         //_________________________________________________________________________________________
@@ -325,10 +353,17 @@ namespace Jurassic.Library
         /// <param name="end"> Element to end at. The offset is exclusive. If not specified, all
         /// elements from the one specified by begin to the end of the array are included in the
         /// new view. </param>
-        [JSInternalFunction(Name = "subarray", Length = 2)]
-        public void Subarray(int begin = 0, int end = int.MaxValue)
+        /// <returns> A new typed array that shares the same ArrayBuffer store. </returns>
+        [JSInternalFunction(Name = "subarray")]
+        public TypedArrayInstance Subarray(int begin = 0, int end = int.MaxValue)
         {
-            throw new NotImplementedException();
+            // Constrain the input parameters to valid values.
+            begin = begin < 0 ? Math.Max(this.Length + begin, 0) : Math.Min(begin, this.Length);
+            end = end < 0 ? Math.Max(this.Length + end, 0) : Math.Min(end, this.Length);
+            int newLength = Math.Max(end - begin, 0);
+
+            // Create a new typed array that uses the same ArrayBuffer.
+            return new TypedArrayInstance(this.Prototype, this.type, this.Buffer, this.ByteOffset + begin * BytesPerElement, newLength);
         }
 
         /// <summary>
@@ -563,6 +598,19 @@ namespace Jurassic.Library
 
         /// <summary>
         /// Returns the index of the given search element in the array, searching backwards from
+        /// the end of the array.
+        /// </summary>
+        /// <param name="searchElement"> The value to search for. </param>
+        /// <returns> The index of the given search element in the array, or <c>-1</c> if the
+        /// element wasn't found. </returns>
+        [JSInternalFunction(Name = "lastIndexOf", Length = 1)]
+        public int LastIndexOf(object searchElement)
+        {
+            return LastIndexOf(searchElement, int.MaxValue);
+        }
+
+        /// <summary>
+        /// Returns the index of the given search element in the array, searching backwards from
         /// <paramref name="fromIndex"/>.
         /// </summary>
         /// <param name="searchElement"> The value to search for. </param>
@@ -570,7 +618,7 @@ namespace Jurassic.Library
         /// <returns> The index of the given search element in the array, or <c>-1</c> if the
         /// element wasn't found. </returns>
         [JSInternalFunction(Name = "lastIndexOf", Length = 1)]
-        public int LastIndexOf(object searchElement, int fromIndex = int.MaxValue)
+        public int LastIndexOf(object searchElement, int fromIndex)
         {
             return new TypedArrayAdapter(this).LastIndexOf(searchElement, fromIndex);
         }
@@ -649,7 +697,40 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "set", Length = 1)]
         public void Set(ObjectInstance array, int offset = 0)
         {
-            throw new NotImplementedException();
+            if (offset < 0)
+                throw new JavaScriptException(Engine, ErrorType.RangeError, "Start offset cannot be negative");
+            if (array is TypedArrayInstance)
+            {
+                var typedArray = (TypedArrayInstance)array;
+                if (typedArray.Length + offset > this.Length)
+                    throw new JavaScriptException(Engine, ErrorType.RangeError, "Source array is too large");
+                if (this.Buffer == typedArray.Buffer && this.ByteOffset + offset * BytesPerElement > typedArray.ByteOffset)
+                {
+                    // Copy in the opposite direction.
+                    for (int i = typedArray.Length - 1; i >= 0; i--)
+                    {
+                        this[offset + i] = typedArray[i];
+                    }
+                }
+                else
+                {
+                    // Copy in the normal direction.
+                    for (int i = 0; i < typedArray.Length; i++)
+                    {
+                        this[offset + i] = typedArray[i];
+                    }
+                }
+            }
+            else
+            {
+                int arrayLength = TypeConverter.ToInteger(array["length"]);
+                if (arrayLength + offset > this.Length)
+                    throw new JavaScriptException(Engine, ErrorType.RangeError, "Source array is too large");
+                for (int i = 0; i < arrayLength; i ++)
+                {
+                    this[offset + i] = array[i];
+                }
+            }
         }
 
         /// <summary>
@@ -702,19 +783,23 @@ namespace Jurassic.Library
                 // Default comparer.
                 comparer = (a, b) =>
                 {
-                    if (a == null && b == null)
-                        return 0;
-                    if (a == null)
-                        return 1;
-                    if (b == null)
+                    double x = TypeConverter.ToNumber(a);
+                    double y = TypeConverter.ToNumber(b);
+                    if (x < y)
                         return -1;
-                    if (a == Undefined.Value && b == Undefined.Value)
-                        return 0;
-                    if (a == Undefined.Value)
+                    if (x > y)
                         return 1;
-                    if (b == Undefined.Value)
+                    if (double.IsNaN(x) && double.IsNaN(y))
+                        return 0;
+                    if (double.IsNaN(x))
+                        return 1;
+                    if (double.IsNaN(y))
                         return -1;
-                    return string.Compare(TypeConverter.ToString(a), TypeConverter.ToString(b), StringComparison.Ordinal);
+                    if (TypeUtilities.IsNegativeZero(x) && TypeUtilities.IsPositiveZero(y))
+                        return -1;
+                    if (TypeUtilities.IsPositiveZero(x) && TypeUtilities.IsNegativeZero(y))
+                        return 1;
+                    return 0;
                 };
             }
             else
@@ -722,18 +807,6 @@ namespace Jurassic.Library
                 // Custom comparer.
                 comparer = (a, b) =>
                 {
-                    if (a == null && b == null)
-                        return 0;
-                    if (a == null)
-                        return 1;
-                    if (b == null)
-                        return -1;
-                    if (a == Undefined.Value && b == Undefined.Value)
-                        return 0;
-                    if (a == Undefined.Value)
-                        return 1;
-                    if (b == Undefined.Value)
-                        return -1;
                     var v = TypeConverter.ToNumber(comparisonFunction.CallFromNative("sort", null, a, b));
                     if (double.IsNaN(v))
                         return 0;

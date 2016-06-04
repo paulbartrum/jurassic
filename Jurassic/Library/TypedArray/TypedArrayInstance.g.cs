@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(28)
+			return new List<PropertyNameAndValue>(29)
 			{
 				new PropertyNameAndValue("buffer", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get buffer", 0, __GETTER__Buffer), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("byteOffset", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get byteOffset", 0, __GETTER__ByteOffset), null, PropertyAttributes.Configurable)),
@@ -110,11 +110,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					((TypedArrayInstance)thisObj).Subarray(0, int.MaxValue); return Undefined.Value;
+					return ((TypedArrayInstance)thisObj).Subarray(0, int.MaxValue);
 				case 1:
-					((TypedArrayInstance)thisObj).Subarray(TypeUtilities.IsUndefined(args[0]) ? 0 : TypeConverter.ToInteger(args[0]), int.MaxValue); return Undefined.Value;
+					return ((TypedArrayInstance)thisObj).Subarray(TypeUtilities.IsUndefined(args[0]) ? 0 : TypeConverter.ToInteger(args[0]), int.MaxValue);
 				default:
-					((TypedArrayInstance)thisObj).Subarray(TypeUtilities.IsUndefined(args[0]) ? 0 : TypeConverter.ToInteger(args[0]), TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1])); return Undefined.Value;
+					return ((TypedArrayInstance)thisObj).Subarray(TypeUtilities.IsUndefined(args[0]) ? 0 : TypeConverter.ToInteger(args[0]), TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -280,11 +280,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return ((TypedArrayInstance)thisObj).LastIndexOf(Undefined.Value, int.MaxValue);
+					return ((TypedArrayInstance)thisObj).LastIndexOf(Undefined.Value);
 				case 1:
-					return ((TypedArrayInstance)thisObj).LastIndexOf(args[0], int.MaxValue);
+					return ((TypedArrayInstance)thisObj).LastIndexOf(args[0]);
 				default:
-					return ((TypedArrayInstance)thisObj).LastIndexOf(args[0], TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
+					return ((TypedArrayInstance)thisObj).LastIndexOf(args[0], TypeConverter.ToInteger(args[1]));
 			}
 		}
 

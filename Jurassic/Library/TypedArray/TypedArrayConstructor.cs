@@ -40,7 +40,7 @@ namespace Jurassic.Library
         /// <summary>
         /// The data storage size, in bytes, of each array element.
         /// </summary>
-        internal int BytesPerElement
+        private int BytesPerElement
         {
             get
             {
@@ -79,7 +79,8 @@ namespace Jurassic.Library
         {
             if (source == null)
                 throw new ArgumentNullException("source");
-            var result = new TypedArrayInstance(this.InstancePrototype, this.type, Engine.ArrayBuffer.Construct(source.Length), 0, source.Length);
+            var result = new TypedArrayInstance(this.InstancePrototype, this.type,
+                Engine.ArrayBuffer.Construct(source.Length * BytesPerElement), 0, source.Length);
             for (int i = 0; i < source.Length; i ++)
             {
                 result[i] = source[i];
