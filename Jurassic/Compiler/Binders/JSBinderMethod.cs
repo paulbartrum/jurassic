@@ -88,7 +88,8 @@ namespace Jurassic.Compiler
                     type != typeof(double) &&
                     type != typeof(string) &&
                     type != typeof(object) &&
-                    typeof(ObjectInstance).IsAssignableFrom(type) == false)
+                    typeof(ObjectInstance).IsAssignableFrom(type) == false &&
+                    type.IsEnum == false)
                     throw new NotImplementedException(string.Format("Unsupported parameter type '{0}'.", type));
             }
         }

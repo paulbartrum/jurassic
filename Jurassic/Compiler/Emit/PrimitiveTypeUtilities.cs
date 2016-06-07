@@ -68,6 +68,17 @@ namespace Jurassic.Compiler
                 return PrimitiveType.ConcatenatedString;
             if (typeof(Library.ObjectInstance).IsAssignableFrom(type))
                 return PrimitiveType.Object;
+            if (type.IsEnum)
+            {
+                try
+                {
+                    return ToPrimitiveType(Enum.GetUnderlyingType(type));
+                }
+                catch (NotImplementedException ex)
+                {
+                    throw new NotImplementedException(string.Format("Unsupported type: {0}", type), ex);
+                }
+            }
             throw new NotImplementedException(string.Format("Unsupported type: {0}", type));
         }
 
