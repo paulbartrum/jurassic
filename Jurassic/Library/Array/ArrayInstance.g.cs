@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(30)
+			return new List<PropertyNameAndValue>(33)
 			{
 				new PropertyNameAndValue("concat", new ClrStubFunction(engine.FunctionInstancePrototype, "concat", 1, __STUB__Concat), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("pop", new ClrStubFunction(engine.FunctionInstancePrototype, "pop", 0, __STUB__Pop), PropertyAttributes.NonEnumerable),
@@ -39,6 +39,9 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("copyWithin", new ClrStubFunction(engine.FunctionInstancePrototype, "copyWithin", 2, __STUB__CopyWithin), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("fill", new ClrStubFunction(engine.FunctionInstancePrototype, "fill", 1, __STUB__Fill), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("findIndex", new ClrStubFunction(engine.FunctionInstancePrototype, "findIndex", 1, __STUB__FindIndex), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("entries", new ClrStubFunction(engine.FunctionInstancePrototype, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("keys", new ClrStubFunction(engine.FunctionInstancePrototype, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("values", new ClrStubFunction(engine.FunctionInstancePrototype, "values", 0, __STUB__Values), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -371,6 +374,30 @@ namespace Jurassic.Library
 				default:
 					return FindIndex(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
+		}
+
+		private static object __STUB__Entries(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is ArrayInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'entries' is not generic.");
+			return ((ArrayInstance)thisObj).Entries();
+		}
+
+		private static object __STUB__Keys(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is ArrayInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'keys' is not generic.");
+			return ((ArrayInstance)thisObj).Keys();
+		}
+
+		private static object __STUB__Values(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is ArrayInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'values' is not generic.");
+			return ((ArrayInstance)thisObj).Values();
 		}
 	}
 

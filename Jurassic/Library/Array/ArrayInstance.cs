@@ -99,6 +99,14 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+
+            // From the spec: the initial value of the @@iterator property is the same function
+            // object as the initial value of the Array.prototype.values property.
+            PropertyNameAndValue valuesProperty = properties.Find(p => "values".Equals(p.Key));
+            if (valuesProperty == null)
+                throw new InvalidOperationException("Expected values property.");
+            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
+
             result.FastSetProperties(properties);
             return result;
         }
@@ -866,19 +874,19 @@ namespace Jurassic.Library
 
 
 
-        //     ARRAY WRAPPER FUNCTIONS
+        //     ARRAY ADAPTER FUNCTIONS
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Implements a wrapper for regular JS arrays.
+        /// Implements an adapter for regular JS arrays.
         /// </summary>
-        private class ArrayInstanceWrapper : ArrayWrapper<object>
+        private class ArrayInstanceAdapter : ArrayAdapter<object>
         {
             /// <summary>
             /// Creates a new ArrayInstanceWrapper instance.
             /// </summary>
             /// <param name="wrappedInstance"> The array-like object that is being wrapped. </param>
-            public ArrayInstanceWrapper(ObjectInstance wrappedInstance)
+            public ArrayInstanceAdapter(ObjectInstance wrappedInstance)
                 : base(wrappedInstance, (int)GetLength(wrappedInstance))
             {
             }
@@ -934,7 +942,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "join", Flags = JSFunctionFlags.HasThisObject)]
         public static string Join(ObjectInstance thisObj, string separator = ",")
         {
-            return new ArrayInstanceWrapper(thisObj).Join(separator);
+            return new ArrayInstanceAdapter(thisObj).Join(separator);
         }
 
         /// <summary>
@@ -945,7 +953,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "reverse", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
         public static ObjectInstance Reverse(ObjectInstance thisObj)
         {
-            return new ArrayInstanceWrapper(thisObj).Reverse();
+            return new ArrayInstanceAdapter(thisObj).Reverse();
         }
 
         /// <summary>
@@ -962,7 +970,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "slice", Flags = JSFunctionFlags.HasThisObject, Length = 2)]
         public static ObjectInstance Slice(ObjectInstance thisObj, int start, int end = int.MaxValue)
         {
-            return new ArrayInstanceWrapper(thisObj).Slice(start, end);
+            return new ArrayInstanceAdapter(thisObj).Slice(start, end);
         }
 
         /// <summary>
@@ -1022,7 +1030,7 @@ namespace Jurassic.Library
                 };
             }
 
-            return new ArrayInstanceWrapper(thisObj).Sort(comparer);
+            return new ArrayInstanceAdapter(thisObj).Sort(comparer);
         }
 
         /// <summary>
@@ -1033,7 +1041,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toLocaleString", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToLocaleString(ObjectInstance thisObj)
         {
-            return new ArrayInstanceWrapper(thisObj).ToLocaleString();
+            return new ArrayInstanceAdapter(thisObj).ToLocaleString();
         }
 
         /// <summary>
@@ -1044,7 +1052,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
         public static string ToString(ObjectInstance thisObj)
         {
-            return new ArrayInstanceWrapper(thisObj).ToString();
+            return new ArrayInstanceAdapter(thisObj).ToString();
         }
 
         /// <summary>
@@ -1059,7 +1067,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "indexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static int IndexOf(ObjectInstance thisObj, object searchElement, int fromIndex = 0)
         {
-            return new ArrayInstanceWrapper(thisObj).IndexOf(searchElement, fromIndex);
+            return new ArrayInstanceAdapter(thisObj).IndexOf(searchElement, fromIndex);
         }
 
         /// <summary>
@@ -1088,7 +1096,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "lastIndexOf", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static int LastIndexOf(ObjectInstance thisObj, object searchElement, int fromIndex)
         {
-            return new ArrayInstanceWrapper(thisObj).LastIndexOf(searchElement, fromIndex);
+            return new ArrayInstanceAdapter(thisObj).LastIndexOf(searchElement, fromIndex);
         }
 
         /// <summary>
@@ -1106,7 +1114,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "every", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static bool Every(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new ArrayInstanceWrapper(thisObj).Every(callbackFunction, context);
+            return new ArrayInstanceAdapter(thisObj).Every(callbackFunction, context);
         }
 
         /// <summary>
@@ -1124,7 +1132,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "some", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static bool Some(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new ArrayInstanceWrapper(thisObj).Some(callbackFunction, context);
+            return new ArrayInstanceAdapter(thisObj).Some(callbackFunction, context);
         }
 
         /// <summary>
@@ -1138,7 +1146,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "forEach", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static void ForEach(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            new ArrayInstanceWrapper(thisObj).ForEach(callbackFunction, context);
+            new ArrayInstanceAdapter(thisObj).ForEach(callbackFunction, context);
         }
 
         /// <summary>
@@ -1156,7 +1164,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "map", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static ObjectInstance Map(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new ArrayInstanceWrapper(thisObj).Map(callbackFunction, context);
+            return new ArrayInstanceAdapter(thisObj).Map(callbackFunction, context);
         }
 
         /// <summary>
@@ -1173,7 +1181,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "find", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static object Find(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new ArrayInstanceWrapper(thisObj).Find(callbackFunction, context);
+            return new ArrayInstanceAdapter(thisObj).Find(callbackFunction, context);
         }
 
         /// <summary>
@@ -1191,7 +1199,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "filter", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static ObjectInstance Filter(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new ArrayInstanceWrapper(thisObj).Filter(callbackFunction, context);
+            return new ArrayInstanceAdapter(thisObj).Filter(callbackFunction, context);
         }
 
         /// <summary>
@@ -1209,7 +1217,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "reduce", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static object Reduce(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
-            return new ArrayInstanceWrapper(thisObj).Reduce(callbackFunction, initialValue);
+            return new ArrayInstanceAdapter(thisObj).Reduce(callbackFunction, initialValue);
         }
 
         /// <summary>
@@ -1228,7 +1236,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "reduceRight", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
         public static object ReduceRight(ObjectInstance thisObj, FunctionInstance callbackFunction, object initialValue = null)
         {
-            return new ArrayInstanceWrapper(thisObj).ReduceRight(callbackFunction, initialValue);
+            return new ArrayInstanceAdapter(thisObj).ReduceRight(callbackFunction, initialValue);
         }
 
         /// <summary>
@@ -1241,10 +1249,11 @@ namespace Jurassic.Library
         /// <param name="target"> Target start index position where to copy the elements to. </param>
         /// <param name="start"> Source start index position where to start copying elements from. </param>
         /// <param name="end"> Optional. Source end index position where to end copying elements from. </param>
+        /// <returns> The array that is being operated on. </returns>
         [JSInternalFunction(Name = "copyWithin", Length = 2, Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
         public static ObjectInstance CopyWithin(ObjectInstance thisObj, int target, int start, int end = int.MaxValue)
         {
-            return new ArrayInstanceWrapper(thisObj).CopyWithin(target, start, end);
+            return new ArrayInstanceAdapter(thisObj).CopyWithin(target, start, end);
         }
 
         /// <summary>
@@ -1259,7 +1268,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "fill", Length = 1, Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject)]
         public static ObjectInstance Fill(ObjectInstance thisObj, object value, int start = 0, int end = int.MaxValue)
         {
-            return new ArrayInstanceWrapper(thisObj).Fill(value, start, end);
+            return new ArrayInstanceAdapter(thisObj).Fill(value, start, end);
         }
 
         /// <summary>
@@ -1276,7 +1285,41 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "findIndex", Length = 1, Flags = JSFunctionFlags.HasThisObject)]
         public static int FindIndex(ObjectInstance thisObj, FunctionInstance callbackFunction, ObjectInstance context = null)
         {
-            return new ArrayInstanceWrapper(thisObj).FindIndex(callbackFunction, context);
+            return new ArrayInstanceAdapter(thisObj).FindIndex(callbackFunction, context);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the key/value pairs for each index in
+        /// the array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the key/value pairs for each index in
+        /// the array. </returns>
+        [JSInternalFunction(Name = "entries")]
+        public ObjectInstance Entries()
+        {
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.KeyAndValue);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the keys for each index in the array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the keys for each index in the array. </returns>
+        [JSInternalFunction(Name = "keys")]
+        public ObjectInstance Keys()
+        {
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Key);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the values for each index in the
+        /// array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the values for each index in the
+        /// array. </returns>
+        [JSInternalFunction(Name = "values")]
+        public ObjectInstance Values()
+        {
+            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Value);
         }
 
 

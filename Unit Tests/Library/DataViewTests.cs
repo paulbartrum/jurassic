@@ -27,6 +27,7 @@ namespace UnitTests
             // toString and valueOf.
             Assert.AreEqual("function DataView() { [native code] }", Evaluate("DataView.toString()"));
             Assert.AreEqual(true, Evaluate("DataView.valueOf() === DataView"));
+            Assert.AreEqual("DataView", Evaluate("DataView.prototype[Symbol.toStringTag]"));
 
             // length
             Assert.AreEqual(3, Evaluate("DataView.length"));

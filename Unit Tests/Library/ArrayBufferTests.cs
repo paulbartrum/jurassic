@@ -22,6 +22,7 @@ namespace UnitTests
             // toString and valueOf.
             Assert.AreEqual("function ArrayBuffer() { [native code] }", Evaluate("ArrayBuffer.toString()"));
             Assert.AreEqual(true, Evaluate("ArrayBuffer.valueOf() === ArrayBuffer"));
+            Assert.AreEqual("ArrayBuffer", Evaluate("ArrayBuffer.prototype[Symbol.toStringTag]"));
 
             // length
             Assert.AreEqual(1, Evaluate("ArrayBuffer.length"));

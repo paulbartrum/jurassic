@@ -6,7 +6,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Implements the array algorithms that are shared between arrays and typed arrays.
     /// </summary>
-    internal abstract class ArrayWrapper<T>
+    internal abstract class ArrayAdapter<T>
     {
         private ObjectInstance wrappedInstance;
         private int length;
@@ -16,7 +16,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="wrappedInstance"> The array-like object that is being wrapped. </param>
         /// <param name="length"> The number of elements in the array. </param>
-        protected ArrayWrapper(ObjectInstance wrappedInstance, int length)
+        protected ArrayAdapter(ObjectInstance wrappedInstance, int length)
         {
             this.wrappedInstance = wrappedInstance;
             this.length = length;

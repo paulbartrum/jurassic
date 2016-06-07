@@ -49,7 +49,7 @@ namespace UnitTests
             }
         }
 
-        public static object EvaluateExceptionType(string script)
+        public static string EvaluateExceptionType(string script)
         {
             object result;
             try

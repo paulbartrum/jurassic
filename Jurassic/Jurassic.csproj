@@ -124,8 +124,10 @@
     <Compile Include="Core\ScriptSource\FileScriptSource.cs" />
     <Compile Include="Core\ScriptSource\ScriptSource.cs" />
     <Compile Include="Library\Array\ArrayConstructor.g.cs" />
-    <Compile Include="Library\Array\ArrayWrapper.cs" />
+    <Compile Include="Library\Array\ArrayAdapter.cs" />
     <Compile Include="Library\Array\ArrayInstance.g.cs" />
+    <Compile Include="Library\Array\ArrayIterator.cs" />
+    <Compile Include="Library\Array\ArrayIterator.g.cs" />
     <Compile Include="Library\Boolean\BooleanConstructor.g.cs" />
     <Compile Include="Library\Boolean\BooleanInstance.g.cs" />
     <Compile Include="Library\ClrWrapper\ClrInstanceWrapper.cs" />

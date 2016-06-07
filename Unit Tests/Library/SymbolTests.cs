@@ -26,6 +26,7 @@ namespace UnitTests
             // toString and valueOf.
             Assert.AreEqual("function Symbol() { [native code] }", Evaluate("Symbol.toString()"));
             Assert.AreEqual(true, Evaluate("Symbol.valueOf() === Symbol"));
+            Assert.AreEqual("Symbol", Evaluate("Symbol.prototype[Symbol.toStringTag]"));
 
             // typeof
             Assert.AreEqual("symbol", Evaluate("typeof Symbol()"));
