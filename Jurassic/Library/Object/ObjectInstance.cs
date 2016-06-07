@@ -417,7 +417,48 @@ namespace Jurassic.Library
         /// <c>false</c> otherwise. </returns>
         public bool HasProperty(object key)
         {
-            return this.GetPropertyValue(key) != null;
+            // Check if the property is an indexed property.
+            uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+            if (arrayIndex != uint.MaxValue)
+                return this.HasProperty(arrayIndex, this);
+
+            // Otherwise, the property is a name.
+            return this.HasProperty(key, this);
+        }
+
+        private bool HasProperty(int index, ObjectInstance thisValue)
+        {
+            // Get the descriptor for the property.
+            PropertyDescriptor property = this.GetOwnPropertyDescriptor(index);
+            if (property.Exists == true)
+            {
+                // The property was found!
+                return true;
+            }
+            // The property might exist in the prototype.
+            if (this.prototype == null)
+                return false;
+            return this.prototype.HasProperty(index, thisValue);
+        }
+
+        private bool HasProperty(object key, ObjectInstance thisValue)
+        {
+            ObjectInstance prototypeObject = this;
+            do
+            {
+                // Retrieve information about the property.
+                var property = prototypeObject.schema.GetPropertyIndexAndAttributes(key);
+                if (property.Exists == true)
+                {
+                    return true;
+                }
+
+                // Traverse the prototype chain.
+                prototypeObject = prototypeObject.prototype;
+            } while (prototypeObject != null);
+
+            // The property doesn't exist.
+            return false;
         }
 
         /// <summary>
