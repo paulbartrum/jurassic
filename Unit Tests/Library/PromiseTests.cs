@@ -25,6 +25,7 @@ namespace UnitTests
 
             // toString and valueOf.
             Assert.AreEqual("function Promise() { [native code] }", Evaluate("Promise.toString()"));
+            Assert.AreEqual("Promise", Evaluate("Promise.prototype[Symbol.toStringTag]"));
             Assert.AreEqual(true, Evaluate("Promise.valueOf() === Promise"));
 
             // length

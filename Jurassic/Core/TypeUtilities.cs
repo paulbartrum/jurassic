@@ -245,6 +245,30 @@ namespace Jurassic
             // TODO: ECMAScript 6 defines IsRegExp in terms of a predefined symbol @@match.
             return value is RegExpInstance;
         }
+
+        private static readonly long negativeZeroBits = BitConverter.DoubleToInt64Bits(-0.0);
+
+        /// <summary>
+        /// Determines if the given number is negative zero.
+        /// </summary>
+        /// <param name="value"> The value to test. </param>
+        /// <returns> <c>true</c> if the value is negative zero; <c>false</c> otherwise. </returns>
+        public static bool IsNegativeZero(double value)
+        {
+            return BitConverter.DoubleToInt64Bits(value) == negativeZeroBits;
+        }
+
+        private static readonly long positiveZeroBits = BitConverter.DoubleToInt64Bits(0.0);
+
+        /// <summary>
+        /// Determines if the given number is positive zero.
+        /// </summary>
+        /// <param name="value"> The value to test. </param>
+        /// <returns> <c>true</c> if the value is positive zero; <c>false</c> otherwise. </returns>
+        public static bool IsPositiveZero(double value)
+        {
+            return BitConverter.DoubleToInt64Bits(value) == positiveZeroBits;
+        }
     }
 
 }

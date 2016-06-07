@@ -1214,5 +1214,84 @@ namespace UnitTests
             // length
             Assert.AreEqual(1, Evaluate("Array.prototype.findIndex.length"));
         }
+
+        [TestMethod]
+        public void entries()
+        {
+            Execute("var i = [11, 7].entries()");
+
+            // Item #1
+            Execute("var result = i.next();");
+            Assert.AreEqual("0,11", Evaluate("result.value.toString()"));
+            Assert.AreEqual(false, Evaluate("result.done"));
+
+            // Item #2
+            Execute("var result = i.next();");
+            Assert.AreEqual("1,7", Evaluate("result.value.toString()"));
+            Assert.AreEqual(false, Evaluate("result.done"));
+
+            // No more items.
+            Execute("var result = i.next();");
+            Assert.AreEqual(Undefined.Value, Evaluate("result.value"));
+            Assert.AreEqual(true, Evaluate("result.done"));
+
+            // toString
+            Assert.AreEqual("[object Array Iterator]", Evaluate("new Int8Array([1, 2, 3]).entries().toString()"));
+        }
+
+        [TestMethod]
+        public void keys()
+        {
+            Execute("var i = [11, 7].keys()");
+
+            // Item #1
+            Execute("var result = i.next();");
+            Assert.AreEqual(0, Evaluate("result.value"));
+            Assert.AreEqual(false, Evaluate("result.done"));
+
+            // Item #2
+            Execute("var result = i.next();");
+            Assert.AreEqual(1, Evaluate("result.value"));
+            Assert.AreEqual(false, Evaluate("result.done"));
+
+            // No more items.
+            Execute("var result = i.next();");
+            Assert.AreEqual(Undefined.Value, Evaluate("result.value"));
+            Assert.AreEqual(true, Evaluate("result.done"));
+
+            // toString
+            Assert.AreEqual("[object Array Iterator]", Evaluate("new Int8Array([1, 2, 3]).keys().toString()"));
+        }
+
+        [TestMethod]
+        public void values()
+        {
+            Execute("var i = [11, 7].values()");
+
+            // Item #1
+            Execute("var result = i.next();");
+            Assert.AreEqual(11, Evaluate("result.value"));
+            Assert.AreEqual(false, Evaluate("result.done"));
+
+            // Item #2
+            Execute("var result = i.next();");
+            Assert.AreEqual(7, Evaluate("result.value"));
+            Assert.AreEqual(false, Evaluate("result.done"));
+
+            // No more items.
+            Execute("var result = i.next();");
+            Assert.AreEqual(Undefined.Value, Evaluate("result.value"));
+            Assert.AreEqual(true, Evaluate("result.done"));
+
+            // toString
+            Assert.AreEqual("[object Array Iterator]", Evaluate("new Int8Array([1, 2, 3]).values().toString()"));
+        }
+
+        [TestMethod]
+        public void Symbol_iterator()
+        {
+            // The Symbol.iterator value is just equal to the values function.
+            Assert.AreEqual(true, Evaluate("[][Symbol.iterator] === [].values"));
+        }
     }
 }
