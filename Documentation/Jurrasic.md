@@ -1,10 +1,11 @@
 #Jurassic JavaScript .Net Documentation
 
 ##Basic Hosting Scenarios
-###<a name="eval></a>Evaluating an expression
+
+###Evaluating an expression
 
 The following code will evaluate a javascript expression:
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 Console.WriteLine(engine.Evaluate("5 * 10 + 2"));
 ```
@@ -15,7 +16,7 @@ You can include multiple statements in the code string; the result of the last v
 
 The above call to Evaluate returns an object. If you want to return a value of a specific type, you can use the coercing version of Evaluate. For example:
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 Console.WriteLine(engine.Evaluate<int>("1.5 + 2.4"));
 ```
@@ -25,14 +26,14 @@ This code outputs "3" to the console. (If you are wondering why it returns 3, ra
 ###Executing a script
 Executing a script runs a script from start to finish. For example, to execute the script at "c:\test.js" use the following code:
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.ExecuteFile(@"c:\test.js");
 ```
 
 If you have the code to run in a string, use the Execute() method:
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.Execute("console.log('testing')");
 ```
@@ -48,18 +49,19 @@ In order to interact with a script, it is useful to be able to modify and retrie
 
 For example, say we have the following javascript file (c:\test.js):
 
-```C#
+```c#
 interop = interop + 5
 ```
 
 The following c# code initializes, then outputs the value of the "interop" variable.
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.SetGlobalValue("interop", 15);
 engine.ExecuteFile(@"c:\test.js");
 Console.WriteLine(engine.GetGlobalValue<int>("interop"));
 ```
+
 This code outputs "20" to the console.
 
 Note that you can only set the value of a variable to a supported type.
@@ -91,12 +93,12 @@ The available functions are:
 
 In addition, only the following format string specifiers are supported:
 
-|format|type|
+|Format | Type|
 |------|--------|
-|%i	|integer|
-|%s	|string|
-|%d	|integer|
-|%f	|floating point number|
+|%i | integer|
+|%s | string|
+|%d | integer|
+|%f | floating point number|
 
 ##Advanced Hosting Scenarios
 
@@ -104,7 +106,7 @@ In addition, only the following format string specifiers are supported:
 
 You can call any .NET from JavaScript using the SetGlobalFunction API. For example:
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.SetGlobalFunction("test", new Func<int, int, int>((a, b) => a + b));
 Console.WriteLine(engine.Evaluate<int>("test(5, 6)"));
@@ -113,6 +115,7 @@ Console.WriteLine(engine.Evaluate<int>("test(5, 6)"));
 This code will output "11" to the console.
 
 Note the following:
+
 * The delegate parameter types and return type must all be supported.
 * An exception thrown within the provided delegate cannot be caught within JavaScript (unless it is a JavaScriptException).
 * The above example will not work in Silverlight because of security restrictions. To fix it, pass a delegate to a public method.
@@ -120,7 +123,7 @@ Note the following:
 ###Calling a JavaScript function from .NET
 You can also call a JavaScript function from .NET.
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.Evaluate("function test(a, b) { return a + b }");
 Console.WriteLine(engine.CallGlobalFunction<int>("test", 5, 6));
@@ -134,7 +137,7 @@ This code outputs "11" to the console.
 
 To start with, let's create a class that contains a couple of properties.
 
-```C#
+```c#
 using Jurassic;
 using Jurassic.Library;
 
@@ -153,6 +156,7 @@ public class AppInfo : ObjectInstance
 ```
 
 In this example there are a few things to note:
+
 * Classes that are exposed to JavaScript are required to inherit from Jurassic.Library.ObjectInstance.
 * Passing a ScriptEngine to the base class constructor means that the object will have no prototype. Therefore the usual functions (hasOwnProperty, toString) will not be available.
 * The class indexer can be used to create read-write properties.
@@ -160,7 +164,7 @@ In this example there are a few things to note:
 
 Here's an example of how to create and use the new class:
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.SetGlobalValue("appInfo", new AppInfo(engine));
 Console.WriteLine(engine.Evaluate<string>("appInfo.name + ' ' + appInfo.version"));
@@ -172,7 +176,7 @@ This will output "Test Application 5" to the console.
 
 The next step up is to create a class with static functions, similar to how the built-in Math object works. For example, say you want to create a new Math2 object with a log10 function:
 
-```C#
+```c#
 using Jurassic;
 using Jurassic.Library;
 
@@ -193,6 +197,7 @@ public class Math2 : ObjectInstance
 ```
 
 Note the following:
+
 * PopulateFunctions searches the class for JSFunction attributes and creates a function for each one it finds.
 * The JSFunction attributes allows the JavaScript function name to be different from the .NET method name.
 * The parameter types and the return type must be on the list of supported types.
@@ -200,7 +205,7 @@ Note the following:
 
 Here's an example of how to create and use the new class:
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.SetGlobalValue("math2", new Math2(engine));
 Console.WriteLine(engine.Evaluate<double>("math2.log10(1000)"));
@@ -212,7 +217,7 @@ This will output "3" to the console.
 
 Objects that can be instantiated, like the built-in Number, String, Array and RegExp objects, require two .NET classes, one for the constructor and one for the instance. For example, let's make a JavaScript object that works similar to the .NET Random class (with a seed, since JavaScript doesn't support this):
 
-```C#
+```c#
 using Jurassic;
 using Jurassic.Library;
 
@@ -256,6 +261,7 @@ public class RandomInstance : ObjectInstance
 ```
 
 Note the following:
+
 * You need two classes - one is the constructor (i.e. the function object that you call new on) and one is for the instance object.
 * The ClrFunction base class requires three parameters: the prototype for the function object, the name of the function and the prototype for any instances created using the function.
 * The JSConstructorFunction attribute marks the method that is called when the new operator is used. You can also use JSCallFunction to mark the method that is called when the function is called directly.
@@ -263,7 +269,7 @@ Note the following:
 
 Here's an example of how to create and use the new class:
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.SetGlobalValue("Random", new RandomConstructor(engine));
 Console.WriteLine(engine.Evaluate<double>("var rand = new Random(1000); rand.nextDouble()"));
@@ -272,14 +278,16 @@ Console.WriteLine(engine.Evaluate<double>("var rand = new Random(1000); rand.nex
 This will output "0.151557459100875" to the console (since we are using a seed, the first call to nextDouble() will be the same every time).
 
 This example is much more involved, but it supports all of the advanced JavaScript concepts:
+
 * rand supports the built-in Object functions (hasOwnProperty, toString, etc).
 * rand utilizes prototypical inheritance. In this case you have the following prototype chain: random instance (with no properties) -> random prototype (with nextDouble defined) -> object prototype -> null.
 
 
 ###Loading a script from a custom source
+
 If the script you want to execute is not in a file and you do not want to load it into a string, you can create a custom ScriptSource. The following example shows how it is done:
 
-```C#
+```c#
 /// <summary>
 /// Represents a string containing script code.
 /// </summary>
@@ -322,6 +330,7 @@ public class StringScriptSource : ScriptSource
 ```
 
 ###Threading and concurrency
+
 Jurassic is not thread-safe. However, it also does not use any thread-local or global state. Therefore, as long as you ensure that no Jurassic object is called from multiple threads at once, it will work. The easiest way to ensure this is to use multiple script engines (one per thread is ideal). Since non-primitive objects are tied to a single script engine, each script engine is fully isolated from one another. This does make sharing data between script engines hard. One way to share data is to serialize it into a string and then pass it between threads (the JSON object is available to serialize JavaScript objects).
 
 ##Other Topics
@@ -332,17 +341,20 @@ Jurassic supports the integrated debugging that Visual Studio affords .NET progr
 ![debugging example][debugex]
 
 However, the following features are not supported:
+
 * Locals window
 * Watch window
 * Friendly names in the Call Stack window
 
 To enable debugging, set the EnableDebugging property of the ScriptEngine to true. This will allow debugging within Visual Studio, but it also has the following negative consequences:
+
 * Code generated with EnableDebugging turned on can not be garbage collected. The more scripts you run, the more memory your program will use.
 * Generated code will be somewhat slower.
 
 Therefore, do not enable this option for production code.
 
 *Tips:*
+
 * to stop at a breakpoint programmatically (from within JavaScript), use the debugger statement (see MSDN for more details).
 * to get the value of a global variable, call scope.GetValue("name of global") (where "scope" is the second parameter of the generated method).
 
@@ -354,7 +366,7 @@ The supported types are as follows:
 
 |C# type name|	.NET type name|	JavaScript type name|
 |-----------------|---------------------|--------------------|
-|bool	|System.Boolean	boolean|
+|bool	|System.Boolean|boolean|
 |int	|System.Int32	|number|
 |double	|System.Double	|number|
 |string	|System.String	|string|
@@ -366,12 +378,13 @@ The supported types are as follows:
 
 The ScriptEngine class has a CompatibilityMode flag which can be used to revert some behaviours to that of ECMAScript 3.
 
-```C#
+```c#
 var engine = new Jurassic.ScriptEngine();
 engine.CompatibilityMode = Jurassic.CompatibilityMode.ECMAScript3;
 ```
 
 Setting this flag has the following effects:
+
 1. Octal literals and octal escape sequences are supported.
 2. parseInt() parses octal numbers without requiring an explicit radix.
 3. NaN, undefined and Infinity can be modified.
@@ -379,17 +392,20 @@ Setting this flag has the following effects:
 5. "this" is converted to an object at the call site of function calls.
 
 ###Performance tips
+
 * Use local variables whenever possible - they are much faster than globals. This means you should always use var to declare variables.
 * Avoid the following language features (they tend to disable optimizations):
-..* eval
-..* arguments
-..* with
+  * eval
+  * arguments
+  * with
 * Use strict mode - it is slightly faster.
 
 ###Non-standard and deprecated functions
+
 A number of functions are either non-standard or were officially deprecated by the Ecma standardization group. These functions are supported for compatibility reasons but they should not be used in new code. Support for these functions may be removed at a future date.
 
 The following functions are deprecated:
+
 * Date.prototype.getYear (use getFullYear instead)
 * Date.prototype.setYear (use setFullYear instead)
 * Date.prototype.toGMTString (use toUTCString instead)
@@ -399,6 +415,7 @@ The following functions are deprecated:
 * String.prototype.substr (use slice or substring instead)
 
 The following functions are non-standard:
+
 * String.prototype.trimLeft
 * String.prototype.trimRight
 * String.prototype.anchor
@@ -417,6 +434,7 @@ The following functions are non-standard:
 String.prototype.sup
 
 The following properties are non-standard:
+
 * Function.prototype.name
 * Function.prototype.displayName
 * RegExp.$1 - RegExp.$9 (new in v2.1)
@@ -427,3 +445,4 @@ The following properties are non-standard:
 * RegExp.rightContext (new in v2.1)
 
 [debugex]: https://github.com/Nanonid/jurassic/raw/master/Documentation/debugging.png
+
