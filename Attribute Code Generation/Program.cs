@@ -484,8 +484,9 @@ namespace Attribute_Code_Generation
                 output.AppendLine("\t\t\t{");
                 for (int i = 0; i <= maxParameterCount; i++)
                 {
-                    var minDifference = methodGroup.Min(mds => Math.Abs(i - mds.Parameters.Count()));
-                    var method = methodGroup.Where(mds => Math.Abs(i - mds.Parameters.Count()) == minDifference).Single();
+                    // If the parameter count is X, then find the method with smallest number of
+                    // parameters which has at least X parameters.
+                    var method = methodGroup.Where(mds => mds.Parameters.Count() >= i).OrderBy(mds => mds.Parameters.Count()).First();
                     if (i < maxParameterCount)
                         output.AppendLine($"\t\t\t\tcase {i}:");
                     else

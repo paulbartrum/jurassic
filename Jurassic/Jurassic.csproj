@@ -124,8 +124,10 @@
     <Compile Include="Core\ScriptSource\FileScriptSource.cs" />
     <Compile Include="Core\ScriptSource\ScriptSource.cs" />
     <Compile Include="Library\Array\ArrayConstructor.g.cs" />
-    <Compile Include="Library\Array\ArrayWrapper.cs" />
+    <Compile Include="Library\Array\ArrayAdapter.cs" />
     <Compile Include="Library\Array\ArrayInstance.g.cs" />
+    <Compile Include="Library\Array\ArrayIterator.cs" />
+    <Compile Include="Library\Array\ArrayIterator.g.cs" />
     <Compile Include="Library\Boolean\BooleanConstructor.g.cs" />
     <Compile Include="Library\Boolean\BooleanInstance.g.cs" />
     <Compile Include="Library\ClrWrapper\ClrInstanceWrapper.cs" />
@@ -167,6 +169,12 @@
     <Compile Include="Library\Date\DateParser.cs" />
     <Compile Include="Library\Function\ArgumentsInstance.cs" />
     <Compile Include="Library\Function\UserDefinedFunction.cs" />
+    <Compile Include="Library\Map\MapConstructor.cs" />
+    <Compile Include="Library\Map\MapConstructor.g.cs" />
+    <Compile Include="Library\Map\MapInstance.cs" />
+    <Compile Include="Library\Map\MapInstance.g.cs" />
+    <Compile Include="Library\Map\MapIterator.cs" />
+    <Compile Include="Library\Map\MapIterator.g.cs" />
     <Compile Include="Library\MathObject.g.cs" />
     <Compile Include="Library\Number\NumberConstructor.g.cs" />
     <Compile Include="Library\Number\NumberInstance.g.cs" />
@@ -211,6 +219,12 @@
     <Compile Include="Library\RegExp\RegExpConstructor.g.cs" />
     <Compile Include="Library\RegExp\RegExpInstance.cs" />
     <Compile Include="Library\RegExp\RegExpInstance.g.cs" />
+    <Compile Include="Library\Set\SetConstructor.cs" />
+    <Compile Include="Library\Set\SetConstructor.g.cs" />
+    <Compile Include="Library\Set\SetInstance.cs" />
+    <Compile Include="Library\Set\SetInstance.g.cs" />
+    <Compile Include="Library\Set\SetIterator.cs" />
+    <Compile Include="Library\Set\SetIterator.g.cs" />
     <Compile Include="Library\String\StringConstructor.g.cs" />
     <Compile Include="Library\String\StringInstance.cs" />
     <Compile Include="Library\Function\FunctionInstance.cs" />

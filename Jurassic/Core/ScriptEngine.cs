@@ -27,10 +27,12 @@ namespace Jurassic
         private DateConstructor dateConstructor;
         private FunctionConstructor functionConstructor;
         private JSONObject jsonObject;
+        private MapConstructor mapConstructor;
         private MathObject mathObject;
         private NumberConstructor numberConstructor;
         private ObjectConstructor objectConstructor;
         private RegExpConstructor regExpConstructor;
+        private SetConstructor setConstructor;
         private StringConstructor stringConstructor;
         private SymbolConstructor symbolConstructor;
 
@@ -90,8 +92,10 @@ namespace Jurassic
             this.arrayConstructor = new ArrayConstructor(baseFunction);
             this.booleanConstructor = new BooleanConstructor(baseFunction);
             this.dateConstructor = new DateConstructor(baseFunction);
+            this.mapConstructor = new MapConstructor(baseFunction);
             this.numberConstructor = new NumberConstructor(baseFunction);
             this.regExpConstructor = new RegExpConstructor(baseFunction);
+            this.setConstructor = new SetConstructor(baseFunction);
             this.stringConstructor = new StringConstructor(baseFunction);
 
             // Create the error functions.
@@ -128,10 +132,12 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Date", this.dateConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Function", this.functionConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("JSON", this.jsonObject, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Map", this.mapConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Math", this.mathObject, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Number", this.numberConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Object", this.objectConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("RegExp", this.regExpConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Set", this.setConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("String", this.stringConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Symbol", this.symbolConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Error", this.errorConstructor, PropertyAttributes.NonEnumerable));
@@ -203,10 +209,12 @@ namespace Jurassic
             this.dateConstructor = (DateConstructor)info.GetValue("dateConstructor", typeof(DateConstructor));
             this.functionConstructor = (FunctionConstructor)info.GetValue("functionConstructor", typeof(FunctionConstructor));
             this.jsonObject = (JSONObject)info.GetValue("jsonObject", typeof(JSONObject));
+            this.mapConstructor = (MapConstructor)info.GetValue("mapConstructor", typeof(MapConstructor));
             this.mathObject = (MathObject)info.GetValue("mathObject", typeof(MathObject));
             this.numberConstructor = (NumberConstructor)info.GetValue("numberConstructor", typeof(NumberConstructor));
             this.objectConstructor = (ObjectConstructor)info.GetValue("objectConstructor", typeof(ObjectConstructor));
             this.regExpConstructor = (RegExpConstructor)info.GetValue("regExpConstructor", typeof(RegExpConstructor));
+            this.setConstructor = (SetConstructor)info.GetValue("setConstructor", typeof(SetConstructor));
             this.stringConstructor = (StringConstructor)info.GetValue("stringConstructor", typeof(StringConstructor));
             this.symbolConstructor = (SymbolConstructor)info.GetValue("symbolConstructor", typeof(SymbolConstructor));
 
@@ -256,10 +264,12 @@ namespace Jurassic
             info.AddValue("dateConstructor", this.dateConstructor);
             info.AddValue("functionConstructor", this.functionConstructor);
             info.AddValue("jsonObject", this.jsonObject);
+            info.AddValue("mapConstructor", this.mapConstructor);
             info.AddValue("mathObject", this.mathObject);
             info.AddValue("numberConstructor", this.numberConstructor);
             info.AddValue("objectConstructor", this.objectConstructor);
             info.AddValue("regExpConstructor", this.regExpConstructor);
+            info.AddValue("setConstructor", this.setConstructor);
             info.AddValue("stringConstructor", this.stringConstructor);
             info.AddValue("symbolConstructor", this.symbolConstructor);
 
@@ -454,6 +464,14 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Gets the built-in Map object.
+        /// </summary>
+        public MapConstructor Map
+        {
+            get { return this.mapConstructor; }
+        }
+
+        /// <summary>
         /// Gets the built-in Math object.
         /// </summary>
         public MathObject Math
@@ -483,6 +501,14 @@ namespace Jurassic
         public RegExpConstructor RegExp
         {
             get { return this.regExpConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in String object.
+        /// </summary>
+        public SetConstructor Set
+        {
+            get { return this.setConstructor; }
         }
 
         /// <summary>

@@ -21,6 +21,7 @@ namespace Jurassic.Library
         internal SymbolConstructor(ObjectInstance prototype, ObjectInstance instancePrototype)
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            Iterator = new SymbolInstance(instancePrototype, "Symbol.iterator");
             ToPrimitive = new SymbolInstance(instancePrototype, "Symbol.toPrimitive");
             ToStringTag = new SymbolInstance(instancePrototype, "Symbol.toStringTag");
 
@@ -29,7 +30,7 @@ namespace Jurassic.Library
             InitializeConstructorProperties(properties, "Symbol", 0, instancePrototype);
             //properties.Add(new PropertyNameAndValue("hasInstance", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("isConcatSpreadable", null, PropertyAttributes.Sealed));
-            //properties.Add(new PropertyNameAndValue("iterator", null, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("iterator", Iterator, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("match", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("replace", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("search", null, PropertyAttributes.Sealed));
@@ -45,6 +46,11 @@ namespace Jurassic.Library
 
         //     .NET ACCESSOR PROPERTIES
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Used to override the default iterator for an object. Used by the for-of statement.
+        /// </summary>
+        public SymbolInstance Iterator { get; internal set; }
 
         /// <summary>
         /// Used to override ToPrimitive behaviour.

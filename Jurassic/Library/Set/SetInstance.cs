@@ -1,0 +1,185 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Jurassic.Library
+{
+    /// <summary>
+    /// The Set object lets you store unique values of any type, whether primitive values or object references.
+    /// </summary>
+    [Serializable]
+    public partial class SetInstance : ObjectInstance
+    {
+        private readonly Dictionary<object, LinkedListNode<object>> store;
+        private readonly LinkedList<object> list;
+
+        //     INITIALIZATION
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates a new set instance.
+        /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        internal SetInstance(ObjectInstance prototype)
+            : base(prototype)
+        {
+            this.store = new Dictionary<object, LinkedListNode<object>>();
+            this.list = new LinkedList<object>();
+        }
+
+        /// <summary>
+        /// Creates the Set prototype object.
+        /// </summary>
+        /// <param name="engine"> The script environment. </param>
+        /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, SetConstructor constructor)
+        {
+            var result = engine.Object.Construct();
+            var properties = GetDeclarativeProperties(engine);
+            properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Set", PropertyAttributes.Configurable));
+
+            // From the spec: the initial value of the @@iterator property is the same function
+            // object as the initial value of the Set.prototype.values property.
+            PropertyNameAndValue valuesProperty = properties.Find(p => "values".Equals(p.Key));
+            if (valuesProperty == null)
+                throw new InvalidOperationException("Expected values property.");
+            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
+
+            result.FastSetProperties(properties);
+            return result;
+        }
+
+
+
+        //     .NET PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Called before a linked list node is deleted.
+        /// </summary>
+        internal event Action<LinkedListNode<object>> BeforeDelete;
+
+
+        //     JAVASCRIPT PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// The number of elements in the Set.
+        /// </summary>
+        [JSProperty(Name = "size")]
+        public int Size
+        {
+            get { return this.store.Count; }
+        }
+
+
+
+        //     JAVASCRIPT FUNCTIONS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Appends a new element with a specified value to the end of the Set.
+        /// </summary>
+        /// <param name="value"> The value of the element to add to the Set. </param>
+        /// <returns> The Set object. </returns>
+        [JSInternalFunction(Name = "add")]
+        public SetInstance Add(object value)
+        {
+            if (this.store.ContainsKey(value))
+                return this;
+            var node = this.list.AddLast(value);
+            this.store.Add(value, node);
+            return this;
+        }
+
+        /// <summary>
+        /// Removes all elements from a Set
+        /// </summary>
+        [JSInternalFunction(Name = "clear")]
+        public void Clear()
+        {
+            this.store.Clear();
+            this.list.Clear();
+        }
+
+        /// <summary>
+        /// Removes the specified value from the Set.
+        /// </summary>
+        /// <param name="value"> The value of the element to remove from the Set. </param>
+        /// <returns> <c>true</c> if an element in the Set object has been removed successfully;
+        /// otherwise <c>false</c>. </returns>
+        [JSInternalFunction(Name = "delete")]
+        public bool Delete(object value)
+        {
+            LinkedListNode<object> node;
+            bool found = this.store.TryGetValue(value, out node);
+            if (!found)
+                return false;
+            this.store.Remove(value);
+            BeforeDelete?.Invoke(node);
+            this.list.Remove(node);
+            return true;
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the key/value pairs for each index in
+        /// the array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the key/value pairs for each index in
+        /// the array. </returns>
+        [JSInternalFunction(Name = "entries")]
+        public ObjectInstance Entries()
+        {
+            return new SetIterator(SetIterator.CreatePrototype(Engine), this, this.list, SetIterator.Kind.KeyAndValue);
+        }
+
+        /// <summary>
+        /// Executes a provided function once per each value in the Set, in insertion order.
+        /// </summary>
+        /// <param name="callback"> Function to execute for each element. </param>
+        /// <param name="thisArg"> Value to use as this when executing callback. </param>
+        [JSInternalFunction(Name = "forEach", Length = 1)]
+        public void ForEach(FunctionInstance callback, object thisArg)
+        {
+            foreach (var value in TypeUtilities.Iterate(Engine, Values()))
+            {
+                callback.Call(thisArg, value, value, this);
+            }
+        }
+
+        /// <summary>
+        /// Returns a boolean indicating whether an element with the specified value exists in the
+        /// Set or not.
+        /// </summary>
+        /// <param name="value"> The value to test for presence in the Set. </param>
+        /// <returns> <c>true</c> if an element with the specified value exists in the Set object;
+        /// otherwise <c>false</c>. </returns>
+        [JSInternalFunction(Name = "has")]
+        public bool Has(object value)
+        {
+            return this.store.ContainsKey(value);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the keys for each index in the array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the keys for each index in the array. </returns>
+        [JSInternalFunction(Name = "keys")]
+        public ObjectInstance Keys()
+        {
+            return new SetIterator(SetIterator.CreatePrototype(Engine), this, this.list, SetIterator.Kind.Key);
+        }
+
+        /// <summary>
+        /// Returns a new array iterator object that contains the values for each index in the
+        /// array.
+        /// </summary>
+        /// <returns> An array iterator object that contains the values for each index in the
+        /// array. </returns>
+        [JSInternalFunction(Name = "values")]
+        public ObjectInstance Values()
+        {
+            return new SetIterator(SetIterator.CreatePrototype(Engine), this, this.list, SetIterator.Kind.Value);
+        }
+    }
+}
