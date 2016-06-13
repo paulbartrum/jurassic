@@ -269,6 +269,70 @@ namespace Jurassic
         {
             return BitConverter.DoubleToInt64Bits(value) == positiveZeroBits;
         }
+
+        /// <summary>
+        /// Converts an iteratable object into a iterator by looking up the @@iterator property,
+        /// then calling that value as a function.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="iterable"> The object to get a iterator from. </param>
+        /// <returns> An iterator object, with a next function, or <c>null</c> if the iterator
+        /// symbol value is undefined or null. </returns>
+        public static ObjectInstance GetIterator(ScriptEngine engine, ObjectInstance iterable)
+        {
+            if (iterable == null)
+                throw new ArgumentNullException("iterable");
+
+            // Get the iterator symbol value.
+            var iteratorValue = iterable[engine.Symbol.Iterator];
+            if (iteratorValue == Undefined.Value || iteratorValue == Null.Value)
+                return null;
+
+            // If a value is present, it must be a function.
+            var iteratorFunc = iteratorValue as FunctionInstance;
+            if (iteratorFunc == null)
+                throw new JavaScriptException(engine, ErrorType.TypeError, "The iterator symbol value must be a function");
+
+            // Call the function to get the iterator.
+            var iterator = iteratorFunc.Call(iterable) as ObjectInstance;
+            if (iterator == null)
+                throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator");
+            return iterator;
+        }
+
+        /// <summary>
+        /// Iterate over the values in an iterator.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="iterator"> The iterator object.  Must contain a next function. </param>
+        /// <returns> An enumerable list of iterator values. </returns>
+        public static IEnumerable<object> Iterate(ScriptEngine engine, ObjectInstance iterator)
+        {
+            if (iterator == null)
+                throw new ArgumentNullException("iterator");
+
+            // Okay, we have the iterator.  Now get a reference to the next function.
+            var nextFunc = iterator["next"] as FunctionInstance;
+            if (nextFunc == null)
+                throw new JavaScriptException(engine, ErrorType.TypeError, "Missing iterator next function");
+
+            // Loop.
+            var values = new List<object>();
+            while (true)
+            {
+                // Call the next function to get the next value.
+                var iteratorResult = nextFunc.Call(iterator) as ObjectInstance;
+                if (iteratorResult == null)
+                    throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator next return value");
+
+                // Check if iteration is done.
+                if (TypeConverter.ToBoolean(iteratorResult["done"]))
+                    break;
+
+                // Return the value.
+                yield return iteratorResult["value"];
+            }
+        }
     }
 
 }

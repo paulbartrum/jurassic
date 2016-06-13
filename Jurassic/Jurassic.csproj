@@ -213,6 +213,12 @@
     <Compile Include="Library\RegExp\RegExpConstructor.g.cs" />
     <Compile Include="Library\RegExp\RegExpInstance.cs" />
     <Compile Include="Library\RegExp\RegExpInstance.g.cs" />
+    <Compile Include="Library\Set\SetConstructor.cs" />
+    <Compile Include="Library\Set\SetConstructor.g.cs" />
+    <Compile Include="Library\Set\SetInstance.cs" />
+    <Compile Include="Library\Set\SetInstance.g.cs" />
+    <Compile Include="Library\Set\SetIterator.cs" />
+    <Compile Include="Library\Set\SetIterator.g.cs" />
     <Compile Include="Library\String\StringConstructor.g.cs" />
     <Compile Include="Library\String\StringInstance.cs" />
     <Compile Include="Library\Function\FunctionInstance.cs" />

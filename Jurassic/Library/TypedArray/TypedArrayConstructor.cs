@@ -203,37 +203,15 @@ namespace Jurassic.Library
         {
             var items = TypeConverter.ToObject(Engine, source);
 
-            var getIterator = items[Engine.Symbol.Iterator];
-            if (getIterator != Undefined.Value && getIterator != Null.Value)
+            var iterator = TypeUtilities.GetIterator(Engine, items);
+            if (iterator != null)
             {
-                // The source object has an iterator symbol value.  Call it to get the iterator.
-                var getIteratorFunc = getIterator as FunctionInstance;
-                if (getIteratorFunc == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "The iterator symbol value must be a function");
-                var iterator = getIteratorFunc.Call(items) as ObjectInstance;
-                if (iterator == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid iterator");
-
-                // Okay, we have the iterator.  Now get a reference to the next function.
-                var nextFunc = iterator["next"] as FunctionInstance;
-                if (nextFunc == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Missing iterator next function");
-
                 // Loop.
                 var values = new List<object>();
-                while (true)
+                foreach (var value in TypeUtilities.Iterate(Engine, iterator))
                 {
-                    // Call the next function to get the next value.
-                    var iteratorResult = nextFunc.Call(iterator) as ObjectInstance;
-                    if (iteratorResult == null)
-                        throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid iterator next return value");
-
-                    // Check if iteration is done.
-                    if (TypeConverter.ToBoolean(iteratorResult["done"]))
-                        break;
-
                     // Collect the values.
-                    values.Add(iteratorResult["value"]);
+                    values.Add(value);
                 }
 
                 // Convert the values into a typed array instance.
