@@ -1,32 +1,7 @@
 #Jurassic JavaScript .Net Documentation
 
 ##Basic Hosting Scenarios
-
-[Evaluating an expression]
-[Executing a script]
-[Accessing and modifying global variables]
-[Using the console API]
-
-##Advanced Hosting Scenarios
-
-[Calling a single .NET method from JavaScript]
-[Calling a JavaScript function from .NET]
-[Exposing a .NET class to JavaScript]
-[Loading a script from a custom source]
-[Threading and concurrency]
-
-##Other Topics
-
-[Debugging]
-[Supported types]
-[Compatibility mode]
-[Performance tips]
-[Non-standard and deprecated functions]
-
-##Basic Hosting
-
-###Evaluating an expression
-Evaluating an expression
+###<a name="eval></a>Evaluating an expression
 
 The following code will evaluate a javascript expression:
 ```C#
@@ -115,8 +90,9 @@ The available functions are:
 10. timeEnd
 
 In addition, only the following format string specifiers are supported:
+
 |format|type|
-|------|--------------|
+|------|--------|
 |%i	|integer|
 |%s	|string|
 |%d	|integer|
@@ -405,9 +381,9 @@ Setting this flag has the following effects:
 ###Performance tips
 * Use local variables whenever possible - they are much faster than globals. This means you should always use var to declare variables.
 * Avoid the following language features (they tend to disable optimizations):
-..*eval
-..*arguments
-..*with
+..* eval
+..* arguments
+..* with
 * Use strict mode - it is slightly faster.
 
 ###Non-standard and deprecated functions
