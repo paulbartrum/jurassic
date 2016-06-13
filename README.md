@@ -58,16 +58,16 @@ Feature|Status
 &nbsp;&nbsp;super|:x:
 &nbsp;&nbsp;generators|:x:
 **Built-ins**|
-&nbsp;&nbsp;typed arrays|10/46
-&nbsp;&nbsp;Map|:x:
-&nbsp;&nbsp;Set|:x:
+&nbsp;&nbsp;typed arrays|45/46
+&nbsp;&nbsp;Map|18/19
+&nbsp;&nbsp;Set|18/19
 &nbsp;&nbsp;WeakMap|:x:
 &nbsp;&nbsp;WeakSet|:x:
 &nbsp;&nbsp;Proxy|:x:
 &nbsp;&nbsp;Reflect|:x:
 &nbsp;&nbsp;Promise|:x:
-&nbsp;&nbsp;Symbol|:x:
-&nbsp;&nbsp;well-known symbols|:x:
+&nbsp;&nbsp;Symbol|6/11
+&nbsp;&nbsp;well-known symbols|6/26
 **Built-in extensions**|
 &nbsp;&nbsp;Object static methods|2/4
 &nbsp;&nbsp;function "name" property|:x:
