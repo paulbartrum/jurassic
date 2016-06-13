@@ -13,6 +13,7 @@ namespace UnitTests
         public void Constructor()
         {
             // Call
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Set()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("Set(2)"));
 
             // Construct

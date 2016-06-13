@@ -27,6 +27,7 @@ namespace Jurassic
         private DateConstructor dateConstructor;
         private FunctionConstructor functionConstructor;
         private JSONObject jsonObject;
+        private MapConstructor mapConstructor;
         private MathObject mathObject;
         private NumberConstructor numberConstructor;
         private ObjectConstructor objectConstructor;
@@ -91,6 +92,7 @@ namespace Jurassic
             this.arrayConstructor = new ArrayConstructor(baseFunction);
             this.booleanConstructor = new BooleanConstructor(baseFunction);
             this.dateConstructor = new DateConstructor(baseFunction);
+            this.mapConstructor = new MapConstructor(baseFunction);
             this.numberConstructor = new NumberConstructor(baseFunction);
             this.regExpConstructor = new RegExpConstructor(baseFunction);
             this.setConstructor = new SetConstructor(baseFunction);
@@ -130,6 +132,7 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Date", this.dateConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Function", this.functionConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("JSON", this.jsonObject, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Map", this.mapConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Math", this.mathObject, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Number", this.numberConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Object", this.objectConstructor, PropertyAttributes.NonEnumerable));
@@ -206,6 +209,7 @@ namespace Jurassic
             this.dateConstructor = (DateConstructor)info.GetValue("dateConstructor", typeof(DateConstructor));
             this.functionConstructor = (FunctionConstructor)info.GetValue("functionConstructor", typeof(FunctionConstructor));
             this.jsonObject = (JSONObject)info.GetValue("jsonObject", typeof(JSONObject));
+            this.mapConstructor = (MapConstructor)info.GetValue("mapConstructor", typeof(MapConstructor));
             this.mathObject = (MathObject)info.GetValue("mathObject", typeof(MathObject));
             this.numberConstructor = (NumberConstructor)info.GetValue("numberConstructor", typeof(NumberConstructor));
             this.objectConstructor = (ObjectConstructor)info.GetValue("objectConstructor", typeof(ObjectConstructor));
@@ -260,6 +264,7 @@ namespace Jurassic
             info.AddValue("dateConstructor", this.dateConstructor);
             info.AddValue("functionConstructor", this.functionConstructor);
             info.AddValue("jsonObject", this.jsonObject);
+            info.AddValue("mapConstructor", this.mapConstructor);
             info.AddValue("mathObject", this.mathObject);
             info.AddValue("numberConstructor", this.numberConstructor);
             info.AddValue("objectConstructor", this.objectConstructor);
@@ -456,6 +461,14 @@ namespace Jurassic
         public FunctionConstructor Function
         {
             get { return this.functionConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Map object.
+        /// </summary>
+        public MapConstructor Map
+        {
+            get { return this.mapConstructor; }
         }
 
         /// <summary>
