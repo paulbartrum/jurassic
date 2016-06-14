@@ -68,17 +68,23 @@ namespace Jurassic.Library
             get { return this.buffer; }
         }
 
+
+
+        //     .NET METHODS
+        //_________________________________________________________________________________________
+
         /// <summary>
-        /// Get a copy of the internal buffer
+        /// Returns a copy of the buffer data.
         /// </summary>
-        /// <returns></returns>
-        public byte[] GetInternalBufferCopy()
+        /// <returns> A copy of the buffer data. </returns>
+        public byte[] ToArray()
         {
-            int len = this.buffer.Length;
-            byte[] copy = new byte[len];
-            Array.Copy(this.buffer, copy, len);
-            return copy;
+            byte[] result = new byte[this.buffer.Length];
+            Array.Copy(this.buffer, result, this.buffer.Length);
+            return result;
         }
+
+
 
         //     JAVASCRIPT PROPERTIES
         //_________________________________________________________________________________________
