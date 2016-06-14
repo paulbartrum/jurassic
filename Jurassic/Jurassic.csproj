@@ -94,6 +94,7 @@
     <Compile Include="Compiler\Statements\BlockStatement.cs" />
     <Compile Include="Compiler\Statements\BreakStatement.cs" />
     <Compile Include="Compiler\Statements\ContinueStatement.cs" />
+    <Compile Include="Compiler\Statements\ForOfStatement.cs" />
     <Compile Include="Compiler\Statements\ForInStatement.cs" />
     <Compile Include="Compiler\Statements\SwitchStatement.cs" />
     <Compile Include="Compiler\Statements\TryCatchFinallyStatement.cs" />
@@ -225,6 +226,7 @@
     <Compile Include="Library\Set\SetInstance.g.cs" />
     <Compile Include="Library\Set\SetIterator.cs" />
     <Compile Include="Library\Set\SetIterator.g.cs" />
+    <Compile Include="Library\String\StringIterator.cs" />
     <Compile Include="Library\String\StringConstructor.g.cs" />
     <Compile Include="Library\String\StringInstance.cs" />
     <Compile Include="Library\Function\FunctionInstance.cs" />
@@ -237,6 +239,7 @@
     <Compile Include="Library\MathObject.cs" />
     <Compile Include="Library\Object\ObjectInstance.cs" />
     <Compile Include="Library\String\StringInstance.g.cs" />
+    <Compile Include="Library\String\StringIterator.g.cs" />
     <Compile Include="Library\Symbol\SymbolConstructor.cs" />
     <Compile Include="Library\Symbol\SymbolConstructor.g.cs" />
     <Compile Include="Library\Symbol\SymbolInstance.cs" />

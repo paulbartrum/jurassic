@@ -674,9 +674,20 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Parses a for statement or a for-in statement.
+        /// When parsing a for statement, used to keep track of what type it is.
         /// </summary>
-        /// <returns> A for statement or a for-in statement. </returns>
+        private enum ForStatementType
+        {
+            Unknown,
+            For,
+            ForIn,
+            ForOf,
+        }
+
+        /// <summary>
+        /// Parses a for statement, for-in statement, or a for-of statement.
+        /// </summary>
+        /// <returns> A for statement, for-in statement, or a for-of statement. </returns>
         private Statement ParseFor()
         {
             // Consume the for keyword.
@@ -688,8 +699,11 @@ namespace Jurassic.Compiler
             // The initialization statement.
             Statement initializationStatement = null;
 
-            // The for-in expression needs a variable to assign to.  Is null for a regular for statement.
-            IReferenceExpression forInReference = null;
+            // The type of for statement.
+            ForStatementType type = ForStatementType.Unknown;
+
+            // The for-in and for-of expressions need a variable to assign to.  Is null for a regular for statement.
+            IReferenceExpression forInOfReference = null;
 
             // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
@@ -702,9 +716,6 @@ namespace Jurassic.Compiler
                 // There can be multiple initializers (but not for for-in statements).
                 var varStatement = new VarStatement(this.labelsForCurrentStatement, this.currentVarScope);
                 initializationStatement = varStatement;
-
-                // Only a simple variable name is allowed for for-in statements.
-                bool cannotBeForIn = false;
 
                 while (true)
                 {
@@ -731,8 +742,8 @@ namespace Jurassic.Compiler
                         // Record the portion of the source document that will be highlighted when debugging.
                         declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
-                        // This is a regular for statement.
-                        cannotBeForIn = true;
+                        // This must be a regular for statement.
+                        type = ForStatementType.For;
                     }
 
                     // Add the declaration to the initialization statement.
@@ -743,10 +754,18 @@ namespace Jurassic.Compiler
                         // This is a regular for statement.
                         break;
                     }
-                    else if (this.nextToken == KeywordToken.In && cannotBeForIn == false)
+                    else if (this.nextToken == KeywordToken.In && type == ForStatementType.Unknown)
                     {
                         // This is a for-in statement.
-                        forInReference = new NameExpression(this.currentVarScope, declaration.VariableName);
+                        forInOfReference = new NameExpression(this.currentVarScope, declaration.VariableName);
+                        type = ForStatementType.ForIn;
+                        break;
+                    }
+                    else if (this.nextToken == IdentifierToken.Of && type == ForStatementType.Unknown)
+                    {
+                        // This is a for-of statement.
+                        forInOfReference = new NameExpression(this.currentVarScope, declaration.VariableName);
+                        type = ForStatementType.ForOf;
                         break;
                     }
                     else if (this.nextToken != PunctuatorToken.Comma)
@@ -759,7 +778,7 @@ namespace Jurassic.Compiler
                     start = this.PositionAfterWhitespace;
 
                     // Multiple initializers are not allowed in for-in statements.
-                    cannotBeForIn = true;
+                    type = ForStatementType.For;
                 }
 
                 // Record the portion of the source document that will be highlighted when debugging.
@@ -772,7 +791,7 @@ namespace Jurassic.Compiler
                 if (this.nextToken != PunctuatorToken.Semicolon)
                 {
                     // Parse an expression.
-                    var initializationExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In);
+                    var initializationExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In, IdentifierToken.Of);
 
                     // Record debug info for the expression.
                     initializationStatement = new ExpressionStatement(initializationExpression);
@@ -782,18 +801,27 @@ namespace Jurassic.Compiler
                     {
                         // This is a for-in statement.
                         if ((initializationExpression is IReferenceExpression) == false)
-                            throw new JavaScriptException(this.engine, ErrorType.ReferenceError, "Invalid left-hand side in for-in", this.LineNumber, this.SourcePath);
-                        forInReference = (IReferenceExpression)initializationExpression;
+                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid left-hand side in for-in", this.LineNumber, this.SourcePath);
+                        forInOfReference = (IReferenceExpression)initializationExpression;
+                        type = ForStatementType.ForIn;
+                    }
+                    else if (this.nextToken == IdentifierToken.Of)
+                    {
+                        // This is a for-of statement.
+                        if ((initializationExpression is IReferenceExpression) == false)
+                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid left-hand side in for-of", this.LineNumber, this.SourcePath);
+                        forInOfReference = (IReferenceExpression)initializationExpression;
+                        type = ForStatementType.ForOf;
                     }
                 }
             }
 
-            if (forInReference != null)
+            if (type == ForStatementType.ForIn)
             {
                 // for (x in y)
                 // for (var x in y)
                 var result = new ForInStatement(this.labelsForCurrentStatement);
-                result.Variable = forInReference;
+                result.Variable = forInOfReference;
                 result.VariableSourceSpan = initializationStatement.SourceSpan;
                 
                 // Consume the "in".
@@ -802,6 +830,30 @@ namespace Jurassic.Compiler
                 // Parse the right-hand-side expression.
                 start = this.PositionAfterWhitespace;
                 result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis);
+                result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
+                // Read the right parenthesis.
+                this.Expect(PunctuatorToken.RightParenthesis);
+
+                // Read the statements that will be executed in the loop body.
+                result.Body = ParseStatement();
+
+                return result;
+            }
+            else if (type == ForStatementType.ForOf)
+            {
+                // for (x of y)
+                // for (var x of y)
+                var result = new ForOfStatement(this.labelsForCurrentStatement);
+                result.Variable = forInOfReference;
+                result.VariableSourceSpan = initializationStatement.SourceSpan;
+
+                // Consume the "of".
+                this.Expect(IdentifierToken.Of);
+
+                // Parse the right-hand-side expression.
+                start = this.PositionAfterWhitespace;
+                result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis, PunctuatorToken.Comma); // Comma is not allowed.
                 result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                 // Read the right parenthesis.
@@ -1496,6 +1548,9 @@ namespace Jurassic.Compiler
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                             break;
+                        // Check for "of" contextual keyword.
+                        if (Array.IndexOf(endTokens, IdentifierToken.Of) >= 0)
+                            break;
                         throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected operator but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
@@ -1505,7 +1560,7 @@ namespace Jurassic.Compiler
                         unboundOperator.OperatorType == OperatorType.MemberAccess &&
                         this.expressionState == ParserExpressionState.Literal)
                     {
-                        this.nextToken = new IdentifierToken(this.nextToken.Text);
+                        this.nextToken = IdentifierToken.Create(this.nextToken.Text);
                     }
 
                     Expression terminal;

@@ -36,6 +36,8 @@ namespace Jurassic
         internal static MethodInfo TypeUtilities_Add;
         internal static MethodInfo TypeUtilities_IsPrimitiveOrObject;
         internal static MethodInfo TypeUtilities_VerifyThisObject;
+        internal static MethodInfo TypeUtilities_GetIterator;
+        internal static MethodInfo TypeUtilities_Iterate;
 
         internal static MethodInfo FunctionInstance_HasInstance;
         internal static MethodInfo FunctionInstance_ConstructLateBound;
@@ -68,9 +70,11 @@ namespace Jurassic
         internal static MethodInfo ConcatenatedString_Append_ConcatenatedString;
         internal static MethodInfo ConcatenatedString_ToString;
 
-        internal static MethodInfo IEnumerable_GetEnumerator;
+        internal static MethodInfo IEnumerable_String_GetEnumerator;
+        internal static MethodInfo IEnumerable_Object_GetEnumerator;
         internal static MethodInfo IEnumerator_MoveNext;
-        internal static MethodInfo IEnumerator_Current;
+        internal static MethodInfo IEnumerator_String_Current;
+        internal static MethodInfo IEnumerator_Object_Current;
 
         internal static MethodInfo Debugger_Break;
         internal static MethodInfo JavaScriptException_ErrorObject;
@@ -157,6 +161,8 @@ namespace Jurassic
             TypeUtilities_Add = GetStaticMethod(typeof(TypeUtilities), "Add", typeof(object), typeof(object));
             TypeUtilities_IsPrimitiveOrObject = GetStaticMethod(typeof(TypeUtilities), "IsPrimitiveOrObject", typeof(object));
             TypeUtilities_VerifyThisObject = GetStaticMethod(typeof(TypeUtilities), "VerifyThisObject", typeof(ScriptEngine), typeof(object), typeof(string));
+            TypeUtilities_GetIterator = GetStaticMethod(typeof(TypeUtilities), "GetIterator", typeof(ScriptEngine), typeof(ObjectInstance));
+            TypeUtilities_Iterate = GetStaticMethod(typeof(TypeUtilities), "Iterate", typeof(ScriptEngine), typeof(ObjectInstance));
 
             ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(object), typeof(bool));
             ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(object), typeof(PropertyDescriptor), typeof(bool));
@@ -218,9 +224,11 @@ namespace Jurassic
 
             JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ScriptEngine), typeof(ErrorType), typeof(string), typeof(int), typeof(string), typeof(string));
             JavaScriptException_Constructor_Object = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string), typeof(string));
-            IEnumerable_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<string>), "GetEnumerator");
+            IEnumerable_String_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<string>), "GetEnumerator");
+            IEnumerable_Object_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<object>), "GetEnumerator");
             IEnumerator_MoveNext = GetInstanceMethod(typeof(System.Collections.IEnumerator), "MoveNext");
-            IEnumerator_Current = GetInstanceMethod(typeof(IEnumerator<string>), "get_Current");
+            IEnumerator_String_Current = GetInstanceMethod(typeof(IEnumerator<string>), "get_Current");
+            IEnumerator_Object_Current = GetInstanceMethod(typeof(IEnumerator<object>), "get_Current");
             Debugger_Break = GetStaticMethod(typeof(System.Diagnostics.Debugger), "Break");
             JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));

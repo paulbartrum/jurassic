@@ -94,7 +94,7 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.TypeUtilities_EnumeratePropertyNames);
 
             // Call IEnumerable<string>.GetEnumerator()
-            generator.Call(ReflectionHelpers.IEnumerable_GetEnumerator);
+            generator.Call(ReflectionHelpers.IEnumerable_String_GetEnumerator);
 
             // Store the enumerator in a temporary variable.
             var enumerator = generator.CreateTemporaryVariable(typeof(IEnumerator<string>));
@@ -115,7 +115,7 @@ namespace Jurassic.Compiler
 
             // lhs = enumerator.Current;
             generator.LoadVariable(enumerator);
-            generator.Call(ReflectionHelpers.IEnumerator_Current);
+            generator.Call(ReflectionHelpers.IEnumerator_String_Current);
             this.Variable.GenerateSet(generator, optimizationInfo, PrimitiveType.String, false);
 
             // Emit the body statement(s).

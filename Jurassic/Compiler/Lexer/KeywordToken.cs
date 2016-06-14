@@ -13,7 +13,7 @@ namespace Jurassic.Compiler
         /// Creates a new KeywordToken instance.
         /// </summary>
         /// <param name="name"> The keyword name. </param>
-        public KeywordToken(string name)
+        private KeywordToken(string name)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -240,7 +240,7 @@ namespace Jurassic.Compiler
                 return result;
 
             // If the text wasn't found, it is an identifier instead.
-            return new IdentifierToken(text);
+            return IdentifierToken.Create(text);
         }
 
         /// <summary>
