@@ -479,7 +479,7 @@ namespace Jurassic.Compiler
                                 // Null character or octal escape sequence.
                                 c = this.reader.Peek();
                                 if (c >= '0' && c <= '9')
-                                    contents.Append(ReadOctalEscapeSequence(0));
+                                    contents.Append(ReadOctalEscapeSequence(firstChar, 0));
                                 else
                                     contents.Append((char)0);
                                 break;
@@ -491,7 +491,7 @@ namespace Jurassic.Compiler
                             case '6':
                             case '7':
                                 // Octal escape sequence.
-                                contents.Append(ReadOctalEscapeSequence(c - '0'));
+                                contents.Append(ReadOctalEscapeSequence(firstChar, c - '0'));
                                 break;
                             case '8':
                             case '9':
@@ -510,7 +510,7 @@ namespace Jurassic.Compiler
                     {
                         // Yes, this is a substitution!
                         ReadNextChar();
-                        return new TemplateLiteralToken(contents.ToString());
+                        return new TemplateLiteralToken(contents.ToString(), substitutionFollows: true);
                     }
                     else
                     {
@@ -523,7 +523,13 @@ namespace Jurassic.Compiler
                     contents.Append((char)c);
                 }
             }
-            return new StringLiteralToken(contents.ToString(), escapeSequenceCount, lineTerminatorCount, firstChar == '`');
+
+            // Template literals return a different type of token.
+            if (firstChar == '`')
+                return new TemplateLiteralToken(contents.ToString(), substitutionFollows: false);
+
+            // Return a regular string literal token.
+            return new StringLiteralToken(contents.ToString(), escapeSequenceCount, lineTerminatorCount);
         }
 
         /// <summary>
@@ -547,13 +553,18 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Reads an octal number turns it into a single-byte character.
         /// </summary>
+        /// <param name="stringDelimiter"> The first character delimiting the string literal. </param>
         /// <param name="firstDigit"> The value of the first digit. </param>
         /// <returns> The character corresponding to the escape sequence. </returns>
-        private char ReadOctalEscapeSequence(int firstDigit)
+        private char ReadOctalEscapeSequence(int stringDelimiter, int firstDigit)
         {
-            // Octal escape sequences are only supported in ECMAScript 3 compatibility mode.
+            // Octal escape sequences are not allowed in strict mode.
             if (this.StrictMode)
                 throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Octal escape sequences are not allowed in strict mode.", this.lineNumber, this.Source.Path);
+
+            // Octal escape sequences are not allowed in template strings.
+            if (stringDelimiter == '`')
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Octal escape sequences are not allowed in template strings.", this.lineNumber, this.Source.Path);
 
             int numericValue = firstDigit;
             for (int i = 0; i < 2; i++)

@@ -67,7 +67,7 @@
     <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\LoggingILGenerator.cs" />
     <Compile Include="Compiler\Emit\LongJumpException.cs" />
-    <Compile Include="Compiler\Expressions\TemplateExpression.cs" />
+    <Compile Include="Compiler\Expressions\TemplateLiteralExpression.cs" />
     <Compile Include="Compiler\Lexer\TemplateLiteralToken.cs" />
     <Compile Include="Compiler\Lexer\StringLiteralToken.cs" />
     <Compile Include="Compiler\Lexer\RegularExpressionLiteral.cs" />

@@ -349,8 +349,8 @@ namespace Jurassic.Compiler
                 if (directiveToken == null)
                     break;
 
-                // Directives cannot have escape sequences or line continuations, nor can they be template literals.
-                if (directiveToken.EscapeSequenceCount != 0 || directiveToken.LineContinuationCount != 0 || directiveToken.IsEndOfTemplateLiteral)
+                // Directives cannot have escape sequences or line continuations.
+                if (directiveToken.EscapeSequenceCount != 0 || directiveToken.LineContinuationCount != 0)
                     break;
 
                 // If the statement starts with a string literal, it must be an expression.
@@ -1516,7 +1516,12 @@ namespace Jurassic.Compiler
                 operatorLookup = temp;
             }
             if (operatorLookup.TryGetValue(new OperatorKey() { Token = token, PostfixOrInfix = postfixOrInfix }, out result) == false)
+            {
+                // Tagged template literals are treated like function calls.
+                if (token is TemplateLiteralToken)
+                    return Operator.FunctionCall;
                 return null;
+            }
             return result;
         }
 
@@ -1535,7 +1540,7 @@ namespace Jurassic.Compiler
 
             while (this.nextToken != null)
             {
-                if (this.nextToken is LiteralToken ||
+                if ((this.nextToken is LiteralToken && (!(this.nextToken is TemplateLiteralToken) || this.expressionState == ParserExpressionState.Literal)) ||
                     this.nextToken is IdentifierToken ||
                     this.nextToken == KeywordToken.Function ||
                     this.nextToken == KeywordToken.This ||
@@ -1569,9 +1574,10 @@ namespace Jurassic.Compiler
                     Expression terminal;
                     if (this.nextToken is LiteralToken)
                     {
-                        if (this.nextToken is TemplateLiteralToken)
+                        if (this.nextToken is TemplateLiteralToken && ((TemplateLiteralToken)this.nextToken).SubstitutionFollows)
                         {
-                            // Handle template literals.
+                            // Handle template literals with substitutions (template literals
+                            // without substitutions are parsed the same as regular strings).
                             terminal = ParseTemplateLiteral();
                         }
                         else
@@ -1622,7 +1628,9 @@ namespace Jurassic.Compiler
                         unboundOperator.Push(terminal);
                     }
                 }
-                else if (this.nextToken is PunctuatorToken || this.nextToken is KeywordToken)
+                else if (this.nextToken is PunctuatorToken ||
+                         this.nextToken is KeywordToken ||
+                        (this.nextToken is TemplateLiteralToken && this.expressionState == ParserExpressionState.Operator))
                 {
                     // The token is an operator (o1).
                     Operator newOperator = OperatorFromToken(this.nextToken, postfixOrInfix: this.expressionState == ParserExpressionState.Operator);
@@ -1782,7 +1790,21 @@ namespace Jurassic.Compiler
                             }
                         }
 
-                        unboundOperator = newExpression;
+                        if (this.nextToken is TemplateLiteralToken)
+                        {
+                            // Read the rest of the template literal, and add the strings and
+                            // values as a TemplateLiteralExpression, which will turned into
+                            // function arguments by the FunctionCallExpression.
+                            newExpression.Push(ParseTemplateLiteral());
+
+                            // Make sure no more operands are added to the operator.
+                            newExpression.SecondTokenEncountered = true;
+                            unboundOperator = null;
+                        }
+                        else
+                        {
+                            unboundOperator = newExpression;
+                        }
                     }
                 }
                 else
@@ -2055,42 +2077,32 @@ namespace Jurassic.Compiler
         /// <returns> An expression that represents the template literal. </returns>
         private Expression ParseTemplateLiteral()
         {
+            Debug.Assert(this.nextToken is TemplateLiteralToken);
+
             var templateStrings = new List<string>();
             var templateValues = new List<Expression>();
-            do
+            while (true)
             {
                 // Record the template literal token value.
-                templateStrings.Add(((TemplateLiteralToken)this.nextToken).Value);
+                var templateLiteralToken = (TemplateLiteralToken)this.nextToken;
+                templateStrings.Add(templateLiteralToken.Value);
 
-                // Consume the template literal token.
-                this.Consume();
+                // Check if we are at the end of the template literal.
+                if (templateLiteralToken.SubstitutionFollows == false)
+                    break;
 
-                // Since this is a TemplateLiteralToken we know there must be a
-                // substitution incoming (because the lexer returns a string literal
-                // if there is no substitution).
+                // Parse the substitution.
+                this.Consume();     // Consume the template literal token.
                 templateValues.Add(ParseExpression(PunctuatorToken.RightBrace));
 
-                // Consume the right brace.
+                // Consume the right brace, and continue scanning the template literal.
+                // The TemplateContinuation option here indicates that the lexer should immediately
+                // start constructing a template literal token.
                 this.Consume(ParserExpressionState.TemplateContinuation);
+            }
 
-                // At this point this.nextToken will either be a StringLiteralToken or
-                // another TemplateLiteralToken.
-            } while (this.nextToken is TemplateLiteralToken);
-
-            // The last bit of the template literal is returned as a StringLiteralToken.
-            Debug.Assert(this.nextToken is StringLiteralToken);
-            templateStrings.Add(((StringLiteralToken)this.nextToken).Value);
-
-            //var templateFunctionCall = new FunctionCallExpression(Operator.FunctionCall);
-            //var templateNameExpression = new MemberAccessExpression(Operator.MemberAccess);
-            //templateNameExpression.Push(new NameExpression()));
-            //templateFunctionCall.Push(templateNameExpression);
-            //templateFunctionCall.Push(new LiteralExpression(templateStrings));
-            //foreach (var templateValue in templateValues)
-            //{
-            //    templateFunctionCall.Push(templateValue);
-            //}
-            return new TemplateExpression(null, templateStrings, templateValues);
+            // If this is an untagged template literal, return a UntaggedTemplateExpression.
+            return new TemplateLiteralExpression(templateStrings, templateValues);
         }
     }
 

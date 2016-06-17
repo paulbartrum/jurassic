@@ -3,17 +3,16 @@
 namespace Jurassic.Compiler
 {
     /// <summary>
-    /// Represents the text content of a template literal that is prior to a substitution.  In
-    /// other words, it indicates to the parser that a substitution immediately follows.
+    /// Represents the text content of a template literal.
     /// 
     /// Example 1: `plain text`
-    /// 1. StringLiteralToken (Value = "plain text")
+    /// 1. TemplateLiteralToken (Value = "plain text")
     /// 
     /// Example 2: `${count}`
     /// 1. TemplateLiteralToken (Value = "")
     /// 2. IdentifierToken (Name = "count")
     /// 3. PunctuatorToken (Text = "}")
-    /// 4. StringLiteralToken (Value = "")
+    /// 4. TemplateLiteralToken (Value = "")
     /// 
     /// Example 3: `Bought ${count} items from ${person}!`
     /// 1. TemplateLiteralToken (Value = "Bought ")
@@ -22,7 +21,7 @@ namespace Jurassic.Compiler
     /// 4. TemplateLiteralToken (Value = " items from ")
     /// 5. IdentifierToken (Name = "person")
     /// 6. PunctuatorToken (Text = "}")
-    /// 7. StringLiteralToken (Value = "!")
+    /// 7. TemplateLiteralToken (Value = "!")
     /// </summary>
     internal class TemplateLiteralToken : LiteralToken
     {
@@ -30,11 +29,24 @@ namespace Jurassic.Compiler
         /// Creates a new TemplateLiteralToken instance.
         /// </summary>
         /// <param name="value"> The literal text. </param>
-        public TemplateLiteralToken(string value)
+        /// <param name="substitutionFollows"> Indicates whether a substitution follows this
+        /// string. </param>
+        public TemplateLiteralToken(string value, bool substitutionFollows)
             : base(value)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
+            this.SubstitutionFollows = substitutionFollows;
+        }
+
+        /// <summary>
+        /// Indicates whether a substitution follows this string.  For example, this is true for
+        /// the "hello" in `hello${1}world`, but not the "world".
+        /// </summary>
+        public bool SubstitutionFollows
+        {
+            get;
+            private set;
         }
 
         /// <summary>

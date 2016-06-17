@@ -7,14 +7,13 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class StringLiteralToken : LiteralToken
     {
-        public StringLiteralToken(string value, int escapeSequenceCount, int lineContinuationCount, bool isEndOfTemplateLiteral)
+        public StringLiteralToken(string value, int escapeSequenceCount, int lineContinuationCount)
             : base(value)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
             this.EscapeSequenceCount = escapeSequenceCount;
             this.LineContinuationCount = lineContinuationCount;
-            this.IsEndOfTemplateLiteral = isEndOfTemplateLiteral;
         }
 
         /// <summary>
@@ -31,16 +30,6 @@ namespace Jurassic.Compiler
         /// Gets the number of line continuations encounted while parsing the string literal.
         /// </summary>
         public int LineContinuationCount
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Indicates whether this string is the last part of a template literal.  For example,
-        /// this is true for `test` but also the "world" in `hello${1}world`.
-        /// </summary>
-        public bool IsEndOfTemplateLiteral
         {
             get;
             private set;

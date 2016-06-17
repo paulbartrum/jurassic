@@ -172,6 +172,26 @@ namespace Jurassic.Compiler
                     // Multiple parameters were passed to the function.
                     arguments = ((ListExpression)argumentsOperand).Items;
                 }
+                else if (argumentsOperand is TemplateLiteralExpression)
+                {
+                    // Tagged template literal.
+                    var templateLiteral = (TemplateLiteralExpression)argumentsOperand;
+                    arguments = new List<Expression>(templateLiteral.Values.Count + 1);
+
+                    // The first parameter to the tag function is an array of strings.
+                    var stringsExpression = new List<Expression>(templateLiteral.Strings.Count);
+                    foreach (var templateString in templateLiteral.Strings)
+                    {
+                        stringsExpression.Add(new LiteralExpression(templateString));
+                    }
+                    arguments.Add(new LiteralExpression(stringsExpression));
+
+                    // Values are passed as subsequent parameters.
+                    foreach (var templateValue in templateLiteral.Values)
+                    {
+                        arguments.Add(templateValue);
+                    }
+                }
                 else
                 {
                     // A single parameter was passed to the function.
