@@ -33,10 +33,6 @@ using System.Runtime.InteropServices;
 // This is the version that appears in Explorer.
 [assembly: AssemblyFileVersion("3.0.0.0")]
 
-// The AllowPartiallyTrustedCallersAttribute requires the assembly to be signed with a strong name
-// key.
-[assembly: System.Security.AllowPartiallyTrustedCallers]
-
 // Unit tests and performance tests need access to internal members.
 [assembly: InternalsVisibleTo("Unit Tests, PublicKey=00240000048000009400000006020000002400005253" +
     "413100040000010001000d9e3222b4ac5e04d6ea884cd918e62997c023dec31205991d186bb880b34edc455cb14b" +

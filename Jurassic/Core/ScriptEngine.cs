@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Jurassic.Library;
+using System.Security;
 
 namespace Jurassic
 {
@@ -35,6 +36,8 @@ namespace Jurassic
         private SetConstructor setConstructor;
         private StringConstructor stringConstructor;
         private SymbolConstructor symbolConstructor;
+        private WeakMapConstructor weakMapConstructor;
+        private WeakSetConstructor weakSetConstructor;
 
         // The built-in error objects.
         private ErrorConstructor errorConstructor;
@@ -97,6 +100,8 @@ namespace Jurassic
             this.regExpConstructor = new RegExpConstructor(baseFunction);
             this.setConstructor = new SetConstructor(baseFunction);
             this.stringConstructor = new StringConstructor(baseFunction);
+            this.weakMapConstructor = new WeakMapConstructor(baseFunction);
+            this.weakSetConstructor = new WeakSetConstructor(baseFunction);
 
             // Create the error functions.
             this.errorConstructor = new ErrorConstructor(baseFunction, ErrorType.Error);
@@ -140,6 +145,8 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Set", this.setConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("String", this.stringConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Symbol", this.symbolConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("WeakMap", this.weakMapConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("WeakSet", this.weakSetConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Error", this.errorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("RangeError", this.rangeErrorConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("TypeError", this.typeErrorConstructor, PropertyAttributes.NonEnumerable));
@@ -217,6 +224,8 @@ namespace Jurassic
             this.setConstructor = (SetConstructor)info.GetValue("setConstructor", typeof(SetConstructor));
             this.stringConstructor = (StringConstructor)info.GetValue("stringConstructor", typeof(StringConstructor));
             this.symbolConstructor = (SymbolConstructor)info.GetValue("symbolConstructor", typeof(SymbolConstructor));
+            this.weakMapConstructor = (WeakMapConstructor)info.GetValue("weakMapConstructor", typeof(WeakMapConstructor));
+            this.weakSetConstructor = (WeakSetConstructor)info.GetValue("weakSetConstructor", typeof(WeakSetConstructor));
 
             // Deserialize the built-in error objects.
             this.errorConstructor = (ErrorConstructor)info.GetValue("errorConstructor", typeof(ErrorConstructor));
@@ -249,6 +258,7 @@ namespace Jurassic
         /// the exception being thrown. </param>
         /// <param name="context"> The StreamingContext that contains contextual information about
         /// the source or destination. </param>
+        [SecurityCritical]
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
             // Serialize the compatibility mode.
@@ -272,6 +282,8 @@ namespace Jurassic
             info.AddValue("setConstructor", this.setConstructor);
             info.AddValue("stringConstructor", this.stringConstructor);
             info.AddValue("symbolConstructor", this.symbolConstructor);
+            info.AddValue("weakMapConstructor", this.weakMapConstructor);
+            info.AddValue("weakSetConstructor", this.weakSetConstructor);
 
             // Serialize the built-in error objects.
             info.AddValue("errorConstructor", this.errorConstructor);
@@ -525,6 +537,22 @@ namespace Jurassic
         public SymbolConstructor Symbol
         {
             get { return this.symbolConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in WeakMap object.
+        /// </summary>
+        public WeakMapConstructor WeakMap
+        {
+            get { return this.weakMapConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in WeakSet object.
+        /// </summary>
+        public WeakSetConstructor WeakSet
+        {
+            get { return this.weakSetConstructor; }
         }
 
         /// <summary>
