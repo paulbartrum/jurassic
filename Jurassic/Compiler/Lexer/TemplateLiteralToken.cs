@@ -31,11 +31,12 @@ namespace Jurassic.Compiler
         /// <param name="value"> The literal text. </param>
         /// <param name="substitutionFollows"> Indicates whether a substitution follows this
         /// string. </param>
-        public TemplateLiteralToken(string value, bool substitutionFollows)
+        public TemplateLiteralToken(string value, string rawText, bool substitutionFollows)
             : base(value)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
+            this.RawText = rawText;
             this.SubstitutionFollows = substitutionFollows;
         }
 
@@ -43,11 +44,12 @@ namespace Jurassic.Compiler
         /// Indicates whether a substitution follows this string.  For example, this is true for
         /// the "hello" in `hello${1}world`, but not the "world".
         /// </summary>
-        public bool SubstitutionFollows
-        {
-            get;
-            private set;
-        }
+        public bool SubstitutionFollows { get; private set; }
+
+        /// <summary>
+        /// The raw text, prior to performing any escape sequence processing.
+        /// </summary>
+        public string RawText { get; private set; }
 
         /// <summary>
         /// Gets the contents of the template string literal.

@@ -12,19 +12,23 @@ namespace Jurassic.Compiler
     internal sealed class TemplateLiteralExpression : Expression
     {
         /// <summary>
-        /// Creates a new instance of UntaggedTemplateExpression.
+        /// Creates a new instance of TemplateLiteralExpression.
         /// </summary>
         /// <param name="strings"> The literal string parts of the template.  For example `1${2}3`
         /// has the string literal parts "1" and "3". </param>
         /// <param name="values"> The substitution expressions in the template.  For example
         /// `1${2}3` has the substitution expression "2". </param>
-        public TemplateLiteralExpression(List<string> strings, List<Expression> values)
+        /// <param name="rawStrings"> The literal string parts of the template, prior to performing
+        /// escape sequence processing. </param>
+        public TemplateLiteralExpression(List<string> strings, List<Expression> values, List<string> rawStrings)
         {
             // There should be one more string than there are values.
             Debug.Assert(strings.Count == values.Count + 1);
+            Debug.Assert(strings.Count == rawStrings.Count);
 
             this.Strings = strings;
             this.Values = values;
+            this.RawStrings = rawStrings;
         }
 
         /// <summary>
@@ -38,6 +42,12 @@ namespace Jurassic.Compiler
         /// substitution expression "2".
         /// </summary>
         public List<Expression> Values { get; private set; }
+
+        /// <summary>
+        /// The literal string parts of the template, prior to performing escape sequence
+        /// processing.
+        /// </summary>
+        public List<string> RawStrings { get; private set; }
 
         /// <summary>
         /// Gets the type that results from evaluating this expression.
@@ -54,6 +64,9 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // This code is only used for untagged template literals.
+            // Tagged template literals are handled by FunctionCallExpression.
+
             // Construct a .NET format string.
             var formatString = new StringBuilder();
             for (int i = 0; i < this.Values.Count; i++)

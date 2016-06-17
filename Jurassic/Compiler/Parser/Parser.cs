@@ -2079,13 +2079,15 @@ namespace Jurassic.Compiler
         {
             Debug.Assert(this.nextToken is TemplateLiteralToken);
 
-            var templateStrings = new List<string>();
-            var templateValues = new List<Expression>();
+            var strings = new List<string>();
+            var values = new List<Expression>();
+            var rawStrings = new List<string>();
             while (true)
             {
                 // Record the template literal token value.
                 var templateLiteralToken = (TemplateLiteralToken)this.nextToken;
-                templateStrings.Add(templateLiteralToken.Value);
+                strings.Add(templateLiteralToken.Value);
+                rawStrings.Add(templateLiteralToken.RawText);
 
                 // Check if we are at the end of the template literal.
                 if (templateLiteralToken.SubstitutionFollows == false)
@@ -2093,7 +2095,7 @@ namespace Jurassic.Compiler
 
                 // Parse the substitution.
                 this.Consume();     // Consume the template literal token.
-                templateValues.Add(ParseExpression(PunctuatorToken.RightBrace));
+                values.Add(ParseExpression(PunctuatorToken.RightBrace));
 
                 // Consume the right brace, and continue scanning the template literal.
                 // The TemplateContinuation option here indicates that the lexer should immediately
@@ -2102,7 +2104,7 @@ namespace Jurassic.Compiler
             }
 
             // If this is an untagged template literal, return a UntaggedTemplateExpression.
-            return new TemplateLiteralExpression(templateStrings, templateValues);
+            return new TemplateLiteralExpression(strings, values, rawStrings);
         }
     }
 

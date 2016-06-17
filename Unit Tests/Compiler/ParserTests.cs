@@ -101,7 +101,7 @@ namespace UnitTests
                 tag `${11}${2}`;"));
 
             // Raw strings.
-            Assert.AreEqual("2 | one\r\n,\r\nthree | two | undefined | undefined", Evaluate(@"
+            Assert.AreEqual(@"2 | one\r\n,\r\nthree | two | undefined | undefined", Evaluate(@"
                 function tag(strings, value1, value2, value3) {
                     return strings.raw.length + ' | ' + strings.raw.join(',') + ' | ' + value1 + ' | ' + value2 + ' | ' + value3;
                 }

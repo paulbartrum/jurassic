@@ -407,9 +407,20 @@ namespace Jurassic.Compiler
             var contents = new StringBuilder();
             int lineTerminatorCount = 0;
             int escapeSequenceCount = 0;
+
+            // In order to support tagged template literals properly, we need to capture the raw
+            // text, including escape sequences.
+            StringBuilder previousInputCapture = null;
+            if (firstChar == '`')
+            {
+                previousInputCapture = this.InputCaptureStringBuilder;
+                this.InputCaptureStringBuilder = new StringBuilder();
+            }
+
+            int c;
             while (true)
             {
-                int c = ReadNextChar();
+                c = ReadNextChar();
                 if (c == firstChar)
                     break;
                 if (c == -1)
@@ -510,7 +521,7 @@ namespace Jurassic.Compiler
                     {
                         // Yes, this is a substitution!
                         ReadNextChar();
-                        return new TemplateLiteralToken(contents.ToString(), substitutionFollows: true);
+                        break;
                     }
                     else
                     {
@@ -526,7 +537,13 @@ namespace Jurassic.Compiler
 
             // Template literals return a different type of token.
             if (firstChar == '`')
-                return new TemplateLiteralToken(contents.ToString(), substitutionFollows: false);
+            {
+                var rawText = this.InputCaptureStringBuilder.ToString(0, this.InputCaptureStringBuilder.Length - (c == '$' ? 2 : 1));
+                this.InputCaptureStringBuilder = previousInputCapture;
+                if (this.InputCaptureStringBuilder != null)
+                    this.InputCaptureStringBuilder.Append(previousInputCapture.ToString());
+                return new TemplateLiteralToken(contents.ToString(), rawText, substitutionFollows: c == '$');
+            }
 
             // Return a regular string literal token.
             return new StringLiteralToken(contents.ToString(), escapeSequenceCount, lineTerminatorCount);

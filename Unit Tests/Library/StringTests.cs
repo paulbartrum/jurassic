@@ -1256,7 +1256,14 @@ namespace UnitTests
         [TestMethod]
         public void raw()
         {
+            // Calling it directly.
+            Assert.AreEqual("hello0world", Evaluate("String.raw({ raw: ['hello', 'world'] }, 0, 1)"));
+            Assert.AreEqual("hello0world", Evaluate("String.raw({ raw: ['hello', 'world'] }, 0)"));
+            Assert.AreEqual("helloworld", Evaluate("String.raw({ raw: ['hello', 'world'] })"));
             Assert.AreEqual("t0e1s2t", Evaluate("String.raw({ raw: 'test' }, 0, 1, 2)"));
+
+            // Calling it via a template literal.
+            Assert.AreEqual(@"one\r\ntwo\r\nthree", Evaluate(@"String.raw`one\r\n${'two'}\r\nthree`"));
 
             // The first parameter must be an object with a "raw" property.
             Assert.AreEqual("TypeError", EvaluateExceptionType("String.raw({}, 0, 1, 2)"));
