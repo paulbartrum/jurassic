@@ -25,6 +25,11 @@ namespace Jurassic.Compiler
         /// Indicates the next token can be an operator.
         /// </summary>
         Operator,
+
+        /// <summary>
+        /// Indicates the next token is the continuation of a template literal.
+        /// </summary>
+        TemplateContinuation,
     }
 
     /// <summary>
@@ -396,9 +401,9 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="firstChar"> The first character of the string literal. </param>
         /// <returns> A string literal. </returns>
-        private Token ReadStringLiteral(int firstChar)
+        public Token ReadStringLiteral(int firstChar)
         {
-            System.Diagnostics.Debug.Assert(firstChar == '\'' || firstChar == '"');
+            System.Diagnostics.Debug.Assert(firstChar == '\'' || firstChar == '"' || firstChar == '`');
             var contents = new StringBuilder();
             int lineTerminatorCount = 0;
             int escapeSequenceCount = 0;
@@ -409,7 +414,7 @@ namespace Jurassic.Compiler
                     break;
                 if (c == -1)
                     throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in string literal.", this.lineNumber, this.Source.Path);
-                if (IsLineTerminator(c))
+                if (IsLineTerminator(c) && firstChar != '`')
                     throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected line terminator in string literal.", this.lineNumber, this.Source.Path);
                 if (c == '\\')
                 {
@@ -498,12 +503,27 @@ namespace Jurassic.Compiler
                         escapeSequenceCount ++;
                     }
                 }
+                else if (c == '$' && firstChar == '`')
+                {
+                    // This is a template literal substitution if the next character is '{'
+                    if (this.reader.Peek() == '{')
+                    {
+                        // Yes, this is a substitution!
+                        ReadNextChar();
+                        return new TemplateLiteralToken(contents.ToString());
+                    }
+                    else
+                    {
+                        // Not a substitution.
+                        contents.Append((char)c);
+                    }
+                }
                 else
                 {
                     contents.Append((char)c);
                 }
             }
-            return new StringLiteralToken(contents.ToString(), escapeSequenceCount, lineTerminatorCount);
+            return new StringLiteralToken(contents.ToString(), escapeSequenceCount, lineTerminatorCount, firstChar == '`');
         }
 
         /// <summary>
@@ -938,7 +958,7 @@ namespace Jurassic.Compiler
         /// literal; <c>false</c> otherwise. </returns>
         private bool IsStringLiteralStartChar(int c)
         {
-            return c == '"' || c == '\'';
+            return c == '"' || c == '\'' || c == '`';
         }
 
         /// <summary>

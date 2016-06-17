@@ -179,7 +179,10 @@ namespace Jurassic.Compiler
             this.positionAfterWhitespace = this.positionBeforeWhitespace;
             while (true)
             {
-                this.nextToken = this.lexer.NextToken();
+                if (expressionState == ParserExpressionState.TemplateContinuation)
+                    this.nextToken = this.lexer.ReadStringLiteral('`');
+                else
+                    this.nextToken = this.lexer.NextToken();
                 if ((this.nextToken is WhiteSpaceToken) == false)
                     break;
                 if (((WhiteSpaceToken)this.nextToken).LineTerminatorCount > 0)
@@ -346,8 +349,8 @@ namespace Jurassic.Compiler
                 if (directiveToken == null)
                     break;
 
-                // Directives cannot have escape sequences or line continuations.
-                if (directiveToken.EscapeSequenceCount != 0 || directiveToken.LineContinuationCount != 0)
+                // Directives cannot have escape sequences or line continuations, nor can they be template literals.
+                if (directiveToken.EscapeSequenceCount != 0 || directiveToken.LineContinuationCount != 0 || directiveToken.IsEndOfTemplateLiteral)
                     break;
 
                 // If the statement starts with a string literal, it must be an expression.
@@ -1565,8 +1568,18 @@ namespace Jurassic.Compiler
 
                     Expression terminal;
                     if (this.nextToken is LiteralToken)
-                        // If the token is a literal, convert it to a literal expression.
-                        terminal = new LiteralExpression(((LiteralToken)this.nextToken).Value);
+                    {
+                        if (this.nextToken is TemplateLiteralToken)
+                        {
+                            // Handle template literals.
+                            terminal = ParseTemplateLiteral();
+                        }
+                        else
+                        {
+                            // Otherwise, it's a simple literal.
+                            terminal = new LiteralExpression(((LiteralToken)this.nextToken).Value);
+                        }
+                    }
                     else if (this.nextToken is IdentifierToken)
                     {
                         // If the token is an identifier, convert it to a NameExpression.
@@ -2034,6 +2047,50 @@ namespace Jurassic.Compiler
         private FunctionExpression ParseFunctionExpression()
         {
             return ParseFunction(FunctionType.Expression, this.currentVarScope);
+        }
+
+        /// <summary>
+        /// Parses a template literal (e.g. `Bought ${count} items`).
+        /// </summary>
+        /// <returns> An expression that represents the template literal. </returns>
+        private Expression ParseTemplateLiteral()
+        {
+            var templateStrings = new List<string>();
+            var templateValues = new List<Expression>();
+            do
+            {
+                // Record the template literal token value.
+                templateStrings.Add(((TemplateLiteralToken)this.nextToken).Value);
+
+                // Consume the template literal token.
+                this.Consume();
+
+                // Since this is a TemplateLiteralToken we know there must be a
+                // substitution incoming (because the lexer returns a string literal
+                // if there is no substitution).
+                templateValues.Add(ParseExpression(PunctuatorToken.RightBrace));
+
+                // Consume the right brace.
+                this.Consume(ParserExpressionState.TemplateContinuation);
+
+                // At this point this.nextToken will either be a StringLiteralToken or
+                // another TemplateLiteralToken.
+            } while (this.nextToken is TemplateLiteralToken);
+
+            // The last bit of the template literal is returned as a StringLiteralToken.
+            Debug.Assert(this.nextToken is StringLiteralToken);
+            templateStrings.Add(((StringLiteralToken)this.nextToken).Value);
+
+            //var templateFunctionCall = new FunctionCallExpression(Operator.FunctionCall);
+            //var templateNameExpression = new MemberAccessExpression(Operator.MemberAccess);
+            //templateNameExpression.Push(new NameExpression()));
+            //templateFunctionCall.Push(templateNameExpression);
+            //templateFunctionCall.Push(new LiteralExpression(templateStrings));
+            //foreach (var templateValue in templateValues)
+            //{
+            //    templateFunctionCall.Push(templateValue);
+            //}
+            return new TemplateExpression(null, templateStrings, templateValues);
         }
     }
 

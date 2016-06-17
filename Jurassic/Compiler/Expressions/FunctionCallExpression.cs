@@ -9,7 +9,7 @@ namespace Jurassic.Compiler
     internal class FunctionCallExpression : OperatorExpression
     {
         /// <summary>
-        /// Creates a new instance of FunctionCallJSExpression.
+        /// Creates a new instance of FunctionCallExpression.
         /// </summary>
         /// <param name="operator"> The binary operator to base this expression on. </param>
         public FunctionCallExpression(Operator @operator)

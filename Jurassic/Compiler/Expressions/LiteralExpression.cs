@@ -10,7 +10,7 @@ namespace Jurassic.Compiler
     internal sealed class LiteralExpression : Expression
     {
         /// <summary>
-        /// Creates a new instance of LiteralJSExpression.
+        /// Creates a new instance of LiteralExpression.
         /// </summary>
         /// <param name="value"> The literal value. </param>
         public LiteralExpression(object value)
