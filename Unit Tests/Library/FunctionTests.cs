@@ -98,7 +98,8 @@ namespace UnitTests
             Assert.AreEqual("", Evaluate("f = function() { }; f.name"));
             Assert.AreEqual("f", Evaluate("x = { y: function f() { } }; x.y.name"));
             Assert.AreEqual("", Evaluate("x = { y: function() { } }; x.y.name"));
-            Assert.AreEqual("f", Evaluate("x = { get f() { } }; Object.getOwnPropertyDescriptor(x, 'f').get.name"));
+            Assert.AreEqual("get f", Evaluate("x = { get f() { } }; Object.getOwnPropertyDescriptor(x, 'f').get.name"));
+            Assert.AreEqual("set f", Evaluate("x = { set f(val) { } }; Object.getOwnPropertyDescriptor(x, 'f').set.name"));
             Assert.AreEqual("anonymous", Evaluate("new Function('').name"));
         }
 

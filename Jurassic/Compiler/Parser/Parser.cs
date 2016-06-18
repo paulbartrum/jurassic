@@ -1252,7 +1252,7 @@ namespace Jurassic.Compiler
         private Statement ParseFunctionDeclaration()
         {
             // Parse the function declaration.
-            var expression = ParseFunction(FunctionType.Declaration, this.initialScope);
+            var expression = ParseFunction(FunctionDeclarationType.Declaration, this.initialScope);
 
             // Add the function to the top-level scope.
             this.initialScope.DeclareVariable(expression.FunctionName, expression, writable: true, deletable: this.context == CodeContext.Eval);
@@ -1262,23 +1262,15 @@ namespace Jurassic.Compiler
             return new EmptyStatement(this.labelsForCurrentStatement);
         }
 
-        private enum FunctionType
-        {
-            Declaration,
-            Expression,
-            Getter,
-            Setter,
-        }
-
         /// <summary>
         /// Parses a function declaration or a function expression.
         /// </summary>
         /// <param name="functionType"> The type of function to parse. </param>
         /// <param name="parentScope"> The parent scope for the function. </param>
         /// <returns> A function expression. </returns>
-        private FunctionExpression ParseFunction(FunctionType functionType, Scope parentScope)
+        private FunctionExpression ParseFunction(FunctionDeclarationType functionType, Scope parentScope)
         {
-            if (functionType != FunctionType.Getter && functionType != FunctionType.Setter)
+            if (functionType != FunctionDeclarationType.Getter && functionType != FunctionDeclarationType.Setter)
             {
                 // Consume the function keyword.
                 this.Expect(KeywordToken.Function);
@@ -1286,17 +1278,17 @@ namespace Jurassic.Compiler
 
             // Read the function name.
             var functionName = string.Empty;
-            if (functionType == FunctionType.Declaration)
+            if (functionType == FunctionDeclarationType.Declaration)
             {
                 functionName = this.ExpectIdentifier();
             }
-            else if (functionType == FunctionType.Expression)
+            else if (functionType == FunctionDeclarationType.Expression)
             {
                 // The function name is optional for function expressions.
                 if (this.nextToken is IdentifierToken)
                     functionName = this.ExpectIdentifier();
             }
-            else if (functionType == FunctionType.Getter || functionType == FunctionType.Setter)
+            else if (functionType == FunctionDeclarationType.Getter || functionType == FunctionDeclarationType.Setter)
             {
                 // Getters and setters can have any name that is allowed of a property.
                 bool wasIdentifier;
@@ -1339,11 +1331,11 @@ namespace Jurassic.Compiler
             }
 
             // Getters must have zero arguments.
-            if (functionType == FunctionType.Getter && argumentNames.Count != 0)
+            if (functionType == FunctionDeclarationType.Getter && argumentNames.Count != 0)
                 throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Getters cannot have arguments", this.LineNumber, this.SourcePath);
 
             // Setters must have one argument.
-            if (functionType == FunctionType.Setter && argumentNames.Count != 1)
+            if (functionType == FunctionDeclarationType.Setter && argumentNames.Count != 1)
                 throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Setters must have a single argument", this.LineNumber, this.SourcePath);
 
             // Read the right parenthesis.
@@ -1364,7 +1356,7 @@ namespace Jurassic.Compiler
             this.methodOptimizationHints.HasNestedFunction = true;
 
             // Create a new scope and assign variables within the function body to the scope.
-            bool includeNameInScope = functionType != FunctionType.Getter && functionType != FunctionType.Setter;
+            bool includeNameInScope = functionType != FunctionDeclarationType.Getter && functionType != FunctionDeclarationType.Setter;
             var scope = DeclarativeScope.CreateFunctionScope(parentScope, includeNameInScope ? functionName : string.Empty, argumentNames);
 
             // Read the function body.
@@ -1379,7 +1371,7 @@ namespace Jurassic.Compiler
                 originalBodyTextBuilder.Append(bodyTextBuilder);
 
             SourceCodePosition endPosition;
-            if (functionType == FunctionType.Expression)
+            if (functionType == FunctionDeclarationType.Expression)
             {
                 // The end token '}' will be consumed by the parent function.
                 if (this.nextToken != PunctuatorToken.RightBrace)
@@ -1401,7 +1393,7 @@ namespace Jurassic.Compiler
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
             var context = new FunctionMethodGenerator(this.engine, scope, functionName,
-                includeNameInScope, argumentNames,
+                functionType, argumentNames,
                 bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body,
                 this.SourcePath, options);
             context.MethodOptimizationHints = functionParser.methodOptimizationHints;
@@ -1935,7 +1927,7 @@ namespace Jurassic.Compiler
                 if (this.nextToken != PunctuatorToken.Colon && mightBeGetOrSet == true && (propertyName == "get" || propertyName == "set"))
                 {
                     // Parse the function name and body.
-                    var function = ParseFunction(propertyName == "get" ? FunctionType.Getter : FunctionType.Setter, this.currentVarScope);
+                    var function = ParseFunction(propertyName == "get" ? FunctionDeclarationType.Getter : FunctionDeclarationType.Setter, this.currentVarScope);
 
                     // Get the function name.
                     var getOrSet = propertyName;
@@ -2068,7 +2060,7 @@ namespace Jurassic.Compiler
         /// <returns> A function expression. </returns>
         private FunctionExpression ParseFunctionExpression()
         {
-            return ParseFunction(FunctionType.Expression, this.currentVarScope);
+            return ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope);
         }
 
         /// <summary>

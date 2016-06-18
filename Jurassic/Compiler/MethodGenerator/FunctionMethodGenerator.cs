@@ -5,6 +5,32 @@ using ErrorType = Jurassic.Library.ErrorType;
 namespace Jurassic.Compiler
 {
     /// <summary>
+    /// Represents how the function was defined.
+    /// </summary>
+    internal enum FunctionDeclarationType
+    {
+        /// <summary>
+        /// The function was declared as a statement.
+        /// </summary>
+        Declaration,
+
+        /// <summary>
+        /// The function was declared as an expression.
+        /// </summary>
+        Expression,
+
+        /// <summary>
+        /// The function is a getter in an object literal.
+        /// </summary>
+        Getter,
+
+        /// <summary>
+        /// The function is a setter in an object literal.
+        /// </summary>
+        Setter,
+    }
+
+    /// <summary>
     /// Represents the information needed to compile a function.
     /// </summary>
     internal class FunctionMethodGenerator : MethodGenerator
@@ -15,17 +41,17 @@ namespace Jurassic.Compiler
         /// <param name="engine"> The script engine. </param>
         /// <param name="scope"> The function scope. </param>
         /// <param name="functionName"> The name of the function. </param>
-        /// <param name="includeNameInScope"> Indicates whether the name should be included in the function scope. </param>
+        /// <param name="declarationType"> Indicates how the function was declared. </param>
         /// <param name="argumentNames"> The names of the arguments. </param>
         /// <param name="bodyText"> The source code of the function. </param>
         /// <param name="body"> The root of the abstract syntax tree for the body of the function. </param>
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, bool includeNameInScope, IList<string> argumentNames, string bodyText, Statement body, string scriptPath, CompilerOptions options)
+        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, FunctionDeclarationType declarationType, IList<string> argumentNames, string bodyText, Statement body, string scriptPath, CompilerOptions options)
             : base(engine, scope, new DummyScriptSource(scriptPath), options)
         {
             this.Name = functionName;
-            this.IncludeNameInScope = includeNameInScope;
+            this.DeclarationType = declarationType;
             this.ArgumentNames = argumentNames;
             this.BodyRoot = body;
             this.BodyText = bodyText;
@@ -73,9 +99,19 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the name of the function.
+        /// The name of the function.  Getters and setters do not include "get" and "set" in their
+        /// name.
         /// </summary>
         public string Name
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Indicates how the function was declared.
+        /// </summary>
+        public FunctionDeclarationType DeclarationType
         {
             get;
             private set;
@@ -90,17 +126,6 @@ namespace Jurassic.Compiler
         {
             get;
             set;
-        }
-
-        /// <summary>
-        /// Indicates whether the function name should be included in the function scope (i.e. if
-        /// this is <c>false</c>, then you cannot reference the function by name from within the
-        /// body of the function).
-        /// </summary>
-        internal bool IncludeNameInScope
-        {
-            get;
-            private set;
         }
 
         /// <summary>
@@ -285,7 +310,7 @@ namespace Jurassic.Compiler
 
             // Transfer the function name into the scope.
             if (string.IsNullOrEmpty(this.Name) == false &&
-                this.IncludeNameInScope == true &&
+                (this.DeclarationType != FunctionDeclarationType.Getter && this.DeclarationType != FunctionDeclarationType.Setter) &&
                 this.ArgumentNames.Contains(this.Name) == false &&
                 optimizationInfo.MethodOptimizationHints.HasVariable(this.Name))
             {
