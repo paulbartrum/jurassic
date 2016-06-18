@@ -214,12 +214,19 @@ namespace Jurassic.Library
         {
             if (key is SymbolInstance)
                 return uint.MaxValue;
+
             var propertyName = (string)key;
             if (propertyName.Length == 0)
                 return uint.MaxValue;
+
             int digit = propertyName[0] - '0';
             if (digit < 0 || digit > 9)
                 return uint.MaxValue;
+
+            // '0' is an array index but '00[, '01', '000' are not.
+            if (digit == 0 && propertyName.Length > 1)
+                return uint.MaxValue;
+
             uint result = (uint)digit;
             for (int i = 1; i < propertyName.Length; i++)
             {
