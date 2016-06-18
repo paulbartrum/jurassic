@@ -112,6 +112,15 @@ namespace UnitTests
             // Adding a property while enumerating it should return the keys as they were originally.
             Assert.AreEqual("bc", Evaluate("var a = {b: 2, c: 3}; var keys = ''; for (var x in a) { a.d = 5; keys += x; }"));
 
+            // Accessor properties should not be evaluated.
+            Assert.AreEqual("a", Evaluate(@"
+                var y = '';
+                var x = { get a() { y += '!'; return '*'; } };
+                for (var prop in x) {
+                    y += prop
+                }
+                y;"));
+
             // Strict mode: the name "eval" is not allowed in strict mode.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; for (var eval in {a:1}) {}"));
         }
