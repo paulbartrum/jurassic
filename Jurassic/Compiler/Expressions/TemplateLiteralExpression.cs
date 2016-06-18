@@ -67,42 +67,32 @@ namespace Jurassic.Compiler
             // This code is only used for untagged template literals.
             // Tagged template literals are handled by FunctionCallExpression.
 
-            // Construct a .NET format string.
-            var formatString = new StringBuilder();
-            for (int i = 0; i < this.Values.Count; i++)
-            {
-                formatString.Append(this.Strings[i]);
-                formatString.Append("{");
-                formatString.Append(i);
-                formatString.Append("}");
-            }
-            formatString.Append(this.Strings[this.Strings.Count - 1]);
-
-            // Load the format string onto the stack.
-            generator.LoadString(formatString.ToString());
-
             // Load the values array onto the stack.
-            generator.LoadInt32(this.Values.Count);
-            generator.NewArray(typeof(object));
-            for (int i = 0; i < this.Values.Count; i++)
+            generator.LoadInt32(this.Strings.Count + this.Values.Count);
+            generator.NewArray(typeof(string));
+            for (int i = 0; i < this.Strings.Count; i++)
             {
-                // Operands for StoreArrayElement() are: an array (object[]), index (int), value (object).
-                // Array
+                // Operands for StoreArrayElement() are: an array (string[]), index (int), value (string).
+
+                // Store the string.
                 generator.Duplicate();
+                generator.LoadInt32(i * 2);
+                generator.LoadString(this.Strings[i]);
+                generator.StoreArrayElement(typeof(string));
 
-                // Index
-                generator.LoadInt32(i);
+                if (i == this.Strings.Count - 1)
+                    break;
 
-                // Value
+                // Store the value.
+                generator.Duplicate();
+                generator.LoadInt32(i * 2 + 1);
                 this.Values[i].GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToAny(generator, this.Values[i].ResultType);
-
-                // Store the element value.
-                generator.StoreArrayElement(typeof(object));
+                EmitConversion.ToString(generator, this.Values[i].ResultType);
+                generator.StoreArrayElement(typeof(string));
             }
 
-            // Call String.Format(string, object[])
-            generator.CallStatic(ReflectionHelpers.String_Format);
+            // Call String.Concat(string[])
+            generator.CallStatic(ReflectionHelpers.String_Concat);
         }
     }
 

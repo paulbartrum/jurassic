@@ -80,7 +80,8 @@ namespace Jurassic
         internal static MethodInfo JavaScriptException_ErrorObject;
         internal static MethodInfo Boolean_Construct;
         internal static MethodInfo Object_Construct;
-        
+        internal static MethodInfo ObjectConstructor_Freeze;
+
         internal static MethodInfo RegExp_Construct;
         internal static MethodInfo Array_New;
         internal static MethodInfo Delegate_CreateDelegate;
@@ -205,7 +206,7 @@ namespace Jurassic
             Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(ScriptEngine), typeof(object), typeof(Scope), typeof(object), typeof(bool));
 
             String_Constructor_Char_Int = GetConstructor(typeof(string), typeof(char), typeof(int));
-            String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
+            String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string[]));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
             String_CompareOrdinal = GetStaticMethod(typeof(string), "CompareOrdinal", typeof(string), typeof(string));
             String_Format = GetStaticMethod(typeof(string), "Format", typeof(string), typeof(object[]));
@@ -236,6 +237,7 @@ namespace Jurassic
             RegExp_Construct = GetInstanceMethod(typeof(RegExpConstructor), "Construct", typeof(object), typeof(string));
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
+            ObjectConstructor_Freeze = GetStaticMethod(typeof(ObjectConstructor), "Freeze", typeof(ObjectInstance));
             UserDefinedFunction_Constructor = GetConstructor(typeof(UserDefinedFunction), typeof(ObjectInstance),
                 typeof(string), typeof(IList<string>), typeof(Scope), typeof(string), typeof(GeneratedMethod), typeof(bool));
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));

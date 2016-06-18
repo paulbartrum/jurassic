@@ -107,6 +107,10 @@ namespace UnitTests
                 }
                 tag `one\r\n${ 'two'}\r\nthree`;"));
 
+            // Check accessibility.
+            Assert.AreEqual(true, Evaluate(@"function tag(strings) { return Object.isFrozen(strings); } tag `test`;"));
+            Assert.AreEqual(true, Evaluate(@"function tag(strings) { return Object.isFrozen(strings.raw); } tag `test`;"));
+
             // Syntax errors
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`unterminated"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`unterminated\r\n"));
@@ -124,10 +128,6 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`\\09`"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`\\0444`"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`\\44`"));
-
-
-            Assert.AreEqual("nine", Evaluate("`nine`"));
-            Assert.AreEqual("nine", Evaluate("`nine`"));
         }
     }
 }
