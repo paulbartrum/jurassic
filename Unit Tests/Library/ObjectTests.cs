@@ -594,6 +594,10 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("x = function() { this.a = 5; }; x.prototype = { b: 2 }; y = new x(); y.hasOwnProperty('b')"));
             Assert.AreEqual(true, Evaluate("Math.hasOwnProperty({toString: function() { return 'max' }})"));
 
+            // Should work with symbols too.
+            Assert.AreEqual(true, Evaluate("x[Symbol.iterator] = 5; x.hasOwnProperty(Symbol.iterator)"));
+            Assert.AreEqual(false, Evaluate("delete x[Symbol.iterator]; x.hasOwnProperty(Symbol.iterator)"));
+
             // length
             Assert.AreEqual(1, Evaluate("Math.hasOwnProperty.length"));
 
@@ -639,6 +643,10 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("[15].propertyIsEnumerable('length')"));
             Assert.AreEqual(true, Evaluate("x = function() { this.a = 5; }; x.prototype = { b: 2 }; y = new x(); y.propertyIsEnumerable('a')"));
             Assert.AreEqual(false, Evaluate("x = function() { this.a = 5; }; x.prototype = { b: 2 }; y = new x(); y.propertyIsEnumerable('b')"));
+
+            // Should work with symbols too.
+            Assert.AreEqual(true, Evaluate("var x = {}; x[Symbol.iterator] = 5; x.propertyIsEnumerable(Symbol.iterator)"));
+            Assert.AreEqual(false, Evaluate("''.propertyIsEnumerable(Symbol.iterator)"));
 
             // length
             Assert.AreEqual(1, Evaluate("Object.propertyIsEnumerable.length"));

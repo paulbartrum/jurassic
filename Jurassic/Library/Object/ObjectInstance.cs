@@ -1111,15 +1111,16 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="thisObject"> The object that is being operated on. </param>
-        /// <param name="propertyName"> The name of the property. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <returns> <c>true</c> if a property with the given name exists on this object,
         /// <c>false</c> otherwise. </returns>
         /// <remarks> Objects in the prototype chain are not considered. </remarks>
         [JSInternalFunction(Name = "hasOwnProperty", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static bool HasOwnProperty(ScriptEngine engine, object thisObject, string propertyName)
+        public static bool HasOwnProperty(ScriptEngine engine, object thisObject, object key)
         {
+            key = TypeConverter.ToPropertyKey(key);
             TypeUtilities.VerifyThisObject(engine, thisObject, "hasOwnProperty");
-            return TypeConverter.ToObject(engine, thisObject).GetOwnPropertyDescriptor(propertyName).Exists;
+            return TypeConverter.ToObject(engine, thisObject).GetOwnPropertyDescriptor(key).Exists;
         }
 
         /// <summary>
@@ -1152,15 +1153,16 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The associated script engine. </param>
         /// <param name="thisObject"> The object that is being operated on. </param>
-        /// <param name="propertyName"> The name of the property. </param>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <returns> <c>true</c> if a property with the given name exists on this object and is
         /// enumerable, <c>false</c> otherwise. </returns>
         /// <remarks> Objects in the prototype chain are not considered. </remarks>
         [JSInternalFunction(Name = "propertyIsEnumerable", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static bool PropertyIsEnumerable(ScriptEngine engine, object thisObject, string propertyName)
+        public static bool PropertyIsEnumerable(ScriptEngine engine, object thisObject, object key)
         {
+            key = TypeConverter.ToPropertyKey(key);
             TypeUtilities.VerifyThisObject(engine, thisObject, "propertyIsEnumerable");
-            var property = TypeConverter.ToObject(engine, thisObject).GetOwnPropertyDescriptor(propertyName);
+            var property = TypeConverter.ToObject(engine, thisObject).GetOwnPropertyDescriptor(key);
             return property.Exists && property.IsEnumerable;
         }
 

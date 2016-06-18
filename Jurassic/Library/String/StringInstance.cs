@@ -785,7 +785,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "@@iterator")]
         public ObjectInstance GetIterator()
         {
-            return new StringIterator(StringIterator.CreatePrototype(Engine), this.value);
+            return new StringIterator(Engine.StringIteratorPrototype, this.value);
         }
 
 

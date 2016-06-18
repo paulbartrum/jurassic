@@ -130,7 +130,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "entries")]
         public ObjectInstance Entries()
         {
-            return new SetIterator(SetIterator.CreatePrototype(Engine), this, this.list, SetIterator.Kind.KeyAndValue);
+            return new SetIterator(Engine.SetIteratorPrototype, this, this.list, SetIterator.Kind.KeyAndValue);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "keys")]
         public ObjectInstance Keys()
         {
-            return new SetIterator(SetIterator.CreatePrototype(Engine), this, this.list, SetIterator.Kind.Key);
+            return new SetIterator(Engine.SetIteratorPrototype, this, this.list, SetIterator.Kind.Key);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "values")]
         public ObjectInstance Values()
         {
-            return new SetIterator(SetIterator.CreatePrototype(Engine), this, this.list, SetIterator.Kind.Value);
+            return new SetIterator(Engine.SetIteratorPrototype, this, this.list, SetIterator.Kind.Value);
         }
     }
 }

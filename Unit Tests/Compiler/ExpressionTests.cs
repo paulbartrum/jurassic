@@ -1379,6 +1379,12 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; var foo = 'test'; delete foo"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function test(){} delete test"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; (function(arg) { delete arg; })()"));
+
+            // Delete a symbol.
+            Assert.AreEqual(true, Evaluate("delete ''[Symbol.iterator]"));
+            Assert.AreEqual(5, Evaluate("var x = {}; x[Symbol.iterator] = 5; x[Symbol.iterator]"));
+            Assert.AreEqual(true, Evaluate("delete x[Symbol.iterator]"));
+            Assert.AreEqual(Undefined.Value, Evaluate("x[Symbol.iterator]"));
         }
 
         [TestMethod]

@@ -1269,5 +1269,30 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("String.raw({}, 0, 1, 2)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("String.raw(5, 0, 1, 2)"));
         }
+
+        [TestMethod]
+        public void iterator()
+        {
+            // The length of "😂!" is three because 😂 is U+1F602 (which encodes to two characters
+            // in UTF-16).  When iterating only two characters should be iterated over.
+            Execute("var str = '😂!';");
+            Assert.AreEqual(3, Evaluate("str.length"));
+            Execute("var iterator = str[Symbol.iterator]();");
+            Assert.AreEqual(@"{""value"":""😂"",""done"":false}", Evaluate("JSON.stringify(iterator.next())"));
+            Assert.AreEqual(@"{""value"":""!"",""done"":false}", Evaluate("JSON.stringify(iterator.next())"));
+            Assert.AreEqual(@"{""done"":true}", Evaluate("JSON.stringify(iterator.next())"));
+
+            // Check the prototype heirarchy is correct.
+            Execute(@"
+                var iterator = ''[Symbol.iterator]();
+                // %StringIteratorPrototype%
+                var proto1 = Object.getPrototypeOf(iterator);
+                // %IteratorPrototype%
+                var proto2 = Object.getPrototypeOf(proto1);");
+            Assert.AreEqual(true, Evaluate("iterator[Symbol.iterator]() === iterator"));
+            Assert.AreEqual(false, Evaluate("iterator.hasOwnProperty(Symbol.iterator)"));
+            Assert.AreEqual(false, Evaluate("proto1.hasOwnProperty(Symbol.iterator)"));
+            Assert.AreEqual(true, Evaluate("proto2.hasOwnProperty(Symbol.iterator)"));
+        }
     }
 }

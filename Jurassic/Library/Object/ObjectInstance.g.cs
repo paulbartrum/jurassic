@@ -28,9 +28,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return HasOwnProperty(engine, thisObj, "undefined");
+					return HasOwnProperty(engine, thisObj, Undefined.Value);
 				default:
-					return HasOwnProperty(engine, thisObj, TypeConverter.ToString(args[0]));
+					return HasOwnProperty(engine, thisObj, args[0]);
 			}
 		}
 
@@ -50,9 +50,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return PropertyIsEnumerable(engine, thisObj, "undefined");
+					return PropertyIsEnumerable(engine, thisObj, Undefined.Value);
 				default:
-					return PropertyIsEnumerable(engine, thisObj, TypeConverter.ToString(args[0]));
+					return PropertyIsEnumerable(engine, thisObj, args[0]);
 			}
 		}
 

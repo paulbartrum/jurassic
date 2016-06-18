@@ -61,6 +61,13 @@ namespace Jurassic
         private TypedArrayConstructor float32ArrayConstructor;
         private TypedArrayConstructor float64ArrayConstructor;
 
+        // Prototypes
+        private ObjectInstance baseIteratorPrototype;
+        private ObjectInstance stringIteratorPrototype;
+        private ObjectInstance mapIteratorPrototype;
+        private ObjectInstance setIteratorPrototype;
+        private ObjectInstance arrayIteratorPrototype;
+
         // Mono check.
         internal static bool IsMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
@@ -427,6 +434,79 @@ namespace Jurassic
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// The prototype shared by all iterators.
+        /// </summary>
+        internal ObjectInstance BaseIteratorPrototype
+        {
+            get
+            {
+                if (this.baseIteratorPrototype == null)
+                {
+                    var result = Object.Construct();
+                    result.FastSetProperties(new List<PropertyNameAndValue>(1)
+                    {
+                        new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(FunctionInstancePrototype, "[Symbol.iterator]", 0,
+                            (engine, thisObj, args) => thisObj), PropertyAttributes.NonEnumerable),
+                    });
+                    this.baseIteratorPrototype = result;
+                }
+                return this.baseIteratorPrototype;
+            }
+        }
+
+        /// <summary>
+        /// The prototype of all string iterators.
+        /// </summary>
+        internal ObjectInstance StringIteratorPrototype
+        {
+            get
+            {
+                if (this.stringIteratorPrototype == null)
+                    this.stringIteratorPrototype = StringIterator.CreatePrototype(this);
+                return this.stringIteratorPrototype;
+            }
+        }
+
+        /// <summary>
+        /// The prototype of all map iterators.
+        /// </summary>
+        internal ObjectInstance MapIteratorPrototype
+        {
+            get
+            {
+                if (this.mapIteratorPrototype == null)
+                    this.mapIteratorPrototype = MapIterator.CreatePrototype(this);
+                return this.mapIteratorPrototype;
+            }
+        }
+
+        /// <summary>
+        /// The prototype of all set iterators.
+        /// </summary>
+        internal ObjectInstance SetIteratorPrototype
+        {
+            get
+            {
+                if (this.setIteratorPrototype == null)
+                    this.setIteratorPrototype = SetIterator.CreatePrototype(this);
+                return this.setIteratorPrototype;
+            }
+        }
+
+        /// <summary>
+        /// The prototype of all array iterators.
+        /// </summary>
+        internal ObjectInstance ArrayIteratorPrototype
+        {
+            get
+            {
+                if (this.arrayIteratorPrototype == null)
+                    this.arrayIteratorPrototype = ArrayIterator.CreatePrototype(this);
+                return this.arrayIteratorPrototype;
+            }
         }
 
 
