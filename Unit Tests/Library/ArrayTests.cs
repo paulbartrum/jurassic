@@ -49,6 +49,9 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("Array(5).length"));
             Assert.AreEqual(false, Evaluate("Array(5).hasOwnProperty(0)"));
 
+            // species
+            Assert.AreEqual(true, Evaluate("Array[Symbol.species] === Array"));
+
             // length
             Assert.AreEqual(1, Evaluate("Array.length"));
 

@@ -22,9 +22,23 @@ namespace Jurassic.Library
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
-            var properties = new List<PropertyNameAndValue>();
+            var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "Map", 0, MapInstance.CreatePrototype(Engine, this));
             FastSetProperties(properties);
+        }
+
+
+
+        //     JAVASCRIPT PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// A reference to the constructor function that is used to create derived objects.
+        /// </summary>
+        [JSProperty(Name = "@@species")]
+        public FunctionInstance Species
+        {
+            get { return this; }
         }
 
 

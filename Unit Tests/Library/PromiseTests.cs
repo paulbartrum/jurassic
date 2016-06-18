@@ -28,6 +28,9 @@ namespace UnitTests
             Assert.AreEqual("Promise", Evaluate("Promise.prototype[Symbol.toStringTag]"));
             Assert.AreEqual(true, Evaluate("Promise.valueOf() === Promise"));
 
+            // species
+            Assert.AreEqual(true, Evaluate("Promise[Symbol.species] === Promise"));
+
             // length
             Assert.AreEqual(1, Evaluate("Promise.length"));
         }

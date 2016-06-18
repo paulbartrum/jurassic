@@ -10,6 +10,13 @@ namespace Jurassic.Library
 
 	public partial class MapConstructor
 	{
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
+		{
+			return new List<PropertyNameAndValue>(4)
+			{
+				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
+			};
+		}
 
 		private static object __STUB__Call(ScriptEngine engine, object thisObj, object[] args)
 		{
@@ -31,6 +38,14 @@ namespace Jurassic.Library
 				default:
 					return ((MapConstructor)thisObj).Construct(args[0]);
 			}
+		}
+
+		private static object __GETTER__Species(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is MapConstructor))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get [Symbol.species]' is not generic.");
+			return ((MapConstructor)thisObj).Species;
 		}
 	}
 

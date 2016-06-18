@@ -22,6 +22,7 @@ namespace Jurassic.Library
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             Iterator = new SymbolInstance(instancePrototype, "Symbol.iterator");
+            Species = new SymbolInstance(instancePrototype, "Symbol.Species");
             ToPrimitive = new SymbolInstance(instancePrototype, "Symbol.toPrimitive");
             ToStringTag = new SymbolInstance(instancePrototype, "Symbol.toStringTag");
 
@@ -34,7 +35,7 @@ namespace Jurassic.Library
             //properties.Add(new PropertyNameAndValue("match", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("replace", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("search", null, PropertyAttributes.Sealed));
-            //properties.Add(new PropertyNameAndValue("species", null, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("species", Species, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("split", null, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("toPrimitive", ToPrimitive, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("toStringTag", ToStringTag, PropertyAttributes.Sealed));
@@ -51,6 +52,12 @@ namespace Jurassic.Library
         /// Used to override the default iterator for an object. Used by the for-of statement.
         /// </summary>
         public SymbolInstance Iterator { get; internal set; }
+
+        /// <summary>
+        /// A function valued property that is the constructor function that is used to create
+        /// derived objects.
+        /// </summary>
+        public SymbolInstance Species { get; internal set; }
 
         /// <summary>
         /// Used to override ToPrimitive behaviour.

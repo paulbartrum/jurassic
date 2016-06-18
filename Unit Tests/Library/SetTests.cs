@@ -32,6 +32,9 @@ namespace UnitTests
             Assert.AreEqual("function Set() { [native code] }", Evaluate("Set.toString()"));
             Assert.AreEqual(true, Evaluate("Set.valueOf() === Set"));
 
+            // species
+            Assert.AreEqual(true, Evaluate("Set[Symbol.species] === Set"));
+
             // length
             Assert.AreEqual(0, Evaluate("Set.length"));
         }

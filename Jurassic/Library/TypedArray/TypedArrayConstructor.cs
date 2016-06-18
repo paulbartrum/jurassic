@@ -90,6 +90,20 @@ namespace Jurassic.Library
 
 
 
+        //     JAVASCRIPT PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// A reference to the constructor function that is used to create derived objects.
+        /// </summary>
+        [JSProperty(Name = "@@species")]
+        public FunctionInstance Species
+        {
+            get { return this; }
+        }
+
+
+
         //     JAVASCRIPT INTERNAL FUNCTIONS
         //_________________________________________________________________________________________
 

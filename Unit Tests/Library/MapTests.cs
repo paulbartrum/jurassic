@@ -36,6 +36,9 @@ namespace UnitTests
             Assert.AreEqual("function Map() { [native code] }", Evaluate("Map.toString()"));
             Assert.AreEqual(true, Evaluate("Map.valueOf() === Map"));
 
+            // species
+            Assert.AreEqual(true, Evaluate("Map[Symbol.species] === Map"));
+
             // length
             Assert.AreEqual(0, Evaluate("Map.length"));
         }

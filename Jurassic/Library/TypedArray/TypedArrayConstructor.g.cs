@@ -14,6 +14,7 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
+				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("from", new ClrStubFunction(engine.FunctionInstancePrototype, "from", 1, __STUB__From), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("of", new ClrStubFunction(engine.FunctionInstancePrototype, "of", 0, __STUB__Of), PropertyAttributes.NonEnumerable),
 			};
@@ -43,6 +44,14 @@ namespace Jurassic.Library
 				default:
 					return ((TypedArrayConstructor)thisObj).Construct(args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? (int?)null : TypeConverter.ToInteger(args[2]));
 			}
+		}
+
+		private static object __GETTER__Species(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is TypedArrayConstructor))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get [Symbol.species]' is not generic.");
+			return ((TypedArrayConstructor)thisObj).Species;
 		}
 
 		private static object __STUB__From(ScriptEngine engine, object thisObj, object[] args)
