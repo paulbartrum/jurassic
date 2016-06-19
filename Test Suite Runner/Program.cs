@@ -33,7 +33,7 @@ namespace Jurassic.TestSuite
             // Server process.
             using (var pipeServer = new PipeServer<WorkerProcessRequest, WorkerProcessResponse>())
             {
-                var entries = JsonConvert.DeserializeObject<CompatTableEntry[]>(File.ReadAllText(@"..\..\compat-table.json"));
+                var entries = JsonConvert.DeserializeObject<CompatTableEntry[]>(File.ReadAllText(@"..\..\Kangax\compat-table.json"));
                 foreach (var testCase in entries)
                 {
                     try
