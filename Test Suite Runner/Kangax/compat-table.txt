@@ -20,20 +20,31 @@ for (var i in scripts) {
   if (scripts[i].attributes && scripts[i].attributes["data-source"]) {
     var result = {};
     var parentIdAttr = scripts[i].parentElement.parentElement.attributes["data-parent"];
-    if (parentIdAttr) {
-      var parentCell = document.getElementById("test-" + parentIdAttr.value);
-      result.name = parentCell.innerText.substr(1);
-      if (result.name.substr(-1) === "►")
-        result.name = result.name.substr(0, result.name.length - 1);
-      var groupElement = parentCell.parentElement;
-	  while (groupElement != null && groupElement.className != "category") {
-		groupElement = groupElement.previousElementSibling;
-	  }
-	  result.group = groupElement.firstElementChild.innerText;
-      result.detail = scripts[i].previousSibling.innerText.substr(1);
-      result.script = scripts[i].attributes["data-source"].value;
-      results.push(result);
+	var parentCell;
+    if (parentIdAttr)
+      parentCell = document.getElementById("test-" + parentIdAttr.value);
+	else
+	  parentCell = scripts[i].parentElement;
+    var groupElement = parentCell.parentElement;
+	while (groupElement != null && groupElement.className != "category") {
+	  groupElement = groupElement.previousElementSibling;
     }
+
+	result.name = parentCell.innerText;
+	if (result.name[0] == '§')
+	  result.name = result.name.substr(1);
+    if (result.name.substr(-1) === "►" || result.name.substr(-1) === "c")
+      result.name = result.name.substr(0, result.name.length - 1);
+
+    result.group = groupElement.firstElementChild.innerText;
+
+    result.detail = scripts[i].previousElementSibling.innerText;
+	if (result.detail[0] == '§')
+	  result.detail = result.detail.substr(1);
+
+    result.script = scripts[i].attributes["data-source"].value;
+    results.push(result);
   }
 }
-document.write(JSON.stringify(results));
+document.body.innerText = JSON.stringify(results);
+"success";

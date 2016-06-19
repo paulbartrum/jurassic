@@ -954,6 +954,12 @@
     "script": "\n'use strict';\nlet scopes = [];\nfor(let i = 0; i < 2; i++) {\n scopes.push(function(){ return i; });\n}\nlet passed = (scopes[0]() === 0 && scopes[1]() === 1);\n\nscopes = [];\nfor(let i in { a:1, b:1 }) {\n scopes.push(function(){ return i; });\n}\npassed &= (scopes[0]() === \"a\" && scopes[1]() === \"b\");\nreturn passed;\n "
   },
   {
+    "name": "block-level function declaration[13]",
+    "group": "Bindings",
+    "detail": "block-level function declaration[13]",
+    "script": "\n'use strict';\nfunction f() { return 1; }\n{\n function f() { return 2; }\n}\nreturn f() === 1;\n "
+  },
+  {
     "name": "arrow functions",
     "group": "Functions",
     "detail": "0 parameters",
@@ -3126,6 +3132,12 @@
     "script": "\nreturn Math.hypot() === 0 &&\n Math.hypot(1) === 1 &&\n Math.hypot(9, 12, 20) === 25 &&\n Math.hypot(27, 36, 60, 100) === 125;\n "
   },
   {
+    "name": "Date.prototype[Symbol.toPrimitive]",
+    "group": "Built-in extensions",
+    "detail": "Date.prototype[Symbol.toPrimitive]",
+    "script": "\nvar tp = Date.prototype[Symbol.toPrimitive];\nreturn tp.call(Object(2), \"number\") === 2\n && tp.call(Object(2), \"string\") === \"2\"\n && tp.call(Object(2), \"default\") === \"2\";\n "
+  },
+  {
     "name": "Array is subclassable",
     "group": "Subclassing",
     "detail": "length property (accessing)",
@@ -3978,6 +3990,12 @@
     "script": "\nvar i, names = [\"anchor\", \"fontcolor\", \"fontsize\", \"link\"];\nfor (i = 0; i < names.length; i++) {\n if (\"\"[names[i]]('\"') !== \"\"[names[i]]('&' + 'quot;')) {\n return false;\n }\n}\nreturn true;\n "
   },
   {
+    "name": "RegExp.prototype.compile",
+    "group": "Annex b",
+    "detail": "RegExp.prototype.compile",
+    "script": "\nreturn typeof RegExp.prototype.compile === 'function';\n "
+  },
+  {
     "name": "RegExp syntax extensions",
     "group": "Annex b",
     "detail": "hyphens in character sets",
@@ -4024,5 +4042,11 @@
     "group": "Annex b",
     "detail": "invalid backreferences become octal escapes",
     "script": "\nreturn /\\41/.exec(\"!\")[0] === \"!\"\n && /[\\41]/.exec(\"!\")[0] === \"!\";\n "
+  },
+  {
+    "name": "HTML-style comments",
+    "group": "Annex b",
+    "detail": "HTML-style comments",
+    "script": "\n--> A comment\n<!-- Another comment\nvar a = 3; <!-- Another comment\nreturn a === 3;\n "
   }
 ]

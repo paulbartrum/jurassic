@@ -69,7 +69,7 @@ namespace Jurassic.TestSuite
                 Console.WriteLine();
                 foreach (var group in entries.GroupBy(e => e.group))
                 {
-                    Console.WriteLine($"**{group.Key}**");
+                    Console.WriteLine($"**{group.Key}**|");
                     foreach (var test in group.GroupBy(e => e.name))
                     {
                         int successCount = test.Count(t => t.Success);
