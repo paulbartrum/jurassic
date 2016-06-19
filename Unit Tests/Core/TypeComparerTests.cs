@@ -283,5 +283,60 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.SameValue(number1, 5.0));
         }
 
+        [TestMethod]
+        public void SameValueZero()
+        {
+            // undefined
+            Assert.AreEqual(true, TypeComparer.SameValueZero(Undefined.Value, Undefined.Value));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(Undefined.Value, Null.Value));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(Undefined.Value, 0));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(null, null));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(null, Undefined.Value));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(null, Null.Value));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(null, 0));
+
+            // null
+            Assert.AreEqual(true, TypeComparer.SameValueZero(Null.Value, Null.Value));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(Null.Value, Undefined.Value));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(Null.Value, 0));
+
+            // number
+            Assert.AreEqual(true, TypeComparer.SameValueZero(+0.0, +0.0));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(-0.0, -0.0));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(+0.0, -0.0));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(-0.0, +0.0));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(1, 1));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(0, 1));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(5, 5.0));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(5.0, 5));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(5.0, 5.0));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(5.0, 6.0));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(double.NaN, double.NaN));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(double.NaN, 5));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(double.NaN, 5.0));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(0, "0"));
+
+            // string
+            Assert.AreEqual(true, TypeComparer.SameValueZero("", ""));
+            Assert.AreEqual(true, TypeComparer.SameValueZero("a", "a"));
+            Assert.AreEqual(false, TypeComparer.SameValueZero("a", "b"));
+            Assert.AreEqual(false, TypeComparer.SameValueZero("0", 0));
+
+            // bool
+            Assert.AreEqual(true, TypeComparer.SameValueZero(false, false));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(true, true));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(true, false));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(false, 0));
+
+            // object
+            var engine = new ScriptEngine();
+            var temp1 = engine.Object.Construct();
+            var temp2 = engine.Object.Construct();
+            var number1 = engine.Number.Construct(5.0);
+            Assert.AreEqual(true, TypeComparer.SameValueZero(temp1, temp1));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(temp1, temp2));
+            Assert.AreEqual(true, TypeComparer.SameValueZero(number1, number1));
+            Assert.AreEqual(false, TypeComparer.SameValueZero(number1, 5.0));
+        }
     }
 }

@@ -18,10 +18,10 @@ namespace UnitTests
 
             // Construct
 
-            // new Set();
+            // new Map();
             Assert.AreEqual(0, Evaluate("new Map().size"));
 
-            // new Set(iterable);
+            // new Map(iterable);
             Assert.AreEqual(3, Evaluate("new Map([[2, 1], [1, 3], [5, 3]]).size"));
             Assert.AreEqual(3, Evaluate("new Map([[2, 1], [1, 3], [5, 3]]).get(1)"));
             Assert.AreEqual(1, Evaluate("new Map([[2, 1], [1, 3], [5, 3]]).get(2)"));
@@ -29,7 +29,7 @@ namespace UnitTests
             Assert.AreEqual("TypeError", EvaluateExceptionType("new Map(5)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("new Map([1, 2])"));
 
-            // Set.prototype.constructor
+            // Map.prototype.constructor
             Assert.AreEqual(true, Evaluate("Map.prototype.constructor === Map"));
 
             // toString and valueOf.
@@ -110,6 +110,20 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(1, Evaluate("Map.prototype.forEach.length"));
+        }
+
+        [TestMethod]
+        public void get()
+        {
+            Assert.AreEqual(2, Evaluate("new Map().set(1, 2).get(1)"));
+            Assert.AreEqual(Undefined.Value, Evaluate("new Map().set(1, 2).get(2)"));
+            Assert.AreEqual(Undefined.Value, Evaluate("new Map().set(0, 2).get('')"));
+            Assert.AreEqual(2, Evaluate("new Map([[1, 2]]).get(1)"));
+            Assert.AreEqual(Undefined.Value, Evaluate("new Map([[1, 2]]).get(2)"));
+            Assert.AreEqual(3.1, Evaluate("new Map([['a', 'b'], [1, 2], [false, true], [5.5, 3.1]]).get(5.5)"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Map.prototype.get.length"));
         }
 
         [TestMethod]

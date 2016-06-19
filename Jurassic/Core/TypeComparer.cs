@@ -72,6 +72,11 @@ namespace Jurassic
         /// <param name="x"> The first object to compare. </param>
         /// <param name="y"> The second object to compare. </param>
         /// <returns> <c>true</c> if the objects are identical; <c>false</c> otherwise. </returns>
+        /// <remarks>
+        /// With this algorithm:
+        /// 1. NaN is not considered equal to NaN.
+        /// 2. +0 and -0 are considered to be equal.
+        /// </remarks>
         public static bool StrictEquals(object x, object y)
         {
             x = x ?? Undefined.Value;
@@ -209,9 +214,9 @@ namespace Jurassic
         /// <returns> <c>true</c> if the objects are the same value according to the SameValue
         /// algorithm. </returns>
         /// <remarks>
-        /// This algorithm differs from the StrictEquals algorithm in two ways:
-        /// 1. NaN compares equal with itself
-        /// 2. Negative zero is considered different from positive zero.
+        /// With this algorithm:
+        /// 1. NaN is considered equal to NaN.
+        /// 2. +0 and -0 are considered to be different.
         /// </remarks>
         public static bool SameValue(object x, object y)
         {
@@ -245,8 +250,9 @@ namespace Jurassic
         /// <returns> <c>true</c> if the objects are the same value according to the SameValueZero
         /// algorithm. </returns>
         /// <remarks>
-        /// This algorithm differs from the StrictEquals algorithm in two ways:
-        /// 1. NaN compares equal with itself
+        /// With this algorithm:
+        /// 1. NaN is considered equal to NaN.
+        /// 2. +0 and -0 are considered to be equal.
         /// </remarks>
         public static bool SameValueZero(object x, object y)
         {

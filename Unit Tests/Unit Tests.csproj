@@ -76,6 +76,8 @@
     <Compile Include="Library\JSONTests.cs" />
     <Compile Include="Library\FunctionTests.cs" />
     <Compile Include="Core\TypeConverterTests.cs" />
+    <Compile Include="Library\WeakSetTests.cs" />
+    <Compile Include="Library\WeakMapTests.cs" />
     <Compile Include="Library\ObjectTests.cs" />
     <Compile Include="Library\GlobalTests.cs" />
     <Compile Include="Library\ReflectTests.cs" />

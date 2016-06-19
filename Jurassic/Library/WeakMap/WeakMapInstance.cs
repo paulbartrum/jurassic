@@ -58,7 +58,7 @@ namespace Jurassic.Library
         {
             var keyObj = key as ObjectInstance;
             if (keyObj == null)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid value used as weak map key");
+                return false;
 
             var removed = this.store.Remove(keyObj);
             GC.KeepAlive(keyObj);
@@ -76,7 +76,7 @@ namespace Jurassic.Library
         {
             var keyObj = key as ObjectInstance;
             if (keyObj == null)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid value used as weak map key");
+                return Undefined.Value;
 
             object result;
             if (!this.store.TryGetValue(keyObj, out result))
@@ -95,7 +95,7 @@ namespace Jurassic.Library
         {
             var keyObj = key as ObjectInstance;
             if (keyObj == null)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid value used as weak map key");
+                return false;
 
             object result;
             return this.store.TryGetValue(keyObj, out result);
