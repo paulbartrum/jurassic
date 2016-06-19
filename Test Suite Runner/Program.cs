@@ -45,6 +45,7 @@ namespace Jurassic.TestSuite
                             new string[]
                             {
                                 "for..of loops",
+                                "template literals",
                                 "typed arrays",
                                 "WeakMap",
                                 "Set",

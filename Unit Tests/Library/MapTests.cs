@@ -105,6 +105,9 @@ namespace UnitTests
             Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e1 === 1) { S.set(4, 0); } result.push(e1) }); result.toString()"));
             Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e1 === 3) { S.set(4, 0); } result.push(e1) }); result.toString()"));
 
+            // -0 is converted to +0.
+            Assert.AreEqual(double.PositiveInfinity, Evaluate(@"var k; new Map([[-0, 0]]).forEach(function(value) { k = 1 / value; }); k"));
+
             // length
             Assert.AreEqual(1, Evaluate("Map.prototype.forEach.length"));
         }
@@ -119,8 +122,10 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("new Map().set('episodic', 0).has('episodic')"));
             Assert.AreEqual(false, Evaluate("new Map().set('episodic', 0).has('dozens')"));
             Assert.AreEqual(false, Evaluate("new Map().set('', 0).has(0)"));
-            Assert.AreEqual(true, Evaluate("new Map().set(5/Infinity, 0).has(5/Infinity)"));
-            Assert.AreEqual(true, Evaluate("new Map().set(5/Infinity, 0).has(-5/Infinity)"));
+            Assert.AreEqual(true, Evaluate("new Map().set(0, 'abc').has(0)"));
+            Assert.AreEqual(true, Evaluate("new Map().set(0, 'abc').has(-0)"));
+            Assert.AreEqual(true, Evaluate("new Map().set(-0, 'abc').has(0)"));
+            Assert.AreEqual(true, Evaluate("new Map().set(-0, 'abc').has(-0)"));
 
             // length
             Assert.AreEqual(1, Evaluate("Map.prototype.has.length"));

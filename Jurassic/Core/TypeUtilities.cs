@@ -81,7 +81,7 @@ namespace Jurassic
             else if (obj is double)
             {
                 var numericResult = (double)obj;
-                if ((double)((int)numericResult) == numericResult)
+                if (((int)numericResult) == numericResult)
                     return (int)numericResult;
             }
             else if (obj is uint)

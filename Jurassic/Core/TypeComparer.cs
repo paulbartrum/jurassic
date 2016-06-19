@@ -236,5 +236,37 @@ namespace Jurassic
                 y = y.ToString();
             return object.Equals(x, y);
         }
+
+        /// <summary>
+        /// Implements the SameValueZero algorithm.
+        /// </summary>
+        /// <param name="x"> The first object to compare. </param>
+        /// <param name="y"> The second object to compare. </param>
+        /// <returns> <c>true</c> if the objects are the same value according to the SameValueZero
+        /// algorithm. </returns>
+        /// <remarks>
+        /// This algorithm differs from the StrictEquals algorithm in two ways:
+        /// 1. NaN compares equal with itself
+        /// </remarks>
+        public static bool SameValueZero(object x, object y)
+        {
+            if (x == null)
+                x = Undefined.Value;
+            if (y == null)
+                y = Undefined.Value;
+            if (x is int)
+                x = (double)(int)x;
+            if (x is uint)
+                x = (double)(uint)x;
+            if (y is int)
+                y = (double)(int)y;
+            if (y is uint)
+                y = (double)(uint)y;
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
+            return object.Equals(x, y);
+        }
     }
 }

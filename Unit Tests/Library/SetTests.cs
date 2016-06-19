@@ -116,6 +116,9 @@ namespace UnitTests
             Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Set([1, 2, 3]).forEach(function (e1, e2, S) { if (e1 === 1) { S.add(4); } result.push(e1) }); result.toString()"));
             Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Set([1, 2, 3]).forEach(function (e1, e2, S) { if (e1 === 3) { S.add(4); } result.push(e1) }); result.toString()"));
 
+            // -0 is converted to +0.
+            Assert.AreEqual(double.PositiveInfinity, Evaluate(@"var k; new Set([-0]).forEach(function(value) { k = 1 / value; }); k"));
+
             // length
             Assert.AreEqual(1, Evaluate("Set.prototype.forEach.length"));
         }
@@ -130,8 +133,10 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("new Set().add('episodic').has('episodic')"));
             Assert.AreEqual(false, Evaluate("new Set().add('episodic').has('dozens')"));
             Assert.AreEqual(false, Evaluate("new Set().add('').has(0)"));
-            Assert.AreEqual(true, Evaluate("new Set().add(5/Infinity).has(5/Infinity)"));
-            Assert.AreEqual(true, Evaluate("new Set().add(5/Infinity).has(-5/Infinity)"));
+            Assert.AreEqual(true, Evaluate("new Set().add(0).has(0)"));
+            Assert.AreEqual(true, Evaluate("new Set().add(0).has(-0)"));
+            Assert.AreEqual(true, Evaluate("new Set().add(-0).has(0)"));
+            Assert.AreEqual(true, Evaluate("new Set().add(-0).has(-0)"));
 
             // length
             Assert.AreEqual(1, Evaluate("Set.prototype.has.length"));
