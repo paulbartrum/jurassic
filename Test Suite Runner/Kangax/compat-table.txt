@@ -21,9 +21,15 @@ for (var i in scripts) {
     var result = {};
     var parentIdAttr = scripts[i].parentElement.parentElement.attributes["data-parent"];
     if (parentIdAttr) {
-      result.name = document.getElementById("test-" + parentIdAttr.value).innerText.substr(1);
+      var parentCell = document.getElementById("test-" + parentIdAttr.value);
+      result.name = parentCell.innerText.substr(1);
       if (result.name.substr(-1) === "►")
         result.name = result.name.substr(0, result.name.length - 1);
+      var groupElement = parentCell.parentElement;
+	  while (groupElement != null && groupElement.className != "category") {
+		groupElement = groupElement.previousElementSibling;
+	  }
+	  result.group = groupElement.firstElementChild.innerText;
       result.detail = scripts[i].previousSibling.innerText.substr(1);
       result.script = scripts[i].attributes["data-source"].value;
       results.push(result);
