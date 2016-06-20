@@ -371,17 +371,17 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Get or sets a value that indicates the maximum recursion depth of user-defined functions that
-        /// is allowed by this script engine. A negative number means that unlimited recursion is allowed.
+        /// Get or sets a value that indicates the maximum recursion depth of user-defined
+        /// functions that is allowed by this script engine.
         /// When a user-defined function exceeds the recursion depth limit, a
-        /// <see cref="RecursionDepthOverflowException"/> will be thrown.
-        /// The default value is <c>-1</c> which allows unlimited recursion.
+        /// <see cref="StackOverflowException"/> will be thrown.
+        /// The default value is <c>0</c>, which allows unlimited recursion.
         /// </summary>
         public int RecursionDepthLimit
         {
             get;
             set;
-        } = -1;
+        }
 
 #if !SILVERLIGHT
 
