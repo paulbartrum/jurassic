@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Jurassic</RootNamespace>
     <AssemblyName>Jurassic</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -20,7 +20,8 @@
     </SccAuxPath>
     <SccProvider>
     </SccProvider>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,6 +34,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>
     </DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -44,6 +46,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugSymbols>true</DebugSymbols>
     <DocumentationFile>bin\Release\Jurassic.xml</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -64,6 +67,9 @@
     <Compile Include="Compiler\Debugging\SourceCodePosition.cs" />
     <Compile Include="Compiler\Emit\ILGenerator\LoggingILGenerator.cs" />
     <Compile Include="Compiler\Emit\LongJumpException.cs" />
+    <Compile Include="Compiler\Expressions\TemplateLiteralExpression.cs" />
+    <Compile Include="Compiler\Lexer\TemplateLiteralToken.cs" />
+    <Compile Include="Compiler\Lexer\StringLiteralToken.cs" />
     <Compile Include="Compiler\Lexer\RegularExpressionLiteral.cs" />
     <Compile Include="Compiler\MethodGenerator\CompilerOptions.cs" />
     <Compile Include="Compiler\MethodGenerator\CodeContext.cs" />
@@ -94,6 +100,7 @@
     <Compile Include="Compiler\Statements\BlockStatement.cs" />
     <Compile Include="Compiler\Statements\BreakStatement.cs" />
     <Compile Include="Compiler\Statements\ContinueStatement.cs" />
+    <Compile Include="Compiler\Statements\ForOfStatement.cs" />
     <Compile Include="Compiler\Statements\ForInStatement.cs" />
     <Compile Include="Compiler\Statements\SwitchStatement.cs" />
     <Compile Include="Compiler\Statements\TryCatchFinallyStatement.cs" />
@@ -169,6 +176,19 @@
     <Compile Include="Library\Date\DateParser.cs" />
     <Compile Include="Library\Function\ArgumentsInstance.cs" />
     <Compile Include="Library\Function\UserDefinedFunction.cs" />
+    <Compile Include="Library\WeakSet\WeakSetConstructor.cs" />
+    <Compile Include="Library\WeakSet\WeakSetConstructor.g.cs" />
+    <Compile Include="Library\WeakSet\WeakSetInstance.cs" />
+    <Compile Include="Library\WeakMap\WeakMapConstructor.cs" />
+    <Compile Include="Library\WeakMap\WeakMapConstructor.g.cs" />
+    <Compile Include="Library\WeakMap\WeakMapInstance.cs" />
+    <Compile Include="Library\WeakMap\WeakMapInstance.g.cs" />
+    <Compile Include="Library\Map\MapConstructor.cs" />
+    <Compile Include="Library\Map\MapConstructor.g.cs" />
+    <Compile Include="Library\Map\MapInstance.cs" />
+    <Compile Include="Library\Map\MapInstance.g.cs" />
+    <Compile Include="Library\Map\MapIterator.cs" />
+    <Compile Include="Library\Map\MapIterator.g.cs" />
     <Compile Include="Library\MathObject.g.cs" />
     <Compile Include="Library\Number\NumberConstructor.g.cs" />
     <Compile Include="Library\Number\NumberInstance.g.cs" />
@@ -213,6 +233,13 @@
     <Compile Include="Library\RegExp\RegExpConstructor.g.cs" />
     <Compile Include="Library\RegExp\RegExpInstance.cs" />
     <Compile Include="Library\RegExp\RegExpInstance.g.cs" />
+    <Compile Include="Library\Set\SetConstructor.cs" />
+    <Compile Include="Library\Set\SetConstructor.g.cs" />
+    <Compile Include="Library\Set\SetInstance.cs" />
+    <Compile Include="Library\Set\SetInstance.g.cs" />
+    <Compile Include="Library\Set\SetIterator.cs" />
+    <Compile Include="Library\Set\SetIterator.g.cs" />
+    <Compile Include="Library\String\StringIterator.cs" />
     <Compile Include="Library\String\StringConstructor.g.cs" />
     <Compile Include="Library\String\StringInstance.cs" />
     <Compile Include="Library\Function\FunctionInstance.cs" />
@@ -225,6 +252,7 @@
     <Compile Include="Library\MathObject.cs" />
     <Compile Include="Library\Object\ObjectInstance.cs" />
     <Compile Include="Library\String\StringInstance.g.cs" />
+    <Compile Include="Library\String\StringIterator.g.cs" />
     <Compile Include="Library\Symbol\SymbolConstructor.cs" />
     <Compile Include="Library\Symbol\SymbolConstructor.g.cs" />
     <Compile Include="Library\Symbol\SymbolInstance.cs" />
@@ -242,6 +270,7 @@
     <Compile Include="Library\TypedArray\TypedArrayInstance.cs" />
     <Compile Include="Library\TypedArray\TypedArrayConstructor.cs" />
     <Compile Include="Library\TypedArray\TypedArrayInstance.g.cs" />
+    <Compile Include="Library\WeakSet\WeakSetInstance.g.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Library\Object\Attributes.cs" />
   </ItemGroup>

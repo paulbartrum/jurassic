@@ -12,10 +12,11 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(6)
+			return new List<PropertyNameAndValue>(7)
 			{
 				new PropertyNameAndValue("fromCharCode", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCharCode", 1, __STUB__FromCharCode), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("fromCodePoint", new ClrStubFunction(engine.FunctionInstancePrototype, "fromCodePoint", 1, __STUB__FromCodePoint), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("raw", new ClrStubFunction(engine.FunctionInstancePrototype, "raw", 2, __STUB__Raw), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -66,6 +67,19 @@ namespace Jurassic.Library
 					return FromCodePoint(engine, new double[0]);
 				default:
 					return FromCodePoint(engine, TypeConverter.ConvertParameterArrayTo<double>(engine, args, 0));
+			}
+		}
+
+		private static object __STUB__Raw(ScriptEngine engine, object thisObj, object[] args)
+		{
+			switch (args.Length)
+			{
+				case 0:
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+				case 1:
+					return Raw(engine, TypeConverter.ToObject(engine, args[0]), new object[0]);
+				default:
+					return Raw(engine, TypeConverter.ToObject(engine, args[0]), TypeUtilities.SliceArray(args, 1));
 			}
 		}
 	}

@@ -24,6 +24,9 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("ArrayBuffer.valueOf() === ArrayBuffer"));
             Assert.AreEqual("ArrayBuffer", Evaluate("ArrayBuffer.prototype[Symbol.toStringTag]"));
 
+            // species
+            Assert.AreEqual(true, Evaluate("ArrayBuffer[Symbol.species] === ArrayBuffer"));
+
             // length
             Assert.AreEqual(1, Evaluate("ArrayBuffer.length"));
         }

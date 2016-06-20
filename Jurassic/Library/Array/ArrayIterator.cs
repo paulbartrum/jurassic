@@ -43,7 +43,7 @@ namespace Jurassic.Library
         /// <param name="engine"> The script environment. </param>
         internal static ObjectInstance CreatePrototype(ScriptEngine engine)
         {
-            var result = engine.Object.Construct();
+            var result = ObjectInstance.CreateRawObject(engine.BaseIteratorPrototype);
             var properties = GetDeclarativeProperties(engine);
             result.FastSetProperties(properties);
             return result;

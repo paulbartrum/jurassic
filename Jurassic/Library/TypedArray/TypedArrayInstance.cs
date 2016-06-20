@@ -331,7 +331,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "entries")]
         public ObjectInstance Entries()
         {
-            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.KeyAndValue);
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.KeyAndValue);
         }
 
         /// <summary>
@@ -341,7 +341,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "keys")]
         public ObjectInstance Keys()
         {
-            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Key);
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Key);
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "values")]
         public ObjectInstance Values()
         {
-            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Value);
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Value);
         }
 
 

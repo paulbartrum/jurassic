@@ -778,6 +778,16 @@ namespace Jurassic.Library
             return result.ToString();
         }
 
+        /// <summary>
+        /// Returns an iterator that iterates over the code points of the string.
+        /// </summary>
+        /// <returns> An iterator for the string instance. </returns>
+        [JSInternalFunction(Name = "@@iterator")]
+        public ObjectInstance GetIterator()
+        {
+            return new StringIterator(Engine.StringIteratorPrototype, this.value);
+        }
+
 
 
         //     JAVASCRIPT FUNCTIONS (HTML WRAPPER FUNCTIONS)

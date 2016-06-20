@@ -76,12 +76,16 @@
     <Compile Include="Library\JSONTests.cs" />
     <Compile Include="Library\FunctionTests.cs" />
     <Compile Include="Core\TypeConverterTests.cs" />
+    <Compile Include="Library\WeakSetTests.cs" />
+    <Compile Include="Library\WeakMapTests.cs" />
     <Compile Include="Library\ObjectTests.cs" />
     <Compile Include="Library\GlobalTests.cs" />
     <Compile Include="Library\ReflectTests.cs" />
     <Compile Include="Library\RegExpTests.cs" />
     <Compile Include="Library\PromiseTests.cs" />
     <Compile Include="Library\ArrayBufferTests.cs" />
+    <Compile Include="Library\MapTests.cs" />
+    <Compile Include="Library\SetTests.cs" />
     <Compile Include="Library\TypedArrayTests.cs" />
     <Compile Include="Library\SymbolTests.cs" />
     <Compile Include="Library\StringTests.cs" />

@@ -23,6 +23,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -38,13 +39,21 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Test Suite Files\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\BlockingQueue.cs" />
+    <Compile Include="Code\PipeClient.cs" />
+    <Compile Include="Code\PipeServer.cs" />
     <Compile Include="Code\Test.cs" />
     <Compile Include="Code\TestEventArgs.cs" />
+    <Compile Include="Code\WorkerProcess.cs" />
+    <Compile Include="Code\WorkerProcessResponse.cs" />
+    <Compile Include="Code\WorkerProcessRequest.cs" />
     <Compile Include="Code\TestSuite.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,9 +66,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Kangax\compat-table.json" />
+    <None Include="packages.config" />
     <None Include="Test Suite Files\suite\2012-05-18.zip" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Kangax\compat-table.txt" />
     <Content Include="Test Suite Files\config\excludelist.xml" />
     <Content Include="Test Suite Files\harness\cth.js" />
     <Content Include="Test Suite Files\harness\Date_constants.js" />

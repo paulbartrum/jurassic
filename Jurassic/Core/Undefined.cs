@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Text;
 
 namespace Jurassic
@@ -48,6 +49,7 @@ namespace Jurassic
         /// the exception being thrown. </param>
         /// <param name="context"> The StreamingContext that contains contextual information about
         /// the source or destination. </param>
+        [SecurityCritical]
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
             // Save the object state.

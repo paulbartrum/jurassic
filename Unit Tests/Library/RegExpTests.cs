@@ -22,6 +22,9 @@ namespace UnitTests
             // for-in
             Assert.AreEqual("$1,$2,$3,$4,$5,$6,$7,$8,$9,input,lastMatch,lastParen,leftContext,rightContext", Evaluate("y = []; for (var x in RegExp) { y.push(x) } y.sort().toString()"));
             Assert.AreEqual("", Evaluate("y = []; for (var x in new RegExp('abc', 'g')) { y.push(x) } y.sort().toString()"));
+
+            // species
+            Assert.AreEqual(true, Evaluate("RegExp[Symbol.species] === RegExp"));
         }
 
         [TestMethod]

@@ -69,6 +69,23 @@ namespace Jurassic.Library
         }
 
 
+
+        //     .NET METHODS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Returns a copy of the buffer data.
+        /// </summary>
+        /// <returns> A copy of the buffer data. </returns>
+        public byte[] ToArray()
+        {
+            byte[] result = new byte[this.buffer.Length];
+            Array.Copy(this.buffer, result, this.buffer.Length);
+            return result;
+        }
+
+
+
         //     JAVASCRIPT PROPERTIES
         //_________________________________________________________________________________________
 

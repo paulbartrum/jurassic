@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(47)
+			return new List<PropertyNameAndValue>(48)
 			{
 				new PropertyNameAndValue("charAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charAt", 1, __STUB__CharAt), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("charCodeAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charCodeAt", 1, __STUB__CharCodeAt), PropertyAttributes.NonEnumerable),
@@ -44,6 +44,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("endsWith", new ClrStubFunction(engine.FunctionInstancePrototype, "endsWith", 1, __STUB__EndsWith), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("contains", new ClrStubFunction(engine.FunctionInstancePrototype, "contains", 1, __STUB__Contains), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("repeat", new ClrStubFunction(engine.FunctionInstancePrototype, "repeat", 1, __STUB__Repeat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.Iterator, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("anchor", new ClrStubFunction(engine.FunctionInstancePrototype, "anchor", 1, __STUB__Anchor), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("big", new ClrStubFunction(engine.FunctionInstancePrototype, "big", 0, __STUB__Big), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("blink", new ClrStubFunction(engine.FunctionInstancePrototype, "blink", 0, __STUB__Blink), PropertyAttributes.NonEnumerable),
@@ -410,6 +411,14 @@ namespace Jurassic.Library
 				default:
 					return Repeat(engine, TypeConverter.ToString(thisObj), TypeConverter.ToInteger(args[0]));
 			}
+		}
+
+		private static object __STUB__GetIterator(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is StringInstance))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method '[Symbol.iterator]' is not generic.");
+			return ((StringInstance)thisObj).GetIterator();
 		}
 
 		private static object __STUB__Anchor(ScriptEngine engine, object thisObj, object[] args)
