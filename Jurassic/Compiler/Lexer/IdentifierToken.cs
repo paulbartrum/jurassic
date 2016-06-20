@@ -37,7 +37,7 @@ namespace Jurassic.Compiler
             get { return this.Name; }
         }
 
-        // Contextual keywords (new in ES6).
+        // Contextual keywords.
         public readonly static IdentifierToken Of = new IdentifierToken("of");
 
         /// <summary>
