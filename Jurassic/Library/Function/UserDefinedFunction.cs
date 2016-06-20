@@ -10,6 +10,9 @@ namespace Jurassic.Library
     [Serializable]
     public class UserDefinedFunction : FunctionInstance
     {
+        [ThreadStatic]
+        private static int currentRecursionDepth;
+
         [NonSerialized]
         private GeneratedMethod generatedMethod;
 
@@ -216,8 +219,20 @@ namespace Jurassic.Library
             // Compile the function.
             var body = Compile();
 
-            // Call the function.
-            return body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
+            // Check the allowed recursion depth.
+            if (this.Engine.RecursionDepthLimit > 0 && currentRecursionDepth >= this.Engine.RecursionDepthLimit)
+                throw new StackOverflowException("The allowed recursion depth of the script engine has been exceeded.");
+
+            currentRecursionDepth++;
+            try
+            {
+                // Call the function.
+                return body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
+            }
+            finally
+            {
+                currentRecursionDepth--;
+            }
         }
 
         /// <summary>
