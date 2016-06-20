@@ -121,5 +121,30 @@ namespace Jurassic.Library
             return result.ToString();
         }
 
+        /// <summary>
+        /// A tag function of template literals which is used to get the raw string form of
+        /// template strings (that is, the original, uninterpreted text).
+        /// </summary>
+        /// <param name="scriptEngine"> The script engine. </param>
+        /// <param name="template"> Well-formed template call site object e.g. { raw: ['one', 'two'] }. </param>
+        /// <param name="substitutions"> Contains substitution values. </param>
+        /// <returns> A formatted string containing the raw template literal text (with
+        /// substitutions included). </returns>
+        [JSInternalFunction(Name = "raw", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static string Raw(ScriptEngine scriptEngine, ObjectInstance template, params object[] substitutions)
+        {
+            var raw = TypeConverter.ToObject(scriptEngine, template["raw"]);
+            int length = TypeConverter.ToInteger(raw["length"]);
+            if (length <= 0)
+                return string.Empty;
+            var result = new System.Text.StringBuilder();
+            for (int i = 0; i < length; i ++)
+            {
+                result.Append(TypeConverter.ToString(raw[i]));
+                if (i < length - 1 && i < substitutions.Length)
+                    result.Append(TypeConverter.ToString(substitutions[i]));
+            }
+            return result.ToString();
+        }
     }
 }

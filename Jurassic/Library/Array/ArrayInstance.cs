@@ -214,12 +214,19 @@ namespace Jurassic.Library
         {
             if (key is SymbolInstance)
                 return uint.MaxValue;
+
             var propertyName = (string)key;
             if (propertyName.Length == 0)
                 return uint.MaxValue;
+
             int digit = propertyName[0] - '0';
             if (digit < 0 || digit > 9)
                 return uint.MaxValue;
+
+            // '0' is an array index but '00[, '01', '000' are not.
+            if (digit == 0 && propertyName.Length > 1)
+                return uint.MaxValue;
+
             uint result = (uint)digit;
             for (int i = 1; i < propertyName.Length; i++)
             {
@@ -1297,7 +1304,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "entries")]
         public ObjectInstance Entries()
         {
-            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.KeyAndValue);
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.KeyAndValue);
         }
 
         /// <summary>
@@ -1307,7 +1314,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "keys")]
         public ObjectInstance Keys()
         {
-            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Key);
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Key);
         }
 
         /// <summary>
@@ -1319,7 +1326,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "values")]
         public ObjectInstance Values()
         {
-            return new ArrayIterator(ArrayIterator.CreatePrototype(Engine), this, ArrayIterator.Kind.Value);
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Value);
         }
 
 

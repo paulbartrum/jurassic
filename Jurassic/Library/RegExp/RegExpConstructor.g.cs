@@ -10,6 +10,13 @@ namespace Jurassic.Library
 
 	public partial class RegExpConstructor
 	{
+		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
+		{
+			return new List<PropertyNameAndValue>(4)
+			{
+				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
+			};
+		}
 
 		private static object __STUB__Call(ScriptEngine engine, object thisObj, object[] args)
 		{
@@ -41,6 +48,14 @@ namespace Jurassic.Library
 				default:
 					return ((RegExpConstructor)thisObj).Construct(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToString(args[1]));
 			}
+		}
+
+		private static object __GETTER__Species(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpConstructor))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get [Symbol.species]' is not generic.");
+			return ((RegExpConstructor)thisObj).Species;
 		}
 	}
 

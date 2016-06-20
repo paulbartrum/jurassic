@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Jurassic.Library;
+using System.Security;
 
 namespace Jurassic.Compiler
 {
@@ -125,6 +126,7 @@ namespace Jurassic.Compiler
         /// the exception being thrown. </param>
         /// <param name="context"> The StreamingContext that contains contextual information about
         /// the source or destination. </param>
+        [SecurityCritical]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
             // Save the base class state.

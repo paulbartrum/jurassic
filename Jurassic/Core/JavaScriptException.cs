@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using Jurassic.Library;
+using System.Security;
 
 namespace Jurassic
 {
@@ -124,6 +125,7 @@ namespace Jurassic
         /// the exception being thrown. </param>
         /// <param name="context"> The StreamingContext that contains contextual information about
         /// the source or destination. </param>
+        [SecurityCritical]
         protected JavaScriptException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -212,7 +214,7 @@ namespace Jurassic
         /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
         /// <param name="message"> A description of the error. </param>
         /// <returns> A new Error instance. </returns>
-        private static Library.ErrorInstance CreateError(ScriptEngine engine, ErrorType type, string message)
+        private static ErrorInstance CreateError(ScriptEngine engine, ErrorType type, string message)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");

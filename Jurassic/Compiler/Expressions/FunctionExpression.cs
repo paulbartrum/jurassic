@@ -22,7 +22,8 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the name of the function.
+        /// Gets the name of the function.  For getters and setters, this does not include the
+        /// "get" or "set".
         /// </summary>
         public string FunctionName
         {
@@ -86,7 +87,12 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
 
             // name
-            generator.LoadString(this.FunctionName);
+            if (this.context.DeclarationType == FunctionDeclarationType.Getter)
+                generator.LoadString("get " + this.FunctionName);
+            else if (this.context.DeclarationType == FunctionDeclarationType.Setter)
+                generator.LoadString("set " + this.FunctionName);
+            else
+                generator.LoadString(this.FunctionName);
 
             // argumentNames
             generator.LoadInt32(this.ArgumentNames.Count);

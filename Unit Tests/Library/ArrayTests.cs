@@ -49,6 +49,9 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("Array(5).length"));
             Assert.AreEqual(false, Evaluate("Array(5).hasOwnProperty(0)"));
 
+            // species
+            Assert.AreEqual(true, Evaluate("Array[Symbol.species] === Array"));
+
             // length
             Assert.AreEqual(1, Evaluate("Array.length"));
 
@@ -91,6 +94,7 @@ namespace UnitTests
                 Assert.AreEqual(3, Evaluate("array[2]"));
                 Assert.AreEqual("twenty", Evaluate("array[20]"));
                 Assert.AreEqual("twenty", Evaluate("array['20']"));
+                Assert.AreEqual(Undefined.Value, Evaluate("array['020']"));
                 Assert.AreEqual("1,two,3", Evaluate("array.toString()"));
             }
             finally

@@ -24,12 +24,24 @@ namespace Jurassic.Library
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             // Initialize the constructor properties.
-            var properties = new List<PropertyNameAndValue>(3);
+            var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "RegExp", 2, RegExpInstance.CreatePrototype(Engine, this));
             AddDeprecatedProperties(properties);
             FastSetProperties(properties);
         }
 
+
+        //     JAVASCRIPT PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// A reference to the constructor function that is used to create derived objects.
+        /// </summary>
+        [JSProperty(Name = "@@species")]
+        public FunctionInstance Species
+        {
+            get { return this; }
+        }
 
 
 

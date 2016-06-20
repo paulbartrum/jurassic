@@ -72,6 +72,11 @@ namespace Jurassic
         /// <param name="x"> The first object to compare. </param>
         /// <param name="y"> The second object to compare. </param>
         /// <returns> <c>true</c> if the objects are identical; <c>false</c> otherwise. </returns>
+        /// <remarks>
+        /// With this algorithm:
+        /// 1. NaN is not considered equal to NaN.
+        /// 2. +0 and -0 are considered to be equal.
+        /// </remarks>
         public static bool StrictEquals(object x, object y)
         {
             x = x ?? Undefined.Value;
@@ -209,9 +214,9 @@ namespace Jurassic
         /// <returns> <c>true</c> if the objects are the same value according to the SameValue
         /// algorithm. </returns>
         /// <remarks>
-        /// This algorithm differs from the StrictEquals algorithm in two ways:
-        /// 1. NaN compares equal with itself
-        /// 2. Negative zero is considered different from positive zero.
+        /// With this algorithm:
+        /// 1. NaN is considered equal to NaN.
+        /// 2. +0 and -0 are considered to be different.
         /// </remarks>
         public static bool SameValue(object x, object y)
         {
@@ -230,6 +235,39 @@ namespace Jurassic
             if (x is double && (double) x == 0.0 && y is double && (double)y == 0.0)
                 if ((1 / (double)x) != (1 / (double)y))
                     return false;
+            if (x is ConcatenatedString)
+                x = x.ToString();
+            if (y is ConcatenatedString)
+                y = y.ToString();
+            return object.Equals(x, y);
+        }
+
+        /// <summary>
+        /// Implements the SameValueZero algorithm.
+        /// </summary>
+        /// <param name="x"> The first object to compare. </param>
+        /// <param name="y"> The second object to compare. </param>
+        /// <returns> <c>true</c> if the objects are the same value according to the SameValueZero
+        /// algorithm. </returns>
+        /// <remarks>
+        /// With this algorithm:
+        /// 1. NaN is considered equal to NaN.
+        /// 2. +0 and -0 are considered to be equal.
+        /// </remarks>
+        public static bool SameValueZero(object x, object y)
+        {
+            if (x == null)
+                x = Undefined.Value;
+            if (y == null)
+                y = Undefined.Value;
+            if (x is int)
+                x = (double)(int)x;
+            if (x is uint)
+                x = (double)(uint)x;
+            if (y is int)
+                y = (double)(int)y;
+            if (y is uint)
+                y = (double)(uint)y;
             if (x is ConcatenatedString)
                 x = x.ToString();
             if (y is ConcatenatedString)

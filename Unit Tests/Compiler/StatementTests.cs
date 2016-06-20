@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
-using Jurassic.Compiler;
 
 namespace UnitTests
 {
@@ -99,7 +94,7 @@ namespace UnitTests
             Assert.AreEqual("1", Evaluate("y = 0; for (x in [7, 5]) { y = x } y"));
             Assert.AreEqual(0, Evaluate("x = 0; for (x in null) { x = 1 } x"));
             Assert.AreEqual(0, Evaluate("x = 0; for (x in undefined) { x = 1 } x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("for (5 in [1, 2]) {}"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (5 in [1, 2]) {}"));
 
             // for (var x in <expression>)
             Assert.AreEqual("1", Evaluate("y = 0; for (var x in [7, 5]) { y = x } y"));
@@ -117,8 +112,45 @@ namespace UnitTests
             // Adding a property while enumerating it should return the keys as they were originally.
             Assert.AreEqual("bc", Evaluate("var a = {b: 2, c: 3}; var keys = ''; for (var x in a) { a.d = 5; keys += x; }"));
 
+            // Accessor properties should not be evaluated.
+            Assert.AreEqual("a", Evaluate(@"
+                var y = '';
+                var x = { get a() { y += '!'; return '*'; } };
+                for (var prop in x) {
+                    y += prop
+                }
+                y;"));
+
             // Strict mode: the name "eval" is not allowed in strict mode.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; for (var eval in {a:1}) {}"));
+        }
+
+        [TestMethod]
+        public void ForOf()
+        {
+            // for (x of <expression>)
+            Assert.AreEqual(206, Evaluate("y = 0; for (x of [93, 113]) { y += x } y"));
+            Assert.AreEqual("93, 113", Evaluate("y = ''; for (x of [93, 113]) { y += (y ? ', ' : '') + x } y"));
+            Assert.AreEqual("b, o, o", Evaluate("y = ''; for (x of 'boo') { y += (y ? ', ' : '') + x } y"));
+            Assert.AreEqual("0, 255", Evaluate("y = ''; for (x of new Uint8Array([0x00, 0xff])) { y += (y ? ', ' : '') + x } y"));
+            Assert.AreEqual("a,1, b,2, c,3", Evaluate("y = ''; for (x of new Map([['a', 1], ['b', 2], ['c', 3]])) { y += (y ? ', ' : '') + x } y"));
+            Assert.AreEqual("1, 2, 3", Evaluate("y = ''; for (x of new Set([1, 1, 2, 2, 3, 3])) { y += (y ? ', ' : '') + x } y"));
+
+            // for (var x of <expression>)
+            Assert.AreEqual(206, Evaluate("y = 0; for (var x of [93, 113]) { y += x } y"));
+
+            // Type errors.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("for (x of 1) {}"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("for (x of null) {}"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("for (x of undefined) {}"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("for (x of {}) {}"));
+
+            // Syntax errors.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (x of [1, 2], [3, 4]) {}"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (5 of [1, 2])"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (var 5 of [1, 2])"));
+
+            // TODO: iterate over a generator.
         }
 
         [TestMethod]

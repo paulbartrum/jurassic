@@ -13,7 +13,7 @@ namespace Jurassic.Compiler
         /// Creates a new IdentifierToken instance.
         /// </summary>
         /// <param name="name"> The identifier name. </param>
-        public IdentifierToken(string name)
+        private IdentifierToken(string name)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -35,6 +35,21 @@ namespace Jurassic.Compiler
         public override string Text
         {
             get { return this.Name; }
+        }
+
+        // Contextual keywords (new in ES6).
+        public readonly static IdentifierToken Of = new IdentifierToken("of");
+
+        /// <summary>
+        /// Creates a new identifier token.
+        /// </summary>
+        /// <param name="name"> The name of the identifer. </param>
+        /// <returns> A new IdentifierToken instance. </returns>
+        public static IdentifierToken Create(string name)
+        {
+            if (name == "of")
+                return Of;
+            return new IdentifierToken(name);
         }
     }
 

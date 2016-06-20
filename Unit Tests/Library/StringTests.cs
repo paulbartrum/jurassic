@@ -1256,11 +1256,43 @@ namespace UnitTests
         [TestMethod]
         public void raw()
         {
+            // Calling it directly.
+            Assert.AreEqual("hello0world", Evaluate("String.raw({ raw: ['hello', 'world'] }, 0, 1)"));
+            Assert.AreEqual("hello0world", Evaluate("String.raw({ raw: ['hello', 'world'] }, 0)"));
+            Assert.AreEqual("helloworld", Evaluate("String.raw({ raw: ['hello', 'world'] })"));
             Assert.AreEqual("t0e1s2t", Evaluate("String.raw({ raw: 'test' }, 0, 1, 2)"));
+
+            // Calling it via a template literal.
+            Assert.AreEqual(@"one\r\ntwo\r\nthree", Evaluate(@"String.raw`one\r\n${'two'}\r\nthree`"));
 
             // The first parameter must be an object with a "raw" property.
             Assert.AreEqual("TypeError", EvaluateExceptionType("String.raw({}, 0, 1, 2)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("String.raw(5, 0, 1, 2)"));
+        }
+
+        [TestMethod]
+        public void iterator()
+        {
+            // The length of "😂!" is three because 😂 is U+1F602 (which encodes to two characters
+            // in UTF-16).  When iterating only two characters should be iterated over.
+            Execute("var str = '😂!';");
+            Assert.AreEqual(3, Evaluate("str.length"));
+            Execute("var iterator = str[Symbol.iterator]();");
+            Assert.AreEqual(@"{""value"":""😂"",""done"":false}", Evaluate("JSON.stringify(iterator.next())"));
+            Assert.AreEqual(@"{""value"":""!"",""done"":false}", Evaluate("JSON.stringify(iterator.next())"));
+            Assert.AreEqual(@"{""done"":true}", Evaluate("JSON.stringify(iterator.next())"));
+
+            // Check the prototype heirarchy is correct.
+            Execute(@"
+                var iterator = ''[Symbol.iterator]();
+                // %StringIteratorPrototype%
+                var proto1 = Object.getPrototypeOf(iterator);
+                // %IteratorPrototype%
+                var proto2 = Object.getPrototypeOf(proto1);");
+            Assert.AreEqual(true, Evaluate("iterator[Symbol.iterator]() === iterator"));
+            Assert.AreEqual(false, Evaluate("iterator.hasOwnProperty(Symbol.iterator)"));
+            Assert.AreEqual(false, Evaluate("proto1.hasOwnProperty(Symbol.iterator)"));
+            Assert.AreEqual(true, Evaluate("proto2.hasOwnProperty(Symbol.iterator)"));
         }
     }
 }

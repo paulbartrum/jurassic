@@ -25,6 +25,11 @@ namespace Jurassic.Compiler
         /// Indicates the next token can be an operator.
         /// </summary>
         Operator,
+
+        /// <summary>
+        /// Indicates the next token is the continuation of a template literal.
+        /// </summary>
+        TemplateContinuation,
     }
 
     /// <summary>
@@ -396,20 +401,31 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="firstChar"> The first character of the string literal. </param>
         /// <returns> A string literal. </returns>
-        private Token ReadStringLiteral(int firstChar)
+        public Token ReadStringLiteral(int firstChar)
         {
-            System.Diagnostics.Debug.Assert(firstChar == '\'' || firstChar == '"');
+            System.Diagnostics.Debug.Assert(firstChar == '\'' || firstChar == '"' || firstChar == '`');
             var contents = new StringBuilder();
             int lineTerminatorCount = 0;
             int escapeSequenceCount = 0;
+
+            // In order to support tagged template literals properly, we need to capture the raw
+            // text, including escape sequences.
+            StringBuilder previousInputCapture = null;
+            if (firstChar == '`')
+            {
+                previousInputCapture = this.InputCaptureStringBuilder;
+                this.InputCaptureStringBuilder = new StringBuilder();
+            }
+
+            int c;
             while (true)
             {
-                int c = ReadNextChar();
+                c = ReadNextChar();
                 if (c == firstChar)
                     break;
                 if (c == -1)
                     throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in string literal.", this.lineNumber, this.Source.Path);
-                if (IsLineTerminator(c))
+                if (IsLineTerminator(c) && firstChar != '`')
                     throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected line terminator in string literal.", this.lineNumber, this.Source.Path);
                 if (c == '\\')
                 {
@@ -474,7 +490,7 @@ namespace Jurassic.Compiler
                                 // Null character or octal escape sequence.
                                 c = this.reader.Peek();
                                 if (c >= '0' && c <= '9')
-                                    contents.Append(ReadOctalEscapeSequence(0));
+                                    contents.Append(ReadOctalEscapeSequence(firstChar, 0));
                                 else
                                     contents.Append((char)0);
                                 break;
@@ -486,7 +502,7 @@ namespace Jurassic.Compiler
                             case '6':
                             case '7':
                                 // Octal escape sequence.
-                                contents.Append(ReadOctalEscapeSequence(c - '0'));
+                                contents.Append(ReadOctalEscapeSequence(firstChar, c - '0'));
                                 break;
                             case '8':
                             case '9':
@@ -498,11 +514,38 @@ namespace Jurassic.Compiler
                         escapeSequenceCount ++;
                     }
                 }
+                else if (c == '$' && firstChar == '`')
+                {
+                    // This is a template literal substitution if the next character is '{'
+                    if (this.reader.Peek() == '{')
+                    {
+                        // Yes, this is a substitution!
+                        ReadNextChar();
+                        break;
+                    }
+                    else
+                    {
+                        // Not a substitution.
+                        contents.Append((char)c);
+                    }
+                }
                 else
                 {
                     contents.Append((char)c);
                 }
             }
+
+            // Template literals return a different type of token.
+            if (firstChar == '`')
+            {
+                var rawText = this.InputCaptureStringBuilder.ToString(0, this.InputCaptureStringBuilder.Length - (c == '$' ? 2 : 1));
+                this.InputCaptureStringBuilder = previousInputCapture;
+                if (this.InputCaptureStringBuilder != null)
+                    this.InputCaptureStringBuilder.Append(previousInputCapture.ToString());
+                return new TemplateLiteralToken(contents.ToString(), rawText, substitutionFollows: c == '$');
+            }
+
+            // Return a regular string literal token.
             return new StringLiteralToken(contents.ToString(), escapeSequenceCount, lineTerminatorCount);
         }
 
@@ -527,13 +570,18 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Reads an octal number turns it into a single-byte character.
         /// </summary>
+        /// <param name="stringDelimiter"> The first character delimiting the string literal. </param>
         /// <param name="firstDigit"> The value of the first digit. </param>
         /// <returns> The character corresponding to the escape sequence. </returns>
-        private char ReadOctalEscapeSequence(int firstDigit)
+        private char ReadOctalEscapeSequence(int stringDelimiter, int firstDigit)
         {
-            // Octal escape sequences are only supported in ECMAScript 3 compatibility mode.
+            // Octal escape sequences are not allowed in strict mode.
             if (this.StrictMode)
                 throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Octal escape sequences are not allowed in strict mode.", this.lineNumber, this.Source.Path);
+
+            // Octal escape sequences are not allowed in template strings.
+            if (stringDelimiter == '`')
+                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Octal escape sequences are not allowed in template strings.", this.lineNumber, this.Source.Path);
 
             int numericValue = firstDigit;
             for (int i = 0; i < 2; i++)
@@ -938,7 +986,7 @@ namespace Jurassic.Compiler
         /// literal; <c>false</c> otherwise. </returns>
         private bool IsStringLiteralStartChar(int c)
         {
-            return c == '"' || c == '\'';
+            return c == '"' || c == '\'' || c == '`';
         }
 
         /// <summary>

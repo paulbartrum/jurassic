@@ -373,7 +373,7 @@ namespace Jurassic.Compiler
             else
             {
                 rhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToString(generator, rhs.ResultType);
+                EmitConversion.ToPropertyKey(generator, rhs.ResultType);
             }
 
             // Call Delete()

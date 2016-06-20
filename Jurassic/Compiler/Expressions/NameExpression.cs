@@ -669,7 +669,7 @@ namespace Jurassic.Compiler
                     var endOfExistsCheck = generator.CreateLabel();
                     generator.BranchIfFalse(endOfExistsCheck);
 
-                    // Call scope.ScopeObject.Delete(propertyName, false)
+                    // Call scope.ScopeObject.Delete(key, false)
                     generator.LoadString(this.Name);
                     generator.LoadBoolean(false);
                     generator.Call(ReflectionHelpers.ObjectInstance_Delete);

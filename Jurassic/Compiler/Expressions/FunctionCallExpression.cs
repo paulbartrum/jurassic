@@ -9,7 +9,7 @@ namespace Jurassic.Compiler
     internal class FunctionCallExpression : OperatorExpression
     {
         /// <summary>
-        /// Creates a new instance of FunctionCallJSExpression.
+        /// Creates a new instance of FunctionCallExpression.
         /// </summary>
         /// <param name="operator"> The binary operator to base this expression on. </param>
         public FunctionCallExpression(Operator @operator)
@@ -172,6 +172,13 @@ namespace Jurassic.Compiler
                     // Multiple parameters were passed to the function.
                     arguments = ((ListExpression)argumentsOperand).Items;
                 }
+                else if (argumentsOperand is TemplateLiteralExpression)
+                {
+                    // Tagged template literal.
+                    var templateLiteral = (TemplateLiteralExpression)argumentsOperand;
+                    GenerateTemplateArgumentsArray(generator, optimizationInfo, templateLiteral);
+                    return;
+                }
                 else
                 {
                     // A single parameter was passed to the function.
@@ -189,6 +196,67 @@ namespace Jurassic.Compiler
                     EmitConversion.ToAny(generator, arguments[i].ResultType);
                     generator.StoreArrayElement(typeof(object));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Generates an array containing the argument values for a tagged template literal.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        /// <param name="templateLiteral"> The template literal expression containing the parameter
+        /// values. </param>
+        internal void GenerateTemplateArgumentsArray(ILGenerator generator, OptimizationInfo optimizationInfo, TemplateLiteralExpression templateLiteral)
+        {
+            // Generate an array containing the value of each argument.
+            generator.LoadInt32(templateLiteral.Values.Count + 1);
+            generator.NewArray(typeof(object));
+
+            // Load the first parameter.
+            generator.Duplicate();
+            generator.LoadInt32(0);
+
+            // The first parameter to the tag function is an array of strings.
+            var stringsExpression = new List<Expression>(templateLiteral.Strings.Count);
+            foreach (var templateString in templateLiteral.Strings)
+            {
+                stringsExpression.Add(new LiteralExpression(templateString));
+            }
+            new LiteralExpression(stringsExpression).GenerateCode(generator, optimizationInfo);
+            generator.Duplicate();
+
+            // Now we need the name of the property.
+            generator.LoadString("raw");
+
+            // Now generate an array of raw strings.
+            var rawStringsExpression = new List<Expression>(templateLiteral.RawStrings.Count);
+            foreach (var rawString in templateLiteral.RawStrings)
+            {
+                rawStringsExpression.Add(new LiteralExpression(rawString));
+            }
+            new LiteralExpression(rawStringsExpression).GenerateCode(generator, optimizationInfo);
+
+            // Freeze array by calling ObjectInstance Freeze(ObjectInstance).
+            generator.CallStatic(ReflectionHelpers.ObjectConstructor_Freeze);
+
+            // Now store the raw strings as a property of the base strings array.
+            generator.LoadBoolean(optimizationInfo.StrictMode);
+            generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+
+            // Freeze array by calling ObjectInstance Freeze(ObjectInstance).
+            generator.CallStatic(ReflectionHelpers.ObjectConstructor_Freeze);
+
+            // Store in the array.
+            generator.StoreArrayElement(typeof(object));
+
+            // Values are passed as subsequent parameters.
+            for (int i = 0; i < templateLiteral.Values.Count; i++)
+            {
+                generator.Duplicate();
+                generator.LoadInt32(i + 1);
+                templateLiteral.Values[i].GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToAny(generator, templateLiteral.Values[i].ResultType);
+                generator.StoreArrayElement(typeof(object));
             }
         }
 

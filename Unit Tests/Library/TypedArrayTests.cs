@@ -61,6 +61,17 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("Int8Array.valueOf() === Int8Array"));
             Assert.AreEqual(false, Evaluate("Int16Array.valueOf() === Int8Array"));
 
+            // species
+            Assert.AreEqual(true, Evaluate("Int8Array[Symbol.species] === Int8Array"));
+            Assert.AreEqual(true, Evaluate("Uint8Array[Symbol.species] === Uint8Array"));
+            Assert.AreEqual(true, Evaluate("Uint8ClampedArray[Symbol.species] === Uint8ClampedArray"));
+            Assert.AreEqual(true, Evaluate("Int16Array[Symbol.species] === Int16Array"));
+            Assert.AreEqual(true, Evaluate("Uint16Array[Symbol.species] === Uint16Array"));
+            Assert.AreEqual(true, Evaluate("Int32Array[Symbol.species] === Int32Array"));
+            Assert.AreEqual(true, Evaluate("Uint32Array[Symbol.species] === Uint32Array"));
+            Assert.AreEqual(true, Evaluate("Float32Array[Symbol.species] === Float32Array"));
+            Assert.AreEqual(true, Evaluate("Float64Array[Symbol.species] === Float64Array"));
+
             // length
             Assert.AreEqual(3, Evaluate("Int8Array.length"));
             Assert.AreEqual(3, Evaluate("Uint8Array.length"));
