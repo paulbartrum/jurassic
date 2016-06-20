@@ -39,7 +39,7 @@ namespace Jurassic.Compiler
                 return null;
 
             // Object literal.
-            if (this.Value is Dictionary<string, object>)
+            if (this.Value is List<KeyValuePair<Expression, Expression>>)
                 return null;
 
             // RegExp literal.
@@ -62,7 +62,7 @@ namespace Jurassic.Compiler
                     return PrimitiveType.Object;
 
                 // Object literal.
-                if (this.Value is Dictionary<string, object>)
+                if (this.Value is List<KeyValuePair<Expression, Expression>>)
                     return PrimitiveType.Object;
 
                 // RegExp literal.
@@ -178,10 +178,10 @@ namespace Jurassic.Compiler
                 // ArrayConstructor.New(object[])
                 generator.Call(ReflectionHelpers.Array_New);
             }
-            else if (this.Value is Dictionary<string, object>)
+            else if (this.Value is List<KeyValuePair<Expression, Expression>>)
             {
                 // This is an object literal.
-                var properties = (Dictionary<string, object>)this.Value;
+                var properties = (List<KeyValuePair<Expression, Expression>>)this.Value;
 
                 // Create a new object.
                 EmitHelpers.LoadScriptEngine(generator);
@@ -190,53 +190,44 @@ namespace Jurassic.Compiler
 
                 foreach (var keyValuePair in properties)
                 {
-                    string propertyName = keyValuePair.Key;
-                    object propertyValue = keyValuePair.Value;
+                    Expression propertyName = keyValuePair.Key;
+                    Expression propertyValue = keyValuePair.Value;
 
                     generator.Duplicate();
-                    generator.LoadString(propertyName);
-                    if (propertyValue is Expression)
+
+                    // The key can be a property name or an expression that evaluates to a name.
+                    propertyName.GenerateCode(generator, optimizationInfo);
+                    EmitConversion.ToPropertyKey(generator, propertyName.ResultType);
+
+                    var functionValue = propertyValue as FunctionExpression;
+                    if (functionValue != null && functionValue.DeclarationType == FunctionDeclarationType.Getter)
                     {
-                        // Add a new property to the object.
-                        var dataPropertyValue = (Expression)propertyValue;
-                        dataPropertyValue.GenerateCode(generator, optimizationInfo);
+                        // Add a getter to the object.
+                        functionValue.GenerateCode(generator, optimizationInfo);
                         // Support the inferred function displayName property.
-                        if (dataPropertyValue is FunctionExpression)
-                            ((FunctionExpression)dataPropertyValue).GenerateDisplayName(generator, optimizationInfo, propertyName, false);
-                        EmitConversion.ToAny(generator, dataPropertyValue.ResultType);
-                        generator.LoadBoolean(optimizationInfo.StrictMode);
-                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+                        if (propertyName is LiteralExpression && ((LiteralExpression)propertyName).Value is string)
+                            functionValue.GenerateDisplayName(generator, optimizationInfo, "get " + (string)((LiteralExpression)propertyName).Value, true);
+                        generator.Call(ReflectionHelpers.ReflectionHelpers_SetObjectLiteralGetter);
                     }
-                    else if (propertyValue is Parser.ObjectLiteralAccessor)
+                    else if(functionValue != null && functionValue.DeclarationType == FunctionDeclarationType.Setter)
                     {
-                        // Add a new getter/setter to the object.
-                        var accessorValue = (Parser.ObjectLiteralAccessor)propertyValue;
-                        if (accessorValue.Getter != null)
-                        {
-                            accessorValue.Getter.GenerateCode(generator, optimizationInfo);
-                            // Support the inferred function displayName property.
-                            accessorValue.Getter.GenerateDisplayName(generator, optimizationInfo, "get " + propertyName, true);
-                            EmitConversion.ToAny(generator, accessorValue.Getter.ResultType);
-                        }
-                        else
-                            generator.LoadNull();
-                        if (accessorValue.Setter != null)
-                        {
-                            accessorValue.Setter.GenerateCode(generator, optimizationInfo);
-                            // Support the inferred function displayName property.
-                            accessorValue.Setter.GenerateDisplayName(generator, optimizationInfo, "set " + propertyName, true);
-                            EmitConversion.ToAny(generator, accessorValue.Setter.ResultType);
-                        }
-                        else
-                            generator.LoadNull();
-                        generator.LoadInt32((int)Library.PropertyAttributes.FullAccess);
-                        generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor3);
-                        generator.LoadBoolean(false);
-                        generator.Call(ReflectionHelpers.ObjectInstance_DefineProperty);
-                        generator.Pop();
+                        // Add a setter to the object.
+                        functionValue.GenerateCode(generator, optimizationInfo);
+                        // Support the inferred function displayName property.
+                        if (propertyName is LiteralExpression && ((LiteralExpression)propertyName).Value is string)
+                            functionValue.GenerateDisplayName(generator, optimizationInfo, "set " + (string)((LiteralExpression)propertyName).Value, true);
+                        generator.Call(ReflectionHelpers.ReflectionHelpers_SetObjectLiteralSetter);
                     }
                     else
-                        throw new InvalidOperationException("Invalid property value type in object literal.");
+                    {
+                        // Add a new property to the object.
+                        propertyValue.GenerateCode(generator, optimizationInfo);
+                        // Support the inferred function displayName property.
+                        if (propertyValue is FunctionExpression && propertyName is LiteralExpression && ((LiteralExpression)propertyName).Value is string)
+                            ((FunctionExpression)propertyValue).GenerateDisplayName(generator, optimizationInfo, (string)((LiteralExpression)propertyName).Value, false);
+                        EmitConversion.ToAny(generator, propertyValue.ResultType);
+                        generator.Call(ReflectionHelpers.ReflectionHelpers_SetObjectLiteralValue);
+                    }
                 }
             }
             else
@@ -264,35 +255,31 @@ namespace Jurassic.Compiler
             }
 
             // Object literal.
-            if (this.Value is Dictionary<string, object>)
+            if (this.Value is List<KeyValuePair<Expression, Expression>>)
             {
                 var result = new System.Text.StringBuilder("{");
-                foreach (var keyValuePair in (Dictionary<string, object>)this.Value)
+                foreach (var keyValuePair in (List<KeyValuePair<Expression, Expression>>)this.Value)
                 {
                     if (result.Length > 1)
                         result.Append(", ");
                     if (keyValuePair.Value is Expression)
                     {
+                        if (keyValuePair.Key is Expression)
+                            result.Append('[');
                         result.Append(keyValuePair.Key);
+                        if (keyValuePair.Key is Expression)
+                            result.Append(']');
                         result.Append(": ");
                         result.Append(keyValuePair.Value);
-
                     }
-                    else if (keyValuePair.Value is Parser.ObjectLiteralAccessor)
+                    else if (keyValuePair.Value is FunctionExpression)
                     {
-                        var accessor = (Parser.ObjectLiteralAccessor)keyValuePair.Value;
-                        if (accessor.Getter != null)
-                        {
+                        var function = (FunctionExpression)keyValuePair.Value;
+                        if (function.DeclarationType == FunctionDeclarationType.Getter)
                             result.Append("get ");
-                            result.Append(accessor.Getter.ToString().Substring(9));
-                            if (accessor.Setter != null)
-                                result.Append(", ");
-                        }
-                        if (accessor.Setter != null)
-                        {
+                        else if (function.DeclarationType == FunctionDeclarationType.Setter)
                             result.Append("set ");
-                            result.Append(accessor.Setter.ToString().Substring(9));
-                        }
+                        result.Append(function.ToString().Substring(9));
                     }
                 }
                 result.Append("}");

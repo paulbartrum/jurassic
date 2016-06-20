@@ -839,8 +839,11 @@ namespace Jurassic.Library
                 }
             }
 
-            // Set the property value and attributes.
-            this.schema = this.schema.SetPropertyAttributes(key, descriptor.Attributes);
+            // Set the property attributes.
+            if (descriptor.Attributes != current.Attributes)
+                this.schema = this.schema.SetPropertyAttributes(key, descriptor.Attributes);
+
+            // Set the property value.
             this.propertyValues[current.Index] = descriptor.Value;
 
             return true;

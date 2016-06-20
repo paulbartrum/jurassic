@@ -22,6 +22,14 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Indicates how the function was declared.
+        /// </summary>
+        public FunctionDeclarationType DeclarationType
+        {
+            get { return this.context.DeclarationType; }
+        }
+
+        /// <summary>
         /// Gets the name of the function.  For getters and setters, this does not include the
         /// "get" or "set".
         /// </summary>

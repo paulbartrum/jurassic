@@ -216,6 +216,9 @@ namespace Jurassic
             // Deserialize the ForceStrictMode flag.
             this.ForceStrictMode = info.GetBoolean("forceStrictMode");
 
+            // Deserialize the RecursionDepthLimit flag.
+            this.RecursionDepthLimit = info.GetInt32("recursionDepthLimit");
+
             // Deserialize the built-in objects.
             this.globalObject = (GlobalObject)info.GetValue("globalObject", typeof(GlobalObject));
             this.arrayConstructor = (ArrayConstructor)info.GetValue("arrayConstructor", typeof(ArrayConstructor));
@@ -273,6 +276,9 @@ namespace Jurassic
 
             // Serialize the ForceStrictMode flag.
             info.AddValue("forceStrictMode", this.ForceStrictMode);
+
+            // Serialize the RecursionDepthLimit flag.
+            info.AddValue("recursionDepthLimit", this.RecursionDepthLimit);
 
             // Serialize the built-in objects.
             info.AddValue("globalObject", this.globalObject);
@@ -359,6 +365,19 @@ namespace Jurassic
         /// in the associated function.
         /// </summary>
         public bool EnableILAnalysis
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Get or sets a value that indicates the maximum recursion depth of user-defined
+        /// functions that is allowed by this script engine.
+        /// When a user-defined function exceeds the recursion depth limit, a
+        /// <see cref="StackOverflowException"/> will be thrown.
+        /// The default value is <c>0</c>, which allows unlimited recursion.
+        /// </summary>
+        public int RecursionDepthLimit
         {
             get;
             set;

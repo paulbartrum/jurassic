@@ -161,7 +161,7 @@
     <Compile Include="Library\JSON\JSONSerializer.cs" />
     <Compile Include="Library\JSON\JSONLexer.cs" />
     <Compile Include="Core\TypeUtilities.cs" />
-    <Compile Include="Core\ReflectionHelpers.cs" />
+    <Compile Include="Compiler\Emit\ReflectionHelpers.cs" />
     <Compile Include="Compiler\Lexer\IdentifierToken.cs" />
     <Compile Include="Compiler\Lexer\KeywordToken.cs" />
     <Compile Include="Compiler\Lexer\Lexer.cs" />
