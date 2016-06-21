@@ -1321,6 +1321,18 @@ namespace UnitTests
                 };
                 obj.y = 'foo';
                 obj.y === 1 && valueSet === 'foo';"));
+
+            // Shorthand properties.
+            Assert.AreEqual(1, Evaluate("var a = 1, b = 2; x = {a, b}; x.a"));
+            Assert.AreEqual(2, Evaluate("var a = 1, b = 2; x = {a, b}; x.b"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("var a = 1, b = { a: 3 }; x = {a, b.a}; x.a"));
+
+            // Shorthand functions.
+            Assert.AreEqual(3, Evaluate("var x = { a() { return 3; } }; x.a()"));
+            Assert.AreEqual("a", Evaluate("var x = { a() { return 3; } }; x.a.name"));
+            Assert.AreEqual(3, Evaluate("var x = { 5.5() { return 3; } }; x[5.5]()"));
+            Assert.AreEqual(3, Evaluate("var x = { this() { return 3; } }; x.this()"));
+            Assert.AreEqual(17, Evaluate("var x = { 'baby superman'() { return 17; } }; x['baby superman']()"));
         }
 
         [TestMethod]

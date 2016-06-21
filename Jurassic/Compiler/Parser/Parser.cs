@@ -1902,22 +1902,46 @@ namespace Jurassic.Compiler
                     propertyName = ReadPropertyNameExpression(out nameType2);
 
                     // Parse the function name and body.
-                    var function = ParseFunction(nameType == PropertyNameType.Get ? FunctionDeclarationType.Getter : FunctionDeclarationType.Setter,
-                        this.currentVarScope, propertyName is LiteralExpression && ((LiteralExpression)propertyName).Value is string ? (string)((LiteralExpression)propertyName).Value : string.Empty);
+                    string nameAsString = propertyName is LiteralExpression ? (string)((LiteralExpression)propertyName).Value : string.Empty;
+                    var function = ParseFunction(nameType == PropertyNameType.Get ? FunctionDeclarationType.Getter : FunctionDeclarationType.Setter, this.currentVarScope, nameAsString);
 
+                    // Add the getter or setter to the list of properties to set.
+                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, function));
+                }
+                else if (nameType != PropertyNameType.Expression && (this.nextToken == PunctuatorToken.Comma || this.nextToken == PunctuatorToken.RightBrace))
+                {
+                    // This is a shorthand property e.g. "var a = 1, b = 2, c = { a, b }" is the
+                    // same as "var a = 1, b = 2, c = { a: a, b: b }".
+                    string nameAsString = (string)((LiteralExpression)propertyName).Value;
+                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, new NameExpression(this.currentVarScope, nameAsString)));
+                }
+                else if (this.nextToken == PunctuatorToken.LeftParenthesis)
+                {
+                    // This is a shorthand function e.g. "var a = { b() { return 2; } }" is the
+                    // same as "var a = { b: function() { return 2; } }".
+
+                    // Parse the function.
+                    string nameAsString = propertyName is LiteralExpression ? (string)((LiteralExpression)propertyName).Value : string.Empty;
+                    var function = ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, nameAsString);
+
+                    // Strangely enough, if declarationType is Expression then the last right
+                    // brace ('}') is not consumed.
+                    this.Expect(PunctuatorToken.RightBrace);
+
+                    // Add the function to the list of properties to set.
                     properties.Add(new KeyValuePair<Expression, Expression>(propertyName, function));
                 }
                 else
                 {
                     // This is a regular property.
-
+                    
                     // Read the colon.
                     this.Expect(PunctuatorToken.Colon);
 
                     // Now read the property value.
                     propertyValue = ParseExpression(PunctuatorToken.Comma, PunctuatorToken.RightBrace);
 
-                    // Add the property setter to the list.
+                    // Add the property to the list.
                     properties.Add(new KeyValuePair<Expression, Expression>(propertyName, propertyValue));
                 }
 
