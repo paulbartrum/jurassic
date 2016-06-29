@@ -44,6 +44,7 @@ namespace Jurassic.TestSuite
                         if (testCase.Success == false && Array.IndexOf(
                             new string[]
                             {
+                                "default function parameters",
                                 "for..of loops",
                                 "template literals",
                                 "typed arrays",

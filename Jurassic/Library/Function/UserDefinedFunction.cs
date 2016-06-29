@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Jurassic.Compiler;
 
 namespace Jurassic.Library
@@ -18,7 +19,7 @@ namespace Jurassic.Library
 
         [NonSerialized]
         private FunctionDelegate body;
-        
+
 
 
         //     INITIALIZATION
@@ -29,27 +30,34 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="name"> The name of the function. </param>
-        /// <param name="argumentNames"> The names of the arguments. </param>
+        /// <param name="argumentsText"> A comma-separated list of arguments. </param>
         /// <param name="bodyText"> The source code for the body of the function. </param>
-        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, string bodyText)
+        /// <remarks> This is used by <c>new Function()</c>. </remarks>
+        internal UserDefinedFunction(ObjectInstance prototype, string name, string argumentsText, string bodyText)
             : base(prototype)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (argumentNames == null)
-                throw new ArgumentNullException("argumentNames");
+            if (argumentsText == null)
+                throw new ArgumentNullException("argumentsText");
             if (bodyText == null)
                 throw new ArgumentNullException("bodyText");
 
             // Set up a new function scope.
-            var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), name, argumentNames);
+            var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), name, null);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentNames, bodyText, new CompilerOptions());
+            var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentsText, bodyText, new CompilerOptions());
             context.GenerateCode();
 
-            // Create a new user defined function.
-            Init(name, argumentNames, this.Engine.CreateGlobalScope(), bodyText, context.GeneratedMethod, context.StrictMode, true);
+            this.ArgumentsText = argumentsText;
+            this.ArgumentNames = context.Arguments.Select(a => a.Name).ToList();
+            this.BodyText = bodyText;
+            this.generatedMethod = context.GeneratedMethod;
+            this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
+            this.ParentScope = this.Engine.CreateGlobalScope();
+            this.StrictMode = context.StrictMode;
+            InitProperties(name, context.Arguments.Count);
         }
 
         /// <summary>
@@ -62,10 +70,18 @@ namespace Jurassic.Library
         /// <param name="bodyText"> The source code for the function body. </param>
         /// <param name="body"> A delegate which represents the body of the function. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
+        /// <remarks> This is used by <c>arguments</c>. </remarks>
         internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, FunctionDelegate body, bool strictMode)
             : base(prototype)
         {
-            Init(name, argumentNames, parentScope, bodyText, new GeneratedMethod(body, null), strictMode, true);
+            this.ArgumentsText = string.Join(", ", argumentNames);
+            this.ArgumentNames = argumentNames;
+            this.BodyText = bodyText;
+            this.generatedMethod = new GeneratedMethod(body, null);
+            this.body = body;
+            this.ParentScope = parentScope;
+            this.StrictMode = strictMode;
+            InitProperties(name, argumentNames.Count);
         }
 
         /// <summary>
@@ -78,76 +94,57 @@ namespace Jurassic.Library
         /// <param name="bodyText"> The source code for the function body. </param>
         /// <param name="generatedMethod"> A delegate which represents the body of the function plus any dependencies. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
+        /// <remarks> This is used by functions declared in JavaScript code (including getters and setters). </remarks>
         public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode)
             : base(prototype)
         {
-            Init(name, argumentNames, parentScope, bodyText, generatedMethod, strictMode, true);
-        }
-
-        /// <summary>
-        /// Initializes a user-defined function.
-        /// </summary>
-        /// <param name="name"> The name of the function. </param>
-        /// <param name="argumentNames"> The names of the arguments. </param>
-        /// <param name="parentScope"> The scope at the point the function is declared. </param>
-        /// <param name="bodyText"> The source code for the function body. </param>
-        /// <param name="generatedMethod"> A delegate which represents the body of the function, plus any dependencies. </param>
-        /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
-        /// <param name="hasInstancePrototype"> <c>true</c> if the function should have a valid
-        /// "prototype" property; <c>false</c> if the "prototype" property should be <c>null</c>. </param>
-        private void Init(string name, IList<string> argumentNames, Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, bool hasInstancePrototype)
-        {
-            if (name == null)
-                throw new ArgumentNullException("name");
-            if (argumentNames == null)
-                throw new ArgumentNullException("argumentNames");
-            if (bodyText == null)
-                throw new ArgumentNullException("bodyText");
-            if (generatedMethod == null)
-                throw new ArgumentNullException("generatedMethod");
-            if (parentScope == null)
-                throw new ArgumentNullException("parentScope");
-            this.ArgumentNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(argumentNames);
+            this.ArgumentsText = string.Join(", ", argumentNames);
+            this.ArgumentNames = argumentNames;
             this.BodyText = bodyText;
             this.generatedMethod = generatedMethod;
             this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
             this.ParentScope = parentScope;
             this.StrictMode = strictMode;
-
-            // Add function properties.
-            this.FastSetProperty("name", name, PropertyAttributes.Configurable);
-            this.FastSetProperty("length", argumentNames.Count, PropertyAttributes.Configurable);
-
-            // The empty function doesn't have an instance prototype.
-            if (hasInstancePrototype == true)
-            {
-                this.FastSetProperty("prototype", this.Engine.Object.Construct(), PropertyAttributes.Writable);
-                this.InstancePrototype.FastSetProperty("constructor", this, PropertyAttributes.NonEnumerable);
-            }
+            InitProperties(name, argumentNames.Count);
         }
 
         /// <summary>
-        /// Compiles the function (if it hasn't already been compiled) and returns a delegate
-        /// representing the compiled function.
+        /// Initializes the object properties.
         /// </summary>
-        private FunctionDelegate Compile()
+        /// <param name="name"> The name of the function. </param>
+        /// <param name="length"> The expected number of arguments. </param>
+        private void InitProperties(string name, int length)
         {
-            if (this.body == null)
+            // Create an object to serve as the instance prototype.
+            var instancePrototype = this.Engine.Object.Construct();
+            instancePrototype.FastSetProperties(new List<PropertyNameAndValue>
             {
-                // Compile the function.
-                var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), this.Name, this.ArgumentNames);
-                var functionGenerator = new FunctionMethodGenerator(this.Engine, scope, this.Name, this.ArgumentNames, this.BodyText, new CompilerOptions());
-                functionGenerator.GenerateCode();
-                this.generatedMethod = functionGenerator.GeneratedMethod;
-                this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
-            }
-            return this.body;
+                new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable)
+            });
+
+            // Now add properties to this object.
+            FastSetProperties(new List<PropertyNameAndValue>()
+            {
+                new PropertyNameAndValue("name", name, PropertyAttributes.Configurable),
+                new PropertyNameAndValue("length", length, PropertyAttributes.Configurable),
+                new PropertyNameAndValue("prototype", instancePrototype, PropertyAttributes.Writable),
+            });
         }
 
 
 
         //     PROPERTIES
         //_________________________________________________________________________________________
+
+
+        /// <summary>
+        /// A comma-separated list of arguments.
+        /// </summary>
+        public string ArgumentsText
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Gets a list containing the names of the function arguments, in order of definition.
@@ -193,14 +190,7 @@ namespace Jurassic.Library
         /// </summary>
         public string DisassembledIL
         {
-            get
-            {
-                // Compile the function.
-                var body = Compile();
-
-                // Return the disassembled IL.
-                return this.generatedMethod.DisassembledIL;
-            }
+            get { return this.generatedMethod.DisassembledIL; }
         }
 
 
@@ -216,9 +206,6 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            // Compile the function.
-            var body = Compile();
-
             // Check the allowed recursion depth.
             if (this.Engine.RecursionDepthLimit > 0 && currentRecursionDepth >= this.Engine.RecursionDepthLimit)
                 throw new StackOverflowException("The allowed recursion depth of the script engine has been exceeded.");
@@ -227,7 +214,7 @@ namespace Jurassic.Library
             try
             {
                 // Call the function.
-                return body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
+                return this.body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
             }
             finally
             {
@@ -241,7 +228,7 @@ namespace Jurassic.Library
         /// <returns> A string representing this object. </returns>
         public override string ToString()
         {
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.BodyText);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, this.ArgumentsText, this.BodyText);
         }
     }
 }

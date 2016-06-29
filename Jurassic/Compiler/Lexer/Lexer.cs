@@ -999,23 +999,6 @@ namespace Jurassic.Compiler
         {
             return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
         }
-
-        /// <summary>
-        /// Validates the given string is a valid identifier and returns the identifier name after
-        /// escape sequences have been processed.
-        /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        /// <param name="str"> The string to resolve into an identifier. </param>
-        /// <returns> The identifier name after escape sequences have been processed, or
-        /// <c>null</c> if the string is not an identifier. </returns>
-        internal static string ResolveIdentifier(ScriptEngine engine, string str)
-        {
-            var lexer = new Lexer(engine, new StringScriptSource(str));
-            var argumentToken = lexer.NextToken();
-            if ((argumentToken is IdentifierToken) == false || lexer.NextToken() != null)
-                return null;
-            return ((Compiler.IdentifierToken)argumentToken).Name;
-        }
     }
 
 }

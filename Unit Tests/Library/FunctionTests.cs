@@ -17,6 +17,8 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("f = new Function('', ''); f()"));
             Assert.AreEqual(4, Evaluate("f = new Function('a', 'b', 'return a+b'); f(1, 3)"));
             Assert.AreEqual(4, Evaluate("f = new Function('a,b', 'return a+b'); f(1, 3)"));
+            Assert.AreEqual(3, Evaluate("f = new Function('a=1,b = 2', 'return a+b'); f()"));
+            Assert.AreEqual(4, Evaluate("f = new Function('a', 'b=3', 'return a+b'); f(1)"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("f = new Function('a, ,b', 'return a+b')"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("f = new Function('a,15,b', 'return a+b')"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("f = new Function('a,this,b', 'return a+b')"));

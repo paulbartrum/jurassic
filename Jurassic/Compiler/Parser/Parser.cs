@@ -39,7 +39,8 @@ namespace Jurassic.Compiler
         /// <param name="initialScope"> The initial variable scope. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         /// <param name="context"> The context of the code (global, function or eval). </param>
-        public Parser(ScriptEngine engine, Lexer lexer, Scope initialScope, CompilerOptions options, CodeContext context)
+        /// <param name="methodOptimizationHints"> Hints about whether optimization is possible. </param>
+        public Parser(ScriptEngine engine, Lexer lexer, Scope initialScope, CompilerOptions options, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
@@ -51,7 +52,7 @@ namespace Jurassic.Compiler
             this.lexer = lexer;
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
             SetInitialScope(initialScope);
-            this.methodOptimizationHints = new MethodOptimizationHints();
+            this.methodOptimizationHints = methodOptimizationHints ?? new MethodOptimizationHints();
             this.options = options;
             this.context = context;
             this.StrictMode = options.ForceStrictMode;
@@ -63,12 +64,13 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="parser"> The parser for the parent context. </param>
         /// <param name="scope"> The function scope. </param>
+        /// <param name="optimizationHints"> Hints about whether optimization is possible. </param>
         /// <returns> A new parser. </returns>
-        private static Parser CreateFunctionBodyParser(Parser parser, Scope scope)
+        private static Parser CreateFunctionBodyParser(Parser parser, Scope scope, MethodOptimizationHints optimizationHints)
         {
             var result = (Parser)parser.MemberwiseClone();
             result.SetInitialScope(scope);
-            result.methodOptimizationHints = new MethodOptimizationHints();
+            result.methodOptimizationHints = optimizationHints;
             result.context = CodeContext.Function;
             result.endToken = PunctuatorToken.RightBrace;
             return result;
@@ -1281,41 +1283,30 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // Read zero or more argument names.
-            var argumentNames = new List<string>();
+            // Create a new scope and assign variables within the function body to the scope.
+            bool includeNameInScope = functionType != FunctionDeclarationType.Getter && functionType != FunctionDeclarationType.Setter;
+            var scope = DeclarativeScope.CreateFunctionScope(parentScope, includeNameInScope ? functionName : string.Empty, null);
 
-            // Read the first argument name.
-            if (this.nextToken != PunctuatorToken.RightParenthesis)
-            {
-                var argumentName = this.ExpectIdentifier();
-                ValidateVariableName(argumentName);
-                argumentNames.Add(argumentName);
-            }
+            // Replace scope and methodOptimizationHints.
+            var originalScope = this.currentVarScope;
+            var originalMethodOptimizationHints = this.methodOptimizationHints;
+            var newMethodOptimizationHints = new MethodOptimizationHints();
+            this.methodOptimizationHints = newMethodOptimizationHints;
+            this.currentVarScope = scope;
 
-            while (true)
-            {
-                if (this.nextToken == PunctuatorToken.Comma)
-                {
-                    // Consume the comma.
-                    this.Consume();
+            // Read zero or more arguments.
+            var arguments = ParseFunctionArguments(PunctuatorToken.RightParenthesis);
 
-                    // Read and validate the argument name.
-                    var argumentName = this.ExpectIdentifier();
-                    ValidateVariableName(argumentName);
-                    argumentNames.Add(argumentName);
-                }
-                else if (this.nextToken == PunctuatorToken.RightParenthesis)
-                    break;
-                else
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected ',' or ')'", this.LineNumber, this.SourcePath);
-            }
+            // Restore scope and methodOptimizationHints.
+            this.methodOptimizationHints = originalMethodOptimizationHints;
+            this.currentVarScope = originalScope;
 
             // Getters must have zero arguments.
-            if (functionType == FunctionDeclarationType.Getter && argumentNames.Count != 0)
+            if (functionType == FunctionDeclarationType.Getter && arguments.Count != 0)
                 throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Getters cannot have arguments", this.LineNumber, this.SourcePath);
 
             // Setters must have one argument.
-            if (functionType == FunctionDeclarationType.Setter && argumentNames.Count != 1)
+            if (functionType == FunctionDeclarationType.Setter && arguments.Count != 1)
                 throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Setters must have a single argument", this.LineNumber, this.SourcePath);
 
             // Read the right parenthesis.
@@ -1335,12 +1326,8 @@ namespace Jurassic.Compiler
             // This context has a nested function.
             this.methodOptimizationHints.HasNestedFunction = true;
 
-            // Create a new scope and assign variables within the function body to the scope.
-            bool includeNameInScope = functionType != FunctionDeclarationType.Getter && functionType != FunctionDeclarationType.Setter;
-            var scope = DeclarativeScope.CreateFunctionScope(parentScope, includeNameInScope ? functionName : string.Empty, argumentNames);
-
             // Read the function body.
-            var functionParser = Parser.CreateFunctionBodyParser(this, scope);
+            var functionParser = CreateFunctionBodyParser(this, scope, newMethodOptimizationHints);
             var body = functionParser.Parse();
 
             // Transfer state back from the function parser.
@@ -1373,11 +1360,59 @@ namespace Jurassic.Compiler
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
             var context = new FunctionMethodGenerator(this.engine, scope, functionName,
-                functionType, argumentNames,
+                functionType, arguments,
                 bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body,
                 this.SourcePath, options);
             context.MethodOptimizationHints = functionParser.methodOptimizationHints;
             return new FunctionExpression(context);
+        }
+
+        /// <summary>
+        /// Parses a comma-separated list of function arguments.
+        /// </summary>
+        /// <param name="endToken"> The token that ends parsing. </param>
+        /// <returns> A list of parsed arguments. </returns>
+        internal List<FunctionArgument> ParseFunctionArguments(Token endToken)
+        {
+            var arguments = new List<FunctionArgument>();
+            if (this.nextToken != endToken)
+            {
+                while (true)
+                {
+                    // Read the argument name.
+                    var argument = new FunctionArgument();
+                    argument.Name = this.ExpectIdentifier();
+                    ValidateVariableName(argument.Name);
+
+                    // Check if the argument has a default value.
+                    if (this.nextToken == PunctuatorToken.Assignment)
+                    {
+                        // Read past the assignment token.
+                        Consume();
+
+                        // Parse the expression that follows.
+                        argument.DefaultValue = ParseExpression(PunctuatorToken.Comma, endToken);
+                    }
+
+                    // Add the variable to the scope so that it can be used in the default value of
+                    // the next argument.  Do this *after* parsing the default value.
+                    this.currentVarScope.DeclareVariable(argument.Name);
+
+                    // Add the argument to the list.
+                    arguments.Add(argument);
+
+                    if (this.nextToken == PunctuatorToken.Comma)
+                    {
+                        // Consume the comma.
+                        this.Consume();
+                    }
+                    else if (this.nextToken == endToken)
+                        break;
+                    else
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Expected ',' or ')'", this.LineNumber, this.SourcePath);
+                }
+            }
+            return arguments;
         }
 
         /// <summary>

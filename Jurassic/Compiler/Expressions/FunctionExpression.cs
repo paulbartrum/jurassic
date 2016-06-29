@@ -39,11 +39,11 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets a list of argument names.
+        /// Gets a list of argument names and default values.
         /// </summary>
-        public IList<string> ArgumentNames
+        public IList<FunctionArgument> Arguments
         {
-            get { return this.context.ArgumentNames; }
+            get { return this.context.Arguments; }
         }
 
         /// <summary>
@@ -103,13 +103,13 @@ namespace Jurassic.Compiler
                 generator.LoadString(this.FunctionName);
 
             // argumentNames
-            generator.LoadInt32(this.ArgumentNames.Count);
+            generator.LoadInt32(this.Arguments.Count);
             generator.NewArray(typeof(string));
-            for (int i = 0; i < this.ArgumentNames.Count; i++)
+            for (int i = 0; i < this.Arguments.Count; i++)
             {
                 generator.Duplicate();
                 generator.LoadInt32(i);
-                generator.LoadString(this.ArgumentNames[i]);
+                generator.LoadString(this.Arguments[i].Name);
                 generator.StoreArrayElement(typeof(string));
             }
 
@@ -122,7 +122,6 @@ namespace Jurassic.Compiler
             // body
             generator.LoadInt64(generatedMethodID);
             generator.Call(ReflectionHelpers.GeneratedMethod_Load);
-
 
             // strictMode
             generator.LoadBoolean(this.context.StrictMode);
@@ -165,7 +164,7 @@ namespace Jurassic.Compiler
         /// <returns> A string representing this expression. </returns>
         public override string ToString()
         {
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.FunctionName, StringHelpers.Join(", ", this.ArgumentNames), this.BodyText);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.FunctionName, StringHelpers.Join(", ", this.Arguments), this.BodyText);
         }
     }
 

@@ -13,11 +13,12 @@ namespace Jurassic.Compiler
         private object[] values;
 
         /// <summary>
-        /// Creates a new declarative scope for use inside a function body.
+        /// Creates a new declarative scope for use inside a function body (and within function
+        /// argument default values).
         /// </summary>
         /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
         /// <param name="functionName"> The name of the function.  Can be empty for an anonymous function. </param>
-        /// <param name="argumentNames"> The names of each of the function arguments. </param>
+        /// <param name="argumentNames"> The names of each of the function arguments.  Can be <c>null</c>. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
         internal static DeclarativeScope CreateFunctionScope(Scope parentScope, string functionName, IEnumerable<string> argumentNames)
         {
@@ -25,15 +26,16 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
             if (functionName == null)
                 throw new ArgumentNullException("functionName");
-            if (argumentNames == null)
-                throw new ArgumentNullException("argumentNames");
             var result = new DeclarativeScope(parentScope, 0);
             if (string.IsNullOrEmpty(functionName) == false)
                 result.DeclareVariable(functionName);
             result.DeclareVariable("this");
             result.DeclareVariable("arguments");
-            foreach (var argumentName in argumentNames)
-                result.DeclareVariable(argumentName);
+            if (argumentNames != null)
+            {
+                foreach (var argumentName in argumentNames)
+                    result.DeclareVariable(argumentName);
+            }
             return result;
         }
 

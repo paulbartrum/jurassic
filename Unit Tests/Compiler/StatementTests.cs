@@ -468,5 +468,22 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("f = new Function('arg', 'arg', \"'use strict'; return true\"); f()"));
         }
 
+
+        [TestMethod]
+        public void FunctionExtensions()
+        {
+            // Default function parameters.
+            //Execute("function f(a = 1, b = 2, c = 3) { return a + b + c; }");
+            //Assert.AreEqual(6, Evaluate("f()"));
+            //Assert.AreEqual(9, Evaluate("f(4)"));
+            //Assert.AreEqual(3, Evaluate("f(1, 1, 1, 1)"));
+            //Assert.AreEqual(9, Evaluate("f(undefined, 5, undefined)"));
+            //Assert.AreEqual(5, Evaluate("f(null, 5, null)"));
+            //Assert.AreEqual(10, Evaluate("(function(a, b = a*2) { return b })(5)"));
+            Assert.AreEqual("testFunc751", Evaluate("(function testFunc751(a = testFunc751) { return a; })().name"));
+            //Assert.AreEqual("test", Evaluate("(function(a = this) { return a; }).call('test').toString()"));
+            //Assert.AreEqual("ReferenceError", EvaluateExceptionType("(function(a, b = c*2) { var c = 3; return b })(5)"));
+            //Assert.AreEqual("ReferenceError", EvaluateExceptionType("(function(a = a) { return a; })()"));
+        }
     }
 }

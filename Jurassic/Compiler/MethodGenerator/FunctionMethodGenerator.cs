@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
@@ -31,6 +32,33 @@ namespace Jurassic.Compiler
     }
 
     /// <summary>
+    /// Represents the declaration of a function parameter.
+    /// </summary>
+    internal struct FunctionArgument
+    {
+        /// <summary>
+        /// The name of the parameter.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The value of the parameter, if no value was passed to the function (can be null).
+        /// </summary>
+        public Expression DefaultValue { get; set; }
+
+        /// <summary>
+        /// Returns the textual representation of this object.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            if (DefaultValue == null)
+                return Name;
+            return $"{Name} = {DefaultValue}";
+        }
+    }
+
+    /// <summary>
     /// Represents the information needed to compile a function.
     /// </summary>
     internal class FunctionMethodGenerator : MethodGenerator
@@ -42,17 +70,18 @@ namespace Jurassic.Compiler
         /// <param name="scope"> The function scope. </param>
         /// <param name="functionName"> The name of the function. </param>
         /// <param name="declarationType"> Indicates how the function was declared. </param>
-        /// <param name="argumentNames"> The names of the arguments. </param>
+        /// <param name="arguments"> The names and default values of the arguments. </param>
         /// <param name="bodyText"> The source code of the function. </param>
         /// <param name="body"> The root of the abstract syntax tree for the body of the function. </param>
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, FunctionDeclarationType declarationType, IList<string> argumentNames, string bodyText, Statement body, string scriptPath, CompilerOptions options)
+        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, FunctionDeclarationType declarationType,
+            IList<FunctionArgument> arguments, string bodyText, Statement body, string scriptPath, CompilerOptions options)
             : base(engine, scope, new DummyScriptSource(scriptPath), options)
         {
             this.Name = functionName;
             this.DeclarationType = declarationType;
-            this.ArgumentNames = argumentNames;
+            this.Arguments = arguments;
             this.BodyRoot = body;
             this.BodyText = bodyText;
             Validate();
@@ -87,14 +116,15 @@ namespace Jurassic.Compiler
         /// <param name="engine"> The script engine. </param>
         /// <param name="scope"> The function scope. </param>
         /// <param name="functionName"> The name of the function. </param>
-        /// <param name="argumentNames"> The names of the arguments. </param>
+        /// <param name="argumentsText"> A comma-separated list of arguments. </param>
         /// <param name="body"> The source code for the body of the function. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, IList<string> argumentNames, string body, CompilerOptions options)
+        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName,
+            string argumentsText, string body, CompilerOptions options)
             : base(engine, scope, new StringScriptSource(body), options)
         {
             this.Name = functionName;
-            this.ArgumentNames = argumentNames;
+            this.ArgumentsText = argumentsText;
             this.BodyText = body;
         }
 
@@ -129,9 +159,18 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets a list of argument names.
+        /// Gets a comma-separated list of arguments.
         /// </summary>
-        public IList<string> ArgumentNames
+        public string ArgumentsText
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a list of argument names and default values.
+        /// </summary>
+        public IList<FunctionArgument> Arguments
         {
             get;
             private set;
@@ -208,17 +247,17 @@ namespace Jurassic.Compiler
                     throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Functions cannot be named '{0}' in strict mode.", this.Name));
 
                 // If the function body is strict mode, then the argument names cannot be 'eval' or 'arguments'.
-                foreach (var argumentName in this.ArgumentNames)
-                    if (argumentName == "arguments" || argumentName == "eval")
-                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Arguments cannot be named '{0}' in strict mode.", argumentName));
+                foreach (var argument in this.Arguments)
+                    if (argument.Name == "arguments" || argument.Name == "eval")
+                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Arguments cannot be named '{0}' in strict mode.", argument.Name));
 
                 // If the function body is strict mode, then the argument names cannot be duplicates.
                 var duplicateCheck = new HashSet<string>();
-                foreach (var argumentName in this.ArgumentNames)
+                foreach (var argument in this.Arguments)
                 {
-                    if (duplicateCheck.Contains(argumentName) == true)
-                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Duplicate argument name '{0}' is not allowed in strict mode.", argumentName));
-                    duplicateCheck.Add(argumentName);
+                    if (duplicateCheck.Contains(argument.Name) == true)
+                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Duplicate argument name '{0}' is not allowed in strict mode.", argument.Name));
+                    duplicateCheck.Add(argument.Name);
                 }
             }
         }
@@ -235,9 +274,15 @@ namespace Jurassic.Compiler
             }
             else
             {
+                Parser argumentsParser;
+                using (var argumentsLexer = new Lexer(this.Engine, new StringScriptSource(this.ArgumentsText)))
+                {
+                    argumentsParser = new Parser(this.Engine, argumentsLexer, this.InitialScope, this.Options, CodeContext.Function);
+                    this.Arguments = argumentsParser.ParseFunctionArguments(endToken: null);
+                }
                 using (var lexer = new Lexer(this.Engine, this.Source))
                 {
-                    var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function);
+                    var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function, argumentsParser.MethodOptimizationHints);
                     this.AbstractSyntaxTree = parser.Parse();
                     this.StrictMode = parser.StrictMode;
                     this.MethodOptimizationHints = parser.MethodOptimizationHints;
@@ -311,7 +356,7 @@ namespace Jurassic.Compiler
             // Transfer the function name into the scope.
             if (string.IsNullOrEmpty(this.Name) == false &&
                 (this.DeclarationType != FunctionDeclarationType.Getter && this.DeclarationType != FunctionDeclarationType.Setter) &&
-                this.ArgumentNames.Contains(this.Name) == false &&
+                this.Arguments.Any(a => a.Name == this.Name) == false &&
                 optimizationInfo.MethodOptimizationHints.HasVariable(this.Name))
             {
                 EmitHelpers.LoadFunction(generator);
@@ -320,7 +365,7 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the arguments object into the scope.
-            if (this.MethodOptimizationHints.HasArguments == true && this.ArgumentNames.Contains("arguments") == false)
+            if (this.MethodOptimizationHints.HasArguments == true && this.Arguments.Any(a => a.Name == "arguments") == false)
             {
                 // prototype
                 EmitHelpers.LoadScriptEngine(generator);
@@ -341,15 +386,14 @@ namespace Jurassic.Compiler
 
             // Transfer the argument values into the scope.
             // Note: the arguments array can be smaller than expected.
-            if (this.ArgumentNames.Count > 0)
+            if (this.Arguments.Count > 0)
             {
-                var endOfArguments = generator.CreateLabel();
-                for (int i = 0; i < this.ArgumentNames.Count; i++)
+                for (int i = 0; i < this.Arguments.Count; i++)
                 {
                     // Check if a duplicate argument name exists.
                     bool duplicate = false;
-                    for (int j = i + 1; j < this.ArgumentNames.Count; j++)
-                        if (this.ArgumentNames[i] == this.ArgumentNames[j])
+                    for (int j = i + 1; j < this.Arguments.Count; j++)
+                        if (this.Arguments[i].Name == this.Arguments[j].Name)
                         {
                             duplicate = true;
                             break;
@@ -357,28 +401,52 @@ namespace Jurassic.Compiler
                     if (duplicate == true)
                         continue;
 
+                    var loadDefaultValue = generator.CreateLabel();
+                    var storeValue = generator.CreateLabel();
+
                     // Check if an array element exists.
                     EmitHelpers.LoadArgumentsArray(generator);
                     generator.LoadArrayLength();
                     generator.LoadInt32(i);
-                    generator.BranchIfLessThanOrEqual(endOfArguments);
+                    generator.BranchIfLessThanOrEqual(loadDefaultValue);
 
-                    // Store the array element in the scope.
+                    // Load the parameter value from the parameters array.
                     EmitHelpers.LoadArgumentsArray(generator);
                     generator.LoadInt32(i);
                     generator.LoadArrayElement(typeof(object));
-                    var argument = new NameExpression(this.InitialScope, this.ArgumentNames[i]);
+
+                    if (this.Arguments[i].DefaultValue == null)
+                    {
+                        // Branch to the part where it stores the value.
+                        generator.Branch(storeValue);
+
+                        // Load undefined.
+                        generator.DefineLabelPosition(loadDefaultValue);
+                        EmitHelpers.EmitUndefined(generator);
+                    }
+                    else
+                    {
+                        // Check if it's undefined.
+                        generator.Duplicate();
+                        EmitHelpers.EmitUndefined(generator);
+                        generator.BranchIfNotEqual(storeValue);
+                        generator.Pop();
+
+                        // Load the default value.
+                        generator.DefineLabelPosition(loadDefaultValue);
+                        this.Arguments[i].DefaultValue.GenerateCode(generator, optimizationInfo);
+                        EmitConversion.ToAny(generator, this.Arguments[i].DefaultValue.ResultType);
+                    }
+
+                    // Store the value in the scope.
+                    generator.DefineLabelPosition(storeValue);
+                    var argument = new NameExpression(this.InitialScope, this.Arguments[i].Name);
                     argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
                 }
-                generator.DefineLabelPosition(endOfArguments);
             }
 
             // Initialize any declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
-
-            //EmitHelpers.LoadScope(generator);
-            //EmitConversion.ToObject(generator, PrimitiveType.Any);
-            //generator.Pop();
 
             // Generate code for the body of the function.
             this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);
@@ -405,8 +473,8 @@ namespace Jurassic.Compiler
         public override string ToString()
         {
             if (this.BodyRoot != null)
-                return string.Format("function {0}({1}) {2}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.BodyRoot);
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.ArgumentNames), this.BodyText);
+                return string.Format("function {0}({1}) {2}", this.Name, StringHelpers.Join(", ", this.Arguments), this.BodyRoot);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.Arguments), this.BodyText);
         }
     }
 
