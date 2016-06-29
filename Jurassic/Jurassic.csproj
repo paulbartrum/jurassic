@@ -122,7 +122,6 @@
     <Compile Include="Core\CompatibilityMode.cs" />
     <Compile Include="Core\ConcatenatedString.cs" />
     <Compile Include="Core\CompiledScript.cs" />
-    <Compile Include="Core\Serialization.cs" />
     <Compile Include="Core\StringHelpers.cs" />
     <Compile Include="Core\NumberFormatter.cs" />
     <Compile Include="Core\NumberParser.cs" />

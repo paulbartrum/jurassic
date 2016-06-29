@@ -311,9 +311,6 @@ namespace Jurassic.Compiler
 
             // Initialize the scope (note: the initial scope for a function is always declarative).
             this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
-            
-            // Verify the scope is correct.
-            VerifyScope(generator);
 
             // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
             if (this.StrictMode == false && this.MethodOptimizationHints.HasThis == true)

@@ -72,9 +72,6 @@ namespace Jurassic.Compiler
                 this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
             }
 
-            // Verify the scope is correct.
-            VerifyScope(generator);
-
             // Initialize any declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 

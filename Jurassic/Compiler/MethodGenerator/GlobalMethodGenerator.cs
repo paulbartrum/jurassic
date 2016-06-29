@@ -66,9 +66,6 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // Verify the scope is correct.
-            VerifyScope(generator);
-
             // Initialize any function or variable declarations.
             this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 

@@ -118,11 +118,7 @@ namespace Jurassic
         /// <summary>
         /// Gets a reference to the JavaScript Error object.
         /// </summary>
-        public object ErrorObject
-        {
-            get { return this.Data["ErrorObject"]; }
-            private set { this.Data["ErrorObject"] = value; }
-        }
+        public object ErrorObject { get; private set; }
 
         /// <summary>
         /// Gets the type of error, e.g. ErrorType.TypeError or ErrorType.SyntaxError.
@@ -141,37 +137,19 @@ namespace Jurassic
         /// Gets the line number in the source file the error occurred on.  Can be <c>0</c> if no
         /// line number information is available.
         /// </summary>
-        public int LineNumber
-        {
-            get
-            {
-                object line = this.Data["LineNumber"];
-                if (line == null)
-                    return 0;
-                return (int)line;
-            }
-            internal set { this.Data["LineNumber"] = value; }
-        }
+        public int LineNumber { get; internal set; }
 
         /// <summary>
         /// Gets the path or URL of the source file.  Can be <c>null</c> if no source information
         /// is available.
         /// </summary>
-        public string SourcePath
-        {
-            get { return (string)this.Data["SourcePath"]; }
-            internal set { this.Data["SourcePath"] = value; }
-        }
+        public string SourcePath { get; internal set; }
 
         /// <summary>
         /// Gets the name of the function where the exception occurred.  Can be <c>null</c> if no
         /// source information is available.
         /// </summary>
-        public string FunctionName
-        {
-            get { return (string)this.Data["FunctionName"]; }
-            internal set { this.Data["FunctionName"] = value; }
-        }
+        public string FunctionName { get; internal set; }
 
 
 
