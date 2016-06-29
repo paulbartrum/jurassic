@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a constructor for one of the error types: Error, RangeError, SyntaxError, etc.
     /// </summary>
-    [Serializable]
     public partial class ErrorConstructor : ClrStubFunction
     {
 

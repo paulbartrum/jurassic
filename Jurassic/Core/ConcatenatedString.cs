@@ -12,7 +12,6 @@ namespace Jurassic
     /// intermediary strings and by doing so speeds up string concatenation dramatically
     /// (this change improved sunspider/string-validate-input.js by almost 20x).
     /// </summary>
-    [Serializable]
     public sealed class ConcatenatedString
     {
         private StringBuilder builder;

@@ -8,7 +8,6 @@ namespace Jurassic.Library
     /// the typed array objects or a DataView object which represents the buffer in a specific
     /// format, and use that to read and write the contents of the buffer.
     /// </summary>
-    [Serializable]
     public partial class ArrayBufferInstance : ObjectInstance
     {
         private byte[] buffer;

@@ -5,7 +5,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a typed array instance.
     /// </summary>
-    [Serializable]
     public partial class TypedArrayInstance : ObjectInstance
     {
         private TypedArrayType type;

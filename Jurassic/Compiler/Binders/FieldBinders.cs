@@ -8,7 +8,6 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Base class of field getter and setter binders.
     /// </summary>
-    [Serializable]
     internal abstract class FieldBinder : Binder
     {
         protected FieldInfo field;
@@ -51,7 +50,6 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Retrieves the value of a field.
     /// </summary>
-    [Serializable]
     internal class FieldGetterBinder : FieldBinder
     {
         /// <summary>
@@ -96,7 +94,6 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Sets the value of a field.
     /// </summary>
-    [Serializable]
     internal class FieldSetterBinder : FieldBinder
     {
         /// <summary>

@@ -10,7 +10,6 @@ namespace Jurassic.Library
     /// None of the methods of the Number prototype are generic; they should throw <c>TypeError</c>
     /// if the <c>this</c> value is not a Number object or a number primitive.
     /// </remarks>
-    [Serializable]
     public partial class NumberInstance : ObjectInstance
     {
         /// <summary>

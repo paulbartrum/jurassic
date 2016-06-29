@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an implementation of the Firebug API using the standard console.
     /// </summary>
-    [Serializable]
     internal class StandardConsoleOutput : IFirebugConsoleOutput
     {
         private int currentIndentation;
@@ -48,7 +47,6 @@ namespace Jurassic.Library
         /// ObjectInstances. </param>
         public void Log(FirebugConsoleMessageStyle style, object[] objects)
         {
-#if !SILVERLIGHT
             var original = Console.ForegroundColor;
             switch (style)
             {
@@ -62,7 +60,6 @@ namespace Jurassic.Library
                     Console.ForegroundColor = ConsoleColor.Red;
                     break;
             }
-#endif
 
             // Convert the objects to a string.
             var message = new System.Text.StringBuilder();
@@ -75,11 +72,8 @@ namespace Jurassic.Library
             // Output the message to the console.
             Console.WriteLine(message.ToString());
 
-
-#if !SILVERLIGHT
             if (style != FirebugConsoleMessageStyle.Regular)
                 Console.ForegroundColor = original;
-#endif
         }
 
         /// <summary>
@@ -87,9 +81,7 @@ namespace Jurassic.Library
         /// </summary>
         public void Clear()
         {
-#if !SILVERLIGHT
             Console.Clear();
-#endif
         }
 
         /// <summary>

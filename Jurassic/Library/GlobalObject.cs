@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents functions and properties within the global scope.
     /// </summary>
-    [Serializable]
     public partial class GlobalObject : ObjectInstance
     {
 

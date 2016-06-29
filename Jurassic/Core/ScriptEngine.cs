@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Jurassic.Library;
-using System.Security;
 
 namespace Jurassic
 {
@@ -9,11 +8,7 @@ namespace Jurassic
     /// Represents the JavaScript script engine.  This is the first object that needs to be
     /// instantiated in order to execute javascript code.
     /// </summary>
-    [Serializable]
     public sealed class ScriptEngine
-#if !SILVERLIGHT
-        : System.Runtime.Serialization.ISerializable
-#endif
     {
         // Compatibility mode.
         private CompatibilityMode compatibilityMode;
@@ -67,9 +62,6 @@ namespace Jurassic
         private ObjectInstance mapIteratorPrototype;
         private ObjectInstance setIteratorPrototype;
         private ObjectInstance arrayIteratorPrototype;
-
-        // Mono check.
-        internal static bool IsMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
 
         /// <summary>
@@ -190,141 +182,6 @@ namespace Jurassic
 
 
 
-        //     SERIALIZATION
-        //_________________________________________________________________________________________
-
-#if !SILVERLIGHT
-
-        /// <summary>
-        /// Initializes a new instance of the ObjectInstance class with serialized data.
-        /// </summary>
-        /// <param name="info"> The SerializationInfo that holds the serialized object data about
-        /// the exception being thrown. </param>
-        /// <param name="context"> The StreamingContext that contains contextual information about
-        /// the source or destination. </param>
-        private ScriptEngine(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-        {
-            // Set the DeserializationEnvironment to this script engine.
-            ScriptEngine.DeserializationEnvironment = this;
-
-            // Create the initial hidden class schema.  This must be done first.
-            this.emptySchema = HiddenClassSchema.CreateEmptySchema();
-
-            // Deserialize the compatibility mode.
-            this.compatibilityMode = (CompatibilityMode)info.GetInt32("compatibilityMode");
-
-            // Deserialize the ForceStrictMode flag.
-            this.ForceStrictMode = info.GetBoolean("forceStrictMode");
-
-            // Deserialize the RecursionDepthLimit flag.
-            this.RecursionDepthLimit = info.GetInt32("recursionDepthLimit");
-
-            // Deserialize the built-in objects.
-            this.globalObject = (GlobalObject)info.GetValue("globalObject", typeof(GlobalObject));
-            this.arrayConstructor = (ArrayConstructor)info.GetValue("arrayConstructor", typeof(ArrayConstructor));
-            this.booleanConstructor = (BooleanConstructor)info.GetValue("booleanConstructor", typeof(BooleanConstructor));
-            this.dateConstructor = (DateConstructor)info.GetValue("dateConstructor", typeof(DateConstructor));
-            this.functionConstructor = (FunctionConstructor)info.GetValue("functionConstructor", typeof(FunctionConstructor));
-            this.jsonObject = (JSONObject)info.GetValue("jsonObject", typeof(JSONObject));
-            this.mapConstructor = (MapConstructor)info.GetValue("mapConstructor", typeof(MapConstructor));
-            this.mathObject = (MathObject)info.GetValue("mathObject", typeof(MathObject));
-            this.numberConstructor = (NumberConstructor)info.GetValue("numberConstructor", typeof(NumberConstructor));
-            this.objectConstructor = (ObjectConstructor)info.GetValue("objectConstructor", typeof(ObjectConstructor));
-            this.regExpConstructor = (RegExpConstructor)info.GetValue("regExpConstructor", typeof(RegExpConstructor));
-            this.setConstructor = (SetConstructor)info.GetValue("setConstructor", typeof(SetConstructor));
-            this.stringConstructor = (StringConstructor)info.GetValue("stringConstructor", typeof(StringConstructor));
-            this.symbolConstructor = (SymbolConstructor)info.GetValue("symbolConstructor", typeof(SymbolConstructor));
-            this.weakMapConstructor = (WeakMapConstructor)info.GetValue("weakMapConstructor", typeof(WeakMapConstructor));
-            this.weakSetConstructor = (WeakSetConstructor)info.GetValue("weakSetConstructor", typeof(WeakSetConstructor));
-
-            // Deserialize the built-in error objects.
-            this.errorConstructor = (ErrorConstructor)info.GetValue("errorConstructor", typeof(ErrorConstructor));
-            this.rangeErrorConstructor = (ErrorConstructor)info.GetValue("rangeErrorConstructor", typeof(ErrorConstructor));
-            this.typeErrorConstructor = (ErrorConstructor)info.GetValue("typeErrorConstructor", typeof(ErrorConstructor));
-            this.syntaxErrorConstructor = (ErrorConstructor)info.GetValue("syntaxErrorConstructor", typeof(ErrorConstructor));
-            this.uriErrorConstructor = (ErrorConstructor)info.GetValue("uriErrorConstructor", typeof(ErrorConstructor));
-            this.evalErrorConstructor = (ErrorConstructor)info.GetValue("evalErrorConstructor", typeof(ErrorConstructor));
-            this.referenceErrorConstructor = (ErrorConstructor)info.GetValue("referenceErrorConstructor", typeof(ErrorConstructor));
-
-            // Deserialize the built-in typed array objects.
-            this.arrayBufferConstructor = (ArrayBufferConstructor)info.GetValue("arrayBufferConstructor", typeof(ArrayBufferConstructor));
-            this.dataViewConstructor = (DataViewConstructor)info.GetValue("dataViewConstructor", typeof(DataViewConstructor));
-            this.int8ArrayConstructor = (TypedArrayConstructor)info.GetValue("int8ArrayConstructor", typeof(TypedArrayConstructor));
-            this.uint8ArrayConstructor = (TypedArrayConstructor)info.GetValue("uint8ArrayConstructor", typeof(TypedArrayConstructor));
-            this.uint8ClampedArrayConstructor = (TypedArrayConstructor)info.GetValue("uint8ClampedArrayConstructor", typeof(TypedArrayConstructor));
-            this.int16ArrayConstructor = (TypedArrayConstructor)info.GetValue("int16ArrayConstructor", typeof(TypedArrayConstructor));
-            this.uint16ArrayConstructor = (TypedArrayConstructor)info.GetValue("uint16ArrayConstructor", typeof(TypedArrayConstructor));
-            this.int32ArrayConstructor = (TypedArrayConstructor)info.GetValue("int32ArrayConstructor", typeof(TypedArrayConstructor));
-            this.uint32ArrayConstructor = (TypedArrayConstructor)info.GetValue("uint32ArrayConstructor", typeof(TypedArrayConstructor));
-            this.float32ArrayConstructor = (TypedArrayConstructor)info.GetValue("float32ArrayConstructor", typeof(TypedArrayConstructor));
-            this.float64ArrayConstructor = (TypedArrayConstructor)info.GetValue("float64ArrayConstructor", typeof(TypedArrayConstructor));
-
-        }
-
-        /// <summary>
-        /// Sets the SerializationInfo with information about the exception.
-        /// </summary>
-        /// <param name="info"> The SerializationInfo that holds the serialized object data about
-        /// the exception being thrown. </param>
-        /// <param name="context"> The StreamingContext that contains contextual information about
-        /// the source or destination. </param>
-        [SecurityCritical]
-        public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-        {
-            // Serialize the compatibility mode.
-            info.AddValue("compatibilityMode", (int)this.compatibilityMode);
-
-            // Serialize the ForceStrictMode flag.
-            info.AddValue("forceStrictMode", this.ForceStrictMode);
-
-            // Serialize the RecursionDepthLimit flag.
-            info.AddValue("recursionDepthLimit", this.RecursionDepthLimit);
-
-            // Serialize the built-in objects.
-            info.AddValue("globalObject", this.globalObject);
-            info.AddValue("arrayConstructor", this.arrayConstructor);
-            info.AddValue("booleanConstructor", this.booleanConstructor);
-            info.AddValue("dateConstructor", this.dateConstructor);
-            info.AddValue("functionConstructor", this.functionConstructor);
-            info.AddValue("jsonObject", this.jsonObject);
-            info.AddValue("mapConstructor", this.mapConstructor);
-            info.AddValue("mathObject", this.mathObject);
-            info.AddValue("numberConstructor", this.numberConstructor);
-            info.AddValue("objectConstructor", this.objectConstructor);
-            info.AddValue("regExpConstructor", this.regExpConstructor);
-            info.AddValue("setConstructor", this.setConstructor);
-            info.AddValue("stringConstructor", this.stringConstructor);
-            info.AddValue("symbolConstructor", this.symbolConstructor);
-            info.AddValue("weakMapConstructor", this.weakMapConstructor);
-            info.AddValue("weakSetConstructor", this.weakSetConstructor);
-
-            // Serialize the built-in error objects.
-            info.AddValue("errorConstructor", this.errorConstructor);
-            info.AddValue("rangeErrorConstructor", this.rangeErrorConstructor);
-            info.AddValue("typeErrorConstructor", this.typeErrorConstructor);
-            info.AddValue("syntaxErrorConstructor", this.syntaxErrorConstructor);
-            info.AddValue("uriErrorConstructor", this.uriErrorConstructor);
-            info.AddValue("evalErrorConstructor", this.evalErrorConstructor);
-            info.AddValue("referenceErrorConstructor", this.referenceErrorConstructor);
-
-            // Serialize the built-in typed array objects.
-            info.AddValue("arrayBufferConstructor", this.arrayBufferConstructor);
-            info.AddValue("dataViewConstructor", this.dataViewConstructor);
-            info.AddValue("int8ArrayConstructor", this.int8ArrayConstructor);
-            info.AddValue("uint8ArrayConstructor", this.uint8ArrayConstructor);
-            info.AddValue("uint8ClampedArrayConstructor", this.uint8ClampedArrayConstructor);
-            info.AddValue("int16ArrayConstructor", this.int16ArrayConstructor);
-            info.AddValue("uint16ArrayConstructor", this.uint16ArrayConstructor);
-            info.AddValue("int32ArrayConstructor", this.int32ArrayConstructor);
-            info.AddValue("uint32ArrayConstructor", this.uint32ArrayConstructor);
-            info.AddValue("float32ArrayConstructor", this.float32ArrayConstructor);
-            info.AddValue("float64ArrayConstructor", this.float64ArrayConstructor);
-        }
-
-#endif
-
-
-
         //     PROPERTIES
         //_________________________________________________________________________________________
 
@@ -381,65 +238,6 @@ namespace Jurassic
         {
             get;
             set;
-        }
-
-#if !SILVERLIGHT
-
-        private static object lowPrivilegeEnvironmentLock = new object();
-        private static bool lowPrivilegeEnvironmentTested = false;
-        private static bool lowPrivilegeEnvironment = false;
-
-        /// <summary>
-        /// Gets a value that indicates whether the script engine must run in a low privilege environment.
-        /// </summary>
-        internal static bool LowPrivilegeEnvironment
-        {
-            get
-            {
-                lock (lowPrivilegeEnvironmentLock)
-                {
-                    if (lowPrivilegeEnvironmentTested == false)
-                    {
-                        var permission = new System.Security.Permissions.SecurityPermission(
-                            System.Security.Permissions.SecurityPermissionFlag.UnmanagedCode);
-                        lowPrivilegeEnvironment = !System.Security.SecurityManager.IsGranted(permission);
-                        lowPrivilegeEnvironmentTested = true;
-                    }
-                }
-                return lowPrivilegeEnvironment;
-            }
-        }
-
-#else
-
-        /// <summary>
-        /// Gets a value that indicates whether the script engine must run in a low privilege environment.
-        /// </summary>
-        internal static bool LowPrivilegeEnvironment
-        {
-            get { return true; }
-        }
-
-        /// <summary>
-        /// Indicates that the current AppDomain is a low privilege environment.
-        /// </summary>
-        internal static void SetLowPrivilegeEnvironment()
-        {
-        }
-
-#endif
-
-        [ThreadStatic]
-        private static ScriptEngine deserializationEnvironment;
-
-        /// <summary>
-        /// Gets or sets the script engine to use when deserializing objects.  This property is a
-        /// per-thread setting; it must be set on the thread that is doing the deserialization.
-        /// </summary>
-        public static ScriptEngine DeserializationEnvironment
-        {
-            get { return deserializationEnvironment; }
-            set { deserializationEnvironment = value; }
         }
 
         /// <summary>

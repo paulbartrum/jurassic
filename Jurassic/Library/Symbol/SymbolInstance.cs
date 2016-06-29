@@ -8,7 +8,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the Symbol object.
     /// </summary>
-    [Serializable]
     public partial class SymbolInstance : ObjectInstance
     {
         private string description;

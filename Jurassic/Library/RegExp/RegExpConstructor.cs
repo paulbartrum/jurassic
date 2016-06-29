@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript RegExp object.
     /// </summary>
-    [Serializable]
     public partial class RegExpConstructor : ClrStubFunction
     {
         private string lastInput;

@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript Object object.
     /// </summary>
-    [Serializable]
     public partial class ObjectConstructor : ClrStubFunction
     {
         

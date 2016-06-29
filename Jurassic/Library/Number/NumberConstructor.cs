@@ -5,7 +5,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript Number object.
     /// </summary>
-    [Serializable]
     public partial class NumberConstructor : ClrStubFunction
     {
 

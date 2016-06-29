@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an iteration over an array-like object.
     /// </summary>
-    [Serializable]
     internal partial class ArrayIterator : ObjectInstance
     {
         private ObjectInstance iteratedObject;

@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an iteration over a Set.
     /// </summary>
-    [Serializable]
     internal partial class SetIterator : ObjectInstance
     {
         private SetInstance set;

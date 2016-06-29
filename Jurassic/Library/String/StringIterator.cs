@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an iteration over a String.
     /// </summary>
-    [Serializable]
     internal partial class StringIterator : ObjectInstance
     {
         private TextElementEnumerator enumerator;

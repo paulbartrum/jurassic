@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a JavaScript function that throws a type error.
     /// </summary>
-    [Serializable]
     internal sealed class ThrowTypeErrorFunction : FunctionInstance
     {
         private string message;

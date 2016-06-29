@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// The Set object lets you store unique values of any type, whether primitive values or object references.
     /// </summary>
-    [Serializable]
     public partial class SetInstance : ObjectInstance
     {
         private readonly Dictionary<object, LinkedListNode<object>> store;

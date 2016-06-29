@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the base class of all the javascript errors.
     /// </summary>
-    [Serializable]
     public partial class ErrorInstance : ObjectInstance
     {
 

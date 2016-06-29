@@ -9,7 +9,6 @@ namespace Jurassic.Compiler
     /// Selects a method from a list of candidates and performs type conversion from actual
     /// argument type to formal argument type.
     /// </summary>
-    [Serializable]
     internal abstract class MethodBinder : Binder
     {
         private string name;

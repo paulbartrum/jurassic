@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in javascript String object.
     /// </summary>
-    [Serializable]
     public partial class TypedArrayConstructor : ClrStubFunction
     {
         private TypedArrayType type;

@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// Represents a function that is implemented with a .NET static method.
     /// Faster, but less flexible version of ClrFunction.  Now used by all the built-in constructors and functions.
     /// </summary>
-    [Serializable]
     public class ClrStubFunction : FunctionInstance
     {
         private Func<ScriptEngine, object, object[], object> callBinder;

@@ -8,15 +8,13 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a container for property names and attributes.
     /// </summary>
-    [Serializable]
     internal class HiddenClassSchema
     {
         // Properties
         private Dictionary<object, SchemaProperty> properties;
 
         // Transitions
-        [Serializable]
-        private struct TransitionInfo
+            private struct TransitionInfo
         {
             public object Key;
             public PropertyAttributes Attributes;

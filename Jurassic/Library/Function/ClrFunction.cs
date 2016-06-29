@@ -11,7 +11,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a JavaScript function implemented by one or more .NET methods.
     /// </summary>
-    [Serializable]
     public class ClrFunction : FunctionInstance
     {
         object thisBinding;

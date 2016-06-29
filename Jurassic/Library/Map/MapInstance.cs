@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// The Map object is a simple key/value map. Any value (both objects and primitive values) may
     /// be used as either a key or a value.
     /// </summary>
-    [Serializable]
     public partial class MapInstance : ObjectInstance
     {
         private readonly Dictionary<object, LinkedListNode<KeyValuePair<object, object>>> store;

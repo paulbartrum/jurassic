@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an iteration over a Map.
     /// </summary>
-    [Serializable]
     internal partial class MapIterator : ObjectInstance
     {
         private MapInstance map;

@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// The WeakSet object lets you store weakly held objects in a collection.
     /// </summary>
-    [Serializable]
     public partial class WeakSetInstance : ObjectInstance
     {
         private readonly ConditionalWeakTable<ObjectInstance, object> store;

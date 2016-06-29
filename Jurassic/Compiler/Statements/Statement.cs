@@ -74,7 +74,7 @@ namespace Jurassic.Compiler
             /// </summary>
             public ILLabel EndOfStatement;
 
-#if DEBUG && !SILVERLIGHT
+#if DEBUG
             /// <summary>
             /// Gets or sets the number of items on the IL stack at the start of the statement.
             /// </summary>
@@ -90,7 +90,7 @@ namespace Jurassic.Compiler
         /// <param name="locals"> Variables common to both GenerateStartOfStatement() and GenerateEndOfStatement(). </param>
         public void GenerateStartOfStatement(ILGenerator generator, OptimizationInfo optimizationInfo, StatementLocals locals)
         {
-#if DEBUG && !SILVERLIGHT
+#if DEBUG
             // Statements must not produce or consume any values on the stack.
             if (generator is DynamicILGenerator)
                 locals.OriginalStackSize = ((DynamicILGenerator)generator).StackSize;
@@ -123,7 +123,7 @@ namespace Jurassic.Compiler
                 optimizationInfo.PopBreakOrContinueInfo();
             }
 
-#if DEBUG && !SILVERLIGHT
+#if DEBUG
             // Check that the stack count is zero.
             if (generator is DynamicILGenerator && ((DynamicILGenerator)generator).StackSize != locals.OriginalStackSize)
                 throw new InvalidOperationException("Encountered unexpected stack imbalance.");

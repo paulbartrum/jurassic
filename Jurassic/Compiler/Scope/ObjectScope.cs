@@ -6,7 +6,6 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents a scope which is backed by the properties of an object.
     /// </summary>
-    [Serializable]
     public class ObjectScope : Scope
     {
         private Library.ObjectInstance scopeObject;

@@ -6,7 +6,6 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents a scope where the variables are statically known.
     /// </summary>
-    [Serializable]
     public class DeclarativeScope : Scope
     {
         // An array of values - one element for each variable declared in the scope.

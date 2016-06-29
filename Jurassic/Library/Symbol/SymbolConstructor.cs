@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents the built-in Symbol object.
     /// </summary>
-    [Serializable]
     public partial class SymbolConstructor : ClrStubFunction
     {
 

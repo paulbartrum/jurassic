@@ -10,7 +10,6 @@ namespace Jurassic.Library
     /// non-standard - it is based on the Firebug console API
     /// (http://getfirebug.com/wiki/index.php/Console_API).
     /// </summary>
-    [Serializable]
     public partial class FirebugConsole : ObjectInstance
     {
         private IFirebugConsoleOutput output;
@@ -188,32 +187,6 @@ namespace Jurassic.Library
         {
             this.output.EndGroup();
         }
-
-
-#if SILVERLIGHT
-
-        // Silverlight does not have a StopWatch class.
-        private class Stopwatch
-        {
-            private int tickCount;
-
-            private Stopwatch()
-            {
-                this.tickCount = Environment.TickCount;
-            }
-
-            public static Stopwatch StartNew()
-            {
-                return new Stopwatch();
-            }
-
-            public long ElapsedMilliseconds
-            {
-                get { return Environment.TickCount - this.tickCount; }
-            }
-        }
-
-#endif
 
         /// <summary>
         /// Creates a new timer under the given name. Call console.timeEnd(name) with the same name

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Jurassic.Compiler
 {
@@ -18,7 +16,6 @@ namespace Jurassic.Compiler
     /// Selects a method from a list of candidates and performs type conversion from actual
     /// argument type to formal argument type.
     /// </summary>
-    [Serializable]
     internal abstract class Binder
     {
         [NonSerialized]
@@ -114,34 +111,18 @@ namespace Jurassic.Compiler
         private BinderDelegate CreateDelegateCore(int argumentCount)
         {
             // Create a new dynamic method.
-            System.Reflection.Emit.DynamicMethod dm;
+            // Full trust only - skips visibility checks.
+            System.Reflection.Emit.DynamicMethod dm = new System.Reflection.Emit.DynamicMethod(
+                string.Format("binder_for_{0}", this.FullName),                                                 // Name of the generated method.
+                typeof(object),                                                                                 // Return type of the generated method.
+                new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },                          // Parameter types of the generated method.
+                typeof(JSBinder),                                                                               // Owner type.
+                true);                                                                                          // Skips visibility checks.
             ILGenerator generator;
-#if !SILVERLIGHT
-            if (ScriptEngine.LowPrivilegeEnvironment == false)
-            {
-                // Full trust only - skips visibility checks.
-                dm = new System.Reflection.Emit.DynamicMethod(
-                    string.Format("binder_for_{0}", this.FullName),                                                 // Name of the generated method.
-                    typeof(object),                                                                                 // Return type of the generated method.
-                    new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) },                          // Parameter types of the generated method.
-                    typeof(JSBinder),                                                                               // Owner type.
-                    true);                                                                                          // Skips visibility checks.
-                if (Environment.Version.Major >= 4 && !ScriptEngine.IsMonoRuntime)
-                    generator = new DynamicILGenerator(dm);
-                else
-                    generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
-            }
-            else
-            {
-#endif
-                // Partial trust / silverlight.
-                dm = new System.Reflection.Emit.DynamicMethod(
-                    string.Format("binder_for_{0}", this.FullName),                                                 // Name of the generated method.
-                    typeof(object),                                                                                 // Return type of the generated method.
-                    new Type[] { typeof(ScriptEngine), typeof(object), typeof(object[]) });                         // Parameter types of the generated method.
-                generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
-#if !SILVERLIGHT
-            }
+#if __MonoCS__
+            generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
+#else
+            generator = new DynamicILGenerator(dm);
 #endif
 
             // Generate the body of the method.

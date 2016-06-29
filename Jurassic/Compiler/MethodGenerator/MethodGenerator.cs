@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -185,34 +184,16 @@ namespace Jurassic.Compiler
                 // FunctionExpression class.
 
                 // Create a new dynamic method.
-                System.Reflection.Emit.DynamicMethod dynamicMethod;
-#if !SILVERLIGHT
-                if (ScriptEngine.LowPrivilegeEnvironment == false)
-                {
-                    // High privilege path.
-                    dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                        GetMethodName(),                                        // Name of the generated method.
-                        typeof(object),                                         // Return type of the generated method.
-                        GetParameterTypes(),                                    // Parameter types of the generated method.
-                        typeof(MethodGenerator),                                // Owner type.
-                        true);                                                  // Skip visibility checks.
-                    // TODO: Figure out why long methods give BadImageFormatException in .NET 3.5 when generated using DynamicILInfo.
-                    if (Environment.Version.Major >= 4 && !ScriptEngine.IsMonoRuntime)
-                        generator = new DynamicILGenerator(dynamicMethod);
-                    else
-                        generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
-                }
-                else
-                {
-#endif
-                // Low privilege path.
-                dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                System.Reflection.Emit.DynamicMethod dynamicMethod = new System.Reflection.Emit.DynamicMethod(
                     GetMethodName(),                                        // Name of the generated method.
                     typeof(object),                                         // Return type of the generated method.
-                    GetParameterTypes());                                   // Parameter types of the generated method.
+                    GetParameterTypes(),                                    // Parameter types of the generated method.
+                    typeof(MethodGenerator),                                // Owner type.
+                    true);                                                  // Skip visibility checks.
+#if __MonoCS__
                 generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
-#if !SILVERLIGHT
-                }
+#else
+                generator = new DynamicILGenerator(dynamicMethod);
 #endif
 
                 if (this.Engine.EnableILAnalysis == true)
@@ -312,49 +293,6 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected abstract void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo);
-
-        /// <summary>
-        /// Verifies the scope has the same structure at runtime as at compile time.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        [System.Diagnostics.Conditional("DEBUG")]
-        protected void VerifyScope(ILGenerator generator)
-        {
-            //// Get the top-level scope.
-            //EmitHelpers.LoadScope(generator);
-            //var scope = this.InitialScope;
-
-            //while (scope != null)
-            //{
-            //    // if (scope == null)
-            //    //   throw new JavaScriptException()
-            //    generator.Duplicate();
-            //    var endOfIf1 = generator.CreateLabel();
-            //    generator.BranchIfNotNull(endOfIf1);
-            //    EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too short");
-            //    generator.DefineLabelPosition(endOfIf1);
-
-            //    // if ((scope is DeclarativeScope/ObjectScope) == false)
-            //    //   throw new JavaScriptException()
-            //    generator.IsInstance(scope.GetType());
-            //    generator.Duplicate();
-            //    var endOfIf2 = generator.CreateLabel();
-            //    generator.BranchIfNotNull(endOfIf2);
-            //    EmitHelpers.EmitThrow(generator, "Error", string.Format("Internal error: incorrect runtime scope type (expected {0})", scope.GetType().Name));
-            //    generator.DefineLabelPosition(endOfIf2);
-
-            //    // scope = scope.ParentScope
-            //    generator.Call(ReflectionHelpers.Scope_ParentScope);
-            //    scope = scope.ParentScope;
-            //}
-
-            //// if (scope != null)
-            ////   throw new JavaScriptException()
-            //var endOfIf3 = generator.CreateLabel();
-            //generator.BranchIfNull(endOfIf3);
-            //EmitHelpers.EmitThrow(generator, "Error", "Internal error: runtime scope chain is too long");
-            //generator.DefineLabelPosition(endOfIf3);
-        }
 
         /// <summary>
         /// Retrieves a delegate for the generated method.

@@ -8,7 +8,6 @@ namespace Jurassic.Library
     /// The WeakMap object is a collection of key/value pairs in which the keys are weakly
     /// referenced.  The keys must be objects and the values can be arbitrary values.
     /// </summary>
-    [Serializable]
     public partial class WeakMapInstance : ObjectInstance
     {
         private readonly ConditionalWeakTable<ObjectInstance, object> store;

@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the RegExp object.
     /// </summary>
-    [Serializable]
     public partial class RegExpInstance : ObjectInstance
     {
         private Regex value;
@@ -183,9 +182,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Deprecated = true, Name = "compile")]
         public void Compile(string pattern, string flags = null)
         {
-#if !SILVERLIGHT
             this.value = new Regex(pattern, ParseFlags(flags) | RegexOptions.Compiled);
-#endif
 
             // Update the javascript properties.
             this.FastSetProperty("source", pattern);

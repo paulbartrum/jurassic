@@ -8,7 +8,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a JavaScript function implemented in javascript.
     /// </summary>
-    [Serializable]
     public class UserDefinedFunction : FunctionInstance
     {
         [ThreadStatic]

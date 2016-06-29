@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
-#if !SILVERLIGHT
 
     /// <summary>
     /// Represents a generator of CIL bytes.
@@ -2475,7 +2474,5 @@ namespace Jurassic.Compiler
         }
 
     }
-
-#endif
 
 }

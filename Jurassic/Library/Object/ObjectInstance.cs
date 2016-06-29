@@ -9,11 +9,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Provides functionality common to all JavaScript objects.
     /// </summary>
-    [Serializable]
     public partial class ObjectInstance
-#if !SILVERLIGHT
-        : System.Runtime.Serialization.IDeserializationCallback
-#endif
     {
         // The script engine associated with this object.
         [NonSerialized]
@@ -113,36 +109,6 @@ namespace Jurassic.Library
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             obj.FastSetProperties(properties);
         }
-
-
-        //     SERIALIZATION
-        //_________________________________________________________________________________________
-
-#if !SILVERLIGHT
-
-        /// <summary>
-        /// Runs when the entire object graph has been deserialized.
-        /// </summary>
-        /// <param name="sender"> Currently always <c>null</c>. </param>
-        /// <remarks> Derived classes must call the base class implementation. </remarks>
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender)
-        {
-            OnDeserializationCallback();
-        }
-
-        /// <summary>
-        /// Runs when the entire object graph has been deserialized.
-        /// </summary>
-        /// <remarks> Derived classes must call the base class implementation. </remarks>
-        protected virtual void OnDeserializationCallback()
-        {
-            // Set the engine to the per-thread deserialization script engine.
-            this.engine = ScriptEngine.DeserializationEnvironment;
-            if (this.engine == null)
-                throw new InvalidOperationException("Set the ScriptEngine.DeserializationEnvironment property before deserializing any objects.");
-        }
-
-#endif
 
 
 

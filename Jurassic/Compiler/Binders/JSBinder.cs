@@ -12,7 +12,6 @@ namespace Jurassic.Compiler
     /// Binds to a method group using the default javascript rules (extra parameter values are
     /// ignored, missing parameter values are replaced with "undefined").
     /// </summary>
-    [Serializable]
     internal class JSBinder : MethodBinder
     {
         private JSBinderMethod[] buckets;

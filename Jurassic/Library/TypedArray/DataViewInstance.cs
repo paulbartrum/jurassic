@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// The DataView view provides a low-level interface for reading and writing multiple number
     /// types in an ArrayBuffer irrespective of the platform's endianness.
     /// </summary>
-    [Serializable]
     public partial class DataViewInstance : ObjectInstance
     {
         private ArrayBufferInstance buffer;

@@ -12,7 +12,6 @@ namespace Jurassic.Compiler
     /// JSBinder is that the number of arguments must be correct.  Additionally, it is possible to
     /// bind to overloaded methods with the same number of arguments.
     /// </summary>
-    [Serializable]
     internal class ClrBinder : MethodBinder
     {
         private IEnumerable<BinderMethod> targetMethods;

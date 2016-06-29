@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a non-native CLR object instance.
     /// </summary>
-    [Serializable]
     public class ClrInstanceWrapper : ObjectInstance
     {
 

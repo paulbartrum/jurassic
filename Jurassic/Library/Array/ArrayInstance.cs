@@ -6,7 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the JavaScript Array object.
     /// </summary>
-    [Serializable]
     public partial class ArrayInstance : ObjectInstance
     {
         // The array, if it is dense.

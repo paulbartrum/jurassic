@@ -6,7 +6,6 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents an enclosing context where variables are uniquely defined.
     /// </summary>
-    [Serializable]
     public abstract class Scope
     {
         // A dictionary containing the variables declared in this scope.
@@ -15,8 +14,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Represents a variable declared in a scope.
         /// </summary>
-        [Serializable]
-        internal class DeclaredVariable
+            internal class DeclaredVariable
         {
             // The scope the variable was declared in.
             public Scope Scope;

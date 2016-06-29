@@ -9,7 +9,6 @@ namespace Jurassic.Library
     /// Represents the instance portion of a CLR type that cannot be exposed directly but instead
     /// must be wrapped.
     /// </summary>
-    [Serializable]
     internal class ClrInstanceTypeWrapper : ObjectInstance
     {
 

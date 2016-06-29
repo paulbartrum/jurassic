@@ -7,7 +7,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an arguments object.
     /// </summary>
-    [Serializable]
     public class ArgumentsInstance : ObjectInstance
     {
         private UserDefinedFunction callee;
