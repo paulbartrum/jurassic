@@ -175,6 +175,10 @@
     <Compile Include="Library\Date\DateParser.cs" />
     <Compile Include="Library\Function\ArgumentsInstance.cs" />
     <Compile Include="Library\Function\UserDefinedFunction.cs" />
+    <Compile Include="Library\Promise\PromiseConstructor.cs" />
+    <Compile Include="Library\Promise\PromiseConstructor.g.cs" />
+    <Compile Include="Library\Promise\PromiseInstance.cs" />
+    <Compile Include="Library\Promise\PromiseInstance.g.cs" />
     <Compile Include="Library\WeakSet\WeakSetConstructor.cs" />
     <Compile Include="Library\WeakSet\WeakSetConstructor.g.cs" />
     <Compile Include="Library\WeakSet\WeakSetInstance.cs" />

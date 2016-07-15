@@ -27,6 +27,7 @@ namespace Jurassic
         private MathObject mathObject;
         private NumberConstructor numberConstructor;
         private ObjectConstructor objectConstructor;
+        private PromiseConstructor promiseConstructor;
         private RegExpConstructor regExpConstructor;
         private SetConstructor setConstructor;
         private StringConstructor stringConstructor;
@@ -96,6 +97,7 @@ namespace Jurassic
             this.dateConstructor = new DateConstructor(baseFunction);
             this.mapConstructor = new MapConstructor(baseFunction);
             this.numberConstructor = new NumberConstructor(baseFunction);
+            this.promiseConstructor = new PromiseConstructor(baseFunction);
             this.regExpConstructor = new RegExpConstructor(baseFunction);
             this.setConstructor = new SetConstructor(baseFunction);
             this.stringConstructor = new StringConstructor(baseFunction);
@@ -140,6 +142,7 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Math", this.mathObject, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Number", this.numberConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Object", this.objectConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Promise", this.promiseConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("RegExp", this.regExpConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Set", this.setConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("String", this.stringConstructor, PropertyAttributes.NonEnumerable));
@@ -402,6 +405,14 @@ namespace Jurassic
         public ObjectConstructor Object
         {
             get { return this.objectConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Promise object.
+        /// </summary>
+        public PromiseConstructor Promise
+        {
+            get { return this.promiseConstructor; }
         }
 
         /// <summary>
