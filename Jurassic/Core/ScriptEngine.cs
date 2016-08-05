@@ -244,6 +244,25 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Represents a method that transforms a line number when formatting the stack trace.
+        /// </summary>
+        /// <param name="line">The line number which is to be transformed. Set this to <c>0</c>
+        /// if the resulting line number is unknown.</param>
+        public delegate void LineNumberTransformDelegate(ref int line);
+
+        /// <summary>
+        /// Gets or sets a delegate that transforms a script line number when
+        /// formatting the stack trace for <see cref="ErrorInstance.Stack"/>.
+        /// This can be useful if you are using a source map to map generated lines
+        /// to source lines and the stack trace should contain the source line numbers.
+        /// </summary>
+        public LineNumberTransformDelegate LineNumberTransform
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The instance prototype of the Function object (i.e. Function.InstancePrototype).
         /// </summary>
         /// <remarks>
@@ -1241,6 +1260,10 @@ namespace Jurassic
         /// <param name="line"> The line number of the statement. </param>
         private void AppendStackFrame(System.Text.StringBuilder result, string path, string function, int line)
         {
+            // Check if we need to transform the line number.
+            if (line > 0 && LineNumberTransform != null)
+                LineNumberTransform(ref line);
+
             result.AppendLine();
             result.Append("    ");
             result.Append("at ");
