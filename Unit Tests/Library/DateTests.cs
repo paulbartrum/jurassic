@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Jurassic.Library;
 
 namespace UnitTests
 {
@@ -680,7 +681,13 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("new Date().valueOf.length"));
         }
 
-
+        [TestMethod]
+        public void IsValid()
+        {
+            Assert.AreEqual(false, ((DateInstance)Evaluate("new Date(NaN)")).IsValid);
+            Assert.AreEqual(false, ((DateInstance)Evaluate("new Date(undefined)")).IsValid);
+            Assert.AreEqual(true, ((DateInstance)Evaluate("new Date()")).IsValid);
+        }
 
 
 
