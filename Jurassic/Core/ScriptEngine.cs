@@ -244,19 +244,18 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Represents a method that transforms a line number when formatting the stack trace.
+        /// Represents a method that transforms a stack frame when formatting the stack trace.
         /// </summary>
-        /// <param name="line">The line number which is to be transformed. Set this to <c>0</c>
-        /// if the resulting line number is unknown.</param>
-        public delegate void LineNumberTransformDelegate(ref int line);
+        /// <param name="context"></param>
+        public delegate void StackFrameTransformDelegate(StackFrameTransformContext context);
 
         /// <summary>
-        /// Gets or sets a delegate that transforms a script line number when
+        /// Gets or sets a delegate that transforms a stack frame when
         /// formatting the stack trace for <see cref="ErrorInstance.Stack"/>.
         /// This can be useful if you are using a source map to map generated lines
         /// to source lines and the stack trace should contain the source line numbers.
         /// </summary>
-        public LineNumberTransformDelegate LineNumberTransform
+        public StackFrameTransformDelegate StackFrameTransform
         {
             get;
             set;
@@ -1260,25 +1259,30 @@ namespace Jurassic
         /// <param name="line"> The line number of the statement. </param>
         private void AppendStackFrame(System.Text.StringBuilder result, string path, string function, int line)
         {
-            // Check if we need to transform the line number.
-            if (line > 0 && LineNumberTransform != null)
-                LineNumberTransform(ref line);
+            // Create a context object which is used for the StackFrameTransform.
+            StackFrameTransformContext ctx = new StackFrameTransformContext()
+            {
+                Line = line,
+                Path = path,
+                Function = function
+            };
+            StackFrameTransform?.Invoke(ctx);
 
             result.AppendLine();
             result.Append("    ");
             result.Append("at ");
-            if (string.IsNullOrEmpty(function) == false)
+            if (string.IsNullOrEmpty(ctx.Function) == false)
             {
-                result.Append(function);
+                result.Append(ctx.Function);
                 result.Append(" (");
             }
-            result.Append(path ?? "unknown");
-            if (line > 0)
+            result.Append(ctx.Path ?? "unknown");
+            if (ctx.Line > 0)
             {
                 result.Append(":");
-                result.Append(line);
+                result.Append(ctx.Line);
             }
-            if (string.IsNullOrEmpty(function) == false)
+            if (string.IsNullOrEmpty(ctx.Function) == false)
                 result.Append(")");
         }
 
