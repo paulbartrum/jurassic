@@ -1266,7 +1266,8 @@ namespace Jurassic
                 Path = path,
                 Function = function
             };
-            StackFrameTransform?.Invoke(ctx);
+            if (StackFrameTransform != null)
+                StackFrameTransform(ctx);
 
             result.AppendLine();
             result.Append("    ");
