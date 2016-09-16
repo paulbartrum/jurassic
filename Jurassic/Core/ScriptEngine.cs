@@ -1269,6 +1269,10 @@ namespace Jurassic
             if (StackFrameTransform != null)
                 StackFrameTransform(ctx);
 
+            // Check if we need to hide the current stack frame.
+            if (!ctx.ShowStackFrame)
+                return;
+
             result.AppendLine();
             result.Append("    ");
             result.Append("at ");

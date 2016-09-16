@@ -7,10 +7,23 @@
     public class StackFrameTransformContext
     {
         /// <summary>
+        /// Gets or sets a value that indicates if the stack frame represented by
+        /// this <see cref="StackFrameTransformContext"/> should actually be shown in the
+        /// stack trace.
+        /// The default value is <c>true</c>.
+        /// </summary>
+        public bool ShowStackFrame
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
         /// Gets or sets the line number. A value of <c>0</c> means the line number
         /// is unknown.
         /// </summary>
-        public int Line {
+        public int Line
+        {
             get;
             set;
         }
