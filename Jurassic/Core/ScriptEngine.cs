@@ -1269,8 +1269,8 @@ namespace Jurassic
             if (StackFrameTransform != null)
                 StackFrameTransform(ctx);
 
-            // Check if we need to hide the current stack frame.
-            if (!ctx.ShowStackFrame)
+            // Check if we need to suppress the current stack frame.
+            if (ctx.SuppressStackFrame)
                 return;
 
             result.AppendLine();
