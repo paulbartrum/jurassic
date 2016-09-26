@@ -151,5 +151,13 @@ namespace UnitTests
             engine.SetGlobalValue("Random", new RandomConstructor(engine));
             Assert.AreEqual(0.15155745910087481, engine.Evaluate<double>("var rand = new Random(1000); rand.nextDouble()"));
         }
+
+        [TestMethod]
+        public void ExposingANETClass3_Call()
+        {
+            var engine = new Jurassic.ScriptEngine();
+            engine.SetGlobalValue("Random", new RandomConstructor(engine));
+            Assert.AreEqual(Undefined.Value, engine.Evaluate("Random(1000);"));
+        }
     }
 }
