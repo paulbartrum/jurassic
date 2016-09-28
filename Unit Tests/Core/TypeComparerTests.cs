@@ -128,9 +128,6 @@ namespace UnitTests
             Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct("5.5"), 5.5));
             Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct(""), ""));
 
-            Assert.AreEqual(true, TypeComparer.Equals(engine.Date.Construct(2016, 9, 27, 12, 43, 00), new System.DateTime(2016, 9, 27, 12, 43, 00)));
-            Assert.AreEqual(false, TypeComparer.Equals(engine.Date.Construct(2016, 9, 27, 12, 43, 01), new System.DateTime(2016, 9, 27, 12, 43, 00)));
-
         }
 
         [TestMethod]
