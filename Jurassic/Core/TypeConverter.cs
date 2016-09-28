@@ -236,8 +236,6 @@ namespace Jurassic
                 result = engine.String.Construct((string)value);
             else if (value is ConcatenatedString)
                 result = engine.String.Construct(value.ToString());
-            else if (value is DateTime)
-                result = engine.Date.Construct(((DateTime)value).ToString("r"));
             else
                 throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), "value");
             result.IsExtensible = false;
