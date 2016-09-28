@@ -34,8 +34,6 @@ namespace Jurassic
                 return "symbol";
             if (obj is ObjectInstance)
                 return "object";
-            if (obj is DateInstance)
-                return "object";
             throw new InvalidOperationException("Unsupported object type.");
         }
 

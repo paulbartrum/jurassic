@@ -175,8 +175,6 @@ namespace Jurassic
                 throw new JavaScriptException(((SymbolInstance)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a string.");
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
-            if (value is DateInstance)
-                return ((DateInstance)value).ToDateString();
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), "value");
         }
 
