@@ -10,7 +10,6 @@ namespace Jurassic.Compiler
     {
         private Library.ObjectInstance scopeObject;
 
-        [NonSerialized]
         private Expression scopeObjectExpression;
 
         private bool providesImplicitThisValue;

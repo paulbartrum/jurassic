@@ -53,6 +53,8 @@ namespace Jurassic.Compiler
         //     DEBUGGING
         //_________________________________________________________________________________________
 
+#if NET40
+
         /// <summary>
         /// Gets or sets the symbol store to write debugging information to.
         /// </summary>
@@ -61,6 +63,8 @@ namespace Jurassic.Compiler
             get;
             set;
         }
+
+#endif
 
         /// <summary>
         /// Gets or sets the source of javascript code.
@@ -99,8 +103,10 @@ namespace Jurassic.Compiler
         {
             if (span == null)
                 throw new ArgumentNullException("span");
+#if NET40
             if (this.DebugDocument != null)
                 generator.MarkSequencePoint(this.DebugDocument, span);
+#endif
             this.SourceSpan = span;
         }
 

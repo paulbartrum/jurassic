@@ -215,7 +215,7 @@ namespace Jurassic.Compiler
             }
             else
             {
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE || !NET40
                 throw new NotImplementedException();
 #else
                 // Debugging or low trust path.
@@ -261,6 +261,7 @@ namespace Jurassic.Compiler
                     generator = new LoggingILGenerator(generator);
                 }
 
+#if NET40
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
                     // Initialize the debugging information.
@@ -269,6 +270,7 @@ namespace Jurassic.Compiler
                     methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
                     methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
                 }
+#endif
                 optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
                 GenerateCode(generator, optimizationInfo);
                 generator.Complete();

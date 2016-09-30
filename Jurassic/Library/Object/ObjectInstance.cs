@@ -12,7 +12,6 @@ namespace Jurassic.Library
     public partial class ObjectInstance
     {
         // The script engine associated with this object.
-        [NonSerialized]
         private ScriptEngine engine;
 
         // Internal prototype chain.

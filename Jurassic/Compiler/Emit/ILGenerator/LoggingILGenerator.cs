@@ -1043,6 +1043,8 @@ namespace Jurassic.Compiler
             this.generator.Breakpoint();
         }
 
+#if NET40
+
         /// <summary>
         /// Marks a sequence point in the Microsoft intermediate language (MSIL) stream.
         /// </summary>
@@ -1055,6 +1057,8 @@ namespace Jurassic.Compiler
         {
             this.generator.MarkSequencePoint(document, startLine, startColumn, endLine, endColumn);
         }
+
+#endif
 
 
 

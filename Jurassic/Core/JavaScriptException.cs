@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using Jurassic.Library;
-using System.Security;
 
 namespace Jurassic
 {

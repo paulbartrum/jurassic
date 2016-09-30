@@ -668,7 +668,6 @@ namespace Jurassic
         /// <summary>
         /// Gets or sets information needed by Reflection.Emit.
         /// </summary>
-        [NonSerialized]
         internal ReflectionEmitModuleInfo ReflectionEmitInfo;
 #endif //!WINDOWS_PHONE
 

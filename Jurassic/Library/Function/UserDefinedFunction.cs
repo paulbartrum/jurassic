@@ -13,10 +13,7 @@ namespace Jurassic.Library
         [ThreadStatic]
         private static int currentRecursionDepth;
 
-        [NonSerialized]
         private GeneratedMethod generatedMethod;
-
-        [NonSerialized]
         private FunctionDelegate body;
 
 

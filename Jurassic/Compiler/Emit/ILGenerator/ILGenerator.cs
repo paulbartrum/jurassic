@@ -880,6 +880,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public abstract void Breakpoint();
 
+#if NET40
+
         /// <summary>
         /// Marks a sequence point in the Microsoft intermediate language (MSIL) stream.
         /// </summary>
@@ -902,6 +904,7 @@ namespace Jurassic.Compiler
         /// <param name="endColumn"> The column in the line where the sequence point ends. </param>
         public abstract void MarkSequencePoint(System.Diagnostics.SymbolStore.ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn);
 
+#endif
 
 
         //     MISC

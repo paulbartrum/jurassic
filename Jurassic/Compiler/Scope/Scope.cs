@@ -14,7 +14,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Represents a variable declared in a scope.
         /// </summary>
-            internal class DeclaredVariable
+        internal class DeclaredVariable
         {
             // The scope the variable was declared in.
             public Scope Scope;
@@ -26,7 +26,6 @@ namespace Jurassic.Compiler
             public string Name;
 
             // The initial value of the variable (used for function declarations only).
-            [NonSerialized]
             public Expression ValueAtTopOfScope;
 
             // true if the variable has been set with the initial value.
@@ -39,11 +38,9 @@ namespace Jurassic.Compiler
             public bool Deletable;
 
             // The storage container for the variable.
-            [NonSerialized]
             public ILLocalVariable Store;
 
             // The statically-determined storage type for the variable.
-            [NonSerialized]
             public PrimitiveType Type = PrimitiveType.Any;
         }
 

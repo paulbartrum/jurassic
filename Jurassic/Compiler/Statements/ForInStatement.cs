@@ -103,9 +103,11 @@ namespace Jurassic.Compiler
             var breakTarget = generator.CreateLabel();
             var continueTarget = generator.DefineLabelPosition();
 
+#if NET40
             // Emit debugging information.
             if (optimizationInfo.DebugDocument != null)
                 generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.VariableSourceSpan);
+#endif
 
             //   if (enumerator.MoveNext() == false)
             //     goto break-target;

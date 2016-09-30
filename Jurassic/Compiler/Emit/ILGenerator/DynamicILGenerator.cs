@@ -2447,6 +2447,8 @@ namespace Jurassic.Compiler
             Emit1ByteOpCode(0x01, 0, 0);
         }
 
+#if NET40
+
         /// <summary>
         /// Marks a sequence point in the Microsoft intermediate language (MSIL) stream.
         /// </summary>
@@ -2459,6 +2461,8 @@ namespace Jurassic.Compiler
         {
             // DynamicMethod does not support sequence points.
         }
+
+#endif
 
 
 
