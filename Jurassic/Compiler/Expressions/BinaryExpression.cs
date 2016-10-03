@@ -714,8 +714,8 @@ namespace Jurassic.Compiler
             EmitConversion.ToAny(generator, this.Right.ResultType);
 
             // Check the right-hand side is a function - if not, throw an exception.
-            generator.IsInstance(typeof(Library.FunctionInstance));
             generator.Duplicate();
+            generator.IsInstance(typeof(Library.FunctionInstance));
             var endOfTypeCheck = generator.CreateLabel();
             generator.BranchIfNotNull(endOfTypeCheck);
 
