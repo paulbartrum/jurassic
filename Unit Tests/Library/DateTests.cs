@@ -61,7 +61,8 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2011, 3, 1, 0, 0, 0)), Evaluate("new Date('29 Feb 2011').valueOf()"));
 
             // Dates before 1970 should work.
-            Assert.AreEqual(-31585783380000d, ChangeLocale("en-NZ", () => Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()")));
+            Assert.AreEqual(-31585736580000d - TimeZoneInfo.Local.GetUtcOffset(new DateTime(969, 01, 01, 8, 17, 0, DateTimeKind.Local)).TotalMilliseconds,
+                Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()"));
             Assert.AreEqual(true, Evaluate("new Date(new Date(969, 01, 01, 8, 17, 0)).getTime() == new Date(969, 01, 01, 8, 17, 0).getTime()"));
 
             // new Date(year, month, [day], [hour], [minute], [second], [millisecond])
