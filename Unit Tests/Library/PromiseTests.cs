@@ -12,6 +12,7 @@ namespace UnitTests
     public class PromiseTests : TestBase
     {
         [TestMethod]
+        [Ignore]    // not supported yet.
         public void Constructor()
         {
             // Call
