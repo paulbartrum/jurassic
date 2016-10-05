@@ -1,5 +1,7 @@
 ![Jurassic](https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/logo.png)
 
+[![Build status](https://ci.appveyor.com/api/projects/status/rx2xy5srhmv3kbkd/branch/master?svg=true)](https://ci.appveyor.com/project/paulbartrum/jurassic/branch/master)
+
 ## What is Jurassic?
 
 Jurassic is an implementation of the ECMAScript language and runtime. It aims to provide
