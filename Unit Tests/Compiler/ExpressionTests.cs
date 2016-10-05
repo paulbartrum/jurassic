@@ -1129,6 +1129,7 @@ namespace UnitTests
 
             // Right-hand-side must be a function.
             Assert.AreEqual("TypeError", EvaluateExceptionType("5 instanceof Math"));
+            Assert.AreEqual("TypeError: The instanceof operator expected a function, but found 'object' instead", EvaluateExceptionMessage("5 instanceof Math"));
 
             // Test newly constructed objects.
             Assert.AreEqual(true, Evaluate("new Number(5) instanceof Number"));
