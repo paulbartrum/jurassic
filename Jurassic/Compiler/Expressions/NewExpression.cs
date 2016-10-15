@@ -70,8 +70,8 @@ namespace Jurassic.Compiler
             }
 
             // Check the object really is a function - if not, throw an exception.
-            generator.IsInstance(typeof(Library.FunctionInstance));
             generator.Duplicate();
+            generator.IsInstance(typeof(Library.FunctionInstance));
             var endOfTypeCheck = generator.CreateLabel();
             generator.BranchIfNotNull(endOfTypeCheck);
 

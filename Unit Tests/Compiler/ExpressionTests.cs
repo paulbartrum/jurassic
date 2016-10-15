@@ -1076,6 +1076,7 @@ namespace UnitTests
             Assert.AreEqual("five", Evaluate("new String('five').toString()"));
             Assert.AreEqual("5", Evaluate("new Number(5).toString()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("new (String('five'))"));
+            Assert.AreEqual("TypeError: The new operator requires a function, found a 'string' instead", EvaluateExceptionMessage("new (String('five'))"));
 
             // Precedence tests.
             Assert.AreEqual("[object Object]", Evaluate("x = {}; x.f = function() { }; (new x.f()).toString()"));
@@ -1157,6 +1158,7 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("'toString' in new String()"));
             Assert.AreEqual(true, Evaluate("var x = 'atan2', y = Math; x in y"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("'toString' in 5"));
+            Assert.AreEqual("TypeError: The in operator expected an object, but found 'number' instead", EvaluateExceptionMessage("'toString' in 5"));
 
             // Check order of evaluation - should be left to right.
             Assert.AreEqual("x", Evaluate(@"
