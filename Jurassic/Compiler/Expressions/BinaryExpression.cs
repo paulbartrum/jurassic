@@ -771,8 +771,8 @@ namespace Jurassic.Compiler
             EmitConversion.ToAny(generator, this.Right.ResultType);
 
             // Check the right-hand side is a javascript object - if not, throw an exception.
-            generator.IsInstance(typeof(Library.ObjectInstance));
             generator.Duplicate();
+            generator.IsInstance(typeof(Library.ObjectInstance));
             var endOfTypeCheck = generator.CreateLabel();
             generator.BranchIfNotNull(endOfTypeCheck);
 
