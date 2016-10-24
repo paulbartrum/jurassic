@@ -175,7 +175,7 @@ namespace UnitTests
         [TestMethod]
         public void set()
         {
-            // Returns the set.
+            // Returns the map.
             Assert.AreEqual(true, Evaluate("var s = new Map(); s.set(1, 2) === s"));
 
             // Values are unique.
@@ -183,6 +183,14 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(2, Evaluate("Map.prototype.set.length"));
+
+            Execute("var i = new Map().set(1, 2).set(0, 9).set(1, 8);");
+
+            // Overwrites values
+            Assert.AreEqual(8, Evaluate("i.get(1)"));
+
+            // Insertion order
+            Assert.AreEqual("1,0", Evaluate("var result = []; i.forEach(function(e1, e2, S) { result.push(e1); }); result.toString();"));
         }
 
         [TestMethod]
