@@ -205,11 +205,15 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "set")]
         public MapInstance Set(object key, object value)
         {
-            if (this.store.ContainsKey(key))
+            LinkedListNode<KeyValuePair<object, object>> node;
+            if (this.store.TryGetValue(key, out node))
+            {
+                node.Value = new KeyValuePair<object, object>(node.Value.Key, value);
                 return this;
+            }
             if (key is double && TypeUtilities.IsNegativeZero((double)key))
                 key = 0;
-            var node = this.list.AddLast(new KeyValuePair<object, object>(key, value));
+            node = this.list.AddLast(new KeyValuePair<object, object>(key, value));
             this.store.Add(key, node);
             return this;
         }
