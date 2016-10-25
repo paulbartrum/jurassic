@@ -142,9 +142,32 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "forEach", Length = 1)]
         public void ForEach(FunctionInstance callback, object thisArg)
         {
-            foreach (var value in TypeUtilities.Iterate(Engine, Values()))
+            var node = this.list.First;
+
+            // This event handler is for when the user-supplied callback deletes the current
+            // linked list node while we're iterating over it.
+            Action<LinkedListNode<object>> beforeDeleteHandler = (deletedNode) =>
             {
-                callback.Call(thisArg, value, value, this);
+                if (deletedNode == node)
+                    node = node.Previous;
+            };
+            BeforeDelete += beforeDeleteHandler;
+            try
+            {
+
+                while (node != null)
+                {
+                    // Call the user-supplied callback.
+                    callback.Call(thisArg, node.Value, node.Value, this);
+
+                    // Go to the next node in the linked list.
+                    node = node == null ? this.list.First : node.Next;
+                }
+
+            }
+            finally
+            {
+                BeforeDelete -= beforeDeleteHandler;
             }
         }
 

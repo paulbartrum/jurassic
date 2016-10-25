@@ -93,17 +93,17 @@ namespace UnitTests
         [TestMethod]
         public void forEach()
         {
-            Assert.AreEqual("9", Evaluate("var result = []; new Map().set(9, 3).forEach(function (e1, e2, S) { result.push(e1) }); result.toString()"));
-            Assert.AreEqual("3", Evaluate("var result = []; new Map().set(9, 3).forEach(function (e1, e2, S) { result.push(e2) }); result.toString()"));
+            Assert.AreEqual("3", Evaluate("var result = []; new Map().set(9, 3).forEach(function (e1, e2, S) { result.push(e1) }); result.toString()"));
+            Assert.AreEqual("9", Evaluate("var result = []; new Map().set(9, 3).forEach(function (e1, e2, S) { result.push(e2) }); result.toString()"));
             Assert.AreEqual("[object Map]", Evaluate("var result = []; new Map().set(42, 5).forEach(function (e1, e2, S) { result.push(S.toString()) }); result.toString()"));
             Assert.AreEqual("99", Evaluate("var result = []; new Map().set(42, 14).forEach(function (e1, e2, S) { result.push(this) }, 99); result.toString()"));
-            Assert.AreEqual("42,2,9,5,13,3", Evaluate("var result = []; new Map().set(42, 2).set(9, 5).set(13, 3).forEach(function (e1, e2, S) { result.push(e1); result.push(e2) }); result.toString()"));
+            Assert.AreEqual("2,42,5,9,3,13", Evaluate("var result = []; new Map().set(42, 2).set(9, 5).set(13, 3).forEach(function (e1, e2, S) { result.push(e1); result.push(e2) }); result.toString()"));
 
             // Items can be added or deleted in the callback.
-            Assert.AreEqual("1,2,3", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e1 === 1) { S.delete(1); } result.push(e1); }); result.toString()"));
-            Assert.AreEqual("1,3", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e1 === 1) { S.delete(2); } result.push(e1); }); result.toString()"));
-            Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e1 === 1) { S.set(4, 0); } result.push(e1) }); result.toString()"));
-            Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e1 === 3) { S.set(4, 0); } result.push(e1) }); result.toString()"));
+            Assert.AreEqual("1,2,3", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e2 === 1) { S.delete(1); } result.push(e2); }); result.toString()"));
+            Assert.AreEqual("1,3", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e2 === 1) { S.delete(2); } result.push(e2); }); result.toString()"));
+            Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e2 === 1) { S.set(4, 0); } result.push(e2) }); result.toString()"));
+            Assert.AreEqual("1,2,3,4", Evaluate("var result = []; new Map([[1, 0], [2, 0], [3, 0]]).forEach(function (e1, e2, S) { if (e2 === 3) { S.set(4, 0); } result.push(e2) }); result.toString()"));
 
             // -0 is converted to +0.
             Assert.AreEqual(double.PositiveInfinity, Evaluate(@"var k; new Map([[-0, 0]]).forEach(function(value) { k = 1 / value; }); k"));

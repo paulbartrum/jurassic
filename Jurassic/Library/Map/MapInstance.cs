@@ -129,12 +129,32 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "forEach", Length = 1)]
         public void ForEach(FunctionInstance callback, object thisArg)
         {
-            foreach (var keyValue in TypeUtilities.Iterate(Engine, Entries()))
+            var node = this.list.First;
+
+            // This event handler is for when the user-supplied callback deletes the current
+            // linked list node while we're iterating over it.
+            Action<LinkedListNode<KeyValuePair<object, object>>> beforeDeleteHandler = (deletedNode) =>
             {
-                var keyValueObj = keyValue as ObjectInstance;
-                if (keyValueObj == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid iterator return value.");
-                callback.Call(thisArg, keyValueObj[0], keyValueObj[1], this);
+                if (deletedNode == node)
+                    node = node.Previous;
+            };
+            BeforeDelete += beforeDeleteHandler;
+            try
+            {
+
+                while (node != null)
+                {
+                    // Call the user-supplied callback.
+                    callback.Call(thisArg, node.Value.Value, node.Value.Key, this);
+
+                    // Go to the next node in the linked list.
+                    node = node == null ? this.list.First : node.Next;
+                }
+
+            }
+            finally
+            {
+                BeforeDelete -= beforeDeleteHandler;
             }
         }
 
