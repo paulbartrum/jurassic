@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic.Library;
 
@@ -85,13 +86,13 @@ namespace UnitTests
             // Date() returns the current date as a string - this test assumes the running time is less than 1s.
             var str = (string)Evaluate("Date()");
                 var formatString = "ddd MMM dd yyyy HH:mm:ss";
-                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString, CultureInfo.InvariantCulture)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
                     string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString), str));
 
             // Any arguments provided are ignored.
             str = (string)Evaluate("Date(2009)");
-                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss")) ||
-                    str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss")));
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture)) ||
+                    str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture)));
 
             // toString and valueOf.
             Assert.AreEqual("function Date() { [native code] }", Evaluate("Date.toString()"));
@@ -692,13 +693,36 @@ namespace UnitTests
             Assert.AreEqual(true, ((DateInstance)Evaluate("new Date()")).IsValid);
         }
 
+        [TestMethod]
+        public void DateConversion()
+        {
+            // Init Jurassic
+            Evaluate("");
 
+            // Simulate "new Date()" (which uses DateTime.Now) at 2016-01-01T11:59:59.9999999Z.
+            var dateInstanceValueField = typeof(DateInstance).GetField("value", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            DateInstance specialNowDate1 = new DateInstance(jurassicScriptEngine.Date.InstancePrototype);
+            dateInstanceValueField.SetValue(specialNowDate1, new DateTime(635872463999999999L, DateTimeKind.Utc));
+            jurassicScriptEngine.SetGlobalValue("specialDate1", specialNowDate1);
+
+            Assert.AreEqual(Evaluate("specialDate1.toUTCString()"), Evaluate("new Date(specialDate1.getTime()).toUTCString()"));
+            Assert.AreEqual(1451649599999d, Evaluate("specialDate1.getTime()"));
+
+            // Simulate "new Date()" at 1969-12-31T23:59:59.9999999Z.
+            DateInstance specialNowDate2 = new DateInstance(jurassicScriptEngine.Date.InstancePrototype);
+            dateInstanceValueField.SetValue(specialNowDate2, new DateTime(621355967999999999L, DateTimeKind.Utc));
+            jurassicScriptEngine.SetGlobalValue("specialDate2", specialNowDate2);
+
+            Assert.AreEqual(-1, Evaluate("specialDate2.getTime()"));
+        }
 
 
 
         private static object ToJSDate(DateTime dateTime)
         {
-            var result = Math.Round(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            // Once we target .NET 4.6, use DateTimeOffset.ToUnixTimeMilliseconds().
+            double result = dateTime.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond -
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / TimeSpan.TicksPerMillisecond;
             if ((double)(int)result == result)
                 return (int)result;
             return result;
