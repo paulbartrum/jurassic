@@ -1111,6 +1111,7 @@ namespace Jurassic.Library
         {
             if (dateTime == InvalidDate)
                 return double.NaN;
+            // Once we target .NET 4.6, use DateTimeOffset.ToUnixTimeMilliseconds().
             return dateTime.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond -
                 new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / TimeSpan.TicksPerMillisecond;
         }
