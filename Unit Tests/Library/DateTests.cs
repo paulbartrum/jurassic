@@ -677,6 +677,8 @@ namespace UnitTests
         public void valueOf()
         {
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 57)), Evaluate("new Date('24 Apr 2010 23:59:57').valueOf()"));
+            double value = (double)Evaluate("new Date().valueOf()");
+            Assert.AreEqual(0.0, value - Math.Floor(value));
             Assert.AreEqual(0, Evaluate("new Date().valueOf.length"));
         }
 
@@ -688,7 +690,7 @@ namespace UnitTests
 
         private static object ToJSDate(DateTime dateTime)
         {
-            var result = dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+            var result = Math.Round(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
             if ((double)(int)result == result)
                 return (int)result;
             return result;
