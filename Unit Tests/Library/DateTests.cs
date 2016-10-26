@@ -706,9 +706,9 @@ namespace UnitTests
             jurassicScriptEngine.SetGlobalValue("specialDate1", specialNowDate1);
 
             Assert.AreEqual(Evaluate("specialDate1.toUTCString()"), Evaluate("new Date(specialDate1.getTime()).toUTCString()"));
-            Assert.AreEqual(1451649599999d, Convert.ToDouble(Evaluate("specialDate1.getTime()")));
+            Assert.AreEqual(1451649599999d, Evaluate("specialDate1.getTime()"));
 
-            // Simulate "new Date" at 1969-12-31T23:59:59.9999999Z.
+            // Simulate "new Date()" at 1969-12-31T23:59:59.9999999Z.
             DateInstance specialNowDate2 = new DateInstance(jurassicScriptEngine.Date.InstancePrototype);
             dateInstanceValueField.SetValue(specialNowDate2, new DateTime(621355967999999999L, DateTimeKind.Utc));
             jurassicScriptEngine.SetGlobalValue("specialDate2", specialNowDate2);
