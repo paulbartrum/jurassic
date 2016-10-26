@@ -1076,6 +1076,7 @@ namespace UnitTests
             Assert.AreEqual("five", Evaluate("new String('five').toString()"));
             Assert.AreEqual("5", Evaluate("new Number(5).toString()"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("new (String('five'))"));
+            Assert.AreEqual("TypeError: The new operator requires a function, found a 'string' instead", EvaluateExceptionMessage("new (String('five'))"));
 
             // Precedence tests.
             Assert.AreEqual("[object Object]", Evaluate("x = {}; x.f = function() { }; (new x.f()).toString()"));
@@ -1129,6 +1130,7 @@ namespace UnitTests
 
             // Right-hand-side must be a function.
             Assert.AreEqual("TypeError", EvaluateExceptionType("5 instanceof Math"));
+            Assert.AreEqual("TypeError: The instanceof operator expected a function, but found 'object' instead", EvaluateExceptionMessage("5 instanceof Math"));
 
             // Test newly constructed objects.
             Assert.AreEqual(true, Evaluate("new Number(5) instanceof Number"));
@@ -1156,6 +1158,7 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("'toString' in new String()"));
             Assert.AreEqual(true, Evaluate("var x = 'atan2', y = Math; x in y"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("'toString' in 5"));
+            Assert.AreEqual("TypeError: The in operator expected an object, but found 'number' instead", EvaluateExceptionMessage("'toString' in 5"));
 
             // Check order of evaluation - should be left to right.
             Assert.AreEqual("x", Evaluate(@"
@@ -1460,13 +1463,10 @@ namespace UnitTests
         }
 
         [TestMethod]
+        [Ignore]    // tagged strings array should be frozen.
         public void TemplateLiterals()
         {
             Assert.AreEqual("nine", Evaluate("`nine`"));
-
-            // New lines are allowed and included in the resulting string.
-            Assert.AreEqual("ni\r\nne", Evaluate("`ni\r\nne`"));
-            Assert.AreEqual("line 1  \r\n  line 2", Evaluate("`line 1  \r\n  line 2`"));
 
             // Escape sequences
             Assert.AreEqual(" \x08 \x09 \x0a \x0b \x0c \x0d \x22 \x27 \x5c \x00 ", Evaluate(@"` \b \t \n \v \f \r \"" \' \\ \0 `"));
@@ -1500,6 +1500,11 @@ namespace UnitTests
                     return strings.raw.length + ' | ' + strings.raw.join(',') + ' | ' + value1 + ' | ' + value2 + ' | ' + value3;
                 }
                 tag `one\r\n${ 'two'}\r\nthree`;"));
+
+            // Newline normalization.
+            Assert.AreEqual("a\nb", Evaluate("`a\rb`"));
+            Assert.AreEqual("a\nb", Evaluate("`a\nb`"));
+            Assert.AreEqual("a\nb", Evaluate("`a\r\nb`"));
 
             // Check accessibility.
             Assert.AreEqual(true, Evaluate(@"function tag(strings) { return Object.isFrozen(strings); } tag `test`;"));

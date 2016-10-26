@@ -425,9 +425,15 @@ namespace Jurassic.Compiler
                     break;
                 if (c == -1)
                     throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in string literal.", this.lineNumber, this.Source.Path);
-                if (IsLineTerminator(c) && firstChar != '`')
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected line terminator in string literal.", this.lineNumber, this.Source.Path);
-                if (c == '\\')
+                if (IsLineTerminator(c))
+                {
+                    // Line terminators are only allowed in template literals.
+                    if (firstChar != '`')
+                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected line terminator in string literal.", this.lineNumber, this.Source.Path);
+                    ReadLineTerminator(c);
+                    contents.Append('\n');
+                }
+                else if (c == '\\')
                 {
                     // Escape sequence or line continuation.
                     c = ReadNextChar();

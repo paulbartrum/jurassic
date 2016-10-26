@@ -125,7 +125,7 @@ namespace Jurassic.Library
         /// </summary>
         public bool IsValid
         {
-            get { return this.value == InvalidDate; }
+            get { return this.value != InvalidDate; }
         }
 
 

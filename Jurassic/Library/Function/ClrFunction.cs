@@ -72,13 +72,13 @@ namespace Jurassic.Library
             if (callBinderMethods.Count > 0)
                 this.callBinder = new JSBinder(callBinderMethods);
             else
-                this.callBinder = new JSBinder(new JSBinderMethod(new Func<object>(() => Undefined.Value).Method));
+                this.callBinder = new EmptyBinder();
 
             // Initialize the Construct function.
             if (constructBinderMethods.Count > 0)
                 this.constructBinder = new JSBinder(constructBinderMethods);
             else
-                this.constructBinder = new JSBinder(new JSBinderMethod(new Func<ObjectInstance>(() => this.Engine.Object.Construct()).Method));
+                this.constructBinder = new EmptyBinder();
 
             // Add function properties.
             this.FastSetProperty("name", name, PropertyAttributes.Configurable);
@@ -223,5 +223,52 @@ namespace Jurassic.Library
         //}
 
 
+        //     HELPER CLASSES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// A binder that merely returns undefined.
+        /// </summary>
+        private class EmptyBinder : Binder
+        {
+            /// <summary>
+            /// Creates a new EmptyBinder instance.
+            /// </summary>
+            public EmptyBinder()
+            {
+            }
+
+            /// <summary>
+            /// Gets the name of the target methods.
+            /// </summary>
+            public override string Name
+            {
+                get { return "undefined"; }
+            }
+
+            /// <summary>
+            /// Gets the full name of the target methods, including the type name.
+            /// </summary>
+            public override string FullName
+            {
+                get { return "undefined"; }
+            }
+
+            /// <summary>
+            /// Generates a method that does type conversion and calls the bound method.
+            /// </summary>
+            /// <param name="generator"> The ILGenerator used to output the body of the method. </param>
+            /// <param name="argumentCount"> The number of arguments that will be passed to the delegate. </param>
+            /// <returns> A delegate that does type conversion and calls the method represented by this
+            /// object. </returns>
+            protected override void GenerateStub(Jurassic.Compiler.ILGenerator generator, int argumentCount)
+            {
+                // Emit undefined.
+                EmitHelpers.EmitUndefined(generator);
+
+                // End the IL.
+                generator.Complete();
+            }
+        }
     }
 }

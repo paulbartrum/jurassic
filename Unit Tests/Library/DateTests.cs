@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Jurassic.Library;
 
 namespace UnitTests
 {
@@ -60,7 +61,8 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2011, 3, 1, 0, 0, 0)), Evaluate("new Date('29 Feb 2011').valueOf()"));
 
             // Dates before 1970 should work.
-            Assert.AreEqual(-31585783380000d, Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()"));
+            Assert.AreEqual(-31585736580000d - TimeZoneInfo.Local.GetUtcOffset(new DateTime(969, 01, 01, 8, 17, 0, DateTimeKind.Local)).TotalMilliseconds,
+                Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()"));
             Assert.AreEqual(true, Evaluate("new Date(new Date(969, 01, 01, 8, 17, 0)).getTime() == new Date(969, 01, 01, 8, 17, 0).getTime()"));
 
             // new Date(year, month, [day], [hour], [minute], [second], [millisecond])
@@ -682,7 +684,13 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("new Date().valueOf.length"));
         }
 
-
+        [TestMethod]
+        public void IsValid()
+        {
+            Assert.AreEqual(false, ((DateInstance)Evaluate("new Date(NaN)")).IsValid);
+            Assert.AreEqual(false, ((DateInstance)Evaluate("new Date(undefined)")).IsValid);
+            Assert.AreEqual(true, ((DateInstance)Evaluate("new Date()")).IsValid);
+        }
 
 
 
@@ -702,7 +710,7 @@ namespace UnitTests
             var offset = timeZoneInfo.GetUtcOffset(date);
             return string.Format("GMT{3}{0:d2}{1:d2} ({2})", offset.Hours, offset.Minutes,
                 timeZoneInfo.IsDaylightSavingTime(date) ? timeZoneInfo.DaylightName : timeZoneInfo.StandardName, 
-                offset.Hours > 0 ? "+" : "");
+                offset.Hours >= 0 ? "+" : "");
         }
     }
 }

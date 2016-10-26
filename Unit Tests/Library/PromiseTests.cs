@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Jurassic;
 
 namespace UnitTests
 {
@@ -14,6 +12,7 @@ namespace UnitTests
     public class PromiseTests : TestBase
     {
         [TestMethod]
+        [Ignore]    // not supported yet.
         public void Constructor()
         {
             // Call
@@ -21,7 +20,9 @@ namespace UnitTests
 
             // Construct
             Assert.AreEqual("TypeError", EvaluateExceptionType("new Promise()"));
-            Assert.AreEqual("", Evaluate("new Promise(function(resolve, reject) { }).toString()"));
+            Assert.AreEqual("[object Promise]", Evaluate("new Promise(function(resolve, reject) { }).toString()"));
+            Assert.AreEqual("s", Evaluate("var f; var x = new Promise(function(resolve, reject) { f = resolve; }); f.name"));
+            Assert.AreEqual("t", Evaluate("var f; var x = new Promise(function(resolve, reject) { f = reject; }); f.name"));
 
             // toString and valueOf.
             Assert.AreEqual("function Promise() { [native code] }", Evaluate("Promise.toString()"));
