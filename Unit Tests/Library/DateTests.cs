@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic.Library;
-using System.Globalization;
 
 namespace UnitTests
 {
