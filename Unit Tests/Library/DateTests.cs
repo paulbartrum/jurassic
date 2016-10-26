@@ -705,7 +705,7 @@ namespace UnitTests
             jurassicScriptEngine.SetGlobalValue("specialDate1", specialNowDate1);
 
             Assert.AreEqual(Evaluate("specialDate1.toUTCString()"), Evaluate("new Date(specialDate1.getTime()).toUTCString()"));
-            Assert.AreEqual(1451649599999, Evaluate("specialDate1.getTime()"));
+            Assert.AreEqual(1451649599999d, Convert.ToDouble(Evaluate("specialDate1.getTime()")));
 
             // Simulate "new Date" at 1969-12-31T23:59:59.9999999Z.
             DateInstance specialNowDate2 = new DateInstance(jurassicScriptEngine.Date.InstancePrototype);
@@ -719,7 +719,9 @@ namespace UnitTests
 
         private static object ToJSDate(DateTime dateTime)
         {
-            double result = Math.Round(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            // Once we target .NET 4.6, use DateTimeOffset.ToUnixTimeMilliseconds().
+            double result = dateTime.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond -
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / TimeSpan.TicksPerMillisecond;
             if ((double)(int)result == result)
                 return (int)result;
             return result;

@@ -1111,7 +1111,8 @@ namespace Jurassic.Library
         {
             if (dateTime == InvalidDate)
                 return double.NaN;
-            return Math.Round(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            return dateTime.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond -
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / TimeSpan.TicksPerMillisecond;
         }
 
         /// <summary>
