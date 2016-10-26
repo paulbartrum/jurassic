@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic.Library;
+using System.Globalization;
 
 namespace UnitTests
 {
@@ -85,13 +86,13 @@ namespace UnitTests
             // Date() returns the current date as a string - this test assumes the running time is less than 1s.
             var str = (string)Evaluate("Date()");
                 var formatString = "ddd MMM dd yyyy HH:mm:ss";
-                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString, CultureInfo.InvariantCulture)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
                     string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString), str));
 
             // Any arguments provided are ignored.
             str = (string)Evaluate("Date(2009)");
-                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss")) ||
-                    str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss")));
+                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture)) ||
+                    str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture)));
 
             // toString and valueOf.
             Assert.AreEqual("function Date() { [native code] }", Evaluate("Date.toString()"));
