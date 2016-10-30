@@ -728,7 +728,8 @@ namespace UnitTests
 
         private static object ToJSDate(DateTime dateTime)
         {
-            var result = Math.Floor(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            double result = dateTime.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond -
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / TimeSpan.TicksPerMillisecond;
             if ((double)(int)result == result)
                 return (int)result;
             return result;

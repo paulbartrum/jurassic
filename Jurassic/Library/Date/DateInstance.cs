@@ -1113,7 +1113,9 @@ namespace Jurassic.Library
                 return double.NaN;
             // The spec requires that the time value is an integer.
             // We could round to nearest, but then date.toUTCString() would be different from Date(date.getTime()).toUTCString().
-            return Math.Floor(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            // We do a integer division before subtracting the dates to ensure the behavior is like Math.Floor().
+            return dateTime.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond -
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / TimeSpan.TicksPerMillisecond;
         }
 
         /// <summary>
