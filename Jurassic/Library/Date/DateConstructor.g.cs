@@ -52,21 +52,21 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return UTC(0, 0, 1, 0, 0, 0, 0);
+					return UTC(engine, 0, 0, 1, 0, 0, 0, 0);
 				case 1:
-					return UTC(TypeConverter.ToInteger(args[0]), 0, 1, 0, 0, 0, 0);
+					return UTC(engine, TypeConverter.ToInteger(args[0]), 0, 1, 0, 0, 0, 0);
 				case 2:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), 1, 0, 0, 0, 0);
+					return UTC(engine, TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), 1, 0, 0, 0, 0);
 				case 3:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), 0, 0, 0, 0);
+					return UTC(engine, TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), 0, 0, 0, 0);
 				case 4:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), 0, 0, 0);
+					return UTC(engine, TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), 0, 0, 0);
 				case 5:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), 0, 0);
+					return UTC(engine, TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), 0, 0);
 				case 6:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), TypeUtilities.IsUndefined(args[5]) ? 0 : TypeConverter.ToInteger(args[5]), 0);
+					return UTC(engine, TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), TypeUtilities.IsUndefined(args[5]) ? 0 : TypeConverter.ToInteger(args[5]), 0);
 				default:
-					return UTC(TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), TypeUtilities.IsUndefined(args[5]) ? 0 : TypeConverter.ToInteger(args[5]), TypeUtilities.IsUndefined(args[6]) ? 0 : TypeConverter.ToInteger(args[6]));
+					return UTC(engine, TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), TypeUtilities.IsUndefined(args[2]) ? 1 : TypeConverter.ToInteger(args[2]), TypeUtilities.IsUndefined(args[3]) ? 0 : TypeConverter.ToInteger(args[3]), TypeUtilities.IsUndefined(args[4]) ? 0 : TypeConverter.ToInteger(args[4]), TypeUtilities.IsUndefined(args[5]) ? 0 : TypeConverter.ToInteger(args[5]), TypeUtilities.IsUndefined(args[6]) ? 0 : TypeConverter.ToInteger(args[6]));
 			}
 		}
 
@@ -75,9 +75,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return Parse("undefined");
+					return Parse(engine, "undefined");
 				default:
-					return Parse(TypeConverter.ToString(args[0]));
+					return Parse(engine, TypeConverter.ToString(args[0]));
 			}
 		}
 	}

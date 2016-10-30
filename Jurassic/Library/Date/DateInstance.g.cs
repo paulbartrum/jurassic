@@ -539,7 +539,7 @@ namespace Jurassic.Library
 
 		private static object __STUB__ToString(ScriptEngine engine, object thisObj, object[] args)
 		{
-			return ToString(thisObj);
+			return ToString(engine, thisObj);
 		}
 
 		private static object __STUB__ToTimeString(ScriptEngine engine, object thisObj, object[] args)

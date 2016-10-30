@@ -15,6 +15,9 @@ namespace Jurassic
         // Compatibility mode.
         private CompatibilityMode compatibilityMode;
 
+        // The TimeZoneInfo used by DateInstance.
+        private TimeZoneInfo timeZone = TimeZoneInfo.Local;
+
         // The initial hidden class schema.
         private HiddenClassSchema emptySchema;
 
@@ -219,6 +222,22 @@ namespace Jurassic
                 this.Global.FastSetProperty("Infinity", double.PositiveInfinity, attributes, overwriteAttributes: true);
                 this.Global.FastSetProperty("NaN", double.NaN, attributes, overwriteAttributes: true);
                 this.Global.FastSetProperty("undefined", Undefined.Value, attributes, overwriteAttributes: true);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="TimeZoneInfo"/> that is used to convert between UTC and
+        /// a local timezone.
+        /// The default value is <see cref="TimeZoneInfo.Local"/>.
+        /// </summary>
+        public TimeZoneInfo TimeZone
+        {
+            get { return this.timeZone; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                this.timeZone = value;
             }
         }
 

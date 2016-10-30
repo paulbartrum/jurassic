@@ -38,7 +38,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public string Call()
         {
-            return DateInstance.ToString(new DateInstance(this.InstancePrototype));
+            return DateInstance.ToString(Engine, new DateInstance(this.InstancePrototype));
         }
 
         /// <summary>
@@ -162,11 +162,11 @@ namespace Jurassic.Library
         /// 
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        [JSInternalFunction(Name = "UTC")]
-        public static double UTC(int year, int month, int day = 1, int hour = 0,
+        [JSInternalFunction(Name = "UTC", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static double UTC(ScriptEngine engine, int year, int month, int day = 1, int hour = 0,
             int minute = 0, int second = 0, int millisecond = 0)
         {
-            return DateInstance.UTC(year, month, day, hour, minute, second, millisecond);
+            return DateInstance.UTC(engine, year, month, day, hour, minute, second, millisecond);
         }
 
         /// <summary>
@@ -174,10 +174,10 @@ namespace Jurassic.Library
         /// January 1, 1970, 00:00:00 UTC.
         /// </summary>
         /// <param name="dateStr"> A string representing a date, expressed in RFC 1123 format. </param>
-        [JSInternalFunction(Name = "parse")]
-        public static double Parse(string dateStr)
+        [JSInternalFunction(Name = "parse", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static double Parse(ScriptEngine engine, string dateStr)
         {
-            return DateInstance.Parse(dateStr);
+            return DateInstance.Parse(engine, dateStr);
         }
     }
 }
