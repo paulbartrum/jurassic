@@ -711,7 +711,7 @@ namespace UnitTests
 
             
             // UTC-03:00
-            jurassicScriptEngine.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific SA Standard Time");
+            jurassicScriptEngine.LocalTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific SA Standard Time");
             Assert.AreEqual(ToJSDate(date), Evaluate(dateExpr + ".getTime()"));
             Assert.AreEqual(23, Evaluate(dateExpr + ".getUTCHours()"));
             Assert.AreEqual(19, Evaluate(dateExpr + ".getHours()"));
@@ -724,7 +724,7 @@ namespace UnitTests
             Assert.AreEqual(3 * 60, Evaluate("new Date(2010, 0, 24, 23, 59, 57).getTimezoneOffset()"));
 
             // UTC+11:00
-            jurassicScriptEngine.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Pacific Standard Time");
+            jurassicScriptEngine.LocalTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Pacific Standard Time");
 
             Assert.AreEqual(ToJSDate(date), Evaluate(dateExpr + ".getTime()"));
             Assert.AreEqual(23, Evaluate(dateExpr + ".getUTCHours()"));
@@ -734,19 +734,19 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(date), Evaluate("new Date(2010, 3, 25, 10, 59, 57).getTime()"));
 
             // Custom UTC Timezone
-            jurassicScriptEngine.TimeZone = TimeZoneInfo.CreateCustomTimeZone("My Custom UTC",
+            jurassicScriptEngine.LocalTimeZone = TimeZoneInfo.CreateCustomTimeZone("My Custom UTC",
                 new TimeSpan(0, 0, 0), "My Custom UTC Zone", "My Custom UTC Display Name");
             Assert.AreEqual("Thu Jan 01 1970 00:00:00 GMT+0000 (My Custom UTC Display Name)", Evaluate("new Date(0).toString()"));
 
             // Check that the differentiation between DateTimeKind.Local and DateTimeKind.Unspecified works
             // when using a copy of the local timezone.
-            jurassicScriptEngine.TimeZone = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
+            jurassicScriptEngine.LocalTimeZone = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneInfo.Local.Id);
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 57, DateTimeKind.Local)),
                 Evaluate("new Date(2010, 3, 24, 23, 59, 57).getTime()"));
 
 
             // Restore local timezone.
-            jurassicScriptEngine.TimeZone = TimeZoneInfo.Local;
+            jurassicScriptEngine.LocalTimeZone = TimeZoneInfo.Local;
         }
 
         

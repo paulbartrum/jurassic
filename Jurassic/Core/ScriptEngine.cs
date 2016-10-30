@@ -16,7 +16,7 @@ namespace Jurassic
         private CompatibilityMode compatibilityMode;
 
         // The TimeZoneInfo used by DateInstance.
-        private TimeZoneInfo timeZone = TimeZoneInfo.Local;
+        private TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
 
         // The initial hidden class schema.
         private HiddenClassSchema emptySchema;
@@ -227,17 +227,17 @@ namespace Jurassic
 
         /// <summary>
         /// Gets or sets the <see cref="TimeZoneInfo"/> that is used to convert between UTC and
-        /// a local timezone.
+        /// local time.
         /// The default value is <see cref="TimeZoneInfo.Local"/>.
         /// </summary>
-        public TimeZoneInfo TimeZone
+        public TimeZoneInfo LocalTimeZone
         {
-            get { return this.timeZone; }
+            get { return this.localTimeZone; }
             set
             {
                 if (value == null)
                     throw new ArgumentNullException("value");
-                this.timeZone = value;
+                this.localTimeZone = value;
             }
         }
 

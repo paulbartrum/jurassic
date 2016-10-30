@@ -243,7 +243,7 @@ namespace Jurassic.Library
         {
             if (this.value == InvalidDate)
                 return double.NaN;
-            return -(int)Engine.TimeZone.GetUtcOffset(this.Value).TotalMinutes;
+            return -(int)Engine.LocalTimeZone.GetUtcOffset(this.Value).TotalMinutes;
         }
 
         /// <summary>
@@ -1217,7 +1217,7 @@ namespace Jurassic.Library
         /// <returns> A string of the form "GMT+1200 (New Zealand Standard Time)". </returns>
         private static string ToTimeZoneString(ScriptEngine engine, DateTime dateTime)
         {
-            var timeZone = engine.TimeZone;
+            var timeZone = engine.LocalTimeZone;
 
             // Compute the time zone offset in hours-minutes.
             int offsetInMinutes = (int)timeZone.GetUtcOffset(dateTime).TotalMinutes;
@@ -1241,7 +1241,7 @@ namespace Jurassic.Library
             if (value == InvalidDate)
                 return value;
 
-            value = TimeZoneInfo.ConvertTimeFromUtc(value, engine.TimeZone);
+            value = TimeZoneInfo.ConvertTimeFromUtc(value, engine.LocalTimeZone);
 
             // Ensure that the kind is local for consistency.
             if (value.Kind == DateTimeKind.Unspecified)
@@ -1259,11 +1259,11 @@ namespace Jurassic.Library
             // timezone is not reference-equal to TimeZoneInfo.Local.
             if (value.Kind == DateTimeKind.Utc)
                 return value;
-            if (object.ReferenceEquals(TimeZoneInfo.Local, engine.TimeZone))
+            if (object.ReferenceEquals(TimeZoneInfo.Local, engine.LocalTimeZone))
                 value = DateTime.SpecifyKind(value, DateTimeKind.Local);
             else
                 value = DateTime.SpecifyKind(value, DateTimeKind.Unspecified);
-            return TimeZoneInfo.ConvertTimeToUtc(value, engine.TimeZone);
+            return TimeZoneInfo.ConvertTimeToUtc(value, engine.LocalTimeZone);
         }
 
     }
