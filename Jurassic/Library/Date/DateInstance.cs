@@ -77,7 +77,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="dateTime"> The date to set the instance value to. </param>
-        private DateInstance(ObjectInstance prototype, DateTime dateTime)
+        public DateInstance(ObjectInstance prototype, DateTime dateTime)
             : base(prototype)
         {
             this.value = dateTime;
