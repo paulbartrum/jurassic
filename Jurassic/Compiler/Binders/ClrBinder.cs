@@ -74,7 +74,7 @@ namespace Jurassic.Compiler
             // Select the method to call at run time.
             generator.LoadInt32(candidateMethods.Count);
             generator.NewArray(typeof(RuntimeMethodHandle));
-            for (int i = 0; i < candidateMethods.Count; i ++)
+            for (int i = 0; i < candidateMethods.Count; i++)
             {
                 generator.Duplicate();
                 generator.LoadInt32(i);
@@ -158,7 +158,7 @@ namespace Jurassic.Compiler
         {
             // Convert Null.Value to null if the target type is a reference type.
             ILLabel endOfNullCheck = null;
-            if (toType.IsValueType == false)
+            if (toType.GetTypeInfo().IsValueType == false)
             {
                 var startOfElse = generator.CreateLabel();
                 endOfNullCheck = generator.CreateLabel();
@@ -191,8 +191,10 @@ namespace Jurassic.Compiler
                     generator.LoadInt32(0);
                     generator.Call(ReflectionHelpers.String_GetChars);
                     break;
+#if !NETSTANDARD1_6
                 case TypeCode.DBNull:
                     throw new NotSupportedException("DBNull is not a supported parameter type.");
+#endif
                 case TypeCode.Decimal:
                     EmitConversion.ToNumber(generator, PrimitiveType.Any);
                     generator.NewObject(ReflectionHelpers.Decimal_Constructor_Double);
@@ -226,7 +228,7 @@ namespace Jurassic.Compiler
                     generator.DefineLabelPosition(endOfUnwrapCheck);
 
                     // Value types must be unboxed.
-                    if (toType.IsValueType == true)
+                    if (toType.GetTypeInfo().IsValueType == true)
                     {
                         if (convertToAddress == true)
                             // Unbox.
@@ -236,7 +238,7 @@ namespace Jurassic.Compiler
                             generator.UnboxAny(toType);
 
                         //// Calling methods on value required the address of the value type, not the value type itself.
-                        //if (argument.Source == BinderArgumentSource.ThisValue && argument.Type.IsValueType == true)
+                        //if (argument.Source == BinderArgumentSource.ThisValue && argument.Type.GetTypeInfo().IsValueType == true)
                         //{
                         //    var temp = generator.CreateTemporaryVariable(argument.Type);
                         //    generator.StoreVariable(temp);
@@ -270,10 +272,10 @@ namespace Jurassic.Compiler
             }
 
             // Label the end of the null check.
-            if (toType.IsValueType == false)
+            if (toType.GetTypeInfo().IsValueType == false)
                 generator.DefineLabelPosition(endOfNullCheck);
         }
-            
+
 
         /// <summary>
         /// Pops the value on the stack, converts it to an object, then pushes the result onto the
@@ -285,7 +287,7 @@ namespace Jurassic.Compiler
         {
             // If the from type is a reference type, check for null.
             ILLabel endOfNullCheck = null;
-            if (fromType.IsValueType == false)
+            if (fromType.GetTypeInfo().IsValueType == false)
             {
                 var startOfElse = generator.CreateLabel();
                 endOfNullCheck = generator.CreateLabel();
@@ -309,9 +311,11 @@ namespace Jurassic.Compiler
                     generator.LoadInt32(1);
                     generator.NewObject(ReflectionHelpers.String_Constructor_Char_Int);
                     break;
-                
+#if !NETSTANDARD1_6
+
                 case TypeCode.DBNull:
                     throw new NotSupportedException("DBNull is not a supported return type.");
+#endif
                 case TypeCode.Decimal:
                     generator.Call(ReflectionHelpers.Decimal_ToDouble);
                     generator.Box(typeof(double));
@@ -338,7 +342,7 @@ namespace Jurassic.Compiler
                     // Note: if the type is a value type it cannot be a primitive or it would
                     // have been handled elsewhere in the switch.
                     ILLabel endOfWrapCheck = null;
-                    if (fromType.IsValueType == false)
+                    if (fromType.GetTypeInfo().IsValueType == false)
                     {
                         generator.Duplicate();
                         generator.Call(ReflectionHelpers.TypeUtilities_IsPrimitiveOrObject);
@@ -351,13 +355,13 @@ namespace Jurassic.Compiler
                     generator.StoreVariable(temp);
                     generator.LoadArgument(0);
                     generator.LoadVariable(temp);
-                    if (fromType.IsValueType == true)
+                    if (fromType.GetTypeInfo().IsValueType == true)
                         generator.Box(fromType);
                     generator.ReleaseTemporaryVariable(temp);
                     generator.NewObject(ReflectionHelpers.ClrInstanceWrapper_Constructor);
-                    
+
                     // End of wrap check.
-                    if (fromType.IsValueType == false)
+                    if (fromType.GetTypeInfo().IsValueType == false)
                         generator.DefineLabelPosition(endOfWrapCheck);
                     break;
 
@@ -382,7 +386,7 @@ namespace Jurassic.Compiler
             }
 
             // Label the end of the null check.
-            if (fromType.IsValueType == false)
+            if (fromType.GetTypeInfo().IsValueType == false)
                 generator.DefineLabelPosition(endOfNullCheck);
         }
     }

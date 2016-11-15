@@ -60,9 +60,9 @@ namespace Jurassic.Library
                 throw new ArgumentNullException("engine");
             if (type == null)
                 throw new ArgumentNullException("type");
-            if (type.BaseType == null)
+            if (type.GetTypeInfo().BaseType == null)
                 return null;
-            return ClrInstanceTypeWrapper.FromCache(engine, type.BaseType);
+            return ClrInstanceTypeWrapper.FromCache(engine, type.GetTypeInfo().BaseType);
         }
 
 

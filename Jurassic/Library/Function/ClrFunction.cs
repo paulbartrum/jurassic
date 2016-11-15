@@ -41,12 +41,12 @@ namespace Jurassic.Library
             // Search through every method in this type looking for [JSCallFunction] and [JSConstructorFunction] attributes.
             var callBinderMethods = new List<JSBinderMethod>(1);
             var constructBinderMethods = new List<JSBinderMethod>(1);
-            var methods = this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            var methods = this.GetType().GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
                 // Search for the [JSCallFunction] and [JSConstructorFunction] attributes.
-                var callAttribute = (JSCallFunctionAttribute) Attribute.GetCustomAttribute(method, typeof(JSCallFunctionAttribute));
-                var constructorAttribute = (JSConstructorFunctionAttribute)Attribute.GetCustomAttribute(method, typeof(JSConstructorFunctionAttribute));
+                var callAttribute = method.GetCustomAttribute<JSCallFunctionAttribute>();
+                var constructorAttribute = method.GetCustomAttribute<JSConstructorFunctionAttribute>();
 
                 // Can't declare both attributes.
                 if (callAttribute != null && constructorAttribute != null)
@@ -61,9 +61,9 @@ namespace Jurassic.Library
                 {
                     var binderMethod = new JSBinderMethod(method, constructorAttribute.Flags);
                     constructBinderMethods.Add(binderMethod);
-                    
+
                     // Constructors must return ObjectInstance or a derived type.
-                    if (typeof(ObjectInstance).IsAssignableFrom(binderMethod.ReturnType) == false)
+                    if (typeof(ObjectInstance).GetTypeInfo().IsAssignableFrom(binderMethod.ReturnType) == false)
                         throw new InvalidOperationException(string.Format("Constructors must return {0} (or a derived type).", typeof(ObjectInstance).Name));
                 }
             }

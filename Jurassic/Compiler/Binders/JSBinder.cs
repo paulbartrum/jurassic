@@ -129,8 +129,8 @@ namespace Jurassic.Compiler
                         // Load the "this" parameter passed by the client.
                         generator.LoadArgument(1);
 
-                        bool inheritsFromObjectInstance = typeof(ObjectInstance).IsAssignableFrom(argument.Type);
-                        if (argument.Type.IsClass == true && inheritsFromObjectInstance == false &&
+                        bool inheritsFromObjectInstance = typeof(ObjectInstance).GetTypeInfo().IsAssignableFrom(argument.Type);
+                        if (argument.Type.GetTypeInfo().IsClass == true && inheritsFromObjectInstance == false &&
                             argument.Type != typeof(string) && argument.Type != typeof(object))
                         {
                             // If the "this" object is an unsupported class, pass it through unmodified.
@@ -277,7 +277,7 @@ namespace Jurassic.Compiler
             // Emit for each type of argument we support.
             if (toType == typeof(int))
                 EmitConversion.ToInteger(il, PrimitiveTypeUtilities.ToPrimitiveType(fromType));
-            else if (typeof(ObjectInstance).IsAssignableFrom(toType))
+            else if (typeof(ObjectInstance).GetTypeInfo().IsAssignableFrom(toType))
             {
                 EmitConversion.Convert(il, PrimitiveTypeUtilities.ToPrimitiveType(fromType), PrimitiveType.Object);
                 if (toType != typeof(ObjectInstance))

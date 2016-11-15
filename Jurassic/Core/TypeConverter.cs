@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
 using Jurassic.Library;
@@ -60,7 +61,7 @@ namespace Jurassic
                 return ToNumber(value);
             if (type == typeof(string))
                 return ToString(value);
-            if (typeof(ObjectInstance).IsAssignableFrom(type))
+            if (typeof(ObjectInstance).GetTypeInfo().IsAssignableFrom(type))
                 return ToObject(engine, value);
             if (type == typeof(object))
                 return value;

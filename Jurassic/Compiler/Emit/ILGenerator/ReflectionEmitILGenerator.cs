@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace Jurassic.Compiler
@@ -637,7 +638,7 @@ namespace Jurassic.Compiler
         {
             if (type == null)
                 throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
+            if (type.GetTypeInfo().IsValueType == false)
                 throw new ArgumentException("The type to box must be a value type.", "type");
             this.generator.Emit(OpCodes.Box, type);
         }
@@ -651,7 +652,7 @@ namespace Jurassic.Compiler
         {
             if (type == null)
                 throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
+            if (type.GetTypeInfo().IsValueType == false)
                 throw new ArgumentException("The type of the boxed value must be a value type.", "type");
             this.generator.Emit(OpCodes.Unbox, type);
         }
@@ -665,7 +666,7 @@ namespace Jurassic.Compiler
         {
             if (type == null)
                 throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
+            if (type.GetTypeInfo().IsValueType == false)
                 throw new ArgumentException("The type of the boxed value must be a value type.", "type");
             this.generator.Emit(OpCodes.Unbox_Any, type);
         }
@@ -952,7 +953,7 @@ namespace Jurassic.Compiler
                     this.generator.Emit(OpCodes.Ldelem_R8);
                     break;
                 default:
-                    if (type.IsClass == true)
+                    if (type.GetTypeInfo().IsClass == true)
                         this.generator.Emit(OpCodes.Ldelem_Ref);
                     else
                         this.generator.Emit(OpCodes.Ldelem, type);
@@ -991,7 +992,7 @@ namespace Jurassic.Compiler
                     this.generator.Emit(OpCodes.Stelem_R8);
                     break;
                 default:
-                    if (type.IsClass == true)
+                    if (type.GetTypeInfo().IsClass == true)
                         this.generator.Emit(OpCodes.Stelem_Ref);
                     else
                         this.generator.Emit(OpCodes.Stelem, type);

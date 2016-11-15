@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Jurassic.Compiler
 {
@@ -640,7 +641,7 @@ namespace Jurassic.Compiler
         /// <param name="method"> The method to call. </param>
         public void Call(System.Reflection.MethodBase method)
         {
-            if (method.IsStatic == true || method.DeclaringType.IsValueType == true)
+            if (method.IsStatic == true || method.DeclaringType.GetTypeInfo().IsValueType == true)
                 CallStatic(method);
             else
                 CallVirtual(method);
@@ -738,7 +739,7 @@ namespace Jurassic.Compiler
         {
             if (method == null)
                 throw new ArgumentNullException("method");
-            if (method.IsStatic == true || method.DeclaringType.IsValueType == true)
+            if (method.IsStatic == true || method.DeclaringType.GetTypeInfo().IsValueType == true)
                 LoadStaticMethodPointer(method);
             else
                 LoadVirtualMethodPointer(method);

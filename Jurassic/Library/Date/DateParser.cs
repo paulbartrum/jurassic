@@ -163,7 +163,11 @@ namespace Jurassic.Library
                 var temp1 = PopulateDayOfWeekNames();
                 var temp2 = PopulateMonthNames();
                 var temp3 = PopulateTimeZones();
+#if NETSTANDARD1_6
+                    System.Threading.Interlocked.MemoryBarrier();
+#else
                 System.Threading.Thread.MemoryBarrier();
+#endif
                 dayOfWeekNames = temp1;
                 monthNames = temp2;
                 timeZoneNames = temp3;

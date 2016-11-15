@@ -1519,7 +1519,11 @@ namespace Jurassic.Compiler
             {
                 // Initialize the operator lookup table.
                 var temp = InitializeOperatorLookup();
+#if NETSTANDARD1_6
+                    System.Threading.Interlocked.MemoryBarrier();
+#else
                 System.Threading.Thread.MemoryBarrier();
+#endif
                 operatorLookup = temp;
             }
             if (operatorLookup.TryGetValue(new OperatorKey() { Token = token, PostfixOrInfix = postfixOrInfix }, out result) == false)

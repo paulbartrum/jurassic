@@ -236,7 +236,7 @@ namespace Jurassic.Compiler
             Debugger_Break = GetStaticMethod(typeof(System.Diagnostics.Debugger), "Break");
             JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));
-            
+
             RegExp_Construct = GetInstanceMethod(typeof(RegExpConstructor), "Construct", typeof(object), typeof(string));
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
@@ -285,7 +285,7 @@ namespace Jurassic.Compiler
                 var field = reflectionField.MemberInfo as FieldInfo;
                 if (field != null && (field.Attributes & FieldAttributes.Public) != FieldAttributes.Public)
                     text.AppendLine(field.ToString());
-                if ((reflectionField.MemberInfo.DeclaringType.Attributes & TypeAttributes.Public) != TypeAttributes.Public)
+                if ((reflectionField.MemberInfo.DeclaringType.GetTypeInfo().Attributes & TypeAttributes.Public) != TypeAttributes.Public)
                     text.AppendLine(reflectionField.MemberInfo.DeclaringType.ToString());
             }
             if (text.Length > 0)
@@ -375,7 +375,7 @@ namespace Jurassic.Compiler
         /// <returns> An enumerable list of all the MemberInfos that are used by this DLL. </returns>
         internal static IEnumerable<ReflectionField> GetMembers()
         {
-            foreach (FieldInfo field in typeof(ReflectionHelpers).GetFields(BindingFlags.NonPublic | BindingFlags.Static))
+            foreach (FieldInfo field in typeof(ReflectionHelpers).GetTypeInfo().GetFields(BindingFlags.NonPublic | BindingFlags.Static))
             {
                 if (field.FieldType != typeof(MethodInfo) && field.FieldType != typeof(ConstructorInfo) && field.FieldType != typeof(FieldInfo))
                     continue;
@@ -391,7 +391,7 @@ namespace Jurassic.Compiler
         /// <returns> The FieldInfo for a field. </returns>
         public static FieldInfo GetField(Type type, string name)
         {
-            FieldInfo result = type.GetField(name);
+            FieldInfo result = type.GetTypeInfo().GetField(name);
             if (result == null)
                 throw new InvalidOperationException(string.Format("The field '{1}' does not exist on type '{0}'.", type, name));
             return result;
@@ -406,7 +406,7 @@ namespace Jurassic.Compiler
         public static ConstructorInfo GetConstructor(Type type, params Type[] parameterTypes)
         {
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            ConstructorInfo result = type.GetConstructor(flags, null, parameterTypes, null);
+            ConstructorInfo result = type.GetTypeInfo().GetConstructor(flags, null, parameterTypes, null);
             if (result == null)
                 throw new InvalidOperationException(string.Format("The constructor {0}({1}) does not exist.", type.FullName, StringHelpers.Join<Type>(", ", parameterTypes)));
             return result;
@@ -421,8 +421,12 @@ namespace Jurassic.Compiler
         /// <returns> The MethodInfo for the method. </returns>
         public static MethodInfo GetInstanceMethod(Type type, string name, params Type[] parameterTypes)
         {
+#if NETSTANDARD1_6
+            var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+#else
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.ExactBinding;
-            MethodInfo result = type.GetMethod(name, flags, null, parameterTypes, null);
+#endif
+            MethodInfo result = type.GetTypeInfo().GetMethod(name, flags, null, parameterTypes, null);
             if (result == null)
                 throw new InvalidOperationException(string.Format("The instance method {0}.{1}({2}) does not exist.", type.FullName, name, StringHelpers.Join<Type>(", ", parameterTypes)));
             return result;
@@ -437,8 +441,13 @@ namespace Jurassic.Compiler
         /// <returns> The MethodInfo for the method. </returns>
         public static MethodInfo GetStaticMethod(Type type, string name, params Type[] parameterTypes)
         {
+#if NETSTANDARD1_6
+            var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly;
+            MethodInfo result = type.GetTypeInfo().GetMethod(name, flags, null, parameterTypes, null);
+#else
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.ExactBinding;
-            MethodInfo result = type.GetMethod(name, flags, null, parameterTypes, null);
+            MethodInfo result = type.GetTypeInfo().GetMethod(name, flags, null, parameterTypes, null);
+#endif
             if (result == null)
                 throw new InvalidOperationException(string.Format("The static method {0}.{1}({2}) does not exist.", type.FullName, name, StringHelpers.Join<Type>(", ", parameterTypes)));
             return result;
@@ -453,7 +462,7 @@ namespace Jurassic.Compiler
         private static MethodInfo GetGenericInstanceMethod(Type type, string name)
         {
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            MethodInfo result = type.GetMethod(name, flags);
+            MethodInfo result = type.GetTypeInfo().GetMethod(name, flags);
             if (result == null)
                 throw new InvalidOperationException(string.Format("The instance method {0}.{1}(...) does not exist.", type.FullName, name));
             return result;

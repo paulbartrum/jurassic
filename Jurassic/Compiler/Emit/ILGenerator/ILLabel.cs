@@ -20,7 +20,11 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator that created this label. </param>
         /// <param name="identifier"> The label identifier (must be unique within a method). </param>
+#if NETSTANDARD1_6
+        public DynamicILLabel(ReflectionEmitILGenerator generator, int identifier)
+#else
         public DynamicILLabel(DynamicILGenerator generator, int identifier)
+#endif
         {
             if (identifier < 0)
                 throw new ArgumentOutOfRangeException("identifier");
@@ -35,7 +39,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the generator that created this label.
         /// </summary>
-        public DynamicILGenerator ILGenerator
+        public ILGenerator ILGenerator
         {
             get;
             private set;

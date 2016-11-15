@@ -49,7 +49,7 @@ namespace Jurassic.Library
             this.WrappedType = type;
 
             // Pick up the public constructors, if any.
-            var constructors = type.GetConstructors();
+            var constructors = type.GetTypeInfo().GetConstructors();
             if (constructors.Length > 0)
                 this.constructBinder = new ClrBinder(constructors);
             else
@@ -72,7 +72,7 @@ namespace Jurassic.Library
             // Populate the fields, properties and methods.
             PopulateMembers(this, type, BindingFlags.Static);
         }
-        
+
         /// <summary>
         /// Returns an object instance to serve as the next object in the prototype chain.
         /// </summary>
@@ -85,9 +85,9 @@ namespace Jurassic.Library
                 throw new ArgumentNullException("engine");
             if (type == null)
                 throw new ArgumentNullException("type");
-            if (type.BaseType == null)
+            if (type.GetTypeInfo().BaseType == null)
                 return null;
-            return ClrStaticTypeWrapper.FromCache(engine, type.BaseType);
+            return ClrStaticTypeWrapper.FromCache(engine, type.GetTypeInfo().BaseType);
         }
 
 
@@ -131,7 +131,7 @@ namespace Jurassic.Library
         {
             object result;
 
-            if (argumentValues.Length == 0 && this.WrappedType.IsValueType)
+            if (argumentValues.Length == 0 && this.WrappedType.GetTypeInfo().IsValueType)
             {
                 result = Activator.CreateInstance(this.WrappedType);
             }
@@ -166,7 +166,7 @@ namespace Jurassic.Library
         {
             // Register static methods as functions.
             var methodGroups = new Dictionary<string, List<MethodBase>>();
-            foreach (var member in type.GetMembers(BindingFlags.Public | BindingFlags.DeclaredOnly | flags))
+            foreach (var member in type.GetTypeInfo().GetMembers(BindingFlags.Public | BindingFlags.DeclaredOnly | flags))
             {
                 switch (member.MemberType)
                 {
@@ -194,7 +194,7 @@ namespace Jurassic.Library
                         if (setMethod != null)
                             methodGroups.Remove(setMethod.Name);
                         break;
- 
+
                     case MemberTypes.Field:
                         FieldInfo field = (FieldInfo)member;
                         ClrFunction fieldGetter = new ClrFunction(target.Engine.Function.InstancePrototype, new FieldGetterBinder(field));
@@ -209,7 +209,7 @@ namespace Jurassic.Library
                         // Support not yet implemented.
                         break;
                 }
-                
+
             }
             foreach (var methodGroup in methodGroups.Values)
             {

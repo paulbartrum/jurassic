@@ -924,7 +924,11 @@ namespace Jurassic.Compiler
         /// <c>false</c> otherwise. </returns>
         private static bool IsIdentifierStartChar(int c)
         {
+#if NETSTANDARD1_6
+            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory((char)c);
+#else
             UnicodeCategory cat = char.GetUnicodeCategory((char)c);
+#endif
             return c == '$' || c == '_' || c == '\\' ||
                 cat == UnicodeCategory.UppercaseLetter ||
                 cat == UnicodeCategory.LowercaseLetter ||
@@ -942,9 +946,13 @@ namespace Jurassic.Compiler
         /// <c>false</c> otherwise. </returns>
         private static bool IsIdentifierChar(int c)
         {
+#if NETSTANDARD1_6
+            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory((char)c);
+#else
             UnicodeCategory cat = char.GetUnicodeCategory((char)c);
+#endif
             return c == '$' || c == '\\' ||
-                cat == UnicodeCategory.UppercaseLetter ||
+            cat == UnicodeCategory.UppercaseLetter ||
                 cat == UnicodeCategory.LowercaseLetter ||
                 cat == UnicodeCategory.TitlecaseLetter ||
                 cat == UnicodeCategory.ModifierLetter ||

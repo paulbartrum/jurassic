@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+#if !NETSTANDARD1_6
 namespace Jurassic.Compiler
 {
+
+
 
     /// <summary>
     /// Represents a generator of CIL bytes.
@@ -2478,5 +2481,5 @@ namespace Jurassic.Compiler
         }
 
     }
-
 }
+#endif

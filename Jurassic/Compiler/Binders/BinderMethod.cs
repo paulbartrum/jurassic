@@ -47,7 +47,7 @@ namespace Jurassic.Compiler
             for (int i = 0; i < parameters.Length; i++)
             {
                 // Check if the last parameter is a ParamArray parameter.
-                if (i == parameters.Length - 1 && Attribute.IsDefined(parameters[i], typeof(ParamArrayAttribute)) == true)
+                if (i == parameters.Length - 1 && parameters[i].HasCustomAttributes<ParamArrayAttribute>())
                 {
                     if (parameters[i].ParameterType.IsArray == false)
                         throw new NotSupportedException("Parameters marked with [ParamArray] must be arrays.");
@@ -266,7 +266,7 @@ namespace Jurassic.Compiler
 
                     // Load the array and index.
                     generator.Duplicate();
-                    generator.LoadInt32(paramArrayIndex ++);
+                    generator.LoadInt32(paramArrayIndex++);
                 }
 
                 // Yield will have the side effect of generating a value.
@@ -332,7 +332,7 @@ namespace Jurassic.Compiler
             return this.Method.ToString();
         }
     }
-    
+
     internal enum BinderArgumentSource
     {
         ScriptEngine,
@@ -416,7 +416,7 @@ namespace Jurassic.Compiler
             {
                 if (this.parameterInfo == null || this.HasDefaultValue == false)
                     return null;
-                if (parameterInfo.DefaultValue == null && this.Type.IsValueType == true)
+                if (parameterInfo.DefaultValue == null && this.Type.GetTypeInfo().IsValueType == true)
                     throw new InvalidOperationException(string.Format("Null is not a valid default value for parameter '{0}'.", this.parameterInfo.Name));
                 if (parameterInfo.DefaultValue != null && parameterInfo.DefaultValue.GetType() != this.Type)
                     throw new InvalidOperationException(string.Format("Default value for parameter '{0}' should be '{1}'.", this.parameterInfo.Name, this.Type));
@@ -424,18 +424,18 @@ namespace Jurassic.Compiler
             }
         }
 
-        /// <summary>
-        /// Gets an attribute instance of the given type, if it exists on the argument.
-        /// </summary>
-        /// <typeparam name="T"> The type of attribute to retrieve. </typeparam>
-        /// <returns> An attribute instance, or <c>null</c> if the attribute does not exist on the
-        /// argument. </returns>
-        public T GetCustomAttribute<T>() where T : Attribute
-        {
-            if (this.parameterInfo == null)
-                return default(T);
-            return (T)Attribute.GetCustomAttribute(this.parameterInfo, typeof(T));
-        }
+        ///// <summary>
+        ///// Gets an attribute instance of the given type, if it exists on the argument.
+        ///// </summary>
+        ///// <typeparam name="T"> The type of attribute to retrieve. </typeparam>
+        ///// <returns> An attribute instance, or <c>null</c> if the attribute does not exist on the
+        ///// argument. </returns>
+        //public T GetCustomAttribute<T>() where T : Attribute
+        //{
+        //    if (this.parameterInfo == null)
+        //        return default(T);
+        //    return (T)Attribute.GetCustomAttribute(this.parameterInfo, typeof(T));
+        //}
     }
 
 }

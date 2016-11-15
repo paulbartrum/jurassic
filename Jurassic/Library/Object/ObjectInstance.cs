@@ -1243,11 +1243,11 @@ namespace Jurassic.Library
             
             // Group the methods on the given type by name.
             var functions = new Dictionary<string, MethodGroup>(20);
-            var methods = type.GetMethods(bindingFlags);
+            var methods = type.GetTypeInfo().GetMethods(bindingFlags);
             foreach (var method in methods)
             {
                 // Make sure the method has the [JSInternalFunction] attribute.
-                var attribute = (JSFunctionAttribute)Attribute.GetCustomAttribute(method, typeof(JSFunctionAttribute));
+                var attribute = method.GetCustomAttribute<JSFunctionAttribute>(); // (JSFunctionAttribute)Attribute.GetCustomAttribute(method, typeof(JSFunctionAttribute));
                 if (attribute == null)
                     continue;
 
@@ -1307,10 +1307,10 @@ namespace Jurassic.Library
                 this.FastSetProperty(name, new ClrFunction(this.Engine.Function.InstancePrototype, methodGroup.Methods, name, methodGroup.Length), methodGroup.PropertyAttributes);
             }
 
-            PropertyInfo[] properties = type.GetProperties(bindingFlags);
+            PropertyInfo[] properties = type.GetTypeInfo().GetProperties(bindingFlags);
             foreach (PropertyInfo prop in properties)
             {
-                var attribute = Attribute.GetCustomAttribute(prop, typeof(JSPropertyAttribute), false) as JSPropertyAttribute;
+                var attribute = prop.GetCustomAttribute<JSPropertyAttribute>(false);
                 if (attribute == null)
                     continue;
 
@@ -1371,9 +1371,9 @@ namespace Jurassic.Library
                 type = this.GetType();
 
             // Find all fields with [JsField]
-            foreach (var field in type.GetFields())
+            foreach (var field in type.GetTypeInfo().GetFields())
             {
-                var attribute = (JSFieldAttribute)Attribute.GetCustomAttribute(field, typeof(JSFieldAttribute));
+                var attribute = field.GetCustomAttribute<JSFieldAttribute>(true);
                 if (attribute == null)
                     continue;
                 this.FastSetProperty(field.Name, field.GetValue(this));

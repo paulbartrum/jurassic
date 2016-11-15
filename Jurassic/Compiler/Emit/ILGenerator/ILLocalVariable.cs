@@ -50,7 +50,11 @@ namespace Jurassic.Compiler
         /// <param name="index"> The index of the local variable within the method body. </param>
         /// <param name="type"> The type of the variable. </param>
         /// <param name="name"> The name of the local variable.  Can be <c>null</c>. </param>
+#if NETSTANDARD1_6
+        public DynamicILLocalVariable(ReflectionEmitILGenerator generator, int index, Type type, string name)
+#else
         public DynamicILLocalVariable(DynamicILGenerator generator, int index, Type type, string name)
+#endif
         {
             if (index < 0)
                 throw new ArgumentOutOfRangeException("index");
@@ -65,7 +69,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the generator that created this variable.
         /// </summary>
-        public DynamicILGenerator ILGenerator
+        public ILGenerator ILGenerator
         {
             get;
             private set;

@@ -149,7 +149,9 @@ namespace Jurassic.Compiler
                     case TypeCode.Object:
                     case TypeCode.Empty:
                     case TypeCode.DateTime:
+#if !NETSTANDARD1_6
                     case TypeCode.DBNull:
+#endif
                     case TypeCode.Decimal:
                         throw new NotImplementedException(string.Format("Cannot emit the value '{0}'", value));
                 }

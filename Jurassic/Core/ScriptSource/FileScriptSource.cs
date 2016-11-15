@@ -44,7 +44,8 @@ namespace Jurassic
         /// same source code. </remarks>
         public override TextReader GetReader()
         {
-            return new StreamReader(this.Path, this.encoding, true);
+            var fs = File.OpenRead(this.Path);
+            return new StreamReader(fs, this.encoding, true);
         }
     }
 }

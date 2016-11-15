@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
 using Jurassic.Library;
@@ -200,7 +201,7 @@ namespace Jurassic
                 type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
                 type == typeof(string) || type == typeof(ConcatenatedString) ||
                 type == typeof(Null) || type == typeof(Undefined) ||
-                typeof(ObjectInstance).IsAssignableFrom(type);
+                typeof(ObjectInstance).GetTypeInfo().IsAssignableFrom(type);
         }
 
         /// <summary>

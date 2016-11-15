@@ -118,7 +118,7 @@ namespace Jurassic.Compiler
                 typeof(JSBinder),                                                                               // Owner type.
                 true);                                                                                          // Skips visibility checks.
             ILGenerator generator;
-#if __MonoCS__
+#if __MonoCS__ || NETSTANDARD1_6
             generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
 #else
             generator = new DynamicILGenerator(dm);

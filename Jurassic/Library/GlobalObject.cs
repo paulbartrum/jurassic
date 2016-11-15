@@ -57,7 +57,11 @@ namespace Jurassic.Library
             if (decodeURIReservedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable(";/?:@&=+$,#");
+#if NETSTANDARD1_6
+                    System.Threading.Interlocked.MemoryBarrier();
+#else
                 System.Threading.Thread.MemoryBarrier();
+#endif
                 decodeURIReservedSet = lookupTable;
             }
             return Decode(engine, input, decodeURIReservedSet);
@@ -75,7 +79,11 @@ namespace Jurassic.Library
             if (decodeURIComponentReservedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable("");
+#if NETSTANDARD1_6
+                    System.Threading.Interlocked.MemoryBarrier();
+#else
                 System.Threading.Thread.MemoryBarrier();
+#endif
                 decodeURIComponentReservedSet = lookupTable;
             }
             return Decode(engine, input, decodeURIComponentReservedSet);
@@ -93,7 +101,11 @@ namespace Jurassic.Library
             if (encodeURIUnescapedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable(";/?:@&=+$,-_.!~*'()#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+#if NETSTANDARD1_6
+                    System.Threading.Interlocked.MemoryBarrier();
+#else
                 System.Threading.Thread.MemoryBarrier();
+#endif
                 encodeURIUnescapedSet = lookupTable;
             }
             return Encode(engine, input, encodeURIUnescapedSet);
@@ -111,7 +123,11 @@ namespace Jurassic.Library
             if (encodeURIComponentUnescapedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable("-_.!~*'()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+#if NETSTANDARD1_6
+                    System.Threading.Interlocked.MemoryBarrier();
+#else
                 System.Threading.Thread.MemoryBarrier();
+#endif
                 encodeURIComponentUnescapedSet = lookupTable;
             }
             return Encode(engine, input, encodeURIComponentUnescapedSet);

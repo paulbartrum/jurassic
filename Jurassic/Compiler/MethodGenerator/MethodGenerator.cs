@@ -190,7 +190,7 @@ namespace Jurassic.Compiler
                     GetParameterTypes(),                                    // Parameter types of the generated method.
                     typeof(MethodGenerator),                                // Owner type.
                     true);                                                  // Skip visibility checks.
-#if __MonoCS__
+#if __MonoCS__ || NETSTANDARD1_6
                 generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
 #else
                 generator = new DynamicILGenerator(dynamicMethod);
