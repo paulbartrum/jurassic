@@ -13,6 +13,11 @@ namespace Jurassic
         {
             return type;
         }
+
+        public static MethodInfo GetMethodInfo(this Delegate d)
+        {
+            return d.Method;
+        }
 #endif
 
         public static bool HasCustomAttributes<TAttribute>(this ParameterInfo param) where TAttribute : Attribute

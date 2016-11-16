@@ -100,7 +100,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             // Initialize the [[Call]] method.
-            this.callBinder = new JSBinder(new JSBinderMethod(delegateToCall.Method));
+            this.callBinder = new JSBinder(new JSBinderMethod(delegateToCall.GetMethodInfo()));
 
             // If the delegate has a class instance, use that to call the method.
             this.thisBinding = delegateToCall.Target;
