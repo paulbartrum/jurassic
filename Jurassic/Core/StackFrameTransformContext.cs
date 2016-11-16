@@ -41,6 +41,7 @@
         /// <summary>
         /// Gets or sets the name of the function. A value of <c>null</c> or
         /// the empty string (<c>""</c>) means that the path is unknown.
+        /// </summary>
         public string Function
         {
             get;

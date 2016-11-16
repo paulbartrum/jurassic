@@ -117,7 +117,7 @@ namespace Jurassic.Library
         /// adopting its eventual state; otherwise the returned promise will be fulfilled with the
         /// value.
         /// </summary>
-        /// <param name="value"> Argument to be resolved by this Promise. Can also be a Promise or
+        /// <param name="x"> Argument to be resolved by this Promise. Can also be a Promise or
         /// a thenable to resolve. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "resolve")]

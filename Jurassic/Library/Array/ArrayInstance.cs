@@ -930,8 +930,10 @@ namespace Jurassic.Library
             /// <summary>
             /// Convert an untyped value to a typed value.
             /// </summary>
-            /// <param name="value"> The value to convert. </param>
-            /// <returns> The value converted to type <typeparamref name="T"/>. </returns>
+            /// <param name="value">The value to convert.</param>
+            /// <returns>
+            /// The value converted to type Object
+            /// </returns>
             public override object ConvertValue(object value)
             {
                 return value;

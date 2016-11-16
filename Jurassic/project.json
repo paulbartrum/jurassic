@@ -24,6 +24,20 @@
   },
 
   "buildOptions": {
-    "allowUnsafe": true
+    "allowUnsafe": true,
+    "xmlDoc": true
+  },
+  "packOptions": {
+    "owners": [ "Paul Bartrum" ],
+    "iconUrl": "https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/nuget-logo.png",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/paulbartrum/jurassic"
+    },
+    "licenseUrl": "https://opensource.org/licenses/MIT",
+    "requireLicenseAcceptance": false,
+    "summary": "Jurassic is an implementation of the ECMAScript (JavaScript) language and runtime.",
+    "releaseNotes": "Ported to dotnet core",
+    "tags": [ "JavaScript", "ECMAScript" ]
   }
 }
