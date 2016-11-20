@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic.Library;
+using System.Globalization;
 
 namespace UnitTests
 {
@@ -61,7 +62,8 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2011, 3, 1, 0, 0, 0)), Evaluate("new Date('29 Feb 2011').valueOf()"));
 
             // Dates before 1970 should work.
-            Assert.AreEqual(-31585783380000d, Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()"));
+            Assert.AreEqual(-31585736580000d - TimeZoneInfo.Local.GetUtcOffset(new DateTime(969, 01, 01, 8, 17, 0, DateTimeKind.Local)).TotalMilliseconds,
+                Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()"));
             Assert.AreEqual(true, Evaluate("new Date(new Date(969, 01, 01, 8, 17, 0)).getTime() == new Date(969, 01, 01, 8, 17, 0).getTime()"));
 
             // new Date(year, month, [day], [hour], [minute], [second], [millisecond])
@@ -84,13 +86,13 @@ namespace UnitTests
             // Date() returns the current date as a string - this test assumes the running time is less than 1s.
             var str = (string)Evaluate("Date()");
                 var formatString = "ddd MMM dd yyyy HH:mm:ss";
-                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString)),
-                    string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString), str));
+            Assert.IsTrue(str.StartsWith(DateTime.Now.ToString(formatString, CultureInfo.InvariantCulture)) || str.StartsWith(DateTime.Now.AddSeconds(1).ToString(formatString, CultureInfo.InvariantCulture)),
+                string.Format("Expected: {0} Was: {1}", DateTime.Now.ToString(formatString, CultureInfo.InvariantCulture), str));
 
             // Any arguments provided are ignored.
             str = (string)Evaluate("Date(2009)");
-                Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss")) ||
-                    str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss")));
+            Assert.IsTrue(str.StartsWith(DateTime.Now.ToString("ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture)) ||
+                str.StartsWith(DateTime.Now.AddSeconds(1).ToString("ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture)));
 
             // toString and valueOf.
             Assert.AreEqual("function Date() { [native code] }", Evaluate("Date.toString()"));
@@ -485,6 +487,13 @@ namespace UnitTests
             Assert.AreEqual((int)ToJSDate(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("x.setTime(0)"));
             Assert.AreEqual((int)ToJSDate(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("x.valueOf()"));
             Assert.AreEqual(double.NaN, Evaluate("x.setTime(NaN)"));
+            Assert.AreEqual(1, Evaluate("x.setTime(1.123456)"));
+            Assert.AreEqual(1, Evaluate("x.setTime(1.8)"));
+            Assert.AreEqual(-1, Evaluate("x.setTime(-1.123456)"));
+            Assert.AreEqual(-1, Evaluate("x.setTime(-1.8)"));
+            Assert.AreEqual(double.NaN, Evaluate("x.setTime(9e15)"));
+            Assert.AreEqual(double.NaN, Evaluate("x.setTime(Infinity)"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("1/x.setTime(-0)"));
             Assert.AreEqual(1, Evaluate("x.setTime.length"));
         }
 
@@ -678,6 +687,8 @@ namespace UnitTests
         public void valueOf()
         {
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 57)), Evaluate("new Date('24 Apr 2010 23:59:57').valueOf()"));
+            double value = (double)Evaluate("new Date().valueOf()");
+            Assert.AreEqual(0.0, value - Math.Floor(value));
             Assert.AreEqual(0, Evaluate("new Date().valueOf.length"));
         }
 
@@ -695,7 +706,7 @@ namespace UnitTests
 
         private static object ToJSDate(DateTime dateTime)
         {
-            var result = dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+            var result = Math.Floor(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
             if ((double)(int)result == result)
                 return (int)result;
             return result;
@@ -707,7 +718,7 @@ namespace UnitTests
             var offset = timeZoneInfo.GetUtcOffset(date);
             return string.Format("GMT{3}{0:d2}{1:d2} ({2})", offset.Hours, offset.Minutes,
                 timeZoneInfo.IsDaylightSavingTime(date) ? timeZoneInfo.DaylightName : timeZoneInfo.StandardName, 
-                offset.Hours > 0 ? "+" : "");
+                offset.Hours >= 0 ? "+" : "");
         }
     }
 }

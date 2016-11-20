@@ -64,6 +64,20 @@ namespace UnitTests
             return string.Format("No error was thrown (result was '{0}')", result);
         }
 
+        public static string EvaluateExceptionMessage(string script)
+        {
+            object result;
+            try
+            {
+                result = Evaluate(script);
+            }
+            catch (Jurassic.JavaScriptException ex)
+            {
+                return ex.Message;
+            }
+            return string.Format("No error was thrown (result was '{0}')", result);
+        }
+
         public static Jurassic.Library.PropertyAttributes EvaluateAccessibility(string objectExpression, string propertyName)
         {
             // Surround the script with parentheses to prevent problems with precedence.

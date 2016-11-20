@@ -14,6 +14,7 @@ namespace UnitTests
     public class ReflectTests : TestBase
     {
         [TestMethod]
+        [Ignore]    // not supported yet.
         public void Constructor()
         {
             // Reflect is not a function.
