@@ -1,4 +1,6 @@
-﻿namespace Jurassic.Compiler
+﻿using System.Globalization;
+
+namespace Jurassic.Compiler
 {
 
     /// <summary>
@@ -50,6 +52,8 @@
                     return string.Format("\"{0}\"", ((string)this.Value).Replace("\"", "\\\""));
                 if (this.Value is bool)
                     return (bool)this.Value ? "true" : "false";
+                if (this.Value is double)
+                    return ((double)this.Value).ToString(CultureInfo.InvariantCulture);
                 return this.Value.ToString();
             }
         }
