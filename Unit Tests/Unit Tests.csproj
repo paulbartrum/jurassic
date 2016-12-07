@@ -115,6 +115,7 @@
   <ItemGroup>
     <Content Include="Core\Sample Files\execute1.js" />
     <Content Include="Core\Sample Files\globals1.js" />
+    <Content Include="Real-world\Files\bignumber.js" />
     <Content Include="Real-world\Files\coffee-script.js" />
     <Content Include="Real-world\Files\color-conversion.js" />
     <Content Include="Real-world\Files\levenshtein.js" />

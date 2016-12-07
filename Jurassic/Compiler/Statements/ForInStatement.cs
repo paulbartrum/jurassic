@@ -114,6 +114,7 @@ namespace Jurassic.Compiler
             generator.BranchIfFalse(breakTarget);
 
             // lhs = enumerator.Current;
+            this.Variable.GenerateReference(generator, optimizationInfo);
             generator.LoadVariable(enumerator);
             generator.Call(ReflectionHelpers.IEnumerator_String_Current);
             this.Variable.GenerateSet(generator, optimizationInfo, PrimitiveType.String, false);
