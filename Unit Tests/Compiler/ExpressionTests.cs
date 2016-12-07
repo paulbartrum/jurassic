@@ -885,6 +885,15 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("x = 'hah'; x |= 1; x"));
             Assert.AreEqual(1, Evaluate("x = 'hah'; x ^= 1; x"));
 
+            // Evaluated left to right.
+            Assert.AreEqual(7, Evaluate("x = 1; (x = 2) + x + (x = 3)"));
+
+            // The left hand side is evaluated before the right hand side.
+            Assert.AreEqual("123", Evaluate("x = '123'; (x = ['123'])[0] = x[0]"));
+
+            // The left hand side should only be evaluated once.
+            Assert.AreEqual("4", Evaluate("x = [[2]]; (x = x[0])[0] += 2; x.toString()"));
+
             // Strict mode: attempts to set a variable that has not been declared is disallowed.
             Assert.AreEqual("ReferenceError", EvaluateExceptionType("'use strict'; asddfsgwqewert = 'test'"));
             Assert.AreEqual("ReferenceError", EvaluateExceptionType("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
@@ -953,6 +962,9 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("x = 0; x ++"));
             Assert.AreEqual(1, Evaluate("x = 0; x ++; x"));
             Assert.AreEqual("ReferenceError", EvaluateExceptionType("2 ++"));
+
+            // The left hand side should only be evaluated once.
+            Assert.AreEqual("3", Evaluate("x = [[2]]; (x = x[0])[0]++; x.toString()"));
 
             // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; eval ++;"));
