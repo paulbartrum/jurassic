@@ -1345,7 +1345,7 @@ namespace UnitTests
         {
             var engine = new ScriptEngine();
             engine.SetGlobalValue("console", new Jurassic.Library.FirebugConsole(engine));
-            engine.ExecuteFile(@"..\..\..\Unit Tests\Real-world\Files\bignumber.js");
+            engine.ExecuteResource("RealWorld/Files/bignumber.js");
             engine.EnableDebugging = true;
             Assert.AreEqual("129963294281830400", engine.Evaluate(@"new BigNumber('129963294281830401').subtract(1).toString()"));
     }

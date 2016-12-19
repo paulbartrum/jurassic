@@ -30,7 +30,7 @@ namespace UnitTests
         public void ExecutingScript1()
         {
             var engine = new Jurassic.ScriptEngine();
-            engine.ExecuteResource("Core/Sample Files/execute1.js");
+            engine.ExecuteResource("Core/SampleFiles/execute1.js");
         }
 
         [TestMethod]
@@ -38,7 +38,7 @@ namespace UnitTests
         {
             var engine = new Jurassic.ScriptEngine();
             engine.SetGlobalValue("interop", 15);
-            engine.ExecuteResource("Core/Sample Files/globals1.js");
+            engine.ExecuteResource("Core/SampleFiles/globals1.js");
             Assert.AreEqual(20, engine.GetGlobalValue<int>("interop"));
         }
 
