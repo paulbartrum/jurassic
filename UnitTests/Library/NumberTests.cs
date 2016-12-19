@@ -148,23 +148,33 @@ namespace UnitTests
         [TestMethod]
         public void toLocaleString()
         {
+            var originalCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                // Culture is en-NZ.
+                System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("en-nz");
             Assert.AreEqual("77", Evaluate("77 .toLocaleString()"));
             Assert.AreEqual("77.5", Evaluate("77.5.toLocaleString()"));
+                Assert.AreEqual("77.123", Evaluate("77.123.toLocaleString()"));
+                Assert.AreEqual("7.7e+101", Evaluate("77e100 .toLocaleString()"));
+                Assert.AreEqual("123456789", Evaluate("123456789 .toLocaleString()"));
+                Assert.AreEqual("-500", Evaluate("(-500).toLocaleString()"));
 
-                // English.
-            Assert.AreEqual("77.123", ChangeLocale("en-NZ", () => Evaluate("77.123.toLocaleString()")));
-            Assert.AreEqual("7.7e+101", ChangeLocale("en-NZ", () => Evaluate("77e100 .toLocaleString()")));
-            Assert.AreEqual("123456789", ChangeLocale("en-NZ", () => Evaluate("123456789 .toLocaleString()")));
-            Assert.AreEqual("-500", ChangeLocale("en-NZ", () => Evaluate("(-500).toLocaleString()")));
-
-                // Spanish.
-            Assert.AreEqual("77,123", ChangeLocale("es-ES", () => Evaluate("77.123.toLocaleString()")));
-            Assert.AreEqual("7,7e+101", ChangeLocale("es-ES", () => Evaluate("77e100 .toLocaleString()")));
-            Assert.AreEqual("123456789", ChangeLocale("es-ES", () => Evaluate("123456789 .toLocaleString()")));
-            Assert.AreEqual("-500", ChangeLocale("es-ES", () => Evaluate("(-500).toLocaleString()")));
+                // Culture is es-ES (spanish).
+                System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("es-ES");
+                Assert.AreEqual("77,123", Evaluate("77.123.toLocaleString()"));
+                Assert.AreEqual("7,7e+101", Evaluate("77e100 .toLocaleString()"));
+                Assert.AreEqual("123456789", Evaluate("123456789 .toLocaleString()"));
+                Assert.AreEqual("-500", Evaluate("(-500).toLocaleString()"));
             Assert.AreEqual(CultureInfo.CurrentCulture.NumberFormat.PositiveInfinitySymbol, Evaluate("Infinity.toLocaleString()"));
             Assert.AreEqual(CultureInfo.CurrentCulture.NumberFormat.NegativeInfinitySymbol, Evaluate("(-Infinity).toLocaleString()"));
             Assert.AreEqual(CultureInfo.CurrentCulture.NumberFormat.NaNSymbol, Evaluate("NaN.toLocaleString()"));
+            }
+            finally
+            {
+                // Revert the culture back to the original value.
+                System.Threading.Thread.CurrentThread.CurrentCulture = originalCulture;
+            }
 
             // length
             Assert.AreEqual(0, Evaluate("NaN.toLocaleString.length"));

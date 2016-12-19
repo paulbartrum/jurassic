@@ -1339,5 +1339,15 @@ namespace UnitTests
                 Execute("Array.prototype.sort = sort");
             }
         }
+
+        [TestMethod]
+        public void BigNumber()
+        {
+            var engine = new ScriptEngine();
+            engine.SetGlobalValue("console", new Jurassic.Library.FirebugConsole(engine));
+            engine.ExecuteFile(@"..\..\..\Unit Tests\Real-world\Files\bignumber.js");
+            engine.EnableDebugging = true;
+            Assert.AreEqual("129963294281830400", engine.Evaluate(@"new BigNumber('129963294281830401').subtract(1).toString()"));
     }
+}
 }

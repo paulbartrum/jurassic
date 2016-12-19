@@ -739,6 +739,32 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("array[4]"));
             Assert.AreEqual(0, Evaluate("deletedItems.length"));
 
+            // Single parameter means delete 'till the end.
+            Evaluate("var array = [1, 21, 4, 11]");
+            Evaluate("var deletedItems = array.splice(2)");
+            Assert.AreEqual(2, Evaluate("array.length"));
+            Assert.AreEqual(1, Evaluate("array[0]"));
+            Assert.AreEqual(21, Evaluate("array[1]"));
+            Assert.AreEqual(2, Evaluate("deletedItems.length"));
+            Assert.AreEqual(4, Evaluate("deletedItems[0]"));
+            Assert.AreEqual(11, Evaluate("deletedItems[1]"));
+
+            // Single parameter means delete 'till the end.
+            Evaluate("var array = [1, 21, 4, 11]");
+            Evaluate("var deletedItems = array.splice(2)");
+            Assert.AreEqual(2, Evaluate("array.length"));
+            Assert.AreEqual(1, Evaluate("array[0]"));
+            Assert.AreEqual(21, Evaluate("array[1]"));
+            Assert.AreEqual(2, Evaluate("deletedItems.length"));
+            Assert.AreEqual(4, Evaluate("deletedItems[0]"));
+            Assert.AreEqual(11, Evaluate("deletedItems[1]"));
+
+            // No parameters returns an empty array.
+            Evaluate("var array = [1, 21, 4, 11]");
+            Evaluate("var deletedItems = array.splice()");
+            Assert.AreEqual(4, Evaluate("array.length"));
+            Assert.AreEqual(0, Evaluate("deletedItems.length"));
+
             // splice is generic.
             Evaluate("var obj = {0: 0, 1: 1, 2: 2, 3: 3}");
             Evaluate("obj.length = 4;");

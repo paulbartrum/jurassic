@@ -15,7 +15,21 @@ namespace Jurassic.Compiler
         PrimitiveType Type { get; }
 
         /// <summary>
-        /// Pushes the value of the reference onto the stack.
+        /// Outputs the values needed to get or set this reference.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        void GenerateReference(ILGenerator generator, OptimizationInfo optimizationInfo);
+
+        /// <summary>
+        /// Duplicates the values needed to get or set this reference.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        void DuplicateReference(ILGenerator generator, OptimizationInfo optimizationInfo);
+
+        /// <summary>
+        /// Pushes the value of the reference onto the stack.  GenerateReference should be called first.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
@@ -24,7 +38,7 @@ namespace Jurassic.Compiler
         void GenerateGet(ILGenerator generator, OptimizationInfo optimizationInfo, bool throwIfUnresolvable);
 
         /// <summary>
-        /// Stores the value on the top of the stack in the reference.
+        /// Stores the value on the top of the stack in the reference.  GenerateReference should be called first.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>

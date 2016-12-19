@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
@@ -2026,9 +2027,12 @@ namespace Jurassic.Compiler
                 else
                 {
                     object literalValue = ((LiteralToken)this.nextToken).Value;
-                    if ((literalValue is string || literalValue is double || literalValue is int) == false)
+                    if (literalValue is string || literalValue is int)
+                        result = new LiteralExpression(((LiteralToken)this.nextToken).Value.ToString());
+                    else if (literalValue is double)
+                        result = new LiteralExpression(((double)((LiteralToken)this.nextToken).Value).ToString(CultureInfo.InvariantCulture));
+                    else
                         throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
-                    result = new LiteralExpression(((LiteralToken)this.nextToken).Value.ToString());
                 }
                 nameType = PropertyNameType.Name;
             }

@@ -85,6 +85,26 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Outputs the values needed to get or set this reference.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        public void GenerateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            // Do nothing.
+        }
+
+        /// <summary>
+        /// Outputs the values needed to get or set this reference.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        public void DuplicateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            // Do nothing.
+        }
+
+        /// <summary>
         /// Pushes the value of the reference onto the stack.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
