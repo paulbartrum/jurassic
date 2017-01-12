@@ -1,0 +1,20 @@
+﻿{
+  "dependencies": {
+    "Jurassic": {
+      "target": "project",
+      "version": "2.2.2-*"
+    }
+  },
+
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+
+  "frameworks": {
+    "net40": {
+      "frameworkAssemblies": {
+      }
+    }
+  }
+}
