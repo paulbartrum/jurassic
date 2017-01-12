@@ -1,5 +1,7 @@
 ﻿{
-  "dependencies": {
+  "version": "1.0.0-*",
+ 
+   "dependencies": {
     "Jurassic": {
       "target": "project",
       "version": "2.2.2-*"

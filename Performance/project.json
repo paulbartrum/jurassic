@@ -1,18 +1,22 @@
-{
+﻿{
   "version": "1.0.0-*",
-
-  "testRunner": "mstest",
 
   "dependencies": {
     "Jurassic": {
       "target": "project",
       "version": "2.2.2-*"
     },
+    "Jint": "2.10.3",
     "dotnet-test-mstest": "1.1.2-preview",
     "MSTest.TestFramework": "1.0.6-preview",
-    "System.Diagnostics.StackTrace": "4.0.1",
-    "System.Globalization": "4.0.11",
-    "System.Globalization.Extensions": "4.0.1"
+    "System.Threading.Thread": "4.3.0",
+    "System.Diagnostics.StackTrace": "4.3.0"
+  },
+
+  "testRunner": "mstest",
+
+  "buildOptions": {
+    "debugType": "portable"
   },
 
   "frameworks": {
@@ -28,12 +32,6 @@
           "type": "platform"
         }
       }
-    }
-  },
-
-  "buildOptions": {
-    "embed": {
-      "include": [ "**/*.js" ]
     }
   }
 }
