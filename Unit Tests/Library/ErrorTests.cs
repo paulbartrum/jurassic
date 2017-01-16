@@ -97,9 +97,9 @@ namespace UnitTests
                     }
                     a('first call, firstarg');"));
             Assert.AreEqual("Error: myError\r\n" +
-                "    at trace (unknown:4)\r\n" +
-                "    at b (unknown:11)\r\n" +
-                "    at a (unknown:14)\r\n" +
+                "    at new trace (unknown:4)\r\n" +
+                "    at new b (unknown:11)\r\n" +
+                "    at new a (unknown:14)\r\n" +
                 "    at unknown:16",
                 Evaluate(@"
                     function trace() {

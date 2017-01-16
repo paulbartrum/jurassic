@@ -172,7 +172,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         internal object CallFromNative(string function, object thisObject, params object[] argumentValues)
         {
-            this.Engine.PushStackFrame("native", function, 0);
+            this.Engine.PushStackFrame("native", function, 0, ScriptEngine.CallType.MethodCall);
             try
             {
                 return CallLateBound(thisObject, argumentValues);
@@ -194,7 +194,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public object CallWithStackTrace(string path, string function, int line, object thisObject, object[] argumentValues)
         {
-            this.Engine.PushStackFrame(path, function, line);
+            this.Engine.PushStackFrame(path, function, line, ScriptEngine.CallType.MethodCall);
             try
             {
                 return CallLateBound(thisObject, argumentValues);
@@ -236,7 +236,7 @@ namespace Jurassic.Library
         /// <returns> The object that was created. </returns>
         public ObjectInstance ConstructWithStackTrace(string path, string function, int line, object[] argumentValues)
         {
-            this.Engine.PushStackFrame(path, function, line);
+            this.Engine.PushStackFrame(path, function, line, ScriptEngine.CallType.NewOperator);
             try
             {
                 return ConstructLateBound(argumentValues);
