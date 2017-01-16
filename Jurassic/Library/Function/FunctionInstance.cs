@@ -172,7 +172,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         internal object CallFromNative(string function, object thisObject, params object[] argumentValues)
         {
-            this.Engine.PushStackFrame("native", function, 0);
+            this.Engine.PushStackFrame("native", function, 0, ScriptEngine.CallType.MethodCall);
             try
             {
                 return CallLateBound(thisObject, argumentValues);
@@ -194,7 +194,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public object CallWithStackTrace(string path, string function, int line, object thisObject, object[] argumentValues)
         {
-            this.Engine.PushStackFrame(path, function, line);
+            this.Engine.PushStackFrame(path, function, line, ScriptEngine.CallType.MethodCall);
             try
             {
                 return CallLateBound(thisObject, argumentValues);
@@ -224,6 +224,27 @@ namespace Jurassic.Library
 
             // Otherwise, return the new object.
             return newObject;
+        }
+
+        /// <summary>
+        /// Creates an object, using this function as the constructor.
+        /// </summary>
+        /// <param name="path"> The path of the javascript source file that contains the caller. </param>
+        /// <param name="function"> The name of the caller function. </param>
+        /// <param name="line"> The line number of the statement that is calling this function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
+        /// <returns> The object that was created. </returns>
+        public ObjectInstance ConstructWithStackTrace(string path, string function, int line, object[] argumentValues)
+        {
+            this.Engine.PushStackFrame(path, function, line, ScriptEngine.CallType.NewOperator);
+            try
+            {
+                return ConstructLateBound(argumentValues);
+            }
+            finally
+            {
+                this.Engine.PopStackFrame();
+            }
         }
 
 

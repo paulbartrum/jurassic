@@ -39,7 +39,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo TypeUtilities_Iterate;
 
         internal static MethodInfo FunctionInstance_HasInstance;
-        internal static MethodInfo FunctionInstance_ConstructLateBound;
+        internal static MethodInfo FunctionInstance_ConstructWithStackTrace;
         internal static MethodInfo FunctionInstance_CallWithStackTrace;
         internal static MethodInfo FunctionInstance_InstancePrototype;
 
@@ -196,7 +196,7 @@ namespace Jurassic.Compiler
             Scope_Delete = GetInstanceMethod(typeof(Scope), "Delete", typeof(string));
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));
-            FunctionInstance_ConstructLateBound = GetInstanceMethod(typeof(FunctionInstance), "ConstructLateBound", typeof(object[]));
+            FunctionInstance_ConstructWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "ConstructWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(object[]));
             FunctionInstance_CallWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "CallWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(object), typeof(object[]));
             FunctionInstance_InstancePrototype = GetInstanceMethod(typeof(FunctionInstance), "get_InstancePrototype");
 

@@ -1223,6 +1223,13 @@ namespace Jurassic
             public string Path;
             public string Function;
             public int Line;
+            public CallType CallType;
+        }
+
+        internal enum CallType
+        {
+            MethodCall,
+            NewOperator,
         }
 
         private Stack<StackFrame> stackFrames = new Stack<StackFrame>();
@@ -1243,10 +1250,18 @@ namespace Jurassic
                 result.Append(": ");
                 result.Append(message);
             }
+            StackFrame[] stackFrameArray = this.stackFrames.ToArray();
             if (path != null || function != null || line != 0)
-                AppendStackFrame(result, path, function, line);
-            foreach (var frame in stackFrames)
-                AppendStackFrame(result, frame.Path, frame.Function, frame.Line);
+            {
+                CallType callType = stackFrameArray.Length > 0 ? stackFrameArray[0].CallType : CallType.MethodCall;
+                AppendStackFrame(result, path, function, line, callType);
+            }
+            for (int i = 0; i < stackFrameArray.Length; i++)
+            {
+                var frame = stackFrameArray[i];
+                CallType callType = stackFrameArray.Length > i + 1 ? stackFrameArray[i + 1].CallType : CallType.MethodCall;
+                AppendStackFrame(result, frame.Path, frame.Function, frame.Line, callType);
+            }
             return result.ToString();
         }
 
@@ -1257,7 +1272,8 @@ namespace Jurassic
         /// <param name="path"> The path of the javascript source file. </param>
         /// <param name="function"> The name of the function. </param>
         /// <param name="line"> The line number of the statement. </param>
-        private void AppendStackFrame(System.Text.StringBuilder result, string path, string function, int line)
+        /// <param name="parentCallType"> The method by which the current stack frame was created. </param>
+        private void AppendStackFrame(System.Text.StringBuilder result, string path, string function, int line, CallType parentCallType)
         {
             // Create a context object which is used for the StackFrameTransform.
             StackFrameTransformContext ctx = new StackFrameTransformContext()
@@ -1278,6 +1294,8 @@ namespace Jurassic
             result.Append("at ");
             if (string.IsNullOrEmpty(ctx.Function) == false)
             {
+                if (parentCallType == CallType.NewOperator)
+                    result.Append("new ");
                 result.Append(ctx.Function);
                 result.Append(" (");
             }
@@ -1292,14 +1310,16 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Pushes a frame to the javascript stack.
+        /// Pushes a frame to the javascript stack.  This needs to be called every time there is a
+        /// function call.
         /// </summary>
         /// <param name="path"> The path of the javascript source file that contains the function. </param>
         /// <param name="function"> The name of the function that is calling another function. </param>
         /// <param name="line"> The line number of the function call. </param>
-        internal void PushStackFrame(string path, string function, int line)
+        /// <param name="callType"> The type of call that is being made. </param>
+        internal void PushStackFrame(string path, string function, int line, CallType callType)
         {
-            this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line });
+            this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line, CallType = callType });
         }
 
         /// <summary>
