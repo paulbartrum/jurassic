@@ -96,6 +96,27 @@ namespace UnitTests
                         return b(3, 4, '\n\n', undefined, {});
                     }
                     a('first call, firstarg');"));
+            Assert.AreEqual("Error: myError\r\n" +
+                "    at trace (unknown:4)\r\n" +
+                "    at b (unknown:11)\r\n" +
+                "    at a (unknown:14)\r\n" +
+                "    at unknown:16",
+                Evaluate(@"
+                    function trace() {
+                        try {
+                            throw new Error('myError');
+                        }
+                        catch (e) {
+                            return Object(e.stack);
+                        }
+                    }
+                    function b() {
+                        return new trace();
+                    }
+                    function a() {
+                        return new b(3, 4, '\n\n', undefined, {});
+                    }
+                    new a('first call, firstarg').valueOf();"));
             Assert.AreEqual("Error: this error is initialized at line 3, but thrown at line 5\r\n" +
                 "    at trace (unknown:5)\r\n" +
                 "    at unknown:11",

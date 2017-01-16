@@ -226,6 +226,27 @@ namespace Jurassic.Library
             return newObject;
         }
 
+        /// <summary>
+        /// Creates an object, using this function as the constructor.
+        /// </summary>
+        /// <param name="path"> The path of the javascript source file that contains the caller. </param>
+        /// <param name="function"> The name of the caller function. </param>
+        /// <param name="line"> The line number of the statement that is calling this function. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
+        /// <returns> The value that was returned from the function. </returns>
+        public ObjectInstance ConstructWithStackTrace(string path, string function, int line, object[] argumentValues)
+        {
+            this.Engine.PushStackFrame(path, function, line);
+            try
+            {
+                return ConstructLateBound(argumentValues);
+            }
+            finally
+            {
+                this.Engine.PopStackFrame();
+            }
+        }
+
 
 
         //     JAVASCRIPT FUNCTIONS
