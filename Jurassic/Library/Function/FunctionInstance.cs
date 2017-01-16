@@ -233,7 +233,7 @@ namespace Jurassic.Library
         /// <param name="function"> The name of the caller function. </param>
         /// <param name="line"> The line number of the statement that is calling this function. </param>
         /// <param name="argumentValues"> An array of argument values. </param>
-        /// <returns> The value that was returned from the function. </returns>
+        /// <returns> The object that was created. </returns>
         public ObjectInstance ConstructWithStackTrace(string path, string function, int line, object[] argumentValues)
         {
             this.Engine.PushStackFrame(path, function, line);
