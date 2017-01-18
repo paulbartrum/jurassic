@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 		NuGet\Jurassic.nuspec = NuGet\Jurassic.nuspec
 		LICENSE.txt = LICENSE.txt
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attribute Code Generation", "Attribute Code Generation\Attribute Code Generation.csproj", "{AC0AC175-980A-43F2-B528-BD74214D6ECB}"
