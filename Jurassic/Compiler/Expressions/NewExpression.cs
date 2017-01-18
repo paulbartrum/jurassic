@@ -97,6 +97,11 @@ namespace Jurassic.Compiler
             generator.DefineLabelPosition(endOfTypeCheck);
             generator.ReleaseTemporaryVariable(targetValue);
 
+            // Pass in the path, function name and line.
+            generator.LoadStringOrNull(optimizationInfo.Source.Path);
+            generator.LoadStringOrNull(optimizationInfo.FunctionName);
+            generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
+
             if (operand is FunctionCallExpression)
             {
                 // Emit an array containing the function arguments.
@@ -110,7 +115,7 @@ namespace Jurassic.Compiler
             }
 
             // Call FunctionInstance.ConstructLateBound(argumentValues)
-            generator.Call(ReflectionHelpers.FunctionInstance_ConstructLateBound);
+            generator.Call(ReflectionHelpers.FunctionInstance_ConstructWithStackTrace);
         }
     }
 
