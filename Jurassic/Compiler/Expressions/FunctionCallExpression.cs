@@ -105,7 +105,7 @@ namespace Jurassic.Compiler
 
             // Throw an nicely formatted exception.
             generator.Pop();
-            EmitHelpers.EmitThrow(generator, ErrorType.TypeError, string.Format("'{0}' is not a function", this.Target.ToString()));
+            EmitHelpers.EmitThrow(generator, ErrorType.TypeError, string.Format("'{0}' is not a function", this.Target.ToString()), optimizationInfo);
             generator.DefineLabelPosition(endOfTypeCheck);
 
             // Pass in the path, function name and line.
