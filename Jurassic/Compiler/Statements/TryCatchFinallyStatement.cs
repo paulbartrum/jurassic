@@ -97,10 +97,32 @@ namespace Jurassic.Compiler
             this.TryBlock.GenerateCode(generator, optimizationInfo);
 
             // Generate code for the catch block.
+            ILLocalVariable skipFinallyBlock = null;
             if (this.CatchBlock != null)
             {
                 // Begin a catch block.  The exception is on the top of the stack.
-                generator.BeginCatchBlock(typeof(JavaScriptException));
+                generator.BeginCatchBlock(typeof(Exception));
+
+                // Check the exception is catchable by calling CanCatchException(ex).
+                // We need to handle the case where JS code calls into .NET code which then throws
+                // a JavaScriptException from a different ScriptEngine.
+                var endOfIfLabel = generator.CreateLabel();
+                generator.Duplicate();  // ex
+                var exceptionTemporary = generator.CreateTemporaryVariable(typeof(Exception));
+                generator.StoreVariable(exceptionTemporary);
+                EmitHelpers.LoadScriptEngine(generator);
+                generator.LoadVariable(exceptionTemporary);
+                generator.ReleaseTemporaryVariable(exceptionTemporary);
+                generator.Call(ReflectionHelpers.ScriptEngine_CanCatchException);
+                generator.BranchIfTrue(endOfIfLabel);
+                generator.LoadBoolean(true);
+                if (this.FinallyBlock != null)
+                {
+                    skipFinallyBlock = generator.DeclareVariable(typeof(bool), "skipFinallyBlock");
+                    generator.StoreVariable(skipFinallyBlock);
+                }
+                generator.Rethrow();
+                generator.DefineLabelPosition(endOfIfLabel);
 
                 // Create a new DeclarativeScope.
                 this.CatchScope.GenerateScopeCreation(generator, optimizationInfo);
@@ -127,6 +149,17 @@ namespace Jurassic.Compiler
             {
                 generator.BeginFinallyBlock();
 
+                // If an exception was thrown that wasn't handled by the catch block, then don't
+                // run the finally block either.  This prevents user code from being run when a
+                // ThreadAbortException is thrown.
+                var endOfFinallyBlock = generator.CreateLabel();
+                if (skipFinallyBlock != null)
+                {
+                    var endOfSkipFinallyBlockLabel = generator.CreateLabel();
+                    generator.LoadVariable(skipFinallyBlock);
+                    generator.BranchIfTrue(endOfFinallyBlock);
+                }
+
                 var branches = new List<ILLabel>();
                 var previousStackSize = optimizationInfo.LongJumpStackSizeThreshold;
                 optimizationInfo.LongJumpStackSizeThreshold = optimizationInfo.BreakOrContinueStackSize;
@@ -146,6 +179,9 @@ namespace Jurassic.Compiler
 
                 // Emit code for the finally block.
                 this.FinallyBlock.GenerateCode(generator, optimizationInfo);
+
+                // Define the position at the end of the finally block.
+                generator.DefineLabelPosition(endOfFinallyBlock);
 
                 // End the main exception block.
                 generator.EndExceptionBlock();

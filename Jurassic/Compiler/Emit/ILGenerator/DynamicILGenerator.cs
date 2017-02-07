@@ -2216,6 +2216,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Re-throws the current exception.
+        /// </summary>
+        public override void Rethrow()
+        {
+            Emit2ByteOpCode(0xFE, 0x1A, 0, 0);
+            UnconditionalBranch();
+        }
+
+        /// <summary>
         /// Begins a try-catch-finally block.
         /// </summary>
         public override void BeginExceptionBlock()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Jurassic.Library;
+using System.ComponentModel;
 
 namespace Jurassic
 {
@@ -1329,6 +1330,23 @@ namespace Jurassic
         {
             this.stackFrames.Pop();
         }
+
+        /// <summary>
+        /// Checks if the given <see cref="Exception"/> is catchable by JavaScript code with a
+        /// <c>catch</c> clause.
+        /// Note: This property is public for technical reasons only and should not be used by user code.
+        /// </summary>
+        /// <param name="ex"> The exception to check. </param>
+        /// <returns><c>true</c> if the <see cref="Exception"/> is catchable, <c>false otherwise</c></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool CanCatchException(Exception ex)
+        {
+            var jsException = ex as JavaScriptException;
+            if (jsException == null)
+                return false;
+            return jsException.Engine == this || jsException.Engine == null;
+        }
+
 
 
         //     CLRTYPEWRAPPER CACHE
