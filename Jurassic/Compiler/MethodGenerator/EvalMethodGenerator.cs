@@ -10,13 +10,12 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new EvalMethodGenerator instance.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="parentScope"> The scope of the calling code. </param>
         /// <param name="source"> The script code to execute. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         /// <param name="thisObject"> The value of the "this" keyword in the calling code. </param>
-        public EvalMethodGenerator(ScriptEngine engine, Scope parentScope, ScriptSource source, CompilerOptions options, object thisObject)
-            : base(engine, parentScope, source, options)
+        public EvalMethodGenerator(Scope parentScope, ScriptSource source, CompilerOptions options, object thisObject)
+            : base(parentScope, source, options)
         {
             this.ThisObject = thisObject;
         }
@@ -44,9 +43,9 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Parse()
         {
-            using (var lexer = new Lexer(this.Engine, this.Source))
+            using (var lexer = new Lexer(this.Source))
             {
-                var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Eval);
+                var parser = new Parser(lexer, this.InitialScope, this.Options, CodeContext.Eval);
                 
                 this.AbstractSyntaxTree = parser.Parse();
 
@@ -93,9 +92,13 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Executes the script.
         /// </summary>
+        /// <param name="engine"> The script engine to use to execute the script. </param>
         /// <returns> The result of evaluating the script. </returns>
-        public object Execute()
+        public object Execute(ScriptEngine engine)
         {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+
             // Compile the code if it hasn't already been compiled.
             if (this.GeneratedMethod == null)
                 GenerateCode();
@@ -106,7 +109,7 @@ namespace Jurassic.Compiler
                 scope = scope.ParentScope;
 
             // Execute the compiled delegate and store the result.
-            object result = ((Func<ScriptEngine, Scope, object, object>)this.GeneratedMethod.GeneratedDelegate)(this.Engine, scope, this.ThisObject);
+            object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(engine, scope, this.ThisObject);
 
             // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
             GC.KeepAlive(this);

@@ -10,11 +10,10 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new GlobalMethodGenerator instance.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="source"> The source of javascript code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public GlobalMethodGenerator(ScriptEngine engine, ScriptSource source, CompilerOptions options)
-            : base(engine, engine.CreateGlobalScope(), source, options)
+        public GlobalMethodGenerator(ScriptSource source, CompilerOptions options)
+            : base(ObjectScope.CreateGlobalPlaceholder(), source, options)
         {
         }
 
@@ -50,9 +49,9 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void Parse()
         {
-            using (var lexer = new Lexer(this.Engine, this.Source))
+            using (var lexer = new Lexer(this.Source))
             {
-                var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Global);
+                var parser = new Parser(lexer, this.InitialScope, this.Options, CodeContext.Global);
                 this.AbstractSyntaxTree = parser.Parse();
                 this.StrictMode = parser.StrictMode;
                 this.MethodOptimizationHints = parser.MethodOptimizationHints;
@@ -79,15 +78,22 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Executes the script.
         /// </summary>
+        /// <param name="engine"> The script engine to use to execute the script. </param>
         /// <returns> The result of evaluating the script. </returns>
-        public object Execute()
+        public object Execute(ScriptEngine engine)
         {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+
             // Compile the code if it hasn't already been compiled.
             if (this.GeneratedMethod == null)
                 GenerateCode();
 
+            // Convert the initial scope into a runtime scope.
+            var runtimeScope = ((ObjectScope)this.InitialScope).ConvertPlaceholderToRuntimeScope(engine.Global);
+
             // Execute the compiled delegate and store the result.
-            object result = ((Func<ScriptEngine, Scope, object, object>)this.GeneratedMethod.GeneratedDelegate)(this.Engine, this.InitialScope, this.Engine.Global);
+            object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(engine, runtimeScope, engine.Global);
 
             // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
             GC.KeepAlive(this);

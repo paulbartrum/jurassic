@@ -21,9 +21,10 @@ namespace Jurassic
         /// <summary>
         /// Executes the compiled script.
         /// </summary>
-        public void Execute()
+        /// <param name="engine"> The script engine to use to execute the script. </param>
+        public void Execute(ScriptEngine engine)
         {
-            methodGen.Execute();
+            methodGen.Execute(engine);
         }
     }
 }

@@ -18,22 +18,25 @@ namespace Jurassic.Compiler
         /// Gets or sets a value that indicates whether to force ES5 strict mode, even if the code
         /// does not contain a strict mode directive ("use strict").  The default is <c>false</c>.
         /// </summary>
-        public bool ForceStrictMode
-        {
-            get;
-            set;
-        }
+        public bool ForceStrictMode { get; set; }
 
         /// <summary>
         /// Gets or sets a value which indicates whether debug information should be generated.  If
         /// this is set to <c>true</c> performance and memory usage are negatively impacted.  The
         /// default is <c>false</c>.
         /// </summary>
-        public bool EnableDebugging
-        {
-            get;
-            set;
-        }
+        public bool EnableDebugging { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that indicates what compatibility mode to use.
+        /// </summary>
+        public CompatibilityMode CompatibilityMode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that indicates whether to disassemble any generated IL and store it
+        /// in the associated function.
+        /// </summary>
+        public bool EnableILAnalysis { get; set; }
 
         /// <summary>
         /// Performs a shallow clone of this instance.
@@ -44,5 +47,4 @@ namespace Jurassic.Compiler
             return (CompilerOptions)this.MemberwiseClone();
         }
     }
-
 }

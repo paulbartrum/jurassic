@@ -66,7 +66,6 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new FunctionMethodGenerator instance.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="scope"> The function scope. </param>
         /// <param name="functionName"> The name of the function. </param>
         /// <param name="declarationType"> Indicates how the function was declared. </param>
@@ -74,17 +73,19 @@ namespace Jurassic.Compiler
         /// <param name="bodyText"> The source code of the function. </param>
         /// <param name="body"> The root of the abstract syntax tree for the body of the function. </param>
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
+        /// <param name="span"> The extent of the function in the source code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName, FunctionDeclarationType declarationType,
-            IList<FunctionArgument> arguments, string bodyText, Statement body, string scriptPath, CompilerOptions options)
-            : base(engine, scope, new DummyScriptSource(scriptPath), options)
+        public FunctionMethodGenerator(DeclarativeScope scope, string functionName, FunctionDeclarationType declarationType,
+            IList<FunctionArgument> arguments, string bodyText, Statement body, string scriptPath, SourceCodeSpan span,
+            CompilerOptions options)
+            : base(scope, new DummyScriptSource(scriptPath), options)
         {
             this.Name = functionName;
             this.DeclarationType = declarationType;
             this.Arguments = arguments;
             this.BodyRoot = body;
             this.BodyText = bodyText;
-            Validate();
+            Validate(span.StartLine, scriptPath);
         }
 
         /// <summary>
@@ -113,15 +114,14 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new FunctionContext instance.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="scope"> The function scope. </param>
         /// <param name="functionName"> The name of the function. </param>
         /// <param name="argumentsText"> A comma-separated list of arguments. </param>
         /// <param name="body"> The source code for the body of the function. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(ScriptEngine engine, DeclarativeScope scope, string functionName,
+        public FunctionMethodGenerator(DeclarativeScope scope, string functionName,
             string argumentsText, string body, CompilerOptions options)
-            : base(engine, scope, new StringScriptSource(body), options)
+            : base(scope, new StringScriptSource(body), options)
         {
             this.Name = functionName;
             this.ArgumentsText = argumentsText;
@@ -238,25 +238,27 @@ namespace Jurassic.Compiler
         /// Checks whether the function is valid (in strict mode the function cannot be named
         /// 'arguments' or 'eval' and the argument names cannot be duplicated).
         /// </summary>
-        private void Validate()
+        /// <param name="lineNumber"> The line number in the source file. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        private void Validate(int lineNumber, string sourcePath)
         {
             if (this.StrictMode == true)
             {
                 // If the function body is strict mode, then the function name cannot be 'eval' or 'arguments'.
                 if (this.Name == "arguments" || this.Name == "eval")
-                    throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Functions cannot be named '{0}' in strict mode.", this.Name));
+                    throw new SyntaxErrorException(string.Format("Functions cannot be named '{0}' in strict mode.", this.Name), lineNumber, sourcePath);
 
                 // If the function body is strict mode, then the argument names cannot be 'eval' or 'arguments'.
                 foreach (var argument in this.Arguments)
                     if (argument.Name == "arguments" || argument.Name == "eval")
-                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Arguments cannot be named '{0}' in strict mode.", argument.Name));
+                        throw new SyntaxErrorException(string.Format("Arguments cannot be named '{0}' in strict mode.", argument.Name), lineNumber, sourcePath);
 
                 // If the function body is strict mode, then the argument names cannot be duplicates.
                 var duplicateCheck = new HashSet<string>();
                 foreach (var argument in this.Arguments)
                 {
                     if (duplicateCheck.Contains(argument.Name) == true)
-                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Duplicate argument name '{0}' is not allowed in strict mode.", argument.Name));
+                        throw new SyntaxErrorException(string.Format("Duplicate argument name '{0}' is not allowed in strict mode.", argument.Name), lineNumber, sourcePath);
                     duplicateCheck.Add(argument.Name);
                 }
             }
@@ -275,19 +277,19 @@ namespace Jurassic.Compiler
             else
             {
                 Parser argumentsParser;
-                using (var argumentsLexer = new Lexer(this.Engine, new StringScriptSource(this.ArgumentsText)))
+                using (var argumentsLexer = new Lexer(new StringScriptSource(this.ArgumentsText)))
                 {
-                    argumentsParser = new Parser(this.Engine, argumentsLexer, this.InitialScope, this.Options, CodeContext.Function);
+                    argumentsParser = new Parser(argumentsLexer, this.InitialScope, this.Options, CodeContext.Function);
                     this.Arguments = argumentsParser.ParseFunctionArguments(endToken: null);
                 }
-                using (var lexer = new Lexer(this.Engine, this.Source))
+                using (var lexer = new Lexer(this.Source))
                 {
-                    var parser = new Parser(this.Engine, lexer, this.InitialScope, this.Options, CodeContext.Function, argumentsParser.MethodOptimizationHints);
+                    var parser = new Parser(lexer, this.InitialScope, this.Options, CodeContext.Function, argumentsParser.MethodOptimizationHints);
                     this.AbstractSyntaxTree = parser.Parse();
                     this.StrictMode = parser.StrictMode;
                     this.MethodOptimizationHints = parser.MethodOptimizationHints;
                 }
-                Validate();
+                Validate(1, this.Source.Path);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jurassic.Compiler;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -152,7 +153,7 @@ namespace Jurassic.Library
         {
             if (TypeUtilities.IsString(code) == false)
                 return code;
-            return engine.Eval(TypeConverter.ToString(code), engine.CreateGlobalScope(), engine.Global, false);
+            return engine.Eval(TypeConverter.ToString(code), ObjectScope.CreateGlobalScope(engine.Global), engine.Global, false);
         }
 
         /// <summary>
@@ -166,7 +167,7 @@ namespace Jurassic.Library
         /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        public static object Eval(ScriptEngine engine, object code, Compiler.Scope scope, object thisObject, bool strictMode)
+        public static object Eval(ScriptEngine engine, object code, Scope scope, object thisObject, bool strictMode)
         {
             if (scope == null)
                 throw new ArgumentNullException("scope");
