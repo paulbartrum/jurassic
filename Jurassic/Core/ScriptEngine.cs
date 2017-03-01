@@ -676,25 +676,18 @@ namespace Jurassic
                 source,                             // The source code.
                 CreateOptions());                   // The compiler options.
 
-            try
-            {
-                // Parse
-                this.ParsingStarted?.Invoke(this, EventArgs.Empty);
-                methodGen.Parse();
+            // Parse
+            this.ParsingStarted?.Invoke(this, EventArgs.Empty);
+            methodGen.Parse();
 
-                // Optimize
-                this.OptimizationStarted?.Invoke(this, EventArgs.Empty);
-                methodGen.Optimize();
+            // Optimize
+            this.OptimizationStarted?.Invoke(this, EventArgs.Empty);
+            methodGen.Optimize();
 
-                // Generate code
-                this.CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
-                methodGen.GenerateCode();
-                VerifyGeneratedCode();
-            }
-            catch (SyntaxErrorException ex)
-            {
-                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
-            }
+            // Generate code
+            this.CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
+            methodGen.GenerateCode();
+            VerifyGeneratedCode();
 
             return new CompiledScript(methodGen);
         }
@@ -817,12 +810,19 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public void Execute(ScriptSource source)
         {
-            // Compile the script.
-            var compiledScript = Compile(source);
+            try
+            {
+                // Compile the script.
+                var compiledScript = Compile(source);
 
-            // ...and execute it.
-            this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
-            compiledScript.Execute(this);
+                // ...and execute it.
+                this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
+                compiledScript.Execute(this);
+            }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
         }
 
         /// <summary>
