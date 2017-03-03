@@ -44,11 +44,11 @@ namespace Jurassic.Compiler
         public Parser(ScriptEngine engine, Lexer lexer, Scope initialScope, CompilerOptions options, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (lexer == null)
-                throw new ArgumentNullException("lexer");
+                throw new ArgumentNullException(nameof(lexer));
             if (initialScope == null)
-                throw new ArgumentNullException("initialScope");
+                throw new ArgumentNullException(nameof(initialScope));
             this.engine = engine;
             this.lexer = lexer;
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
@@ -281,7 +281,7 @@ namespace Jurassic.Compiler
         private void SetInitialScope(Scope initialScope)
         {
             if (initialScope == null)
-                throw new ArgumentNullException("initialScope");
+                throw new ArgumentNullException(nameof(initialScope));
             this.currentLetScope = this.currentVarScope = this.initialScope = initialScope;
         }
 
@@ -318,7 +318,7 @@ namespace Jurassic.Compiler
         private ScopeContext CreateScopeContext(Scope letScope, Scope varScope = null)
         {
             if (letScope == null)
-                throw new ArgumentNullException("letScope");
+                throw new ArgumentNullException(nameof(letScope));
             var result = new ScopeContext(this);
             this.currentLetScope = letScope;
             if (varScope != null)

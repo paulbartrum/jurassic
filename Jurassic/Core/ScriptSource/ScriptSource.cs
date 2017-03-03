@@ -35,7 +35,7 @@ namespace Jurassic
         internal string ReadSpan(Compiler.SourceCodeSpan span)
         {
             if (span == null)
-                throw new ArgumentNullException("span");
+                throw new ArgumentNullException(nameof(span));
 
             int line = 1, column = 1;
             var reader = this.GetReader();

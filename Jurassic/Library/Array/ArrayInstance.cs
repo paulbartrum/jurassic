@@ -60,7 +60,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (elements == null)
-                throw new ArgumentNullException("elements");
+                throw new ArgumentNullException(nameof(elements));
             this.dense = elements;
             
             this.denseMayContainHoles = Array.IndexOf(elements, null) >= 0;
@@ -80,7 +80,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (sparseArray == null)
-                throw new ArgumentNullException("sparseArray");
+                throw new ArgumentNullException(nameof(sparseArray));
             this.sparse = sparseArray;
 
             // Create a fake property for length plus initialize the real length property.

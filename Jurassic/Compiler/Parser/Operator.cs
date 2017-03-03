@@ -148,7 +148,7 @@ namespace Jurassic.Compiler
         private Operator(Token token, int precedence, OperatorPlacement placement, OperatorAssociativity associativity, OperatorType type, Token secondaryToken = null, int rhsPrecedence = -1)
         {
             if (token == null)
-                throw new ArgumentNullException("token");
+                throw new ArgumentNullException(nameof(token));
             if (token == secondaryToken)
                 throw new ArgumentException("Token and secondaryToken must be different.");
             if ((placement & (OperatorPlacement.HasLHSOperand | OperatorPlacement.HasRHSOperand)) == 0)

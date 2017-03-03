@@ -21,7 +21,7 @@ namespace Jurassic
         public FileScriptSource(string path, Encoding encoding = null)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             this.path = path;
             this.encoding = encoding ?? Encoding.UTF8;
         }

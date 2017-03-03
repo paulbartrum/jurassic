@@ -21,9 +21,9 @@ namespace Jurassic.Library
         public JSONLexer(ScriptEngine engine, TextReader reader)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (reader == null)
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             this.engine = engine;
             this.reader = reader;
         }

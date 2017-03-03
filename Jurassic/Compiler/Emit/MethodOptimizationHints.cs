@@ -20,7 +20,7 @@ namespace Jurassic.Compiler
         public void EncounteredVariable(string name)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             this.names.Add(name);
             this.cached = false;
         }
@@ -36,7 +36,7 @@ namespace Jurassic.Compiler
         public bool HasVariable(string name)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (this.HasEval == true)
                 return true;
             if (this.HasNestedFunction == true)

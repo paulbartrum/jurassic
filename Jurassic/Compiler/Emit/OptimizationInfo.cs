@@ -98,7 +98,7 @@ namespace Jurassic.Compiler
         public void MarkSequencePoint(ILGenerator generator, SourceCodeSpan span)
         {
             if (span == null)
-                throw new ArgumentNullException("span");
+                throw new ArgumentNullException(nameof(span));
             if (this.DebugDocument != null)
                 generator.MarkSequencePoint(this.DebugDocument, span);
             this.SourceSpan = span;
@@ -191,7 +191,7 @@ namespace Jurassic.Compiler
         public ILLocalVariable GetRegExpVariable(ILGenerator generator, RegularExpressionLiteral literal)
         {
             if (literal == null)
-                throw new ArgumentNullException("literal");
+                throw new ArgumentNullException(nameof(literal));
 
             // Create a new Dictionary if it hasn't been created before.
             if (this.regularExpressionVariables == null)
@@ -263,7 +263,7 @@ namespace Jurassic.Compiler
         public void PushBreakOrContinueInfo(IList<string> labelNames, ILLabel breakTarget, ILLabel continueTarget, bool labelledOnly)
         {
             if (breakTarget == null)
-                throw new ArgumentNullException("breakTarget");
+                throw new ArgumentNullException(nameof(breakTarget));
 
             // Check the label doesn't already exist.
             if (labelNames != null)
@@ -372,7 +372,7 @@ namespace Jurassic.Compiler
         private int GetBreakOrContinueLabelDepth(ILLabel label)
         {
             if (label == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
 
             int depth = this.breakOrContinueStack.Count - 1;
             foreach (var info in this.breakOrContinueStack)

@@ -36,11 +36,11 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (argumentsText == null)
-                throw new ArgumentNullException("argumentsText");
+                throw new ArgumentNullException(nameof(argumentsText));
             if (bodyText == null)
-                throw new ArgumentNullException("bodyText");
+                throw new ArgumentNullException(nameof(bodyText));
 
             // Set up a new function scope.
             var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), name, null);

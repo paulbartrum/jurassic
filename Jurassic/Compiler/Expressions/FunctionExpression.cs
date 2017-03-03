@@ -17,7 +17,7 @@ namespace Jurassic.Compiler
         public FunctionExpression(FunctionMethodGenerator functionContext)
         {
             if (functionContext == null)
-                throw new ArgumentNullException("functionContext");
+                throw new ArgumentNullException(nameof(functionContext));
             this.context = functionContext;
         }
 
@@ -141,7 +141,7 @@ namespace Jurassic.Compiler
         public void GenerateDisplayName(ILGenerator generator, OptimizationInfo optimizationInfo, string displayName, bool force)
         {
             if (displayName == null)
-                throw new ArgumentNullException("displayName");
+                throw new ArgumentNullException(nameof(displayName));
 
             // We only infer names for functions if the function doesn't have a name.
             if (force == true || string.IsNullOrEmpty(this.FunctionName))

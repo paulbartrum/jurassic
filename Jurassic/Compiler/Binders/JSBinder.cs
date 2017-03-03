@@ -45,7 +45,7 @@ namespace Jurassic.Compiler
                     if (argumentCount >= method.RequiredParameterCount && argumentCount <= method.MaxParameterCount)
                     {
                         if (preferred != null)
-                            throw new ArgumentException(string.Format("Multiple ambiguous methods detected: {0} and {1}.", method, preferred), "targetMethods");
+                            throw new ArgumentException(string.Format("Multiple ambiguous methods detected: {0} and {1}.", method, preferred), nameof(targetMethods));
                         preferred = method;
                     }
                 }

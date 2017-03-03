@@ -25,7 +25,7 @@ namespace Jurassic
         public ConcatenatedString(string initialValue)
         {
             if (initialValue == null)
-                throw new ArgumentNullException("initialValue");
+                throw new ArgumentNullException(nameof(initialValue));
             this.builder = new StringBuilder(initialValue);
             this.length = initialValue.Length;
             this.cachedString = initialValue;
@@ -39,9 +39,9 @@ namespace Jurassic
         public ConcatenatedString(string left, string right)
         {
             if (left == null)
-                throw new ArgumentNullException("left");
+                throw new ArgumentNullException(nameof(left));
             if (right == null)
-                throw new ArgumentNullException("right");
+                throw new ArgumentNullException(nameof(right));
             this.builder = new StringBuilder(left, left.Length + right.Length);
             this.builder.Append(right);
             this.length = left.Length + right.Length;
@@ -55,7 +55,7 @@ namespace Jurassic
         public ConcatenatedString(string[] strings)
         {
             if (strings == null)
-                throw new ArgumentNullException("strings");
+                throw new ArgumentNullException(nameof(strings));
 
             // Calculate the total length.
             foreach (string str in strings)

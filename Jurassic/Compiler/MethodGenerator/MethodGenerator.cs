@@ -17,13 +17,13 @@ namespace Jurassic.Compiler
         protected MethodGenerator(ScriptEngine engine, Scope scope, ScriptSource source, CompilerOptions options)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (options == null)
-                throw new ArgumentNullException("options");
+                throw new ArgumentNullException(nameof(options));
             this.Engine = engine;
             this.InitialScope = scope;
             this.Source = source;

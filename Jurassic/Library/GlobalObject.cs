@@ -169,7 +169,7 @@ namespace Jurassic.Library
         public static object Eval(ScriptEngine engine, object code, Compiler.Scope scope, object thisObject, bool strictMode)
         {
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             if (TypeUtilities.IsString(code) == false)
                 return code;
             return engine.Eval(TypeConverter.ToString(code), scope, thisObject, strictMode);
@@ -537,7 +537,7 @@ namespace Jurassic.Library
             {
                 char c = characters[i];
                 if (c >= 128)
-                    throw new ArgumentException("Characters must be ASCII.", "characters");
+                    throw new ArgumentException(nameof(characters));
                 result[c] = true;
             }
             return result;

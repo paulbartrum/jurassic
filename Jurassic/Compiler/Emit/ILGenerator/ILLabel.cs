@@ -96,7 +96,7 @@ namespace Jurassic.Compiler
         public ReflectionEmitILLabel(System.Reflection.Emit.Label label)
         {
             if (label == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.UnderlyingLabel = label;
         }
 

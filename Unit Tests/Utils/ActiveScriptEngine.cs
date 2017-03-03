@@ -62,7 +62,7 @@ namespace UnitTests
         private ActiveScriptEngine(object scriptEngine, ScriptLanguage language)
         {
             if (scriptEngine == null)
-                throw new ArgumentNullException("scriptEngine");
+                throw new ArgumentNullException(nameof(scriptEngine));
             this.language = language;
             this.engine = (IActiveScript)scriptEngine;
             this.engine.SetScriptSite(this);

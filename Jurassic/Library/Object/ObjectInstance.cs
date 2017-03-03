@@ -57,7 +57,7 @@ namespace Jurassic.Library
         protected ObjectInstance(ObjectInstance prototype)
         {
             if (prototype == null)
-                throw new ArgumentNullException("prototype");
+                throw new ArgumentNullException(nameof(prototype));
             this.prototype = prototype;
             this.engine = prototype.Engine;
             this.schema = this.engine.EmptySchema;
@@ -71,7 +71,7 @@ namespace Jurassic.Library
         protected ObjectInstance(ScriptEngine engine, ObjectInstance prototype)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             this.engine = engine;
             this.prototype = prototype;
             this.schema = engine.EmptySchema;

@@ -18,7 +18,7 @@ namespace Jurassic.Compiler
         public OperatorExpression(Operator @operator)
         {
             if (@operator == null)
-                throw new ArgumentNullException("operator");
+                throw new ArgumentNullException(nameof(@operator));
             this.Operator = @operator;
             this.operands = new Expression[@operator.Arity];
         }
@@ -31,7 +31,7 @@ namespace Jurassic.Compiler
         public static OperatorExpression FromOperator(Operator @operator)
         {
             if (@operator == null)
-                throw new ArgumentNullException("operator");
+                throw new ArgumentNullException(nameof(@operator));
             switch (@operator.Type)
             {
                 case OperatorType.Grouping:

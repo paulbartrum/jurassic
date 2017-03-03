@@ -50,9 +50,9 @@ namespace Jurassic.Compiler
         public Lexer(ScriptEngine engine, ScriptSource source)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             this.engine = engine;
             this.source = source;
             this.reader = source.GetReader();

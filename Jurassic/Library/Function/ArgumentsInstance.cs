@@ -29,11 +29,11 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (callee == null)
-                throw new ArgumentNullException("callee");
+                throw new ArgumentNullException(nameof(callee));
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             if (argumentValues == null)
-                throw new ArgumentNullException("argumentValues");
+                throw new ArgumentNullException(nameof(argumentValues));
             this.callee = callee;
             this.scope = scope;
             this.FastSetProperty("length", argumentValues.Length, PropertyAttributes.NonEnumerable);

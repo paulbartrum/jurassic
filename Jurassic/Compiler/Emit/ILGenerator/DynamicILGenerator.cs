@@ -83,7 +83,7 @@ namespace Jurassic.Compiler
         public DynamicILGenerator(System.Reflection.Emit.DynamicMethod dynamicMethod)
         {
             if (dynamicMethod == null)
-                throw new ArgumentNullException("dynamicMethod");
+                throw new ArgumentNullException(nameof(dynamicMethod));
             this.dynamicMethod = dynamicMethod;
             this.dynamicILInfo = dynamicMethod.GetDynamicILInfo();
             this.bytes = new byte[100];
@@ -751,12 +751,12 @@ namespace Jurassic.Compiler
         public override void DefineLabelPosition(ILLabel label)
         {
             if (label as DynamicILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             var label2 = (DynamicILLabel)label;
             if (label2.ILGenerator != this)
-                throw new ArgumentException("The label wasn't created by this generator.", "label");
+                throw new ArgumentException(nameof(label));
             if (label2.ILOffset != -1)
-                throw new ArgumentException("The label position has already been defined.", "label");
+                throw new ArgumentException(nameof(label));
             label2.ILOffset = this.offset;
 
 #if DEBUG
@@ -893,10 +893,10 @@ namespace Jurassic.Compiler
         private void EmitLabel(ILLabel label, int startOfNextInstruction)
         {
             if (label as DynamicILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             var label2 = (DynamicILLabel)label;
             if (label2.ILGenerator != this)
-                throw new ArgumentException("The label wasn't created by this generator.", "label");
+                throw new ArgumentException(nameof(label));
 
             // Enlarge the array if necessary.
             if (this.offset + 4 >= this.bytes.Length)
@@ -1121,7 +1121,7 @@ namespace Jurassic.Compiler
         public override void Switch(ILLabel[] labels)
         {
             if (labels == null)
-                throw new ArgumentNullException("labels");
+                throw new ArgumentNullException(nameof(labels));
 
             // Calculate the size of the instruction and the position of the start of the next instruction.
             int instructionSize = 1 + 4 + labels.Length * 4;
@@ -1176,9 +1176,9 @@ namespace Jurassic.Compiler
         public override void LoadVariable(ILLocalVariable variable)
         {
             if (variable as DynamicILLocalVariable == null)
-                throw new ArgumentNullException("variable");
+                throw new ArgumentNullException(nameof(variable));
             if (((DynamicILLocalVariable)variable).ILGenerator != this)
-                throw new ArgumentException("The variable wasn't created by this generator.", "variable");
+                throw new ArgumentException(nameof(variable));
 
             if (variable.Index <= 3)
             {
@@ -1211,9 +1211,9 @@ namespace Jurassic.Compiler
         public override void LoadAddressOfVariable(ILLocalVariable variable)
         {
             if (variable as DynamicILLocalVariable == null)
-                throw new ArgumentNullException("variable");
+                throw new ArgumentNullException(nameof(variable));
             if (((DynamicILLocalVariable)variable).ILGenerator != this)
-                throw new ArgumentException("The variable wasn't created by this generator.", "variable");
+                throw new ArgumentException(nameof(variable));
 
             if (variable.Index < 256)
             {
@@ -1238,9 +1238,9 @@ namespace Jurassic.Compiler
         public override void StoreVariable(ILLocalVariable variable)
         {
             if (variable as DynamicILLocalVariable == null)
-                throw new ArgumentNullException("variable");
+                throw new ArgumentNullException(nameof(variable));
             if (((DynamicILLocalVariable)variable).ILGenerator != this)
-                throw new ArgumentException("The variable wasn't created by this generator.", "variable");
+                throw new ArgumentException(nameof(variable));
 
             if (variable.Index <= 3)
             {
@@ -1606,9 +1606,9 @@ namespace Jurassic.Compiler
         public override void Box(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (type.IsValueType == false)
-                throw new ArgumentException("The type to box must be a value type.", "type");
+                throw new ArgumentException(nameof(type));
 
             // Get the token for the type.
             int token = this.GetToken(type);
@@ -1625,9 +1625,9 @@ namespace Jurassic.Compiler
         public override void Unbox(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (type.IsValueType == false)
-                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
+                throw new ArgumentException(nameof(type));
 
             // Get the token for the type.
             int token = this.GetToken(type);
@@ -1644,9 +1644,9 @@ namespace Jurassic.Compiler
         public override void UnboxAny(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (type.IsValueType == false)
-                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
+                throw new ArgumentException(nameof(type));
 
             // Get the token for the type.
             int token = this.GetToken(type);
@@ -1733,7 +1733,7 @@ namespace Jurassic.Compiler
         public override void NewObject(System.Reflection.ConstructorInfo constructor)
         {
             if (constructor == null)
-                throw new ArgumentNullException("constructor");
+                throw new ArgumentNullException(nameof(constructor));
 
             // Get the argument details.
             var parameters = constructor.GetParameters();
@@ -1761,7 +1761,7 @@ namespace Jurassic.Compiler
         public override void CallStatic(System.Reflection.MethodBase method)
         {
             if (method == null)
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
 
             // Emit the call instruction.
             EmitCall(0x28, method);
@@ -1777,9 +1777,9 @@ namespace Jurassic.Compiler
         public override void CallVirtual(System.Reflection.MethodBase method)
         {
             if (method == null)
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             if (method.IsStatic == true)
-                throw new ArgumentException("Static methods cannot be called using this method.", "method");
+                throw new ArgumentException(nameof(method));
 
             // Emit the callvirt instruction.
             EmitCall(0x6F, method);
@@ -1879,7 +1879,7 @@ namespace Jurassic.Compiler
         public override void LoadField(System.Reflection.FieldInfo field)
         {
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
 
             int token = this.GetToken(field);
             if (field.IsStatic == true)
@@ -1903,7 +1903,7 @@ namespace Jurassic.Compiler
         public override void StoreField(System.Reflection.FieldInfo field)
         {
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
 
             int token = this.GetToken(field);
             if (field.IsStatic == true)
@@ -1930,7 +1930,7 @@ namespace Jurassic.Compiler
         public override void CastClass(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             //if (this.EnableDiagnostics == true && ScriptEngine.LowPrivilegeEnvironment == false)
             //{
@@ -1976,7 +1976,7 @@ namespace Jurassic.Compiler
         public override void IsInstance(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             int token = this.GetToken(type);
             Emit1ByteOpCodeInt32(0x75, 1, 1, token);
             PopStackOperands(VESType.Object);
@@ -1990,7 +1990,7 @@ namespace Jurassic.Compiler
         public override void LoadToken(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             var token = this.GetToken(type);
             Emit1ByteOpCodeInt32(0xD0, 0, 1, token);
             PushStackOperand(VESType.ManagedPointer);
@@ -2004,7 +2004,7 @@ namespace Jurassic.Compiler
         public override void LoadToken(System.Reflection.MethodBase method)
         {
             if (method == null)
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             var token = this.GetToken(method);
             Emit1ByteOpCodeInt32(0xD0, 0, 1, token);
             PushStackOperand(VESType.ManagedPointer);
@@ -2017,7 +2017,7 @@ namespace Jurassic.Compiler
         public override void LoadToken(System.Reflection.FieldInfo field)
         {
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             var token = this.GetToken(field);
             Emit1ByteOpCodeInt32(0xD0, 0, 1, token);
             PushStackOperand(VESType.ManagedPointer);
@@ -2031,7 +2031,7 @@ namespace Jurassic.Compiler
         public override void LoadStaticMethodPointer(System.Reflection.MethodBase method)
         {
             if (method == null)
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             var token = this.GetToken(method);
             Emit2ByteOpCodeInt32(0xFE, 0x06, 0, 1, token);
             PushStackOperand(VESType.NativeInt);
@@ -2046,9 +2046,9 @@ namespace Jurassic.Compiler
         public override void LoadVirtualMethodPointer(System.Reflection.MethodBase method)
         {
             if (method == null)
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             if (method.IsStatic == true)
-                throw new ArgumentException("The given method cannot be static.", "method");
+                throw new ArgumentException(nameof(method));
             var token = this.GetToken(method);
             Emit2ByteOpCodeInt32(0xFE, 0x07, 0, 1, token);
             PushStackOperand(VESType.NativeInt);
@@ -2062,7 +2062,7 @@ namespace Jurassic.Compiler
         public override void InitObject(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             var token = this.GetToken(type);
             Emit2ByteOpCodeInt32(0xFE, 0x15, 1, 0, token);
             PopStackOperands(VESType.NativeInt | VESType.ManagedPointer);
@@ -2081,7 +2081,7 @@ namespace Jurassic.Compiler
         public override void NewArray(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             var token = this.GetToken(type);
             Emit1ByteOpCodeInt32(0x8D, 1, 1, token);
             PopStackOperands(VESType.Int32);
@@ -2095,7 +2095,7 @@ namespace Jurassic.Compiler
         public override void LoadArrayElement(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             switch (Type.GetTypeCode(type))
             {
@@ -2151,7 +2151,7 @@ namespace Jurassic.Compiler
         public override void StoreArrayElement(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             switch (Type.GetTypeCode(type))
             {
@@ -2275,7 +2275,7 @@ namespace Jurassic.Compiler
         public override void BeginCatchBlock(Type exceptionType)
         {
             if (exceptionType == null)
-                throw new ArgumentNullException("exceptionType");
+                throw new ArgumentNullException(nameof(exceptionType));
             if (this.activeExceptionRegions == null || this.activeExceptionRegions.Count == 0)
                 throw new InvalidOperationException("BeginExceptionBlock() must have been called before calling this method.");
 

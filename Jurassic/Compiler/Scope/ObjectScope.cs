@@ -22,7 +22,7 @@ namespace Jurassic.Compiler
         internal static ObjectScope CreateGlobalScope(Library.GlobalObject globalObject)
         {
             if (globalObject == null)
-                throw new ArgumentNullException("globalObject");
+                throw new ArgumentNullException(nameof(globalObject));
             return new ObjectScope(null) { ScopeObject = globalObject };
         }
 

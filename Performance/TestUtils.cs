@@ -109,7 +109,7 @@ namespace Performance
         public static string NormalizeText(string text, string lineBreak = null)
         {
             if (text == null)
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
 
             // Find the maximum number of spaces that is common to each line.
             bool startOfLine = true;

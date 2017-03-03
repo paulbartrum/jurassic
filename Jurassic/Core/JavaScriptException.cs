@@ -180,7 +180,7 @@ namespace Jurassic
         private static ErrorInstance CreateError(ScriptEngine engine, ErrorType type, string message)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
 
             // Get the constructor corresponding to the error name.
             ErrorConstructor constructor;
@@ -208,7 +208,7 @@ namespace Jurassic
                     constructor = engine.ReferenceError;
                     break;
                 default:
-                    throw new ArgumentException($"Unrecognised error type {type}.", "name");
+                    throw new ArgumentException($"Unrecognised error type {type}.", nameof(type));
             }
 
             // Create an error instance.

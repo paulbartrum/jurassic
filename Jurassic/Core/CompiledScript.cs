@@ -14,7 +14,7 @@ namespace Jurassic
         internal CompiledScript(GlobalMethodGenerator methodGen)
         {
             if (methodGen == null)
-                throw new ArgumentNullException("methodGen");
+                throw new ArgumentNullException(nameof(methodGen));
             this.methodGen = methodGen;
         }
 

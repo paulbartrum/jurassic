@@ -25,9 +25,9 @@ namespace Jurassic.Library
         public JSONParser(ScriptEngine engine, JSONLexer lexer)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (lexer == null)
-                throw new ArgumentNullException("lexer");
+                throw new ArgumentNullException(nameof(lexer));
             this.engine = engine;
             this.lexer = lexer;
             this.Consume();

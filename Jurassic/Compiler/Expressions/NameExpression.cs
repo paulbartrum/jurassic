@@ -17,9 +17,9 @@ namespace Jurassic.Compiler
         public NameExpression(Scope scope, string name)
         {
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             this.Scope = scope;
             this.Name = name;
         }

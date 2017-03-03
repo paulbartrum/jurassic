@@ -53,7 +53,7 @@ namespace Jurassic.Library
         public static SparseArray FromDenseArray(object[] array, int length)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             if (length > array.Length)
                 throw new ArgumentOutOfRangeException("length");
             var result = new SparseArray();
