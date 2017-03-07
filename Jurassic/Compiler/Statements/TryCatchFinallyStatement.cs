@@ -98,32 +98,37 @@ namespace Jurassic.Compiler
 
             // Generate code for the catch block.
             ILLocalVariable skipFinallyBlock = null;
-            if (this.CatchBlock != null)
-            {
-                // Begin a catch block.  The exception is on the top of the stack.
-                generator.BeginCatchBlock(typeof(Exception));
+           
+            
+            // Begin a catch block.  The exception is on the top of the stack.
+            generator.BeginCatchBlock(typeof(Exception));
 
-                // Check the exception is catchable by calling CanCatchException(ex).
-                // We need to handle the case where JS code calls into .NET code which then throws
-                // a JavaScriptException from a different ScriptEngine.
-                var endOfIfLabel = generator.CreateLabel();
-                generator.Duplicate();  // ex
-                var exceptionTemporary = generator.CreateTemporaryVariable(typeof(Exception));
-                generator.StoreVariable(exceptionTemporary);
-                EmitHelpers.LoadScriptEngine(generator);
-                generator.LoadVariable(exceptionTemporary);
-                generator.ReleaseTemporaryVariable(exceptionTemporary);
-                generator.Call(ReflectionHelpers.ScriptEngine_CanCatchException);
-                generator.BranchIfTrue(endOfIfLabel);
+            // Check the exception is catchable by calling CanCatchException(ex).
+            // We need to handle the case where JS code calls into .NET code which then throws
+            // a JavaScriptException from a different ScriptEngine.
+            // If CatchBlock is null, we need to rethrow the exception in every case.
+            var endOfIfLabel = generator.CreateLabel();
+            generator.Duplicate();  // ex
+            var exceptionTemporary = generator.CreateTemporaryVariable(typeof(Exception));
+            generator.StoreVariable(exceptionTemporary);
+            EmitHelpers.LoadScriptEngine(generator);
+            generator.LoadVariable(exceptionTemporary);
+            generator.ReleaseTemporaryVariable(exceptionTemporary);
+            generator.Call(ReflectionHelpers.ScriptEngine_CanCatchException);
+            generator.BranchIfTrue(endOfIfLabel);
+            if (this.FinallyBlock != null)
+            {
                 generator.LoadBoolean(true);
-                if (this.FinallyBlock != null)
-                {
-                    skipFinallyBlock = generator.DeclareVariable(typeof(bool), "skipFinallyBlock");
-                    generator.StoreVariable(skipFinallyBlock);
-                }
-                generator.Rethrow();
+                skipFinallyBlock = generator.DeclareVariable(typeof(bool), "skipFinallyBlock");
+                generator.StoreVariable(skipFinallyBlock);
+            }
+            if (this.CatchBlock == null)
+                generator.DefineLabelPosition(endOfIfLabel);
+            generator.Rethrow();
+            if (this.CatchBlock != null)
                 generator.DefineLabelPosition(endOfIfLabel);
 
+            if (this.CatchBlock != null) {
                 // Create a new DeclarativeScope.
                 this.CatchScope.GenerateScopeCreation(generator, optimizationInfo);
 
@@ -152,13 +157,9 @@ namespace Jurassic.Compiler
                 // If an exception was thrown that wasn't handled by the catch block, then don't
                 // run the finally block either.  This prevents user code from being run when a
                 // ThreadAbortException is thrown.
-                var endOfFinallyBlock = generator.CreateLabel();
-                if (skipFinallyBlock != null)
-                {
-                    var endOfSkipFinallyBlockLabel = generator.CreateLabel();
-                    generator.LoadVariable(skipFinallyBlock);
-                    generator.BranchIfTrue(endOfFinallyBlock);
-                }
+                var endOfFinallyBlock = generator.CreateLabel();                
+                generator.LoadVariable(skipFinallyBlock);
+                generator.BranchIfTrue(endOfFinallyBlock);
 
                 var branches = new List<ILLabel>();
                 var previousStackSize = optimizationInfo.LongJumpStackSizeThreshold;
