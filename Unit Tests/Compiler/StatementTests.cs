@@ -456,6 +456,48 @@ namespace UnitTests
                 Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("exceptionHandled"));
                 Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("finallyBlockRan"));
             }
+
+            // The finally block shouldn't run for exceptions other than JavaScriptException.
+            scriptEngine.SetGlobalFunction("test", new Action(() =>
+            {
+                throw new ArgumentException("This is a test.");
+            }));
+            try
+            {
+                scriptEngine.Execute(@"
+                    finallyBlockRan = false;
+                    try {
+                        test();
+                    } finally {
+                        finallyBlockRan = true;
+                    }");
+                Assert.Fail("The exception should bubble out without being caught.");
+            }
+            catch (ArgumentException)
+            {
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("finallyBlockRan"));
+            }
+
+            // The finally block shouldn't run for exceptions from other script engines.
+            scriptEngine.SetGlobalFunction("test", new Action(() =>
+            {
+                throw new JavaScriptException(jurassicScriptEngine, ErrorType.Error, "This is a test.");
+            }));
+            try
+            {
+                scriptEngine.Execute(@"
+                    finallyBlockRan = false;
+                    try {
+                        test();
+                    } finally {
+                        finallyBlockRan = true;
+                    }");
+                Assert.Fail("The exception should bubble out without being caught.");
+            }
+            catch (JavaScriptException)
+            {
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("finallyBlockRan"));
+            }
         }
 
         [TestMethod]
