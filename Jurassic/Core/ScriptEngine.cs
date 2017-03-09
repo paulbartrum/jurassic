@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Jurassic.Library;
 using Jurassic.Compiler;
+using System.ComponentModel;
 
 namespace Jurassic
 {
