@@ -14,7 +14,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Represents a variable declared in a scope.
         /// </summary>
-            internal class DeclaredVariable
+        internal class DeclaredVariable
         {
             // The scope the variable was declared in.
             public Scope Scope;

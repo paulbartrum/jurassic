@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Jurassic.Library;
-using System.ComponentModel;
+using Jurassic.Compiler;
 
 namespace Jurassic
 {
@@ -658,21 +658,6 @@ namespace Jurassic
             set;
         }
 
-#if !WINDOWS_PHONE
-        internal class ReflectionEmitModuleInfo
-        {
-            public System.Reflection.Emit.AssemblyBuilder AssemblyBuilder;
-            public System.Reflection.Emit.ModuleBuilder ModuleBuilder;
-            public int TypeCount;
-        }
-
-        /// <summary>
-        /// Gets or sets information needed by Reflection.Emit.
-        /// </summary>
-        [NonSerialized]
-        internal ReflectionEmitModuleInfo ReflectionEmitInfo;
-#endif //!WINDOWS_PHONE
-
 
 
         //     EXECUTION
@@ -687,24 +672,20 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public CompiledScript Compile(ScriptSource source)
         {
-            var methodGen = new Jurassic.Compiler.GlobalMethodGenerator(
-                this,                               // The script engine
+            var methodGen = new GlobalMethodGenerator(
                 source,                             // The source code.
                 CreateOptions());                   // The compiler options.
 
             // Parse
-            if (this.ParsingStarted != null)
-                this.ParsingStarted(this, EventArgs.Empty);
+            this.ParsingStarted?.Invoke(this, EventArgs.Empty);
             methodGen.Parse();
 
             // Optimize
-            if (this.OptimizationStarted != null)
-                this.OptimizationStarted(this, EventArgs.Empty);
+            this.OptimizationStarted?.Invoke(this, EventArgs.Empty);
             methodGen.Optimize();
 
             // Generate code
-            if (this.CodeGenerationStarted != null)
-                this.CodeGenerationStarted(this, EventArgs.Empty);
+            this.CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
             methodGen.GenerateCode();
             VerifyGeneratedCode();
 
@@ -742,33 +723,35 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public object Evaluate(ScriptSource source)
         {
-            var methodGen = new Jurassic.Compiler.EvalMethodGenerator(
-                this,                               // The script engine
-                this.CreateGlobalScope(),           // The variable scope.
-                source,                             // The source code.
-                CreateOptions(),                    // The compiler options.
-                this.Global);                       // The value of the "this" keyword.
-            
-            // Parse
-            if (this.ParsingStarted != null)
-                this.ParsingStarted(this, EventArgs.Empty);
-            methodGen.Parse();
+            var methodGen = new EvalMethodGenerator(
+                ObjectScope.CreateGlobalScope(this.Global), // The variable scope.
+                source,                                     // The source code.
+                CreateOptions(),                            // The compiler options.
+                this.Global);                               // The value of the "this" keyword.
 
-            // Optimize
-            if (this.OptimizationStarted != null)
-                this.OptimizationStarted(this, EventArgs.Empty);
-            methodGen.Optimize();
+            try
+            {
+                // Parse
+                this.ParsingStarted?.Invoke(this, EventArgs.Empty);
+                methodGen.Parse();
 
-            // Generate code
-            if (this.CodeGenerationStarted != null)
-                this.CodeGenerationStarted(this, EventArgs.Empty);
-            methodGen.GenerateCode();
-            VerifyGeneratedCode();
+                // Optimize
+                this.OptimizationStarted?.Invoke(this, EventArgs.Empty);
+                methodGen.Optimize();
+
+                // Generate code
+                this.CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
+                methodGen.GenerateCode();
+                VerifyGeneratedCode();
+            }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
 
             // Execute
-            if (this.ExecutionStarted != null)
-                this.ExecutionStarted(this, EventArgs.Empty);
-            var result = methodGen.Execute();
+            this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
+            var result = methodGen.Execute(this);
 
             // Normalize the result (convert null to Undefined, double to int, etc).
             return TypeUtilities.NormalizeValue(result);
@@ -827,13 +810,19 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public void Execute(ScriptSource source)
         {
-            // Compile the script.
-            var compiledScript = Compile(source);
+            try
+            {
+                // Compile the script.
+                var compiledScript = Compile(source);
 
-            // ...and execute it.
-            if (this.ExecutionStarted != null)
-                this.ExecutionStarted(this, EventArgs.Empty);
-            compiledScript.Execute();
+                // ...and execute it.
+                this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
+                compiledScript.Execute(this);
+            }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
         }
 
         /// <summary>
@@ -883,9 +872,15 @@ namespace Jurassic
         /// Creates a CompilerOptions instance using the script engine properties.
         /// </summary>
         /// <returns> A populated CompilerOptions instance. </returns>
-        private Compiler.CompilerOptions CreateOptions()
+        private CompilerOptions CreateOptions()
         {
-            return new Compiler.CompilerOptions() { ForceStrictMode = this.ForceStrictMode, EnableDebugging = this.EnableDebugging };
+            return new CompilerOptions()
+            {
+                ForceStrictMode = this.ForceStrictMode,
+                EnableDebugging = this.EnableDebugging,
+                CompatibilityMode = this.CompatibilityMode,
+                EnableILAnalysis = this.EnableILAnalysis,
+            };
         }
 
 
@@ -1085,20 +1080,6 @@ namespace Jurassic
 
 
 
-        //     SCOPE
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Creates a new global scope.
-        /// </summary>
-        /// <returns> A new global scope, with no declared variables. </returns>
-        internal Compiler.ObjectScope CreateGlobalScope()
-        {
-            return Compiler.ObjectScope.CreateGlobalScope(this.Global);
-        }
-
-
-
         //     HIDDEN CLASS INITIALIZATION
         //_________________________________________________________________________________________
 
@@ -1118,7 +1099,7 @@ namespace Jurassic
         //private class EvalCacheKey
         //{
         //    public string Code;
-        //    public Compiler.Scope Scope;
+        //    public Scope Scope;
         //    public bool StrictMode;
 
         //    public override int GetHashCode()
@@ -1128,7 +1109,7 @@ namespace Jurassic
         //        var scope = this.Scope;
         //        do
         //        {
-        //            if (scope is Compiler.DeclarativeScope)
+        //            if (scope is DeclarativeScope)
         //                hashCode ^= bitValue;
         //            scope = scope.ParentScope;
         //            bitValue *= 2;
@@ -1176,28 +1157,27 @@ namespace Jurassic
         /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        internal object Eval(string code, Compiler.Scope scope, object thisObject, bool strictMode)
+        internal object Eval(string code, Scope scope, object thisObject, bool strictMode)
         {
             // Check if the cache contains the eval already.
             //var key = new EvalCacheKey() { Code = code, Scope = scope, StrictMode = strictMode };
             //WeakReference cachedEvalGenRef;
             //if (evalCache.TryGetValue(key, out cachedEvalGenRef) == true)
             //{
-            //    var cachedEvalGen = (Compiler.EvalMethodGenerator)cachedEvalGenRef.Target;
+            //    var cachedEvalGen = (EvalMethodGenerator)cachedEvalGenRef.Target;
             //    if (cachedEvalGen != null)
             //    {
             //        // Replace the "this object" before running.
             //        cachedEvalGen.ThisObject = thisObject;
 
             //        // Execute the cached code.
-            //        return ((Compiler.EvalMethodGenerator)cachedEvalGen).Execute();
+            //        return ((EvalMethodGenerator)cachedEvalGen).Execute();
             //    }
             //}
 
             // Parse the eval string into an AST.
-            var options = new Compiler.CompilerOptions() { ForceStrictMode = strictMode };
-            var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
-                this,                                                   // The script engine.
+            var options = new CompilerOptions() { ForceStrictMode = strictMode };
+            var evalGen = new EvalMethodGenerator(
                 scope,                                                  // The scope to run the code in.
                 new StringScriptSource(code, "eval"),                   // The source code to execute.
                 options,                                                // Options.
@@ -1210,8 +1190,17 @@ namespace Jurassic
             //// Add the eval method generator to the cache.
             //evalCache[key] = new WeakReference(evalGen);
 
-            // Compile and run the eval code.
-            return evalGen.Execute();
+            try
+            {
+
+                // Compile and run the eval code.
+                return evalGen.Execute(this);
+
+            }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
         }
 
 
