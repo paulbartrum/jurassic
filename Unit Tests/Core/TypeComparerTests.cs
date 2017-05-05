@@ -127,6 +127,7 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.Equals(engine.String.Construct("5.5"), engine.String.Construct("5.5")));
             Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct("5.5"), 5.5));
             Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct(""), ""));
+
         }
 
         [TestMethod]
