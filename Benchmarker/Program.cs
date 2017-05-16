@@ -76,7 +76,7 @@ namespace Benchmarker
         static void Main(string[] args)
         {
             // Up the thread priority so nothing gets in the way of the benchmarking.
-            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+            // System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
             // 61.3242ms
             var stopWatch = System.Diagnostics.Stopwatch.StartNew();

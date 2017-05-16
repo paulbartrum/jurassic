@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3C73BC26-5032-48A5-B32E-01639B5A4D5E}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Documentation\ECMA-262 (ECMAScript 5.1).pdf = Documentation\ECMA-262 (ECMAScript 5.1).pdf
 		Documentation\ECMA-262 (ECMAScript 6).pdf = Documentation\ECMA-262 (ECMAScript 6).pdf
 		Documentation\ECMA-335 (CLI).pdf = Documentation\ECMA-335 (CLI).pdf
-		global.json = global.json
 		NuGet\Jurassic.nuspec = NuGet\Jurassic.nuspec
 		LICENSE.txt = LICENSE.txt
 		nuget.config = nuget.config
@@ -17,15 +16,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attribute Code Generation", "Attribute Code Generation\Attribute Code Generation.csproj", "{AC0AC175-980A-43F2-B528-BD74214D6ECB}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Jurassic", "Jurassic\Jurassic.xproj", "{12D83CAD-7086-4719-992F-C4962E933E21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jurassic", "Jurassic\Jurassic.csproj", "{12D83CAD-7086-4719-992F-C4962E933E21}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "UnitTests", "UnitTests\UnitTests.xproj", "{B0D0F980-2741-4D85-9D82-7F09ED470EB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{B0D0F980-2741-4D85-9D82-7F09ED470EB1}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Benchmarker", "Benchmarker\Benchmarker.xproj", "{9D1D7022-9301-4F5F-8D8B-2E99E86B1F6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarker", "Benchmarker\Benchmarker.csproj", "{9D1D7022-9301-4F5F-8D8B-2E99E86B1F6D}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TestSuiteRunner", "TestSuiteRunner\TestSuiteRunner.xproj", "{2EF7140C-2729-49B9-88EF-70DFD04AE40B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSuiteRunner", "TestSuiteRunner\TestSuiteRunner.csproj", "{2EF7140C-2729-49B9-88EF-70DFD04AE40B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Performance", "Performance\Performance.xproj", "{F17DCB4C-9CDF-4050-B6EC-E4B6A69461E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Performance", "Performance\Performance.csproj", "{F17DCB4C-9CDF-4050-B6EC-E4B6A69461E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -215,17 +215,23 @@ namespace Jurassic.Compiler
             }
             else
             {
-#if NETSTANDARD1_6
-
+#if WINDOWS_PHONE
+                throw new NotImplementedException();
+#else
                 // Debugging or low trust path.
-                ScriptEngine.ReflectionEmitModuleInfo reflectionEmitInfo = this.Engine.ReflectionEmitInfo;
+                ReflectionEmitModuleInfo reflectionEmitInfo = ReflectionEmitInfo;
                 if (reflectionEmitInfo == null)
                 {
-                    reflectionEmitInfo = new ScriptEngine.ReflectionEmitModuleInfo();
+                    reflectionEmitInfo = new ReflectionEmitModuleInfo();
 
                     // Create a dynamic assembly and module.
+#if NETSTANDARD1_6
                     reflectionEmitInfo.AssemblyBuilder = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
                         new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
+#else
+                    reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
+                        new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
+#endif
 
                     // Mark the assembly as debuggable.  This must be done before the module is created.
                     var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetTypeInfo().GetConstructor(
@@ -237,74 +243,11 @@ namespace Jurassic.Compiler
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
                     // Create a dynamic module.
+#if NETSTANDARD1_6
                     reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module");
-
-                    this.Engine.ReflectionEmitInfo = reflectionEmitInfo;
-                }
-
-                // Create a new type to hold our method.
-                var typeBuilder = reflectionEmitInfo.ModuleBuilder.DefineType("JavaScriptClass" + reflectionEmitInfo.TypeCount.ToString(), System.Reflection.TypeAttributes.Public | System.Reflection.TypeAttributes.Class);
-                reflectionEmitInfo.TypeCount++;
-
-                // Create a method.
-                var methodBuilder = typeBuilder.DefineMethod(this.GetMethodName(),
-                    System.Reflection.MethodAttributes.HideBySig | System.Reflection.MethodAttributes.Static | System.Reflection.MethodAttributes.Public,
-                    typeof(object), GetParameterTypes());
-
-                // Generate the IL for the method.
-                generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
-
-                if (this.Engine.EnableILAnalysis == true)
-                {
-                    // Replace the generator with one that logs.
-                    generator = new LoggingILGenerator(generator);
-                }
-
-#if NET40
-                if (this.Source.Path != null && this.Options.EnableDebugging == true)
-                {
-                    // Initialize the debugging information.
-                    optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, COMHelpers.LanguageType, COMHelpers.LanguageVendor, COMHelpers.DocumentType);
-                    methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
-                    methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
-                    methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
-                }
-#endif
-                optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
-                GenerateCode(generator, optimizationInfo);
-                generator.Complete();
-
-                // Bake it.
-                var type = typeBuilder.CreateTypeInfo();
-                var methodInfo = type.GetMethod(this.GetMethodName());
-                var dlegate = methodInfo.CreateDelegate(this.GetDelegate());
-                this.GeneratedMethod = new GeneratedMethod(dlegate, optimizationInfo.NestedFunctions);
 #else
-#if WINDOWS_PHONE || !NET40
-                throw new NotImplementedException();
-#else
-
-                // Debugging or low trust path.
-                ReflectionEmitModuleInfo reflectionEmitInfo = ReflectionEmitInfo;
-                if (reflectionEmitInfo == null)
-                {
-                    reflectionEmitInfo = new ReflectionEmitModuleInfo();
-
-                    // Create a dynamic assembly and module.
-                    reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
-                        new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
-
-                    // Mark the assembly as debuggable.  This must be done before the module is created.
-                    var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetConstructor(
-                        new Type[] { typeof(System.Diagnostics.DebuggableAttribute.DebuggingModes) });
-                    reflectionEmitInfo.AssemblyBuilder.SetCustomAttribute(
-                        new System.Reflection.Emit.CustomAttributeBuilder(debuggableAttributeConstructor,
-                            new object[] { 
-                                System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations | 
-                                System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
-
-                    // Create a dynamic module.
                     reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
+#endif
 
                     ReflectionEmitInfo = reflectionEmitInfo;
                 }
@@ -327,29 +270,32 @@ namespace Jurassic.Compiler
                     generator = new LoggingILGenerator(generator);
                 }
 
-#if NET40
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
                     // Initialize the debugging information.
+#if !NETSTANDARD1_6
                     optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, COMHelpers.LanguageType, COMHelpers.LanguageVendor, COMHelpers.DocumentType);
+#endif
                     methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
                     methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
                     methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
                 }
-#endif
                 optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
                 GenerateCode(generator, optimizationInfo);
                 generator.Complete();
 
                 // Bake it.
-                var type = typeBuilder.CreateType();
+                var type = typeBuilder.CreateTypeInfo();
                 var methodInfo = type.GetMethod(this.GetMethodName());
+#if NETSTANDARD1_6
+                this.GeneratedMethod = new GeneratedMethod(methodInfo.CreateDelegate(GetDelegate()), optimizationInfo.NestedFunctions);
+#else
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
-#endif //NETSTANDARD1_6
+#endif
 #endif //WINDOWS_PHONE
-            }
+                }
 
-            if (this.Options.EnableILAnalysis == true)
+                if (this.Options.EnableILAnalysis == true)
             {
                 // Store the disassembled IL so it can be retrieved for analysis purposes.
                 this.GeneratedMethod.DisassembledIL = generator.ToString();
