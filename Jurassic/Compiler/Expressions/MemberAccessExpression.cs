@@ -85,7 +85,7 @@ namespace Jurassic.Compiler
             {
                 var rhs = this.GetOperand(1) as NameExpression;
                 if (rhs == null)
-                    throw new JavaScriptException(optimizationInfo.Engine, ErrorType.SyntaxError, "Invalid member access", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+                    throw new SyntaxErrorException("Invalid member access", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
                 propertyName = rhs.Name;
                 return TypeOfMemberAccess.Static;
             }

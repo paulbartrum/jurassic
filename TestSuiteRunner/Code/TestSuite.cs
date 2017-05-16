@@ -41,7 +41,7 @@
 //        public TestSuite(Func<string, Stream> openFile)
 //        {
 //            if (openFile == null)
-//                throw new ArgumentNullException("openFile");
+//                throw new ArgumentNullException(nameof(openFile));
 
 //            // Init collection.
 //            this.IncludedTests = new List<string>();
@@ -321,7 +321,7 @@
 //            public ScriptEngineWrapper(ScriptEngine engine)
 //            {
 //                if (engine == null)
-//                    throw new ArgumentNullException("engine");
+//                    throw new ArgumentNullException(nameof(engine));
 //                this.Engine = engine;
 //            }
 

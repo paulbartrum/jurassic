@@ -23,7 +23,7 @@ namespace Jurassic.Library
             : base(targetFunction.Prototype)
         {
             if (targetFunction == null)
-                throw new ArgumentNullException("targetFunction");
+                throw new ArgumentNullException(nameof(targetFunction));
             if (boundArguments == null)
                 boundArguments = new object[0];
             this.TargetFunction = targetFunction;

@@ -282,7 +282,7 @@ namespace Jurassic
         public static ObjectInstance GetIterator(ScriptEngine engine, ObjectInstance iterable)
         {
             if (iterable == null)
-                throw new ArgumentNullException("iterable");
+                throw new ArgumentNullException(nameof(iterable));
 
             // Get the iterator symbol value.
             var iteratorValue = iterable[engine.Symbol.Iterator];
@@ -310,7 +310,7 @@ namespace Jurassic
         public static IEnumerable<object> Iterate(ScriptEngine engine, ObjectInstance iterator)
         {
             if (iterator == null)
-                throw new ArgumentNullException("iterator");
+                throw new ArgumentNullException(nameof(iterator));
 
             // Okay, we have the iterator.  Now get a reference to the next function.
             var nextFunc = iterator["next"] as FunctionInstance;

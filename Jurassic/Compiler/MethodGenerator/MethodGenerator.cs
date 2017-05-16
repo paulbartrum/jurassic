@@ -11,34 +11,21 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new MethodGenerator instance.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="scope"> The initial scope. </param>
         /// <param name="source"> The source of javascript code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        protected MethodGenerator(ScriptEngine engine, Scope scope, ScriptSource source, CompilerOptions options)
+        protected MethodGenerator(Scope scope, ScriptSource source, CompilerOptions options)
         {
-            if (engine == null)
-                throw new ArgumentNullException("engine");
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (options == null)
-                throw new ArgumentNullException("options");
-            this.Engine = engine;
+                throw new ArgumentNullException(nameof(options));
             this.InitialScope = scope;
             this.Source = source;
             this.Options = options;
             this.StrictMode = this.Options.ForceStrictMode;
-        }
-
-        /// <summary>
-        /// Gets a reference to the script engine.
-        /// </summary>
-        public ScriptEngine Engine
-        {
-            get;
-            private set;
         }
 
         /// <summary>
@@ -158,6 +145,18 @@ namespace Jurassic.Compiler
         {
         }
 
+        internal class ReflectionEmitModuleInfo
+        {
+            public System.Reflection.Emit.AssemblyBuilder AssemblyBuilder;
+            public System.Reflection.Emit.ModuleBuilder ModuleBuilder;
+            public int TypeCount;
+        }
+
+        /// <summary>
+        /// Gets or sets information needed by Reflection.Emit.
+        /// </summary>
+        private static ReflectionEmitModuleInfo ReflectionEmitInfo;
+
         /// <summary>
         /// Generates IL for the script.
         /// </summary>
@@ -171,7 +170,7 @@ namespace Jurassic.Compiler
             }
 
             // Initialize global code-gen information.
-            var optimizationInfo = new OptimizationInfo(this.Engine);
+            var optimizationInfo = new OptimizationInfo();
             optimizationInfo.AbstractSyntaxTree = this.AbstractSyntaxTree;
             optimizationInfo.StrictMode = this.StrictMode;
             optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
@@ -197,7 +196,7 @@ namespace Jurassic.Compiler
                 generator = new DynamicILGenerator(dynamicMethod);
 #endif
 
-                if (this.Engine.EnableILAnalysis == true)
+                if (this.Options.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
                     generator = new LoggingILGenerator(generator);
@@ -286,10 +285,10 @@ namespace Jurassic.Compiler
 #else
 
                 // Debugging or low trust path.
-                ScriptEngine.ReflectionEmitModuleInfo reflectionEmitInfo = this.Engine.ReflectionEmitInfo;
+                ReflectionEmitModuleInfo reflectionEmitInfo = ReflectionEmitInfo;
                 if (reflectionEmitInfo == null)
                 {
-                    reflectionEmitInfo = new ScriptEngine.ReflectionEmitModuleInfo();
+                    reflectionEmitInfo = new ReflectionEmitModuleInfo();
 
                     // Create a dynamic assembly and module.
                     reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
@@ -307,7 +306,7 @@ namespace Jurassic.Compiler
                     // Create a dynamic module.
                     reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
 
-                    this.Engine.ReflectionEmitInfo = reflectionEmitInfo;
+                    ReflectionEmitInfo = reflectionEmitInfo;
                 }
 
                 // Create a new type to hold our method.
@@ -322,7 +321,7 @@ namespace Jurassic.Compiler
                 // Generate the IL for the method.
                 generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
 
-                if (this.Engine.EnableILAnalysis == true)
+                if (this.Options.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
                     generator = new LoggingILGenerator(generator);
@@ -350,7 +349,7 @@ namespace Jurassic.Compiler
 #endif //WINDOWS_PHONE
             }
 
-            if (this.Engine.EnableILAnalysis == true)
+            if (this.Options.EnableILAnalysis == true)
             {
                 // Store the disassembled IL so it can be retrieved for analysis purposes.
                 this.GeneratedMethod.DisassembledIL = generator.ToString();
@@ -365,12 +364,22 @@ namespace Jurassic.Compiler
         protected abstract void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo);
 
         /// <summary>
+        /// Represents a delegate that is used for global code.  For internal use only.
+        /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
+        /// <param name="scope"> The scope (global or eval context) or the parent scope (function
+        /// context). </param>
+        /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
+        /// <returns> The result of calling the method. </returns>
+        protected delegate object GlobalCodeDelegate(ScriptEngine engine, Scope scope, object thisObject);
+
+        /// <summary>
         /// Retrieves a delegate for the generated method.
         /// </summary>
         /// <returns> The delegate type that matches the method parameters. </returns>
         protected virtual Type GetDelegate()
         {
-            return typeof(Func<ScriptEngine, Scope, object, object>);
+            return typeof(GlobalCodeDelegate);
         }
     }
 

@@ -31,7 +31,7 @@ namespace Jurassic.Compiler
         public BinderMethod(MethodBase method)
         {
             if (method == null)
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             this.Method = method;
         }
 
@@ -214,7 +214,7 @@ namespace Jurassic.Compiler
         public virtual IEnumerable<BinderArgument> GetArguments(int argumentCount)
         {
             if (IsArgumentCountCompatible(argumentCount) == false)
-                throw new ArgumentException("This method cannot be called with the given number of arguments.", "argumentCount");
+                throw new ArgumentException(nameof(argumentCount));
 
             // The first argument is the "this" object, if the method is an instance method.
             if (this.Method is MethodInfo && this.Method.IsStatic == false)
@@ -248,7 +248,7 @@ namespace Jurassic.Compiler
         public IEnumerable<BinderArgument> GenerateArguments(ILGenerator generator, int argumentCount)
         {
             if (generator == null)
-                throw new ArgumentNullException("generator");
+                throw new ArgumentNullException(nameof(generator));
 
             int paramArrayIndex = 0;
             foreach (var argument in this.GetArguments(argumentCount))

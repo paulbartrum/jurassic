@@ -77,7 +77,7 @@ namespace Jurassic.Library
         public TypedArrayInstance From(object[] source)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             var result = new TypedArrayInstance(this.InstancePrototype, this.type,
                 Engine.ArrayBuffer.Construct(source.Length * BytesPerElement), 0, source.Length);
             for (int i = 0; i < source.Length; i ++)

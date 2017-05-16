@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Jurassic.Compiler;
 
 namespace Jurassic.Library
 {
@@ -13,7 +12,7 @@ namespace Jurassic.Library
     /// <param name="functionObject"> The function object. </param>
     /// <param name="arguments"> The arguments that were passed to the function. </param>
     /// <returns> The result of calling the method. </returns>
-    public delegate object FunctionDelegate(ScriptEngine engine, Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments);
+    public delegate object FunctionDelegate(ScriptEngine engine, Scope scope, object thisObject, FunctionInstance functionObject, object[] arguments);
 
     /// <summary>
     /// Called once per element by Array.prototype.every, Array.prototype.some and Array.prototype.filter.

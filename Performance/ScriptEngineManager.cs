@@ -32,7 +32,7 @@ namespace Performance
         public ScriptEngineManager(string currentDir, Action<ScriptEngine> initCallback = null)
         {
             if (currentDir == null)
-                throw new ArgumentNullException("currentDir");
+                throw new ArgumentNullException(nameof(currentDir));
             this.currentDir = currentDir;
             this.initCallback = initCallback;
         }

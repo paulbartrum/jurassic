@@ -28,7 +28,7 @@ namespace Jurassic
         public StringScriptSource(string code, string path)
         {
             if (code == null)
-                throw new ArgumentNullException("code");
+                throw new ArgumentNullException(nameof(code));
             this.code = code;
             this.path = path;
         }

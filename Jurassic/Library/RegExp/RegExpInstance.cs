@@ -30,7 +30,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (pattern == null)
-                throw new ArgumentNullException("pattern");
+                throw new ArgumentNullException(nameof(pattern));
 
             try
             {
@@ -56,7 +56,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (existingInstance == null)
-                throw new ArgumentNullException("existingInstance");
+                throw new ArgumentNullException(nameof(existingInstance));
             this.value = existingInstance.value;
             this.globalSearch = existingInstance.globalSearch;
 

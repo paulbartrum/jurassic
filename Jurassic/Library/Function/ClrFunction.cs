@@ -31,9 +31,9 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (instancePrototype == null)
-                throw new ArgumentNullException("instancePrototype");
+                throw new ArgumentNullException(nameof(instancePrototype));
 
             // This is a constructor so ignore the "this" parameter when the function is called.
             thisBinding = this;
@@ -213,7 +213,7 @@ namespace Jurassic.Library
         //    // Delegate types have an Invoke method containing the relevant parameters.
         //    MethodInfo adapterInvokeMethod = typeof(T).GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
         //    if (adapterInvokeMethod == null)
-        //        throw new ArgumentException("The type parameter T must be delegate type.", "T");
+        //        throw new ArgumentException(nameof(T));
 
         //    // Get the argument types.
         //    Type[] argumentTypes = adapterInvokeMethod.GetParameters().Select(p => p.ParameterType).ToArray();

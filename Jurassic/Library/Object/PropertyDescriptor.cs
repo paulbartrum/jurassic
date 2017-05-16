@@ -283,7 +283,7 @@ namespace Jurassic.Library
         public ObjectInstance ToObject(ScriptEngine engine)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             var result = engine.Object.Construct();
             if (this.IsAccessor == false)
             {

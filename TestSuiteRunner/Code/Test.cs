@@ -45,11 +45,11 @@
 //        public Test(TestSuite suite, string path, string fileContents)
 //        {
 //            if (suite == null)
-//                throw new ArgumentNullException("suite");
+//                throw new ArgumentNullException(nameof(suite));
 //            if (path == null)
-//                throw new ArgumentNullException("path");
+//                throw new ArgumentNullException(nameof(path));
 //            if (fileContents == null)
-//                throw new ArgumentNullException("fileContents");
+//                throw new ArgumentNullException(nameof(fileContents));
 //            this.Suite = suite;
 //            this.Path = path;
 

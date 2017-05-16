@@ -32,9 +32,9 @@ namespace Jurassic.Library
         private static ObjectInstance GetPrototypeObject(ScriptEngine engine, object instance)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (instance == null)
-                throw new ArgumentNullException("instance");
+                throw new ArgumentNullException(nameof(instance));
             return ClrInstanceTypeWrapper.FromCache(engine, instance.GetType());
         }
 

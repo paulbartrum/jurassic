@@ -49,6 +49,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo ScriptEngine_RegExp;
         internal static MethodInfo ScriptEngine_Array;
         internal static MethodInfo ScriptEngine_Object;
+        internal static MethodInfo ScriptEngine_CanCatchException;
         internal static MethodInfo Global_Eval;
 
         internal static ConstructorInfo String_Constructor_Char_Int;
@@ -206,6 +207,7 @@ namespace Jurassic.Compiler
             ScriptEngine_RegExp = GetInstanceMethod(typeof(ScriptEngine), "get_RegExp");
             ScriptEngine_Array = GetInstanceMethod(typeof(ScriptEngine), "get_Array");
             ScriptEngine_Object = GetInstanceMethod(typeof(ScriptEngine), "get_Object");
+            ScriptEngine_CanCatchException = GetInstanceMethod(typeof(ScriptEngine), "CanCatchException", typeof(Exception));
             Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(ScriptEngine), typeof(object), typeof(Scope), typeof(object), typeof(bool));
 
             String_Constructor_Char_Int = GetConstructor(typeof(string), typeof(char), typeof(int));

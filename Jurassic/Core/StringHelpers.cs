@@ -22,9 +22,9 @@ namespace Jurassic
         internal static string Join<T>(string separator, IEnumerable<T> values)
         {
             if (separator == null)
-                throw new ArgumentNullException("separator");
+                throw new ArgumentNullException(nameof(separator));
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             var result = new StringBuilder();
             bool first = true;
             foreach (object value in values)

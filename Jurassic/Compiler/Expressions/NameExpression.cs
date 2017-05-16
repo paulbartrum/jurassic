@@ -17,9 +17,9 @@ namespace Jurassic.Compiler
         public NameExpression(Scope scope, string name)
         {
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             this.Scope = scope;
             this.Name = name;
         }
@@ -618,7 +618,7 @@ namespace Jurassic.Compiler
         {
             // Deleting a variable is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
-                throw new JavaScriptException(optimizationInfo.Engine, ErrorType.SyntaxError, string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name), optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+                throw new SyntaxErrorException(string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name), optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
 
             var endOfDelete = generator.CreateLabel();
             var scope = this.Scope;

@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
+using Jurassic.Library;
 
 namespace UnitTests
 {
@@ -401,6 +402,102 @@ namespace UnitTests
             Assert.AreEqual(6, Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { throw 5; } catch (e) { j ++; } finally { j ++; continue; } j = 0; } j"));
             Assert.AreEqual(4, Evaluate("var j = 0; try { for (var i = 0; i < 3; i ++) { j ++; continue; j ++; } } finally { j ++; } j"));
             Assert.AreEqual(4, Evaluate("var j = 0; try { j ++ } finally { for (var i = 0; i < 3; i ++) { j ++; continue; j ++; } } j"));
+
+            var scriptEngine = new ScriptEngine();
+
+            // Catch should not catch exceptions other than JavaScriptException.
+            // AND if the catch block is not run then the finally block shouldn't run either.
+            scriptEngine.SetGlobalFunction("test", new Action(() =>
+            {
+                throw new ArgumentException("This is a test.");
+            }));
+            try
+            {
+                scriptEngine.Execute(@"
+                    catchBlockRan = false;
+                    finallyBlockRan = false;
+                    try {
+                        test();
+                    } catch (ex) {
+                        catchBlockRan = true;
+                    } finally {
+                        finallyBlockRan = true;
+                    }");
+                Assert.Fail("The exception should bubble out without being caught.");
+        }
+            catch (ArgumentException)
+            {
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("exceptionHandled"));
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("finallyBlockRan"));
+            }
+
+            // Catch should not catch exceptions from other script engines.
+            // AND if the catch block is not run then the finally block shouldn't run either.
+            scriptEngine.SetGlobalFunction("test", new Action(() =>
+            {
+                throw new JavaScriptException(jurassicScriptEngine, ErrorType.Error, "This is a test.");
+            }));
+            try
+            {
+                scriptEngine.Execute(@"
+                    catchBlockRan = false;
+                    finallyBlockRan = false;
+                    try {
+                        test();
+                    } catch (ex) {
+                        catchBlockRan = true;
+                    } finally {
+                        finallyBlockRan = true;
+                    }");
+                Assert.Fail("The exception should bubble out without being caught.");
+            }
+            catch (JavaScriptException)
+            {
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("exceptionHandled"));
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("finallyBlockRan"));
+            }
+
+            // The finally block shouldn't run for exceptions other than JavaScriptException.
+            scriptEngine.SetGlobalFunction("test", new Action(() =>
+            {
+                throw new ArgumentException("This is a test.");
+            }));
+            try
+            {
+                scriptEngine.Execute(@"
+                    finallyBlockRan = false;
+                    try {
+                        test();
+                    } finally {
+                        finallyBlockRan = true;
+                    }");
+                Assert.Fail("The exception should bubble out without being caught.");
+            }
+            catch (ArgumentException)
+            {
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("finallyBlockRan"));
+            }
+
+            // The finally block shouldn't run for exceptions from other script engines.
+            scriptEngine.SetGlobalFunction("test", new Action(() =>
+            {
+                throw new JavaScriptException(jurassicScriptEngine, ErrorType.Error, "This is a test.");
+            }));
+            try
+            {
+                scriptEngine.Execute(@"
+                    finallyBlockRan = false;
+                    try {
+                        test();
+                    } finally {
+                        finallyBlockRan = true;
+                    }");
+                Assert.Fail("The exception should bubble out without being caught.");
+            }
+            catch (JavaScriptException)
+            {
+                Assert.AreEqual(false, scriptEngine.GetGlobalValue<bool>("finallyBlockRan"));
+            }
         }
 
         [TestMethod]

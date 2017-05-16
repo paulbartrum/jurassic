@@ -16,7 +16,7 @@ namespace Jurassic.Compiler
         private KeywordToken(string name)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             this.Name = name;
         }
 

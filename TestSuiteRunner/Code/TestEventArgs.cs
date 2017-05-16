@@ -44,11 +44,11 @@
 //        public TestEventArgs(TestRunStatus status, Test test, bool strictMode, Exception failureException = null)
 //        {
 //            if (test == null)
-//                throw new ArgumentNullException("test");
+//                throw new ArgumentNullException(nameof(test));
 //            if (status == TestRunStatus.Failed && failureException == null)
-//                throw new ArgumentNullException("failureException");
+//                throw new ArgumentNullException(nameof(failureException));
 //            if (status != TestRunStatus.Failed && failureException != null)
-//                throw new ArgumentException("failureException should be null", "failureException");
+//                throw new ArgumentException(nameof(failureException));
 //            this.Status = status;
 //            this.Test = test;
 //            this.StrictMode = strictMode;
