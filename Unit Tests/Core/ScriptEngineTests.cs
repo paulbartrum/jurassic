@@ -87,6 +87,12 @@ namespace UnitTests
             Assert.AreEqual(true, engine.Evaluate("test.b() === 6"));
             engine.SetGlobalValue("test", new InheritedObjectInstance2(engine));
             Assert.AreEqual(true, engine.Evaluate("test.a() === 7"));
+            engine.SetGlobalValue("test", null);
+            Assert.AreEqual(true, engine.Evaluate("test === null"));
+            engine.SetGlobalValue("test", Null.Value);
+            Assert.AreEqual(true, engine.Evaluate("test === null"));
+            engine.SetGlobalValue("test", Undefined.Value);
+            Assert.AreEqual(true, engine.Evaluate("test === undefined"));
         }
 
         private class TestClass

@@ -945,12 +945,10 @@ namespace Jurassic
         {
             if (variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
 
             if (value == null)
                 value = Null.Value;
-            else
+            else if (value != Undefined.Value && value != Null.Value)
             {
                 switch (Type.GetTypeCode(value.GetType()))
                 {
