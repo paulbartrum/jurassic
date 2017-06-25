@@ -16,11 +16,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5</DefineConstants>
-    <DocumentationFile>bin\Debug\netstandard1.6\Jurassic.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard1.5\Jurassic.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard1.6\Jurassic.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard1.5\Jurassic.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
