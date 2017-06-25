@@ -115,7 +115,7 @@ namespace Jurassic.Compiler
 
 
                         case TypeCode.Empty:
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
                         case TypeCode.DBNull:
 #endif
                             throw new NotSupportedException(string.Format("{0} is not a supported parameter type.", outputType));

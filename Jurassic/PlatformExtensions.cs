@@ -8,7 +8,7 @@ namespace Jurassic
 {
     internal static class PlatformExtensions
     {
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
         public static Type GetTypeInfo(this Type type)
         {
             return type;
@@ -22,7 +22,7 @@ namespace Jurassic
 
         public static bool HasCustomAttributes<TAttribute>(this ParameterInfo param) where TAttribute : Attribute
         {
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
             return Attribute.IsDefined(param, typeof(TAttribute));
 #else
             return param.GetCustomAttributes(typeof(ParamArrayAttribute), true).Any();
@@ -39,7 +39,7 @@ namespace Jurassic
             return member.GetCustomAttributes(typeof(TAttribute), inherit).Cast<TAttribute>().FirstOrDefault();
         }
 
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
         public static ConstructorInfo GetConstructor(this TypeInfo type, BindingFlags flags, object binder, Type[] parameterTypes, object parameterModifiers)
         {
             ConstructorInfo[] constructors = type.GetConstructors(flags).Where(c => c.GetParameters().Count() == parameterTypes.Length).ToArray();
@@ -85,7 +85,7 @@ namespace Jurassic
 
     }
 
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
     internal sealed class StackOverflowException : Exception
     {
         public StackOverflowException(string message) : base(message) { }

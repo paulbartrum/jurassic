@@ -206,7 +206,7 @@ namespace Jurassic.Compiler
                 if (ecmaScript3LookupTable == null)
                 {
                     lookupTable = InitializeLookupTable(ecmaScript3ReservedWords);
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
                     System.Threading.Interlocked.MemoryBarrier();
 #else
                     System.Threading.Thread.MemoryBarrier();
@@ -221,7 +221,7 @@ namespace Jurassic.Compiler
                 if (ecmaScript5LookupTable == null)
                 {
                     lookupTable = InitializeLookupTable(new Token[0]);
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
                     System.Threading.Interlocked.MemoryBarrier();
 #else
                     System.Threading.Thread.MemoryBarrier();
@@ -236,7 +236,7 @@ namespace Jurassic.Compiler
                 if (strictModeLookupTable == null)
                 {
                     lookupTable = InitializeLookupTable(strictModeReservedWords);
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
                     System.Threading.Interlocked.MemoryBarrier();
 #else
                     System.Threading.Thread.MemoryBarrier();

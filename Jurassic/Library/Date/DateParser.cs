@@ -163,8 +163,8 @@ namespace Jurassic.Library
                 var temp1 = PopulateDayOfWeekNames();
                 var temp2 = PopulateMonthNames();
                 var temp3 = PopulateTimeZones();
-#if NETSTANDARD1_6
-                    System.Threading.Interlocked.MemoryBarrier();
+#if NETSTANDARD1_5
+                System.Threading.Interlocked.MemoryBarrier();
 #else
                 System.Threading.Thread.MemoryBarrier();
 #endif
@@ -338,7 +338,7 @@ namespace Jurassic.Library
         /// </summary>
         private static HashSet<string> PopulateDayOfWeekNames()
         {
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
             var result = new HashSet<string>(System.Globalization.CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(System.Globalization.CompareOptions.IgnoreCase));
 #else
             var result = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
@@ -367,7 +367,7 @@ namespace Jurassic.Library
         /// </summary>
         private static Dictionary<string, int> PopulateMonthNames()
         {
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
             var monthNames = new Dictionary<string, int>(48, System.Globalization.CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(System.Globalization.CompareOptions.IgnoreCase));
 #else
             var monthNames = new Dictionary<string, int>(48, StringComparer.InvariantCultureIgnoreCase);
@@ -397,7 +397,7 @@ namespace Jurassic.Library
         private static Dictionary<string, int> PopulateTimeZones()
         {
 
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
             var result = new Dictionary<string, int>(15, System.Globalization.CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(System.Globalization.CompareOptions.IgnoreCase))
 #else
             var result = new Dictionary<string, int>(15, StringComparer.InvariantCultureIgnoreCase)

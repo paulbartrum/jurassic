@@ -912,7 +912,7 @@ namespace Jurassic.Compiler
         /// <c>false</c> otherwise. </returns>
         private static bool IsIdentifierStartChar(int c)
         {
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
             UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory((char)c);
 #else
             UnicodeCategory cat = char.GetUnicodeCategory((char)c);
@@ -934,7 +934,7 @@ namespace Jurassic.Compiler
         /// <c>false</c> otherwise. </returns>
         private static bool IsIdentifierChar(int c)
         {
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
             UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory((char)c);
 #else
             UnicodeCategory cat = char.GetUnicodeCategory((char)c);

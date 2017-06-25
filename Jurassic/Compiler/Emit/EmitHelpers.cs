@@ -149,7 +149,7 @@ namespace Jurassic.Compiler
                     case TypeCode.Object:
                     case TypeCode.Empty:
                     case TypeCode.DateTime:
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
                     case TypeCode.DBNull:
 #endif
                     case TypeCode.Decimal:

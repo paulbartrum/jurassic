@@ -58,8 +58,8 @@ namespace Jurassic.Library
             if (decodeURIReservedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable(";/?:@&=+$,#");
-#if NETSTANDARD1_6
-                    System.Threading.Interlocked.MemoryBarrier();
+#if NETSTANDARD1_5
+                System.Threading.Interlocked.MemoryBarrier();
 #else
                 System.Threading.Thread.MemoryBarrier();
 #endif
@@ -80,8 +80,8 @@ namespace Jurassic.Library
             if (decodeURIComponentReservedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable("");
-#if NETSTANDARD1_6
-                    System.Threading.Interlocked.MemoryBarrier();
+#if NETSTANDARD1_5
+                System.Threading.Interlocked.MemoryBarrier();
 #else
                 System.Threading.Thread.MemoryBarrier();
 #endif
@@ -102,8 +102,8 @@ namespace Jurassic.Library
             if (encodeURIUnescapedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable(";/?:@&=+$,-_.!~*'()#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-#if NETSTANDARD1_6
-                    System.Threading.Interlocked.MemoryBarrier();
+#if NETSTANDARD1_5
+                System.Threading.Interlocked.MemoryBarrier();
 #else
                 System.Threading.Thread.MemoryBarrier();
 #endif
@@ -124,8 +124,8 @@ namespace Jurassic.Library
             if (encodeURIComponentUnescapedSet == null)
             {
                 var lookupTable = CreateCharacterSetLookupTable("-_.!~*'()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-#if NETSTANDARD1_6
-                    System.Threading.Interlocked.MemoryBarrier();
+#if NETSTANDARD1_5
+                System.Threading.Interlocked.MemoryBarrier();
 #else
                 System.Threading.Thread.MemoryBarrier();
 #endif

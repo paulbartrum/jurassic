@@ -191,7 +191,7 @@ namespace Jurassic.Compiler
                     generator.LoadInt32(0);
                     generator.Call(ReflectionHelpers.String_GetChars);
                     break;
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
                 case TypeCode.DBNull:
                     throw new NotSupportedException("DBNull is not a supported parameter type.");
 #endif
@@ -311,7 +311,7 @@ namespace Jurassic.Compiler
                     generator.LoadInt32(1);
                     generator.NewObject(ReflectionHelpers.String_Constructor_Char_Int);
                     break;
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
 
                 case TypeCode.DBNull:
                     throw new NotSupportedException("DBNull is not a supported return type.");

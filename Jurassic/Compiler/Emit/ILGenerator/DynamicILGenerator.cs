@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
 namespace Jurassic.Compiler
 {
 

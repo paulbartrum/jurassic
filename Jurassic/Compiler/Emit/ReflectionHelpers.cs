@@ -423,7 +423,7 @@ namespace Jurassic.Compiler
         /// <returns> The MethodInfo for the method. </returns>
         public static MethodInfo GetInstanceMethod(Type type, string name, params Type[] parameterTypes)
         {
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 #else
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.ExactBinding;
@@ -443,7 +443,7 @@ namespace Jurassic.Compiler
         /// <returns> The MethodInfo for the method. </returns>
         public static MethodInfo GetStaticMethod(Type type, string name, params Type[] parameterTypes)
         {
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly;
             MethodInfo result = type.GetTypeInfo().GetMethod(name, flags, null, parameterTypes, null);
 #else

@@ -50,7 +50,7 @@ namespace Jurassic.Compiler
         /// <param name="index"> The index of the local variable within the method body. </param>
         /// <param name="type"> The type of the variable. </param>
         /// <param name="name"> The name of the local variable.  Can be <c>null</c>. </param>
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
         public DynamicILLocalVariable(ReflectionEmitILGenerator generator, int index, Type type, string name)
 #else
         public DynamicILLocalVariable(DynamicILGenerator generator, int index, Type type, string name)

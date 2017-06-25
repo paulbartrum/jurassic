@@ -1517,8 +1517,8 @@ namespace Jurassic.Compiler
             {
                 // Initialize the operator lookup table.
                 var temp = InitializeOperatorLookup();
-#if NETSTANDARD1_6
-                    System.Threading.Interlocked.MemoryBarrier();
+#if NETSTANDARD1_5
+                System.Threading.Interlocked.MemoryBarrier();
 #else
                 System.Threading.Thread.MemoryBarrier();
 #endif

@@ -190,7 +190,7 @@ namespace Jurassic.Compiler
                     GetParameterTypes(),                                    // Parameter types of the generated method.
                     typeof(MethodGenerator),                                // Owner type.
                     true);                                                  // Skip visibility checks.
-#if __MonoCS__ || NETSTANDARD1_6
+#if __MonoCS__ || NETSTANDARD1_5
                 generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
 #else
                 generator = new DynamicILGenerator(dynamicMethod);
@@ -225,7 +225,7 @@ namespace Jurassic.Compiler
                     reflectionEmitInfo = new ReflectionEmitModuleInfo();
 
                     // Create a dynamic assembly and module.
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
                     reflectionEmitInfo.AssemblyBuilder = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
                         new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
 #else
@@ -243,7 +243,7 @@ namespace Jurassic.Compiler
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
                     // Create a dynamic module.
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
                     reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module");
 #else
                     reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
@@ -273,7 +273,7 @@ namespace Jurassic.Compiler
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
                     // Initialize the debugging information.
-#if !NETSTANDARD1_6
+#if !NETSTANDARD1_5
                     optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, COMHelpers.LanguageType, COMHelpers.LanguageVendor, COMHelpers.DocumentType);
 #endif
                     methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
@@ -287,7 +287,7 @@ namespace Jurassic.Compiler
                 // Bake it.
                 var type = typeBuilder.CreateTypeInfo();
                 var methodInfo = type.GetMethod(this.GetMethodName());
-#if NETSTANDARD1_6
+#if NETSTANDARD1_5
                 this.GeneratedMethod = new GeneratedMethod(methodInfo.CreateDelegate(GetDelegate()), optimizationInfo.NestedFunctions);
 #else
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
