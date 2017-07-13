@@ -152,6 +152,8 @@ namespace Jurassic.Compiler
             public int TypeCount;
         }
 
+        private static object reflectionEmitInfoLock = new object();
+
         /// <summary>
         /// Gets or sets information needed by Reflection.Emit.
         /// </summary>
@@ -219,42 +221,47 @@ namespace Jurassic.Compiler
                 throw new NotImplementedException();
 #else
                 // Debugging or low trust path.
-                ReflectionEmitModuleInfo reflectionEmitInfo = ReflectionEmitInfo;
-                if (reflectionEmitInfo == null)
+                ReflectionEmitModuleInfo reflectionEmitInfo;
+                System.Reflection.Emit.TypeBuilder typeBuilder;
+                lock (reflectionEmitInfoLock)
                 {
-                    reflectionEmitInfo = new ReflectionEmitModuleInfo();
+                    reflectionEmitInfo = ReflectionEmitInfo;
+                    if (reflectionEmitInfo == null)
+                    {
+                        reflectionEmitInfo = new ReflectionEmitModuleInfo();
 
-                    // Create a dynamic assembly and module.
+                        // Create a dynamic assembly and module.
 #if NETSTANDARD1_5
-                    reflectionEmitInfo.AssemblyBuilder = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
-                        new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
+                        reflectionEmitInfo.AssemblyBuilder = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
+                            new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
 #else
                     reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
                         new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
 #endif
 
-                    // Mark the assembly as debuggable.  This must be done before the module is created.
-                    var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetTypeInfo().GetConstructor(
-                        new Type[] { typeof(System.Diagnostics.DebuggableAttribute.DebuggingModes) });
-                    reflectionEmitInfo.AssemblyBuilder.SetCustomAttribute(
-                        new System.Reflection.Emit.CustomAttributeBuilder(debuggableAttributeConstructor,
-                            new object[] {
+                        // Mark the assembly as debuggable.  This must be done before the module is created.
+                        var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetTypeInfo().GetConstructor(
+                            new Type[] { typeof(System.Diagnostics.DebuggableAttribute.DebuggingModes) });
+                        reflectionEmitInfo.AssemblyBuilder.SetCustomAttribute(
+                            new System.Reflection.Emit.CustomAttributeBuilder(debuggableAttributeConstructor,
+                                new object[] {
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations |
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
-                    // Create a dynamic module.
+                        // Create a dynamic module.
 #if NETSTANDARD1_5
-                    reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module");
+                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module");
 #else
                     reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
 #endif
 
-                    ReflectionEmitInfo = reflectionEmitInfo;
-                }
+                        ReflectionEmitInfo = reflectionEmitInfo;
+                    }
 
-                // Create a new type to hold our method.
-                var typeBuilder = reflectionEmitInfo.ModuleBuilder.DefineType("JavaScriptClass" + reflectionEmitInfo.TypeCount.ToString(), System.Reflection.TypeAttributes.Public | System.Reflection.TypeAttributes.Class);
-                reflectionEmitInfo.TypeCount++;
+                    // Create a new type to hold our method.
+                    typeBuilder = reflectionEmitInfo.ModuleBuilder.DefineType("JavaScriptClass" + reflectionEmitInfo.TypeCount.ToString(), System.Reflection.TypeAttributes.Public | System.Reflection.TypeAttributes.Class);
+                    reflectionEmitInfo.TypeCount++;
+                }
 
                 // Create a method.
                 var methodBuilder = typeBuilder.DefineMethod(this.GetMethodName(),
@@ -293,9 +300,9 @@ namespace Jurassic.Compiler
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
 #endif
 #endif //WINDOWS_PHONE
-                }
+            }
 
-                if (this.Options.EnableILAnalysis == true)
+            if (this.Options.EnableILAnalysis == true)
             {
                 // Store the disassembled IL so it can be retrieved for analysis purposes.
                 this.GeneratedMethod.DisassembledIL = generator.ToString();
