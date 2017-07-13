@@ -57,12 +57,12 @@ namespace Jurassic.Library
         private static ObjectInstance GetPrototypeObject(ScriptEngine engine, Type type)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (type == null)
-                throw new ArgumentNullException("type");
-            if (type.BaseType == null)
+                throw new ArgumentNullException(nameof(type));
+            if (type.GetTypeInfo().BaseType == null)
                 return null;
-            return ClrInstanceTypeWrapper.FromCache(engine, type.BaseType);
+            return ClrInstanceTypeWrapper.FromCache(engine, type.GetTypeInfo().BaseType);
         }
 
 

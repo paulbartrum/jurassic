@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
 using Jurassic.Library;
@@ -60,11 +61,11 @@ namespace Jurassic
                 return ToNumber(value);
             if (type == typeof(string))
                 return ToString(value);
-            if (typeof(ObjectInstance).IsAssignableFrom(type))
+            if (typeof(ObjectInstance).GetTypeInfo().IsAssignableFrom(type))
                 return ToObject(engine, value);
             if (type == typeof(object))
                 return value;
-            throw new ArgumentException(string.Format("Cannot convert to '{0}'.  The type is unsupported.", type), "value");
+            throw new ArgumentException(string.Format("Cannot convert to '{0}'.  The type is unsupported.", type), nameof(value));
         }
 
         /// <summary>
@@ -92,7 +93,7 @@ namespace Jurassic
                 return ((ConcatenatedString)value).Length > 0;
             if (value is ObjectInstance)
                 return true;
-            throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a boolean.", value.GetType()), "value");
+            throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a boolean.", value.GetType()), nameof(value));
         }
 
         /// <summary>
@@ -122,7 +123,7 @@ namespace Jurassic
                 throw new JavaScriptException(((SymbolInstance)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a number.");
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
-            throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), "value");
+            throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), nameof(value));
         }
 
         // Single-item cache.
@@ -175,7 +176,7 @@ namespace Jurassic
                 throw new JavaScriptException(((SymbolInstance)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a string.");
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
-            throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), "value");
+            throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), nameof(value));
         }
 
         /// <summary>
@@ -213,7 +214,7 @@ namespace Jurassic
         public static ObjectInstance ToObject(ScriptEngine engine, object value, int lineNumber, string sourcePath, string functionName)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             if (value is ObjectInstance)
                 return (ObjectInstance)value;
             if (value == null || value == Undefined.Value)
@@ -235,7 +236,7 @@ namespace Jurassic
             else if (value is ConcatenatedString)
                 result = engine.String.Construct(value.ToString());
             else
-                throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), "value");
+                throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), nameof(value));
             result.IsExtensible = false;
             return result;
         }

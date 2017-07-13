@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(33)
+			return new List<PropertyNameAndValue>(35)
 			{
 				new PropertyNameAndValue("concat", new ClrStubFunction(engine.FunctionInstancePrototype, "concat", 1, __STUB__Concat), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("pop", new ClrStubFunction(engine.FunctionInstancePrototype, "pop", 0, __STUB__Pop), PropertyAttributes.NonEnumerable),
@@ -92,9 +92,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return Splice(TypeConverter.ToObject(engine, thisObj), 0, 0, new object[0]);
+					return Splice(TypeConverter.ToObject(engine, thisObj));
 				case 1:
-					return Splice(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToInteger(args[0]), 0, new object[0]);
+					return Splice(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToInteger(args[0]));
 				case 2:
 					return Splice(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToInteger(args[0]), TypeConverter.ToInteger(args[1]), new object[0]);
 				default:

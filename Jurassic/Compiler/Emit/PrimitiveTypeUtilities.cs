@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Jurassic.Compiler
 {
@@ -66,7 +67,7 @@ namespace Jurassic.Compiler
                 return PrimitiveType.String;
             if (type == typeof(ConcatenatedString))
                 return PrimitiveType.ConcatenatedString;
-            if (typeof(Library.ObjectInstance).IsAssignableFrom(type))
+            if(typeof(Library.ObjectInstance).GetTypeInfo().IsAssignableFrom(type))
                 return PrimitiveType.Object;
             throw new NotImplementedException(string.Format("Unsupported type: {0}", type));
         }

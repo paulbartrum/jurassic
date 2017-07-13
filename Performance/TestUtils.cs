@@ -11,13 +11,23 @@ namespace Performance
     {
         public static void Benchmark(Action codeToTest, double previousResult = 0)
         {
+            //TODO Thread/process priority
             // Up the thread priority.
-            var priorPriority = System.Threading.Thread.CurrentThread.Priority;
-            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
+            //var priorPriority = System.Threading.Thread.CurrentThread.Priority;
+            //System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
             try
             {
                 // Get the test name from a stack trace.
-                var testName = new System.Diagnostics.StackTrace().GetFrame(1).GetMethod().Name;
+                //var testName = new System.Diagnostics.StackTrace().GetFrame(1).GetMethod().Name;
+                string testName = null;
+                try
+                {
+                    throw new Exception();
+                }
+                catch(Exception ex)
+                {
+                    testName = new System.Diagnostics.StackTrace(ex, false).GetFrames()[1].GetMethod().Name;
+                }
 
                 // Measure the test overhead.
                 Action emptyAction = () => { };
@@ -87,8 +97,9 @@ namespace Performance
             }
             finally
             {
+                //TODO Thread/process priority
                 // Revert the thread priority.
-                System.Threading.Thread.CurrentThread.Priority = priorPriority;
+                //System.Threading.Thread.CurrentThread.Priority = priorPriority;
             }
         }
 
@@ -109,7 +120,7 @@ namespace Performance
         public static string NormalizeText(string text, string lineBreak = null)
         {
             if (text == null)
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
 
             // Find the maximum number of spaces that is common to each line.
             bool startOfLine = true;

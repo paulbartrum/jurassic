@@ -20,7 +20,7 @@ namespace Jurassic.Compiler
             : base(labels)
         {
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             this.Scope = scope;
             this.declarations = new List<VariableDeclaration>(1);
         }

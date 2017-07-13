@@ -149,6 +149,20 @@ namespace Jurassic
         /// </summary>
         public string FunctionName { get; internal set; }
 
+        /// <summary>
+        /// Gets a reference to the script engine associated with this object.  Will be <c>null</c>
+        /// for statements like "throw 2".
+        /// </summary>
+        public ScriptEngine Engine
+        {
+            get
+            {
+                if (this.ErrorObject is ErrorInstance)
+                    return ((ErrorInstance)this.ErrorObject).Engine;
+                return null;
+            }
+        }
+
 
 
         //     PRIVATE IMPLEMENTATION METHODS
@@ -164,7 +178,7 @@ namespace Jurassic
         private static ErrorInstance CreateError(ScriptEngine engine, ErrorType type, string message)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
 
             // Get the constructor corresponding to the error name.
             ErrorConstructor constructor;
@@ -192,7 +206,7 @@ namespace Jurassic
                     constructor = engine.ReferenceError;
                     break;
                 default:
-                    throw new ArgumentException($"Unrecognised error type {type}.", "name");
+                    throw new ArgumentException($"Unrecognised error type {type}.", nameof(type));
             }
 
             // Create an error instance.

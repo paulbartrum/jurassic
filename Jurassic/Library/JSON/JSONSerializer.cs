@@ -21,7 +21,7 @@ namespace Jurassic.Library
         public JSONSerializer(ScriptEngine engine)
         {
             if (engine == null)
-                throw new ArgumentNullException("engine");
+                throw new ArgumentNullException(nameof(engine));
             this.engine = engine;
         }
 

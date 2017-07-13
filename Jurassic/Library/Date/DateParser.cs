@@ -163,7 +163,11 @@ namespace Jurassic.Library
                 var temp1 = PopulateDayOfWeekNames();
                 var temp2 = PopulateMonthNames();
                 var temp3 = PopulateTimeZones();
+#if NETSTANDARD1_5
+                System.Threading.Interlocked.MemoryBarrier();
+#else
                 System.Threading.Thread.MemoryBarrier();
+#endif
                 dayOfWeekNames = temp1;
                 monthNames = temp2;
                 timeZoneNames = temp3;
@@ -334,7 +338,11 @@ namespace Jurassic.Library
         /// </summary>
         private static HashSet<string> PopulateDayOfWeekNames()
         {
+#if NETSTANDARD1_5
+            var result = new HashSet<string>(System.Globalization.CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(System.Globalization.CompareOptions.IgnoreCase));
+#else
             var result = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+#endif
 
             // Add the abbreviated day names for the culture to the dictionary.
             var abbreviatedNames = CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedDayNames;
@@ -359,7 +367,12 @@ namespace Jurassic.Library
         /// </summary>
         private static Dictionary<string, int> PopulateMonthNames()
         {
+#if NETSTANDARD1_5
+            var monthNames = new Dictionary<string, int>(48, System.Globalization.CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(System.Globalization.CompareOptions.IgnoreCase));
+#else
             var monthNames = new Dictionary<string, int>(48, StringComparer.InvariantCultureIgnoreCase);
+#endif
+
 
             // Add the abbreviated month names for the culture to the dictionary.
             var abbreviatedNames = CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames;
@@ -383,7 +396,12 @@ namespace Jurassic.Library
         /// </summary>
         private static Dictionary<string, int> PopulateTimeZones()
         {
+
+#if NETSTANDARD1_5
+            var result = new Dictionary<string, int>(15, System.Globalization.CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(System.Globalization.CompareOptions.IgnoreCase))
+#else
             var result = new Dictionary<string, int>(15, StringComparer.InvariantCultureIgnoreCase)
+#endif
             {
                 { "UT", 0 },
                 { "UTC", 0 },

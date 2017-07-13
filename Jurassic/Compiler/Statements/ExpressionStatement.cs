@@ -18,7 +18,7 @@ namespace Jurassic.Compiler
             : base(null)
         {
             if (expression == null)
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             this.Expression = expression;
         }
 
@@ -32,7 +32,7 @@ namespace Jurassic.Compiler
             : base(labels)
         {
             if (expression == null)
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             this.Expression = expression;
             this.ContributesToEvalResult = true;
         }

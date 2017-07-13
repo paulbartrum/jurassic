@@ -16,7 +16,7 @@ namespace Jurassic.Compiler
         public GeneratedMethod(Delegate delegateToMethod, IList<GeneratedMethod> dependencies)
         {
             if (delegateToMethod == null)
-                throw new ArgumentNullException("delegateToMethod");
+                throw new ArgumentNullException(nameof(delegateToMethod));
             this.GeneratedDelegate = delegateToMethod;
             this.Dependencies = dependencies;
         }
@@ -84,7 +84,7 @@ namespace Jurassic.Compiler
         public static long Save(GeneratedMethod generatedMethod)
         {
             if (generatedMethod == null)
-                throw new ArgumentNullException("generatedMethod");
+                throw new ArgumentNullException(nameof(generatedMethod));
             lock (cacheLock)
             {
                 // Create a cache (if it hasn't already been created).

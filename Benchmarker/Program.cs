@@ -76,7 +76,7 @@ namespace Benchmarker
         static void Main(string[] args)
         {
             // Up the thread priority so nothing gets in the way of the benchmarking.
-            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+            // System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
             // 61.3242ms
             var stopWatch = System.Diagnostics.Stopwatch.StartNew();
@@ -92,7 +92,7 @@ namespace Benchmarker
             Console.WriteLine($"Init x 1000 took {stopWatch.Elapsed.TotalMilliseconds}ms");
 
             // Sunspider.
-            var files = Directory.GetFiles(@"..\..\Files\sunspider-0.9.1", "*.js");
+            var files = Directory.GetFiles(@"Files\sunspider-0.9.1", "*.js");
             var results = new Series[files.Length];
             for (int j = 0; j < 5; j++)
             {

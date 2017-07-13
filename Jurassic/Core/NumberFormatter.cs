@@ -310,7 +310,7 @@ namespace Jurassic
                         errorPowerOfTen = integralDigits - precision - 1;
                     break;
                 default:
-                    throw new ArgumentException("Unknown formatting style.", "style");
+                    throw new ArgumentException(nameof(style));
             }
             if (errorPowerOfTen != int.MinValue)
             {

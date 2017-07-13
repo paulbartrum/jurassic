@@ -31,9 +31,9 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (instancePrototype == null)
-                throw new ArgumentNullException("instancePrototype");
+                throw new ArgumentNullException(nameof(instancePrototype));
 
             // This is a constructor so ignore the "this" parameter when the function is called.
             thisBinding = this;
@@ -41,12 +41,12 @@ namespace Jurassic.Library
             // Search through every method in this type looking for [JSCallFunction] and [JSConstructorFunction] attributes.
             var callBinderMethods = new List<JSBinderMethod>(1);
             var constructBinderMethods = new List<JSBinderMethod>(1);
-            var methods = this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            var methods = this.GetType().GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
                 // Search for the [JSCallFunction] and [JSConstructorFunction] attributes.
-                var callAttribute = (JSCallFunctionAttribute) Attribute.GetCustomAttribute(method, typeof(JSCallFunctionAttribute));
-                var constructorAttribute = (JSConstructorFunctionAttribute)Attribute.GetCustomAttribute(method, typeof(JSConstructorFunctionAttribute));
+                var callAttribute = method.GetCustomAttribute<JSCallFunctionAttribute>();
+                var constructorAttribute = method.GetCustomAttribute<JSConstructorFunctionAttribute>();
 
                 // Can't declare both attributes.
                 if (callAttribute != null && constructorAttribute != null)
@@ -61,9 +61,9 @@ namespace Jurassic.Library
                 {
                     var binderMethod = new JSBinderMethod(method, constructorAttribute.Flags);
                     constructBinderMethods.Add(binderMethod);
-                    
+
                     // Constructors must return ObjectInstance or a derived type.
-                    if (typeof(ObjectInstance).IsAssignableFrom(binderMethod.ReturnType) == false)
+                    if (typeof(ObjectInstance).GetTypeInfo().IsAssignableFrom(binderMethod.ReturnType) == false)
                         throw new InvalidOperationException(string.Format("Constructors must return {0} (or a derived type).", typeof(ObjectInstance).Name));
                 }
             }
@@ -100,7 +100,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             // Initialize the [[Call]] method.
-            this.callBinder = new JSBinder(new JSBinderMethod(delegateToCall.Method));
+            this.callBinder = new JSBinder(new JSBinderMethod(delegateToCall.GetMethodInfo()));
 
             // If the delegate has a class instance, use that to call the method.
             this.thisBinding = delegateToCall.Target;
@@ -213,7 +213,7 @@ namespace Jurassic.Library
         //    // Delegate types have an Invoke method containing the relevant parameters.
         //    MethodInfo adapterInvokeMethod = typeof(T).GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
         //    if (adapterInvokeMethod == null)
-        //        throw new ArgumentException("The type parameter T must be delegate type.", "T");
+        //        throw new ArgumentException(nameof(T));
 
         //    // Get the argument types.
         //    Type[] argumentTypes = adapterInvokeMethod.GetParameters().Select(p => p.ParameterType).ToArray();

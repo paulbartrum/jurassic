@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Jurassic.Library;
+using Jurassic.Compiler;
+using System.ComponentModel;
 
 namespace Jurassic
 {
@@ -657,20 +659,6 @@ namespace Jurassic
             set;
         }
 
-#if !WINDOWS_PHONE
-        internal class ReflectionEmitModuleInfo
-        {
-            public System.Reflection.Emit.AssemblyBuilder AssemblyBuilder;
-            public System.Reflection.Emit.ModuleBuilder ModuleBuilder;
-            public int TypeCount;
-        }
-
-        /// <summary>
-        /// Gets or sets information needed by Reflection.Emit.
-        /// </summary>
-        internal ReflectionEmitModuleInfo ReflectionEmitInfo;
-#endif //!WINDOWS_PHONE
-
 
 
         //     EXECUTION
@@ -685,24 +673,20 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public CompiledScript Compile(ScriptSource source)
         {
-            var methodGen = new Jurassic.Compiler.GlobalMethodGenerator(
-                this,                               // The script engine
+            var methodGen = new GlobalMethodGenerator(
                 source,                             // The source code.
                 CreateOptions());                   // The compiler options.
 
             // Parse
-            if (this.ParsingStarted != null)
-                this.ParsingStarted(this, EventArgs.Empty);
+            this.ParsingStarted?.Invoke(this, EventArgs.Empty);
             methodGen.Parse();
 
             // Optimize
-            if (this.OptimizationStarted != null)
-                this.OptimizationStarted(this, EventArgs.Empty);
+            this.OptimizationStarted?.Invoke(this, EventArgs.Empty);
             methodGen.Optimize();
 
             // Generate code
-            if (this.CodeGenerationStarted != null)
-                this.CodeGenerationStarted(this, EventArgs.Empty);
+            this.CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
             methodGen.GenerateCode();
             VerifyGeneratedCode();
 
@@ -740,33 +724,35 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public object Evaluate(ScriptSource source)
         {
-            var methodGen = new Jurassic.Compiler.EvalMethodGenerator(
-                this,                               // The script engine
-                this.CreateGlobalScope(),           // The variable scope.
+            var methodGen = new EvalMethodGenerator(
+                ObjectScope.CreateGlobalScope(this.Global), // The variable scope.
                 source,                             // The source code.
                 CreateOptions(),                    // The compiler options.
                 this.Global);                       // The value of the "this" keyword.
-            
+
+            try
+            {
             // Parse
-            if (this.ParsingStarted != null)
-                this.ParsingStarted(this, EventArgs.Empty);
+                this.ParsingStarted?.Invoke(this, EventArgs.Empty);
             methodGen.Parse();
 
             // Optimize
-            if (this.OptimizationStarted != null)
-                this.OptimizationStarted(this, EventArgs.Empty);
+                this.OptimizationStarted?.Invoke(this, EventArgs.Empty);
             methodGen.Optimize();
 
             // Generate code
-            if (this.CodeGenerationStarted != null)
-                this.CodeGenerationStarted(this, EventArgs.Empty);
+                this.CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
             methodGen.GenerateCode();
             VerifyGeneratedCode();
+            }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
 
             // Execute
-            if (this.ExecutionStarted != null)
-                this.ExecutionStarted(this, EventArgs.Empty);
-            var result = methodGen.Execute();
+            this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
+            var result = methodGen.Execute(this);
 
             // Normalize the result (convert null to Undefined, double to int, etc).
             return TypeUtilities.NormalizeValue(result);
@@ -825,13 +811,19 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public void Execute(ScriptSource source)
         {
+            try
+            {
             // Compile the script.
             var compiledScript = Compile(source);
 
             // ...and execute it.
-            if (this.ExecutionStarted != null)
-                this.ExecutionStarted(this, EventArgs.Empty);
-            compiledScript.Execute();
+                this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
+                compiledScript.Execute(this);
+        }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
         }
 
         /// <summary>
@@ -881,9 +873,15 @@ namespace Jurassic
         /// Creates a CompilerOptions instance using the script engine properties.
         /// </summary>
         /// <returns> A populated CompilerOptions instance. </returns>
-        private Compiler.CompilerOptions CreateOptions()
+        private CompilerOptions CreateOptions()
         {
-            return new Compiler.CompilerOptions() { ForceStrictMode = this.ForceStrictMode, EnableDebugging = this.EnableDebugging };
+            return new CompilerOptions()
+            {
+                ForceStrictMode = this.ForceStrictMode,
+                EnableDebugging = this.EnableDebugging,
+                CompatibilityMode = this.CompatibilityMode,
+                EnableILAnalysis = this.EnableILAnalysis,
+            };
         }
 
 
@@ -901,7 +899,7 @@ namespace Jurassic
         public bool HasGlobalValue(string variableName)
         {
             if (variableName == null)
-                throw new ArgumentNullException("variableName");
+                throw new ArgumentNullException(nameof(variableName));
             return this.Global.HasProperty(variableName);
         }
 
@@ -913,7 +911,7 @@ namespace Jurassic
         public object GetGlobalValue(string variableName)
         {
             if (variableName == null)
-                throw new ArgumentNullException("variableName");
+                throw new ArgumentNullException(nameof(variableName));
             return TypeUtilities.NormalizeValue(this.Global.GetPropertyValue(variableName));
         }
 
@@ -930,7 +928,7 @@ namespace Jurassic
         public T GetGlobalValue<T>(string variableName)
         {
             if (variableName == null)
-                throw new ArgumentNullException("variableName");
+                throw new ArgumentNullException(nameof(variableName));
             return TypeConverter.ConvertTo<T>(this, TypeUtilities.NormalizeValue(this.Global.GetPropertyValue(variableName)));
         }
 
@@ -946,13 +944,11 @@ namespace Jurassic
         public void SetGlobalValue(string variableName, object value)
         {
             if (variableName == null)
-                throw new ArgumentNullException("variableName");
-            if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(variableName));
 
             if (value == null)
                 value = Null.Value;
-            else
+            else if (value != Undefined.Value && value != Null.Value)
             {
                 switch (Type.GetTypeCode(value.GetType()))
                 {
@@ -1000,7 +996,7 @@ namespace Jurassic
                         value = (double)(ulong)value;
                         break;
                     default:
-                        throw new ArgumentException(string.Format("Cannot store value of type {0}.", value.GetType()), "value");
+                        throw new ArgumentException(string.Format("Cannot store value of type {0}.", value.GetType()), nameof(value));
                 }
             }
             this.Global.SetPropertyValue(variableName, value, true);
@@ -1015,9 +1011,9 @@ namespace Jurassic
         public object CallGlobalFunction(string functionName, params object[] argumentValues)
         {
             if (functionName == null)
-                throw new ArgumentNullException("functionName");
+                throw new ArgumentNullException(nameof(functionName));
             if (argumentValues == null)
-                throw new ArgumentNullException("argumentValues");
+                throw new ArgumentNullException(nameof(argumentValues));
             var value = this.Global.GetPropertyValue(functionName);
             if ((value is FunctionInstance) == false)
                 throw new InvalidOperationException(string.Format("'{0}' is not a function.", functionName));
@@ -1034,9 +1030,9 @@ namespace Jurassic
         public T CallGlobalFunction<T>(string functionName, params object[] argumentValues)
         {
             if (functionName == null)
-                throw new ArgumentNullException("functionName");
+                throw new ArgumentNullException(nameof(functionName));
             if (argumentValues == null)
-                throw new ArgumentNullException("argumentValues");
+                throw new ArgumentNullException(nameof(argumentValues));
             return TypeConverter.ConvertTo<T>(this, CallGlobalFunction(functionName, argumentValues));
         }
 
@@ -1049,9 +1045,9 @@ namespace Jurassic
         public void SetGlobalFunction(string functionName, Delegate functionDelegate)
         {
             if (functionName == null)
-                throw new ArgumentNullException("functionName");
+                throw new ArgumentNullException(nameof(functionName));
             if (functionDelegate == null)
-                throw new ArgumentNullException("functionDelegate");
+                throw new ArgumentNullException(nameof(functionDelegate));
             SetGlobalValue(functionName, new ClrFunction(this.Function.InstancePrototype, functionDelegate, functionName));
         }
 
@@ -1083,20 +1079,6 @@ namespace Jurassic
 
 
 
-        //     SCOPE
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Creates a new global scope.
-        /// </summary>
-        /// <returns> A new global scope, with no declared variables. </returns>
-        internal Compiler.ObjectScope CreateGlobalScope()
-        {
-            return Compiler.ObjectScope.CreateGlobalScope(this.Global);
-        }
-
-
-
         //     HIDDEN CLASS INITIALIZATION
         //_________________________________________________________________________________________
 
@@ -1116,7 +1098,7 @@ namespace Jurassic
         //private class EvalCacheKey
         //{
         //    public string Code;
-        //    public Compiler.Scope Scope;
+        //    public Scope Scope;
         //    public bool StrictMode;
 
         //    public override int GetHashCode()
@@ -1126,7 +1108,7 @@ namespace Jurassic
         //        var scope = this.Scope;
         //        do
         //        {
-        //            if (scope is Compiler.DeclarativeScope)
+        //            if (scope is DeclarativeScope)
         //                hashCode ^= bitValue;
         //            scope = scope.ParentScope;
         //            bitValue *= 2;
@@ -1174,28 +1156,27 @@ namespace Jurassic
         /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        internal object Eval(string code, Compiler.Scope scope, object thisObject, bool strictMode)
+        internal object Eval(string code, Scope scope, object thisObject, bool strictMode)
         {
             // Check if the cache contains the eval already.
             //var key = new EvalCacheKey() { Code = code, Scope = scope, StrictMode = strictMode };
             //WeakReference cachedEvalGenRef;
             //if (evalCache.TryGetValue(key, out cachedEvalGenRef) == true)
             //{
-            //    var cachedEvalGen = (Compiler.EvalMethodGenerator)cachedEvalGenRef.Target;
+            //    var cachedEvalGen = (EvalMethodGenerator)cachedEvalGenRef.Target;
             //    if (cachedEvalGen != null)
             //    {
             //        // Replace the "this object" before running.
             //        cachedEvalGen.ThisObject = thisObject;
 
             //        // Execute the cached code.
-            //        return ((Compiler.EvalMethodGenerator)cachedEvalGen).Execute();
+            //        return ((EvalMethodGenerator)cachedEvalGen).Execute();
             //    }
             //}
 
             // Parse the eval string into an AST.
-            var options = new Compiler.CompilerOptions() { ForceStrictMode = strictMode };
-            var evalGen = new Jurassic.Compiler.EvalMethodGenerator(
-                this,                                                   // The script engine.
+            var options = new CompilerOptions() { ForceStrictMode = strictMode };
+            var evalGen = new EvalMethodGenerator(
                 scope,                                                  // The scope to run the code in.
                 new StringScriptSource(code, "eval"),                   // The source code to execute.
                 options,                                                // Options.
@@ -1208,8 +1189,17 @@ namespace Jurassic
             //// Add the eval method generator to the cache.
             //evalCache[key] = new WeakReference(evalGen);
 
+            try
+            {
+
             // Compile and run the eval code.
-            return evalGen.Execute();
+                return evalGen.Execute(this);
+
+        }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
         }
 
 
@@ -1222,6 +1212,13 @@ namespace Jurassic
             public string Path;
             public string Function;
             public int Line;
+            public CallType CallType;
+        }
+
+        internal enum CallType
+        {
+            MethodCall,
+            NewOperator,
         }
 
         private Stack<StackFrame> stackFrames = new Stack<StackFrame>();
@@ -1242,10 +1239,18 @@ namespace Jurassic
                 result.Append(": ");
                 result.Append(message);
             }
+            StackFrame[] stackFrameArray = this.stackFrames.ToArray();
             if (path != null || function != null || line != 0)
-                AppendStackFrame(result, path, function, line);
-            foreach (var frame in stackFrames)
-                AppendStackFrame(result, frame.Path, frame.Function, frame.Line);
+            {
+                CallType callType = stackFrameArray.Length > 0 ? stackFrameArray[0].CallType : CallType.MethodCall;
+                AppendStackFrame(result, path, function, line, callType);
+            }
+            for (int i = 0; i < stackFrameArray.Length; i++)
+            {
+                var frame = stackFrameArray[i];
+                CallType callType = stackFrameArray.Length > i + 1 ? stackFrameArray[i + 1].CallType : CallType.MethodCall;
+                AppendStackFrame(result, frame.Path, frame.Function, frame.Line, callType);
+            }
             return result.ToString();
         }
 
@@ -1256,7 +1261,8 @@ namespace Jurassic
         /// <param name="path"> The path of the javascript source file. </param>
         /// <param name="function"> The name of the function. </param>
         /// <param name="line"> The line number of the statement. </param>
-        private void AppendStackFrame(System.Text.StringBuilder result, string path, string function, int line)
+        /// <param name="parentCallType"> The method by which the current stack frame was created. </param>
+        private void AppendStackFrame(System.Text.StringBuilder result, string path, string function, int line, CallType parentCallType)
         {
             // Create a context object which is used for the StackFrameTransform.
             StackFrameTransformContext ctx = new StackFrameTransformContext()
@@ -1277,6 +1283,8 @@ namespace Jurassic
             result.Append("at ");
             if (string.IsNullOrEmpty(ctx.Function) == false)
             {
+                if (parentCallType == CallType.NewOperator)
+                    result.Append("new ");
                 result.Append(ctx.Function);
                 result.Append(" (");
             }
@@ -1291,14 +1299,16 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Pushes a frame to the javascript stack.
+        /// Pushes a frame to the javascript stack.  This needs to be called every time there is a
+        /// function call.
         /// </summary>
         /// <param name="path"> The path of the javascript source file that contains the function. </param>
         /// <param name="function"> The name of the function that is calling another function. </param>
         /// <param name="line"> The line number of the function call. </param>
-        internal void PushStackFrame(string path, string function, int line)
+        /// <param name="callType"> The type of call that is being made. </param>
+        internal void PushStackFrame(string path, string function, int line, CallType callType)
         {
-            this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line });
+            this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line, CallType = callType });
         }
 
         /// <summary>
@@ -1308,6 +1318,23 @@ namespace Jurassic
         {
             this.stackFrames.Pop();
         }
+
+        /// <summary>
+        /// Checks if the given <see cref="Exception"/> is catchable by JavaScript code with a
+        /// <c>catch</c> clause.
+        /// Note: This property is public for technical reasons only and should not be used by user code.
+        /// </summary>
+        /// <param name="ex"> The exception to check. </param>
+        /// <returns><c>true</c> if the <see cref="Exception"/> is catchable, <c>false otherwise</c></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool CanCatchException(Exception ex)
+        {
+            var jsException = ex as JavaScriptException;
+            if (jsException == null)
+                return false;
+            return jsException.Engine == this || jsException.Engine == null;
+        }
+
 
 
         //     CLRTYPEWRAPPER CACHE

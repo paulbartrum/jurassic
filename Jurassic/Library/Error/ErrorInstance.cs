@@ -115,7 +115,7 @@ namespace Jurassic.Library
         /// Returns a string representing the current object.
         /// </summary>
         /// <param name="engine"> The current script environment. </param>
-        /// <param name="thisRef"> The object that is being operated on. </param>
+        /// <param name="thisObj"> The object that is being operated on. </param>
         /// <returns> A string representing the current object. </returns>
         [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
         public static string ToString(ScriptEngine engine, object thisObj)

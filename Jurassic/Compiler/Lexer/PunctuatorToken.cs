@@ -18,7 +18,7 @@ namespace Jurassic.Compiler
         private PunctuatorToken(string text)
         {
             if (text == null)
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             this.text = text;
         }
 

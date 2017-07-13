@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jurassic.Library;
+using System;
 
 namespace Jurassic.Compiler
 {
@@ -8,21 +9,44 @@ namespace Jurassic.Compiler
     /// </summary>
     public class ObjectScope : Scope
     {
-        private Library.ObjectInstance scopeObject;
+        private ObjectInstance scopeObject;
 
         private Expression scopeObjectExpression;
 
         private bool providesImplicitThisValue;
 
         /// <summary>
-        /// Creates a new global object scope.
+        /// Creates a new object scope that is used at compile time as a stand-in for a real
+        /// global scope.
         /// </summary>
+        internal static ObjectScope CreateGlobalPlaceholder()
+        {
+            return new ObjectScope(null);
+        }
+
+        /// <summary>
+        /// Creates a new global object scope that is used at runtime.
+        /// </summary>
+        /// <param name="globalObject"> The global object. </param>
         /// <returns> A new ObjectScope instance. </returns>
-        internal static ObjectScope CreateGlobalScope(Library.GlobalObject globalObject)
+        internal static ObjectScope CreateGlobalScope(GlobalObject globalObject)
+        {
+            if (globalObject == null)
+                throw new ArgumentNullException(nameof(globalObject));
+            return new ObjectScope(null) { ScopeObject = globalObject };
+        }
+
+        /// <summary>
+        /// Sets the ScopeObject to the given global object.
+        /// </summary>
+        /// <param name="globalObject"> The global object. </param>
+        internal ObjectScope ConvertPlaceholderToRuntimeScope(GlobalObject globalObject)
         {
             if (globalObject == null)
                 throw new ArgumentNullException("globalObject");
-            return new ObjectScope(null) { ScopeObject = globalObject };
+            var result = (ObjectScope)this.MemberwiseClone();
+            result.ScopeObject = globalObject;
+            return result;
         }
 
         /// <summary>
@@ -44,7 +68,7 @@ namespace Jurassic.Compiler
         ///// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
         ///// <param name="scopeObject"> An expression that evaluates to the object to use. </param>
         ///// <returns> A new ObjectScope instance. </returns>
-        //public static ObjectScope CreateWithScope(Scope parentScope, Library.ObjectInstance scopeObject)
+        //public static ObjectScope CreateWithScope(Scope parentScope, ObjectInstance scopeObject)
         //{
         //    if (parentScope == null)
         //        throw new ArgumentException("With scopes must have a parent scope.");
@@ -61,7 +85,7 @@ namespace Jurassic.Compiler
         /// <param name="canDeclareVariables"> Indicates whether variables can be declared within
         /// the scope. </param>
         /// <returns> A new ObjectScope instance. </returns>
-        public static ObjectScope CreateRuntimeScope(Scope parentScope, Library.ObjectInstance scopeObject, bool providesImplicitThisValue, bool canDeclareVariables)
+        public static ObjectScope CreateRuntimeScope(Scope parentScope, ObjectInstance scopeObject, bool providesImplicitThisValue, bool canDeclareVariables)
         {
             return new ObjectScope(parentScope) { ScopeObject = scopeObject, ProvidesImplicitThisValue = providesImplicitThisValue, CanDeclareVariables = canDeclareVariables };
         }
@@ -77,9 +101,9 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the object that stores the values of the variables in the scope.
+        /// Gets the object that stores the values of the variables in the scope.  May be <c>null</c>.
         /// </summary>
-        public Library.ObjectInstance ScopeObject
+        public ObjectInstance ScopeObject
         {
             get { return this.scopeObject; }
             private set { this.scopeObject = value; }
@@ -219,7 +243,7 @@ namespace Jurassic.Compiler
             //}
 
             //// Store the scope object into a temp variable.
-            //var scopeObject = generator.DeclareVariable(typeof(Library.ObjectInstance));
+            //var scopeObject = generator.DeclareVariable(typeof(ObjectInstance));
             //if (scope == null)
             //    EmitHelpers.LoadScope(generator);
             //else
@@ -351,7 +375,7 @@ namespace Jurassic.Compiler
             //}
 
             //// Store the scope object into a temp variable.
-            //var scopeObject = generator.DeclareVariable(typeof(Library.ObjectInstance));
+            //var scopeObject = generator.DeclareVariable(typeof(ObjectInstance));
             //if (scope == null)
             //    EmitHelpers.LoadScope(generator);
             //else

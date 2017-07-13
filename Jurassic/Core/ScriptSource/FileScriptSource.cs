@@ -21,7 +21,7 @@ namespace Jurassic
         public FileScriptSource(string path, Encoding encoding = null)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             this.path = path;
             this.encoding = encoding ?? Encoding.UTF8;
         }
@@ -44,7 +44,8 @@ namespace Jurassic
         /// same source code. </remarks>
         public override TextReader GetReader()
         {
-            return new StreamReader(this.Path, this.encoding, true);
+            var fs = File.OpenRead(this.Path);
+            return new StreamReader(fs, this.encoding, true);
         }
     }
 }

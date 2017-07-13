@@ -30,7 +30,7 @@ namespace Jurassic.Compiler
         public LoggingILGenerator(ILGenerator generator)
         {
             if (generator == null)
-                throw new ArgumentNullException("generator");
+                throw new ArgumentNullException(nameof(generator));
             this.generator = generator;
             this.header = new StringBuilder();
             this.log = new StringBuilder();
@@ -751,7 +751,7 @@ namespace Jurassic.Compiler
         public override void LoadField(System.Reflection.FieldInfo field)
         {
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             if (field.IsStatic == false)
                 Log("ldfld", field);
             else
@@ -766,7 +766,7 @@ namespace Jurassic.Compiler
         public override void StoreField(System.Reflection.FieldInfo field)
         {
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             if (field.IsStatic == false)
                 Log("stfld", field);
             else
@@ -923,6 +923,15 @@ namespace Jurassic.Compiler
         {
             Log("throw");
             this.generator.Throw();
+        }
+
+        /// <summary>
+        /// Rethrows the current exception.
+        /// </summary>
+        public override void Rethrow()
+        {
+            Log("rethrow");
+            this.generator.Rethrow();
         }
 
         /// <summary>

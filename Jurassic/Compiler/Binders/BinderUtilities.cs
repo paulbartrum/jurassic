@@ -104,10 +104,10 @@ namespace Jurassic.Compiler
                             }
                             else if (input == Null.Value)
                             {
-                                if (outputType.IsValueType == true)
+                                if (outputType.GetTypeInfo().IsValueType == true)
                                     demeritPoints[i] += disqualification;
                             }
-                            else if (outputType.IsAssignableFrom(input.GetType()) == false)
+                            else if (outputType.GetTypeInfo().IsAssignableFrom(input.GetType()) == false)
                             {
                                 demeritPoints[i] += disqualification;
                             }
@@ -115,7 +115,9 @@ namespace Jurassic.Compiler
 
 
                         case TypeCode.Empty:
+#if !NETSTANDARD1_5
                         case TypeCode.DBNull:
+#endif
                             throw new NotSupportedException(string.Format("{0} is not a supported parameter type.", outputType));
                     }
                 }

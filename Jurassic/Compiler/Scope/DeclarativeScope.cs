@@ -24,7 +24,7 @@ namespace Jurassic.Compiler
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
             if (functionName == null)
-                throw new ArgumentNullException("functionName");
+                throw new ArgumentNullException(nameof(functionName));
             var result = new DeclarativeScope(parentScope, 0);
             if (string.IsNullOrEmpty(functionName) == false)
                 result.DeclareVariable(functionName);
@@ -49,7 +49,7 @@ namespace Jurassic.Compiler
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Catch scopes must have a parent scope.");
             if (catchVariableName == null)
-                throw new ArgumentNullException("catchVariableName");
+                throw new ArgumentNullException(nameof(catchVariableName));
             var result = new DeclarativeScope(parentScope, 0);
             result.DeclareVariable(catchVariableName);
             result.CanDeclareVariables = false;    // Only the catch variable can be declared in this scope.
@@ -79,7 +79,7 @@ namespace Jurassic.Compiler
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
             if (declaredVariableNames == null)
-                throw new ArgumentNullException("declaredVariableNames");
+                throw new ArgumentNullException(nameof(declaredVariableNames));
             var result = new DeclarativeScope(parentScope, declaredVariableNames.Length);
             foreach (string variableName in declaredVariableNames)
                 result.DeclareVariable(variableName);

@@ -17,9 +17,9 @@ namespace Jurassic.Compiler
         public NameExpression(Scope scope, string name)
         {
             if (scope == null)
-                throw new ArgumentNullException("scope");
+                throw new ArgumentNullException(nameof(scope));
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             this.Scope = scope;
             this.Name = name;
         }
@@ -82,6 +82,26 @@ namespace Jurassic.Compiler
         {
             // NOTE: this is a get reference because assignment expressions do not call this method.
             GenerateGet(generator, optimizationInfo, true);
+        }
+
+        /// <summary>
+        /// Outputs the values needed to get or set this reference.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        public void GenerateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            // Do nothing.
+        }
+
+        /// <summary>
+        /// Outputs the values needed to get or set this reference.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        public void DuplicateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            // Do nothing.
         }
 
         /// <summary>
@@ -598,7 +618,7 @@ namespace Jurassic.Compiler
         {
             // Deleting a variable is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
-                throw new JavaScriptException(optimizationInfo.Engine, ErrorType.SyntaxError, string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name), optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+                throw new SyntaxErrorException(string.Format("Cannot delete {0} because deleting a variable or argument is not allowed in strict mode", this.Name), optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
 
             var endOfDelete = generator.CreateLabel();
             var scope = this.Scope;

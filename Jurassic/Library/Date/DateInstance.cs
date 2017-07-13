@@ -38,7 +38,7 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="value"> The number of milliseconds since January 1, 1970, 00:00:00 UTC. </param>
         public DateInstance(ObjectInstance prototype, double value)
-            : this(prototype, ToDateTime(value >= 0 ? Math.Floor(value) : Math.Ceiling(value)))
+            : this(prototype, ToDateTime(value))
         {
         }
 
@@ -68,7 +68,7 @@ namespace Jurassic.Library
         /// </remarks>
         public DateInstance(ObjectInstance prototype, int year, int month, int day = 1, int hour = 0,
             int minute = 0, int second = 0, int millisecond = 0)
-            : this(prototype, DateInstance.ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
+            : this(prototype, ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
         {
         }
 
@@ -1111,7 +1111,9 @@ namespace Jurassic.Library
         {
             if (dateTime == InvalidDate)
                 return double.NaN;
-            return dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+            // The spec requires that the time value is an integer.
+            // We could round to nearest, but then date.toUTCString() would be different from Date(date.getTime()).toUTCString().
+            return Math.Floor(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
         }
 
         /// <summary>
@@ -1125,8 +1127,15 @@ namespace Jurassic.Library
             if (double.IsNaN(milliseconds))
                 return InvalidDate;
 
-            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                .AddMilliseconds(milliseconds);
+            try
+            {
+                return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    .AddMilliseconds(Math.Truncate(milliseconds));
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return InvalidDate;
+            }
         }
 
         /// <summary>

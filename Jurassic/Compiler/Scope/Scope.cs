@@ -139,7 +139,7 @@ namespace Jurassic.Compiler
         internal DeclaredVariable GetDeclaredVariable(string variableName)
         {
             if (variableName == null)
-                throw new ArgumentNullException("variableName");
+                throw new ArgumentNullException(nameof(variableName));
             DeclaredVariable variable;
             if (this.variables.TryGetValue(variableName, out variable) == false)
                 return null;
@@ -172,7 +172,7 @@ namespace Jurassic.Compiler
         internal virtual DeclaredVariable DeclareVariable(string name, Expression valueAtTopOfScope = null, bool writable = true, bool deletable = false)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             // If variables cannot be declared in the scope, try the parent scope instead.
             if (this.CanDeclareVariables == false)

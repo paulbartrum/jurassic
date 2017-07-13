@@ -28,7 +28,7 @@ namespace Jurassic.Compiler
         protected MethodBinder(BinderMethod targetMethod)
         {
             if (targetMethod == null)
-                throw new ArgumentNullException("targetMethod");
+                throw new ArgumentNullException(nameof(targetMethod));
             this.name = targetMethod.Name;
             this.declaringType = targetMethod.DeclaringType;
             this.functionLength = targetMethod.RequiredParameterCount +
@@ -43,7 +43,7 @@ namespace Jurassic.Compiler
         protected MethodBinder(IEnumerable<BinderMethod> targetMethods)
         {
             if (targetMethods == null)
-                throw new ArgumentNullException("targetMethods");
+                throw new ArgumentNullException(nameof(targetMethods));
 
             // At least one method must be provided.
             // Every method must have the same name and declaring type.
@@ -57,15 +57,15 @@ namespace Jurassic.Compiler
                 else
                 {
                     if (this.Name != method.Name)
-                        throw new ArgumentException("Every method must have the same name.", "targetMethods");
+                        throw new ArgumentException(nameof(targetMethods));
                     if (this.declaringType != method.DeclaringType)
-                        throw new ArgumentException("Every method must have the same declaring type.", "targetMethods");
+                        throw new ArgumentException(nameof(targetMethods));
                 }
                 this.functionLength = Math.Max(this.FunctionLength, method.RequiredParameterCount +
                     method.OptionalParameterCount + (method.HasParamArray ? 1 : 0));
             }
             if (this.Name == null)
-                throw new ArgumentException("At least one method must be provided.", "targetMethods");
+                throw new ArgumentException(nameof(targetMethods));
         }
 
 

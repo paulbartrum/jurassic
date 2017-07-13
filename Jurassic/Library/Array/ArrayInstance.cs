@@ -60,7 +60,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (elements == null)
-                throw new ArgumentNullException("elements");
+                throw new ArgumentNullException(nameof(elements));
             this.dense = elements;
             
             this.denseMayContainHoles = Array.IndexOf(elements, null) >= 0;
@@ -80,7 +80,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (sparseArray == null)
-                throw new ArgumentNullException("sparseArray");
+                throw new ArgumentNullException(nameof(sparseArray));
             this.sparse = sparseArray;
 
             // Create a fake property for length plus initialize the real length property.
@@ -760,6 +760,35 @@ namespace Jurassic.Library
         /// Deletes a range of elements from the array and optionally inserts new elements.
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <returns> An array containing the deleted elements, if any. </returns>
+        [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 2)]
+        public static ArrayInstance Splice(ObjectInstance thisObj)
+        {
+            // If the number of actual arguments is 0, then
+            //     Let insertCount be 0.
+            //     Let actualDeleteCount be 0.
+            return Splice(thisObj, 0, 0);
+        }
+
+        /// <summary>
+        /// Deletes a range of elements from the array and optionally inserts new elements.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <param name="start"> The index to start deleting from. </param>
+        /// <returns> An array containing the deleted elements, if any. </returns>
+        [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 2)]
+        public static ArrayInstance Splice(ObjectInstance thisObj, int start)
+        {
+            // Else if the number of actual arguments is 1, then
+            //     Let insertCount be 0.
+            //     Let actualDeleteCount be len – actualStart.
+            return Splice(thisObj, start, int.MaxValue);
+        }
+
+        /// <summary>
+        /// Deletes a range of elements from the array and optionally inserts new elements.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
         /// <param name="start"> The index to start deleting from. </param>
         /// <param name="deleteCount"> The number of elements to delete. </param>
         /// <param name="items"> The items to insert. </param>
@@ -930,8 +959,10 @@ namespace Jurassic.Library
             /// <summary>
             /// Convert an untyped value to a typed value.
             /// </summary>
-            /// <param name="value"> The value to convert. </param>
-            /// <returns> The value converted to type <typeparamref name="T"/>. </returns>
+            /// <param name="value">The value to convert.</param>
+            /// <returns>
+            /// The value converted to type Object
+            /// </returns>
             public override object ConvertValue(object value)
             {
                 return value;

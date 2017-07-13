@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace Jurassic.Compiler
@@ -17,7 +18,7 @@ namespace Jurassic.Compiler
         public ReflectionEmitILGenerator(System.Reflection.Emit.ILGenerator generator)
         {
             if (generator == null)
-                throw new ArgumentNullException("generator");
+                throw new ArgumentNullException(nameof(generator));
             this.generator = generator;
         }
 
@@ -77,7 +78,7 @@ namespace Jurassic.Compiler
         public override void DefineLabelPosition(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.MarkLabel(((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -88,7 +89,7 @@ namespace Jurassic.Compiler
         public override void Branch(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Br, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -99,7 +100,7 @@ namespace Jurassic.Compiler
         public override void BranchIfZero(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Brfalse, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -111,7 +112,7 @@ namespace Jurassic.Compiler
         public override void BranchIfNotZero(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Brtrue, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -122,7 +123,7 @@ namespace Jurassic.Compiler
         public override void BranchIfEqual(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Beq, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -133,7 +134,7 @@ namespace Jurassic.Compiler
         public override void BranchIfNotEqual(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Bne_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -145,7 +146,7 @@ namespace Jurassic.Compiler
         public override void BranchIfGreaterThan(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Bgt, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -159,7 +160,7 @@ namespace Jurassic.Compiler
         public override void BranchIfGreaterThanUnsigned(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Bgt_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -171,7 +172,7 @@ namespace Jurassic.Compiler
         public override void BranchIfGreaterThanOrEqual(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Bge, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -185,7 +186,7 @@ namespace Jurassic.Compiler
         public override void BranchIfGreaterThanOrEqualUnsigned(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Bge_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -197,7 +198,7 @@ namespace Jurassic.Compiler
         public override void BranchIfLessThan(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Blt, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -211,7 +212,7 @@ namespace Jurassic.Compiler
         public override void BranchIfLessThanUnsigned(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Blt_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -223,7 +224,7 @@ namespace Jurassic.Compiler
         public override void BranchIfLessThanOrEqual(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Ble, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -237,7 +238,7 @@ namespace Jurassic.Compiler
         public override void BranchIfLessThanOrEqualUnsigned(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Ble_Un, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 
@@ -258,7 +259,7 @@ namespace Jurassic.Compiler
         public override void Switch(ILLabel[] labels)
         {
             if (labels == null)
-                throw new ArgumentNullException("labels");
+                throw new ArgumentNullException(nameof(labels));
 
             var reflectionLabels = new System.Reflection.Emit.Label[labels.Length];
             for (int i = 0; i < labels.Length; i++)
@@ -289,7 +290,7 @@ namespace Jurassic.Compiler
         public override void LoadVariable(ILLocalVariable variable)
         {
             if (variable as ReflectionEmitILLocalVariable == null)
-                throw new ArgumentNullException("variable");
+                throw new ArgumentNullException(nameof(variable));
             this.generator.Emit(OpCodes.Ldloc, ((ReflectionEmitILLocalVariable)variable).UnderlyingLocal);
         }
 
@@ -300,7 +301,7 @@ namespace Jurassic.Compiler
         public override void LoadAddressOfVariable(ILLocalVariable variable)
         {
             if (variable as ReflectionEmitILLocalVariable == null)
-                throw new ArgumentNullException("variable");
+                throw new ArgumentNullException(nameof(variable));
             this.generator.Emit(OpCodes.Ldloca, ((ReflectionEmitILLocalVariable)variable).UnderlyingLocal);
         }
 
@@ -311,7 +312,7 @@ namespace Jurassic.Compiler
         public override void StoreVariable(ILLocalVariable variable)
         {
             if (variable as ReflectionEmitILLocalVariable == null)
-                throw new ArgumentNullException("variable");
+                throw new ArgumentNullException(nameof(variable));
             this.generator.Emit(OpCodes.Stloc, ((ReflectionEmitILLocalVariable)variable).UnderlyingLocal);
         }
 
@@ -636,9 +637,9 @@ namespace Jurassic.Compiler
         public override void Box(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
-                throw new ArgumentException("The type to box must be a value type.", "type");
+                throw new ArgumentNullException(nameof(type));
+            if (type.GetTypeInfo().IsValueType == false)
+                throw new ArgumentException(nameof(type));
             this.generator.Emit(OpCodes.Box, type);
         }
 
@@ -650,9 +651,9 @@ namespace Jurassic.Compiler
         public override void Unbox(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
-                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
+                throw new ArgumentNullException(nameof(type));
+            if (type.GetTypeInfo().IsValueType == false)
+                throw new ArgumentException(nameof(type));
             this.generator.Emit(OpCodes.Unbox, type);
         }
 
@@ -664,9 +665,9 @@ namespace Jurassic.Compiler
         public override void UnboxAny(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
-            if (type.IsValueType == false)
-                throw new ArgumentException("The type of the boxed value must be a value type.", "type");
+                throw new ArgumentNullException(nameof(type));
+            if (type.GetTypeInfo().IsValueType == false)
+                throw new ArgumentException(nameof(type));
             this.generator.Emit(OpCodes.Unbox_Any, type);
         }
 
@@ -765,9 +766,9 @@ namespace Jurassic.Compiler
         public override void CallVirtual(System.Reflection.MethodBase method)
         {
             if (method == null)
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             if (method.IsStatic == true)
-                throw new ArgumentException("Static methods cannot be called this method.", "method");
+                throw new ArgumentException(nameof(method));
             if (method is System.Reflection.ConstructorInfo)
                 this.generator.Emit(OpCodes.Callvirt, (System.Reflection.ConstructorInfo)method);
             else if (method is System.Reflection.MethodInfo)
@@ -783,7 +784,7 @@ namespace Jurassic.Compiler
         public override void LoadField(System.Reflection.FieldInfo field)
         {
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             if (field.IsStatic == true)
                 this.generator.Emit(OpCodes.Ldsfld, field);
             else
@@ -797,7 +798,7 @@ namespace Jurassic.Compiler
         public override void StoreField(System.Reflection.FieldInfo field)
         {
             if (field == null)
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             if (field.IsStatic == true)
                 this.generator.Emit(OpCodes.Stsfld, field);
             else
@@ -885,7 +886,7 @@ namespace Jurassic.Compiler
         public override void LoadVirtualMethodPointer(System.Reflection.MethodBase method)
         {
             if (method != null && method.IsStatic == true)
-                throw new ArgumentException("The given method cannot be static.", "method");
+                throw new ArgumentException(nameof(method));
             if (method is System.Reflection.ConstructorInfo)
                 this.generator.Emit(OpCodes.Ldvirtftn, (System.Reflection.ConstructorInfo)method);
             else if (method is System.Reflection.MethodInfo)
@@ -902,7 +903,7 @@ namespace Jurassic.Compiler
         public override void InitObject(Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             this.generator.Emit(OpCodes.Initobj, type);
         }
 
@@ -952,7 +953,7 @@ namespace Jurassic.Compiler
                     this.generator.Emit(OpCodes.Ldelem_R8);
                     break;
                 default:
-                    if (type.IsClass == true)
+                    if (type.GetTypeInfo().IsClass == true)
                         this.generator.Emit(OpCodes.Ldelem_Ref);
                     else
                         this.generator.Emit(OpCodes.Ldelem, type);
@@ -991,7 +992,7 @@ namespace Jurassic.Compiler
                     this.generator.Emit(OpCodes.Stelem_R8);
                     break;
                 default:
-                    if (type.IsClass == true)
+                    if (type.GetTypeInfo().IsClass == true)
                         this.generator.Emit(OpCodes.Stelem_Ref);
                     else
                         this.generator.Emit(OpCodes.Stelem, type);
@@ -1018,6 +1019,14 @@ namespace Jurassic.Compiler
         public override void Throw()
         {
             this.generator.Emit(OpCodes.Throw);
+        }
+
+        /// <summary>
+        /// Rethrows the current exception.
+        /// </summary>
+        public override void Rethrow()
+        {
+            this.generator.Emit(OpCodes.Rethrow);
         }
 
         /// <summary>
@@ -1078,7 +1087,7 @@ namespace Jurassic.Compiler
         public override void Leave(ILLabel label)
         {
             if (label as ReflectionEmitILLabel == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
             this.generator.Emit(OpCodes.Leave, ((ReflectionEmitILLabel)label).UnderlyingLabel);
         }
 

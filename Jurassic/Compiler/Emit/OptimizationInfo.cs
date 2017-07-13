@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -15,19 +14,8 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new OptimizationInfo instance.
         /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        public OptimizationInfo(ScriptEngine engine)
+        public OptimizationInfo()
         {
-            this.Engine = engine;
-        }
-
-        /// <summary>
-        /// Gets the associated script engine.
-        /// </summary>
-        public ScriptEngine Engine
-        {
-            get;
-            private set;
         }
 
         /// <summary>
@@ -102,7 +90,7 @@ namespace Jurassic.Compiler
         public void MarkSequencePoint(ILGenerator generator, SourceCodeSpan span)
         {
             if (span == null)
-                throw new ArgumentNullException("span");
+                throw new ArgumentNullException(nameof(span));
 #if NET40
             if (this.DebugDocument != null)
                 generator.MarkSequencePoint(this.DebugDocument, span);
@@ -197,7 +185,7 @@ namespace Jurassic.Compiler
         public ILLocalVariable GetRegExpVariable(ILGenerator generator, RegularExpressionLiteral literal)
         {
             if (literal == null)
-                throw new ArgumentNullException("literal");
+                throw new ArgumentNullException(nameof(literal));
 
             // Create a new Dictionary if it hasn't been created before.
             if (this.regularExpressionVariables == null)
@@ -269,7 +257,7 @@ namespace Jurassic.Compiler
         public void PushBreakOrContinueInfo(IList<string> labelNames, ILLabel breakTarget, ILLabel continueTarget, bool labelledOnly)
         {
             if (breakTarget == null)
-                throw new ArgumentNullException("breakTarget");
+                throw new ArgumentNullException(nameof(breakTarget));
 
             // Check the label doesn't already exist.
             if (labelNames != null)
@@ -277,7 +265,7 @@ namespace Jurassic.Compiler
                 foreach (var labelName in labelNames)
                     foreach (var info in this.breakOrContinueStack)
                         if (info.LabelNames != null && info.LabelNames.Contains(labelName) == true)
-                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Label '{0}' has already been declared", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
+                            throw new SyntaxErrorException(string.Format("Label '{0}' has already been declared", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
             }
 
             // Push the info to the stack.
@@ -314,7 +302,7 @@ namespace Jurassic.Compiler
                     if (info.LabelledOnly == false)
                         return info.BreakTarget;
                 }
-                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "Illegal break statement", this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
+                throw new SyntaxErrorException("Illegal break statement", this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
             }
             else
             {
@@ -323,7 +311,7 @@ namespace Jurassic.Compiler
                     if (info.LabelNames != null && info.LabelNames.Contains(labelName) == true)
                         return info.BreakTarget;
                 }
-                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Undefined label '{0}'", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
+                throw new SyntaxErrorException(string.Format("Undefined label '{0}'", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
             }
         }
 
@@ -343,7 +331,7 @@ namespace Jurassic.Compiler
                     if (info.ContinueTarget != null && info.LabelledOnly == false)
                         return info.ContinueTarget;
                 }
-                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "Illegal continue statement", this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
+                throw new SyntaxErrorException("Illegal continue statement", this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
             }
             else
             {
@@ -352,11 +340,11 @@ namespace Jurassic.Compiler
                     if (info.LabelNames != null && info.LabelNames.Contains(labelName) == true)
                     {
                         if (info.ContinueTarget == null)
-                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("The statement with label '{0}' is not a loop", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
+                            throw new SyntaxErrorException(string.Format("The statement with label '{0}' is not a loop", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
                         return info.ContinueTarget;
                     }
                 }
-                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Undefined label '{0}'", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
+                throw new SyntaxErrorException(string.Format("Undefined label '{0}'", labelName), this.SourceSpan.StartLine, this.Source.Path, this.FunctionName);
             }
         }
 
@@ -378,7 +366,7 @@ namespace Jurassic.Compiler
         private int GetBreakOrContinueLabelDepth(ILLabel label)
         {
             if (label == null)
-                throw new ArgumentNullException("label");
+                throw new ArgumentNullException(nameof(label));
 
             int depth = this.breakOrContinueStack.Count - 1;
             foreach (var info in this.breakOrContinueStack)

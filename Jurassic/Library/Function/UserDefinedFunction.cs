@@ -33,25 +33,32 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (argumentsText == null)
-                throw new ArgumentNullException("argumentsText");
+                throw new ArgumentNullException(nameof(argumentsText));
             if (bodyText == null)
-                throw new ArgumentNullException("bodyText");
+                throw new ArgumentNullException(nameof(bodyText));
 
             // Set up a new function scope.
-            var scope = DeclarativeScope.CreateFunctionScope(this.Engine.CreateGlobalScope(), name, null);
+            var scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(this.Engine.Global), name, null);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(this.Engine, scope, name, argumentsText, bodyText, new CompilerOptions());
-            context.GenerateCode();
+            var context = new FunctionMethodGenerator(scope, name, argumentsText, bodyText, new CompilerOptions());
+            try
+            {
+                context.GenerateCode();
+            }
+            catch (SyntaxErrorException ex)
+            {
+                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+            }
 
             this.ArgumentsText = argumentsText;
             this.ArgumentNames = context.Arguments.Select(a => a.Name).ToList();
             this.BodyText = bodyText;
             this.generatedMethod = context.GeneratedMethod;
             this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
-            this.ParentScope = this.Engine.CreateGlobalScope();
+            this.ParentScope = ObjectScope.CreateGlobalScope(this.Engine.Global);
             this.StrictMode = context.StrictMode;
             InitProperties(name, context.Arguments.Count);
         }

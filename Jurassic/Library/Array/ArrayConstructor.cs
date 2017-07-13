@@ -45,7 +45,7 @@ namespace Jurassic.Library
             {
                 var temp = new object[elements.Length];
                 Array.Copy(elements, temp, elements.Length);
-                return new ArrayInstance(this.InstancePrototype, elements);
+                return new ArrayInstance(this.InstancePrototype, temp);
             }
 
             return new ArrayInstance(this.InstancePrototype, elements);

@@ -26,7 +26,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             this.value = value;
             this.FastSetProperty("length", value.Length);
         }

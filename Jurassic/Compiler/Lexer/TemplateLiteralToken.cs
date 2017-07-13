@@ -28,14 +28,16 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new TemplateLiteralToken instance.
         /// </summary>
-        /// <param name="value"> The literal text. </param>
-        /// <param name="substitutionFollows"> Indicates whether a substitution follows this
-        /// string. </param>
+        /// <param name="value">The literal text.</param>
+        /// <param name="rawText">The raw text.</param>
+        /// <param name="substitutionFollows">Indicates whether a substitution follows this
+        /// string.</param>
+        /// <exception cref="System.ArgumentNullException">value</exception>
         public TemplateLiteralToken(string value, string rawText, bool substitutionFollows)
             : base(value)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             this.RawText = rawText;
             this.SubstitutionFollows = substitutionFollows;
         }
