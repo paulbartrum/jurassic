@@ -881,6 +881,7 @@ namespace Jurassic
                 EnableDebugging = this.EnableDebugging,
                 CompatibilityMode = this.CompatibilityMode,
                 EnableILAnalysis = this.EnableILAnalysis,
+                EmitOnLoopIteration = this.OnLoopIterationCall
             };
         }
 
@@ -1368,5 +1369,19 @@ namespace Jurassic
                 return this.staticTypeWrapperCache;
             }
         }
+
+        //     Emit on loop iteration (before loop's branch call)
+        //_________________________________________________________________________________________
+        private Action _onLoopIterationCall;
+        public Action OnLoopIterationCall
+        {
+            get { return _onLoopIterationCall; }
+            set
+            {
+                _onLoopIterationCall = value;
+                OnLoopIterationCallTarget = OnLoopIterationCall?.Target;
+            }
+        }
+        public object OnLoopIterationCallTarget;
     }
 }
