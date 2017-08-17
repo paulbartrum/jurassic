@@ -177,6 +177,8 @@ namespace Jurassic.Compiler
             optimizationInfo.MethodOptimizationHints = this.MethodOptimizationHints;
             optimizationInfo.FunctionName = this.GetStackName();
             optimizationInfo.Source = this.Source;
+            optimizationInfo.EmitOnLoopIteration = Options.EmitOnLoopIteration;
+            
 
             ILGenerator generator;
             if (this.Options.EnableDebugging == false)

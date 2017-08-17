@@ -72,6 +72,7 @@
     <Compile Include="Library\DataViewTests.cs" />
     <Compile Include="Library\ArrayTests.cs" />
     <Compile Include="Library\BooleanTests.cs" />
+    <Compile Include="Library\EmitUserCodeOnLoopIterationTests.cs" />
     <Compile Include="Library\JSONTests.cs" />
     <Compile Include="Library\FunctionTests.cs" />
     <Compile Include="Core\TypeConverterTests.cs" />
