@@ -38,6 +38,8 @@ namespace Jurassic.Compiler
         /// </summary>
         public bool EnableILAnalysis { get; set; }
 
+        public Action EmitOnLoopIteration { get; set; }
+
         /// <summary>
         /// Performs a shallow clone of this instance.
         /// </summary>
