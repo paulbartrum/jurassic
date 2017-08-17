@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Jurassic.Compiler
 {
@@ -409,6 +410,21 @@ namespace Jurassic.Compiler
             set;
         }
 
+        public Action EmitOnLoopIteration { get; set; }
+
+        public void TryEmitOnLoopIteration(ILGenerator generator)
+        {
+            if (EmitOnLoopIteration == null)
+                return;
+
+            if (EmitOnLoopIteration.Target != null)
+            {
+                generator.LoadArgument(0);
+                generator.LoadField(typeof(ScriptEngine).GetField(nameof(ScriptEngine.OnLoopIterationCallTarget)));
+            }
+            generator.Call(EmitOnLoopIteration.Method);
+        }
+
         /// <summary>
         /// Emits code to branch between statements, even if code generation is within a finally
         /// block (where unconditional branches are not allowed).
@@ -417,6 +433,7 @@ namespace Jurassic.Compiler
         /// <param name="targetLabel"> The label to jump to. </param>
         public void EmitLongJump(ILGenerator generator, ILLabel targetLabel)
         {
+            TryEmitOnLoopIteration(generator);
             if (this.LongJumpCallback == null)
             {
                 // Code generation is not inside a finally block.
