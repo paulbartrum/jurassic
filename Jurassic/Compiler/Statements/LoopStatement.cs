@@ -225,6 +225,7 @@ namespace Jurassic.Compiler
             if (this.IncrementStatement != null)
                 this.IncrementStatement.GenerateCode(generator, optimizationInfo);
 
+            optimizationInfo.TryEmitOnLoopIteration(generator);
             // Unconditionally branch back to the start of the loop.
             generator.Branch(startOfLoop);
 
