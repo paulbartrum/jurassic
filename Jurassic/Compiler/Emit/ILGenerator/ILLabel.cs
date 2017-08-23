@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -9,6 +8,8 @@ namespace Jurassic.Compiler
     internal abstract class ILLabel
     {
     }
+
+#if USE_DYNAMIC_IL_INFO
 
     /// <summary>
     /// Represents a label in IL code.
@@ -83,6 +84,8 @@ namespace Jurassic.Compiler
 
 #endif
     }
+
+#endif
 
     /// <summary>
     /// Represents a label in IL code.

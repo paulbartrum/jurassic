@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -33,6 +32,8 @@ namespace Jurassic.Compiler
             get;
         }
     }
+
+#if USE_DYNAMIC_IL_INFO
 
     /// <summary>
     /// Represents a local variable in CIL code.
@@ -95,6 +96,8 @@ namespace Jurassic.Compiler
             get { return this.name; }
         }
     }
+
+#endif
 
     /// <summary>
     /// Represents a local variable in CIL code.

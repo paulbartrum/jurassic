@@ -93,10 +93,11 @@ namespace Jurassic.TestSuite
             this.inPipe = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
             this.outPipe = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
 
-            // Start a copy of this EXE and pass it the pipe handle.
+            // Start a copy of this process and pass it the pipe handle.
+            var commandLineArgs = Environment.GetCommandLineArgs();
             var childProcess = new Process();
-            childProcess.StartInfo.FileName = Process.GetCurrentProcess().MainModule.FileName;
-            childProcess.StartInfo.Arguments = $"--pipe {this.outPipe.GetClientHandleAsString()} {this.inPipe.GetClientHandleAsString()}";
+            childProcess.StartInfo.FileName = "dotnet";
+            childProcess.StartInfo.Arguments = $"\"{commandLineArgs[0]}\" --pipe {this.outPipe.GetClientHandleAsString()} {this.inPipe.GetClientHandleAsString()}";
             childProcess.StartInfo.UseShellExecute = false;
             childProcess.Start();
             this.childProcess = childProcess;

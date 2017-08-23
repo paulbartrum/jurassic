@@ -158,7 +158,7 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, obj.f());
 
             // Attempting to call an invalid function should throw an exception.
-            ExpectException<Microsoft.CSharp.RuntimeBinder.RuntimeBinderException>(() => obj.g(3));
+            ExpectException<Exception>(() => obj.g(3));
         }
     }
 }

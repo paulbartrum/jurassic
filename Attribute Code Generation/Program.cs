@@ -4,7 +4,6 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.MSBuild;
 using System.Text;
 
 namespace Attribute_Code_Generation
@@ -13,12 +12,9 @@ namespace Attribute_Code_Generation
     {
         static void Main(string[] args)
         {
-            var workspace = MSBuildWorkspace.Create();
-            var project = workspace.OpenProjectAsync(@"..\..\..\Jurassic\Jurassic.csproj").Result;
-
-            foreach (var document in project.Documents)
+            foreach (var csFilePath in Directory.EnumerateFiles(@"..\Jurassic", "*.cs", SearchOption.AllDirectories))
             {
-                var root = document.GetSyntaxRootAsync().Result;
+                var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(csFilePath));
 
                 // Construct the output file.
                 var output = new StringBuilder();
@@ -35,7 +31,7 @@ namespace Attribute_Code_Generation
 
                 bool outputFile = false;
                 var classCollector = new ClassCollector();
-                classCollector.Visit(root);
+                classCollector.Visit(syntaxTree.GetRoot());
                 foreach (var classSyntax in classCollector.Classes)
                 {
                     // Find all the methods with [JSInternalFunction], [JSCallFunction], [JSConstructorFunction], [JSProperty] or [JSField].
@@ -140,7 +136,7 @@ namespace Attribute_Code_Generation
                 if (outputFile)
                 {
                     // Write the output file.
-                    File.WriteAllText(Path.Combine(Path.GetDirectoryName(document.FilePath), Path.GetFileNameWithoutExtension(document.FilePath) + ".g.cs"), output.ToString());
+                    File.WriteAllText(Path.Combine(Path.GetDirectoryName(csFilePath), Path.GetFileNameWithoutExtension(csFilePath) + ".g.cs"), output.ToString());
                 }
             }
         }

@@ -43,9 +43,6 @@ namespace UnitTests
             if (jurassicScriptEngine == null)
             {
                 jurassicScriptEngine = new Jurassic.ScriptEngine();
-#if DEBUG
-                jurassicScriptEngine.EnableDebugging = true;
-#endif
             }
         }
 

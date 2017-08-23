@@ -58,11 +58,6 @@ namespace Performance
         {
             // Initialize the script engine.
             var engine = new ScriptEngine();
-
-#if DEBUG
-            engine.EnableDebugging = true;
-#endif
-
             engine.OptimizationStarted += (sender, e) => { parseTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
             engine.CodeGenerationStarted += (sender, e) => { optimizationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };
             engine.ExecutionStarted += (sender, e) => { codeGenerationTime = timer.Elapsed.TotalMilliseconds; timer.Restart(); };

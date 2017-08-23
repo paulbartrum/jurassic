@@ -119,10 +119,10 @@ namespace Jurassic.Compiler
                 typeof(JSBinder),                                                                               // Owner type.
                 true);                                                                                          // Skips visibility checks.
             ILGenerator generator;
-#if __MonoCS__
-            generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
-#else
+#if USE_DYNAMIC_IL_INFO
             generator = new DynamicILGenerator(dm);
+#else
+            generator = new ReflectionEmitILGenerator(dm.GetILGenerator());
 #endif
 
             // Generate the body of the method.

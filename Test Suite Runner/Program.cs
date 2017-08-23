@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Jurassic.TestSuite;
 using Newtonsoft.Json;
 
 namespace Jurassic.TestSuite
@@ -33,7 +30,7 @@ namespace Jurassic.TestSuite
             // Server process.
             using (var pipeServer = new PipeServer<WorkerProcessRequest, WorkerProcessResponse>())
             {
-                var entries = JsonConvert.DeserializeObject<CompatTableEntry[]>(File.ReadAllText(@"..\..\Kangax\compat-table.json"));
+                var entries = JsonConvert.DeserializeObject<CompatTableEntry[]>(File.ReadAllText(@"Kangax\compat-table.json"));
                 foreach (var testCase in entries)
                 {
                     try

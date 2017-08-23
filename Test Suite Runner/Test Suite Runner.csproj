@@ -1,112 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{73B31BC6-5614-4A58-A312-06B53CD0E8C0}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Jurassic.TestSuite</RootNamespace>
-    <AssemblyName>Test Suite Runner</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.84.0.0, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Test Suite Files\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.XML" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Code\PipeClient.cs" />
-    <Compile Include="Code\PipeServer.cs" />
-    <Compile Include="Code\Test.cs" />
-    <Compile Include="Code\TestEventArgs.cs" />
-    <Compile Include="Code\WorkerProcess.cs" />
-    <Compile Include="Code\WorkerProcessResponse.cs" />
-    <Compile Include="Code\WorkerProcessRequest.cs" />
-    <Compile Include="Code\TestSuite.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ProjectReference Include="..\Jurassic\Jurassic.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Jurassic\Jurassic.csproj">
-      <Project>{2CE5502D-8710-4BE3-9D90-201D526904B3}</Project>
-      <Name>Jurassic</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Kangax\compat-table.json" />
-    <None Include="packages.config" />
-    <None Include="Test Suite Files\suite\2012-05-18.zip" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Kangax\compat-table.txt" />
-    <Content Include="Test Suite Files\config\excludelist.xml" />
-    <Content Include="Test Suite Files\harness\cth.js" />
-    <Content Include="Test Suite Files\harness\Date_constants.js" />
-    <Content Include="Test Suite Files\harness\Date_library.js" />
-    <Content Include="Test Suite Files\harness\ed.js" />
-    <Content Include="Test Suite Files\harness\environment.js" />
-    <Content Include="Test Suite Files\harness\framework.js" />
-    <Content Include="Test Suite Files\harness\gs.js" />
-    <Content Include="Test Suite Files\harness\helper.js" />
-    <Content Include="Test Suite Files\harness\jquery-1.4.2.min.js" />
-    <Content Include="Test Suite Files\harness\jquery.base64.js" />
-    <Content Include="Test Suite Files\harness\jqueryprogressbar.js" />
-    <Content Include="Test Suite Files\harness\math_isequal.js" />
-    <Content Include="Test Suite Files\harness\math_precision.js" />
-    <Content Include="Test Suite Files\harness\numeric_conversion.js" />
-    <Content Include="Test Suite Files\harness\sections.js" />
-    <Content Include="Test Suite Files\harness\sta.js" />
-    <Content Include="Test Suite Files\harness\sth.js" />
-    <Content Include="Test Suite Files\ICSharpCode.SharpZipLib.dll" />
-    <Content Include="Test Suite Files\LICENSE.txt" />
-    <Content Include="Test Suite Files\README.txt" />
-    <Content Include="Test Suite Files\Results 2012-06-25.txt" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties ProjectLinkerExcludeFilter="\\?desktop(\\.*)?$;\\?silverlight(\\.*)?$;\.desktop;\.silverlight;\.xaml;^service references(\\.*)?$;\.clientconfig;^web references(\\.*)?$" ProjectLinkReference="96371037-f900-4e84-adb8-0cf7767ef723" />
-    </VisualStudio>
-  </ProjectExtensions>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

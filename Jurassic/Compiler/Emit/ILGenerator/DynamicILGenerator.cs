@@ -4,6 +4,8 @@ using System.Collections.Generic;
 namespace Jurassic.Compiler
 {
 
+#if USE_DYNAMIC_IL_INFO
+
     /// <summary>
     /// Represents a generator of CIL bytes.
     /// </summary>
@@ -2483,5 +2485,7 @@ namespace Jurassic.Compiler
         }
 
     }
+
+#endif
 
 }
