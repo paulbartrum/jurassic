@@ -271,7 +271,7 @@ namespace Jurassic.Compiler
             ReflectionHelpers_SetObjectLiteralGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetObjectLiteralSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
 
-#if DEBUG
+#if DEBUG && ENABLE_DEBUGGING
             // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus
             // must be public.
             var text = new System.Text.StringBuilder();
@@ -292,22 +292,6 @@ namespace Jurassic.Compiler
             }
             if (text.Length > 0)
                 throw new InvalidOperationException("The following members need to be public: " + Environment.NewLine + text.ToString());
-
-            // For ease of debugging, all runtime calls should have the DebuggerHidden
-            // attribute.
-            //text.Clear();
-            //foreach (var reflectionField in GetMembers())
-            //{
-            //    var methodBase = reflectionField.MemberInfo as MethodBase;
-            //    if (methodBase != null && Attribute.GetCustomAttribute(methodBase, typeof(System.Diagnostics.DebuggerHiddenAttribute)) == null)
-            //    {
-            //        text.Append(methodBase.DeclaringType.ToString());
-            //        text.Append("/");
-            //        text.AppendLine(methodBase.ToString());
-            //    }
-            //}
-            //if (text.Length > 0)
-            //    throw new InvalidOperationException("The following methods do not have [DebuggerHidden]: " + Environment.NewLine + text.ToString());
 #endif
         }
 
