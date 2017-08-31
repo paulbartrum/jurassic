@@ -253,7 +253,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "pow")]
         public static double Pow(double @base, double exponent)
         {
-            if (@base == 1.0 && double.IsInfinity(exponent))
+            if ((@base == 1.0 || @base == -1) && double.IsInfinity(exponent))
                 return double.NaN;
             if (double.IsNaN(@base) && exponent == 0.0)
                 return 1.0;

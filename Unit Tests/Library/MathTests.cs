@@ -267,11 +267,16 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("Math.pow(-1, 0)"));
             Assert.AreEqual(0, Evaluate("Math.pow(0, 1)"));
             Assert.AreEqual(0, Evaluate("Math.pow(0, Infinity)"));
+            Assert.AreEqual(0, Evaluate("Math.pow(0.1, Infinity)"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("Math.pow(0.1, -Infinity)"));
+            Assert.AreEqual(0, Evaluate("Math.pow(-0.1, Infinity)"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("Math.pow(-0.1, -Infinity)"));
             Assert.AreEqual(double.NaN, Evaluate("Math.pow(1, Infinity)"));
             Assert.AreEqual(double.NaN, Evaluate("Math.pow(1, -Infinity)"));
             Assert.AreEqual(double.NaN, Evaluate("Math.pow(-1, Infinity)"));
             Assert.AreEqual(double.NaN, Evaluate("Math.pow(-1, -Infinity)"));
             Assert.AreEqual(double.PositiveInfinity, Evaluate("Math.pow(2, Infinity)"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("Math.pow(-2, Infinity)"));
             Assert.AreEqual(0, Evaluate("Math.pow(2, -Infinity)"));
             Assert.AreEqual(double.PositiveInfinity, Evaluate("Math.pow(Infinity, Infinity)"));
             Assert.AreEqual(0, Evaluate("Math.pow(Infinity, -Infinity)"));

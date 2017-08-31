@@ -94,7 +94,7 @@ namespace UnitTests
                 for (int j = 0; j < 100; j += 19)
                 {
                     var expected = System.Numerics.BigInteger.Parse(significantNumbers[i]) << j;
-                    var actual = BigInteger.LeftShift(Jurassic.BigInteger.Parse(significantNumbers[i]), j);
+                    var actual = BigInteger.LeftShift(BigInteger.Parse(significantNumbers[i]), j);
                     Assert.AreEqual(expected, Convert(actual), string.Format("Computing {0} << {1}", significantNumbers[i], j));
                 }
         }
@@ -123,7 +123,7 @@ namespace UnitTests
                 for (int j = 0; j < 50; j ++)
                 {
                     var expected = System.Numerics.BigInteger.Pow(radixValues[i], j);
-                    var actual = Jurassic.BigInteger.Pow(radixValues[i], j);
+                    var actual = BigInteger.Pow(radixValues[i], j);
                     Assert.AreEqual(expected, Convert(actual), string.Format("Computing Pow({0}, {1})", radixValues[i], j));
                 }
         }
@@ -131,11 +131,11 @@ namespace UnitTests
         [TestMethod]
         public new void ToString()
         {
-            Jurassic.BigInteger.Parse("4294967295").ToString();
+            BigInteger.Parse("4294967295").ToString();
             for (int i = 0; i < significantNumbers.Length; i++)
             {
                 var expected = System.Numerics.BigInteger.Parse(significantNumbers[i]).ToString();
-                var actual = Jurassic.BigInteger.Parse(significantNumbers[i]).ToString();
+                var actual = BigInteger.Parse(significantNumbers[i]).ToString();
                 Assert.AreEqual(expected, actual, string.Format("Computing ToString({0})", significantNumbers[i]));
             }
         }
@@ -146,7 +146,7 @@ namespace UnitTests
             for (int i = 0; i < significantNumbers.Length; i++)
             {
                 var expected = System.Numerics.BigInteger.Abs(System.Numerics.BigInteger.Parse(significantNumbers[i]));
-                var actual = Jurassic.BigInteger.Abs(Jurassic.BigInteger.Parse(significantNumbers[i]));
+                var actual = BigInteger.Abs(BigInteger.Parse(significantNumbers[i]));
                 Assert.AreEqual(expected, Convert(actual), string.Format("Computing Abs({0})", significantNumbers[i]));
             }
         }
@@ -160,8 +160,11 @@ namespace UnitTests
                 for (int j = 0; j < baseValues.Length; j++)
                 {
                     var expected = System.Numerics.BigInteger.Log(System.Numerics.BigInteger.Parse(significantNumbers[i]), baseValues[j]);
-                    var actual = BigInteger.Log(Jurassic.BigInteger.Parse(significantNumbers[i]), baseValues[j]);
-                    Assert.AreEqual(expected, actual, string.Format("Computing Log({0}, {1})", significantNumbers[i], baseValues[j]));
+                    var actual = BigInteger.Log(BigInteger.Parse(significantNumbers[i]), baseValues[j]);
+                    if (double.IsNaN(expected))
+                        Assert.AreEqual(expected, actual, string.Format("Computing Log({0}, {1})", significantNumbers[i], baseValues[j]));
+                    else
+                        Assert.AreEqual(expected, actual, 0.0000000000001, string.Format("Computing Log({0}, {1})", significantNumbers[i], baseValues[j]));
                 }
             }
         }
@@ -183,13 +186,13 @@ namespace UnitTests
             for (int i = 0; i < significantNumbers.Length; i++)
             {
                 var expected = (double)System.Numerics.BigInteger.Parse(significantNumbers[i]);
-                var actual = Jurassic.BigInteger.Parse(significantNumbers[i]).ToDouble();
+                var actual = BigInteger.Parse(significantNumbers[i]).ToDouble();
                 Assert.AreEqual(expected, actual, string.Format("Computing ToDouble({0})", significantNumbers[i]));
             }
         }
 
         // Helper method.
-        private System.Numerics.BigInteger Convert(Jurassic.BigInteger value)
+        private System.Numerics.BigInteger Convert(BigInteger value)
         {
             var result = System.Numerics.BigInteger.Zero;
             for (int i = value.WordCount - 1; i >= 0; i --)
