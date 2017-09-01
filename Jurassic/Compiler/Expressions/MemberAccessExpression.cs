@@ -230,11 +230,36 @@ namespace Jurassic.Compiler
             {
                 // Named property access (e.g. x = y.property)
                 // -------------------------------------------
-                // value = object.GetPropertyValue("property")
 
-                // Call GetPropertyValue
-                generator.LoadString(propertyName);
-                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                // Use a PropertyReference to speed up access if we are inside a loop.
+                if (optimizationInfo.InsideLoop)
+                {
+                    // C#
+                    // if (propertyReference != null)
+                    //     propertyReference = new PropertyReference("property");
+                    // value = object.GetPropertyValue(propertyReference)
+
+                    ILLocalVariable propertyReference = optimizationInfo.GetPropertyReferenceVariable(generator, propertyName);
+                    generator.LoadVariable(propertyReference);
+                    generator.Duplicate();
+                    var afterIf = generator.CreateLabel();
+                    generator.BranchIfNotNull(afterIf);
+                    generator.Pop();
+                    generator.LoadString(propertyName);
+                    generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                    generator.Duplicate();
+                    generator.StoreVariable(propertyReference);
+                    generator.DefineLabelPosition(afterIf);
+                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_PropertyReference);
+                }
+                else
+                {
+                    // C#
+                    // value = object.GetPropertyValue("property")
+
+                    generator.LoadString(propertyName);
+                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                }
             }
             else
             {
@@ -281,11 +306,32 @@ namespace Jurassic.Compiler
                 EmitConversion.ToAny(generator, valueType);
                 generator.StoreVariable(value);
 
-                // Call SetPropertyValue
-                generator.LoadString(propertyName);
-                generator.LoadVariable(value);
-                generator.LoadBoolean(optimizationInfo.StrictMode);
-                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+                // Use a PropertyReference to speed up access if we are inside a loop.
+                if (optimizationInfo.InsideLoop)
+                {
+                    ILLocalVariable propertyReference = optimizationInfo.GetPropertyReferenceVariable(generator, propertyName);
+                    generator.LoadVariable(propertyReference);
+                    generator.Duplicate();
+                    var afterIf = generator.CreateLabel();
+                    generator.BranchIfNotNull(afterIf);
+                    generator.Pop();
+                    generator.LoadString(propertyName);
+                    generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                    generator.Duplicate();
+                    generator.StoreVariable(propertyReference);
+                    generator.DefineLabelPosition(afterIf);
+
+                    generator.LoadVariable(value);
+                    generator.LoadBoolean(optimizationInfo.StrictMode);
+                    generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_PropertyReference);
+                }
+                else
+                {
+                    generator.LoadString(propertyName);
+                    generator.LoadVariable(value);
+                    generator.LoadBoolean(optimizationInfo.StrictMode);
+                    generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+                }
 
                 generator.ReleaseTemporaryVariable(value);
             }

@@ -9,7 +9,7 @@ namespace Jurassic.Library
     public abstract partial class FunctionInstance : ObjectInstance
     {
         // Used to speed up access to the prototype property.
-        private PropertyReference cachedInstancePrototype;
+        private PropertyReference instancePrototypeProperty = new PropertyReference("prototype");
 
 
         //     INITIALIZATION
@@ -75,9 +75,7 @@ namespace Jurassic.Library
                 // See 13.2.2
 
                 // Retrieve the value of the prototype property.
-                if (cachedInstancePrototype == null)
-                    cachedInstancePrototype = GetPropertyReference("prototype");
-                ObjectInstance prototype = cachedInstancePrototype.Value as ObjectInstance;
+                ObjectInstance prototype = GetPropertyValue(instancePrototypeProperty) as ObjectInstance;
                 
                 // If the prototype property is not set to an object, use the Object prototype property instead.
                 if (prototype == null && this != this.Engine.Object)

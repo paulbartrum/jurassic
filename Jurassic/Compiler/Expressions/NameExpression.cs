@@ -203,16 +203,42 @@ namespace Jurassic.Compiler
                 }
                 else
                 {
-                    // Gets the value of a global variable (if scope.ParentScope == null) or a
-                    // variable in an object scope.
                     if (scopeVariable == null)
                         EmitHelpers.LoadScope(generator);
                     else
                         generator.LoadVariable(scopeVariable);
                     generator.CastClass(typeof(ObjectScope));
                     generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
-                    generator.LoadString(this.Name);
-                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+
+                    if (scope.ParentScope == null)
+                    {
+                        // Gets the value of a global variable.
+                        // JS: object.property
+                        // C# ==>
+                        // if (propertyName == null)
+                        //     propertyName = new PropertyName("property");
+                        // object.GetPropertyValue(propertyName);
+
+                        ILLocalVariable propertyName = optimizationInfo.GetGlobalPropertyReferenceVariable(generator, this.Name);
+                        generator.LoadVariable(propertyName);
+                        generator.Duplicate();
+                        var afterIf = generator.CreateLabel();
+                        generator.BranchIfNotNull(afterIf);
+                        generator.Pop();
+                        generator.LoadString(this.Name);
+                        generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                        generator.Duplicate();
+                        generator.StoreVariable(propertyName);
+                        generator.DefineLabelPosition(afterIf);
+                        
+                        generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_PropertyReference);
+                    }
+                    else
+                    {
+                        // Gets the value of a variable in an object scope.
+                        generator.LoadString(this.Name);
+                        generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                    }
 
                     // Check if the value is null.
                     generator.Duplicate();
@@ -401,17 +427,39 @@ namespace Jurassic.Compiler
                         generator.LoadVariable(scopeVariable);
                     generator.CastClass(typeof(ObjectScope));
                     generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
-                    generator.LoadString(this.Name);
-                    generator.LoadVariable(value);
-                    generator.LoadBoolean(optimizationInfo.StrictMode);
 
                     if (scope.ParentScope == null && throwIfUnresolvable == false)
                     {
-                        // Set the property value unconditionally.
-                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+                        // Sets the value of a global variable.
+                        // JS: object.property = value
+                        // C# ==>
+                        // if (propertyName == null)
+                        //     propertyName = new PropertyName("property");
+                        // object.SetPropertyValue(propertyName, value, strictMode);
+
+                        ILLocalVariable propertyName = optimizationInfo.GetGlobalPropertyReferenceVariable(generator, this.Name);
+                        generator.LoadVariable(propertyName);
+                        generator.Duplicate();
+                        var afterIf = generator.CreateLabel();
+                        generator.BranchIfNotNull(afterIf);
+                        generator.Pop();
+                        generator.LoadString(this.Name);
+                        generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                        generator.Duplicate();
+                        generator.StoreVariable(propertyName);
+                        generator.DefineLabelPosition(afterIf);
+
+                        generator.LoadVariable(value);
+                        generator.LoadBoolean(optimizationInfo.StrictMode);
+                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_PropertyReference);
                     }
                     else
                     {
+                        // Setting a variable within a "with" scope.
+                        generator.LoadString(this.Name);
+                        generator.LoadVariable(value);
+                        generator.LoadBoolean(optimizationInfo.StrictMode);
+
                         // Set the property value if the property exists.
                         generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValueIfExists);
 

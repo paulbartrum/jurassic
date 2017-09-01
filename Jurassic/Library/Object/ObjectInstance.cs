@@ -203,131 +203,6 @@ namespace Jurassic.Library
                 return this.schema.EnumeratePropertyNamesAndValues(this.propertyValues);
             }
         }
-
-
-
-        //     INLINE CACHING
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// Gets an object that can read or write a specific property within this object. This
-        /// method can be used when repeatedly accessing the same property; it speeds up accesses,
-        /// provided properties aren't being added or removed from the object.
-        /// </summary>
-        /// <param name="key"> The property key (either a string or a Symbol). </param>
-        /// <returns> An object that can help speed up property accesses. </returns>
-        public PropertyReference GetPropertyReference(object key)
-        {
-            return new PropertyReference(this, key);
-        }
-
-        /// <summary>
-        /// References a property of an object.
-        /// </summary>
-        public class PropertyReference
-        {
-            private ObjectInstance objectInstance;
-            private object propertyKey;
-            private HiddenClassSchema cachedSchema;
-            private int cachedIndex;
-
-            /// <summary>
-            /// Creates a new PropertyReference instance.
-            /// </summary>
-            /// <param name="objectInstance"> The object that contains the property. </param>
-            /// <param name="propertyKey"> The property key (either a string or a Symbol). </param>
-            public PropertyReference(ObjectInstance objectInstance, object propertyKey)
-            {
-                if (objectInstance == null)
-                    throw new ArgumentNullException(nameof(objectInstance));
-                this.objectInstance = objectInstance;
-                this.propertyKey = propertyKey;
-            }
-
-            public object Value
-            {
-                get
-                {
-                    // Check if anything has changed.
-                    if (this.cachedSchema == this.objectInstance.schema)
-                    {
-                        // Fast path: nothing has changed.
-                        return this.objectInstance.propertyValues[this.cachedIndex];
-                    }
-
-                    var propertyInfo = this.objectInstance.schema.GetPropertyIndexAndAttributes(this.propertyKey);
-                    if (propertyInfo.Exists == true)
-                    {
-                        // The property exists; it can be cached as long as it is not an accessor property.
-                        if ((propertyInfo.Attributes & (PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != 0)
-                        {
-                            // Getters and the length property cannot be cached.
-                            this.cachedSchema = null;
-
-                            // Call the getter if there is one.
-                            if (propertyInfo.IsAccessor == true)
-                                return ((PropertyAccessorValue)this.objectInstance.propertyValues[propertyInfo.Index]).GetValue(this.objectInstance);
-
-                            // Otherwise, the property is the "magic" length property.
-                            return ((ArrayInstance)this.objectInstance).Length;
-                        }
-
-                        // The property can be cached for next time.
-                        this.cachedIndex = propertyInfo.Index;
-                        this.cachedSchema = this.objectInstance.schema;
-                        return this.objectInstance.propertyValues[this.cachedIndex];
-                    }
-                    else
-                    {
-                        // The property is in the prototype or is non-existent.
-                        this.cachedSchema = null;
-                        if (this.objectInstance.Prototype == null)
-                            return this.objectInstance.GetMissingPropertyValue(this.propertyKey);
-                        return this.objectInstance.Prototype.GetNamedPropertyValue(this.propertyKey, this.objectInstance);
-                    }
-                }
-            }
-            /// <summary>
-            /// Sets the value of the given property.
-            /// </summary>
-            /// <param name="value"> The desired value of the property. </param>
-            /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
-            /// be set (i.e. if the property is read-only or if the object is not extensible and a new
-            /// property needs to be created). </param>
-            public void SetValue(object value, bool throwOnError)
-            {
-                // Check if anything has changed.
-                if (this.cachedSchema == this.objectInstance.schema)
-                {
-                    // Fast path: nothing has changed.
-                    this.objectInstance.propertyValues[this.cachedIndex] = value ?? Undefined.Value;
-                }
-
-                var propertyInfo = this.objectInstance.schema.GetPropertyIndexAndAttributes(this.propertyKey);
-                if (propertyInfo.Exists == true)
-                {
-                    // The property exists; it can be cached as long as it is not read-only or an accessor property.
-                    if ((propertyInfo.Attributes & (PropertyAttributes.Writable | PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != PropertyAttributes.Writable)
-                    {
-                        this.cachedSchema = null;
-                        this.objectInstance.SetPropertyValue(this.propertyKey, value, throwOnError);
-                    }
-                    else
-                    {
-                        // The property can be cached.
-                        this.cachedIndex = propertyInfo.Index;
-                        this.cachedSchema = this.objectInstance.schema;
-                        this.objectInstance.propertyValues[this.cachedIndex] = value ?? Undefined.Value;
-                    }
-                }
-                else
-                {
-                    // The property is in the prototype or is non-existent.
-                    this.cachedSchema = null;
-                    this.objectInstance.SetPropertyValue(this.propertyKey, value, throwOnError);
-                }
-            }
-        }
         
 
 
@@ -426,6 +301,53 @@ namespace Jurassic.Library
 
             // Otherwise, the property is a name.
             return GetNamedPropertyValue(key, this);
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name.
+        /// </summary>
+        /// <param name="propertyReference"> The name of the property. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        public object GetPropertyValue(PropertyReference propertyReference)
+        {
+            // Check if anything has changed.
+            if (propertyReference.CachedSchema == this.schema)
+            {
+                // Fast path: nothing has changed.
+                return this.propertyValues[propertyReference.CachedIndex];
+            }
+
+            var propertyInfo = this.schema.GetPropertyIndexAndAttributes(propertyReference.Name);
+            if (propertyInfo.Exists == true)
+            {
+                // The property exists; it can be cached as long as it is not an accessor property.
+                if ((propertyInfo.Attributes & (PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != 0)
+                {
+                    // Getters and the length property cannot be cached.
+                    propertyReference.ClearCache();
+
+                    // Call the getter if there is one.
+                    if (propertyInfo.IsAccessor == true)
+                        return ((PropertyAccessorValue)this.propertyValues[propertyInfo.Index]).GetValue(this);
+
+                    // Otherwise, the property is the "magic" length property.
+                    return ((ArrayInstance)this).Length;
+                }
+
+                // The property can be cached for next time.
+                propertyReference.CachePropertyDetails(this.schema, propertyInfo.Index);
+                return this.propertyValues[propertyReference.CachedIndex];
+            }
+            else
+            {
+                // The property is in the prototype or is non-existent.
+                propertyReference.ClearCache();
+                if (this.Prototype == null)
+                    return this.GetMissingPropertyValue(propertyReference.Name);
+                return this.Prototype.GetNamedPropertyValue(propertyReference.Name, this);
+            }
         }
 
         /// <summary>
@@ -571,6 +493,51 @@ namespace Jurassic.Library
             {
                 // The property doesn't exist - add it.
                 AddProperty(key, value, PropertyAttributes.FullAccess, throwOnError);
+            }
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given name.  If a property with the given name
+        /// does not exist, or exists in the prototype chain (and is not a setter) then a new
+        /// property is created.
+        /// </summary>
+        /// <param name="propertyReference"> The name of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set (i.e. if the property is read-only or if the object is not extensible and a new
+        /// property needs to be created). </param>
+        public void SetPropertyValue(PropertyReference propertyReference, object value, bool throwOnError)
+        {
+            // Check if anything has changed.
+            if (propertyReference.CachedSchema == this.schema)
+            {
+                // Fast path: nothing has changed.
+                this.propertyValues[propertyReference.CachedIndex] = value ?? Undefined.Value;
+                return;
+            }
+
+            var propertyInfo = this.schema.GetPropertyIndexAndAttributes(propertyReference.Name);
+            if (propertyInfo.Exists == true)
+            {
+                // The property exists; it can be cached as long as it is not read-only or an accessor property.
+                if ((propertyInfo.Attributes & (PropertyAttributes.Writable | PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != PropertyAttributes.Writable)
+                {
+                    propertyReference.ClearCache();
+                    this.SetPropertyValue(propertyReference.Name, value, throwOnError);
+                }
+                else
+                {
+                    // The property can be cached.
+                    propertyReference.CachePropertyDetails(this.schema, propertyInfo.Index);
+                    this.propertyValues[propertyReference.CachedIndex] = value ?? Undefined.Value;
+                }
+            }
+            else
+            {
+                // The property is in the prototype or is non-existent.
+                propertyReference.ClearCache();
+                this.SetPropertyValue(propertyReference.Name, value, throwOnError);
             }
         }
 
