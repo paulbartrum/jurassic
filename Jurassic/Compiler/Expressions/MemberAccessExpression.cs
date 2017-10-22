@@ -230,59 +230,43 @@ namespace Jurassic.Compiler
             {
                 // Named property access (e.g. x = y.property)
                 // -------------------------------------------
-                // __object_cacheKey = null;
-                // __object_property_cachedIndex = 0;
-                // ...
-                // if (__object_cacheKey != object.InlineCacheKey)
-                //     xxx = object.InlineGetPropertyValue("property", out __object_property_cachedIndex, out __object_cacheKey)
-                // else
-                //     xxx = object.InlinePropertyValues[__object_property_cachedIndex];
 
-                // TODO: share these variables somehow.
-                var cacheKey = generator.DeclareVariable(typeof(object));
-                var cachedIndex = generator.DeclareVariable(typeof(int));
+                // Use a PropertyReference to speed up access if we are inside a loop.
+                if (optimizationInfo.InsideLoop)
+                {
+                    // C#
+                    // if (propertyReference != null)
+                    //     propertyReference = new PropertyReference("property");
+                    // value = object.GetPropertyValue(propertyReference)
 
-                // Store the object into a temp variable.
-                var objectInstance = generator.DeclareVariable(PrimitiveType.Object);
-                generator.StoreVariable(objectInstance);
+                    ILLocalVariable propertyReference = optimizationInfo.GetPropertyReferenceVariable(generator, propertyName);
+                    generator.LoadVariable(propertyReference);
+                    generator.Duplicate();
+                    var afterIf = generator.CreateLabel();
+                    generator.BranchIfNotNull(afterIf);
+                    generator.Pop();
+                    generator.LoadString(propertyName);
+                    generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                    generator.Duplicate();
+                    generator.StoreVariable(propertyReference);
+                    generator.DefineLabelPosition(afterIf);
+                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_PropertyReference);
+                }
+                else
+                {
+                    // C#
+                    // value = object.GetPropertyValue("property")
 
-                // if (__object_cacheKey != object.InlineCacheKey)
-                generator.LoadVariable(cacheKey);
-                generator.LoadVariable(objectInstance);
-                generator.Call(ReflectionHelpers.ObjectInstance_InlineCacheKey);
-                var elseClause = generator.CreateLabel();
-                generator.BranchIfEqual(elseClause);
-
-                // value = object.InlineGetProperty("property", out __object_property_cachedIndex, out __object_cacheKey)
-                generator.LoadVariable(objectInstance);
-                generator.LoadString(propertyName);
-                generator.LoadAddressOfVariable(cachedIndex);
-                generator.LoadAddressOfVariable(cacheKey);
-                generator.Call(ReflectionHelpers.ObjectInstance_InlineGetPropertyValue);
-
-                var endOfIf = generator.CreateLabel();
-                generator.Branch(endOfIf);
-
-                // else
-                generator.DefineLabelPosition(elseClause);
-
-                // value = object.InlinePropertyValues[__object_property_cachedIndex];
-                generator.LoadVariable(objectInstance);
-                generator.Call(ReflectionHelpers.ObjectInstance_InlinePropertyValues);
-                generator.LoadVariable(cachedIndex);
-                generator.LoadArrayElement(typeof(object));
-
-                // End of the if statement
-                generator.DefineLabelPosition(endOfIf);
-
+                    generator.LoadString(propertyName);
+                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                }
             }
             else
             {
                 // Dynamic property access
                 // -----------------------
-                // xxx = object.Get(x)
+                // x = y.GetPropertyValue("property")
 
-                // Call Get(object)
                 generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
             }
         }
@@ -313,71 +297,50 @@ namespace Jurassic.Compiler
             }
             else if (memberAccessType == TypeOfMemberAccess.Static)
             {
-                // Named property modification (e.g. x.property = y)
-                // -------------------------------------------------
-                // __object_cacheKey = null;
-                // __object_property_cachedIndex = 0;
-                // ...
-                // if (__object_cacheKey != object.InlineCacheKey)
-                //     object.InlineSetPropertyValue("property", value, strictMode, out __object_property_cachedIndex, out __object_cacheKey)
-                // else
-                //     object.InlinePropertyValues[__object_property_cachedIndex] = value;
+                // Named property modification (e.g. object.property = value)
+                // ----------------------------------------------------------
+                // object.SetPropertyValue(property, value, strictMode)
 
                 // Convert the value to an object and store it in a temporary variable.
                 var value = generator.CreateTemporaryVariable(typeof(object));
                 EmitConversion.ToAny(generator, valueType);
                 generator.StoreVariable(value);
 
-                // TODO: share these variables somehow.
-                var cacheKey = generator.DeclareVariable(typeof(object));
-                var cachedIndex = generator.DeclareVariable(typeof(int));
+                // Use a PropertyReference to speed up access if we are inside a loop.
+                if (optimizationInfo.InsideLoop)
+                {
+                    ILLocalVariable propertyReference = optimizationInfo.GetPropertyReferenceVariable(generator, propertyName);
+                    generator.LoadVariable(propertyReference);
+                    generator.Duplicate();
+                    var afterIf = generator.CreateLabel();
+                    generator.BranchIfNotNull(afterIf);
+                    generator.Pop();
+                    generator.LoadString(propertyName);
+                    generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                    generator.Duplicate();
+                    generator.StoreVariable(propertyReference);
+                    generator.DefineLabelPosition(afterIf);
 
-                // Store the object into a temp variable.
-                var objectInstance = generator.DeclareVariable(PrimitiveType.Object);
-                generator.StoreVariable(objectInstance);
+                    generator.LoadVariable(value);
+                    generator.LoadBoolean(optimizationInfo.StrictMode);
+                    generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_PropertyReference);
+                }
+                else
+                {
+                    generator.LoadString(propertyName);
+                    generator.LoadVariable(value);
+                    generator.LoadBoolean(optimizationInfo.StrictMode);
+                    generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+                }
 
-                // if (__object_cacheKey != object.InlineCacheKey)
-                generator.LoadVariable(cacheKey);
-                generator.LoadVariable(objectInstance);
-                generator.Call(ReflectionHelpers.ObjectInstance_InlineCacheKey);
-                var elseClause = generator.CreateLabel();
-                generator.BranchIfEqual(elseClause);
-
-                // xxx = object.InlineSetPropertyValue("property", value, strictMode, out __object_property_cachedIndex, out __object_cacheKey)
-                generator.LoadVariable(objectInstance);
-                generator.LoadString(propertyName);
-                generator.LoadVariable(value);
-                generator.LoadBoolean(optimizationInfo.StrictMode);
-                generator.LoadAddressOfVariable(cachedIndex);
-                generator.LoadAddressOfVariable(cacheKey);
-                generator.Call(ReflectionHelpers.ObjectInstance_InlineSetPropertyValue);
-
-                var endOfIf = generator.CreateLabel();
-                generator.Branch(endOfIf);
-
-                // else
-                generator.DefineLabelPosition(elseClause);
-
-                // object.InlinePropertyValues[__object_property_cachedIndex] = value;
-                generator.LoadVariable(objectInstance);
-                generator.Call(ReflectionHelpers.ObjectInstance_InlinePropertyValues);
-                generator.LoadVariable(cachedIndex);
-                generator.LoadVariable(value);
-                generator.StoreArrayElement(typeof(object));
-
-                // End of the if statement
-                generator.DefineLabelPosition(endOfIf);
-
-                // The temporary variable is no longer needed.
                 generator.ReleaseTemporaryVariable(value);
             }
             else
             {
                 // Dynamic property access
                 // -----------------------
-                // xxx = object.Get(x)
+                // object.SetPropertyValue(property, value, strictMode)
 
-                // Call the indexer.
                 EmitConversion.ToAny(generator, valueType);
                 generator.LoadBoolean(optimizationInfo.StrictMode);
                 generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);

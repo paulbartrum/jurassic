@@ -166,6 +166,64 @@ namespace Jurassic.Compiler
             set;
         }
 
+        private Dictionary<string, ILLocalVariable> globalVariables;
+
+        /// <summary>
+        /// Retrieves a variable that can be used to store a property name referencing a
+        /// global variable.
+        /// </summary>
+        /// <param name="generator"> The IL generator used to create the variable. </param>
+        /// <param name="name"> The name of the global variable. </param>
+        /// <returns> A variable. </returns>
+        public ILLocalVariable GetGlobalPropertyReferenceVariable(ILGenerator generator, string name)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            // Create a new Dictionary if it hasn't been created before.
+            if (this.globalVariables == null)
+                this.globalVariables = new Dictionary<string, ILLocalVariable>();
+
+            // Check if the name already exists in the dictionary.
+            ILLocalVariable variable;
+            if (this.globalVariables.TryGetValue(name, out variable) == false)
+            {
+                // The literal does not exist - add it.
+                variable = generator.DeclareVariable(typeof(Library.PropertyReference), name);
+                this.globalVariables.Add(name, variable);
+            }
+            return variable;
+        }
+
+        private Dictionary<string, ILLocalVariable> propertyVariables;
+
+        /// <summary>
+        /// Retrieves a variable that can be used to store a property name referencing an
+        /// object property.
+        /// </summary>
+        /// <param name="generator"> The IL generator used to create the variable. </param>
+        /// <param name="name"> The name of the property. </param>
+        /// <returns> A variable. </returns>
+        public ILLocalVariable GetPropertyReferenceVariable(ILGenerator generator, string name)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            // Create a new Dictionary if it hasn't been created before.
+            if (this.propertyVariables == null)
+                this.propertyVariables = new Dictionary<string, ILLocalVariable>();
+
+            // Check if the name already exists in the dictionary.
+            ILLocalVariable variable;
+            if (this.propertyVariables.TryGetValue(name, out variable) == false)
+            {
+                // The literal does not exist - add it.
+                variable = generator.DeclareVariable(typeof(Library.PropertyReference), name);
+                this.propertyVariables.Add(name, variable);
+            }
+            return variable;
+        }
+
         private Dictionary<RegularExpressionLiteral, ILLocalVariable> regularExpressionVariables;
 
         /// <summary>
@@ -225,7 +283,7 @@ namespace Jurassic.Compiler
 
 
 
-        //     BREAK AND CONTINUE SUPPORT
+        //     LOOP SUPPORT
         //_________________________________________________________________________________________
 
         private class BreakOrContinueInfo
@@ -237,6 +295,14 @@ namespace Jurassic.Compiler
         }
 
         private Stack<BreakOrContinueInfo> breakOrContinueStack = new Stack<BreakOrContinueInfo>();
+
+        /// <summary>
+        /// Indicates whether we are generating code inside a loop.
+        /// </summary>
+        public bool InsideLoop
+        {
+            get { return breakOrContinueStack.Count > 0; }
+        }
 
         /// <summary>
         /// Pushes information about break or continue targets to a stack.

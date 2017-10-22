@@ -98,14 +98,11 @@ namespace Jurassic.Compiler
         internal static MethodInfo ObjectInstance_HasProperty;
         internal static MethodInfo ObjectInstance_GetPropertyValue_Object;
         internal static MethodInfo ObjectInstance_GetPropertyValue_Int;
+        internal static MethodInfo ObjectInstance_GetPropertyValue_PropertyReference;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Object;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Int;
+        internal static MethodInfo ObjectInstance_SetPropertyValue_PropertyReference;
         internal static MethodInfo ObjectInstance_SetPropertyValueIfExists;
-        internal static MethodInfo ObjectInstance_InlinePropertyValues;
-        internal static MethodInfo ObjectInstance_InlineCacheKey;
-        internal static MethodInfo ObjectInstance_InlineGetPropertyValue;
-        internal static MethodInfo ObjectInstance_InlineSetPropertyValue;
-        internal static MethodInfo ObjectInstance_InlineSetPropertyValueIfExists;
 
         internal static MethodInfo Scope_ParentScope;
         internal static MethodInfo ObjectScope_CreateRuntimeScope;
@@ -126,6 +123,7 @@ namespace Jurassic.Compiler
         internal static ConstructorInfo PropertyDescriptor_Constructor3;
         internal static ConstructorInfo ClrInstanceWrapper_Constructor;
         internal static ConstructorInfo Decimal_Constructor_Double;
+        internal static ConstructorInfo PropertyName_Constructor;
 
         internal static FieldInfo Undefined_Value;
         internal static FieldInfo Null_Value;
@@ -174,17 +172,11 @@ namespace Jurassic.Compiler
             ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(object));
             ObjectInstance_GetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(object));
             ObjectInstance_GetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(uint));
+            ObjectInstance_GetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(PropertyReference));
             ObjectInstance_SetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
+            ObjectInstance_SetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(PropertyReference), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(object), typeof(object), typeof(bool));
-            ObjectInstance_InlinePropertyValues = GetInstanceMethod(typeof(ObjectInstance), "get_InlinePropertyValues");
-            ObjectInstance_InlineCacheKey = GetInstanceMethod(typeof(ObjectInstance), "get_InlineCacheKey");
-            ObjectInstance_InlineGetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineGetPropertyValue",
-                new Type[] { typeof(string), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
-            ObjectInstance_InlineSetPropertyValue = GetInstanceMethod(typeof(ObjectInstance), "InlineSetPropertyValue",
-                new Type[] { typeof(string), typeof(object), typeof(bool), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
-            ObjectInstance_InlineSetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "InlineSetPropertyValueIfExists",
-                new Type[] { typeof(string), typeof(object), typeof(bool), typeof(int).MakeByRefType(), typeof(object).MakeByRefType() });
 
             Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
             ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance), typeof(bool), typeof(bool));
@@ -254,6 +246,7 @@ namespace Jurassic.Compiler
             PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
             ClrInstanceWrapper_Constructor = GetConstructor(typeof(ClrInstanceWrapper), typeof(ScriptEngine), typeof(object));
             Decimal_Constructor_Double = GetConstructor(typeof(decimal), typeof(double));
+            PropertyName_Constructor = GetConstructor(typeof(PropertyReference), typeof(string));
 
             GeneratedMethod_Load = GetStaticMethod(typeof(GeneratedMethod), "Load", typeof(long));
             ClrInstanceWrapper_GetWrappedInstance = GetInstanceMethod(typeof(ClrInstanceWrapper), "get_WrappedInstance");

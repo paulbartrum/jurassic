@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jurassic.Library;
+using System;
 using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
@@ -202,91 +203,48 @@ namespace Jurassic.Compiler
                 }
                 else
                 {
+                    if (scopeVariable == null)
+                        EmitHelpers.LoadScope(generator);
+                    else
+                        generator.LoadVariable(scopeVariable);
+                    generator.CastClass(typeof(ObjectScope));
+                    generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
+
                     if (scope.ParentScope == null)
                     {
+                        // Gets the value of a global variable.
+                        // JS: object.property
+                        // C# ==>
+                        // if (propertyName == null)
+                        //     propertyName = new PropertyName("property");
+                        // object.GetPropertyValue(propertyName);
 
-                        // Global variable access
-                        // -------------------------------------------
-                        // __object_cacheKey = null;
-                        // __object_property_cachedIndex = 0;
-                        // ...
-                        // if (__object_cacheKey != object.InlineCacheKey)
-                        //     xxx = object.InlineGetPropertyValue("variable", out __object_property_cachedIndex, out __object_cacheKey)
-                        // else
-                        //     xxx = object.InlinePropertyValues[__object_property_cachedIndex];
-
-                        // Get a reference to the global object.
-                        if (scopeVariable == null)
-                            EmitHelpers.LoadScope(generator);
-                        else
-                            generator.LoadVariable(scopeVariable);
-                        generator.CastClass(typeof(ObjectScope));
-                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
-
-                        // TODO: share these variables somehow.
-                        var cacheKey = generator.DeclareVariable(typeof(object));
-                        var cachedIndex = generator.DeclareVariable(typeof(int));
-
-                        // Store the object into a temp variable.
-                        var objectInstance = generator.DeclareVariable(PrimitiveType.Object);
-                        generator.StoreVariable(objectInstance);
-
-                        // if (__object_cacheKey != object.InlineCacheKey)
-                        generator.LoadVariable(cacheKey);
-                        generator.LoadVariable(objectInstance);
-                        generator.Call(ReflectionHelpers.ObjectInstance_InlineCacheKey);
-                        var elseClause = generator.CreateLabel();
-                        generator.BranchIfEqual(elseClause);
-
-                        // value = object.InlineGetProperty("property", out __object_property_cachedIndex, out __object_cacheKey)
-                        generator.LoadVariable(objectInstance);
-                        generator.LoadString(this.Name);
-                        generator.LoadAddressOfVariable(cachedIndex);
-                        generator.LoadAddressOfVariable(cacheKey);
-                        generator.Call(ReflectionHelpers.ObjectInstance_InlineGetPropertyValue);
-
-                        var endOfIf = generator.CreateLabel();
-                        generator.Branch(endOfIf);
-
-                        // else
-                        generator.DefineLabelPosition(elseClause);
-
-                        // value = object.InlinePropertyValues[__object_property_cachedIndex];
-                        generator.LoadVariable(objectInstance);
-                        generator.Call(ReflectionHelpers.ObjectInstance_InlinePropertyValues);
-                        generator.LoadVariable(cachedIndex);
-                        generator.LoadArrayElement(typeof(object));
-
-                        // End of the if statement
-                        generator.DefineLabelPosition(endOfIf);
-
-                        // Check if the value is null.
+                        ILLocalVariable propertyName = optimizationInfo.GetGlobalPropertyReferenceVariable(generator, this.Name);
+                        generator.LoadVariable(propertyName);
                         generator.Duplicate();
-                        generator.BranchIfNotNull(endOfGet);
-                        if (scope.ParentScope != null)
-                            generator.Pop();
-
+                        var afterIf = generator.CreateLabel();
+                        generator.BranchIfNotNull(afterIf);
+                        generator.Pop();
+                        generator.LoadString(this.Name);
+                        generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                        generator.Duplicate();
+                        generator.StoreVariable(propertyName);
+                        generator.DefineLabelPosition(afterIf);
+                        
+                        generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_PropertyReference);
                     }
                     else
                     {
-
                         // Gets the value of a variable in an object scope.
-                        if (scopeVariable == null)
-                            EmitHelpers.LoadScope(generator);
-                        else
-                            generator.LoadVariable(scopeVariable);
-                        generator.CastClass(typeof(ObjectScope));
-                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
                         generator.LoadString(this.Name);
                         generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
-
-                        // Check if the value is null.
-                        generator.Duplicate();
-                        generator.BranchIfNotNull(endOfGet);
-                        if (scope.ParentScope != null)
-                            generator.Pop();
-
                     }
+
+                    // Check if the value is null.
+                    generator.Duplicate();
+                    generator.BranchIfNotNull(endOfGet);
+                    if (scope.ParentScope != null)
+                        generator.Pop();
                 }
 
                 // Try the parent scope.
@@ -463,111 +421,50 @@ namespace Jurassic.Compiler
                         generator.StoreVariable(value);
                     }
 
-                    if (scope.ParentScope == null)
+                    if (scopeVariable == null)
+                        EmitHelpers.LoadScope(generator);
+                    else
+                        generator.LoadVariable(scopeVariable);
+                    generator.CastClass(typeof(ObjectScope));
+                    generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
+
+                    if (scope.ParentScope == null && throwIfUnresolvable == false)
                     {
-                        // Optimization: if this is the global scope, use hidden classes to
-                        // optimize variable access.
+                        // Sets the value of a global variable.
+                        // JS: object.property = value
+                        // C# ==>
+                        // if (propertyName == null)
+                        //     propertyName = new PropertyName("property");
+                        // object.SetPropertyValue(propertyName, value, strictMode);
 
-                        // Global variable modification
-                        // ----------------------------
-                        // __object_cacheKey = null;
-                        // __object_property_cachedIndex = 0;
-                        // ...
-                        // if (__object_cacheKey != object.InlineCacheKey)
-                        //     object.InlineSetPropertyValueIfExists("property", value, strictMode, out __object_property_cachedIndex, out __object_cacheKey)
-                        // else
-                        //     object.InlinePropertyValues[__object_property_cachedIndex] = value;
-
-                        // Get a reference to the global object.
-                        if (scopeVariable == null)
-                            EmitHelpers.LoadScope(generator);
-                        else
-                            generator.LoadVariable(scopeVariable);
-                        generator.CastClass(typeof(ObjectScope));
-                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
-
-                        // TODO: share these variables somehow.
-                        var cacheKey = generator.DeclareVariable(typeof(object));
-                        var cachedIndex = generator.DeclareVariable(typeof(int));
-
-                        // Store the object into a temp variable.
-                        var objectInstance = generator.DeclareVariable(PrimitiveType.Object);
-                        generator.StoreVariable(objectInstance);
-
-                        // if (__object_cacheKey != object.InlineCacheKey)
-                        generator.LoadVariable(cacheKey);
-                        generator.LoadVariable(objectInstance);
-                        generator.Call(ReflectionHelpers.ObjectInstance_InlineCacheKey);
-                        var elseClause = generator.CreateLabel();
-                        generator.BranchIfEqual(elseClause);
-
-                        // xxx = object.InlineSetPropertyValueIfExists("property", value, strictMode, out __object_property_cachedIndex, out __object_cacheKey)
-                        generator.LoadVariable(objectInstance);
+                        ILLocalVariable propertyName = optimizationInfo.GetGlobalPropertyReferenceVariable(generator, this.Name);
+                        generator.LoadVariable(propertyName);
+                        generator.Duplicate();
+                        var afterIf = generator.CreateLabel();
+                        generator.BranchIfNotNull(afterIf);
+                        generator.Pop();
                         generator.LoadString(this.Name);
+                        generator.NewObject(ReflectionHelpers.PropertyName_Constructor);
+                        generator.Duplicate();
+                        generator.StoreVariable(propertyName);
+                        generator.DefineLabelPosition(afterIf);
+
                         generator.LoadVariable(value);
                         generator.LoadBoolean(optimizationInfo.StrictMode);
-                        generator.LoadAddressOfVariable(cachedIndex);
-                        generator.LoadAddressOfVariable(cacheKey);
-                        if (throwIfUnresolvable == false)
-                        {
-                            // Set the property value unconditionally.
-                            generator.Call(ReflectionHelpers.ObjectInstance_InlineSetPropertyValue);
-                        }
-                        else
-                        {
-                            // Set the property value if the property exists.
-                            generator.Call(ReflectionHelpers.ObjectInstance_InlineSetPropertyValueIfExists);
-
-                            // The return value is true if the property was defined, and false if it wasn't.
-                            generator.BranchIfTrue(endOfSet);
-                        }
-
-                        var endOfIf = generator.CreateLabel();
-                        generator.Branch(endOfIf);
-
-                        // else
-                        generator.DefineLabelPosition(elseClause);
-
-                        // object.InlinePropertyValues[__object_property_cachedIndex] = value;
-                        generator.LoadVariable(objectInstance);
-                        generator.Call(ReflectionHelpers.ObjectInstance_InlinePropertyValues);
-                        generator.LoadVariable(cachedIndex);
-                        generator.LoadVariable(value);
-                        generator.StoreArrayElement(typeof(object));
-                        generator.Branch(endOfSet);
-
-                        // End of the if statement
-                        generator.DefineLabelPosition(endOfIf);
-
+                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_PropertyReference);
                     }
                     else
                     {
-                        // Slow route.
-
-                        if (scopeVariable == null)
-                            EmitHelpers.LoadScope(generator);
-                        else
-                            generator.LoadVariable(scopeVariable);
-                        generator.CastClass(typeof(ObjectScope));
-                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
+                        // Setting a variable within a "with" scope.
                         generator.LoadString(this.Name);
                         generator.LoadVariable(value);
                         generator.LoadBoolean(optimizationInfo.StrictMode);
 
-                        if (scope.ParentScope == null && throwIfUnresolvable == false)
-                        {
-                            // Set the property value unconditionally.
-                            generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
-                        }
-                        else
-                        {
-                            // Set the property value if the property exists.
-                            generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValueIfExists);
+                        // Set the property value if the property exists.
+                        generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValueIfExists);
 
-                            // The return value is true if the property was defined, and false if it wasn't.
-                            generator.BranchIfTrue(endOfSet);
-                        }
-
+                        // The return value is true if the property was defined, and false if it wasn't.
+                        generator.BranchIfTrue(endOfSet);
                     }
                 }
 
