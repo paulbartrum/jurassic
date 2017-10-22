@@ -160,6 +160,25 @@ namespace Jurassic.Compiler
         /// </summary>
         private static ReflectionEmitModuleInfo ReflectionEmitInfo;
 
+        /// <summary>
+        /// Gets the language type GUID for the symbol store.
+        /// </summary>
+        private static readonly Guid LanguageType =      // JScript
+            new Guid("3A12D0B6-C26C-11D0-B442-00A0244A1DD2");
+
+        /// <summary>
+        /// Gets the language vendor GUID for the symbol store.
+        /// </summary>
+        private static readonly Guid LanguageVendor =
+            new Guid("CFA05A92-B7CC-4D3D-92E1-4D18CDACDC8D");
+
+
+        /// <summary>
+        /// Gets the document type GUID for the symbol store.
+        /// </summary>
+        private static readonly Guid DocumentType =
+            new Guid("5A869D0B-6611-11D3-BD2A-0000F80849BD");
+
 #endif
 
         /// <summary>
@@ -272,7 +291,7 @@ namespace Jurassic.Compiler
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
                     // Initialize the debugging information.
-                    optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, COMHelpers.LanguageType, COMHelpers.LanguageVendor, COMHelpers.DocumentType);
+                    optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, LanguageType, LanguageVendor, DocumentType);
                     methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
                     methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
                     methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
