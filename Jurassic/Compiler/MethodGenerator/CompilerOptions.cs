@@ -20,22 +20,6 @@ namespace Jurassic.Compiler
         /// </summary>
         public bool ForceStrictMode { get; set; }
 
-#if ENABLE_DEBUGGING
-
-        /// <summary>
-        /// Gets or sets a value which indicates whether debug information should be generated.  If
-        /// this is set to <c>true</c> performance and memory usage are negatively impacted.  The
-        /// default is <c>false</c>.
-        /// </summary>
-        public bool EnableDebugging { get; set; }
-
-#else
-
-        // Debugging is not supported.
-        internal bool EnableDebugging => false;
-
-#endif
-
         /// <summary>
         /// Gets or sets a value that indicates what compatibility mode to use.
         /// </summary>
@@ -46,6 +30,11 @@ namespace Jurassic.Compiler
         /// in the associated function.
         /// </summary>
         public bool EnableILAnalysis { get; set; }
+
+        /// <summary>
+        /// An (optional) auxillary method generation helper
+        /// </summary>
+        public IMethodGenerationHelper MethodGenerationHelper { get; set; }
 
         /// <summary>
         /// Performs a shallow clone of this instance.

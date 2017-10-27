@@ -1133,11 +1133,10 @@ namespace Jurassic.Compiler
         /// <param name="endColumn"> The column in the line where the sequence point ends. </param>
         public override void MarkSequencePoint(System.Diagnostics.SymbolStore.ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn)
         {
-#if ENABLE_DEBUGGING
-            this.generator.MarkSequencePoint(document, startLine, startColumn, endLine, endColumn);
-#else
-            throw new NotImplementedException();
-#endif
+            if (document != null)
+                this.generator.MarkSequencePoint(document, startLine, startColumn, endLine, endColumn);
+            else
+                throw new NotImplementedException();
         }
 
 

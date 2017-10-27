@@ -88,6 +88,9 @@ namespace Jurassic
             // Create the built-in Symbol function first.
             this.symbolConstructor = new SymbolConstructor(baseFunction, baseSymbol);
 
+            // Nullify the method generation helper
+            this.MethodGenerationHelper = null;
+
             // Create the rest of the built-ins.
             this.globalObject = new GlobalObject(baseObject);
             this.mathObject = new MathObject(baseObject);
@@ -627,24 +630,15 @@ namespace Jurassic
             get { return this.float64ArrayConstructor; }
         }
 
-
-
-        //     DEBUGGING SUPPORT
-        //_________________________________________________________________________________________
-
-#if ENABLE_DEBUGGING
-
         /// <summary>
-        /// Gets or sets a value which indicates whether debug information should be generated.  If
-        /// this is set to <c>true</c> performance and memory usage are negatively impacted.
+        /// Gets or sets an auxillary method generation helper. Typically used to generate symbolic information
+        /// rich methods.
         /// </summary>
-        public bool EnableDebugging
+        public IMethodGenerationHelper  MethodGenerationHelper
         {
             get;
             set;
         }
-
-#endif
 
         /// <summary>
         /// Gets or sets whether CLR types can be exposed directly to the script engine.  If this is set to 
@@ -882,11 +876,9 @@ namespace Jurassic
             return new CompilerOptions()
             {
                 ForceStrictMode = this.ForceStrictMode,
-#if ENABLE_DEBUGGING
-                EnableDebugging = this.EnableDebugging,
-#endif
                 CompatibilityMode = this.CompatibilityMode,
                 EnableILAnalysis = this.EnableILAnalysis,
+                MethodGenerationHelper = this.MethodGenerationHelper
             };
         }
 

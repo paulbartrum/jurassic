@@ -3,6 +3,36 @@
 namespace Jurassic.Compiler
 {
     /// <summary>
+    /// The default implementation of method generation helper
+    /// </summary>
+    internal class DefaultMethodGenerationHelper : IMethodGenerationHelper
+    {
+        private System.Reflection.Emit.DynamicMethod _dynamicMethod;
+
+        public override System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument
+        { get => null; }
+
+        public override System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes)
+        {
+            _dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                methodName,                                        // Name of the generated method.
+                typeof(object),                                         // Return type of the generated method.
+                parametersTypes,                                    // Parameter types of the generated method.
+                typeof(MethodGenerator),                                // Owner type.
+                true);                                                  // Skip visibility checks.
+
+            return _dynamicMethod.GetILGenerator();
+        }
+
+        public override Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes)
+        {
+            return _dynamicMethod.CreateDelegate(delegateType);
+        }
+
+    };
+
+
+    /// <summary>
     /// Represents the unit of compilation.
     /// </summary>
     internal abstract class MethodGenerator
@@ -144,42 +174,6 @@ namespace Jurassic.Compiler
         {
         }
 
-#if ENABLE_DEBUGGING
-
-        internal class ReflectionEmitModuleInfo
-        {
-            public System.Reflection.Emit.AssemblyBuilder AssemblyBuilder;
-            public System.Reflection.Emit.ModuleBuilder ModuleBuilder;
-            public int TypeCount;
-        }
-
-        private static object reflectionEmitInfoLock = new object();
-
-        /// <summary>
-        /// Gets or sets information needed by Reflection.Emit.
-        /// </summary>
-        private static ReflectionEmitModuleInfo ReflectionEmitInfo;
-
-        /// <summary>
-        /// Gets the language type GUID for the symbol store.
-        /// </summary>
-        private static readonly Guid LanguageType =      // JScript
-            new Guid("3A12D0B6-C26C-11D0-B442-00A0244A1DD2");
-
-        /// <summary>
-        /// Gets the language vendor GUID for the symbol store.
-        /// </summary>
-        private static readonly Guid LanguageVendor =
-            new Guid("CFA05A92-B7CC-4D3D-92E1-4D18CDACDC8D");
-
-
-        /// <summary>
-        /// Gets the document type GUID for the symbol store.
-        /// </summary>
-        private static readonly Guid DocumentType =
-            new Guid("5A869D0B-6611-11D3-BD2A-0000F80849BD");
-
-#endif
 
         /// <summary>
         /// Generates IL for the script.
@@ -202,13 +196,23 @@ namespace Jurassic.Compiler
             optimizationInfo.Source = this.Source;
 
             ILGenerator generator;
-            if (this.Options.EnableDebugging == false)
-            {
-                // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
-                // FunctionExpression class.
+            System.Reflection.Emit.DynamicMethod dynamicMethod;
+            IMethodGenerationHelper methodHelper = this.Options.MethodGenerationHelper;
 
+            if (methodHelper != null)
+            {
+                methodHelper.SetupMethodGeneration(this.Source, this.Options);
+                generator = new ReflectionEmitILGenerator(methodHelper.BeginMethodGeneration(
+                    GetMethodName(), 
+                    GetParameterTypes())
+                );
+                optimizationInfo.DebugDocument = methodHelper.DebugDocument;
+                dynamicMethod = null;
+            }
+            else
+            {
                 // Create a new dynamic method.
-                System.Reflection.Emit.DynamicMethod dynamicMethod = new System.Reflection.Emit.DynamicMethod(
+                dynamicMethod = new System.Reflection.Emit.DynamicMethod(
                     GetMethodName(),                                        // Name of the generated method.
                     typeof(object),                                         // Return type of the generated method.
                     GetParameterTypes(),                                    // Parameter types of the generated method.
@@ -219,95 +223,26 @@ namespace Jurassic.Compiler
 #else
                 generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
 #endif
-
-                if (this.Options.EnableILAnalysis == true)
-                {
-                    // Replace the generator with one that logs.
-                    generator = new LoggingILGenerator(generator);
-                }
-
-                // Initialization code will appear to come from line 1.
-                optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
-
-                // Generate the IL.
-                GenerateCode(generator, optimizationInfo);
-                generator.Complete();
-
-                // Create a delegate from the method.
-                this.GeneratedMethod = new GeneratedMethod(dynamicMethod.CreateDelegate(GetDelegate()), optimizationInfo.NestedFunctions);
-
             }
-            else
+
+            if (this.Options.EnableILAnalysis == true)
             {
-#if ENABLE_DEBUGGING
-                // Debugging or low trust path.
-                ReflectionEmitModuleInfo reflectionEmitInfo;
-                System.Reflection.Emit.TypeBuilder typeBuilder;
-                lock (reflectionEmitInfoLock)
-                {
-                    reflectionEmitInfo = ReflectionEmitInfo;
-                    if (reflectionEmitInfo == null)
-                    {
-                        reflectionEmitInfo = new ReflectionEmitModuleInfo();
-
-                        // Create a dynamic assembly and module.
-                        reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
-                            new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
-
-                        // Mark the assembly as debuggable.  This must be done before the module is created.
-                        var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetConstructor(
-                            new Type[] { typeof(System.Diagnostics.DebuggableAttribute.DebuggingModes) });
-                        reflectionEmitInfo.AssemblyBuilder.SetCustomAttribute(
-                            new System.Reflection.Emit.CustomAttributeBuilder(debuggableAttributeConstructor,
-                                new object[] {
-                                System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations |
-                                System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
-
-                        // Create a dynamic module.
-                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
-
-                        ReflectionEmitInfo = reflectionEmitInfo;
-                    }
-
-                    // Create a new type to hold our method.
-                    typeBuilder = reflectionEmitInfo.ModuleBuilder.DefineType("JavaScriptClass" + reflectionEmitInfo.TypeCount.ToString(), System.Reflection.TypeAttributes.Public | System.Reflection.TypeAttributes.Class);
-                    reflectionEmitInfo.TypeCount++;
-                }
-
-                // Create a method.
-                var methodBuilder = typeBuilder.DefineMethod(this.GetMethodName(),
-                    System.Reflection.MethodAttributes.HideBySig | System.Reflection.MethodAttributes.Static | System.Reflection.MethodAttributes.Public,
-                    typeof(object), GetParameterTypes());
-
-                // Generate the IL for the method.
-                generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator());
-
-                if (this.Options.EnableILAnalysis == true)
-                {
-                    // Replace the generator with one that logs.
-                    generator = new LoggingILGenerator(generator);
-                }
-
-                if (this.Source.Path != null && this.Options.EnableDebugging == true)
-                {
-                    // Initialize the debugging information.
-                    optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, LanguageType, LanguageVendor, DocumentType);
-                    methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
-                    methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
-                    methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
-                }
-                optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
-                GenerateCode(generator, optimizationInfo);
-                generator.Complete();
-
-                // Bake it.
-                var type = typeBuilder.CreateType();
-                var methodInfo = type.GetMethod(this.GetMethodName());
-                this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
-#else
-                throw new NotImplementedException();
-#endif // ENABLE_DEBUGGING
+                // Replace the generator with one that logs.
+                generator = new LoggingILGenerator(generator);
             }
+
+            // Initialization code will appear to come from line 1.
+            optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
+
+            // Generate the IL.
+            GenerateCode(generator, optimizationInfo);
+            generator.Complete();
+
+            Delegate methodDelegate = this.Options.MethodGenerationHelper != null ?
+                methodHelper.EndMethodGeneration(GetDelegate(), GetMethodName(), GetParameterTypes()) :
+                dynamicMethod.CreateDelegate(GetDelegate());
+
+            this.GeneratedMethod = new GeneratedMethod(methodDelegate, optimizationInfo.NestedFunctions);
 
             if (this.Options.EnableILAnalysis == true)
             {
@@ -315,6 +250,7 @@ namespace Jurassic.Compiler
                 this.GeneratedMethod.DisassembledIL = generator.ToString();
             }
         }
+
 
         /// <summary>
         /// Generates IL for the script.
