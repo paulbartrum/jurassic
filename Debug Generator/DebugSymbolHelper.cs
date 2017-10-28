@@ -4,12 +4,7 @@ using Jurassic.Compiler;
 
 namespace Jurassic.Debugging
 {
-    internal class DebugReflectionEmitILGenerator : ReflectionEmitILGenerator
-    {
-
-    }
-
-    public class MethodGenerationHelper : IMethodGenerationHelper
+    public class DebugSymbolHelper : ISymbolHelper
     {
         internal class ReflectionEmitModuleInfo
         {
@@ -59,10 +54,12 @@ namespace Jurassic.Debugging
         /// </summary>
         private System.Diagnostics.SymbolStore.ISymbolDocumentWriter _debugDocument;
 
-        public override System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument
-        { get => this._debugDocument; }
+        /// <summary>
+        /// The symbol-aware generator initialiazed upon method generation begin.
+        /// </summary>
+        private System.Reflection.Emit.ILGenerator generator;
 
-        public override void SetupMethodGeneration(ScriptSource scriptSource, CompilerOptions options)
+        public override void SetupGeneration(ScriptSource scriptSource, CompilerOptions options)
         {
             this._debugDocument = null;
             this.Source = scriptSource;
@@ -117,7 +114,7 @@ namespace Jurassic.Debugging
                 methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
             }
 
-            return methodBuilder.GetILGenerator();
+            return generator = methodBuilder.GetILGenerator();
         }
 
         public override Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes)
@@ -125,6 +122,14 @@ namespace Jurassic.Debugging
             // Bake it.
             var methodInfo = this.TypeBuilder.CreateType().GetMethod(methodName);
             return Delegate.CreateDelegate(delegateType, methodInfo);
+        }
+
+        public override void MarkSequencePoint(int startLine, int startColumn, int endLine, int endColumn)
+        {
+            generator.MarkSequencePoint(_debugDocument,
+                                        startLine, startColumn,
+                                        endLine, endColumn);
+            
         }
     }
 }

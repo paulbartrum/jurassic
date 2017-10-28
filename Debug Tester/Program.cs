@@ -19,7 +19,7 @@ namespace Debug_Tester
         {
             ScriptEngine jurassic = new ScriptEngine();
             jurassic.EnableExposedClrTypes = true;
-            //jurassic.EnableDebugging = true;
+            jurassic.SymbolHelper = new DebugSymbolHelper();
             jurassic.EnableILAnalysis = true;
             jurassic.SetGlobalValue("console", new JSConsole());
 

@@ -88,8 +88,8 @@ namespace Jurassic
             // Create the built-in Symbol function first.
             this.symbolConstructor = new SymbolConstructor(baseFunction, baseSymbol);
 
-            // Nullify the method generation helper
-            this.MethodGenerationHelper = null;
+            // Nullify the symbol generation helper
+            this.SymbolHelper = new DefaultSymbolHelper();
 
             // Create the rest of the built-ins.
             this.globalObject = new GlobalObject(baseObject);
@@ -634,7 +634,7 @@ namespace Jurassic
         /// Gets or sets an auxillary method generation helper. Typically used to generate symbolic information
         /// rich methods.
         /// </summary>
-        public IMethodGenerationHelper  MethodGenerationHelper
+        public ISymbolHelper SymbolHelper
         {
             get;
             set;
@@ -878,7 +878,7 @@ namespace Jurassic
                 ForceStrictMode = this.ForceStrictMode,
                 CompatibilityMode = this.CompatibilityMode,
                 EnableILAnalysis = this.EnableILAnalysis,
-                MethodGenerationHelper = this.MethodGenerationHelper
+                SymbolHelper = this.SymbolHelper
             };
         }
 

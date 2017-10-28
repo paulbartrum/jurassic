@@ -11,8 +11,7 @@ namespace Jurassic.Compiler
         /// Creates a new CompilerOptions instance.
         /// </summary>
         public CompilerOptions()
-        {
-        }
+        { }
 
         /// <summary>
         /// Gets or sets a value that indicates whether to force ES5 strict mode, even if the code
@@ -34,7 +33,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// An (optional) auxillary method generation helper
         /// </summary>
-        public IMethodGenerationHelper MethodGenerationHelper { get; set; }
+        public ISymbolHelper SymbolHelper { get; set; }
 
         /// <summary>
         /// Performs a shallow clone of this instance.

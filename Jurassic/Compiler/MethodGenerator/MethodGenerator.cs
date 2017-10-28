@@ -2,35 +2,6 @@
 
 namespace Jurassic.Compiler
 {
-    /// <summary>
-    /// The default implementation of method generation helper
-    /// </summary>
-    internal class DefaultMethodGenerationHelper : IMethodGenerationHelper
-    {
-        private System.Reflection.Emit.DynamicMethod _dynamicMethod;
-
-        public override System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument
-        { get => null; }
-
-        public override System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes)
-        {
-            _dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                methodName,                                        // Name of the generated method.
-                typeof(object),                                         // Return type of the generated method.
-                parametersTypes,                                    // Parameter types of the generated method.
-                typeof(MethodGenerator),                                // Owner type.
-                true);                                                  // Skip visibility checks.
-
-            return _dynamicMethod.GetILGenerator();
-        }
-
-        public override Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes)
-        {
-            return _dynamicMethod.CreateDelegate(delegateType);
-        }
-
-    };
-
 
     /// <summary>
     /// Represents the unit of compilation.
@@ -195,40 +166,27 @@ namespace Jurassic.Compiler
             optimizationInfo.FunctionName = this.GetStackName();
             optimizationInfo.Source = this.Source;
 
-            ILGenerator generator;
-            System.Reflection.Emit.DynamicMethod dynamicMethod;
-            IMethodGenerationHelper methodHelper = this.Options.MethodGenerationHelper;
+            ISymbolHelper symbolHelper = this.Options.SymbolHelper;
 
-            if (methodHelper != null)
-            {
-                methodHelper.SetupMethodGeneration(this.Source, this.Options);
-                generator = new ReflectionEmitILGenerator(methodHelper.BeginMethodGeneration(
-                    GetMethodName(), 
-                    GetParameterTypes())
-                );
-                optimizationInfo.DebugDocument = methodHelper.DebugDocument;
-                dynamicMethod = null;
-            }
-            else
-            {
-                // Create a new dynamic method.
-                dynamicMethod = new System.Reflection.Emit.DynamicMethod(
-                    GetMethodName(),                                        // Name of the generated method.
-                    typeof(object),                                         // Return type of the generated method.
-                    GetParameterTypes(),                                    // Parameter types of the generated method.
-                    typeof(MethodGenerator),                                // Owner type.
-                    true);                                                  // Skip visibility checks.
+            symbolHelper.SetupGeneration(this.Source, this.Options);
+            ILGenerator generator = new ReflectionEmitILGenerator(symbolHelper.BeginMethodGeneration(
+                GetMethodName(),
+                GetParameterTypes())
+            );
+            generator.SymbolHelper = symbolHelper;
+
+#if DYNAMIC_IL_DISABLED_WITH_SYMBOL_HELPER
 #if USE_DYNAMIC_IL_INFO
                 generator = new DynamicILGenerator(dynamicMethod);
 #else
-                generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
+            generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator());
 #endif
-            }
-
+#endif
             if (this.Options.EnableILAnalysis == true)
             {
                 // Replace the generator with one that logs.
                 generator = new LoggingILGenerator(generator);
+                generator.SymbolHelper = symbolHelper;
             }
 
             // Initialization code will appear to come from line 1.
@@ -238,9 +196,12 @@ namespace Jurassic.Compiler
             GenerateCode(generator, optimizationInfo);
             generator.Complete();
 
-            Delegate methodDelegate = this.Options.MethodGenerationHelper != null ?
-                methodHelper.EndMethodGeneration(GetDelegate(), GetMethodName(), GetParameterTypes()) :
-                dynamicMethod.CreateDelegate(GetDelegate());
+            // Finalize the method generation consulting Symbol helper
+            Delegate methodDelegate = symbolHelper.EndMethodGeneration(
+                GetDelegate(), 
+                GetMethodName(), 
+                GetParameterTypes()
+            );
 
             this.GeneratedMethod = new GeneratedMethod(methodDelegate, optimizationInfo.NestedFunctions);
 
