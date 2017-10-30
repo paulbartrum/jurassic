@@ -630,6 +630,7 @@ namespace Jurassic
             get { return this.float64ArrayConstructor; }
         }
 
+
         /// <summary>
         /// Gets or sets an auxillary method generation helper. Typically used to generate symbolic information
         /// rich methods.
@@ -639,6 +640,7 @@ namespace Jurassic
             get;
             set;
         }
+
 
         /// <summary>
         /// Gets or sets whether CLR types can be exposed directly to the script engine.  If this is set to 
@@ -656,7 +658,6 @@ namespace Jurassic
             get;
             set;
         }
-
 
 
         //     EXECUTION

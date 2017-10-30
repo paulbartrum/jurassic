@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Jurassic.Compiler;
 
@@ -52,20 +53,25 @@ namespace Jurassic.Debugging
         /// <summary>
         /// The debug documet created, if at all.
         /// </summary>
-        private System.Diagnostics.SymbolStore.ISymbolDocumentWriter _debugDocument;
+        private System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument;
 
         /// <summary>
         /// The symbol-aware generator initialiazed upon method generation begin.
         /// </summary>
         private System.Reflection.Emit.ILGenerator generator;
 
+        /// <summary>
+        /// The name of the method being built.
+        /// </summary>
+        private string MethodName;
+
         public DebugSymbolHelper(ScriptSource scriptSource, CompilerOptions options)
         {
-            this._debugDocument = null;
+            this.DebugDocument = null;
             this.Source = scriptSource;
         }
 
-        public System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes)
+        public System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes, string[] parametersNames)
         {
             // Debugging or low trust path.
             ReflectionEmitModuleInfo reflectionEmitInfo;
@@ -101,32 +107,32 @@ namespace Jurassic.Debugging
             }
 
             // Create a method.
-            var methodBuilder = this.TypeBuilder.DefineMethod(methodName,
-                System.Reflection.MethodAttributes.HideBySig | System.Reflection.MethodAttributes.Static | System.Reflection.MethodAttributes.Public,
-                typeof(object), parametersTypes);
+           var methodBuilder = this.TypeBuilder.DefineMethod(this.MethodName = methodName,
+                MethodAttributes.HideBySig | MethodAttributes.Static | MethodAttributes.Public,
+                typeof(object), 
+                parametersTypes);
 
             if (this.Source.Path != null)
             {
                 // Initialize the debugging information.
-                this._debugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, LanguageType, LanguageVendor, DocumentType);
-                methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
-                methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
-                methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
+                this.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, LanguageType, LanguageVendor, DocumentType);
+                for (var i = 0;i < parametersNames.Length; ++i)
+                    methodBuilder.DefineParameter(i + 1, ParameterAttributes.In, parametersNames[i]);
             }
 
             return generator = methodBuilder.GetILGenerator();
         }
 
-        public Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes)
+        public Delegate EndMethodGeneration(Type delegateType)
         { 
             // Bake it.
-            var methodInfo = this.TypeBuilder.CreateType().GetMethod(methodName);
+            var methodInfo = this.TypeBuilder.CreateType().GetMethod(this.MethodName);
             return Delegate.CreateDelegate(delegateType, methodInfo);
         }
 
         public void MarkSequencePoint(int startLine, int startColumn, int endLine, int endColumn)
         {
-            generator.MarkSequencePoint(_debugDocument,
+            generator.MarkSequencePoint(this.DebugDocument,
                                         startLine, startColumn,
                                         endLine, endColumn);
             

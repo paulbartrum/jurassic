@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Jurassic.Compiler
@@ -10,17 +11,16 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="methodName">The name of the method being generated.</param>
         /// <param name="parametersTypes">The parameters' types being passed to this method.</param>
+        /// <param name="parametersNames">The names for all parameters for this method.</param>
         /// <returns>A MethodInfo compliant instance, which will be used to obtain ILGenerator.</returns>
-        System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes);
+        System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes, string[] parametersNames);
 
         /// <summary>
         /// Invoked after the code is enitted, to finish the method generation process.
         /// </summary>
         /// <param name="delegateType">The type of delegate that needs to be created.</param>
-        /// <param name="methodName">The name of the method being generated.</param>
-        /// <param name="parametersTypes">The parameters' types being passed to this method.</param>
         /// <returns>A delegate performing the compiled functionality.</returns>
-        Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes);
+        Delegate EndMethodGeneration(Type delegateType);
 
         /// <summary>
         /// Marks a sequence point in the Microsoft intermediate language (MSIL) stream.
@@ -46,7 +46,7 @@ namespace Jurassic.Compiler
             dynamicMethod = null;
         }
 
-        public System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes)
+        public System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes, string[] parametersNames)
         {
             dynamicMethod = new System.Reflection.Emit.DynamicMethod(
                 methodName,                                        // Name of the generated method.
@@ -58,7 +58,10 @@ namespace Jurassic.Compiler
             return dynamicMethod.GetILGenerator();
         }
 
-        public Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes)
+        public void DeclareMethodParameters(IEnumerable<string> parameterNames)
+        { }
+
+        public Delegate EndMethodGeneration(Type delegateType)
         {
             return dynamicMethod.CreateDelegate(delegateType);
         }

@@ -134,6 +134,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets an array of names - one for each parameter accepted by the method being generated.
+        /// </summary>
+        /// <returns>An array of parameter names.</returns>
+        protected virtual string[] GetParameterNames()
+        {
+            return new string[] { "engine", "scope", "this" };
+        }
+
+        /// <summary>
         /// Parses the source text into an abstract syntax tree.
         /// </summary>
         public abstract void Parse();
@@ -170,8 +179,10 @@ namespace Jurassic.Compiler
 
             ILGenerator generator = new ReflectionEmitILGenerator(symbolHelper.BeginMethodGeneration(
                 GetMethodName(),
-                GetParameterTypes())
+                GetParameterTypes(),
+                GetParameterNames())
             );
+
             generator.SymbolHelper = symbolHelper;
 
 #if DYNAMIC_IL_DISABLED_WITH_SYMBOL_HELPER
@@ -196,11 +207,7 @@ namespace Jurassic.Compiler
             generator.Complete();
 
             // Finalize the method generation consulting Symbol helper
-            Delegate methodDelegate = symbolHelper.EndMethodGeneration(
-                GetDelegate(), 
-                GetMethodName(), 
-                GetParameterTypes()
-            );
+            Delegate methodDelegate = symbolHelper.EndMethodGeneration(GetDelegate());
 
             this.GeneratedMethod = new GeneratedMethod(methodDelegate, optimizationInfo.NestedFunctions);
 
