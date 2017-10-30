@@ -240,7 +240,7 @@ namespace Jurassic.Compiler
         /// <returns>An array of parameter names.</returns>
         protected override string[] GetParameterNames()
         {
-            return new string[] { "engine", "scope", "this", "function", "arguments" };
+            return new string[] { "engine", "scope", "this", "body", "arguments" };
         }
 
         /// <summary>
