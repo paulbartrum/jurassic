@@ -166,9 +166,8 @@ namespace Jurassic.Compiler
             optimizationInfo.FunctionName = this.GetStackName();
             optimizationInfo.Source = this.Source;
 
-            ISymbolHelper symbolHelper = this.Options.SymbolHelper;
+            ISymbolHelper symbolHelper = this.Options.SymbolFactory(this.Source, this.Options);
 
-            symbolHelper.SetupGeneration(this.Source, this.Options);
             ILGenerator generator = new ReflectionEmitILGenerator(symbolHelper.BeginMethodGeneration(
                 GetMethodName(),
                 GetParameterTypes())

@@ -33,7 +33,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// An (optional) auxillary method generation helper
         /// </summary>
-        public ISymbolHelper SymbolHelper { get; set; }
+        public SymbolHelperFactory SymbolFactory { get; set; }
 
         /// <summary>
         /// Performs a shallow clone of this instance.

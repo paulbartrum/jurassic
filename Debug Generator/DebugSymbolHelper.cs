@@ -59,13 +59,13 @@ namespace Jurassic.Debugging
         /// </summary>
         private System.Reflection.Emit.ILGenerator generator;
 
-        public override void SetupGeneration(ScriptSource scriptSource, CompilerOptions options)
+        public DebugSymbolHelper(ScriptSource scriptSource, CompilerOptions options)
         {
             this._debugDocument = null;
             this.Source = scriptSource;
         }
 
-        public override System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes)
+        public System.Reflection.Emit.ILGenerator BeginMethodGeneration(string methodName, Type[] parametersTypes)
         {
             // Debugging or low trust path.
             ReflectionEmitModuleInfo reflectionEmitInfo;
@@ -117,19 +117,24 @@ namespace Jurassic.Debugging
             return generator = methodBuilder.GetILGenerator();
         }
 
-        public override Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes)
+        public Delegate EndMethodGeneration(Type delegateType, string methodName, Type[] parametersTypes)
         { 
             // Bake it.
             var methodInfo = this.TypeBuilder.CreateType().GetMethod(methodName);
             return Delegate.CreateDelegate(delegateType, methodInfo);
         }
 
-        public override void MarkSequencePoint(int startLine, int startColumn, int endLine, int endColumn)
+        public void MarkSequencePoint(int startLine, int startColumn, int endLine, int endColumn)
         {
             generator.MarkSequencePoint(_debugDocument,
                                         startLine, startColumn,
                                         endLine, endColumn);
             
+        }
+
+        public static ISymbolHelper DebugSymbolFactory(ScriptSource scriptSource, CompilerOptions options)
+        {
+            return new DebugSymbolHelper(scriptSource, options);
         }
     }
 }
