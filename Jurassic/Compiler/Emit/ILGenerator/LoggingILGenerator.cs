@@ -36,6 +36,7 @@ namespace Jurassic.Compiler
             this.log = new StringBuilder();
             this.definedLabels = new Dictionary<ILLabel, int>();
             this.fixUps = new List<LabelFixUp>();
+            this.SymbolHelper = generator.SymbolHelper;
         }
 
 

@@ -196,7 +196,6 @@ namespace Jurassic.Compiler
             {
                 // Replace the generator with one that logs.
                 generator = new LoggingILGenerator(generator);
-                generator.SymbolHelper = symbolHelper;
             }
 
             // Initialization code will appear to come from line 1.
@@ -217,7 +216,6 @@ namespace Jurassic.Compiler
                 this.GeneratedMethod.DisassembledIL = generator.ToString();
             }
         }
-
 
         /// <summary>
         /// Generates IL for the script.
