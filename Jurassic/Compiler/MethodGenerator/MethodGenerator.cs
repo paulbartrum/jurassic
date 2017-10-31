@@ -84,6 +84,17 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// The factory for creating symbol generation helpers to be used, when the new method 
+        /// is being generated. Since it is used during script compilation, we can afford to
+        /// make it static.
+        /// </summary>
+        internal static SymbolHelperFactory SymbolHelperFactory
+        {
+            get; 
+            set;
+        }
+
+        /// <summary>
         /// Gets the generated IL.  This will be <c>null</c> until GenerateCode() is
         /// called.
         /// </summary>
@@ -175,7 +186,7 @@ namespace Jurassic.Compiler
             optimizationInfo.FunctionName = this.GetStackName();
             optimizationInfo.Source = this.Source;
 
-            ISymbolHelper symbolHelper = this.Options.SymbolFactory(this.Source, this.Options);
+            ISymbolHelper symbolHelper = MethodGenerator.SymbolHelperFactory(this.Source, this.Options);
 
             ILGenerator generator = new ReflectionEmitILGenerator(symbolHelper.BeginMethodGeneration(
                 GetMethodName(),

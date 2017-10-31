@@ -249,6 +249,16 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// The symbol helper factory to be used, during method generation.
+        /// Passed to the (static) member of method generator.
+        /// </summary>
+        public SymbolHelperFactory SymbolFactory
+        {
+            get { return MethodGenerator.SymbolHelperFactory; }
+            set { MethodGenerator.SymbolHelperFactory = value; }
+        }
+
+        /// <summary>
         /// Represents a method that transforms a stack frame when formatting the stack trace.
         /// </summary>
         /// <param name="context"></param>
@@ -630,18 +640,6 @@ namespace Jurassic
             get { return this.float64ArrayConstructor; }
         }
 
-
-        /// <summary>
-        /// Gets or sets an auxillary method generation helper. Typically used to generate symbolic information
-        /// rich methods.
-        /// </summary>
-        public SymbolHelperFactory SymbolFactory
-        {
-            get;
-            set;
-        }
-
-
         /// <summary>
         /// Gets or sets whether CLR types can be exposed directly to the script engine.  If this is set to 
         /// <c>false</c>, attempting to instantiate CLR types from script may result in exceptions being
@@ -878,8 +876,7 @@ namespace Jurassic
             {
                 ForceStrictMode = this.ForceStrictMode,
                 CompatibilityMode = this.CompatibilityMode,
-                EnableILAnalysis = this.EnableILAnalysis,
-                SymbolFactory = this.SymbolFactory
+                EnableILAnalysis = this.EnableILAnalysis
             };
         }
 

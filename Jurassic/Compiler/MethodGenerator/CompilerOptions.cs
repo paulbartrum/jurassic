@@ -31,11 +31,6 @@ namespace Jurassic.Compiler
         public bool EnableILAnalysis { get; set; }
 
         /// <summary>
-        /// An (optional) auxillary method generation helper
-        /// </summary>
-        public SymbolHelperFactory SymbolFactory { get; set; }
-
-        /// <summary>
         /// Performs a shallow clone of this instance.
         /// </summary>
         /// <returns> A shallow clone of this instance. </returns>
