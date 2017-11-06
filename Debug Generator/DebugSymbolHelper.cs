@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Jurassic.Compiler;
 
@@ -84,7 +83,7 @@ namespace Jurassic.Debugging
 
                     // Create a dynamic assembly and module.
                     reflectionEmitInfo.AssemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(
-                        new System.Reflection.AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
+                        new AssemblyName("Jurassic Dynamic Assembly"), System.Reflection.Emit.AssemblyBuilderAccess.Run);
 
                     // Mark the assembly as debuggable.  This must be done before the module is created.
                     var debuggableAttributeConstructor = typeof(System.Diagnostics.DebuggableAttribute).GetConstructor(
@@ -102,7 +101,9 @@ namespace Jurassic.Debugging
                 }
 
                 // Create a new type to hold our method.
-                this.TypeBuilder = reflectionEmitInfo.ModuleBuilder.DefineType("JavaScriptClass" + reflectionEmitInfo.TypeCount.ToString(), System.Reflection.TypeAttributes.Public | System.Reflection.TypeAttributes.Class);
+                this.TypeBuilder = reflectionEmitInfo.ModuleBuilder.DefineType(
+                    "JurassicType" + reflectionEmitInfo.TypeCount.ToString(), 
+                    TypeAttributes.Public | TypeAttributes.Class);
                 reflectionEmitInfo.TypeCount++;
             }
 
@@ -136,6 +137,12 @@ namespace Jurassic.Debugging
                                         startLine, startColumn,
                                         endLine, endColumn);
             
+        }
+
+        public void DeclareVariable(System.Reflection.Emit.LocalBuilder localBuilder, string name)
+        {
+            if (name != null)
+                localBuilder.SetLocalSymInfo(name);
         }
 
         public static ISymbolHelper DebugSymbolFactory(ScriptSource scriptSource, CompilerOptions options)

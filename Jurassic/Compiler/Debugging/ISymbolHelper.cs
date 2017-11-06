@@ -30,6 +30,13 @@ namespace Jurassic.Compiler
         /// <param name="endLine"> The line where the sequence point ends. </param>
         /// <param name="endColumn"> The column in the line where the sequence point ends. </param>
         void MarkSequencePoint(int startLine, int startColumn, int endLine, int endColumn);
+
+        /// <summary>
+        /// Informs the symbol helper that there is a local variable to be declared.
+        /// </summary>
+        /// <param name="localBuilder"></param>
+        /// <param name="name"></param>
+        void DeclareVariable(System.Reflection.Emit.LocalBuilder localBuilder, string name);
     }
 
     public delegate ISymbolHelper SymbolHelperFactory(ScriptSource scriptSource, CompilerOptions options);
@@ -50,10 +57,10 @@ namespace Jurassic.Compiler
         {
             dynamicMethod = new System.Reflection.Emit.DynamicMethod(
                 methodName,                                        // Name of the generated method.
-                typeof(object),                                         // Return type of the generated method.
-                parametersTypes,                                    // Parameter types of the generated method.
-                typeof(MethodGenerator),                                // Owner type.
-                true);                                                  // Skip visibility checks.
+                typeof(object),                                    // Return type of the generated method.
+                parametersTypes,                                   // Parameter types of the generated method.
+                typeof(MethodGenerator),                           // Owner type.
+                true);                                             // Skip visibility checks.
 
             return dynamicMethod.GetILGenerator();
         }
@@ -68,6 +75,10 @@ namespace Jurassic.Compiler
 
         public void MarkSequencePoint(int startLine, int startColumn, int endLine, int endColumn)
         { }
+
+        public void DeclareVariable(System.Reflection.Emit.LocalBuilder localBuilder, string name)
+        { }
+
     };
 
 }

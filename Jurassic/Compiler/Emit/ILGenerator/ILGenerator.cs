@@ -908,7 +908,7 @@ namespace Jurassic.Compiler
         /// <param name="endColumn"> The column in the line where the sequence point ends. </param>
         public virtual void MarkSequencePoint(int startLine, int startColumn, int endLine, int endColumn)
         {
-            this.SymbolHelper.MarkSequencePoint(startLine, startColumn, endLine, endColumn);
+            this.SymbolHelper?.MarkSequencePoint(startLine, startColumn, endLine, endColumn);
         }
 
 

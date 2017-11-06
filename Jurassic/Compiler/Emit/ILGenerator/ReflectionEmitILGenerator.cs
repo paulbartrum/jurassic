@@ -279,7 +279,9 @@ namespace Jurassic.Compiler
         /// <returns> A new local variable. </returns>
         public override ILLocalVariable DeclareVariable(Type type, string name = null)
         {
-            return new ReflectionEmitILLocalVariable(this.generator.DeclareLocal(type), name);
+            var localBuilder = this.generator.DeclareLocal(type);
+            this.SymbolHelper?.DeclareVariable(localBuilder, name);
+            return new ReflectionEmitILLocalVariable(localBuilder, name);
         }
 
         /// <summary>
