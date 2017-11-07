@@ -89,7 +89,7 @@ namespace Jurassic
             this.symbolConstructor = new SymbolConstructor(baseFunction, baseSymbol);
 
             // Setup the symbol factory to the default one.
-            this.SymbolFactory = (ScriptSource src, CompilerOptions options) => { return new DefaultSymbolHelper(); };
+            ScriptEngine.SymbolFactory = (ScriptSource src, CompilerOptions options) => { return new DefaultSymbolHelper(); };
 
             // Create the rest of the built-ins.
             this.globalObject = new GlobalObject(baseObject);
@@ -252,10 +252,10 @@ namespace Jurassic
         /// The symbol helper factory to be used, during method generation.
         /// Passed to the (static) member of method generator.
         /// </summary>
-        public SymbolHelperFactory SymbolFactory
+        public static SymbolHelperFactory SymbolFactory
         {
-            get { return MethodGenerator.SymbolHelperFactory; }
-            set { MethodGenerator.SymbolHelperFactory = value; }
+            get;
+            set;
         }
 
         /// <summary>

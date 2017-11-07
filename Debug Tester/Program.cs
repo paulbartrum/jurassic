@@ -18,9 +18,9 @@ namespace Debug_Tester
         static void Main(string[] args)
         {
             ScriptEngine jurassic = new ScriptEngine();
+            ScriptEngine.SymbolFactory = DebugSymbolHelper.DebugSymbolFactory;
+
             jurassic.EnableExposedClrTypes = true;
-            jurassic.SymbolFactory = DebugSymbolHelper.DebugSymbolFactory;
-            //jurassic.EnableILAnalysis = true;
             jurassic.SetGlobalValue("console", new JSConsole());
 
             jurassic.ExecuteFile("Script.js");
