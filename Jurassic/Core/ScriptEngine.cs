@@ -88,6 +88,9 @@ namespace Jurassic
             // Create the built-in Symbol function first.
             this.symbolConstructor = new SymbolConstructor(baseFunction, baseSymbol);
 
+            // Setup the symbol factory to the default one.
+            ScriptEngine.SymbolFactory = (ScriptSource src, CompilerOptions options) => { return new DefaultSymbolHelper(); };
+
             // Create the rest of the built-ins.
             this.globalObject = new GlobalObject(baseObject);
             this.mathObject = new MathObject(baseObject);
@@ -240,6 +243,16 @@ namespace Jurassic
         /// The default value is <c>0</c>, which allows unlimited recursion.
         /// </summary>
         public int RecursionDepthLimit
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The symbol helper factory to be used, during method generation.
+        /// Passed to the (static) member of method generator.
+        /// </summary>
+        public static SymbolHelperFactory SymbolFactory
         {
             get;
             set;
@@ -627,25 +640,6 @@ namespace Jurassic
             get { return this.float64ArrayConstructor; }
         }
 
-
-
-        //     DEBUGGING SUPPORT
-        //_________________________________________________________________________________________
-
-#if ENABLE_DEBUGGING
-
-        /// <summary>
-        /// Gets or sets a value which indicates whether debug information should be generated.  If
-        /// this is set to <c>true</c> performance and memory usage are negatively impacted.
-        /// </summary>
-        public bool EnableDebugging
-        {
-            get;
-            set;
-        }
-
-#endif
-
         /// <summary>
         /// Gets or sets whether CLR types can be exposed directly to the script engine.  If this is set to 
         /// <c>false</c>, attempting to instantiate CLR types from script may result in exceptions being
@@ -662,7 +656,6 @@ namespace Jurassic
             get;
             set;
         }
-
 
 
         //     EXECUTION
@@ -882,11 +875,8 @@ namespace Jurassic
             return new CompilerOptions()
             {
                 ForceStrictMode = this.ForceStrictMode,
-#if ENABLE_DEBUGGING
-                EnableDebugging = this.EnableDebugging,
-#endif
                 CompatibilityMode = this.CompatibilityMode,
-                EnableILAnalysis = this.EnableILAnalysis,
+                EnableILAnalysis = this.EnableILAnalysis
             };
         }
 

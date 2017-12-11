@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Debug Tester": {
+      "commandName": "Project",
+      "workingDirectory": ".\\"
+    }
+  }
+}

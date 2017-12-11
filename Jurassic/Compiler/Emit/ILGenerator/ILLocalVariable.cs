@@ -113,12 +113,8 @@ namespace Jurassic.Compiler
         /// <param name="name"> The name of the local variable.  Can be <c>null</c>. </param>
         public ReflectionEmitILLocalVariable(System.Reflection.Emit.LocalBuilder local, string name)
         {
-            if (local == null)
-                throw new ArgumentNullException(nameof(local));
-            this.UnderlyingLocal = local;
+            this.UnderlyingLocal = local ?? throw new ArgumentNullException(nameof(local));
             this.name = name;
-            //if (name != null)
-            //    local.SetLocalSymInfo(name);
         }
 
         /// <summary>

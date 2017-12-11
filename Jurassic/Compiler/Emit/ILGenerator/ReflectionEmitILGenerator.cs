@@ -279,7 +279,9 @@ namespace Jurassic.Compiler
         /// <returns> A new local variable. </returns>
         public override ILLocalVariable DeclareVariable(Type type, string name = null)
         {
-            return new ReflectionEmitILLocalVariable(this.generator.DeclareLocal(type), name);
+            var localBuilder = this.generator.DeclareLocal(type);
+            this.SymbolHelper?.DeclareVariable(localBuilder, name);
+            return new ReflectionEmitILLocalVariable(localBuilder, name);
         }
 
         /// <summary>
@@ -1122,24 +1124,6 @@ namespace Jurassic.Compiler
         {
             this.generator.Emit(OpCodes.Break);
         }
-
-        /// <summary>
-        /// Marks a sequence point in the Microsoft intermediate language (MSIL) stream.
-        /// </summary>
-        /// <param name="document"> The document for which the sequence point is being defined. </param>
-        /// <param name="startLine"> The line where the sequence point begins. </param>
-        /// <param name="startColumn"> The column in the line where the sequence point begins. </param>
-        /// <param name="endLine"> The line where the sequence point ends. </param>
-        /// <param name="endColumn"> The column in the line where the sequence point ends. </param>
-        public override void MarkSequencePoint(System.Diagnostics.SymbolStore.ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn)
-        {
-#if ENABLE_DEBUGGING
-            this.generator.MarkSequencePoint(document, startLine, startColumn, endLine, endColumn);
-#else
-            throw new NotImplementedException();
-#endif
-        }
-
 
 
         //     MISC

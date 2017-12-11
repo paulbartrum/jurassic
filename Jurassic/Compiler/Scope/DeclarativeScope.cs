@@ -237,7 +237,7 @@ namespace Jurassic.Compiler
                     generator.StoreArrayElement(typeof(string));
                 }
 
-                // DeclarativeScope.CreateRuntimeScope(parentScope, declaredVariableNames)
+                // DeclarativeScope.CreateRuntimeScope(this.ParentScope, this.DeclaredVariableNames);
                 generator.Call(ReflectionHelpers.DeclarativeScope_CreateRuntimeScope);
 
                 // Save the new scope.

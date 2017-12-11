@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <Authors>Ivan (Jonan) Georgiev</Authors>
+    <Company>Cozyroc, LLC</Company>
+    <Description>A debugging testbed for Jurassic.</Description>
+    <Version>4.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <StartupObject />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jurassic\Jurassic.csproj">
+      <Project>{78658500-2aee-44ef-9b9d-6bf1a0aa5c42}</Project>
+      <Name>Jurassic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Debug Generator\Debug Generator.csproj">
+      <Project>{842069c8-05d0-41b6-8e95-e8e9e3df9e5a}</Project>
+      <Name>Debug Generator</Name>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Script.js" />
+  </ItemGroup>
+
+</Project>
