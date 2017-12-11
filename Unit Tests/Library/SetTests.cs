@@ -21,6 +21,8 @@ namespace UnitTests
             // new Set();
             Assert.AreEqual(0, Evaluate("new Set().size"));
 
+            Assert.AreEqual(Undefined.Value, Evaluate("new Set([,1])[0]"));
+
             // new Set(iterable);
             Assert.AreEqual(4, Evaluate("new Set([2, 1, 1, 3, 5, 3, 2]).size"));
             Assert.AreEqual("2,1,3,5", Evaluate("Int8Array.from(new Set([2, 1, 1, 3, 5, 3, 2])).toString()"));
