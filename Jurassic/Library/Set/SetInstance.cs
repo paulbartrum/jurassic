@@ -84,6 +84,8 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "add")]
         public SetInstance Add(object value)
         {
+            value = value ?? Undefined.Value;
+
             if (this.store.ContainsKey(value))
                 return this;
             if (value is double && TypeUtilities.IsNegativeZero((double)value))
