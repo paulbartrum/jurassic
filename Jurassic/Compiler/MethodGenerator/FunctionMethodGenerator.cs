@@ -235,6 +235,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets an array of names - one for each parameter accepted by the method being generated.
+        /// </summary>
+        /// <returns> An array of parameter names. </returns>
+        protected override string[] GetParameterNames()
+        {
+            return new string[] { "engine", "scope", "this", "body", "arguments" };
+        }
+
+        /// <summary>
         /// Checks whether the function is valid (in strict mode the function cannot be named
         /// 'arguments' or 'eval' and the argument names cannot be duplicated).
         /// </summary>

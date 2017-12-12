@@ -133,6 +133,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Gets an array of names - one for each parameter accepted by the method being generated.
+        /// </summary>
+        /// <returns> An array of parameter names. </returns>
+        protected virtual string[] GetParameterNames()
+        {
+            return new string[] { "engine", "scope", "this" };
+        }
+
+        /// <summary>
         /// Parses the source text into an abstract syntax tree.
         /// </summary>
         public abstract void Parse();
@@ -292,9 +301,9 @@ namespace Jurassic.Compiler
                 {
                     // Initialize the debugging information.
                     optimizationInfo.DebugDocument = reflectionEmitInfo.ModuleBuilder.DefineDocument(this.Source.Path, LanguageType, LanguageVendor, DocumentType);
-                    methodBuilder.DefineParameter(1, System.Reflection.ParameterAttributes.None, "scriptEngine");
-                    methodBuilder.DefineParameter(2, System.Reflection.ParameterAttributes.None, "scope");
-                    methodBuilder.DefineParameter(3, System.Reflection.ParameterAttributes.None, "thisValue");
+                    var parameterNames = GetParameterNames();
+                    for (var i = 0; i < parameterNames.Length; i ++)
+                        methodBuilder.DefineParameter(i + 1, System.Reflection.ParameterAttributes.In, parameterNames[i]);
                 }
                 optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
                 GenerateCode(generator, optimizationInfo);
