@@ -117,10 +117,6 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException(nameof(local));
             this.UnderlyingLocal = local;
             this.name = name;
-#if ENABLE_DEBUGGING
-            if (name != null)
-                local.SetLocalSymInfo(name);
-#endif
         }
 
         /// <summary>
