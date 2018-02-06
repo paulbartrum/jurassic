@@ -3,87 +3,21 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Jurassic.TestSuite
+namespace Jurassic.TestSuiteRunner
 {
     class Program
     {
-        public class CompatTableEntry
-        {
-            public string group { get; set; }
-            public string name { get; set; }
-            public string detail { get; set; }
-            public string script { get; set; }
-            public bool Success { get; set; }
-            public WorkerProcessResponse Response { get; set; }
-        }
-
         static void Main(string[] args)
         {
-            string inPipeHandle, outPipeHandle;
-            if (PipeServer<WorkerProcessRequest, WorkerProcessResponse>.IsChildProcess(out inPipeHandle, out outPipeHandle))
+            if (PipeClient.TryStartChildProcess(TestSuite.FromId))
             {
-                // Child process.
-                WorkerProcess.Start(inPipeHandle, outPipeHandle);
+                // Child process has ended.
                 return;
             }
-
-            // Server process.
-            using (var pipeServer = new PipeServer<WorkerProcessRequest, WorkerProcessResponse>())
+            else
             {
-                var entries = JsonConvert.DeserializeObject<CompatTableEntry[]>(File.ReadAllText(@"Kangax\compat-table.json"));
-                foreach (var testCase in entries)
-                {
-                    try
-                    {
-                        testCase.Response = pipeServer.Send(new WorkerProcessRequest { Script = $"(function () {{ {testCase.script} }})();" });
-                        if (testCase.Response.JsonResult == "true")
-                            testCase.Success = true;
-                        if (testCase.Success == false && Array.IndexOf(
-                            new string[]
-                            {
-                                "default function parameters",
-                                "for..of loops",
-                                "template literals",
-                                "typed arrays",
-                                "WeakMap",
-                                "Set",
-                                "WeakMap",
-                                "WeakSet",
-                                "Object static methods",
-                                @"function ""name"" property",
-                                "Array static methods",
-                                "Array.prototype methods",
-                            }, testCase.name) >= 0)
-                        {
-                            Console.WriteLine($"{testCase.name} -- {testCase.detail}, result: {testCase.Response.JsonResult ?? $"{testCase.Response.ErrorType}: {testCase.Response.ErrorMessage}"}");
-                        }
-                    }
-                    catch (IOException)
-                    {
-                        Console.WriteLine("*** Worker process crashed ***");
-                    }
-                }
-
-                Console.WriteLine();
-                Console.WriteLine();
-                foreach (var group in entries.GroupBy(e => e.group))
-                {
-                    Console.WriteLine($"**{group.Key}**|");
-                    foreach (var test in group.GroupBy(e => e.name))
-                    {
-                        int successCount = test.Count(t => t.Success);
-                        int totalCount = test.Count();
-
-                        string status = ":x:";
-                        if (successCount == 0)
-                            status = ":x:";
-                        else if (successCount == totalCount)
-                            status = $":white_check_mark: {successCount}/{totalCount}";
-                        else
-                            status = $"{successCount}/{totalCount}";
-                        Console.WriteLine($"&nbsp;&nbsp;{test.Key.Replace("_", "\\_")}|{status}");
-                    }
-                }
+                var testSuite = new KangaxTestSuite();
+                testSuite.Run();
             }
 
             //// Find the Test Suite Files directory.

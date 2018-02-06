@@ -1,4 +1,4 @@
-﻿namespace Jurassic.TestSuite
+﻿namespace Jurassic.TestSuiteRunner
 {
     /// <summary>
     /// Commands a child process to perform some action.

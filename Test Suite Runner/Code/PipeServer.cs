@@ -2,66 +2,53 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
-using Newtonsoft.Json;
 
-namespace Jurassic.TestSuite
+namespace Jurassic.TestSuiteRunner
 {
     /// <summary>
-    /// Creates a pipe server that can send messages and receive replies.
+    /// A class that can send messages over a pipe.
     /// </summary>
-    /// <typeparam name="TOut"> The type of the outgoing message. </typeparam>
-    /// <typeparam name="TIn"> The type of the incoming message. </typeparam>
-    public class PipeServer<TOut, TIn> : IDisposable
+    public class PipeServer : IDisposable
     {
+        private string clientParams;
         private AnonymousPipeServerStream inPipe;
         private AnonymousPipeServerStream outPipe;
         private Process childProcess;
+
+        /// <summary>
+        /// Initializes a new pipe server.
+        /// </summary>
+        /// <param name="clientParams"> One-time initialization data that will be passed to the
+        /// child process. </param>
+        public PipeServer(string clientParams)
+        {
+            this.clientParams = clientParams;
+        }
 
         /// <summary>
         /// Cleans up resources.
         /// </summary>
         public void Dispose()
         {
-            if (this.childProcess != null)
+            if (childProcess != null)
             {
-                this.childProcess.Dispose();
-                this.childProcess = null;
-                this.inPipe.Dispose();
-                this.inPipe = null;
-                this.outPipe.Dispose();
-                this.outPipe = null;
+                childProcess.Dispose();
+                childProcess = null;
+                inPipe.Dispose();
+                inPipe = null;
+                outPipe.Dispose();
+                outPipe = null;
             }
-        }
-
-        /// <summary>
-        /// Determines if the current process is a child process.
-        /// </summary>
-        /// <param name="childInPipeHandle"> If the return value is true, this is set to the handle
-        /// for the pipe for incoming messages. </param>
-        /// <param name="childOutPipeHandle"> If the return value is true, this is set to the
-        /// handle for the pipe for outgoing messages. </param>
-        /// <returns> <c>true</c> if the current process is a child (worker) process; <c>false</c>
-        /// otherwise. </returns>
-        public static bool IsChildProcess(out string childInPipeHandle, out string childOutPipeHandle)
-        {
-            var commandLineArgs = Environment.GetCommandLineArgs();
-            if (commandLineArgs.Length >= 4 && commandLineArgs[1] == "--pipe")
-            {
-                childInPipeHandle = commandLineArgs[2];
-                childOutPipeHandle = commandLineArgs[3];
-                return true;
-            }
-            childInPipeHandle = null;
-            childOutPipeHandle = null;
-            return false;
         }
 
         /// <summary>
         /// Sends a message to the child process.
         /// </summary>
+        /// <typeparam name="TRequest"> The type of the outgoing request message. </typeparam>
+        /// <typeparam name="TResponse"> The type of the incoming response message. </typeparam>
         /// <param name="message"> The message to send. </param>
         /// <returns> A response message from the child process. </returns>
-        public TIn Send(TOut message)
+        public string Send(string message)
         {
             // Star the child process if it's not running.
             if (this.childProcess == null)
@@ -71,12 +58,12 @@ namespace Jurassic.TestSuite
             {
                 // Send the message.
                 var writer = new BinaryWriter(this.outPipe);    // Note: disposing closes the stream.
-                writer.Write(JsonConvert.SerializeObject(message));
+                writer.Write(message);
                 writer.Flush();
 
                 // Read the incoming response.
                 var reader = new BinaryReader(this.inPipe);     // Note: disposing closes the stream.
-                return JsonConvert.DeserializeObject<TIn>(reader.ReadString());
+                return reader.ReadString();
             }
             catch (IOException)
             {
@@ -97,7 +84,7 @@ namespace Jurassic.TestSuite
             var commandLineArgs = Environment.GetCommandLineArgs();
             var childProcess = new Process();
             childProcess.StartInfo.FileName = "dotnet";
-            childProcess.StartInfo.Arguments = $"\"{commandLineArgs[0]}\" --pipe {this.outPipe.GetClientHandleAsString()} {this.inPipe.GetClientHandleAsString()}";
+            childProcess.StartInfo.Arguments = $"\"{commandLineArgs[0]}\" --pipe {this.outPipe.GetClientHandleAsString()} {this.inPipe.GetClientHandleAsString()} \"{clientParams}\"";
             childProcess.StartInfo.UseShellExecute = false;
             childProcess.Start();
             this.childProcess = childProcess;
@@ -107,5 +94,4 @@ namespace Jurassic.TestSuite
             this.outPipe.DisposeLocalCopyOfClientHandle();
         }
     }
-
 }

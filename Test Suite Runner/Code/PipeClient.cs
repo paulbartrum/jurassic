@@ -1,51 +1,83 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
-using Newtonsoft.Json;
+using System.Runtime.InteropServices;
 
-namespace Jurassic.TestSuite
+namespace Jurassic.TestSuiteRunner
 {
     /// <summary>
-    /// Listens for messages on a pipe from the parent process and sends responses.
+    /// A class that can receive messages from a pipe.
     /// </summary>
-    /// <typeparam name="TIn"> The type of the incoming message. </typeparam>
-    /// <typeparam name="TOut"> The type of the outgoing message. </typeparam>
-    public class PipeClient<TIn, TOut>
+    public static class PipeClient
     {
         /// <summary>
-        /// Starts reading from the pipe with the given handle.
+        /// Determines if the current process is a child process, and if so, starts processing messages.
         /// </summary>
-        /// <param name="inPipeHandle"> The pipe handle identifier for incoming data. </param>
-        /// <param name="outPipeHandle"> The pipe handle identifier for outgoing data. </param>
-        /// <param name="callback"> The callback that handles incoming messages. </param>
-        public static void Start(string inPipeHandle, string outPipeHandle, Func<TIn, TOut> callback)
+        /// <param name="testSuiteFactory"> A callback that creates a test suite from the given
+        /// client params string. </param>
+        /// <returns> <c>true</c> if the current process is a child (worker) process; <c>false</c>
+        /// otherwise. </returns>
+        public static bool TryStartChildProcess(Func<string, TestSuite> testSuiteFactory)
         {
-            try
+            var commandLineArgs = Environment.GetCommandLineArgs();
+            if (commandLineArgs.Length >= 5 && commandLineArgs[1] == "--pipe")
             {
-                using (var inPipe = new AnonymousPipeClientStream(PipeDirection.In, inPipeHandle))
-                using (var reader = new BinaryReader(inPipe))
-                using (var outPipe = new AnonymousPipeClientStream(PipeDirection.Out, outPipeHandle))
-                using (var writer = new BinaryWriter(outPipe))
+                string inPipeHandle = commandLineArgs[2];
+                string outPipeHandle = commandLineArgs[3];
+                TestSuite testSuite = testSuiteFactory(commandLineArgs[4]);
+
+                // Disable the error reporting dialog.
+                NativeMethods.SetErrorMode(
+                    NativeMethods.SetErrorMode(0) |
+                    ErrorModes.SEM_NOGPFAULTERRORBOX |
+                    ErrorModes.SEM_FAILCRITICALERRORS |
+                    ErrorModes.SEM_NOOPENFILEERRORBOX);
+
+                try
                 {
-                    while (true)
+                    using (var inPipe = new AnonymousPipeClientStream(PipeDirection.In, inPipeHandle))
+                    using (var reader = new BinaryReader(inPipe))
+                    using (var outPipe = new AnonymousPipeClientStream(PipeDirection.Out, outPipeHandle))
+                    using (var writer = new BinaryWriter(outPipe))
                     {
-                        // Read the incoming message.
-                        var message = JsonConvert.DeserializeObject<TIn>(reader.ReadString());
+                        while (true)
+                        {
+                            // Read the incoming message.
+                            var request = reader.ReadString();
 
-                        // Call the callback.
-                        var response = callback(message);
+                            // Call the callback.
+                            var response = testSuite.ProcessRequest(request);
 
-                        // Send the response message.
-                        writer.Write(JsonConvert.SerializeObject(response));
-                        writer.Flush();
+                            // Send the response message.
+                            writer.Write(response);
+                            writer.Flush();
+                        }
                     }
                 }
+                catch (EndOfStreamException)
+                {
+                    // Expected when the pipe is closed by the server.
+                }
+
+                return true;
             }
-            catch (EndOfStreamException)
-            {
-                // Expected when the pipe is closed by the server.
-            }
+            return false;
+        }
+
+        [Flags]
+        private enum ErrorModes : uint
+        {
+            SYSTEM_DEFAULT = 0x0,
+            SEM_FAILCRITICALERRORS = 0x0001,
+            SEM_NOALIGNMENTFAULTEXCEPT = 0x0004,
+            SEM_NOGPFAULTERRORBOX = 0x0002,
+            SEM_NOOPENFILEERRORBOX = 0x8000
+        }
+
+        private static class NativeMethods
+        {
+            [DllImport("kernel32.dll")]
+            internal static extern ErrorModes SetErrorMode(ErrorModes mode);
         }
     }
-
 }

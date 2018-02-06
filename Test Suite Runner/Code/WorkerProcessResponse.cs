@@ -1,4 +1,4 @@
-﻿namespace Jurassic.TestSuite
+﻿namespace Jurassic.TestSuiteRunner
 {
     /// <summary>
     /// The reply message from a worker process.
