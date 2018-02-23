@@ -56,7 +56,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Called before a linked list node is deleted.
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="node"> The node that is being deleted. </param>
         private void Set_BeforeDelete(LinkedListNode<object> node)
         {
             if (node == this.lastNode)

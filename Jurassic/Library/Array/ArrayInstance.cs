@@ -960,7 +960,7 @@ namespace Jurassic.Library
             /// Convert an untyped value to a typed value.
             /// </summary>
             /// <param name="value"> The value to convert. </param>
-            /// <returns> The value converted to type <typeparamref name="T"/>. </returns>
+            /// <returns> The typed value. </returns>
             public override object ConvertValue(object value)
             {
                 return value;

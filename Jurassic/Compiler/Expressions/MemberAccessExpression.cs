@@ -75,6 +75,8 @@ namespace Jurassic.Compiler
         /// Determines the type of member access.
         /// </summary>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        /// <param name="propertyName"> Outputs the name of the property that is being accessed, if
+        /// it is available at compile time, or <c>null</c> otherwise. </param>
         /// <returns></returns>
         private TypeOfMemberAccess DetermineTypeOfMemberAccess(OptimizationInfo optimizationInfo, out string propertyName)
         {

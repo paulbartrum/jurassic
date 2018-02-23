@@ -87,8 +87,8 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets an object that contains details of the property with the given name.
         /// </summary>
+        /// <param name="obj"> The object to retrieve property details for. </param>
         /// <param name="key"> The property key (either a string or a Symbol). </param>
-        /// <param name="propertyName"> The name of the property to retrieve details for. </param>
         /// <returns> An object containing some of the following properties: configurable,
         /// writable, enumerable, value, get and set. </returns>
         [JSInternalFunction(Name = "getOwnPropertyDescriptor")]

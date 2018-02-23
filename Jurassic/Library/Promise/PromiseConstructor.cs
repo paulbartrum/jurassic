@@ -121,13 +121,13 @@ namespace Jurassic.Library
         /// a thenable to resolve. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "resolve")]
-        public PromiseInstance Resolve(object x)
+        public PromiseInstance Resolve(object value)
         {
             ClrStubFunction func = new ClrStubFunction(this.Engine.FunctionInstancePrototype, (engine, thisObj, args) =>
             {
                 FunctionInstance resolve = (FunctionInstance)args[0];
                 FunctionInstance reject = (FunctionInstance)args[1];
-                resolve.Call(thisObj, x);
+                resolve.Call(thisObj, value);
                 return Undefined.Value;
             });
             return this.Construct(func);

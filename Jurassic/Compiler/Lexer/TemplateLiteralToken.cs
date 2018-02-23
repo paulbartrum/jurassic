@@ -29,6 +29,7 @@ namespace Jurassic.Compiler
         /// Creates a new TemplateLiteralToken instance.
         /// </summary>
         /// <param name="value"> The literal text. </param>
+        /// <param name="rawText"> The contents of the template literal, without any escaping. </param>
         /// <param name="substitutionFollows"> Indicates whether a substitution follows this
         /// string. </param>
         public TemplateLiteralToken(string value, string rawText, bool substitutionFollows)
