@@ -9,16 +9,19 @@ namespace Jurassic.Compiler
     internal class ReflectionEmitILGenerator : ILGenerator
     {
         private System.Reflection.Emit.ILGenerator generator;
+        private bool emitDebugInfo;
 
         /// <summary>
         /// Creates a new ReflectionEmitILGenerator instance.
         /// </summary>
         /// <param name="generator"> The ILGenerator that is used to output the IL. </param>
-        public ReflectionEmitILGenerator(System.Reflection.Emit.ILGenerator generator)
+        /// <param name="emitDebugInfo"> Indicates whether to emit debugging information, like symbol names. </param>
+        public ReflectionEmitILGenerator(System.Reflection.Emit.ILGenerator generator, bool emitDebugInfo)
         {
             if (generator == null)
                 throw new ArgumentNullException(nameof(generator));
             this.generator = generator;
+            this.emitDebugInfo = emitDebugInfo;
         }
 
 
@@ -279,7 +282,12 @@ namespace Jurassic.Compiler
         /// <returns> A new local variable. </returns>
         public override ILLocalVariable DeclareVariable(Type type, string name = null)
         {
-            return new ReflectionEmitILLocalVariable(this.generator.DeclareLocal(type), name);
+            var localBuilder = this.generator.DeclareLocal(type);
+#if ENABLE_DEBUGGING
+            if (emitDebugInfo && name != null)
+                localBuilder.SetLocalSymInfo(name);
+#endif
+            return new ReflectionEmitILLocalVariable(localBuilder, name);
         }
 
         /// <summary>
