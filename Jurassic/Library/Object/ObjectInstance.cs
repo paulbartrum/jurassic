@@ -321,7 +321,16 @@ namespace Jurassic.Library
             // The property might exist in the prototype.
             if (this.prototype == null)
                 return thisValue.GetMissingPropertyValue(index.ToString());
-            return this.prototype.GetPropertyValue(index, thisValue);
+            object result = this.prototype.GetPropertyValue(index, thisValue);
+            if (result == null)
+            {
+                result = GetArrayElementPropertyValue(index, thisValue);
+            }
+            if (result == null)
+            {
+                result = GetIndexerPropertyValue(index, thisValue);
+            }
+            return result;
         }
 
         /// <summary>
@@ -339,7 +348,12 @@ namespace Jurassic.Library
                 return GetPropertyValue(arrayIndex);
 
             // Otherwise, the property is a name.
-            return GetNamedPropertyValue(key, this);
+            object result = GetNamedPropertyValue(key, this);
+
+            // Otherwise, the property can be an indexer
+            if (result == null)
+                result = GetIndexerPropertyValue(key, this);
+            return result;
         }
 
         /// <summary>
@@ -385,7 +399,11 @@ namespace Jurassic.Library
                 propertyReference.ClearCache();
                 if (this.Prototype == null)
                     return this.GetMissingPropertyValue(propertyReference.Name);
-                return this.Prototype.GetNamedPropertyValue(propertyReference.Name, this);
+
+                var propertyValuePrototype = this.Prototype.GetNamedPropertyValue(propertyReference.Name, this);
+                if (propertyValuePrototype == null)
+                    propertyValuePrototype = GetIndexerPropertyValue(propertyReference.Name, this);
+                return propertyValuePrototype;
             }
         }
 
@@ -425,6 +443,65 @@ namespace Jurassic.Library
 
             // The property doesn't exist.
             return thisValue.GetMissingPropertyValue(key);
+        }
+
+        /// <summary>
+        /// Gets the value of the property using indexer.
+        /// </summary>
+        /// <param name="key"> The property key - string, int, and so on. 
+        /// The type should be the same as the type of the indexer parameter</param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the indexer property does not exist directly on
+        /// this object. </remarks>
+        private object GetIndexerPropertyValue(object key, ObjectInstance thisValue)
+        {
+            ObjectInstance prototypeObject = thisValue;
+            do
+            {
+                // Retrieve information about the property.
+                IEnumerable<SchemaProperty> properties = prototypeObject.schema.GetIndexers();
+                foreach (SchemaProperty property in properties)
+                {
+                    if (property.Exists == true)
+                    {
+                        // The property was found!
+                        object value = prototypeObject.propertyValues[property.Index];
+                        try
+                        {
+                            return ((PropertyAccessorValue)value).GetValue(thisValue, new object[] { key });
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+
+                // Traverse the prototype chain.
+                prototypeObject = prototypeObject.prototype;
+            } while (prototypeObject != null);
+
+            // The indexer property doesn't exist.
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given array index if current object is an Array.
+        /// </summary>
+        /// <param name="index"> The array index of the property. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the object is not an Array. </returns>
+        private static object GetArrayElementPropertyValue(uint index, ObjectInstance thisValue)
+        {
+            object result = null;
+            ClrInstanceWrapper thisWrapper = thisValue as ClrInstanceWrapper;
+            if (thisWrapper != null && thisWrapper.WrappedInstance.GetType().IsArray)
+            {
+                Array thisArray = thisWrapper.WrappedInstance as Array;
+                result = thisArray.GetValue(index);
+            }
+
+            return result;
         }
 
         /// <summary>

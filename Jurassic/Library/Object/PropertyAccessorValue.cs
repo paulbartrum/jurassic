@@ -45,12 +45,13 @@ namespace Jurassic.Library
         /// Gets the property value by calling the getter, if one is present.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword inside the getter. </param>
+        /// <param name="argumentValues"></param>
         /// <returns> The property value returned by the getter. </returns>
-        public object GetValue(ObjectInstance thisObject)
+        public object GetValue(ObjectInstance thisObject, params object[] argumentValues)
         {
             if (this.getter == null)
                 return Undefined.Value;
-            return this.getter.CallLateBound(thisObject);
+            return this.getter.CallLateBound(thisObject, argumentValues);
         }
 
         /// <summary>

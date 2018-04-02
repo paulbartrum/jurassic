@@ -53,5 +53,10 @@ namespace Jurassic.Library
         /// Indicates the property is the "magic" length property (only found on arrays).
         /// </summary>
         IsLengthProperty = 16,
+
+        /// <summary>
+        /// Indicates the property is index property
+        /// </summary>
+        IsIndexProperty = 32,
     }
 }

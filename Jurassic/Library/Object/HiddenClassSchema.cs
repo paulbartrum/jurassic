@@ -14,7 +14,7 @@ namespace Jurassic.Library
         private Dictionary<object, SchemaProperty> properties;
 
         // Transitions
-            private struct TransitionInfo
+        private struct TransitionInfo
         {
             public object Key;
             public PropertyAttributes Attributes;
@@ -122,6 +122,14 @@ namespace Jurassic.Library
             if (this.properties.TryGetValue(key, out propertyInfo) == false)
                 return SchemaProperty.Undefined;
             return propertyInfo;
+        }
+
+        public IEnumerable<SchemaProperty> GetIndexers()
+        {
+            if (this.properties == null)
+                this.properties = CreatePropertiesDictionary();
+            IEnumerable<SchemaProperty> result = this.properties.Values.Where(sp => sp.IsIndexer);
+            return result;
         }
 
         /// <summary>
