@@ -38,27 +38,26 @@ namespace Jurassic.Library
             return ClrInstanceTypeWrapper.FromCache(engine, instance.GetType());
         }
 
-      /// <summary>Creates an instance of ClrInstanceWrapper or ArrayInstance based on object type.</summary>
-      /// <param name="engine"></param>
-      /// <param name="instance"></param>
-      public static ObjectInstance Create(ScriptEngine engine, object instance)
-      {
-         if (typeof(System.Collections.IEnumerable).IsAssignableFrom(instance.GetType()))
-         {
-            var src = instance as System.Collections.IList;
-            var dst = new object[src.Count];
-            for (int i = 0; i<src.Count;i++)
+        /// <summary>Creates an instance of ClrInstanceWrapper or ArrayInstance based on object type.</summary>
+        /// <param name="engine"></param>
+        /// <param name="instance"></param>
+        public static ObjectInstance Create(ScriptEngine engine, object instance)
+        {
+            if (typeof(System.Collections.IEnumerable).IsAssignableFrom(instance.GetType()))
             {
-               var obj = src[i];
-               dst[i] = ClrInstanceWrapper.Create(engine, obj);
+                var src = instance as System.Collections.IEnumerable;
+                var dst = new System.Collections.ArrayList();
+                var enumerator = src.GetEnumerator();
+                while (enumerator.MoveNext()) {
+                   var wrapped = ClrInstanceWrapper.Create(engine, enumerator.Current);
+                   dst.Add(wrapped);
+                }
+
+                return engine.Array.New(dst.ToArray());
             }
 
-            return engine.Array.New(dst);
-         }
-
-         return new ClrInstanceWrapper(engine, instance);
-      }
-
+            return new ClrInstanceWrapper(engine, instance);
+        }
 
         //     PROPERTIES
         //_________________________________________________________________________________________
