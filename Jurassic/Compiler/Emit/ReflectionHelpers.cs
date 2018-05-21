@@ -89,6 +89,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo MethodBase_GetMethodFromHandle;
         internal static MethodInfo GeneratedMethod_Load;
         internal static MethodInfo ClrInstanceWrapper_GetWrappedInstance;
+        internal static MethodInfo ClrInstanceWrapper_Create;
         internal static MethodInfo Decimal_ToDouble;
         internal static MethodInfo BinderUtilities_ResolveOverloads;
         internal static MethodInfo Convert_ToInt32_Double;
@@ -250,6 +251,7 @@ namespace Jurassic.Compiler
 
             GeneratedMethod_Load = GetStaticMethod(typeof(GeneratedMethod), "Load", typeof(long));
             ClrInstanceWrapper_GetWrappedInstance = GetInstanceMethod(typeof(ClrInstanceWrapper), "get_WrappedInstance");
+            ClrInstanceWrapper_Create = GetStaticMethod(typeof(ClrInstanceWrapper), "Create", new Type[] { typeof(ScriptEngine), typeof(object) });
             Decimal_ToDouble = GetStaticMethod(typeof(decimal), "ToDouble", typeof(decimal));
             BinderUtilities_ResolveOverloads = GetStaticMethod(typeof(BinderUtilities), "ResolveOverloads", typeof(RuntimeMethodHandle[]), typeof(ScriptEngine), typeof(object), typeof(object[]));
             Convert_ToInt32_Double = GetStaticMethod(typeof(Convert), "ToInt32", typeof(double));

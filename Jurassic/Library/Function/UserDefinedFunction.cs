@@ -46,7 +46,14 @@ namespace Jurassic.Library
             var scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(this.Engine.Global), name, null);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(scope, name, argumentsText, bodyText, new CompilerOptions());
+            var context = new FunctionMethodGenerator(scope, name, argumentsText, bodyText, new CompilerOptions() {
+#if ENABLE_DEBUGGING
+               EnableDebugging = this.Engine.EnableDebugging,
+#endif
+               ForceStrictMode = this.Engine.ForceStrictMode,
+               EnableILAnalysis = this.Engine.EnableILAnalysis,
+               CompatibilityMode = this.Engine.CompatibilityMode
+            });
             try
             {
                 context.GenerateCode();
