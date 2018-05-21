@@ -43,11 +43,12 @@ namespace Jurassic.Library
         /// <param name="instance"></param>
         public static ObjectInstance Create(ScriptEngine engine, object instance)
         {
-            if (typeof(System.Collections.IEnumerable).IsAssignableFrom(instance.GetType()))
+
+            var instanceAsIEnumerable = instance as System.Collections.IEnumerable;
+            if (instanceAsIEnumerable != null)
             {
-                var src = instance as System.Collections.IEnumerable;
                 var dst = new System.Collections.ArrayList();
-                var enumerator = src.GetEnumerator();
+                var enumerator = instanceAsIEnumerable.GetEnumerator();
                 while (enumerator.MoveNext()) {
                    var wrapped = ClrInstanceWrapper.Create(engine, enumerator.Current);
                    dst.Add(wrapped);
