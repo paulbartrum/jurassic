@@ -80,6 +80,8 @@ namespace Jurassic
                 return false;
             if (value is bool)
                 return (bool)value;
+            if (value is byte)
+                return ((byte)value) != 0;
             if (value is int)
                 return ((int)value) != 0;
             if (value is uint)
@@ -90,7 +92,7 @@ namespace Jurassic
                 return ((string)value).Length > 0;
             if (value is ConcatenatedString)
                 return ((ConcatenatedString)value).Length > 0;
-            if (value is ObjectInstance)
+            if (value is Object && !(value is DBNull)) // All non null objects, except DBNull are converted to true
                 return true;
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a boolean.", value.GetType()), nameof(value));
         }
@@ -104,6 +106,8 @@ namespace Jurassic
         {
             if (value is double)
                 return (double)value;
+            if (value is byte)
+                return (double)(byte)value;
             if (value is int)
                 return (double)(int)value;
             if (value is uint)
@@ -146,6 +150,8 @@ namespace Jurassic
                 return "null";
             if (value is bool)
                 return (bool)value ? "true" : "false";
+            if (value is byte)
+                return ((byte)value).ToString();
             if (value is int)
                 return ((int)value).ToString();
             if (value is uint)
@@ -224,6 +230,8 @@ namespace Jurassic
             ObjectInstance result;
             if (value is bool)
                 result = engine.Boolean.Construct((bool)value);
+            else if (value is byte)
+                result = engine.Number.Construct((byte)value);
             else if (value is int)
                 result = engine.Number.Construct((int)value);
             else if (value is uint)
@@ -234,6 +242,10 @@ namespace Jurassic
                 result = engine.String.Construct((string)value);
             else if (value is ConcatenatedString)
                 result = engine.String.Construct(value.ToString());
+            else if (value is DateTime)
+                result = engine.Date.Construct((DateTime)value);
+            else if (value is object && engine.EnableExposedClrTypes)
+                result = new ClrInstanceWrapper(engine, value);
             else
                 throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), nameof(value));
             result.IsExtensible = false;
