@@ -385,7 +385,6 @@ namespace Jurassic.Compiler
                         generator.Box(fromType);
                     generator.ReleaseTemporaryVariable(temp);
                     generator.CallStatic(ReflectionHelpers.ClrInstanceWrapper_Create);
-                    //generator.NewObject(ReflectionHelpers.ClrInstanceWrapper_Constructor);
                     
                     // End of wrap check.
                     if (fromType.IsValueType == false)

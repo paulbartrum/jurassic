@@ -122,7 +122,6 @@ namespace Jurassic.Compiler
         internal static ConstructorInfo Arguments_Constructor;
         internal static ConstructorInfo PropertyDescriptor_Constructor2;
         internal static ConstructorInfo PropertyDescriptor_Constructor3;
-        internal static ConstructorInfo ClrInstanceWrapper_Constructor;
         internal static ConstructorInfo Decimal_Constructor_Double;
         internal static ConstructorInfo PropertyName_Constructor;
 
@@ -245,7 +244,6 @@ namespace Jurassic.Compiler
             Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
             PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(Library.PropertyAttributes));
             PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
-            ClrInstanceWrapper_Constructor = GetConstructor(typeof(ClrInstanceWrapper), typeof(ScriptEngine), typeof(object));
             Decimal_Constructor_Double = GetConstructor(typeof(decimal), typeof(double));
             PropertyName_Constructor = GetConstructor(typeof(PropertyReference), typeof(string));
 
