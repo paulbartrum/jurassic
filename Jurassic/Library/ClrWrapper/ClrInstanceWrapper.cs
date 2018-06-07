@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -38,8 +39,24 @@ namespace Jurassic.Library
             return ClrInstanceTypeWrapper.FromCache(engine, instance.GetType());
         }
 
+        /// <summary>
+        /// Creates an instance of ClrInstanceWrapper or ArrayInstance based on object type.
+        /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
+        /// <param name="instance"> The CLR object instance to wrap. </param>
+        public static ObjectInstance Create(ScriptEngine engine, object instance)
+        {
+            if (instance is IEnumerable enumerable)
+            {
+                var wrappedList = instance is ICollection ? new List<object>(((ICollection)instance).Count) : new List<object>();
+                var enumerator = enumerable.GetEnumerator();
+                while (enumerator.MoveNext())
+                    wrappedList.Add(Create(engine, enumerator.Current));
+                return engine.Array.New(wrappedList.ToArray());
+            }
 
-
+            return new ClrInstanceWrapper(engine, instance);
+        }
 
         //     PROPERTIES
         //_________________________________________________________________________________________

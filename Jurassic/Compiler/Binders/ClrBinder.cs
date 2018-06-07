@@ -297,6 +297,36 @@ namespace Jurassic.Compiler
                 generator.DefineLabelPosition(startOfElse);
             }
 
+            // Handle Nullable<>.
+            var isNullable = fromType.IsGenericType && fromType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            if (isNullable)
+            {
+                endOfNullCheck = generator.CreateLabel();
+
+                var v = generator.CreateTemporaryVariable(fromType);
+                generator.StoreVariable(v);
+                generator.LoadAddressOfVariable(v);
+
+                var hasValue = ReflectionHelpers.GetInstanceMethod(fromType, "get_HasValue");
+                generator.Call(hasValue);
+                generator.BranchIfTrue(endOfNullCheck);
+                
+                // Return null.
+                generator.LoadNull();
+                generator.Return();
+                
+                // Jump here if it was NOT null.
+                generator.DefineLabelPosition(endOfNullCheck);
+
+                // Get the underlying value.
+                generator.LoadAddressOfVariable(v);
+                var getValue = ReflectionHelpers.GetInstanceMethod(fromType, "get_Value");
+                generator.Call(getValue);
+
+                // Now let the normal conversion work.
+                fromType = fromType.GenericTypeArguments[0];
+            }
+
             switch (Type.GetTypeCode(fromType))
             {
                 case TypeCode.Boolean:
@@ -354,7 +384,7 @@ namespace Jurassic.Compiler
                     if (fromType.IsValueType == true)
                         generator.Box(fromType);
                     generator.ReleaseTemporaryVariable(temp);
-                    generator.NewObject(ReflectionHelpers.ClrInstanceWrapper_Constructor);
+                    generator.CallStatic(ReflectionHelpers.ClrInstanceWrapper_Create);
                     
                     // End of wrap check.
                     if (fromType.IsValueType == false)
