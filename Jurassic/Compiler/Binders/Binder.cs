@@ -122,11 +122,15 @@ namespace Jurassic.Compiler
 #if USE_DYNAMIC_IL_INFO
             generator = new DynamicILGenerator(dm);
 #else
-            generator = new ReflectionEmitILGenerator(dm.GetILGenerator(), emitDebugInfo: false);
+#if ENABLE_DEBUGGING
+         generator = new LoggingILGenerator(new ReflectionEmitILGenerator(dm.GetILGenerator(), emitDebugInfo: true));
+#else
+         generator = new ReflectionEmitILGenerator(dm.GetILGenerator(), emitDebugInfo: false);
+#endif
 #endif
 
-            // Generate the body of the method.
-            GenerateStub(generator, argumentCount);
+         // Generate the body of the method.
+         GenerateStub(generator, argumentCount);
 
             // Convert the DynamicMethod to a delegate.
             return (BinderDelegate)dm.CreateDelegate(typeof(BinderDelegate));
