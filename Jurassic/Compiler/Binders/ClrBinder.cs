@@ -312,7 +312,7 @@ namespace Jurassic.Compiler
                 generator.BranchIfTrue(endOfNullCheck);
                 
                 // Return null.
-                generator.LoadNull();
+                EmitHelpers.EmitNull(generator);
                 generator.Return();
                 
                 // Jump here if it was NOT null.
