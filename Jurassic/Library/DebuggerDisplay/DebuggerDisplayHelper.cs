@@ -74,5 +74,25 @@ namespace Jurassic.Library
             }
             return result;
         }
+
+        /// <summary>
+        /// Return decorated or actual Clr Type
+        /// </summary>
+        /// <param name="value">The object</param>
+        /// <returns>The name of the type</returns>
+        public static string TypeRepresentation(object value)
+        {
+            string result;
+            if (value is ObjectInstance)
+            {
+                result = (value as ObjectInstance).DebuggerDisplayType;
+            }
+            else
+            {
+                result = value?.GetType().Name;
+            }
+            return result;
+
+        }
     }
 }
