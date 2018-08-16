@@ -22,6 +22,10 @@ namespace Jurassic.Library
             {
                 result = (value as ObjectInstance).DebuggerDisplayValue;
             }
+            else if (value is IDebuggerDisplay)
+            {
+                result = (value as IDebuggerDisplay).DebuggerDisplayValue;
+            }
             else if (value is string)
             {
                 result = string.Format("\"{0}\"", value);
@@ -55,6 +59,10 @@ namespace Jurassic.Library
             {
                 result = (value as ObjectInstance).DebuggerDisplayShortValue;
             }
+            else if (value is IDebuggerDisplay)
+            {
+                result = (value as IDebuggerDisplay).DebuggerDisplayShortValue;
+            }
             else if (value is string)
             {
                 result = string.Format("\"{0}\"", value);
@@ -85,6 +93,10 @@ namespace Jurassic.Library
             if (value is ObjectInstance)
             {
                 result = (value as ObjectInstance).DebuggerDisplayType;
+            }
+            else if (value is IDebuggerDisplay)
+            {
+                result = (value as IDebuggerDisplay).DebuggerDisplayType;
             }
             else
             {
