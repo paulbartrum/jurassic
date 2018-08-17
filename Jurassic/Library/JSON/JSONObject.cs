@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents the built-in JSON object.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class JSONObject : ObjectInstance
     {
 
@@ -87,6 +90,16 @@ namespace Jurassic.Library
 
             // Serialize the value.
             return serializer.Serialize(value);
+        }
+
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return "JSON Object"; }
         }
     }
 }

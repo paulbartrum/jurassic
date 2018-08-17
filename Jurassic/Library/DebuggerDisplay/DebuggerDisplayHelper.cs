@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-
+using System.Linq;
+using System.Text;
 
 namespace Jurassic.Library
 {
@@ -104,6 +106,22 @@ namespace Jurassic.Library
             }
             return result;
 
+        }
+
+        /// <summary>
+        /// Converts map contents to string
+        /// </summary>
+        /// <param name="mapStore">Internal storage of a MapInstance</param>
+        /// <returns>The result string</returns>
+        public static string MapRepresentation(Dictionary<object, LinkedListNode<KeyValuePair<object, object>>> mapStore)
+        {
+            IEnumerable<string> strValues =
+                mapStore.Values.Select(node =>
+                    string.Format("{0} => {1}",
+                        ShortStringRepresentation(node.Value.Key),
+                        ShortStringRepresentation(node.Value.Value)));
+
+            return string.Join(", ", strValues);
         }
     }
 }
