@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// The Set object lets you store unique values of any type, whether primitive values or object references.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(SetInstanceDebugView))]
     public partial class SetInstance : ObjectInstance
     {
         private readonly Dictionary<object, LinkedListNode<object>> store;
@@ -57,6 +62,51 @@ namespace Jurassic.Library
         /// Called before a linked list node is deleted.
         /// </summary>
         internal event Action<LinkedListNode<object>> BeforeDelete;
+
+        /// <summary>
+        /// Gets the internal storage. Used by debugger decoration only.
+        /// </summary>
+        internal Dictionary<object, LinkedListNode<object>> Store
+        {
+            get { return this.store; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                IEnumerable<string> strValues =
+                    this.store.Values.Select(value => DebuggerDisplayHelper.ShortStringRepresentation(value.Value));
+
+                return string.Format("[{0}]", string.Join(", ", strValues));
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayType; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get
+            {
+                string result = string.Format("Set({0})", this.store.Count);
+                return result;
+            }
+        }
 
 
         //     JAVASCRIPT PROPERTIES
