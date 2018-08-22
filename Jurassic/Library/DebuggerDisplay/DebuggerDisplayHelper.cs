@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Jurassic.Library
@@ -122,6 +124,49 @@ namespace Jurassic.Library
                         ShortStringRepresentation(node.Value.Value)));
 
             return string.Join(", ", strValues);
+        }
+
+        /// <summary>
+        /// Gets the keys of a weak map using reflection
+        /// </summary>
+        /// <param name="weakMap">The WeakMapInstance</param>
+        /// <returns>Keys</returns>
+        public static IEnumerable<ObjectInstance> GetKeys(this ConditionalWeakTable<ObjectInstance, object> weakMap)
+        {
+            IEnumerable<ObjectInstance> keys = weakMap.GetType().InvokeMember(
+                                        "Keys",
+                                        BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+                                        null,
+                                        weakMap,
+                                        new object[] { }) as IEnumerable<ObjectInstance>;
+            return keys;
+        }
+
+        /// <summary>
+        /// Converts WeakMapInstance to its string representation
+        /// </summary>
+        /// <param name="sb">StringBuilder to add strings</param>
+        /// <param name="weakMapStore">Internal storage of a WeakMapInstance</param>
+        public static void WeakMapRepresentation(StringBuilder sb,
+            ConditionalWeakTable<ObjectInstance, object> weakMapStore)
+        {
+            bool comma = false;
+            IEnumerable<ObjectInstance> keys = weakMapStore.GetKeys();
+            foreach (ObjectInstance key in keys)
+            {
+                object value;
+                if (weakMapStore.TryGetValue(key, out value))
+                {
+                    if (comma)
+                    {
+                        sb.Append(", ");
+                    }
+                    sb.AppendFormat("{0} => {1}",
+                        DebuggerDisplayHelper.ShortStringRepresentation(key),
+                        DebuggerDisplayHelper.ShortStringRepresentation(value));
+                    comma = true;
+                }
+            }
         }
     }
 }
