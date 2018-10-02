@@ -58,12 +58,12 @@ namespace Jurassic.Library
         /// Sets the property value by calling the setter, if one is present.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword inside the setter. </param>
-        /// <param name="value"> The desired value. </param>
-        public void SetValue(ObjectInstance thisObject, object value)
+        /// <param name="argumentValues"> The values as arguments list. </param>
+        public void SetValue(ObjectInstance thisObject, params object[] argumentValues)
         {
             if (this.setter == null)
                 return;
-            this.setter.CallLateBound(thisObject, value);
+            this.setter.CallLateBound(thisObject, argumentValues);
         }
 
         /// <summary>
