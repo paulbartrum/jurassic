@@ -22,6 +22,8 @@ namespace Jurassic.Compiler
         private BinderDelegate[] delegateCache;
         private const int MaximumCachedParameterCount = 8;
 
+        [NonSerialized]
+        private Object lockObject = new Object();
 
 
 
@@ -82,23 +84,26 @@ namespace Jurassic.Compiler
         /// the same parameter count will be markedly quicker. </remarks>
         public BinderDelegate CreateDelegate(int argumentCount)
         {
-            // If there are too many arguments, don't cache the delegate.
-            if (argumentCount > MaximumCachedParameterCount)
-                return CreateDelegateCore(argumentCount);
-
-            // Save the delegate that is created into a cache so it doesn't have to be created again.
-            if (this.delegateCache == null)
-                this.delegateCache = new BinderDelegate[MaximumCachedParameterCount + 1];
-            var binderDelegate = this.delegateCache[argumentCount];
-            if (binderDelegate == null)
+            lock (lockObject)
             {
-                // Create a binding method.
-                binderDelegate = CreateDelegateCore(argumentCount);
+                // If there are too many arguments, don't cache the delegate.
+                if (argumentCount > MaximumCachedParameterCount)
+                    return CreateDelegateCore(argumentCount);
 
-                // Store it in the cache.
-                this.delegateCache[argumentCount] = binderDelegate;
+                // Save the delegate that is created into a cache so it doesn't have to be created again.
+                if (this.delegateCache == null)
+                    this.delegateCache = new BinderDelegate[MaximumCachedParameterCount + 1];
+                var binderDelegate = this.delegateCache[argumentCount];
+                if (binderDelegate == null)
+                {
+                    // Create a binding method.
+                    binderDelegate = CreateDelegateCore(argumentCount);
+
+                    // Store it in the cache.
+                    this.delegateCache[argumentCount] = binderDelegate;
+                }
+                return binderDelegate;
             }
-            return binderDelegate;
         }
 
         /// <summary>

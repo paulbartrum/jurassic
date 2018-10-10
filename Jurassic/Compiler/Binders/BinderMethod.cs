@@ -19,6 +19,7 @@ namespace Jurassic.Compiler
         private int optionalParameterCount;
         private Type paramArrayElementType;
 
+        private Object lockObject = new Object();
 
 
         //     INITIALIZATION
@@ -133,8 +134,11 @@ namespace Jurassic.Compiler
         {
             get
             {
-                if (this.initialized == false)
-                    Init();
+                lock (lockObject)
+                {
+                    if (this.initialized == false)
+                        Init();
+                }
                 return this.requiredParameterCount;
             }
         }
@@ -146,8 +150,11 @@ namespace Jurassic.Compiler
         {
             get
             {
-                if (this.initialized == false)
-                    Init();
+                lock (lockObject)
+                {
+                    if (this.initialized == false)
+                        Init();
+                }
                 return this.optionalParameterCount;
             }
         }
@@ -159,8 +166,11 @@ namespace Jurassic.Compiler
         {
             get
             {
-                if (this.initialized == false)
-                    Init();
+                lock (lockObject)
+                {
+                    if (this.initialized == false)
+                        Init();
+                }
                 return this.paramArrayElementType != null;
             }
         }
@@ -172,8 +182,11 @@ namespace Jurassic.Compiler
         {
             get
             {
-                if (this.initialized == false)
-                    Init();
+                lock (lockObject)
+                {
+                    if (this.initialized == false)
+                        Init();
+                }
                 return this.paramArrayElementType;
             }
         }
