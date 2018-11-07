@@ -123,17 +123,22 @@ namespace Jurassic.Compiler
             }
 
             // Find the method(s) with the fewest number of demerit points.
-            int lowestScore = int.MaxValue;
-            var lowestIndices = new List<int>();
-            for (int i = 0; i < methods.Length; i++)
+            int lowestScore;
+            var lowestIndices = _LowestIndices(methods, demeritPoints, out lowestScore);
+
+            // Try to get the method from the most close base type 
+            if (lowestIndices.Count > 1)
             {
-                if (demeritPoints[i] < lowestScore)
+                for (int i = 0; i < demeritPoints.Length; i++)
                 {
-                    lowestScore = demeritPoints[i];
-                    lowestIndices.Clear();
+                    demeritPoints[i] = disqualification;
                 }
-                if (demeritPoints[i] <= lowestScore)
-                    lowestIndices.Add(i);
+                for (int i = 0; i < lowestIndices.Count; i++)
+                {
+                    int index = lowestIndices[i];
+                    demeritPoints[index] = _CalcMethodDistance(_GetThisType(thisValue), methods[index].DeclaringType);
+                }
+                lowestIndices = _LowestIndices(methods, demeritPoints, out lowestScore);
             }
 
             // Throw an error if the match is ambiguous.
@@ -150,6 +155,59 @@ namespace Jurassic.Compiler
                 throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The best method overload {0} has some invalid arguments", methods[lowestIndices[0]]));
 
             return lowestIndices[0];
+        }
+
+
+        private static List<int> _LowestIndices(BinderMethod[] methods, int[] demeritPoints, out int lowestScore)
+        {
+            lowestScore = int.MaxValue;
+            List<int> lowestIndices = new List<int>();
+            for (int i = 0; i < methods.Length; i++)
+            {
+                if (demeritPoints[i] < lowestScore)
+                {
+                    lowestScore = demeritPoints[i];
+                    lowestIndices.Clear();
+                }
+                if (demeritPoints[i] <= lowestScore)
+                    lowestIndices.Add(i);
+            }
+
+            return lowestIndices;
+        }
+
+
+        private static Type _GetThisType(object thisValue)
+        {
+            object thisUnwrapped = thisValue;
+            if (thisUnwrapped is Jurassic.Library.ClrInstanceWrapper)
+            {
+                thisUnwrapped = ((Jurassic.Library.ClrInstanceWrapper)thisUnwrapped).WrappedInstance;
+            }
+            else if (thisUnwrapped is Jurassic.Library.ClrInstanceTypeWrapper)
+            {
+                thisUnwrapped = ((Jurassic.Library.ClrInstanceTypeWrapper)thisUnwrapped).WrappedType;
+            }
+            else if (thisUnwrapped is Jurassic.Library.ClrStaticTypeWrapper)
+            {
+                thisUnwrapped = ((Jurassic.Library.ClrStaticTypeWrapper)thisUnwrapped).WrappedType;
+            }
+            return thisUnwrapped.GetType();
+        }
+
+
+        private static int _CalcMethodDistance(Type thisType, Type declaringType)
+        {
+            Type currentType = thisType;
+
+            int result = 0;
+            while (currentType != null && currentType != declaringType)
+            {
+                result++;
+                currentType = currentType.BaseType;
+            }
+
+            return result;
         }
     }
 
