@@ -111,6 +111,12 @@ namespace Jurassic.Compiler
                             {
                                 demeritPoints[i] += disqualification;
                             }
+                            else if (outputType != input.GetType())
+                            {
+                                // To fix ambiguous when the parameter is of type object and there is another method 
+                                // with parameter which inherits object.
+                                demeritPoints[i]++;
+                            }
                             break;
 
 
