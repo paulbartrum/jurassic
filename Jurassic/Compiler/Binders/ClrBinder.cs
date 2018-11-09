@@ -191,8 +191,6 @@ namespace Jurassic.Compiler
                     generator.LoadInt32(0);
                     generator.Call(ReflectionHelpers.String_GetChars);
                     break;
-                case TypeCode.DBNull:
-                    throw new NotSupportedException("DBNull is not a supported parameter type.");
                 case TypeCode.Decimal:
                     EmitConversion.ToNumber(generator, PrimitiveType.Any);
                     generator.NewObject(ReflectionHelpers.Decimal_Constructor_Double);
@@ -213,6 +211,7 @@ namespace Jurassic.Compiler
                     generator.ConvertToInt64();
                     break;
 
+                case TypeCode.DBNull:
                 case TypeCode.DateTime:
                 case TypeCode.Object:
                     // Check if the type must be unwrapped.
@@ -340,8 +339,6 @@ namespace Jurassic.Compiler
                     generator.NewObject(ReflectionHelpers.String_Constructor_Char_Int);
                     break;
                 
-                case TypeCode.DBNull:
-                    throw new NotSupportedException("DBNull is not a supported return type.");
                 case TypeCode.Decimal:
                     generator.Call(ReflectionHelpers.Decimal_ToDouble);
                     generator.Box(typeof(double));
@@ -362,6 +359,7 @@ namespace Jurassic.Compiler
                     generator.Box(typeof(double));
                     break;
 
+                case TypeCode.DBNull:
                 case TypeCode.DateTime:
                 case TypeCode.Object:
                     // Check if the type must be wrapped with a ClrInstanceWrapper.
