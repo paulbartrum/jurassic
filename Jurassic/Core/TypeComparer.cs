@@ -20,14 +20,54 @@ namespace Jurassic
         {
             x = x ?? Undefined.Value;
             y = y ?? Undefined.Value;
+            if (x is sbyte)
+                x = (double)(sbyte)x;
+            if (x is byte)
+                x = (double)(byte)x;
+            if (x is char)
+                x = (double)(char)x;
+            if (x is short)
+                x = (double)(short)x;
+            if (x is ushort)
+                x = (double)(ushort)x;
             if (x is int)
                 x = (double)(int)x;
             if (x is uint)
                 x = (double)(uint)x;
+            if (x is long)
+                x = (double)(long)x;
+            if (x is ulong)
+                x = (double)(ulong)x;
+            if (x is Enum)
+                x = (double)(int)x;
+            if (x is float)
+                x = (double)(float)x;
+            if (x is decimal)
+                x = decimal.ToDouble((decimal)x);
+            if (y is sbyte)
+                y = (double)(sbyte)y;
+            if (y is byte)
+                y = (double)(byte)y;
+            if (y is char)
+                y = (double)(char)y;
+            if (y is short)
+                y = (double)(short)y;
+            if (y is ushort)
+                y = (double)(ushort)y;
             if (y is int)
                 y = (double)(int)y;
             if (y is uint)
                 y = (double)(uint)y;
+            if (y is long)
+                y = (double)(long)y;
+            if (y is ulong)
+                y = (double)(ulong)y;
+            if (y is Enum)
+                y = (double)(int)y;
+            if (y is float)
+                y = (double)(float)y;
+            if (y is decimal)
+                y = decimal.ToDouble((decimal)y);
             if (x is ConcatenatedString)
                 x = x.ToString();
             if (y is ConcatenatedString)
@@ -81,14 +121,50 @@ namespace Jurassic
         {
             x = x ?? Undefined.Value;
             y = y ?? Undefined.Value;
+            if (x is sbyte)
+                x = (double)(sbyte)x;
+            if (x is byte)
+                x = (double)(byte)x;
+            if (x is char)
+                x = (double)(char)x;
+            if (x is short)
+                x = (double)(short)x;
+            if (x is ushort)
+                x = (double)(ushort)x;
             if (x is int)
                 x = (double)(int)x;
             if (x is uint)
                 x = (double)(uint)x;
+            if (x is long)
+                x = (double)(long)x;
+            if (x is ulong)
+                x = (double)(ulong)x;
+            if (x is float)
+                x = (double)(float)x;
+            if (x is decimal)
+                x = decimal.ToDouble((decimal)x);
+            if (y is sbyte)
+                y = (double)(sbyte)y;
+            if (y is byte)
+                y = (double)(byte)y;
+            if (y is char)
+                y = (double)(char)y;
+            if (y is short)
+                y = (double)(short)y;
+            if (y is ushort)
+                y = (double)(ushort)y;
             if (y is int)
                 y = (double)(int)y;
             if (y is uint)
                 y = (double)(uint)y;
+            if (y is long)
+                y = (double)(long)y;
+            if (y is ulong)
+                y = (double)(ulong)y;
+            if (y is float)
+                y = (double)(float)y;
+            if (y is decimal)
+                y = decimal.ToDouble((decimal)y);
             if (x is double && double.IsNaN((double)x) == true)
                 return false;
             if (x is ConcatenatedString)
@@ -224,14 +300,54 @@ namespace Jurassic
                 x = Undefined.Value;
             if (y == null)
                 y = Undefined.Value;
+            if (x is sbyte)
+                x = (double)(sbyte)x;
+            if (x is byte)
+                x = (double)(byte)x;
+            if (x is char)
+                x = (double)(char)x;
+            if (x is short)
+                x = (double)(short)x;
+            if (x is ushort)
+                x = (double)(ushort)x;
             if (x is int)
                 x = (double)(int)x;
             if (x is uint)
                 x = (double)(uint)x;
+            if (x is long)
+                x = (double)(long)x;
+            if (x is ulong)
+                x = (double)(ulong)x;
+            if (x is Enum)
+                x = (double)(int)x;
+            if (x is float)
+                x = (double)(float)x;
+            if (x is decimal)
+                x = decimal.ToDouble((decimal)x);
+            if (y is sbyte)
+                y = (double)(sbyte)y;
+            if (y is byte)
+                y = (double)(byte)y;
+            if (y is char)
+                y = (double)(char)y;
+            if (y is short)
+                y = (double)(short)y;
+            if (y is ushort)
+                y = (double)(ushort)y;
             if (y is int)
                 y = (double)(int)y;
             if (y is uint)
                 y = (double)(uint)y;
+            if (y is long)
+                y = (double)(long)y;
+            if (y is ulong)
+                y = (double)(ulong)y;
+            if (y is Enum)
+                y = (double)(int)y;
+            if (y is float)
+                y = (double)(float)y;
+            if (y is decimal)
+                y = decimal.ToDouble((decimal)y);
             if (x is double && (double) x == 0.0 && y is double && (double)y == 0.0)
                 if ((1 / (double)x) != (1 / (double)y))
                     return false;
@@ -260,14 +376,54 @@ namespace Jurassic
                 x = Undefined.Value;
             if (y == null)
                 y = Undefined.Value;
+            if (x is sbyte)
+                x = (double)(sbyte)x;
+            if (x is byte)
+                x = (double)(byte)x;
+            if (x is char)
+                x = (double)(char)x;
+            if (x is short)
+                x = (double)(short)x;
+            if (x is ushort)
+                x = (double)(ushort)x;
             if (x is int)
                 x = (double)(int)x;
             if (x is uint)
                 x = (double)(uint)x;
+            if (x is long)
+                x = (double)(long)x;
+            if (x is ulong)
+                x = (double)(ulong)x;
+            if (x is Enum)
+                x = (double)(int)x;
+            if (x is float)
+                x = (double)(float)x;
+            if (x is decimal)
+                x = decimal.ToDouble((decimal)x);
+            if (y is sbyte)
+                y = (double)(sbyte)y;
+            if (y is byte)
+                y = (double)(byte)y;
+            if (y is char)
+                y = (double)(char)y;
+            if (y is short)
+                y = (double)(short)y;
+            if (y is ushort)
+                y = (double)(ushort)y;
             if (y is int)
                 y = (double)(int)y;
             if (y is uint)
                 y = (double)(uint)y;
+            if (y is long)
+                y = (double)(long)y;
+            if (y is ulong)
+                y = (double)(ulong)y;
+            if (y is Enum)
+                y = (double)(int)y;
+            if (y is float)
+                y = (double)(float)y;
+            if (y is decimal)
+                y = decimal.ToDouble((decimal)y);
             if (x is ConcatenatedString)
                 x = x.ToString();
             if (y is ConcatenatedString)

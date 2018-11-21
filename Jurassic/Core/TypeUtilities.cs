@@ -24,7 +24,12 @@ namespace Jurassic
                 return "object";
             if (obj is bool)
                 return "boolean";
-            if (obj is double || obj is int || obj is uint)
+            if (obj is float || obj is double || obj is decimal ||
+                obj is sbyte || obj is byte || obj is char ||
+                obj is short || obj is ushort ||
+                obj is int || obj is uint ||
+                obj is long || obj is ulong ||
+                obj is Enum)
                 return "number";
             if (obj is string || obj is ConcatenatedString)
                 return "string";
@@ -55,7 +60,12 @@ namespace Jurassic
         /// otherwise. </returns>
         internal static bool IsNumeric(object obj)
         {
-            return obj is double || obj is int || obj is uint;
+            return obj is float || obj is double || obj is decimal ||
+                obj is sbyte || obj is byte || obj is char ||
+                obj is short || obj is ushort ||
+                obj is int || obj is uint ||
+                obj is long || obj is ulong ||
+                obj is Enum;
         }
 
         /// <summary>
@@ -78,7 +88,7 @@ namespace Jurassic
         {
             if (obj == null)
                 return Undefined.Value;
-            else if (obj is double)
+            else if (obj is float || obj is double || obj is decimal)
             {
                 var numericResult = (double)obj;
                 if (((int)numericResult) == numericResult)
@@ -95,6 +105,8 @@ namespace Jurassic
                 obj = ((ConcatenatedString)obj).ToString();
             else if (obj is ClrInstanceWrapper)
                 obj = ((ClrInstanceWrapper)obj).WrappedInstance;
+            else if (obj is ClrInstanceTypeWrapper)
+                obj = ((ClrInstanceTypeWrapper)obj).WrappedType;
             else if (obj is ClrStaticTypeWrapper)
                 obj = ((ClrStaticTypeWrapper)obj).WrappedType;
             return obj;
@@ -178,7 +190,12 @@ namespace Jurassic
                 return true;
             var type = value.GetType();
             return type == typeof(bool) ||
-                type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
+                type == typeof(sbyte) || type == typeof(byte) || type == typeof(char) ||
+                type == typeof(short) || type == typeof(ushort) ||
+                type == typeof(int) || type == typeof(uint) ||
+                type == typeof(long) || type == typeof(ulong) ||
+                type.IsEnum ||
+                type == typeof(float) || type == typeof(double) || type == typeof(decimal) ||
                 type == typeof(string) || type == typeof(ConcatenatedString) ||
                 type == typeof(Null) || type == typeof(Undefined) ||
                 type == typeof(SymbolInstance);
@@ -197,7 +214,12 @@ namespace Jurassic
                 return true;
             var type = value.GetType();
             return type == typeof(bool) ||
-                type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
+                type == typeof(sbyte) || type == typeof(byte) || type == typeof(char) ||
+                type == typeof(short) || type == typeof(ushort) ||
+                type == typeof(int) || type == typeof(uint) ||
+                type == typeof(long) || type == typeof(ulong) ||
+                type.IsEnum ||
+                type == typeof(float) || type == typeof(double) || type == typeof(decimal) ||
                 type == typeof(string) || type == typeof(ConcatenatedString) ||
                 type == typeof(Null) || type == typeof(Undefined) ||
                 typeof(ObjectInstance).IsAssignableFrom(type);
