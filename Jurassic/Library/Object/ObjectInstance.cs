@@ -456,6 +456,9 @@ namespace Jurassic.Library
         /// this object. </remarks>
         private object GetIndexerPropertyValue(object key, ObjectInstance thisValue)
         {
+            if (!IsClrWrapper)
+                return null;    // This method is only for CLR clases
+
             ObjectInstance prototypeObject = thisValue;
             do
             {
@@ -491,8 +494,11 @@ namespace Jurassic.Library
         /// <param name="index"> The array index of the property. </param>
         /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
         /// <returns> The value of the property, or <c>null</c> if the object is not an Array. </returns>
-        private static object GetArrayElementPropertyValue(uint index, ObjectInstance thisValue)
+        private object GetArrayElementPropertyValue(uint index, ObjectInstance thisValue)
         {
+            if (!IsClrWrapper)
+                return null;   //This method is only for CLR clases
+
             object result = null;
             ClrInstanceWrapper thisWrapper = thisValue as ClrInstanceWrapper;
             if (thisWrapper != null && thisWrapper.WrappedInstance.GetType().IsArray)
@@ -762,6 +768,9 @@ namespace Jurassic.Library
         /// this object. </remarks>
         private bool SetIndexerPropertyValue(object key, object value, ObjectInstance thisValue)
         {
+            if (!IsClrWrapper)
+                return false;   // This method is only for CLR clases
+
             ObjectInstance prototypeObject = thisValue;
             do
             {
@@ -801,6 +810,9 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if the value is set; <c>false</c> otherwise. </returns>
         private bool SetArrayElementPropertyValue(uint index, ObjectInstance thisValue, object value)
         {
+            if (!IsClrWrapper)
+                return false;   // This method is only for CLR clases
+
             ClrInstanceWrapper thisWrapper = thisValue as ClrInstanceWrapper;
             if (thisWrapper != null && thisWrapper.WrappedInstance.GetType().IsArray)
             {
@@ -1216,6 +1228,14 @@ namespace Jurassic.Library
             {
                 return "<error>";
             }
+        }
+
+        /// <summary>
+        /// Returns true when JavaScript object is a Clr Wrapper
+        /// </summary>
+        protected virtual bool IsClrWrapper
+        {
+            get { return false; }
         }
 
 

@@ -122,6 +122,13 @@ namespace Jurassic.Library
         //    return base.GetPrimitiveValue(typeHint);
         //}
 
+        /// <summary>
+        /// This object is a Clr Wrapper
+        /// </summary>
+        protected override bool IsClrWrapper
+        {
+            get { return true; }
+        }
 
 
 

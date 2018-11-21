@@ -265,6 +265,18 @@ namespace Jurassic.Library
 
 
 
+        //     OBJECTINSTANCE OVERRIDES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// This object is a Clr Wrapper
+        /// </summary>
+        protected override bool IsClrWrapper
+        {
+            get { return true; }
+        }
+
+
 
         //     OBJECT OVERRIDES
         //_________________________________________________________________________________________
