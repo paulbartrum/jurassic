@@ -33,7 +33,8 @@ namespace Jurassic.Compiler
             const int disqualification = 65536;
             for (int i = 0; i < methods.Length; i++)
             {
-                foreach (var argument in methods[i].GetArguments(arguments.Length))
+                IEnumerable<BinderArgument> binderArguments = methods[i].GetArguments(arguments.Length);
+                foreach (var argument in binderArguments)
                 {
                     // Get the input parameter.
                     object input;
@@ -147,6 +148,21 @@ namespace Jurassic.Compiler
                 lowestIndices = _LowestIndices(methods, demeritPoints, out lowestScore);
             }
 
+            // Try to get the method with most close arguments count
+            if (lowestIndices.Count > 1)
+            {
+                for (int i = 0; i < demeritPoints.Length; i++)
+                {
+                    demeritPoints[i] = disqualification;
+                }
+                for (int i = 0; i < lowestIndices.Count; i++)
+                {
+                    int index = lowestIndices[i];
+                    demeritPoints[index] = _CalcArgumentsPoint(methods[index], arguments.Length);
+                }
+                lowestIndices = _LowestIndices(methods, demeritPoints, out lowestScore);
+            }
+
             // Throw an error if the match is ambiguous.
             if (lowestIndices.Count > 1)
             {
@@ -214,6 +230,13 @@ namespace Jurassic.Compiler
             }
 
             return result;
+        }
+
+
+        private static int _CalcArgumentsPoint(BinderMethod method, int argumentsCount)
+        {
+            int points = Math.Max(method.GetParameters().Length - argumentsCount, 0);
+            return points;
         }
     }
 

@@ -187,7 +187,7 @@ namespace Jurassic.Compiler
         /// Gets an array of method parameters.
         /// </summary>
         /// <returns> An array of ParameterInfo instances describing the method parameters. </returns>
-        protected virtual ParameterInfo[] GetParameters()
+        internal virtual ParameterInfo[] GetParameters()
         {
             return this.Method.GetParameters();
         }
