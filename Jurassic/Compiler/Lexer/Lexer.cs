@@ -617,9 +617,11 @@ namespace Jurassic.Compiler
                 if (IsHexDigit(c) == false)
                     throw new SyntaxErrorException(string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c), this.lineNumber, this.Source.Path);
             }
+            if (contents.Length == 0)
+                throw new SyntaxErrorException("Invalid Unicode escape sequence.", this.lineNumber, this.Source.Path);
 
             // Convert the number into a string.
-            int codePoint = int.Parse(contents.ToString(), System.Globalization.NumberStyles.HexNumber);
+            int codePoint = int.Parse(contents.ToString(), NumberStyles.HexNumber);
             if (codePoint <= 65535)
                 return new string((char)codePoint, 1);
             return new string(new char[] { (char)((codePoint - 65536) / 1024 + 0xD800), (char)((codePoint - 65536) % 1024 + 0xDC00) });

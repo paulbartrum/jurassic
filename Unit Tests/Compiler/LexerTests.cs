@@ -38,6 +38,8 @@ namespace UnitTests
             Assert.AreEqual(13, Evaluate(@"delete Te\u{20BB7}st; Te\u{20BB7}st = 13; Te\u{20BB7}st"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"ident\u{20}ifier"));
             Assert.AreEqual(3, Evaluate("delete _\u200c\u200d; _\u200c\u200d = 3; _\u200c\u200d"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("ident\\u{}ifier"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("ident\\u{AB}ifier"));
         }
 
         [TestMethod]
