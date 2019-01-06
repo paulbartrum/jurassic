@@ -66,6 +66,15 @@ namespace UnitTests
                 Evaluate("new Date(969, 01, 01, 8, 17, 0).valueOf()"));
             Assert.AreEqual(true, Evaluate("new Date(new Date(969, 01, 01, 8, 17, 0)).getTime() == new Date(969, 01, 01, 8, 17, 0).getTime()"));
 
+            // Minimum and maximum .NET DateTime values should work.
+            // DateTimeOffset.MinValue.ToUnixTimeMilliseconds() == -62135596800000
+            Assert.AreEqual("0001-01-01T00:00:00.000Z",
+                Evaluate($"new Date(-62135596800000).toISOString()"));
+            // DateTimeOffset.MaxValue.ToUnixTimeMilliseconds() == 253402300799999
+            Assert.AreEqual("9999-12-31T23:59:59.999Z",
+                Evaluate($"new Date(253402300799999).toISOString()"));
+
+
             // new Date(year, month, [day], [hour], [minute], [second], [millisecond])
             // Note: month is 0-11 is javascript but 1-12 in .NET.
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1)), Evaluate("new Date(2010, 0).valueOf()"));
