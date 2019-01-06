@@ -1731,6 +1731,11 @@ namespace Jurassic.Compiler
                             else if (unboundOperator != null && unboundOperator.AcceptingOperands == true)
                             {
                                 // "5 + !"
+                                // Two operators in a row is problematic if the left operator is
+                                // higher precedence than the right operator (e.g. "new ++a"), so
+                                // this is disallowed by the spec.
+                                if (unboundOperator.Precedence > newOperator.Precedence)
+                                    throw new SyntaxErrorException($"Unexpected token {Token.ToText(this.nextToken)} in expression", this.LineNumber, this.SourcePath);
                                 unboundOperator.Push(newExpression);
                             }
                             else
@@ -1790,6 +1795,16 @@ namespace Jurassic.Compiler
                                         break;
                                     throw new SyntaxErrorException("Invalid use of prefix operator.", this.LineNumber, this.SourcePath);
                                 }
+
+                                // Two operators in a row is problematic if the right operator is
+                                // higher precedence than the left operator (e.g. "a++[0]"), so
+                                // this is disallowed by the spec.
+                                if (lowPrecedenceOperator.Operator.HasLHSOperand && !lowPrecedenceOperator.Operator.HasRHSOperand &&
+                                    newOperator.Precedence > lowPrecedenceOperator.Precedence)
+                                {
+                                    throw new SyntaxErrorException($"Unexpected token {Token.ToText(this.nextToken)} in expression", this.LineNumber, this.SourcePath);
+                                }
+
                                 newExpression.Push(lowPrecedenceOperator.Pop());
                                 lowPrecedenceOperator.Push(newExpression);
                             }
