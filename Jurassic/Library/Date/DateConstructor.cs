@@ -146,6 +146,7 @@ namespace Jurassic.Library
         /// Given the components of a UTC date, returns the number of milliseconds since January 1,
         /// 1970, 00:00:00 UTC to that date.
         /// </summary>
+        /// <param name="engine"></param>
         /// <param name="year"> The full year. </param>
         /// <param name="month"> The month as an integer between 0 and 11 (january to december). </param>
         /// <param name="day"> The day of the month, from 1 to 31.  Defaults to 1. </param>
@@ -173,6 +174,7 @@ namespace Jurassic.Library
         /// Parses a string representation of a date, and returns the number of milliseconds since
         /// January 1, 1970, 00:00:00 UTC.
         /// </summary>
+        /// <param name="engine"></param>
         /// <param name="dateStr"> A string representing a date, expressed in RFC 1123 format. </param>
         [JSInternalFunction(Name = "parse", Flags = JSFunctionFlags.HasEngineParameter)]
         public static double Parse(ScriptEngine engine, string dateStr)
