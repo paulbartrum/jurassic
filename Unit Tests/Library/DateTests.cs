@@ -707,6 +707,10 @@ namespace UnitTests
             Assert.AreEqual(false, ((DateInstance)Evaluate("new Date(NaN)")).IsValid);
             Assert.AreEqual(false, ((DateInstance)Evaluate("new Date(undefined)")).IsValid);
             Assert.AreEqual(true, ((DateInstance)Evaluate("new Date()")).IsValid);
+
+            Assert.AreEqual(double.NaN, Evaluate("var date = new Date(NaN); date.setMonth(1); date.getTime();"));
+            Assert.AreEqual(double.NaN, Evaluate("var date = new Date(NaN); date.setHours(1); date.getTime();"));
+            Assert.AreEqual(0, Evaluate("var date = new Date(NaN); date.setFullYear(1970); date.getTime();"));
         }
 
         [TestMethod]

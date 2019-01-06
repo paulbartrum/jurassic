@@ -1065,7 +1065,14 @@ namespace Jurassic.Library
         /// the new date. </returns>
         private double SetDateComponents(DateComponent firstComponent, DateTimeKind localOrUniversal, params double[] componentValues)
         {
-            // When operating on an invalid date, use the unix epoch (value 0).
+            // When operating on an invalid date, we only set the date if
+            // the year is actually specified. This matches the behavior of
+            // other JS engines.
+            if (!this.IsValid && firstComponent != DateComponent.Year)
+            {
+                return this.ValueInMilliseconds;
+            }
+
             DateTime value = this.value ?? new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);            
             
             // Convert the date to local or universal time.
@@ -1259,12 +1266,12 @@ namespace Jurassic.Library
         {
             if (value == null)
                 return null;
+            if (value.Value.Kind == DateTimeKind.Utc)
+                return value;
 
             // TimeZoneInfo.ConvertToUtc() expects the DateTime's Kind to be Local when the timezone
             // is reference-equal to TimeZoneInfo.Local, and expects Kind to be Unspecified when the
             // timezone is not reference-equal to TimeZoneInfo.Local.
-            if (value.Value.Kind == DateTimeKind.Utc)
-                return value;
             if (object.ReferenceEquals(TimeZoneInfo.Local, engine.LocalTimeZone))
                 value = DateTime.SpecifyKind(value.Value, DateTimeKind.Local);
             else
