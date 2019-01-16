@@ -40,6 +40,8 @@ namespace Jurassic.Library
         // Stores flags related to this object.
         private ObjectFlags flags = ObjectFlags.Extensible;
 
+        private object lockDuringSet = new object();
+
 
 
         //     INITIALIZATION
@@ -497,12 +499,15 @@ namespace Jurassic.Library
         /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
         public virtual void SetPropertyValue(uint index, object value, bool throwOnError)
         {
-            string indexStr = index.ToString();
-            bool exists = SetPropertyValueIfExists(indexStr, value, throwOnError);
-            if (exists == false)
+            lock (lockDuringSet)
             {
-                // The property doesn't exist - add it.
-                AddProperty(indexStr, value, PropertyAttributes.FullAccess, throwOnError);
+                string indexStr = index.ToString();
+                bool exists = SetPropertyValueIfExistsCore(indexStr, value, throwOnError);
+                if (exists == false)
+                {
+                    // The property doesn't exist - add it.
+                    AddProperty(indexStr, value, PropertyAttributes.FullAccess, throwOnError);
+                }
             }
         }
 
@@ -527,11 +532,14 @@ namespace Jurassic.Library
                 return;
             }
 
-            bool exists = SetPropertyValueIfExists(key, value, throwOnError);
-            if (exists == false)
+            lock (lockDuringSet)
             {
-                // The property doesn't exist - add it.
-                AddProperty(key, value, PropertyAttributes.FullAccess, throwOnError);
+                bool exists = SetPropertyValueIfExistsCore(key, value, throwOnError);
+                if (exists == false)
+                {
+                    // The property doesn't exist - add it.
+                    AddProperty(key, value, PropertyAttributes.FullAccess, throwOnError);
+                }
             }
         }
 
@@ -596,6 +604,14 @@ namespace Jurassic.Library
         /// property needs to be created). </param>
         /// <returns> <c>true</c> if the property value exists; <c>false</c> otherwise. </returns>
         public bool SetPropertyValueIfExists(object key, object value, bool throwOnError)
+        {
+            lock (lockDuringSet)
+            {
+                return SetPropertyValueIfExistsCore(key, value, throwOnError);
+            }
+        }
+
+        private bool SetPropertyValueIfExistsCore(object key, object value, bool throwOnError)
         {
             // Do not store nulls - null represents a non-existant value.
             value = value ?? Undefined.Value;
@@ -736,48 +752,51 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if the property was successfully modified; <c>false</c> otherwise. </returns>
         public virtual bool DefineProperty(object key, PropertyDescriptor descriptor, bool throwOnError)
         {
-            // Retrieve info on the property.
-            var current = this.schema.GetPropertyIndexAndAttributes(key);
-
-            if (current.Exists == false)
+            lock (lockDuringSet)
             {
-                // Create a new property.
-                return AddProperty(key, descriptor.Value, descriptor.Attributes, throwOnError);
-            }
+                // Retrieve info on the property.
+                var current = this.schema.GetPropertyIndexAndAttributes(key);
 
-            // If the current property is not configurable, then the only change that is allowed is
-            // a change from one simple value to another (i.e. accessors are not allowed) and only
-            // if the writable attribute is set.
-            if (current.IsConfigurable == false)
-            {
-                // Get the current value of the property.
-                object currentValue = this.propertyValues[current.Index];
-                object getter = null, setter = null;
-                if (currentValue is PropertyAccessorValue)
+                if (current.Exists == false)
                 {
-                    getter = ((PropertyAccessorValue)currentValue).Getter;
-                    setter = ((PropertyAccessorValue)currentValue).Setter;
+                    // Create a new property.
+                    return AddProperty(key, descriptor.Value, descriptor.Attributes, throwOnError);
                 }
 
-                // Check if the modification is allowed.
-                if (descriptor.Attributes != current.Attributes ||
-                    (descriptor.IsAccessor == true && (getter != descriptor.Getter || setter != descriptor.Setter)) ||
-                    (descriptor.IsAccessor == false && current.IsWritable == false && TypeComparer.SameValue(currentValue, descriptor.Value) == false))
+                // If the current property is not configurable, then the only change that is allowed is
+                // a change from one simple value to another (i.e. accessors are not allowed) and only
+                // if the writable attribute is set.
+                if (current.IsConfigurable == false)
                 {
-                    if (throwOnError == true)
-                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' is non-configurable.", key));
-                    return false;
+                    // Get the current value of the property.
+                    object currentValue = this.propertyValues[current.Index];
+                    object getter = null, setter = null;
+                    if (currentValue is PropertyAccessorValue)
+                    {
+                        getter = ((PropertyAccessorValue)currentValue).Getter;
+                        setter = ((PropertyAccessorValue)currentValue).Setter;
+                    }
+
+                    // Check if the modification is allowed.
+                    if (descriptor.Attributes != current.Attributes ||
+                        (descriptor.IsAccessor == true && (getter != descriptor.Getter || setter != descriptor.Setter)) ||
+                        (descriptor.IsAccessor == false && current.IsWritable == false && TypeComparer.SameValue(currentValue, descriptor.Value) == false))
+                    {
+                        if (throwOnError == true)
+                            throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' is non-configurable.", key));
+                        return false;
+                    }
                 }
+
+                // Set the property attributes.
+                if (descriptor.Attributes != current.Attributes)
+                    this.schema = this.schema.SetPropertyAttributes(key, descriptor.Attributes);
+
+                // Set the property value.
+                this.propertyValues[current.Index] = descriptor.Value;
+
+                return true;
             }
-
-            // Set the property attributes.
-            if (descriptor.Attributes != current.Attributes)
-                this.schema = this.schema.SetPropertyAttributes(key, descriptor.Attributes);
-
-            // Set the property value.
-            this.propertyValues[current.Index] = descriptor.Value;
-
-            return true;
         }
 
         /// <summary>
@@ -833,16 +852,19 @@ namespace Jurassic.Library
         /// <param name="overwriteAttributes"> Indicates whether to overwrite any existing attributes. </param>
         internal void FastSetProperty(object key, object value, PropertyAttributes attributes = PropertyAttributes.Sealed, bool overwriteAttributes = false)
         {
-            int index = this.schema.GetPropertyIndex(key);
-            if (index < 0)
+            lock (lockDuringSet)
             {
-                // The property is doesn't exist - add a new property.
-                AddProperty(key, value, attributes, false);
-                return;
+                int index = this.schema.GetPropertyIndex(key);
+                if (index < 0)
+                {
+                    // The property is doesn't exist - add a new property.
+                    AddProperty(key, value, attributes, false);
+                    return;
+                }
+                if (overwriteAttributes == true)
+                    this.schema = this.schema.SetPropertyAttributes(key, attributes);
+                this.propertyValues[index] = value;
             }
-            if (overwriteAttributes == true)
-                this.schema = this.schema.SetPropertyAttributes(key, attributes);
-            this.propertyValues[index] = value;
         }
 
         /// <summary>
