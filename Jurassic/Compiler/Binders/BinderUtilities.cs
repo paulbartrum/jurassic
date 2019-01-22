@@ -56,8 +56,10 @@ namespace Jurassic.Compiler
 
                     // Get the type of the output parameter.
                     Type outputType = argument.Type;
+                    TypeCode typeCode = Type.GetTypeCode(outputType);
 
-                    switch (Type.GetTypeCode(outputType))
+
+                    switch (typeCode)
                     {
                         case TypeCode.Boolean:
                             if ((input is bool) == false)
@@ -65,23 +67,34 @@ namespace Jurassic.Compiler
                             break;
 
                         case TypeCode.SByte:
-                        case TypeCode.Int16:
-                        case TypeCode.Int32:
-                        case TypeCode.Int64:
                         case TypeCode.Byte:
                         case TypeCode.UInt16:
                         case TypeCode.UInt32:
                         case TypeCode.UInt64:
+                        case TypeCode.Int16:
+                        case TypeCode.Int32:
+                        case TypeCode.Int64:
                         case TypeCode.Single:
                         case TypeCode.Decimal:
-                            if (TypeUtilities.IsNumeric(input) == true)
-                                demeritPoints[i] ++;
-                            else
-                                demeritPoints[i] += disqualification;
-                            break;
-
                         case TypeCode.Double:
-                            if (TypeUtilities.IsNumeric(input) == false)
+                            Dictionary<TypeCode, int> offsetDict = new Dictionary<TypeCode, int>() { { TypeCode.SByte, 10 },
+                                { TypeCode.Byte, 9 },
+                                { TypeCode.UInt16, 8 },
+                                { TypeCode.UInt32, 7 },
+                                { TypeCode.UInt64, 6 },
+                                { TypeCode.Int16, 5 },
+                                { TypeCode.Int32, 4 },
+                                { TypeCode.Int64, 3 },
+                                { TypeCode.Single, 2 },
+                                { TypeCode.Decimal, 1 },
+                                { TypeCode.Double, 0 }
+                            };
+
+                            // To fix ambiguous methods error when there are method with numeric parameters
+                            // double has maximal priority
+                            if (TypeUtilities.IsNumeric(input) == true)
+                                demeritPoints[i] += offsetDict[typeCode];
+                            else
                                 demeritPoints[i] += disqualification;
                             break;
 
@@ -124,6 +137,11 @@ namespace Jurassic.Compiler
                         case TypeCode.Empty:
                         case TypeCode.DBNull:
                             throw new NotSupportedException(string.Format("{0} is not a supported parameter type.", outputType));
+                    }
+                    // To fix ambiguous methods error when there are method with smilar parameters, for example int32[] and int32
+                    if (argument.IsParamArrayArgument)
+                    {
+                        demeritPoints[i] += 100;
                     }
                 }
                 
