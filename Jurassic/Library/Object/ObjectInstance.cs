@@ -694,16 +694,19 @@ namespace Jurassic.Library
         /// <paramref name="throwOnError"/> was <c>false</c>. </returns>
         public virtual bool Delete(uint index, bool throwOnError)
         {
-            string indexStr = index.ToString();
+            lock (lockDuringSet)
+            {
+                string indexStr = index.ToString();
 
-            // Retrieve the attributes for the property.
-            var propertyInfo = this.schema.GetPropertyIndexAndAttributes(indexStr);
-            if (propertyInfo.Exists == false)
-                return true;    // Property doesn't exist - delete succeeded!
+                // Retrieve the attributes for the property.
+                var propertyInfo = this.schema.GetPropertyIndexAndAttributes(indexStr);
+                if (propertyInfo.Exists == false)
+                    return true;    // Property doesn't exist - delete succeeded!
 
-            // Delete the property.
-            this.schema = this.schema.DeleteProperty(indexStr);
-            return true;
+                // Delete the property.
+                this.schema = this.schema.DeleteProperty(indexStr);
+                return true;
+            }
         }
 
         /// <summary>
@@ -722,22 +725,25 @@ namespace Jurassic.Library
             if (arrayIndex != uint.MaxValue)
                 return Delete(arrayIndex, throwOnError);
 
-            // Retrieve the attributes for the property.
-            var propertyInfo = this.schema.GetPropertyIndexAndAttributes(key);
-            if (propertyInfo.Exists == false)
-                return true;    // Property doesn't exist - delete succeeded!
-
-            // Check if the property can be deleted.
-            if (propertyInfo.IsConfigurable == false)
+            lock (lockDuringSet)
             {
-                if (throwOnError == true)
-                    throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' cannot be deleted.", key));
-                return false;
-            }
+                // Retrieve the attributes for the property.
+                var propertyInfo = this.schema.GetPropertyIndexAndAttributes(key);
+                if (propertyInfo.Exists == false)
+                    return true;    // Property doesn't exist - delete succeeded!
 
-            // Delete the property.
-            this.schema = this.schema.DeleteProperty(key);
-            return true;
+                // Check if the property can be deleted.
+                if (propertyInfo.IsConfigurable == false)
+                {
+                    if (throwOnError == true)
+                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' cannot be deleted.", key));
+                    return false;
+                }
+
+                // Delete the property.
+                this.schema = this.schema.DeleteProperty(key);
+                return true;
+            }
         }
 
         /// <summary>
