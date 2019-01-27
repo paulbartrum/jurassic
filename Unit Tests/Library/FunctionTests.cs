@@ -193,5 +193,22 @@ namespace UnitTests
                 function baz() { return bar(); }
                 baz();"));
         }
+
+        [TestMethod]
+        public void FunctionDeclarationWithinLoop()
+        {
+            // This shouldn't throw.
+            Execute(@"
+'use strict';
+for (var i = 0; i < 3; i++) {
+    (function () {
+        function test() {
+        }
+        test();
+    }());
+}
+
+");
+        }
     }
 }
