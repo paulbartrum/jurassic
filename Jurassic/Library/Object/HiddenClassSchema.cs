@@ -30,6 +30,8 @@ namespace Jurassic.Library
         private HiddenClassSchema parent;
         private TransitionInfo addPropertyTransitionInfo;
 
+        private object lockDuringAdd = new object();
+
         /// <summary>
         /// Creates a new HiddenClassSchema instance from a modify or delete operation.
         /// </summary>
@@ -132,42 +134,44 @@ namespace Jurassic.Library
         /// <returns> A new schema with the extra property. </returns>
         public HiddenClassSchema AddProperty(object key, PropertyAttributes attributes = PropertyAttributes.FullAccess)
         {
-            // Package the name and attributes into a struct.
-            var transitionInfo = new TransitionInfo() { Key = key, Attributes = attributes };
-
-            // Check if there is a transition to the schema already.
-            HiddenClassSchema newSchema = null;
-            if (this.addTransitions != null)
-                this.addTransitions.TryGetValue(transitionInfo, out newSchema);
-
-            if (newSchema == null)
+            lock (this.lockDuringAdd)
             {
-                if (this.parent == null)
-                {
-                    // Create a new schema based on this one.  A complete copy must be made of the properties hashtable.
-                    var properties = new Dictionary<object, SchemaProperty>(this.properties);
-                    properties.Add(key, new SchemaProperty(this.NextValueIndex, attributes));
-                    newSchema = new HiddenClassSchema(properties, this.NextValueIndex + 1, this, transitionInfo);
-                }
-                else
-                {
-                    // Create a new schema based on this one.  The properties hashtable is "given
-                    // away" so a copy does not have to be made.
-                    if (this.properties == null)
-                        this.properties = CreatePropertiesDictionary();
-                    this.properties.Add(key, new SchemaProperty(this.NextValueIndex, attributes));
-                    newSchema = new HiddenClassSchema(this.properties, this.NextValueIndex + 1, this, transitionInfo);
-                    this.properties = null;
-                }
-                
+                // Package the name and attributes into a struct.
+                var transitionInfo = new TransitionInfo() { Key = key, Attributes = attributes };
 
-                // Add a transition to the new schema.
-                if (this.addTransitions == null)
-                    this.addTransitions = new Dictionary<TransitionInfo, HiddenClassSchema>(1);
-                this.addTransitions.Add(transitionInfo, newSchema);
+                // Check if there is a transition to the schema already.
+                HiddenClassSchema newSchema = null;
+                if (this.addTransitions != null)
+                    this.addTransitions.TryGetValue(transitionInfo, out newSchema);
+
+                if (newSchema == null)
+                {
+                    if (this.parent == null)
+                    {
+                        // Create a new schema based on this one.  A complete copy must be made of the properties hashtable.
+                        var properties = new Dictionary<object, SchemaProperty>(this.properties);
+                        properties.Add(key, new SchemaProperty(this.NextValueIndex, attributes));
+                        newSchema = new HiddenClassSchema(properties, this.NextValueIndex + 1, this, transitionInfo);
+                    }
+                    else
+                    {
+                        // Create a new schema based on this one.  The properties hashtable is "given
+                        // away" so a copy does not have to be made.
+                        if (this.properties == null)
+                            this.properties = CreatePropertiesDictionary();
+                        this.properties.Add(key, new SchemaProperty(this.NextValueIndex, attributes));
+                        newSchema = new HiddenClassSchema(this.properties, this.NextValueIndex + 1, this, transitionInfo);
+                        this.properties = null;
+                    }
+
+                    // Add a transition to the new schema.
+                    if (this.addTransitions == null)
+                        this.addTransitions = new Dictionary<TransitionInfo, HiddenClassSchema>(1);
+                    this.addTransitions.Add(transitionInfo, newSchema);
+                }
+
+                return newSchema;
             }
-
-            return newSchema;
         }
 
         /// <summary>
