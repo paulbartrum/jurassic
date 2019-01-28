@@ -29,9 +29,6 @@ namespace Jurassic.Compiler
             [NonSerialized]
             public Expression ValueAtTopOfScope;
 
-            // true if the variable has been set with the initial value.
-            public bool Initialized;
-
             // true if the variable can be modified.
             public bool Writable;
 
@@ -302,9 +299,6 @@ namespace Jurassic.Compiler
                     var name = new NameExpression(this, variable.Name);
                     name.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);
                 }
-
-                // Mark the variable as having been initialized.
-                variable.Initialized = true;
             }
         }
 
