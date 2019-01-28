@@ -509,7 +509,6 @@ namespace Jurassic.Compiler
 
                 // Add the variable to the current function's list of local variables.
                 this.currentVarScope.DeclareVariable(declaration.VariableName,
-                    this.context == CodeContext.Function ? null : new LiteralExpression(Undefined.Value),
                     writable: true, deletable: this.context == CodeContext.Eval);
 
                 // The next token is either an equals sign (=), a semi-colon or a comma.
@@ -729,7 +728,6 @@ namespace Jurassic.Compiler
 
                     // Add the variable to the current function's list of local variables.
                     this.currentVarScope.DeclareVariable(declaration.VariableName,
-                        this.context == CodeContext.Function ? null : new LiteralExpression(Undefined.Value),
                         writable: true, deletable: this.context == CodeContext.Eval);
 
                     // The next token is either an equals sign (=), a semi-colon, a comma, or the "in" keyword.

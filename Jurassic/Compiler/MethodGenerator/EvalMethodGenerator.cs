@@ -72,7 +72,7 @@ namespace Jurassic.Compiler
             }
 
             // Initialize any declarations.
-            this.InitialScope.GenerateDeclarations(generator, optimizationInfo, fromEvalMethodGenerator: true);
+            this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 
             // Generate the main body of code.
             this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);
