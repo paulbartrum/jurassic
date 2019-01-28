@@ -104,6 +104,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo ObjectInstance_SetPropertyValue_Int;
         internal static MethodInfo ObjectInstance_SetPropertyValue_PropertyReference;
         internal static MethodInfo ObjectInstance_SetPropertyValueIfExists;
+        internal static MethodInfo ObjectInstance_InitializeMissingProperty;
 
         internal static MethodInfo Scope_ParentScope;
         internal static MethodInfo ObjectScope_CreateRuntimeScope;
@@ -177,6 +178,7 @@ namespace Jurassic.Compiler
             ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(PropertyReference), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(object), typeof(object), typeof(bool));
+            ObjectInstance_InitializeMissingProperty = GetInstanceMethod(typeof(ObjectInstance), "InitializeMissingProperty", typeof(object), typeof(Library.PropertyAttributes));
 
             Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
             ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance), typeof(bool), typeof(bool));

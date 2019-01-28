@@ -186,6 +186,11 @@ namespace UnitTests
 
             // Variables should not be reinitialized.
             Assert.AreEqual(0, Evaluate("var x = 0; eval('var x'); x"));
+            Assert.AreEqual(Undefined.Value, Evaluate("var x = 0; eval('var x = undefined'); x"));
+            Assert.AreEqual(1, Evaluate("var x = 0; eval('var x = 1'); x"));
+            Assert.AreEqual(5, Evaluate("(function() { var a = 5; eval('var a'); return a; })()"));
+            Assert.AreEqual(Undefined.Value, Evaluate("(function() { var a = 5; eval('var a = undefined'); return a; })()"));
+            Assert.AreEqual(6, Evaluate("(function() { var a = 5; eval('var a = 6'); return a; })()"));
 
             // Eval() can introduce new variables into a function scope.
             Assert.AreEqual(5, Evaluate("b = 1; (function() { var a = 5; eval('var b = a'); return b; })()"));

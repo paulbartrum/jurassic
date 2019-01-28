@@ -85,6 +85,17 @@ namespace UnitTests
             Assert.AreEqual(45, Evaluate("'use strict'; var y = 0; for (var x = 0; x < 10; x ++) { y += x; } y"));
             Execute("'use strict'; var y = 0; for (var x = 0; x < 10; x ++) { y += x; }");
             Assert.AreEqual(45, Evaluate("y"));
+
+            // This shouldn't throw.
+            Execute(@"
+                'use strict';
+                for (var i = 0; i < 3; i++) {
+                    (function () {
+                        function test() {
+                        }
+                        test();
+                    }());
+                }");
         }
 
         [TestMethod]

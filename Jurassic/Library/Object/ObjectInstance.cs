@@ -827,6 +827,24 @@ namespace Jurassic.Library
             this.schema = new HiddenClassSchema(propertyDictionary, nextValueIndex);
         }
 
+        /// <summary>
+        /// Initializes a property to be <c>undefined</c>, if the property doesn't exist.
+        /// If it does exist, then this method does nothing.
+        /// </summary>
+        /// <param name="key"> The property key of the property. </param>
+        /// <param name="attributes"> The attributes of the new property, if it doesn't exist. </param>
+        public void InitializeMissingProperty(object key, PropertyAttributes attributes)
+        {
+            // Retrieve info on the property.
+            var current = this.schema.GetPropertyIndexAndAttributes(key);
+
+            if (current.Exists == false)
+            {
+                // Create a new property.
+                AddProperty(key, Undefined.Value, attributes, false);
+            }
+        }
+
 
         //     OTHERS
         //_________________________________________________________________________________________
