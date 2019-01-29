@@ -1152,6 +1152,14 @@ namespace Jurassic.Library
         /// <returns> The equivalent .NET date. </returns>
         private static DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, DateTimeKind kind)
         {
+            // DateTime doesn't support years below year 1.
+            if (year < 0)
+                return InvalidDate;
+
+            // If the year is between 0 and 99, add 1900.
+            if (year >= 0 && year <= 99)
+                year += 1900;
+
             if (month >= 0 && month < 12 &&
                 day >= 1 && day <= DateTime.DaysInMonth(year, month + 1) &&
                 hour >= 0 && hour < 24 &&
