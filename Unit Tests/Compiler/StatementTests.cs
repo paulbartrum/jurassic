@@ -80,6 +80,7 @@ namespace UnitTests
             Assert.AreEqual(11, Evaluate("y = 1; for (var x = 1; x < 5; x ++) { y = y + x } y"));
             Assert.AreEqual(11, Evaluate("for (var x = 1, y = 1; x < 5; x ++) { y = y + x } y"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (var x + 1; x < 5; x ++) { }"));
+            Assert.AreEqual("ReferenceError", EvaluateExceptionType("for (var x = 0; x < 1; 0 ++) { }"));
 
             // Strict mode.
             Assert.AreEqual(45, Evaluate("'use strict'; var y = 0; for (var x = 0; x < 10; x ++) { y += x; } y"));
