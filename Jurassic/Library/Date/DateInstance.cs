@@ -68,7 +68,7 @@ namespace Jurassic.Library
         /// </remarks>
         public DateInstance(ObjectInstance prototype, int year, int month, int day = 1, int hour = 0,
             int minute = 0, int second = 0, int millisecond = 0)
-            : this(prototype, ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
+            : this(prototype, ToDateTime(year >= 0 && year < 100 ? year + 1900 : year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
         {
         }
 
@@ -1155,10 +1155,6 @@ namespace Jurassic.Library
             // DateTime doesn't support years below year 1.
             if (year < 0)
                 return InvalidDate;
-
-            // If the year is between 0 and 99, add 1900.
-            if (year >= 0 && year <= 99)
-                year += 1900;
 
             if (month >= 0 && month < 12 &&
                 day >= 1 && day <= DateTime.DaysInMonth(year, month + 1) &&
