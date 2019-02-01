@@ -64,6 +64,18 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("! * 5"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("("));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("(1"));
+
+            // Two operators in a row
+            Execute("var op = { test: 5, '1': 3 };");
+            Assert.AreEqual(6, Evaluate("++op.test"));
+            Assert.AreEqual(4, Evaluate("++op[1]"));
+            Assert.AreEqual(true, Evaluate("isNaN((op++).test)"));
+            Assert.AreEqual(true, Evaluate("isNaN((op++)[0])"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("op++.test"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("op++[1]"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("op++(1)"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("new ++op"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("op+.test"));
         }
     }
 }

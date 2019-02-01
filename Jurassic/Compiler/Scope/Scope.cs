@@ -29,9 +29,6 @@ namespace Jurassic.Compiler
             [NonSerialized]
             public Expression ValueAtTopOfScope;
 
-            // true if the variable has been set with the initial value.
-            public bool Initialized;
-
             // true if the variable can be modified.
             public bool Writable;
 
@@ -260,22 +257,28 @@ namespace Jurassic.Compiler
             // Initialize the declared variables and functions.
             foreach (var variable in this.variables.Values)
             {
-                // When a scope is reused, i.e. with an eval(), do not reinitialize the variables.
-                if (variable.Initialized == true)
-                    continue;
-
-                if (variable.ValueAtTopOfScope != null)
+                // Emit the initialization code.
+                if (this is ObjectScope)
                 {
-                    // Emit the initialization code.
-                    if (this is ObjectScope)
-                    {
-                        // Determine the property attributes.
-                        var attributes = Library.PropertyAttributes.Enumerable;
-                        if (variable.Writable == true)
-                            attributes |= Library.PropertyAttributes.Writable;
-                        if (variable.Deletable == true)
-                            attributes |= Library.PropertyAttributes.Configurable;
+                    // Determine the property attributes.
+                    var attributes = Library.PropertyAttributes.Enumerable;
+                    if (variable.Writable == true)
+                        attributes |= Library.PropertyAttributes.Writable;
+                    if (variable.Deletable == true)
+                        attributes |= Library.PropertyAttributes.Configurable;
 
+                    if (variable.ValueAtTopOfScope == null)
+                    {
+                        // void InitializeMissingProperty(object key, PropertyAttributes attributes)
+                        EmitHelpers.LoadScope(generator);
+                        generator.CastClass(typeof(ObjectScope));
+                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
+                        generator.LoadString(variable.Name);
+                        generator.LoadInt32((int)attributes);
+                        generator.Call(ReflectionHelpers.ObjectInstance_InitializeMissingProperty);
+                    }
+                    else
+                    {
                         // bool DefineProperty(string propertyName, PropertyDescriptor descriptor, bool throwOnError)
                         EmitHelpers.LoadScope(generator);
                         generator.CastClass(typeof(ObjectScope));
@@ -289,15 +292,12 @@ namespace Jurassic.Compiler
                         generator.Call(ReflectionHelpers.ObjectInstance_DefineProperty);
                         generator.Pop();
                     }
-                    else
-                    {
-                        variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
-                        var name = new NameExpression(this, variable.Name);
-                        name.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);
-                    }
-
-                    // Mark the variable as having been initialized.
-                    variable.Initialized = true;
+                }
+                else if (variable.ValueAtTopOfScope != null)
+                {
+                    variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
+                    var name = new NameExpression(this, variable.Name);
+                    name.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);
                 }
             }
         }

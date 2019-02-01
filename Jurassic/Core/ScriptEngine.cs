@@ -1345,16 +1345,16 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Checks if the given <see cref="Exception"/> is catchable by JavaScript code with a
+        /// Checks if the given <paramref name="exception"/> is catchable by JavaScript code with a
         /// <c>catch</c> clause.
-        /// Note: This property is public for technical reasons only and should not be used by user code.
+        /// Note: This method is public for technical reasons only and should not be used by user code.
         /// </summary>
-        /// <param name="ex"> The exception to check. </param>
+        /// <param name="exception"> The exception to check. </param>
         /// <returns><c>true</c> if the <see cref="Exception"/> is catchable, <c>false otherwise</c></returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool CanCatchException(Exception ex)
+        public bool CanCatchException(object exception)
         {
-            var jsException = ex as JavaScriptException;
+            var jsException = exception as JavaScriptException;
             if (jsException == null)
                 return false;
             return jsException.Engine == this || jsException.Engine == null;

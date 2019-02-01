@@ -64,7 +64,7 @@ namespace Jurassic.Library
         /// </remarks>
         public DateInstance(ObjectInstance prototype, int year, int month, int day = 1, int hour = 0,
             int minute = 0, int second = 0, int millisecond = 0)
-            : this(prototype, ToUtcDateTime(prototype.Engine, year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
+            : this(prototype, ToUtcDateTime(prototype.Engine, year >= 0 && year < 100 ? year + 1900 : year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
         {
         }
 
@@ -1172,6 +1172,10 @@ namespace Jurassic.Library
         /// <returns> The equivalent .NET date. </returns>
         private static DateTime? ToUtcDateTime(ScriptEngine engine, int year, int month, int day, int hour, int minute, int second, int millisecond, DateTimeKind kind)
         {
+            // DateTime doesn't support years below year 1.
+            if (year < 0)
+                return null;
+
             DateTime value;
             if (month >= 0 && month < 12 &&
                 day >= 1 && day <= DateTime.DaysInMonth(year, month + 1) &&

@@ -1378,6 +1378,20 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("x = {a: 1, b: 2}; y = 'a'; delete x[y]"));
             Assert.AreEqual(Undefined.Value, Evaluate("x = {a: 1, b: 2}; y = 'a'; delete x[y]; x.a"));
 
+            // Delete from a dense array.
+            Assert.AreEqual(true, Evaluate("x = [0, 1, 2]; delete x[1]"));
+            Assert.AreEqual("0,,2", Evaluate("x = [0, 1, 2]; delete x[1]; x.toString()"));
+            Assert.AreEqual(true, Evaluate("x = [0, 1, 2]; delete x[-1]"));
+            Assert.AreEqual("0,1,2", Evaluate("x = [0, 1, 2]; delete x[-1]; x.toString()"));
+            Assert.AreEqual(true, Evaluate("x = [0, 1, 2]; delete x[3]"));
+            Assert.AreEqual("0,1,2", Evaluate("x = [0, 1, 2]; delete x[3]; x.toString()"));
+
+            // Delete from a sparse array.
+            Assert.AreEqual(true, Evaluate("x = []; x[10000] = 1; delete x[10000]"));
+            Assert.AreEqual(10001, Evaluate("x = []; x[10000] = 1; delete x[10000]; x.length"));
+            Assert.AreEqual(true, Evaluate("x = []; x[10000] = 1; delete x[10001]"));
+            Assert.AreEqual(10001, Evaluate("x = []; x[10000] = 1; delete x[10000]; x.length"));
+
             // Delete does not operate against the prototype chain.
             Assert.AreEqual(true, Evaluate("x = Object.create({a: 1}); delete x.a"));
             Assert.AreEqual(1, Evaluate("x = Object.create({a: 1}); delete x.a; x.a"));

@@ -342,6 +342,8 @@ namespace Jurassic.Library
         {
             if (this.dense != null)
             {
+                if (index >= this.dense.Length)
+                    return true;
                 this.dense[index] = null;
                 this.denseMayContainHoles = true;
             }

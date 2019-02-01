@@ -77,6 +77,9 @@ namespace UnitTests
 
             // new Date(year, month, [day], [hour], [minute], [second], [millisecond])
             // Note: month is 0-11 is javascript but 1-12 in .NET.
+            Assert.AreEqual(ToJSDate(new DateTime(1900, 1, 1)), Evaluate("new Date(0, 0).valueOf()"));
+            Assert.AreEqual(ToJSDate(new DateTime(1901, 1, 1)), Evaluate("new Date(1, 0).valueOf()"));
+            Assert.AreEqual(ToJSDate(new DateTime(100, 1, 1)), Evaluate("new Date(100, 0).valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1)), Evaluate("new Date(2010, 0).valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5)), Evaluate("new Date(2010, 0, 5).valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5, 12, 0, 0)), Evaluate("new Date(2010, 0, 5, 12).valueOf()"));
@@ -119,6 +122,7 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, Evaluate("new Date(NaN).valueOf()"));
             Assert.AreEqual(double.NaN, Evaluate("new Date(2010, 1, NaN).valueOf()"));
             Assert.AreEqual(double.NaN, Evaluate("new Date(2010, 1, 2, NaN).valueOf()"));
+            Assert.AreEqual(double.NaN, Evaluate("new Date(-1, 0).valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 2, 1, 1, 1, 1)), Evaluate("new Date(2010, 1, 2, 1, 1, 1, 1, undefined).valueOf()"));
 
             // length
