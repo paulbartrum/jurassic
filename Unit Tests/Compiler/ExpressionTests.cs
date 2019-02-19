@@ -1363,9 +1363,12 @@ namespace UnitTests
             Assert.AreEqual(3, Evaluate("var x = { this() { return 3; } }; x.this()"));
             Assert.AreEqual(17, Evaluate("var x = { 'baby superman'() { return 17; } }; x['baby superman']()"));
             Assert.AreEqual(19, Evaluate("var x = { [1+2]() { return 19; } }; x[3]()"));
+            Assert.AreEqual("1", Evaluate("var x = { [1]() { return 19; } }; x[1].name"));
+            Assert.AreEqual("test", Evaluate("var x = { ['test']() { return 19; } }; x.test.name"));
 
             // TODO: we currently cannot compute function names at runtime.
-            Assert.AreEqual(Undefined.Value, Evaluate("var x = { [1+2]() { return 19; } }; x[3]().name"));
+            Assert.AreEqual("", Evaluate("var x = { [1+2]() { return 19; } }; x[3].name"));
+            Assert.AreEqual("", Evaluate("var y = { a: 1, b: 2 }; var x = {[y]() { return 10; }}; x[y].name"));
         }
 
         [TestMethod]
