@@ -1970,7 +1970,7 @@ namespace Jurassic.Compiler
                     // same as "var a = { b: function() { return 2; } }".
 
                     // Parse the function.
-                    string nameAsString = propertyName is LiteralExpression ? (string)((LiteralExpression)propertyName).Value : string.Empty;
+                    string nameAsString = propertyName is LiteralExpression && ((LiteralExpression)propertyName).Value is string ? (string)((LiteralExpression)propertyName).Value : string.Empty;
                     var function = ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, nameAsString, startPosition);
 
                     // Strangely enough, if declarationType is Expression then the last right
