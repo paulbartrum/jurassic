@@ -149,6 +149,7 @@ namespace UnitTests
             Assert.AreEqual("a,b", Evaluate(@"Object.keys(JSON.parse('{""a"": 2, ""b"": 3}')).toString()"));
             Assert.AreEqual(2, Evaluate(@"Object.keys(JSON.parse('{""a"": 2, ""b"": 3}')).length"));
             Assert.AreEqual(3, Evaluate(@"JSON.parse('{""a"": 2, ""b"": 3}').b"));
+            Assert.AreEqual("01,id", Evaluate(@"Object.keys(JSON.parse('{""01"":""Foo"",""id"":""Foo""}')).toString()"));
 
             // Duplicate keys override earlier values.
             Assert.AreEqual("a", Evaluate(@"Object.keys(JSON.parse('{""a"": 2, ""a"": 3}')).toString()"));
@@ -231,6 +232,7 @@ namespace UnitTests
             // Objects.
             Assert.AreEqual("{}", Evaluate("JSON.stringify({})"));
             Assert.AreEqual(@"{""a"":1,""b"":2}", Evaluate("JSON.stringify({a: 1, b: 2})"));
+            Assert.AreEqual(@"{""01"":""test""}", Evaluate("JSON.stringify({'01': 'test'})"));
 
             // Cyclic reference
             Assert.AreEqual("TypeError", EvaluateExceptionType("a = []; a[0] = a; JSON.stringify(a)"));
