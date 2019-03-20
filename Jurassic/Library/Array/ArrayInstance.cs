@@ -1359,6 +1359,20 @@ namespace Jurassic.Library
             return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Value);
         }
 
+        /// <summary>
+        /// Determines whether an array includes a certain value among its entries.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <param name="searchElement"> The value to search for. </param>
+        /// <param name="fromIndex"> The array index to start searching. </param>
+        /// <returns> <c>true</c> given search element in the array, or <c>false</c> if the element
+        /// wasn't found. </returns>
+        [JSInternalFunction(Name = "includes", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static bool Includes(ObjectInstance thisObj, object searchElement, int fromIndex = 0)
+        {
+            return new ArrayInstanceAdapter(thisObj).Includes(searchElement, fromIndex);
+        }
+
 
 
         //     PRIVATE IMPLEMENTATION METHODS

@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(35)
+			return new List<PropertyNameAndValue>(36)
 			{
 				new PropertyNameAndValue("concat", new ClrStubFunction(engine.FunctionInstancePrototype, "concat", 1, __STUB__Concat), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("pop", new ClrStubFunction(engine.FunctionInstancePrototype, "pop", 0, __STUB__Pop), PropertyAttributes.NonEnumerable),
@@ -42,6 +42,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("entries", new ClrStubFunction(engine.FunctionInstancePrototype, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("keys", new ClrStubFunction(engine.FunctionInstancePrototype, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("values", new ClrStubFunction(engine.FunctionInstancePrototype, "values", 0, __STUB__Values), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("includes", new ClrStubFunction(engine.FunctionInstancePrototype, "includes", 1, __STUB__Includes), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -398,6 +399,21 @@ namespace Jurassic.Library
 			if (!(thisObj is ArrayInstance))
 				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'values' is not generic.");
 			return ((ArrayInstance)thisObj).Values();
+		}
+
+		private static object __STUB__Includes(ScriptEngine engine, object thisObj, object[] args)
+		{
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			switch (args.Length)
+			{
+				case 0:
+					return Includes(TypeConverter.ToObject(engine, thisObj), Undefined.Value, 0);
+				case 1:
+					return Includes(TypeConverter.ToObject(engine, thisObj), args[0], 0);
+				default:
+					return Includes(TypeConverter.ToObject(engine, thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
+			}
 		}
 	}
 

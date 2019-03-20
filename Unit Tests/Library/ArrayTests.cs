@@ -936,6 +936,10 @@ namespace UnitTests
             Assert.AreEqual(6, Evaluate("[0, false, , null, 'undefined', , undefined, 0].indexOf(undefined)"));
             Assert.AreEqual(1, Evaluate("var indexOf_nullVariable; [0, indexOf_nullVariable, 0].indexOf(undefined)"));
 
+            // indexOf(NaN)
+            Assert.AreEqual(-1, Evaluate("[1, 2].indexOf(NaN)"));
+            Assert.AreEqual(-1, Evaluate("[1, 2, NaN].indexOf(NaN)"));
+
             // length
             Assert.AreEqual(1, Evaluate("Array.prototype.indexOf.length"));
         }
@@ -1322,6 +1326,49 @@ namespace UnitTests
         {
             // The Symbol.iterator value is just equal to the values function.
             Assert.AreEqual(true, Evaluate("[][Symbol.iterator] === [].values"));
+        }
+
+        [TestMethod]
+        public void includes()
+        {
+            // includes(searchElement)
+            Assert.AreEqual(true, Evaluate("[3, 2, 1].includes(1)"));
+            Assert.AreEqual(true, Evaluate("[3, 2, 1].includes(2)"));
+            Assert.AreEqual(true, Evaluate("[3, 2, 1].includes(3)"));
+            Assert.AreEqual(false, Evaluate("[3, 2, 1].includes(4)"));
+            Assert.AreEqual(false, Evaluate("[3, 2, 1].includes(true)"));
+            Assert.AreEqual(true, Evaluate("[3, 1, 2, 1].includes(1)"));
+
+            // includes(searchElement, fromIndex)
+            Assert.AreEqual(true, Evaluate("[3, 2, 1].includes(1, 1)"));
+            Assert.AreEqual(true, Evaluate("[3, 2, 1].includes(2, 1)"));
+            Assert.AreEqual(false, Evaluate("[3, 2, 1].includes(3, 1)"));
+            Assert.AreEqual(false, Evaluate("[3, 2, 1].includes(4, 1)"));
+            Assert.AreEqual(false, Evaluate("[3, 2, 1].includes(2, -1)"));
+            Assert.AreEqual(true, Evaluate("[3, 2, 1].includes(2, -2)"));
+            Assert.AreEqual(true, Evaluate("['a', 'b', 'c', 'a'].includes('a', 0)"));
+            Assert.AreEqual(true, Evaluate("['a', 'b', 'c', 'a'].includes('a', 1)"));
+            Assert.AreEqual(true, Evaluate("['a', 'b', 'c', 'a'].includes('a', -10)"));
+            Assert.AreEqual(false, Evaluate("['a', 'b', 'c', 'a'].includes('a', 10)"));
+            Assert.AreEqual(true, Evaluate("[3, 2, 1].includes(1, undefined)"));
+
+            // includes(undefined)
+            Assert.AreEqual(false, Evaluate("[].includes(undefined)"));
+            Assert.AreEqual(true, Evaluate("[undefined].includes(undefined)"));
+            Assert.AreEqual(true, Evaluate("[1,,2].includes(undefined)"));
+
+            // includes(null)
+            Assert.AreEqual(false, Evaluate("[].includes(null)"));
+            Assert.AreEqual(true, Evaluate("[null].includes(null)"));
+            Assert.AreEqual(false, Evaluate("[1,,2].includes(null)"));
+
+            // includes(NaN)
+            Assert.AreEqual(false, Evaluate("[1, 2].includes(NaN)"));
+            Assert.AreEqual(true, Evaluate("[1, 2, NaN].includes(NaN)"));
+            Assert.AreEqual(false, Evaluate("[1, 2, 'NaN'].includes(NaN)"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Array.prototype.includes.length"));
         }
     }
 }
