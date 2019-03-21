@@ -70,6 +70,8 @@ namespace Jurassic.Compiler
                     return Operator.Subtract;
                 case OperatorType.CompoundUnsignedRightShift:
                     return Operator.UnsignedRightShift;
+                case OperatorType.CompoundExponentiation:
+                    return Operator.Exponentiation;
             }
             return null;
         }

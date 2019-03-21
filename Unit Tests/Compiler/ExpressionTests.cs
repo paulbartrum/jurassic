@@ -881,6 +881,7 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("x = 4; x &= 1; x"));
             Assert.AreEqual(5, Evaluate("x = 4; x |= 1; x"));
             Assert.AreEqual(5, Evaluate("x = 4; x ^= 1; x"));
+            Assert.AreEqual(16, Evaluate("x = 4; x **= 2; x"));
 
             // String operations.
             Assert.AreEqual("hah", Evaluate("x = 'hah'"));
@@ -909,6 +910,7 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("x = 'hah'; x &= 1; x"));
             Assert.AreEqual(1, Evaluate("x = 'hah'; x |= 1; x"));
             Assert.AreEqual(1, Evaluate("x = 'hah'; x ^= 1; x"));
+            Assert.AreEqual(double.NaN, Evaluate("x = 'hah'; x **= 2; x"));
 
             // Evaluated left to right.
             Assert.AreEqual(7, Evaluate("x = 1; (x = 2) + x + (x = 3)"));
@@ -1574,6 +1576,43 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`\\09`"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`\\0444`"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("`\\44`"));
+        }
+
+        [TestMethod]
+        public void Exponentiation()
+        {
+            Assert.AreEqual(8, Evaluate("2**3"));
+            Assert.AreEqual(11.31370849898476039, Evaluate("2 ** 3.5"));
+            Assert.AreEqual(0.088388347648318441, Evaluate("2 ** -3.5"));
+            Assert.AreEqual(double.NaN, Evaluate("2 ** NaN"));
+            Assert.AreEqual(1, Evaluate("2 ** 0"));
+            Assert.AreEqual(1, Evaluate("NaN ** 0"));
+            Assert.AreEqual(1, Evaluate("NaN ** -0"));
+            Assert.AreEqual(double.NaN, Evaluate("NaN ** 1"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("2 ** Infinity"));
+            Assert.AreEqual(0, Evaluate("2 ** (-Infinity)"));
+            Assert.AreEqual(double.NaN, Evaluate("1 ** Infinity"));
+            Assert.AreEqual(double.NaN, Evaluate("1 ** -Infinity"));
+            Assert.AreEqual(0, Evaluate("0.5 ** Infinity"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("0.5 ** -Infinity"));
+            Assert.AreEqual(0, Evaluate("(-0.5) ** Infinity"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("(-0.5) ** -Infinity"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("Infinity ** 1"));
+            Assert.AreEqual(0, Evaluate("Infinity ** -1"));
+            Assert.AreEqual(double.NegativeInfinity, Evaluate("-Infinity ** 1"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("-Infinity ** 2"));
+            Assert.AreEqual(0, Evaluate("(-Infinity) ** -1"));
+            Assert.AreEqual(true, Evaluate("Object.is((-Infinity) ** -1, -0)"));
+            Assert.AreEqual(0, Evaluate("-Infinity ** -2"));
+            Assert.AreEqual(0, Evaluate("0 ** 1"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("0 ** -1"));
+            Assert.AreEqual(-0, Evaluate("(-0) ** 1"));
+            Assert.AreEqual(true, Evaluate("Object.is((-0) ** 1, -0)"));
+            Assert.AreEqual(+0, Evaluate("(-0) ** 2"));
+            Assert.AreEqual(double.NegativeInfinity, Evaluate("(-0) ** -1"));
+            Assert.AreEqual(double.PositiveInfinity, Evaluate("(-0) ** -2"));
+            Assert.AreEqual(double.NaN, Evaluate("(-1) ** 1.5"));
+            Assert.AreEqual(double.NaN, Evaluate("(-1) ** -1.5"));
         }
     }
 }

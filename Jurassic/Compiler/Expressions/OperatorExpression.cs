@@ -63,6 +63,7 @@ namespace Jurassic.Compiler
                 case OperatorType.CompoundSignedRightShift:
                 case OperatorType.CompoundSubtract:
                 case OperatorType.CompoundUnsignedRightShift:
+                case OperatorType.CompoundExponentiation:
                     return new AssignmentExpression(@operator);
 
                 case OperatorType.Conditional:
