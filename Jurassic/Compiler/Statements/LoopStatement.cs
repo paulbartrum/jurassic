@@ -439,6 +439,7 @@ namespace Jurassic.Compiler
                 continueEncountered == true ||
                 root is IfStatement ||
                 root is TernaryExpression ||
+                root is SwitchStatement ||
                 root is TryCatchFinallyStatement ||
                 (root is BinaryExpression && ((BinaryExpression)root).OperatorType == OperatorType.LogicalAnd) ||
                 (root is BinaryExpression && ((BinaryExpression)root).OperatorType == OperatorType.LogicalOr);
