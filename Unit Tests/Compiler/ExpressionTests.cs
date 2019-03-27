@@ -1039,6 +1039,9 @@ namespace UnitTests
             Assert.AreEqual(27, Evaluate("5 + (5 + 6) * 2"));
             Assert.AreEqual(33, Evaluate("5 + (5 * 6) - 2"));
             Assert.AreEqual(32, Evaluate("(5 + (5 + 6)) * 2"));
+
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("(5"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("({[0]("));
         }
 
         [TestMethod]
@@ -1254,6 +1257,7 @@ namespace UnitTests
             Assert.AreEqual("ReferenceError", EvaluateExceptionType("qwerty345.prop"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("null.prop"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("undefined.prop"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("[].()"));
         }
 
         [TestMethod]
@@ -1460,6 +1464,9 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("var x = {}; x[Symbol.iterator] = 5; x[Symbol.iterator]"));
             Assert.AreEqual(true, Evaluate("delete x[Symbol.iterator]"));
             Assert.AreEqual(Undefined.Value, Evaluate("x[Symbol.iterator]"));
+
+            // Errors
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("delete[].(0)"));
         }
 
         [TestMethod]

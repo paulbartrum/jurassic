@@ -364,10 +364,17 @@ namespace Jurassic.Compiler
 
             // Load the property name and convert to a string.
             var rhs = this.GetOperand(1);
-            if (this.OperatorType == OperatorType.MemberAccess && rhs is NameExpression)
-                generator.LoadString((rhs as NameExpression).Name);
+            if (this.OperatorType == OperatorType.MemberAccess)
+            {
+                // delete a.b
+                if (rhs is NameExpression nameExpession)
+                    generator.LoadString(nameExpession.Name);
+                else
+                    throw new SyntaxErrorException("Invalid member access", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+            }
             else
             {
+                // delete a['1']
                 rhs.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToPropertyKey(generator, rhs.ResultType);
             }
