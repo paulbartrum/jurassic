@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Jurassic.Library
 {
@@ -6,6 +7,8 @@ namespace Jurassic.Library
     /// The DataView view provides a low-level interface for reading and writing multiple number
     /// types in an ArrayBuffer irrespective of the platform's endianness.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(DataViewInstanceDebugView))]
     public partial class DataViewInstance : ObjectInstance
     {
         private ArrayBufferInstance buffer;
@@ -422,5 +425,37 @@ namespace Jurassic.Library
             }
         }
 
+
+
+        //     .NET PROPERTIES
+        //_________________________________________________________________________________________
+
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get { return "{}"; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayType; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return string.Format("DataView({0})", this.byteLength); }
+        }
     }
 }

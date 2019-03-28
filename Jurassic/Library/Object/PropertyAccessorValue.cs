@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Jurassic.Library
 {
@@ -7,7 +8,8 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a the value of an accessor property.
     /// </summary>
-    internal sealed class PropertyAccessorValue
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    internal sealed class PropertyAccessorValue : IDebuggerDisplay
     {
         private FunctionInstance getter;
         private FunctionInstance setter;
@@ -61,6 +63,49 @@ namespace Jurassic.Library
             if (this.setter == null)
                 return;
             this.setter.CallLateBound(thisObject, value);
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public string DebuggerDisplayValue
+        {
+            get
+            {
+                string result = string.Empty;
+                if (this.getter != null && this.setter != null)
+                {
+                    result = "getter;setter";
+                }
+                else if (this.getter != null)
+                {
+                    result = "getter";
+                }
+                else if (this.setter != null)
+                {
+                    result = "getter";
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayValue; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public string DebuggerDisplayType
+        {
+            get { return "Property Accessor"; }
         }
     }
 

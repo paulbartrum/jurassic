@@ -3,16 +3,21 @@ using System.Collections.Generic;
 using System.Reflection;
 using Jurassic.Compiler;
 using System.Linq;
+using System.Diagnostics;
+using System.Text;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Provides functionality common to all JavaScript objects.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class ObjectInstance
     {
         // The script engine associated with this object.
         [NonSerialized]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private ScriptEngine engine;
 
         // Internal prototype chain.
@@ -118,6 +123,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a reference to the script engine associated with this object.
         /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public ScriptEngine Engine
         {
             get { return this.engine; }
@@ -204,6 +210,40 @@ namespace Jurassic.Library
             }
         }
         
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public virtual string DebuggerDisplayValue
+        {
+            get
+            {
+                IEnumerable<string> strValues =
+                    this.Properties.Select(pnv => 
+                        string.Format("{0}: {1}", pnv.Key, DebuggerDisplayHelper.ShortStringRepresentation(pnv.Value)));
+
+                return string.Format("{{{0}}}", string.Join(", ", strValues));
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public virtual string DebuggerDisplayShortValue
+        {
+            get { return "{\u2026}"; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public virtual string DebuggerDisplayType
+        {
+            get { return "Object"; }
+        }
+
 
 
         //     PROPERTY MANAGEMENT

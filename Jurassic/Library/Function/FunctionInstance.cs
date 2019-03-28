@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents a JavaScript function.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public abstract partial class FunctionInstance : ObjectInstance
     {
         // Used to speed up access to the prototype property.
@@ -119,6 +122,39 @@ namespace Jurassic.Library
             protected set { this.FastSetProperty("length", value); }
         }
 
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                string name = this.Name;
+                if (string.IsNullOrEmpty(name))
+                    name = "function";
+                string result = string.Format("{0}()", name);
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayValue; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return "Function"; }
+        }
 
 
         //     JAVASCRIPT INTERNAL FUNCTIONS
