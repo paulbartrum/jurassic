@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for PromiseInstance.
     /// </summary>
-    public class PromiseInstanceDebugView
+    internal class PromiseInstanceDebugView
     {
         /// <summary>
         /// The displayed PromiseInstance

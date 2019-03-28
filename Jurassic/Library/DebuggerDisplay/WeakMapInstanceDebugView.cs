@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for WeakMapInstance entry
     /// </summary>
-    public class WeakMapInstanceDebugView
+    internal class WeakMapInstanceDebugView
     {
         /// <summary>
         /// The displayed WeakMapInstance

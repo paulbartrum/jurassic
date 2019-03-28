@@ -11,7 +11,7 @@ namespace Jurassic.Library
     /// <summary>
     /// Helper methods used from debugger visualization
     /// </summary>
-    public static class DebuggerDisplayHelper
+    internal static class DebuggerDisplayHelper
     {
         /// <summary>
         /// Converts any object to string, to be displayed in debugger watch window.
@@ -22,13 +22,9 @@ namespace Jurassic.Library
         public static string StringRepresentation(object value)
         {
             string result;
-            if (value is ObjectInstance)
+            if (value is IDebuggerDisplay debuggerDisplay)
             {
-                result = (value as ObjectInstance).DebuggerDisplayValue;
-            }
-            else if (value is IDebuggerDisplay)
-            {
-                result = (value as IDebuggerDisplay).DebuggerDisplayValue;
+                result = debuggerDisplay.DebuggerDisplayValue;
             }
             else if (value is string)
             {
@@ -59,13 +55,9 @@ namespace Jurassic.Library
         public static string ShortStringRepresentation(object value)
         {
             string result;
-            if (value is ObjectInstance)
+            if (value is IDebuggerDisplay debuggerDisplay)
             {
-                result = (value as ObjectInstance).DebuggerDisplayShortValue;
-            }
-            else if (value is IDebuggerDisplay)
-            {
-                result = (value as IDebuggerDisplay).DebuggerDisplayShortValue;
+                result = debuggerDisplay.DebuggerDisplayShortValue;
             }
             else if (value is string)
             {
@@ -94,13 +86,9 @@ namespace Jurassic.Library
         public static string TypeRepresentation(object value)
         {
             string result;
-            if (value is ObjectInstance)
+            if (value is IDebuggerDisplay debuggerDisplay)
             {
-                result = (value as ObjectInstance).DebuggerDisplayType;
-            }
-            else if (value is IDebuggerDisplay)
-            {
-                result = (value as IDebuggerDisplay).DebuggerDisplayType;
+                result = debuggerDisplay.DebuggerDisplayType;
             }
             else
             {

@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for SetInstance
     /// </summary>
-    public class SetInstanceDebugView
+    internal class SetInstanceDebugView
     {
         /// <summary>
         /// The displayed SetInstance

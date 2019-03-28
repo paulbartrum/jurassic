@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for StringIterator
     /// </summary>
-    public class StringIteratorDebugView
+    internal class StringIteratorDebugView
     {
         /// <summary>
         /// The displayed stringIterator

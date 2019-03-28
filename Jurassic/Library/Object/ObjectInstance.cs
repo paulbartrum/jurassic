@@ -4,7 +4,6 @@ using System.Reflection;
 using Jurassic.Compiler;
 using System.Linq;
 using System.Diagnostics;
-using System.Text;
 
 namespace Jurassic.Library
 {
@@ -13,7 +12,7 @@ namespace Jurassic.Library
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
     [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
-    public partial class ObjectInstance
+    public partial class ObjectInstance : IDebuggerDisplay
     {
         // The script engine associated with this object.
         [NonSerialized]

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-
 
 namespace Jurassic.Library
 {
@@ -13,7 +10,7 @@ namespace Jurassic.Library
     /// Debugger decorator for WeakSetInstance entries
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    public class WeakSetEntriesDebugView : IDebuggerDisplay
+    internal class WeakSetEntriesDebugView : IDebuggerDisplay
     {
         /// <summary>
         /// The WeakSetInstance internal storage

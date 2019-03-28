@@ -2,13 +2,12 @@
 using System.Globalization;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for TypedArrayInstance
     /// </summary>
-    public class TypedArrayInstanceDebugView
+    internal class TypedArrayInstanceDebugView
     {
         /// <summary>
         /// The displayed TypedArrayInstance

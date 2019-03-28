@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Jurassic.Library
+﻿namespace Jurassic.Library
 {
     /// <summary>
     /// Interface for objects supporting decoration of the debugger information.
     /// </summary>
-    public interface IDebuggerDisplay
+    internal interface IDebuggerDisplay
     {
         /// <summary>
         /// Gets value, that will be displayed in debugger watch window.

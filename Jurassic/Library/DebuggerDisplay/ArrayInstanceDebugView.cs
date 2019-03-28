@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for ArrayInstance.
     /// </summary>
-    public class ArrayInstanceDebugView
+    internal class ArrayInstanceDebugView
     {
         /// <summary>
         /// The watched array

@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace Jurassic.Library
 {
@@ -10,7 +9,7 @@ namespace Jurassic.Library
     /// Debugger decorator for MapIterator entries - key or value.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    public class MapKeyOrValuesDebugView : IDebuggerDisplay
+    internal class MapKeyOrValuesDebugView : IDebuggerDisplay
     {
         /// <summary>
         /// Internal Map storage

@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for ClrInstanceWrapper
     /// </summary>
-    public class ClrInstanceWrapperDebugView
+    internal class ClrInstanceWrapperDebugView
     {
         /// <summary>
         /// The displayed object

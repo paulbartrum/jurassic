@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
-
 
 namespace Jurassic.Library
 {
@@ -10,7 +7,7 @@ namespace Jurassic.Library
     /// Debugger decorator for WeakMapInstance entry - key-value pair
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    public class WeakMapEntryDebugView : IDebuggerDisplay
+    internal class WeakMapEntryDebugView : IDebuggerDisplay
     {
         /// <summary>
         /// The key

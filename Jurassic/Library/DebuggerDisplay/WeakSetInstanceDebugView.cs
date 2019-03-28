@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for WeakSetInstance
     /// </summary>
-    public class WeakSetInstanceDebugView
+    internal class WeakSetInstanceDebugView
     {
         /// <summary>
         /// The displayed WeakSetInstance

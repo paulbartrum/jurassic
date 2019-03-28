@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-
 
 namespace Jurassic.Library
 {
@@ -12,7 +10,7 @@ namespace Jurassic.Library
     /// Debugger decorator for WeakMapInstance entries
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    public class WeakMapEntriesDebugView : IDebuggerDisplay
+    internal class WeakMapEntriesDebugView : IDebuggerDisplay
     {
         /// <summary>
         /// The WeakMapInstance internal storage

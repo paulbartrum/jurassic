@@ -1,14 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for DataViewInstance
     /// </summary>
-    public class DataViewInstanceDebugView
+    internal class DataViewInstanceDebugView
     {
         /// <summary>
         /// The displayed DataViewInstance

@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for ObjectInstance and some classes inheriting ObjectInstance.
     /// </summary>
-    public class ObjectInstanceDebugView
+    internal class ObjectInstanceDebugView
     {
         /// <summary>
         /// The displayed object

@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for SetIterator
     /// </summary>
-    public class SetIteratorDebugView
+    internal class SetIteratorDebugView
     {
         /// <summary>
         /// The displayed SetIterator

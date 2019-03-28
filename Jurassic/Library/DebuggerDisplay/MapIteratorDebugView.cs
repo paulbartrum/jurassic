@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for MapIterator.
     /// </summary>
-    public class MapIteratorDebugView
+    internal class MapIteratorDebugView
     {
         /// <summary>
         /// The displayed iterator

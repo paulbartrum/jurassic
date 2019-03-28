@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-
 
 namespace Jurassic.Library
 {
@@ -11,7 +9,7 @@ namespace Jurassic.Library
     /// Debugger decorator for SetInstance entries - key-value pairs.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    public class SetEntriesDebugView : IDebuggerDisplay
+    internal class SetEntriesDebugView : IDebuggerDisplay
     {
         /// <summary>
         /// The SetInstance internal strorage

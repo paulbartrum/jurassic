@@ -81,9 +81,9 @@ namespace Jurassic.Library
             get
             {
                 string result;
-                if (this.descriptor.Value is ObjectInstance)
+                if (this.descriptor.Value is IDebuggerDisplay debuggerDisplay)
                 {
-                    result = (this.descriptor.Value as ObjectInstance).DebuggerDisplayValue;
+                    result = debuggerDisplay.DebuggerDisplayValue;
                 }
                 else if (this.descriptor.Value is string)
                 {
@@ -114,9 +114,9 @@ namespace Jurassic.Library
             get
             {
                 string result;
-                if (this.descriptor.Value is ObjectInstance)
+                if (this.descriptor.Value is IDebuggerDisplay debuggerDisplay)
                 {
-                    result = (this.descriptor.Value as ObjectInstance).DebuggerDisplayType;
+                    result = debuggerDisplay.DebuggerDisplayType;
                 }
                 else
                 {

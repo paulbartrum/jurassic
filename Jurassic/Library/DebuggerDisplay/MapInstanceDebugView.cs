@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 
-
 namespace Jurassic.Library
 {
     /// <summary>
     /// Debugger decorator for MapInstance.
     /// </summary>
-    public class MapInstanceDebugView
+    internal class MapInstanceDebugView
     {
         /// <summary>
         /// The displayed map

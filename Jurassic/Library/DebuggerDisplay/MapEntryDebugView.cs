@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-
 
 namespace Jurassic.Library
 {
@@ -10,7 +8,7 @@ namespace Jurassic.Library
     /// Debugger decorator for MapInstance entry.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    public class MapEntryDebugView : IDebuggerDisplay
+    internal class MapEntryDebugView : IDebuggerDisplay
     {
         /// <summary>
         /// The displayed entry
