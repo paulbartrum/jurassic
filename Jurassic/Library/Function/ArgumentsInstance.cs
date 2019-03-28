@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
 using Jurassic.Compiler;
 
 namespace Jurassic.Library
@@ -7,6 +10,8 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an arguments object.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public class ArgumentsInstance : ObjectInstance
     {
         private UserDefinedFunction callee;
@@ -159,6 +164,63 @@ namespace Jurassic.Library
 
             // Delegate to the base class implementation.
             return base.Delete(index, throwOnError);
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("[");
+
+                bool comma = false;
+                int len = (int)this["length"];
+                for (int i = 0; i < len; i++)
+                {
+                    object arg = this[i.ToString(CultureInfo.InvariantCulture)];
+                    object value;
+                    if (arg is PropertyAccessorValue)
+                    {
+                        value = (arg as PropertyAccessorValue).GetValue(this);
+                    }
+                    else
+                    {
+                        value = arg;
+                    }
+
+                    if (comma)
+                    {
+                        sb.Append(", ");
+                    }
+                    sb.Append(DebuggerDisplayHelper.ShortStringRepresentation(value));
+                    comma = true;
+                }
+
+                sb.Append("]");
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayType; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return string.Format("Arguments({0})", this["length"]); }
         }
     }
 }

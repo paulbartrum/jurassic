@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Jurassic.Library
@@ -7,6 +8,8 @@ namespace Jurassic.Library
     /// <summary>
     /// The WeakSet object lets you store weakly held objects in a collection.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(WeakSetInstanceDebugView))]
     public partial class WeakSetInstance : ObjectInstance
     {
         private readonly ConditionalWeakTable<ObjectInstance, object> store;
@@ -93,6 +96,59 @@ namespace Jurassic.Library
 
             object result;
             return this.store.TryGetValue(valueObj, out result);
+        }
+
+
+        //     .NET PROPERTIES
+        //_________________________________________________________________________________________
+
+
+        /// <summary>
+        /// Gets the internal storage. Used by debugger decoration.
+        /// </summary>
+        internal ConditionalWeakTable<ObjectInstance, object> Store
+        {
+            get { return this.store; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                IEnumerable<ObjectInstance> keys = this.store.GetKeys();
+                IEnumerable<string> strValues =
+                    keys.Select(key => DebuggerDisplayHelper.ShortStringRepresentation(key));
+
+                return string.Format("[{0}]", string.Join(", ", strValues));
+            }
+        }
+
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayType; }
+        }
+
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get
+            {
+                string result = string.Format("WeakSet({0})", this.store.GetKeys().Count());
+                return result;
+            }
         }
     }
 }

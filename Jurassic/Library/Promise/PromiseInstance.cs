@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents an instance of the Promise object.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(PromiseInstanceDebugView))]
     public partial class PromiseInstance : ObjectInstance
     {
         internal enum PromiseState
@@ -40,10 +44,20 @@ namespace Jurassic.Library
         {
             FunctionInstance resolveFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, (engine, thisObj, param) =>
             {
+                this.state = PromiseState.Fulfilled;
+                if (param.Length > 0)
+                {
+                    result = param[0];
+                }
                 return Undefined.Value;
             });
             FunctionInstance rejectFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, (engine, thisObj, param) =>
             {
+                this.state = PromiseState.Rejected;
+                if (param.Length > 0)
+                {
+                    result = param[0];
+                }
                 return Undefined.Value;
             });
             try
@@ -102,6 +116,57 @@ namespace Jurassic.Library
         public PromiseInstance Then(FunctionInstance onFulfilled, FunctionInstance onRejected)
         {
             throw new NotImplementedException();
+        }
+
+
+
+        //     .NET ACCESSOR PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets the promise status. Used by debugger decoration only.
+        /// </summary>
+        internal PromiseState State
+        {
+            get { return this.state; }
+        }
+
+        /// <summary>
+        /// Gets the promise result. Used by debugger decoration only.
+        /// </summary>
+        internal object Result
+        {
+            get { return this.result; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                return this.state.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayValue; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return "Promise"; }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Jurassic.Compiler;
 
@@ -7,7 +8,12 @@ namespace Jurassic.Library
 {
     /// <summary>
     /// Represents a JavaScript function implemented in javascript.
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(UserDefinedFunctionDebugView))]
     public class UserDefinedFunction : FunctionInstance
     {
         [ThreadStatic]
@@ -43,10 +49,10 @@ namespace Jurassic.Library
                 throw new ArgumentNullException(nameof(bodyText));
 
             // Set up a new function scope.
-            var scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(this.Engine.Global), name, null);
+            this.Scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(this.Engine.Global), name, null);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(scope, name, argumentsText, bodyText, new CompilerOptions() {
+            var context = new FunctionMethodGenerator(this.Scope, name, argumentsText, bodyText, new CompilerOptions() {
 #if ENABLE_DEBUGGING
                EnableDebugging = this.Engine.EnableDebugging,
 #endif
@@ -204,6 +210,31 @@ namespace Jurassic.Library
         public string DisassembledIL
         {
             get { return this.generatedMethod.DisassembledIL; }
+        }
+
+        /// <summary>
+        /// The function scope. Internal just to be visible in debugger.
+        /// </summary>
+        internal DeclarativeScope Scope
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                string name = this.Name;
+                if (string.IsNullOrEmpty(name))
+                    name = "function";
+                string result = string.Format("{0}({1})", name, this.ArgumentsText);
+                return result;
+            }
         }
 
 

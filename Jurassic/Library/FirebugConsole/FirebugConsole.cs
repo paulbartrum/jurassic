@@ -10,6 +10,8 @@ namespace Jurassic.Library
     /// non-standard - it is based on the Firebug console API
     /// (http://getfirebug.com/wiki/index.php/Console_API).
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class FirebugConsole : ObjectInstance
     {
         private IFirebugConsoleOutput output;
@@ -43,6 +45,34 @@ namespace Jurassic.Library
                     throw new ArgumentNullException(nameof(value));
                 this.output = value;
             }
+        }
+
+        /// <summary>
+        /// Gets an enumerable list of every property name and value associated with this object.
+        /// Does not include properties in the prototype chain.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get { return "Firebug Console"; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayValue; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return "Console"; }
         }
 
 
