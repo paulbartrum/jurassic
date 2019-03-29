@@ -888,11 +888,10 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string representing the date and time.
         /// </summary>
-        /// <param name="engine"></param>
         /// <param name="thisRef"> The object that is being operated on. </param>
         /// <returns> A string representing the date and time. </returns>
-        [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static string ToString(ScriptEngine engine, object thisRef)
+        [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
+        public static string ToString(object thisRef)
         {
             // As of ES6, this method is generic.
             if ((thisRef is DateInstance) == false)
@@ -904,7 +903,7 @@ namespace Jurassic.Library
 
             var dateTime = ConvertTimeFromUtc(instance.Engine, instance.Value);
             return dateTime.Value.ToString("ddd MMM dd yyyy HH:mm:ss ", System.Globalization.DateTimeFormatInfo.InvariantInfo) +
-                ToTimeZoneString(engine, dateTime.Value);
+                ToTimeZoneString(instance.Engine, dateTime.Value);
         }
 
         /// <summary>
