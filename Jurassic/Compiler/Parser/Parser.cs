@@ -1969,8 +1969,13 @@ namespace Jurassic.Compiler
                     // This is a shorthand function e.g. "var a = { b() { return 2; } }" is the
                     // same as "var a = { b: function() { return 2; } }".
 
+                    // Determine the function name. TODO: the function name can be dynamic, i.e.
+                    // only available at runtime, figure out how to accommodate this.
+                    string nameAsString = string.Empty;
+                    if (propertyName is LiteralExpression literalExpression && literalExpression.ResultType != PrimitiveType.Object)
+                        nameAsString = TypeConverter.ToString(literalExpression.Value);
+
                     // Parse the function.
-                    string nameAsString = propertyName is LiteralExpression ? (string)((LiteralExpression)propertyName).Value : string.Empty;
                     var function = ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, nameAsString, startPosition);
 
                     // Strangely enough, if declarationType is Expression then the last right

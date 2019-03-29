@@ -1,6 +1,7 @@
 ﻿using Jurassic.Compiler;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Jurassic.Library
@@ -8,6 +9,8 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents functions and properties within the global scope.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class GlobalObject : ObjectInstance
     {
 

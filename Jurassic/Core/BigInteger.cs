@@ -501,10 +501,16 @@ namespace Jurassic
         /// <paramref name="divisor"/>. </returns>
         public static int Quorem(ref BigInteger dividend, BigInteger divisor)
         {
-            int n = divisor.wordCount;
-            if (dividend.wordCount > n)
-                throw new ArgumentException("b is too large");
-            if (dividend.wordCount < n)
+            if (dividend.wordCount > divisor.wordCount)
+            {
+                if (divisor.bits.Length < dividend.wordCount)
+                {
+                    var newBits = new uint[dividend.wordCount];
+                    Array.Copy(divisor.bits, 0, newBits, 0, divisor.wordCount);
+                }
+                divisor.wordCount = dividend.wordCount;
+            }
+            else if (dividend.wordCount < divisor.wordCount)
                 return 0;
             uint q = dividend.bits[dividend.wordCount - 1] / (divisor.bits[divisor.wordCount - 1] + 1);	/* ensure q <= true quotient */
 

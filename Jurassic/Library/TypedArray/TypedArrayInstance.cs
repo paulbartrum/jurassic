@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Text;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents a typed array instance.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(TypedArrayInstanceDebugView))]
     public partial class TypedArrayInstance : ObjectInstance
     {
         private TypedArrayType type;
@@ -177,7 +181,7 @@ namespace Jurassic.Library
         /// <summary>
         /// The data storage size, in bytes, of each array element.
         /// </summary>
-        private int BytesPerElement
+        internal int BytesPerElement
         {
             get
             {
@@ -201,6 +205,51 @@ namespace Jurassic.Library
                 }
             }
         }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("[");
+                bool comma = false;
+                for (int i = 0; i < this.Length; i++)
+                {
+                    if (comma)
+                    {
+                        sb.Append(", ");
+                    }
+                    sb.Append(DebuggerDisplayHelper.ShortStringRepresentation(this[i]));
+                    comma = true;
+                }
+
+                sb.Append("]");
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayType; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return string.Format("{0}({1})", this.Type, this.Length); }
+        }
+
 
 
         //     JAVASCRIPT PROPERTIES

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Jurassic.Library
@@ -7,9 +8,12 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an iteration over a String.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(StringIteratorDebugView))]
     internal partial class StringIterator : ObjectInstance
     {
         private TextElementEnumerator enumerator;
+        private bool done;
 
 
         //     INITIALIZATION
@@ -65,19 +69,18 @@ namespace Jurassic.Library
         public ObjectInstance Next()
         {
             object value;
-            bool done;
 
             if (this.enumerator.MoveNext())
             {
                 // Return the text element.
                 value = this.enumerator.Current;
-                done = false;
+                this.done = false;
             }
             else
             {
                 // We've reached the end of the string.
                 value = Undefined.Value;
-                done = true;
+                this.done = true;
             }
 
             // Return the result.
@@ -88,6 +91,83 @@ namespace Jurassic.Library
                     new PropertyNameAndValue("done", done, PropertyAttributes.FullAccess),
                 });
             return result;
+        }
+
+
+
+        //     .NET PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets wheter the end is reached. Used by debugger decoration only.
+        /// </summary>
+        internal bool Done
+        {
+            get { return this.done; }
+        }
+
+        /// <summary>
+        /// Gets current index. Used by debugger decoration only.
+        /// </summary>
+        internal int IteratorIndex
+        {
+            get
+            {
+                try
+                {
+                    return this.enumerator.ElementIndex;
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Gets current character. Used by debugger decoration only.
+        /// </summary>
+        public string Current
+        {
+            get
+            {
+                try
+                {
+                    return this.enumerator.Current as string;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get { return this.Current as string; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayValue; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return this.ToStringTag; }
         }
     }
 }

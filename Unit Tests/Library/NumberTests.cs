@@ -298,6 +298,13 @@ namespace UnitTests
             Assert.AreEqual("0.00142233513615237575", Evaluate("0.003.toString(8)"));
             Assert.AreEqual("27524716460150203300000000000000000", Evaluate("15e30.toString(8)"));
             Assert.AreEqual("0.252525252525252525", Evaluate("(1/3).toString(8)"));
+            Assert.AreEqual("0", Evaluate("0 .toString(3)"));
+            Assert.AreEqual("1", Evaluate("1 .toString(3)"));
+            Assert.AreEqual("2", Evaluate("2 .toString(3)"));
+            Assert.AreEqual("10", Evaluate("3 .toString(3)"));
+            Assert.AreEqual("11", Evaluate("4 .toString(3)"));
+            Assert.AreEqual("12", Evaluate("5 .toString(3)"));
+            Assert.AreEqual("20", Evaluate("6 .toString(3)"));
 
             // Decimal point should be '.' regardless of locale.
             Assert.AreEqual("77.1274", ChangeLocale("es-ES", () => Evaluate("77.1274.toString()")));

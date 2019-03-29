@@ -82,6 +82,8 @@ namespace Jurassic.Compiler
                     return TypeConverter.ToNumber(left) / TypeConverter.ToNumber(right);
                 case OperatorType.Modulo:
                     return TypeConverter.ToNumber(left) % TypeConverter.ToNumber(right);
+                case OperatorType.Exponentiation:
+                    return Library.MathObject.Pow(TypeConverter.ToNumber(left), TypeConverter.ToNumber(right));
 
                 // Bitwise operations.
                 case OperatorType.BitwiseAnd:
@@ -165,6 +167,7 @@ namespace Jurassic.Compiler
                     case OperatorType.Multiply:
                     case OperatorType.Divide:
                     case OperatorType.Modulo:
+                    case OperatorType.Exponentiation:
                         return PrimitiveType.Number;
 
                     // Bitwise operations.
@@ -278,6 +281,7 @@ namespace Jurassic.Compiler
                 case OperatorType.Multiply:
                 case OperatorType.Divide:
                 case OperatorType.Modulo:
+                case OperatorType.Exponentiation:
                     EmitConversion.ToNumber(generator, this.Left.ResultType);
                     break;
 
@@ -311,6 +315,7 @@ namespace Jurassic.Compiler
                 case OperatorType.Multiply:
                 case OperatorType.Divide:
                 case OperatorType.Modulo:
+                case OperatorType.Exponentiation:
                     EmitConversion.ToNumber(generator, this.Right.ResultType);
                     break;
 
@@ -352,6 +357,9 @@ namespace Jurassic.Compiler
                     break;
                 case OperatorType.Modulo:
                     generator.Remainder();
+                    break;
+                case OperatorType.Exponentiation:
+                    generator.CallStatic(ReflectionHelpers.Math_Pow);
                     break;
 
                 // Bitwise operations.

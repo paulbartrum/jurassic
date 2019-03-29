@@ -242,7 +242,7 @@ namespace Jurassic.Library
 
 
 
-        //     JAVASCRIPT FUNCTIONS (NEW IN ES5)
+        //     JAVASCRIPT FUNCTIONS
         //_________________________________________________________________________________________
 
         /// <summary>
@@ -690,6 +690,33 @@ namespace Jurassic.Library
 
             // No matches, return undefined.
             return -1;
+        }
+
+        /// <summary>
+        /// Determines whether an array includes a certain value among its entries.
+        /// </summary>
+        /// <param name="searchElement"> The value to search for. </param>
+        /// <param name="fromIndex"> The array index to start searching. </param>
+        /// <returns> <c>true</c> given search element in the array, or <c>false</c> if the element
+        /// wasn't found. </returns>
+        public bool Includes(object searchElement, int fromIndex)
+        {
+            // If fromIndex is less than zero, it is an offset from the end of the array.
+            if (fromIndex < 0)
+                fromIndex += Length;
+
+            for (int i = Math.Max(fromIndex, 0); i < Length; i++)
+            {
+                // Get the value of the array element.
+                object elementValue = this[i];
+
+                // Compare the given search element with the array element.
+                if (TypeComparer.SameValueZero(searchElement, elementValue) == true)
+                    return true;
+            }
+
+            // The search element wasn't found.
+            return false;
         }
 
 

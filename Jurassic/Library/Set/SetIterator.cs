@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents an iteration over a Set.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(SetIteratorDebugView))]
     internal partial class SetIterator : ObjectInstance
     {
         private SetInstance set;
@@ -132,6 +135,75 @@ namespace Jurassic.Library
                     new PropertyNameAndValue("done", this.done, PropertyAttributes.FullAccess),
                 });
             return result;
+        }
+
+
+
+        //     .NET PROPERTIES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Gets wheter the end is reached. Used by debugger decoration only.
+        /// </summary>
+        internal bool Done
+        {
+            get { return this.done; }
+        }
+
+        /// <summary>
+        /// Gets current index. Used by debugger decoration only.
+        /// </summary>
+        internal int IteratorIndex
+        {
+            get
+            {
+                return this.lastNode == null
+                    ? 0
+                    : new List<object>(this.list).IndexOf(this.lastNode.Value) + 1;
+            }
+        }
+
+        /// <summary>
+        /// Gets what is iterated - key, value or both.
+        /// </summary>
+        internal Kind IteratorKind
+        {
+            get { return this.kind; }
+        }
+
+        /// <summary>
+        /// Gets the iterated Set.
+        /// </summary>
+        internal SetInstance Set
+        {
+            get { return this.set; }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get { return this.kind.ToString(); }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayValue; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return this.ToStringTag; }
         }
     }
 }

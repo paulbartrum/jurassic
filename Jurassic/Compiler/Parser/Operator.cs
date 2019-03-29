@@ -117,7 +117,9 @@ namespace Jurassic.Compiler
         CompoundSignedRightShift,
         CompoundSubtract,
         CompoundUnsignedRightShift,
+        CompoundExponentiation,
         Comma,
+        Exponentiation
     }
 
     /// <summary>
@@ -324,32 +326,35 @@ namespace Jurassic.Compiler
         }
 
         // Parenthesis.
-        public static readonly Operator Grouping                    = new Operator(PunctuatorToken.LeftParenthesis, 18, OperatorPlacement.HasRHSOperand, OperatorAssociativity.LeftToRight, OperatorType.Grouping, PunctuatorToken.RightParenthesis, 0);
+        public static readonly Operator Grouping                    = new Operator(PunctuatorToken.LeftParenthesis, 19, OperatorPlacement.HasRHSOperand, OperatorAssociativity.LeftToRight, OperatorType.Grouping, PunctuatorToken.RightParenthesis, 0);
 
         // Index operator.
-        public static readonly Operator Index                       = new Operator(PunctuatorToken.LeftBracket, 17, OperatorPlacement.HasLHSOperand | OperatorPlacement.HasRHSOperand, OperatorAssociativity.LeftToRight, OperatorType.Index, PunctuatorToken.RightBracket, 0);
+        public static readonly Operator Index                       = new Operator(PunctuatorToken.LeftBracket, 18, OperatorPlacement.HasLHSOperand | OperatorPlacement.HasRHSOperand, OperatorAssociativity.LeftToRight, OperatorType.Index, PunctuatorToken.RightBracket, 0);
 
         // Member access operator and function call operator.
-        public static readonly Operator MemberAccess                = new Operator(PunctuatorToken.Dot, 17, OperatorPlacement.Binary, OperatorAssociativity.LeftToRight, OperatorType.MemberAccess);
-        public static readonly Operator FunctionCall                = new Operator(PunctuatorToken.LeftParenthesis, 17, OperatorPlacement.HasLHSOperand | OperatorPlacement.HasRHSOperand | OperatorPlacement.InnerOperandIsOptional, OperatorAssociativity.LeftToRight, OperatorType.FunctionCall, PunctuatorToken.RightParenthesis, 0);
+        public static readonly Operator MemberAccess                = new Operator(PunctuatorToken.Dot, 18, OperatorPlacement.Binary, OperatorAssociativity.LeftToRight, OperatorType.MemberAccess);
+        public static readonly Operator FunctionCall                = new Operator(PunctuatorToken.LeftParenthesis, 18, OperatorPlacement.HasLHSOperand | OperatorPlacement.HasRHSOperand | OperatorPlacement.InnerOperandIsOptional, OperatorAssociativity.LeftToRight, OperatorType.FunctionCall, PunctuatorToken.RightParenthesis, 0);
 
         // New operator.
-        public static readonly Operator New                         = new Operator(KeywordToken.New, 16, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.New);
+        public static readonly Operator New                         = new Operator(KeywordToken.New, 17, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.New);
 
         // Postfix operators.
-        public static readonly Operator PostIncrement               = new Operator(PunctuatorToken.Increment, 15, OperatorPlacement.Postfix, OperatorAssociativity.LeftToRight, OperatorType.PostIncrement);
-        public static readonly Operator PostDecrement               = new Operator(PunctuatorToken.Decrement, 15, OperatorPlacement.Postfix, OperatorAssociativity.LeftToRight, OperatorType.PostDecrement);
+        public static readonly Operator PostIncrement               = new Operator(PunctuatorToken.Increment, 16, OperatorPlacement.Postfix, OperatorAssociativity.LeftToRight, OperatorType.PostIncrement);
+        public static readonly Operator PostDecrement               = new Operator(PunctuatorToken.Decrement, 16, OperatorPlacement.Postfix, OperatorAssociativity.LeftToRight, OperatorType.PostDecrement);
 
         // Unary prefix operators.
-        public static readonly Operator Delete                      = new Operator(KeywordToken.Delete, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Delete);
-        public static readonly Operator Void                        = new Operator(KeywordToken.Void, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Void);
-        public static readonly Operator Typeof                      = new Operator(KeywordToken.Typeof, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Typeof);
-        public static readonly Operator PreIncrement                = new Operator(PunctuatorToken.Increment, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.PreIncrement);
-        public static readonly Operator PreDecrement                = new Operator(PunctuatorToken.Decrement, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.PreDecrement);
-        public static readonly Operator Plus                        = new Operator(PunctuatorToken.Plus, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Plus);
-        public static readonly Operator Minus                       = new Operator(PunctuatorToken.Minus, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Minus);
-        public static readonly Operator LogicalNot                  = new Operator(PunctuatorToken.LogicalNot, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.LogicalNot);
-        public static readonly Operator BitwiseNot                  = new Operator(PunctuatorToken.BitwiseNot, 14, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.BitwiseNot);
+        public static readonly Operator Delete                      = new Operator(KeywordToken.Delete, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Delete);
+        public static readonly Operator Void                        = new Operator(KeywordToken.Void, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Void);
+        public static readonly Operator Typeof                      = new Operator(KeywordToken.Typeof, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Typeof);
+        public static readonly Operator PreIncrement                = new Operator(PunctuatorToken.Increment, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.PreIncrement);
+        public static readonly Operator PreDecrement                = new Operator(PunctuatorToken.Decrement, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.PreDecrement);
+        public static readonly Operator Plus                        = new Operator(PunctuatorToken.Plus, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Plus);
+        public static readonly Operator Minus                       = new Operator(PunctuatorToken.Minus, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.Minus);
+        public static readonly Operator LogicalNot                  = new Operator(PunctuatorToken.LogicalNot, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.LogicalNot);
+        public static readonly Operator BitwiseNot                  = new Operator(PunctuatorToken.BitwiseNot, 15, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.BitwiseNot);
+
+        // Exponention operator.
+        public static readonly Operator Exponentiation              = new Operator(PunctuatorToken.Exponentiation, 14, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.Exponentiation);
 
         // Arithmetic operators.
         public static readonly Operator Multiply                    = new Operator(PunctuatorToken.Multiply, 13, OperatorPlacement.Binary, OperatorAssociativity.LeftToRight, OperatorType.Multiply);
@@ -404,6 +409,7 @@ namespace Jurassic.Compiler
         public static readonly Operator CompoundSignedRightShift    = new Operator(PunctuatorToken.CompoundSignedRightShift, 2, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.CompoundSignedRightShift);
         public static readonly Operator CompoundSubtract            = new Operator(PunctuatorToken.CompoundSubtract, 2, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.CompoundSubtract);
         public static readonly Operator CompoundUnsignedRightShift  = new Operator(PunctuatorToken.CompoundUnsignedRightShift, 2, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.CompoundUnsignedRightShift);
+        public static readonly Operator CompoundExponentiation      = new Operator(PunctuatorToken.CompoundExponentiation, 2, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.CompoundExponentiation);
 
         // Comma operator.
         public static readonly Operator Comma                       = new Operator(PunctuatorToken.Comma, 1, OperatorPlacement.Binary, OperatorAssociativity.LeftToRight, OperatorType.Comma);

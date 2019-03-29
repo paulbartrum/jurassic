@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
@@ -8,6 +9,8 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the Symbol object.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class SymbolInstance : ObjectInstance
     {
         private string description;
@@ -76,6 +79,39 @@ namespace Jurassic.Library
         public SymbolInstance ToPrimitive(string hint)
         {
             return this;
+        }
+
+
+
+        //     .NET ACCESSOR PROPERTIES
+        //_________________________________________________________________________________________
+
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get { return this.ToStringJS(); }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get { return this.DebuggerDisplayValue; }
+        }
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return "Symbol"; }
         }
     }
 }

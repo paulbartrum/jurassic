@@ -5,10 +5,10 @@
     <Authors>Paul Bartrum</Authors>
     <Company />
     <Description>A .NET library to parse and execute JavaScript code.</Description>
-    <Version>3.0.0-alpha</Version>
+    <Version>3.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
-    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/paulbartrum/jurassic</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/nuget-logo.png</PackageIconUrl>
     <PackageTags>JavaScript ECMAScript</PackageTags>
@@ -18,14 +18,34 @@
     <DefineConstants Condition="'$(TargetFramework)' == 'net45'">$(DefineConstants);ENABLE_DEBUGGING</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);NETSTANDARD</DefineConstants>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Jurassic.xml</DocumentationFile>
+    <PackageReleaseNotes>* Migrated to .NET core 2.0
+* Silverlight support has been removed
+* Jurassic classes are no longer implement ISerializable
+* Support template literals
+* Support extended unicode escape sequences
+* Support for-of statements
+* The CompiledScript class allows compiling script once, then running it on any ScriptEngine.
+* Support for typed arrays, Map, Set, WeakMap and WeakSet.
+* Partial support for symbols
+* Support ECMAScript 6 library functions on String, Array, Number and Math</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/paulbartrum/jurassic.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>master</RepositoryBranch>
+    <RepositoryCommit>3ce05b3455dce546d36f08902546a61ac50c6c81</RepositoryCommit>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
   </ItemGroup>
 
 </Project>

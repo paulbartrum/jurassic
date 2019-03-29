@@ -76,7 +76,6 @@ namespace Jurassic.Compiler
         internal static MethodInfo IEnumerator_String_Current;
         internal static MethodInfo IEnumerator_Object_Current;
 
-        internal static MethodInfo Debugger_Break;
         internal static MethodInfo JavaScriptException_ErrorObject;
         internal static MethodInfo Boolean_Construct;
         internal static MethodInfo Object_Construct;
@@ -93,6 +92,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo Decimal_ToDouble;
         internal static MethodInfo BinderUtilities_ResolveOverloads;
         internal static MethodInfo Convert_ToInt32_Double;
+        internal static MethodInfo Math_Pow;
 
         internal static MethodInfo ObjectInstance_Delete;
         internal static MethodInfo ObjectInstance_DefineProperty;
@@ -229,7 +229,6 @@ namespace Jurassic.Compiler
             IEnumerator_MoveNext = GetInstanceMethod(typeof(System.Collections.IEnumerator), "MoveNext");
             IEnumerator_String_Current = GetInstanceMethod(typeof(IEnumerator<string>), "get_Current");
             IEnumerator_Object_Current = GetInstanceMethod(typeof(IEnumerator<object>), "get_Current");
-            Debugger_Break = GetStaticMethod(typeof(System.Diagnostics.Debugger), "Break");
             JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));
             
@@ -255,6 +254,7 @@ namespace Jurassic.Compiler
             Decimal_ToDouble = GetStaticMethod(typeof(decimal), "ToDouble", typeof(decimal));
             BinderUtilities_ResolveOverloads = GetStaticMethod(typeof(BinderUtilities), "ResolveOverloads", typeof(RuntimeMethodHandle[]), typeof(ScriptEngine), typeof(object), typeof(object[]));
             Convert_ToInt32_Double = GetStaticMethod(typeof(Convert), "ToInt32", typeof(double));
+            Math_Pow = GetStaticMethod(typeof(MathObject), "Pow", typeof(double), typeof(double));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

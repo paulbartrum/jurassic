@@ -12,7 +12,7 @@ namespace Attribute_Code_Generation
     {
         static void Main(string[] args)
         {
-            foreach (var csFilePath in Directory.EnumerateFiles(@"..\Jurassic", "*.cs", SearchOption.AllDirectories))
+            foreach (var csFilePath in Directory.EnumerateFiles(@"..\..\..\..\Jurassic", "*.cs", SearchOption.AllDirectories))
             {
                 var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(csFilePath));
 

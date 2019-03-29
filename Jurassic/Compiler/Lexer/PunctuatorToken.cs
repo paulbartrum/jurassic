@@ -39,6 +39,7 @@ namespace Jurassic.Compiler
         public readonly static PunctuatorToken Inequality = new PunctuatorToken("!=");
         public readonly static PunctuatorToken StrictEquality = new PunctuatorToken("===");
         public readonly static PunctuatorToken StrictInequality = new PunctuatorToken("!==");
+        public readonly static PunctuatorToken Exponentiation = new PunctuatorToken("**");
         public readonly static PunctuatorToken Plus = new PunctuatorToken("+");
         public readonly static PunctuatorToken Minus = new PunctuatorToken("-");
         public readonly static PunctuatorToken Multiply = new PunctuatorToken("*");
@@ -68,6 +69,7 @@ namespace Jurassic.Compiler
         public readonly static PunctuatorToken CompoundBitwiseAnd = new PunctuatorToken("&=");
         public readonly static PunctuatorToken CompoundBitwiseOr = new PunctuatorToken("|=");
         public readonly static PunctuatorToken CompoundBitwiseXor = new PunctuatorToken("^=");
+        public readonly static PunctuatorToken CompoundExponentiation = new PunctuatorToken("**=");
 
         // These are treated specially by the lexer.
         public readonly static PunctuatorToken Dot = new PunctuatorToken(".");
@@ -93,6 +95,7 @@ namespace Jurassic.Compiler
             {"!=", Inequality},
             {"===", StrictEquality},
             {"!==", StrictInequality},
+            {"**", Exponentiation },
             {"+", Plus},
             {"-", Minus},
             {"*", Multiply},
@@ -122,6 +125,7 @@ namespace Jurassic.Compiler
             {"&=", CompoundBitwiseAnd},
             {"|=", CompoundBitwiseOr},
             {"^=", CompoundBitwiseXor},
+            {"**=", CompoundExponentiation },
 
             // These are treated specially by the lexer.
             {".", Dot},

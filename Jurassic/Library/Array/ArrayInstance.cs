@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents an instance of the JavaScript Array object.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
+    [DebuggerTypeProxy(typeof(ArrayInstanceDebugView))]
     public partial class ArrayInstance : ObjectInstance
     {
         // The array, if it is dense.
@@ -198,6 +203,50 @@ namespace Jurassic.Library
             }
         }
 
+
+        private int GetLength()
+        {
+            return this.Properties.Where(pnv => (pnv.Key is string) && (pnv.Key as string) != "length").Count();
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayValue
+        {
+            get
+            {
+                IEnumerable<string> strValues = 
+                    this.Properties.Where(pnv => !((pnv.Key is string) && (pnv.Key as string) == "length")).
+                        Select(pnv=> DebuggerDisplayHelper.ShortStringRepresentation(pnv.Value));
+
+                return string.Format("[{0}]", string.Join(", ", strValues));
+            }
+        }
+
+        /// <summary>
+        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayShortValue
+        {
+            get
+            {
+                string result = string.Format("Array({0})", this.GetLength());
+                return result;
+            }
+        }
+
+
+        /// <summary>
+        /// Gets type, that will be displayed in debugger watch window.
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public override string DebuggerDisplayType
+        {
+            get { return "Array"; }
+        }
 
 
         //     INTERNAL HELPER METHODS
@@ -1357,6 +1406,20 @@ namespace Jurassic.Library
         public ObjectInstance Values()
         {
             return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Value);
+        }
+
+        /// <summary>
+        /// Determines whether an array includes a certain value among its entries.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <param name="searchElement"> The value to search for. </param>
+        /// <param name="fromIndex"> The array index to start searching. </param>
+        /// <returns> <c>true</c> given search element in the array, or <c>false</c> if the element
+        /// wasn't found. </returns>
+        [JSInternalFunction(Name = "includes", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static bool Includes(ObjectInstance thisObj, object searchElement, int fromIndex = 0)
+        {
+            return new ArrayInstanceAdapter(thisObj).Includes(searchElement, fromIndex);
         }
 
 
