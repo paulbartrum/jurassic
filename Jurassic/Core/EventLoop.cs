@@ -9,7 +9,7 @@ namespace Jurassic
     /// </summary>
     public sealed class EventLoop
     {
-        private readonly struct EventLoopInstance
+        private struct EventLoopInstance
         {
             private readonly FunctionInstance callback;
             private readonly object thisObj;

@@ -14,7 +14,7 @@ namespace UnitTests
     [TestClass]
     public class PromiseTests : TestBase
     {
-        private readonly struct NotifyCompletionWithNoResult : INotifyCompletion
+        private struct NotifyCompletionWithNoResult : INotifyCompletion
         {
             public void OnCompleted(Action continuation) => continuation();
         }

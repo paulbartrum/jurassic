@@ -9,7 +9,7 @@ namespace Jurassic.Library
 {
     internal static class TaskAwaiterCache
     {
-        private readonly struct Key : IEquatable<Key>
+        private struct Key : IEquatable<Key>
         {
             public readonly RuntimeTypeHandle Generic;
             public readonly RuntimeTypeHandle Actual;
