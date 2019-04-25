@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Jurassic.Library
 {
@@ -28,11 +30,11 @@ namespace Jurassic.Library
 
         // 	A list of PromiseReaction records to be processed when/if the promise transitions
         // from the Pending state to the Fulfilled state.
-        private readonly List<object> fulfillReactions = new List<object>();
+        private readonly List<FunctionInstance> fulfillReactions = new List<FunctionInstance>();
 
         // 	A list of PromiseReaction records to be processed when/if the promise transitions
         // from the Pending state to the Rejected state.
-        private readonly List<object> rejectReactions = new List<object>();
+        private readonly List<FunctionInstance> rejectReactions = new List<FunctionInstance>();
 
 
         /// <summary>
@@ -42,24 +44,8 @@ namespace Jurassic.Library
         /// <param name="executor"></param>
         internal PromiseInstance(ObjectInstance prototype, FunctionInstance executor) : base(prototype)
         {
-            FunctionInstance resolveFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, (engine, thisObj, param) =>
-            {
-                this.state = PromiseState.Fulfilled;
-                if (param.Length > 0)
-                {
-                    result = param[0];
-                }
-                return Undefined.Value;
-            });
-            FunctionInstance rejectFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, (engine, thisObj, param) =>
-            {
-                this.state = PromiseState.Rejected;
-                if (param.Length > 0)
-                {
-                    result = param[0];
-                }
-                return Undefined.Value;
-            });
+            FunctionInstance resolveFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, "s", 1, (engine, thisObj, param) => Resolve(param));
+            FunctionInstance rejectFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, "t", 1, (engine, thisObj, param) => Reject(param));
             try
             {
                 executor.Call(Undefined.Value, resolveFunc, rejectFunc);
@@ -68,6 +54,52 @@ namespace Jurassic.Library
             {
                 rejectFunc.Call(Undefined.Value, ex.ErrorObject);
             }
+        }
+
+        /// <summary>
+        /// Creates a new Promise instance.
+        /// </summary>
+        /// <param name="prototype"></param>
+        internal PromiseInstance(ObjectInstance prototype) : base(prototype)
+        {
+
+        }
+
+        internal object Reject(params object[] param) => 
+            ResolveOrReject(param, PromiseState.Rejected, rejectReactions);
+
+        internal object Resolve(params object[] param) => 
+            ResolveOrReject(param, PromiseState.Fulfilled, fulfillReactions);
+
+        internal object ResolveOrReject(object[] param, PromiseState state, List<FunctionInstance> functions)
+        {
+            if (this.state != PromiseState.Pending)
+                throw new JavaScriptException(Engine, ErrorType.TypeError, string.Format("Promise has already been {0}", this.state));
+
+            this.state = state;
+            if (param.Length > 0)
+            {
+                result = param[0];
+            }
+            else
+            {
+                result = Undefined.Value;
+            }
+
+            foreach (var function in functions)
+            {
+                ResolveOrReject(function);
+            }
+            fulfillReactions.Clear();
+            rejectReactions.Clear();
+            return Undefined.Value;
+        }
+
+        internal void ResolveOrReject(FunctionInstance function)
+        {
+            if (function == null) return;
+            if (result == Undefined.Value) function.CallLateBound(function);
+            else function.CallLateBound(function, result);
         }
 
         /// <summary>
@@ -91,6 +123,18 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
+        /// Returns a Promise and deals with all cases. It behaves the same as calling
+        /// Promise.prototype.then(onFinally, onFinally).
+        /// </summary>
+        /// <param name="onFinally"> A Function called when the Promise is completed.</param>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "finally")]
+        public PromiseInstance Finally(object onFinally)
+        {
+            return Then(onFinally, onFinally);
+        }
+
+        /// <summary>
         /// Returns a Promise and deals with rejected cases only. It behaves the same as calling
         /// Promise.prototype.then(undefined, onRejected).
         /// </summary>
@@ -98,7 +142,7 @@ namespace Jurassic.Library
         /// has one argument, the rejection reason. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "catch")]
-        public PromiseInstance Catch(FunctionInstance onRejected)
+        public PromiseInstance Catch(object onRejected)
         {
             return Then(null, onRejected);
         }
@@ -113,11 +157,45 @@ namespace Jurassic.Library
         /// has one argument, the rejection reason. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "then")]
-        public PromiseInstance Then(FunctionInstance onFulfilled, FunctionInstance onRejected)
+        public PromiseInstance Then(object onFulfilled, object onRejected)
         {
-            throw new NotImplementedException();
+            if (state == PromiseState.Pending)
+            {
+                if (onFulfilled is FunctionInstance f) fulfillReactions.Add(f);
+                if (onRejected is FunctionInstance r) rejectReactions.Add(r);
+            }
+            else if (state == PromiseState.Fulfilled)
+            {
+                ResolveOrReject(onFulfilled as FunctionInstance);
+            }
+            else if (state == PromiseState.Rejected)
+            {
+                ResolveOrReject(onRejected as FunctionInstance);
+            }
+            return this;
         }
 
+        /// <summary>
+        /// Creates a task that completes when this promise completes.
+        /// </summary>
+        /// <returns>The task that completes when this promise completes.</returns>
+        public Task<object> CreateTask()
+        {
+            var tcs = new TaskCompletionSource<object>();
+            Then(new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
+                {
+                    var result = arg.Length == 0 ? Undefined.Value : arg[0];
+                    tcs.SetResult(result);
+                    return Undefined.Value;
+                }),
+                new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
+                {
+                    var result = arg.Length == 0 ? Undefined.Value : arg[0];
+                    tcs.SetException(new JavaScriptException(result, 0, null));
+                    return Undefined.Value;
+                }));
+            return tcs.Task;
+        }
 
 
         //     .NET ACCESSOR PROPERTIES
@@ -168,5 +246,6 @@ namespace Jurassic.Library
         {
             get { return "Promise"; }
         }
+
     }
 }
