@@ -307,10 +307,10 @@ namespace Jurassic
             double num = ToNumber(value);
             if (num > 2147483647.0)
                 return 2147483647;
-#pragma warning disable 1718
+            #pragma warning disable 1718
             if (num != num)
                 return 0;
-#pragma warning restore 1718
+            #pragma warning restore 1718
             return (int)num;
         }
 
