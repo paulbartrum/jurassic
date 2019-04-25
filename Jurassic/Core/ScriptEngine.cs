@@ -1243,8 +1243,6 @@ namespace Jurassic
 
         private Stack<StackFrame> stackFrames = new Stack<StackFrame>();
 
-        internal bool IsExecutingJavaScript => stackFrames.Count > 0;
-
         /// <summary>
         /// Creates a stack trace.
         /// </summary>
