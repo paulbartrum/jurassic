@@ -11,6 +11,9 @@ namespace UnitTests
         [ThreadStatic]
         public static Jurassic.ScriptEngine jurassicScriptEngine;
 
+        [ThreadStatic]
+        public static TestingContext testingContext;
+
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
@@ -38,12 +41,15 @@ namespace UnitTests
             jurassicScriptEngine.Execute(script);
         }
 
-        private static void InitializeJurassic()
+        protected static void InitializeJurassic()
         {
             if (jurassicScriptEngine == null)
             {
                 jurassicScriptEngine = new Jurassic.ScriptEngine();
+                testingContext = new TestingContext(jurassicScriptEngine);
+                jurassicScriptEngine.SetGlobalValue("testingContext", testingContext);
             }
+            testingContext.Clear();
         }
 
         public static string EvaluateExceptionType(string script)

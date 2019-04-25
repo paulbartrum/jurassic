@@ -234,10 +234,25 @@ namespace Jurassic
                 result = engine.String.Construct((string)value);
             else if (value is ConcatenatedString)
                 result = engine.String.Construct(value.ToString());
+            else if (value is System.Runtime.CompilerServices.INotifyCompletion notify)
+                result = ToPromise(engine, notify);
             else
                 throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), nameof(value));
+
             result.IsExtensible = false;
             return result;
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to a Promise.
+        /// </summary>
+        /// <param name="engine"> The script engine used to create new objects. </param>
+        /// <param name="value"> The value to convert. </param>
+        /// <returns> An promise. </returns>
+        public static PromiseInstance ToPromise<T>(ScriptEngine engine, T value)
+            where T : System.Runtime.CompilerServices.INotifyCompletion
+        {
+            return engine.Promise.Construct(value);
         }
 
         /// <summary>
@@ -292,10 +307,10 @@ namespace Jurassic
             double num = ToNumber(value);
             if (num > 2147483647.0)
                 return 2147483647;
-            #pragma warning disable 1718
+#pragma warning disable 1718
             if (num != num)
                 return 0;
-            #pragma warning restore 1718
+#pragma warning restore 1718
             return (int)num;
         }
 
@@ -376,7 +391,7 @@ namespace Jurassic
             if (offset >= args.Length)
                 return new T[0];
             var result = new T[args.Length - offset];
-            for (int i = 0; i < result.Length; i ++)
+            for (int i = 0; i < result.Length; i++)
             {
                 result[i] = ConvertTo<T>(engine, args[offset + i]);
             }

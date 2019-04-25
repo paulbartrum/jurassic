@@ -54,49 +54,57 @@ namespace Jurassic.Library
 
 		private static object __STUB__Reject(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is PromiseConstructor))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'reject' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					return Reject(TypeConverter.ToObject(engine, thisObj), Undefined.Value);
+					return ((PromiseConstructor)thisObj).Reject(Undefined.Value);
 				default:
-					return Reject(TypeConverter.ToObject(engine, thisObj), args[0]);
+					return ((PromiseConstructor)thisObj).Reject(args[0]);
 			}
 		}
 
 		private static object __STUB__Resolve(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is PromiseConstructor))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'resolve' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					return Resolve(TypeConverter.ToObject(engine, thisObj), Undefined.Value);
+					return ((PromiseConstructor)thisObj).Resolve(Undefined.Value);
 				default:
-					return Resolve(TypeConverter.ToObject(engine, thisObj), args[0]);
+					return ((PromiseConstructor)thisObj).Resolve(args[0]);
 			}
 		}
 
 		private static object __STUB__Race(ScriptEngine engine, object thisObj, object[] args)
 		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is PromiseConstructor))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'race' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
-					return Race(TypeConverter.ToObject(engine, args[0]));
+					return ((PromiseConstructor)thisObj).Race(TypeConverter.ToObject(engine, args[0]));
 			}
 		}
 
 		private static object __STUB__All(ScriptEngine engine, object thisObj, object[] args)
 		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is PromiseConstructor))
+				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'all' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
-					return All(TypeConverter.ToObject(engine, args[0]));
+					return ((PromiseConstructor)thisObj).All(TypeConverter.ToObject(engine, args[0]));
 			}
 		}
 	}

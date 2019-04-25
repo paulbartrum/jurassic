@@ -65,10 +65,10 @@ namespace Jurassic.Library
 
         }
 
-        internal object Reject(params object[] param) => 
+        internal object Reject(params object[] param) =>
             ResolveOrReject(param, PromiseState.Rejected, rejectReactions);
 
-        internal object Resolve(params object[] param) => 
+        internal object Resolve(params object[] param) =>
             ResolveOrReject(param, PromiseState.Fulfilled, fulfillReactions);
 
         internal object ResolveOrReject(object[] param, PromiseState state, List<FunctionInstance> functions)
@@ -97,9 +97,18 @@ namespace Jurassic.Library
 
         internal void ResolveOrReject(FunctionInstance function)
         {
-            if (function == null) return;
-            if (result == Undefined.Value) function.CallLateBound(function);
-            else function.CallLateBound(function, result);
+            if (function == null)
+            {
+                // Do nothing.
+            }
+            else if (result == Undefined.Value)
+            {
+                function.Engine.EventLoop.PendCallback(function, function.Engine.Global);
+            }
+            else
+            {
+                function.Engine.EventLoop.PendCallback(function, function.Engine.Global, result);
+            }
         }
 
         /// <summary>
@@ -181,6 +190,15 @@ namespace Jurassic.Library
         /// <returns>The task that completes when this promise completes.</returns>
         public Task<object> CreateTask()
         {
+            if (state == PromiseState.Fulfilled)
+            {
+                return Task.FromResult(result);
+            }
+            else if (state == PromiseState.Rejected)
+            {
+                throw new JavaScriptException(result, 0, null);
+            }
+
             var tcs = new TaskCompletionSource<object>();
             Then(new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
                 {

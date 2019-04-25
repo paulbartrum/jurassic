@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using static Jurassic.Library.PromiseInstance;
 
 namespace Jurassic.Library
@@ -42,14 +43,44 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Creates a new promise instance.
+        /// Creates a new Promise instance.
         /// </summary>
-        /// <param name="executor">  </param>
-        /// <returns></returns>
+        /// <param name="executor">The function that the promise executes.</param>
+        /// <returns>The Promise instance.</returns>
         [JSConstructorFunction]
         public PromiseInstance Construct(FunctionInstance executor)
         {
             return new PromiseInstance(this.InstancePrototype, executor);
+        }
+
+        /// <summary>
+        /// Creates a new Promise instance.
+        /// </summary>
+        /// <param name="notify">A <see cref="INotifyCompletion"/> that will signal the success or failure of the promise.</param>
+        /// <returns>The Promise instance.</returns>
+        public PromiseInstance Construct<T>(T notify)
+            where T : INotifyCompletion
+        {
+            var promise = new PromiseInstance(this.InstancePrototype);
+            if (notify == null) return promise;
+
+            notify.OnCompleted(() =>
+            {
+                try
+                {
+                    promise.Resolve(TaskAwaiterCache.GetResult(notify));
+                }
+                catch (JavaScriptException jex)
+                {
+                    promise.Reject(jex.ErrorObject);
+                }
+                catch (Exception e)
+                {
+                    promise.Reject(e.Message);
+                }
+            });
+
+            return promise;
         }
 
 
@@ -76,13 +107,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a Promise that is rejected for the specified reason.
         /// </summary>
-        /// <param name="thisObject">The Promise prototype.</param>
         /// <param name="result">The reason.</param>
         /// <returns></returns>
-        [JSInternalFunction(Name = "reject", Flags = JSFunctionFlags.HasThisObject)]
-        public static PromiseInstance Reject(ObjectInstance thisObject, object result)
+        [JSInternalFunction(Name = "reject")]
+        public PromiseInstance Reject(object result)
         {
-            var promise = new PromiseInstance(thisObject);
+            var promise = new PromiseInstance(this.InstancePrototype);
             promise.Reject(result);
             return promise;
         }
@@ -90,13 +120,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a Promise that is resolved with the specified result.
         /// </summary>
-        /// <param name="thisObject">The Promise prototype.</param>
         /// <param name="result">The result.</param>
         /// <returns></returns>
-        [JSInternalFunction(Name = "resolve", Flags = JSFunctionFlags.HasThisObject)]
-        public static PromiseInstance Resolve(ObjectInstance thisObject, object result)
+        [JSInternalFunction(Name = "resolve")]
+        public PromiseInstance Resolve(object result)
         {
-            var promise = new PromiseInstance(thisObject);
+            var promise = new PromiseInstance(this.InstancePrototype);
             promise.Resolve(result);
             return promise;
         }
@@ -108,7 +137,7 @@ namespace Jurassic.Library
         /// <param name="iterable">The list of Promises.</param>
         /// <returns></returns>
         [JSInternalFunction(Name = "race")]
-        public static PromiseInstance Race(ObjectInstance iterable)
+        public PromiseInstance Race(ObjectInstance iterable)
         {
             if (iterable == null)
                 throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, "The parameter must be an iterable.");
@@ -168,7 +197,7 @@ namespace Jurassic.Library
         /// <param name="iterable">The list of Promises.</param>
         /// <returns></returns>
         [JSInternalFunction(Name = "all")]
-        public static PromiseInstance All(ObjectInstance iterable)
+        public PromiseInstance All(ObjectInstance iterable)
         {
             if (iterable == null)
                 throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, "The parameter must be an iterable.");

@@ -66,6 +66,8 @@ namespace Jurassic
         private ObjectInstance setIteratorPrototype;
         private ObjectInstance arrayIteratorPrototype;
 
+        // Execution behavior
+        private readonly EventLoop eventLoop;
 
         /// <summary>
         /// Initializes a new scripting environment.
@@ -171,6 +173,8 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Float64Array", this.float64ArrayConstructor, PropertyAttributes.NonEnumerable));
 
             this.globalObject.FastSetProperties(globalProperties);
+
+            this.eventLoop = new EventLoop();
         }
 
         /// <summary>
@@ -627,7 +631,17 @@ namespace Jurassic
             get { return this.float64ArrayConstructor; }
         }
 
+        //     EXECUTION BEHAVIOR
+        //_________________________________________________________________________________________
 
+        /// <summary>
+        /// Gets the built-in event loop, that can be used to pend and invoke
+        /// callbacks into the engine.
+        /// </summary>
+        public EventLoop EventLoop
+        {
+            get { return this.eventLoop; }
+        }
 
         //     DEBUGGING SUPPORT
         //_________________________________________________________________________________________
@@ -667,7 +681,7 @@ namespace Jurassic
 
         //     EXECUTION
         //_________________________________________________________________________________________
-        
+
         /// <summary>
         /// Compiles the given source code and returns it in a form that can be executed many
         /// times.
@@ -1228,6 +1242,8 @@ namespace Jurassic
         }
 
         private Stack<StackFrame> stackFrames = new Stack<StackFrame>();
+
+        internal bool IsExecutingJavaScript => stackFrames.Count > 0;
 
         /// <summary>
         /// Creates a stack trace.
