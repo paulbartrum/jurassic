@@ -471,7 +471,7 @@ namespace UnitTests
             Assert.AreEqual(2, (int)testingContext[0]);
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(1000)]
         public async Task CreateTask()
         {
             var promise = EvaluatePromise("new Promise(function(){})");
@@ -492,7 +492,7 @@ namespace UnitTests
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(1000)]
         public async Task CreateTask_Delayed()
         {
             var promise = EvaluatePromise("new Promise(function(){})");

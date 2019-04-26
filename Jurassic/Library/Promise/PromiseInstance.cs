@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Jurassic.Library
@@ -14,11 +11,27 @@ namespace Jurassic.Library
     [DebuggerTypeProxy(typeof(PromiseInstanceDebugView))]
     public partial class PromiseInstance : ObjectInstance
     {
+        // Initial room for try, catch, finally.
+        private const int InitialReactionCapacity = 3;
+
         internal enum PromiseState
         {
             Pending,
             Fulfilled,
             Rejected,
+        }
+
+        [DebuggerDisplay("{State,nq} {Callback}")]
+        private struct Reaction
+        {
+            public FunctionInstance Callback { get; }
+            public PromiseState State { get; }
+
+            public Reaction(object callback, PromiseState state)
+            {
+                Callback = callback as FunctionInstance;
+                State = state;
+            }
         }
 
         // Governs how a promise will react to incoming calls to its then() method.
@@ -29,13 +42,12 @@ namespace Jurassic.Library
         private object result;
 
         // 	A list of PromiseReaction records to be processed when/if the promise transitions
-        // from the Pending state to the Fulfilled state.
-        private readonly List<FunctionInstance> fulfillReactions = new List<FunctionInstance>();
+        // from the Pending state to any other state.
+        private readonly List<Reaction> reactions = new List<Reaction>(InitialReactionCapacity);
 
-        // 	A list of PromiseReaction records to be processed when/if the promise transitions
-        // from the Pending state to the Rejected state.
-        private readonly List<FunctionInstance> rejectReactions = new List<FunctionInstance>();
-
+        // Representative lock object for this (never lock(this)). Do not directly invoke any
+        // callbacks while holding this lock as that could deadlock depending on user code.
+        private readonly object sync = new object();
 
         /// <summary>
         /// Creates a new Promise instance.
@@ -66,48 +78,53 @@ namespace Jurassic.Library
         }
 
         internal object Reject(params object[] param) =>
-            ResolveOrReject(param, PromiseState.Rejected, rejectReactions);
+            ResolveOrReject(param, PromiseState.Rejected);
 
         internal object Resolve(params object[] param) =>
-            ResolveOrReject(param, PromiseState.Fulfilled, fulfillReactions);
+            ResolveOrReject(param, PromiseState.Fulfilled);
 
-        internal object ResolveOrReject(object[] param, PromiseState state, List<FunctionInstance> functions)
+        private object ResolveOrReject(object[] param, PromiseState state)
         {
-            if (this.state != PromiseState.Pending)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, string.Format("Promise has already been {0}", this.state));
-
-            this.state = state;
-            if (param.Length > 0)
+            lock (sync)
             {
-                result = param[0];
-            }
-            else
-            {
-                result = Undefined.Value;
+                // Interlocked can't be used here because there is a strong dependency between
+                // state and result, the two have to be changed in tandem.
+                if (this.state != PromiseState.Pending)
+                    return Undefined.Value;
+
+                this.state = state;
+                if (param.Length > 0)
+                {
+                    result = param[0];
+                }
+                else
+                {
+                    result = Undefined.Value;
+                }
             }
 
-            foreach (var function in functions)
+            // At this point it is guaranteed that only one thread is accessing reactions (see Then).
+            foreach (var function in reactions)
             {
                 ResolveOrReject(function);
             }
-            fulfillReactions.Clear();
-            rejectReactions.Clear();
+            reactions.Clear();
             return Undefined.Value;
         }
 
-        internal void ResolveOrReject(FunctionInstance function)
+        private void ResolveOrReject(Reaction reaction)
         {
-            if (function == null)
+            if (reaction.Callback == null || reaction.State != state)
             {
                 // Do nothing.
             }
             else if (result == Undefined.Value)
             {
-                function.Engine.EventLoop.PendCallback(function, function.Engine.Global);
+                reaction.Callback.Engine.EventLoop.PendCallback(reaction.Callback, reaction.Callback.Engine.Global);
             }
             else
             {
-                function.Engine.EventLoop.PendCallback(function, function.Engine.Global, result);
+                reaction.Callback.Engine.EventLoop.PendCallback(reaction.Callback, reaction.Callback.Engine.Global, result);
             }
         }
 
@@ -168,18 +185,24 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "then")]
         public PromiseInstance Then(object onFulfilled, object onRejected)
         {
-            if (state == PromiseState.Pending)
+            lock (sync)
             {
-                if (onFulfilled is FunctionInstance f) fulfillReactions.Add(f);
-                if (onRejected is FunctionInstance r) rejectReactions.Add(r);
-            }
-            else if (state == PromiseState.Fulfilled)
-            {
-                ResolveOrReject(onFulfilled as FunctionInstance);
-            }
-            else if (state == PromiseState.Rejected)
-            {
-                ResolveOrReject(onRejected as FunctionInstance);
+                var fulfilled = new Reaction(onFulfilled, PromiseState.Fulfilled);
+                var rejected = new Reaction(onRejected, PromiseState.Rejected);
+
+                if (state == PromiseState.Pending)
+                {
+                    if (fulfilled.Callback != null) reactions.Add(fulfilled);
+                    if (rejected.Callback != null) reactions.Add(rejected);
+                }
+                else if (state == PromiseState.Fulfilled)
+                {
+                    ResolveOrReject(fulfilled);
+                }
+                else if (state == PromiseState.Rejected)
+                {
+                    ResolveOrReject(rejected);
+                }
             }
             return this;
         }
@@ -190,15 +213,20 @@ namespace Jurassic.Library
         /// <returns>The task that completes when this promise completes.</returns>
         public Task<object> CreateTask()
         {
-            if (state == PromiseState.Fulfilled)
+            lock (sync)
             {
-                return Task.FromResult(result);
-            }
-            else if (state == PromiseState.Rejected)
-            {
-                throw new JavaScriptException(result, 0, null);
+                if (state == PromiseState.Fulfilled)
+                {
+                    return Task.FromResult(result);
+                }
+                else if (state == PromiseState.Rejected)
+                {
+                    throw new JavaScriptException(result, 0, null);
+                }
             }
 
+            // These callbacks shouldn't deadlock on this.sync as they will not immediately fire
+            // (they are added to a queue and will execute after the current Evaluate/Execute).
             var tcs = new TaskCompletionSource<object>();
             Then(new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
                 {
