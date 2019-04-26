@@ -67,7 +67,7 @@ Feature|Status
 &nbsp;&nbsp;WeakSet|9/11
 &nbsp;&nbsp;Proxy[18]|:x:
 &nbsp;&nbsp;Reflect[20]|:x:
-&nbsp;&nbsp;Promise|:x:
+&nbsp;&nbsp;Promise|:white_check_mark:
 &nbsp;&nbsp;Symbol|5/11
 &nbsp;&nbsp;well-known symbols[21]|5/26
 **Built-in extensions**|
