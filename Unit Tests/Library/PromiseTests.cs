@@ -112,6 +112,14 @@ namespace UnitTests
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(3, (int)testingContext[0]);
+
+            var exception = EvaluateExceptionMessage(@"
+                (function(){ 
+                    var resolver;
+                    p = new Promise(function(resolve, reject) { resolver = resolve }).then(function(r) { throw r }, function(r) { testingContext.push(r) });
+                    resolver(p);
+                })()");
+            Assert.AreEqual("TypeError: Cannot resolve a promise with itself.", exception);
         }
 
         [TestMethod]
@@ -370,6 +378,20 @@ namespace UnitTests
                     var promise2 = new Promise(function(resolve, reject) { complete2 = [ resolve, reject ]; });
                     var complete3;
                     var promise3 = new Promise(function(resolve, reject) { complete3 = [ resolve, reject ]; });
+                    complete1[0](2);
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { throw r }, function(r) { throw r });
+                })()");
+            Assert.AreEqual(0, (int)testingContext.Length);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
+                    var complete2;
+                    var promise2 = new Promise(function(resolve, reject) { complete2 = [ resolve, reject ]; });
+                    var complete3;
+                    var promise3 = new Promise(function(resolve, reject) { complete3 = [ resolve, reject ]; });
                     var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { throw r }, function(r) { throw r });
                     complete1[0](2);
                     complete2[0](3);
@@ -389,6 +411,50 @@ namespace UnitTests
                     complete3[0](4);
                     complete1[0](2);
                     complete2[0](3);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            arrayInstance = testingContext[0] as ArrayInstance;
+            Assert.IsNotNull(arrayInstance);
+            Assert.AreEqual(3, (int)arrayInstance.Length);
+            Assert.AreEqual(2, (int)arrayInstance[0]);
+            Assert.AreEqual(3, (int)arrayInstance[1]);
+            Assert.AreEqual(4, (int)arrayInstance[2]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
+                    var complete2;
+                    var promise2 = new Promise(function(resolve, reject) { complete2 = [ resolve, reject ]; });
+                    var complete3;
+                    var promise3 = new Promise(function(resolve, reject) { complete3 = [ resolve, reject ]; });
+                    complete3[0](4);
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
+                    complete1[0](2);
+                    complete2[0](3);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            arrayInstance = testingContext[0] as ArrayInstance;
+            Assert.IsNotNull(arrayInstance);
+            Assert.AreEqual(3, (int)arrayInstance.Length);
+            Assert.AreEqual(2, (int)arrayInstance[0]);
+            Assert.AreEqual(3, (int)arrayInstance[1]);
+            Assert.AreEqual(4, (int)arrayInstance[2]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
+                    var complete2;
+                    var promise2 = new Promise(function(resolve, reject) { complete2 = [ resolve, reject ]; });
+                    var complete3;
+                    var promise3 = new Promise(function(resolve, reject) { complete3 = [ resolve, reject ]; });
+                    complete3[0](4);
+                    complete1[0](2);
+                    complete2[0](3);
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
             arrayInstance = testingContext[0] as ArrayInstance;
@@ -466,6 +532,19 @@ namespace UnitTests
                     var promise3 = new Promise(function(resolve, reject) { complete3 = [ resolve, reject ]; });
                     var promise = Promise.all([promise1, 3, promise3]).then(function(r) { throw r }, function(r) { testingContext.push(r) });
                     complete1[1](2);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
+                    var complete3;
+                    var promise3 = new Promise(function(resolve, reject) { complete3 = [ resolve, reject ]; });
+                    complete1[1](2);
+                    var promise = Promise.all([promise1, 3, promise3]).then(function(r) { throw r }, function(r) { testingContext.push(r) });
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(2, (int)testingContext[0]);
@@ -645,6 +724,344 @@ namespace UnitTests
             Execute("promise.then(function (r) { testingContext.push(r) }, function (r) { throw r })");
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(Undefined.Value, testingContext[0]);
+        }
+
+        [TestMethod]
+        public void Thenable()
+        {
+            // Do nothing
+            Evaluate(@"
+                (function() {
+                    var thenable = {
+                        then: function(resolve, reject) {}
+                    };
+                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { throw r }, function(r) { throw r })
+                })()");
+            
+            // Resolve
+            Evaluate(@"
+                (function() {
+                    var thenable = {
+                        then: function(resolve, reject) { resolve(2) }
+                    };
+                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { testingContext.push(r) }, function(r) { throw r })
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            Evaluate(@"
+                (function() {
+                    var resolver;
+                    var thenable = {
+                        then: function(resolve, reject) { resolver = resolve }
+                    };
+                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { testingContext.push(r) }, function(r) { throw r })
+                    resolver(2);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            // Reject
+            Evaluate(@"
+                (function() {
+                    var thenable = {
+                        then: function(resolve, reject) { reject(2) }
+                    };
+                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { throw r }, function(r) { testingContext.push(r) })
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            Evaluate(@"
+                (function() {
+                    var rejecter;
+                    var thenable = {
+                        then: function(resolve, reject) { rejecter = reject }
+                    };
+                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { throw r }, function(r) { testingContext.push(r) })
+                    rejecter(2);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            // Throw
+            Evaluate(@"
+                (function() {
+                    var thenable = {};
+                    Object.defineProperty(thenable, 'then', {
+                        get: function() { throw 2 }
+                    });
+                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { throw r }, function(r) { testingContext.push(r) })
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            Evaluate(@"
+                (function() {
+                    var thenable = {
+                        then: function(resolve, reject) {
+                            throw 2
+                        }
+                    };
+                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { throw r }, function(r) { testingContext.push(r) })
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+        }
+
+        [TestMethod]
+        public void All_Thenable()
+        {
+            ArrayInstance arrayInstance;
+
+            // No action
+            Execute(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).finally(function() { throw 'Called' });
+                })()");
+            Assert.AreEqual(0, (int)testingContext.Length);
+
+            // Resolve
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { throw r }, function(r) { throw r });
+                    complete1[0](2);
+                })()");
+            Assert.AreEqual(0, (int)testingContext.Length);
+
+            Evaluate(@"
+                (function()
+                {
+                    var promise1 = {
+                        then: function(resolve, reject) { resolve(2) }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { throw r }, function(r) { throw r });
+                })()");
+            Assert.AreEqual(0, (int)testingContext.Length);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { throw r }, function(r) { throw r });
+                    complete1[0](2);
+                    complete2[0](3);
+                })()");
+            Assert.AreEqual(0, (int)testingContext.Length);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
+                    complete3[0](4);
+                    complete1[0](2);
+                    complete2[0](3);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            arrayInstance = testingContext[0] as ArrayInstance;
+            Assert.IsNotNull(arrayInstance);
+            Assert.AreEqual(3, (int)arrayInstance.Length);
+            Assert.AreEqual(2, (int)arrayInstance[0]);
+            Assert.AreEqual(3, (int)arrayInstance[1]);
+            Assert.AreEqual(4, (int)arrayInstance[2]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var promise3 = {
+                        then: function(resolve, reject) { resolve(4) }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
+                    complete1[0](2);
+                    complete2[0](3);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            arrayInstance = testingContext[0] as ArrayInstance;
+            Assert.IsNotNull(arrayInstance);
+            Assert.AreEqual(3, (int)arrayInstance.Length);
+            Assert.AreEqual(2, (int)arrayInstance[0]);
+            Assert.AreEqual(3, (int)arrayInstance[1]);
+            Assert.AreEqual(4, (int)arrayInstance[2]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var promise1 = {
+                        then: function(resolve, reject) { resolve(2) }
+                    };
+                    var promise2 = {
+                        then: function(resolve, reject) { resolve(3) }
+                    };
+                    var promise3 = {
+                        then: function(resolve, reject) { resolve(4) }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            arrayInstance = testingContext[0] as ArrayInstance;
+            Assert.IsNotNull(arrayInstance);
+            Assert.AreEqual(3, (int)arrayInstance.Length);
+            Assert.AreEqual(2, (int)arrayInstance[0]);
+            Assert.AreEqual(3, (int)arrayInstance[1]);
+            Assert.AreEqual(4, (int)arrayInstance[2]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, 3, 4]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
+                    complete1[0](2);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            arrayInstance = testingContext[0] as ArrayInstance;
+            Assert.AreEqual(3, (int)arrayInstance.Length);
+            Assert.AreEqual(2, (int)arrayInstance[0]);
+            Assert.AreEqual(3, (int)arrayInstance[1]);
+            Assert.AreEqual(4, (int)arrayInstance[2]);
+
+            // Reject
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { throw r }, function(r) { testingContext.push(r) });
+                    complete1[1](2);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete2;
+                    var promise2 = {
+                        then: function(resolve, reject) { complete2 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, promise2, promise3]).then(function(r) { throw r }, function(r) { testingContext.push(r) });
+                    complete2[0](3);
+                    complete1[1](2);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var complete1;
+                    var promise1 = {
+                        then: function(resolve, reject) { complete1 = [ resolve, reject ]; }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, 3, promise3]).then(function(r) { throw r }, function(r) { testingContext.push(r) });
+                    complete1[1](2);
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
+
+            Evaluate(@"
+                (function()
+                {
+                    var promise1 = {
+                        then: function(resolve, reject) { reject(2) }
+                    };
+                    var complete3;
+                    var promise3 = {
+                        then: function(resolve, reject) { complete3 = [ resolve, reject ]; }
+                    };
+                    var promise = Promise.all([promise1, 3, promise3]).then(function(r) { throw r }, function(r) { testingContext.push(r) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(2, (int)testingContext[0]);
         }
     }
 }

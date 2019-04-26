@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using static Jurassic.Library.PromiseInstance;
 
 namespace Jurassic.Library
@@ -147,44 +148,10 @@ namespace Jurassic.Library
 
             var promise = new PromiseInstance(iterable.Engine.Promise.InstancePrototype);
 
-            var resolve = new ClrStubFunction(iterable.Engine.Function.InstancePrototype, (engine, ths, arg) =>
-            {
-                if (promise.State != PromiseState.Pending) return Undefined.Value;
-
-                promise.Resolve(arg);
-                return Undefined.Value;
-            });
-
-            var reject = new ClrStubFunction(iterable.Engine.Function.InstancePrototype, (engine, ths, arg) =>
-            {
-                if (promise.State != PromiseState.Pending) return Undefined.Value;
-
-                promise.Reject(arg);
-                return Undefined.Value;
-            });
-
             foreach (var promiseOrValue in promises)
             {
                 if (promise.State != PromiseState.Pending) break;
-
-                if (promiseOrValue is PromiseInstance p)
-                {
-                    if (p.State == PromiseState.Rejected)
-                    {
-                        promise.Reject(p.Result);
-                        break;
-                    }
-                    else if (p.State == PromiseState.Fulfilled)
-                    {
-                        promise.Resolve(p.Result);
-                        break;
-                    }
-                    p.Then(resolve, reject);
-                }
-                else
-                {
-                    promise.Resolve(promiseOrValue);
-                }
+                promise.Resolve(promiseOrValue);
             }
 
             return promise;
@@ -209,14 +176,6 @@ namespace Jurassic.Library
 
             var promise = new PromiseInstance(iterable.Engine.Promise.InstancePrototype);
 
-            var reject = new ClrStubFunction(iterable.Engine.Function.InstancePrototype, (engine, ths, arg) =>
-            {
-                if (promise.State != PromiseState.Pending) return Undefined.Value;
-
-                promise.Reject(arg);
-                return Undefined.Value;
-            });
-
             for (var i = 0; i < promises.Count; i++)
             {
                 if (promise.State != PromiseState.Pending) break;
@@ -240,31 +199,74 @@ namespace Jurassic.Library
                     }
 
                     var j = i; // Some C# versions need this.
-                    var resolve = new ClrStubFunction(iterable.Engine.Function.InstancePrototype, (engine, ths, arg) =>
-                    {
-                        if (promise.State != PromiseState.Pending) return Undefined.Value;
-
-                        results[j] = arg.Length == 0
-                            ? Undefined.Value
-                            : arg[0];
-
-                        if (--count == 0)
+                    p.Then(
+                        arg =>
                         {
-                            promise.Resolve(results);
-                        }
-                        return Undefined.Value;
-                    });
+                            if (promise.State != PromiseState.Pending) return;
 
-                    p.Then(resolve, reject);
+                            results[j] = arg;
+
+                            if (--count == 0)
+                            {
+                                promise.Resolve(results);
+                            }
+                        },
+                        arg =>
+                        {
+                            promise.Reject(arg);
+                        });
+
+                    continue;
                 }
-                else
+                else if (promises[i] is ObjectInstance obj && obj.HasProperty("then"))
                 {
-                    results[i] = promises[i];
-                    if (--count == 0)
+                    FunctionInstance then;
+                    try
                     {
-                        promise.Resolve(results);
+                        then = obj.GetPropertyValue("then") as FunctionInstance;
+                    }
+                    catch (JavaScriptException jex)
+                    {
+                        promise.Reject(jex.ErrorObject);
                         break;
                     }
+
+                    if (then != null)
+                    {
+                        try
+                        {
+                            var j = i; // Some C# versions need this.
+                            var resolve = new ClrStubFunction(iterable.Engine.Function.InstancePrototype, (engine, ths, arg) =>
+                            {
+                                if (promise.State != PromiseState.Pending) return Undefined.Value;
+
+                                results[j] = arg.Length == 0
+                                    ? Undefined.Value
+                                    : arg[0];
+
+                                if (--count == 0)
+                                {
+                                    promise.Resolve(results);
+                                }
+                                return Undefined.Value;
+                            });
+
+                            then.Call(obj, resolve, promise.RejectPromise);
+                            continue;
+                        }
+                        catch (JavaScriptException jex)
+                        {
+                            promise.Reject(jex.ErrorObject);
+                            break;
+                        }
+                    }
+                }
+
+                results[i] = promises[i];
+                if (--count == 0)
+                {
+                    promise.Resolve(results);
+                    break;
                 }
             }
 

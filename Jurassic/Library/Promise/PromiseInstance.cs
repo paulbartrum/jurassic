@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Jurassic.Library
@@ -25,12 +27,32 @@ namespace Jurassic.Library
         private struct Reaction
         {
             public FunctionInstance Callback { get; }
+            public PromiseInstance Chain { get; }
+            public Action<object> Action { get; }
             public PromiseState State { get; }
 
             public Reaction(object callback, PromiseState state)
             {
                 Callback = callback as FunctionInstance;
                 State = state;
+                Chain = null;
+                Action = null;
+            }
+
+            public Reaction(PromiseInstance chain)
+            {
+                Callback = null;
+                State = PromiseState.Pending;
+                Chain = chain;
+                Action = null;
+            }
+
+            public Reaction(Action<object> action, PromiseState state)
+            {
+                Callback = null;
+                State = state;
+                Chain = null;
+                Action = action;
             }
         }
 
@@ -49,22 +71,26 @@ namespace Jurassic.Library
         // callbacks while holding this lock as that could deadlock depending on user code.
         private readonly object sync = new object();
 
+        // The function that will resolve the promise.
+        private readonly FunctionInstance resolvePromise;
+
+        // The function that will reject the promise.
+        private readonly FunctionInstance rejectPromise;
+
         /// <summary>
         /// Creates a new Promise instance.
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="executor"></param>
-        internal PromiseInstance(ObjectInstance prototype, FunctionInstance executor) : base(prototype)
+        internal PromiseInstance(ObjectInstance prototype, FunctionInstance executor) : this(prototype)
         {
-            FunctionInstance resolveFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, "s", 1, (engine, thisObj, param) => Resolve(param));
-            FunctionInstance rejectFunc = new ClrStubFunction(Engine.FunctionInstancePrototype, "t", 1, (engine, thisObj, param) => Reject(param));
             try
             {
-                executor.Call(Undefined.Value, resolveFunc, rejectFunc);
+                executor.Call(Undefined.Value, resolvePromise, rejectPromise);
             }
             catch (JavaScriptException ex)
             {
-                rejectFunc.Call(Undefined.Value, ex.ErrorObject);
+                rejectPromise.Call(Undefined.Value, ex.ErrorObject);
             }
         }
 
@@ -74,7 +100,8 @@ namespace Jurassic.Library
         /// <param name="prototype"></param>
         internal PromiseInstance(ObjectInstance prototype) : base(prototype)
         {
-
+            resolvePromise = new ClrStubFunction(Engine.FunctionInstancePrototype, "s", 1, (engine, thisObj, param) => Resolve(param));
+            rejectPromise = new ClrStubFunction(Engine.FunctionInstancePrototype, "t", 1, (engine, thisObj, param) => Reject(param));
         }
 
         internal object Reject(params object[] param) =>
@@ -101,7 +128,13 @@ namespace Jurassic.Library
                 {
                     result = Undefined.Value;
                 }
+
+                if (state == PromiseState.Fulfilled)
+                    HandlePromiseChain();
             }
+
+            if (state == PromiseState.Pending)
+                return Undefined.Value;
 
             // At this point it is guaranteed that only one thread is accessing reactions (see Then).
             foreach (var function in reactions)
@@ -114,7 +147,15 @@ namespace Jurassic.Library
 
         private void ResolveOrReject(Reaction reaction)
         {
-            if (reaction.Callback == null || reaction.State != state)
+            if (reaction.Chain != null)
+            {
+                reaction.Chain.ResolveOrReject(new object[] { result }, state);
+            }
+            else if (reaction.Action != null && reaction.State == state)
+            {
+                reaction.Action(result);
+            }
+            else if (reaction.Callback == null || reaction.State != state)
             {
                 // Do nothing.
             }
@@ -125,6 +166,80 @@ namespace Jurassic.Library
             else
             {
                 reaction.Callback.Engine.EventLoop.PendCallback(reaction.Callback, reaction.Callback.Engine.Global, result);
+            }
+        }
+
+        private void HandlePromiseChain()
+        {
+            // 2.3.1. if promise and x refer to the same object, reject promise with a TypeError as the reason
+            if (result == this)
+            {
+                state = PromiseState.Pending;
+                result = null;
+                throw new JavaScriptException(Engine, ErrorType.TypeError, "Cannot resolve a promise with itself.");
+            }
+
+            // 2.3.2 if x is a promise, adopt its state:
+            if (result is PromiseInstance promise)
+            {
+                lock (promise.sync)
+                {
+                    if (promise.State == PromiseState.Rejected)
+                    {
+                        state = promise.state;
+                        result = promise.result;
+                    }
+                    else if (promise.State == PromiseState.Fulfilled)
+                    {
+                        state = promise.state;
+                        result = promise.result;
+                    }
+                    else
+                    {
+                        state = PromiseState.Pending;
+                        result = null;
+                        promise.reactions.Add(new Reaction(this));
+                    }
+                }
+            }
+
+            // 2.3.3. Otherwise, if x is an object or function, 
+            else if (result is ObjectInstance obj && obj.HasProperty("then"))
+            {
+                // 2.3.3.1 Let then be x.then
+                FunctionInstance then;
+                try
+                {
+                    then = obj.GetPropertyValue("then") as FunctionInstance;
+
+                    // 2.3.3.2 If retrieving the property x.then results in a
+                    //         thrown exception e, reject promise with e as the reason.
+                }
+                catch (JavaScriptException jex)
+                {
+                    state = PromiseState.Rejected;
+                    result = jex.ErrorObject;
+                    return;
+                }
+
+                // 2.3.3.3. If then is a function, call it with x as this, first argument resolvePromise, and second argument rejectPromise.
+                if (then != null)
+                {
+                    try
+                    {
+                        state = PromiseState.Pending;
+                        var thisObj = result;
+                        result = null;
+                        then.Call(thisObj, resolvePromise, rejectPromise);
+                        return;
+                    }
+                    catch (JavaScriptException jex)
+                    {
+                        state = PromiseState.Rejected;
+                        result = jex.ErrorObject;
+                        return;
+                    }
+                }
             }
         }
 
@@ -171,6 +286,39 @@ namespace Jurassic.Library
         public PromiseInstance Catch(object onRejected)
         {
             return Then(null, onRejected);
+        }
+
+        /// <summary>
+        /// Returns a Promise. It takes two arguments: callback functions for the success and
+        /// failure cases of the Promise.
+        /// </summary>
+        /// <param name="onFulfilled"> A Function called when the Promise is fulfilled. This
+        /// function has one argument, the fulfillment value. </param>
+        /// <param name="onRejected"> A Function called when the Promise is rejected. This function
+        /// has one argument, the rejection reason. </param>
+        /// <returns></returns>
+        internal PromiseInstance Then(Action<object> onFulfilled, Action<object> onRejected)
+        {
+            lock (sync)
+            {
+                var fulfilled = new Reaction(onFulfilled, PromiseState.Fulfilled);
+                var rejected = new Reaction(onRejected, PromiseState.Rejected);
+
+                if (state == PromiseState.Pending)
+                {
+                    if (fulfilled.Action != null) reactions.Add(fulfilled);
+                    if (rejected.Action != null) reactions.Add(rejected);
+                }
+                else if (state == PromiseState.Fulfilled)
+                {
+                    ResolveOrReject(fulfilled);
+                }
+                else if (state == PromiseState.Rejected)
+                {
+                    ResolveOrReject(rejected);
+                }
+            }
+            return this;
         }
 
         /// <summary>
@@ -261,6 +409,22 @@ namespace Jurassic.Library
         internal object Result
         {
             get { return this.result; }
+        }
+
+        /// <summary>
+        /// Gets a function that will resolve the promise.
+        /// </summary>
+        internal FunctionInstance ResolvePromise
+        {
+            get { return this.resolvePromise; }
+        }
+
+        /// <summary>
+        /// Gets a function that will reject the promise.
+        /// </summary>
+        internal FunctionInstance RejectPromise
+        {
+            get { return this.rejectPromise; }
         }
 
         /// <summary>
