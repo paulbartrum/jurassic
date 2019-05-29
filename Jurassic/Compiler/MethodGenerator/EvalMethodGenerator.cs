@@ -112,7 +112,7 @@ namespace Jurassic.Compiler
             object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(engine, scope, this.ThisObject);
 
             // Execute any pending event loop callbacks.
-            engine.EventLoop.ExecutePendingCallbacks();
+            engine.ExecutePendingCallbacks();
 
             // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
             GC.KeepAlive(this);

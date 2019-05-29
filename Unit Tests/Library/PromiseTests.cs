@@ -614,7 +614,7 @@ namespace UnitTests
             tcs.SetResult(100);
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.EventLoop.ExecutePendingCallbacks();
+            jurassicScriptEngine.ExecutePendingCallbacks();
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(100, (int)testingContext[0]);
 
@@ -629,7 +629,7 @@ namespace UnitTests
             tcs.SetException(new JavaScriptException(100, 0, null));
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.EventLoop.ExecutePendingCallbacks();
+            jurassicScriptEngine.ExecutePendingCallbacks();
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(100, (int)testingContext[0]);
         }
@@ -650,7 +650,7 @@ namespace UnitTests
             tcs.SetResult(100);
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.EventLoop.ExecutePendingCallbacks();
+            jurassicScriptEngine.ExecutePendingCallbacks();
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(100, (int)testingContext[0]);
 
@@ -665,7 +665,7 @@ namespace UnitTests
             tcs.SetException(new JavaScriptException(100, 0, null));
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.EventLoop.ExecutePendingCallbacks();
+            jurassicScriptEngine.ExecutePendingCallbacks();
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(100, (int)testingContext[0]);
         }
@@ -692,7 +692,7 @@ namespace UnitTests
             tcs.SetResult(100);
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.EventLoop.ExecutePendingCallbacks();
+            jurassicScriptEngine.ExecutePendingCallbacks();
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(Undefined.Value, testingContext[0]);
 
@@ -707,7 +707,7 @@ namespace UnitTests
             tcs.SetException(new JavaScriptException(100, 0, null));
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.EventLoop.ExecutePendingCallbacks();
+            jurassicScriptEngine.ExecutePendingCallbacks();
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(100, testingContext[0]);
         }

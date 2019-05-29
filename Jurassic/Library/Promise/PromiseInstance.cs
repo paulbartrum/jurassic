@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Jurassic.Library
@@ -161,11 +160,11 @@ namespace Jurassic.Library
             }
             else if (result == Undefined.Value)
             {
-                reaction.Callback.Engine.EventLoop.PendCallback(reaction.Callback, reaction.Callback.Engine.Global);
+                reaction.Callback.Engine.AddPendingCallback(reaction.Callback, reaction.Callback.Engine.Global);
             }
             else
             {
-                reaction.Callback.Engine.EventLoop.PendCallback(reaction.Callback, reaction.Callback.Engine.Global, result);
+                reaction.Callback.Engine.AddPendingCallback(reaction.Callback, reaction.Callback.Engine.Global, result);
             }
         }
 
