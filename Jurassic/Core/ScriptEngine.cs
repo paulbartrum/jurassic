@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Jurassic.Library;
 using Jurassic.Compiler;
 using System.ComponentModel;
+using System.Collections.Concurrent;
 
 namespace Jurassic
 {
@@ -65,7 +66,6 @@ namespace Jurassic
         private ObjectInstance mapIteratorPrototype;
         private ObjectInstance setIteratorPrototype;
         private ObjectInstance arrayIteratorPrototype;
-
 
         /// <summary>
         /// Initializes a new scripting environment.
@@ -667,7 +667,7 @@ namespace Jurassic
 
         //     EXECUTION
         //_________________________________________________________________________________________
-        
+
         /// <summary>
         /// Compiles the given source code and returns it in a form that can be executed many
         /// times.
@@ -1373,6 +1373,60 @@ namespace Jurassic
                     this.staticTypeWrapperCache = new Dictionary<Type, ClrStaticTypeWrapper>();
                 return this.staticTypeWrapperCache;
             }
+        }
+
+
+
+        //     PENDING CALLBACKS
+        //_________________________________________________________________________________________
+
+        private struct PendingCallback
+        {
+            private readonly FunctionInstance callback;
+            private readonly object thisObj;
+            private readonly object[] arguments;
+
+            public PendingCallback(FunctionInstance callback, object thisObj, object[] arguments)
+            {
+                this.callback = callback;
+                this.thisObj = thisObj;
+                this.arguments = arguments;
+            }
+
+            public void Invoke() => callback.Call(thisObj, arguments);
+        }
+
+        private readonly Queue<PendingCallback> pendingCallbacks = new Queue<PendingCallback>();
+
+        /// <summary>
+        /// Appends a callback to the EventLoop that will be executed at the end of script execution.
+        /// </summary>
+        /// <param name="callback"> The callback function. </param>
+        /// <param name="thisObj"> The value of <c>this</c> in the context of the function. </param>
+        /// <param name="arguments"> Any number of arguments that will be passed to the function. </param>
+        public void AddPendingCallback(FunctionInstance callback, object thisObj, params object[] arguments)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+            var instance = new PendingCallback(callback, thisObj, arguments);
+            pendingCallbacks.Enqueue(instance);
+        }
+
+        /// <summary>
+        /// This method is called at the end of script execution in order to execute pending
+        /// callbacks registered with <see cref="AddPendingCallback(FunctionInstance, object, object[])"/>.
+        /// </summary>
+        /// <returns> A value indicating whether any callbacks were invoked. </returns>
+        internal bool ExecutePendingCallbacks()
+        {
+            var result = false;
+            while (pendingCallbacks.Count > 0)
+            {
+                var instance = pendingCallbacks.Dequeue();
+                instance.Invoke();
+                result = true;
+            }
+            return result;
         }
     }
 }
