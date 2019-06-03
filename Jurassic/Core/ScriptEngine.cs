@@ -758,6 +758,9 @@ namespace Jurassic
             this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
             var result = methodGen.Execute(this);
 
+            // Execute any pending callbacks.
+            ExecutePendingCallbacks();
+
             // Normalize the result (convert null to Undefined, double to int, etc).
             return TypeUtilities.NormalizeValue(result);
         }

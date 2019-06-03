@@ -68,6 +68,14 @@ namespace UnitTests
             promise = EvaluatePromise("Promise.resolve()");
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
             Assert.AreEqual(Undefined.Value, promise.Result);
+
+            // Pending callbacks are called at the very end of the execution process.
+            Assert.AreEqual(1, Evaluate("var f = 1; Promise.resolve().then(function() { f = 2; }); f"));
+            Assert.AreEqual(2, Evaluate("f"));
+            Assert.AreEqual(3, Evaluate("var f = 3; eval('Promise.resolve().then(function() { f = 4; })'); f"));
+            Assert.AreEqual(4, Evaluate("f"));
+            Assert.AreEqual(5, Evaluate("var f = 5; Promise.resolve().then(function() { f = 6; Promise.resolve().then(function() { f = 7; }); }); f"));
+            Assert.AreEqual(7, Evaluate("f"));
         }
 
         [TestMethod]

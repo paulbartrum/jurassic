@@ -95,9 +95,6 @@ namespace Jurassic.Compiler
             // Execute the compiled delegate and store the result.
             object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(engine, runtimeScope, engine.Global);
 
-            // Execute any pending event loop callbacks.
-            engine.ExecutePendingCallbacks();
-
             // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
             GC.KeepAlive(this);
 
