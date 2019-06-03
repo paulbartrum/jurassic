@@ -1407,7 +1407,7 @@ namespace Jurassic
         /// <param name="callback"> The callback function. </param>
         /// <param name="thisObj"> The value of <c>this</c> in the context of the function. </param>
         /// <param name="arguments"> Any number of arguments that will be passed to the function. </param>
-        public void AddPendingCallback(FunctionInstance callback, object thisObj, params object[] arguments)
+        internal void AddPendingCallback(FunctionInstance callback, object thisObj, params object[] arguments)
         {
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
@@ -1419,17 +1419,13 @@ namespace Jurassic
         /// This method is called at the end of script execution in order to execute pending
         /// callbacks registered with <see cref="AddPendingCallback(FunctionInstance, object, object[])"/>.
         /// </summary>
-        /// <returns> A value indicating whether any callbacks were invoked. </returns>
-        internal bool ExecutePendingCallbacks()
+        internal void ExecutePendingCallbacks()
         {
-            var result = false;
             while (pendingCallbacks.Count > 0)
             {
                 var instance = pendingCallbacks.Dequeue();
                 instance.Invoke();
-                result = true;
             }
-            return result;
         }
     }
 }
