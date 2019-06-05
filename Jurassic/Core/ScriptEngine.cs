@@ -783,6 +783,17 @@ namespace Jurassic
         /// <param name="code"> The javascript source code to execute. </param>
         public void Execute(string code)
         {
+            // Special case for executing pending callbacks only.
+            if (string.IsNullOrEmpty(code))
+            {
+                ParsingStarted?.Invoke(this, EventArgs.Empty);
+                OptimizationStarted?.Invoke(this, EventArgs.Empty);
+                CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
+                ExecutionStarted?.Invoke(this, EventArgs.Empty);
+                ExecutePendingCallbacks();
+                return;
+            }
+
             Execute(new StringScriptSource(code));
         }
 
@@ -1400,6 +1411,7 @@ namespace Jurassic
         }
 
         private readonly Queue<PendingCallback> pendingCallbacks = new Queue<PendingCallback>();
+        private bool processingPendingCallbacks;
 
         /// <summary>
         /// Appends a callback to the EventLoop that will be executed at the end of script execution.
@@ -1421,11 +1433,17 @@ namespace Jurassic
         /// </summary>
         internal void ExecutePendingCallbacks()
         {
+            // It's possible for pending callbacks to end up calling Execute(). If this is the
+            // case, do nothing.
+            if (processingPendingCallbacks)
+                return;
+            processingPendingCallbacks = true;
             while (pendingCallbacks.Count > 0)
             {
                 var instance = pendingCallbacks.Dequeue();
                 instance.Invoke();
             }
+            processingPendingCallbacks = false;
         }
     }
 }
