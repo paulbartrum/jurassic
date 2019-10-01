@@ -614,14 +614,13 @@ namespace Jurassic.Library
                 int start = 0, end = -1;
                 while (end < pattern.Length)
                 {
-                    end = pattern.IndexOfAny(new char[] { '.', '^', '$' }, end + 1);
+                    end = pattern.IndexOfAny(new char[] { '.', '^', '$', '\\' }, end + 1);
                     if (end == -1)
                         break;
-                    if (end > 0 && pattern[end - 1] == '\\')
-                        continue;
                     if (builder == null)
                         builder = new StringBuilder();
                     builder.Append(pattern.Substring(start, end - start));
+                    start = end + 1;
                     switch (pattern[end])
                     {
                         case '.':
@@ -637,8 +636,17 @@ namespace Jurassic.Library
                         case '$':
                             builder.Append(@"(?=$|\r)");
                             break;
+                        case '\\':
+                            // $ is an anchor. \$ matches the literal dollar sign. \\$ is a backslash then an anchor.
+                            if (end < pattern.Length - 1)
+                            {
+                                builder.Append(pattern[end]);
+                                builder.Append(pattern[end + 1]);
+                                start++;
+                                end++;
+                            }
+                            break;
                     }
-                    start = end + 1;
                 }
                 if (builder != null)
                 {

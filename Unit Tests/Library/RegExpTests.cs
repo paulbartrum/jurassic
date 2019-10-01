@@ -181,9 +181,10 @@ namespace UnitTests
             Assert.AreEqual("one,two", Evaluate(@"'one\ntwo'.match(/^.*$/mg).toString()"));
             Assert.AreEqual("one,two,", Evaluate(@"'one\ntwo\n'.match(/^.*$/mg).toString()"));
             Assert.AreEqual("one,,two", Evaluate(@"'one\r\ntwo'.match(/^.*$/mg).toString()"));
-            Assert.AreEqual("$", Evaluate(@"'one$two'.match(/\$/mg).toString()"));
+            Assert.AreEqual("e$t", Evaluate(@"'one$two'.match(/.\$./mg).toString()"));
             Assert.AreEqual("^.*$", Evaluate(@"/^.*$/mg.source"));
             Assert.AreEqual("one: two,one,two", Evaluate(@"'one: two\nthree: four'.match(/^([^:]+):\s*(.*)$/m).toString()"));
+            Assert.AreEqual(@"one\", Evaluate(@"'one\\\r'.match(/^.*\\$/mg).toString()"));
 
             // This property is non-writable, configurable and non-enumerable.
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.multiline = true; x.multiline"));
