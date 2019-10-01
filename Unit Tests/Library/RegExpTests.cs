@@ -176,6 +176,15 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("/abc/.multiline"));
             Assert.AreEqual(true, Evaluate("/abc/m.multiline"));
 
+            // In multiline mode, the meaning of '.', '^' and '$' changes to match both '\r' and '\n' as well as the start and end of the string.
+            // Note that in the .NET native Regex these characters only match '\n', not '\r'.
+            Assert.AreEqual("one,two", Evaluate(@"'one\ntwo'.match(/^.*$/mg).toString()"));
+            Assert.AreEqual("one,two,", Evaluate(@"'one\ntwo\n'.match(/^.*$/mg).toString()"));
+            Assert.AreEqual("one,,two", Evaluate(@"'one\r\ntwo'.match(/^.*$/mg).toString()"));
+            Assert.AreEqual("$", Evaluate(@"'one$two'.match(/\$/mg).toString()"));
+            Assert.AreEqual("^.*$", Evaluate(@"/^.*$/mg.source"));
+            Assert.AreEqual("one: two,one,two", Evaluate(@"'one: two\nthree: four'.match(/^([^:]+):\s*(.*)$/m).toString()"));
+
             // This property is non-writable, configurable and non-enumerable.
             Assert.AreEqual(false, Evaluate("var x = new RegExp('abc'); x.multiline = true; x.multiline"));
             Assert.AreEqual(true, Evaluate("var x = new RegExp('abc'); x.multiline = true; delete x.multiline"));
