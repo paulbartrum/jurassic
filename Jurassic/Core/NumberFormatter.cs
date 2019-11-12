@@ -252,19 +252,6 @@ namespace Jurassic
                 integralDigits += diff;
             }
 
-            // Output any leading zeros.
-            bool decimalPointOutput = false;
-            if (integralDigits <= 0 && integralDigits > lowExponentThreshold + 1)
-            {
-                result.Append('0');
-                if (integralDigits < 0)
-                {
-                    result.Append(numberFormatInfo.NumberDecimalSeparator);
-                    decimalPointOutput = true;
-                    result.Append('0', -integralDigits);
-                }
-            }
-
             // We need to calculate the integers "scaledValue" and "divisor" such that:
             // value = scaledValue / divisor * 10 ^ exponent
             // 1 <= scaledValue / divisor < 10
@@ -342,6 +329,7 @@ namespace Jurassic
             int zeroCount = 0;
             int digitsOutput = 0;
             bool rounded = false, scientificNotation = false;
+            bool decimalPointOutput = false;
             for (; digitsOutput < maxDigitsToOutput && rounded == false; digitsOutput++)
             {
                 // Calculate the next digit.
@@ -368,10 +356,28 @@ namespace Jurassic
                 if (digit > 0 || decimalPointOutput == false)
                 {
                     // Check if the decimal point should be output.
-                    if (decimalPointOutput == false && (scientificNotation == true || digitsOutput == integralDigits))
+                    if (decimalPointOutput == false)
                     {
-                        result.Append(numberFormatInfo.NumberDecimalSeparator);
-                        decimalPointOutput = true;
+                        if (integralDigits <= 0 && integralDigits > lowExponentThreshold + 1)
+                        {
+                            // Handles case where 0 < value < 1. Outputs leading zero, the decimal
+                            // point and then any zeros after that. The lowExponentThreshold check
+                            // is to make sure we're not outputting in scientific notation (the
+                            // scientificNotation variable cannot be used as it has not been
+                            // calculated yet).
+                            result.Append('0');
+                            result.Append(numberFormatInfo.NumberDecimalSeparator);
+                            if (integralDigits < 0)
+                                result.Append('0', -integralDigits);
+                            decimalPointOutput = true;
+                        }
+                        else if (scientificNotation == true || digitsOutput == integralDigits)
+                        {
+                            // For scientific notation values, or values greater than 1, we only
+                            // need to output a decimal point.
+                            result.Append(numberFormatInfo.NumberDecimalSeparator);
+                            decimalPointOutput = true;
+                        }
                     }
 
                     // Output any pent-up zeros.
