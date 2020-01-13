@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -12,9 +11,6 @@ namespace Jurassic.Library
     [DebuggerTypeProxy(typeof(PromiseInstanceDebugView))]
     public partial class PromiseInstance : ObjectInstance
     {
-        // Initial room for try, catch, finally.
-        private const int InitialReactionCapacity = 3;
-
         internal enum PromiseState
         {
             Pending,
@@ -22,37 +18,19 @@ namespace Jurassic.Library
             Rejected,
         }
 
-        [DebuggerDisplay("{State,nq} {Callback}")]
-        private struct Reaction
+        private enum ReactionType
         {
-            public FunctionInstance Callback { get; }
-            public PromiseInstance Chain { get; }
-            public Action<object> Action { get; }
-            public PromiseState State { get; }
+            Fulfill,
+            Reject
+        }
 
-            public Reaction(object callback, PromiseState state)
-            {
-                Callback = callback as FunctionInstance;
-                State = state;
-                Chain = null;
-                Action = null;
-            }
+        private class Reaction
+        {
+            public PromiseInstance Promise { get; set; }
 
-            public Reaction(PromiseInstance chain)
-            {
-                Callback = null;
-                State = PromiseState.Pending;
-                Chain = chain;
-                Action = null;
-            }
+            public ReactionType Type { get; set; }
 
-            public Reaction(Action<object> action, PromiseState state)
-            {
-                Callback = null;
-                State = state;
-                Chain = null;
-                Action = action;
-            }
+            public FunctionInstance Handler { get; set; }
         }
 
         // Governs how a promise will react to incoming calls to its then() method.
@@ -64,17 +42,14 @@ namespace Jurassic.Library
 
         // 	A list of PromiseReaction records to be processed when/if the promise transitions
         // from the Pending state to any other state.
-        private readonly List<Reaction> reactions = new List<Reaction>(InitialReactionCapacity);
-
-        // Representative lock object for this (never lock(this)). Do not directly invoke any
-        // callbacks while holding this lock as that could deadlock depending on user code.
-        private readonly object sync = new object();
+        private List<Reaction> fulfillReactions;
+        private List<Reaction> rejectReactions;
 
         // The function that will resolve the promise.
-        private readonly FunctionInstance resolvePromise;
+        private readonly FunctionInstance resolveFunction;
 
         // The function that will reject the promise.
-        private readonly FunctionInstance rejectPromise;
+        private readonly FunctionInstance rejectFunction;
 
         /// <summary>
         /// Creates a new Promise instance.
@@ -85,11 +60,11 @@ namespace Jurassic.Library
         {
             try
             {
-                executor.Call(Undefined.Value, resolvePromise, rejectPromise);
+                executor.Call(Undefined.Value, resolveFunction, rejectFunction);
             }
             catch (JavaScriptException ex)
             {
-                rejectPromise.Call(Undefined.Value, ex.ErrorObject);
+                rejectFunction.Call(Undefined.Value, ex.ErrorObject);
             }
         }
 
@@ -99,151 +74,94 @@ namespace Jurassic.Library
         /// <param name="prototype"></param>
         internal PromiseInstance(ObjectInstance prototype) : base(prototype)
         {
-            resolvePromise = new ClrStubFunction(Engine.FunctionInstancePrototype, "s", 1, (engine, thisObj, param) => Resolve(param));
-            rejectPromise = new ClrStubFunction(Engine.FunctionInstancePrototype, "t", 1, (engine, thisObj, param) => Reject(param));
+            resolveFunction = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, Resolve);
+            rejectFunction = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, Reject);
         }
 
-        internal object Reject(params object[] param) =>
-            ResolveOrReject(param, PromiseState.Rejected);
-
-        internal object Resolve(params object[] param) =>
-            ResolveOrReject(param, PromiseState.Fulfilled);
-
-        private object ResolveOrReject(object[] param, PromiseState state)
+        private object Resolve(ScriptEngine engine, object thisObj, object[] param)
         {
-            lock (sync)
-            {
-                // Interlocked can't be used here because there is a strong dependency between
-                // state and result, the two have to be changed in tandem.
-                if (this.state != PromiseState.Pending)
-                    return Undefined.Value;
-
-                this.state = state;
-                if (param.Length > 0)
-                {
-                    result = param[0];
-                }
-                else
-                {
-                    result = Undefined.Value;
-                }
-
-                if (state == PromiseState.Fulfilled)
-                    HandlePromiseChain();
-            }
-
-            if (state == PromiseState.Pending)
-                return Undefined.Value;
-
-            // At this point it is guaranteed that only one thread is accessing reactions (see Then).
-            foreach (var function in reactions)
-            {
-                ResolveOrReject(function);
-            }
-            reactions.Clear();
+            Resolve(param.Length >= 1 ? param[0] : Undefined.Value);
             return Undefined.Value;
         }
 
-        private void ResolveOrReject(Reaction reaction)
+        internal void Resolve(object resolution)
         {
-            if (reaction.Chain != null)
+            // Do nothing if the promise has already been resolved.
+            if (state != PromiseState.Pending)
+                return;
+
+            if (resolution == this)
             {
-                reaction.Chain.ResolveOrReject(new object[] { result }, state);
+                // Reject promise.
+                Reject(Engine.TypeError.Construct("A promise cannot be resolved with itself."));
+                return;
             }
-            else if (reaction.Action != null && reaction.State == state)
+            else if (resolution is ObjectInstance thenObject)
             {
-                reaction.Action(result);
+                // Try to call a method on the object called "then".
+                try
+                {
+                    if (thenObject.GetPropertyValue("then") is FunctionInstance thenFunction)
+                    {
+                        Engine.AddPendingCallback(() =>
+                        {
+                            try
+                            {
+                                thenFunction.Call(thenObject, resolveFunction, rejectFunction);
+                            }
+                            catch (JavaScriptException ex)
+                            {
+                                Reject(ex.ErrorObject);
+                            }
+                        });
+                        return;
+                    }
+                }
+                catch (JavaScriptException ex)
+                {
+                    // GetPropertyValue threw an exception.
+                    Reject(ex.ErrorObject);
+                    return;
+                }
             }
-            else if (reaction.Callback == null || reaction.State != state)
+
+            // Fulfill promise.
+            this.state = PromiseState.Fulfilled;
+            this.result = resolution;
+            var reactions = this.fulfillReactions;
+            if (reactions != null)
             {
-                // Do nothing.
-            }
-            else if (result == Undefined.Value)
-            {
-                reaction.Callback.Engine.AddPendingCallback(reaction.Callback, reaction.Callback.Engine.Global);
-            }
-            else
-            {
-                reaction.Callback.Engine.AddPendingCallback(reaction.Callback, reaction.Callback.Engine.Global, result);
+                this.fulfillReactions = null;
+                foreach (var reaction in reactions)
+                    EnqueueJob(reaction);
             }
         }
 
-        private void HandlePromiseChain()
+        private object Reject(ScriptEngine engine, object thisObj, object[] param)
         {
-            // 2.3.1. if promise and x refer to the same object, reject promise with a TypeError as the reason
-            if (result == this)
+            Reject(param.Length >= 1 ? param[0] : Undefined.Value);
+            return Undefined.Value;
+        }
+
+        internal void Reject(object resolution)
+        {
+            // Do nothing if the promise has already been resolved.
+            if (state != PromiseState.Pending)
+                return;
+
+            this.state = PromiseState.Rejected;
+            this.result = resolution;
+            var reactions = this.rejectReactions;
+            if (reactions != null)
             {
-                state = PromiseState.Pending;
-                result = null;
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Cannot resolve a promise with itself.");
-            }
-
-            // 2.3.2 if x is a promise, adopt its state:
-            if (result is PromiseInstance promise)
-            {
-                lock (promise.sync)
-                {
-                    if (promise.State == PromiseState.Rejected)
-                    {
-                        state = promise.state;
-                        result = promise.result;
-                    }
-                    else if (promise.State == PromiseState.Fulfilled)
-                    {
-                        state = promise.state;
-                        result = promise.result;
-                    }
-                    else
-                    {
-                        state = PromiseState.Pending;
-                        result = null;
-                        promise.reactions.Add(new Reaction(this));
-                    }
-                }
-            }
-
-            // 2.3.3. Otherwise, if x is an object or function, 
-            else if (result is ObjectInstance obj && obj.HasProperty("then"))
-            {
-                // 2.3.3.1 Let then be x.then
-                FunctionInstance then;
-                try
-                {
-                    then = obj.GetPropertyValue("then") as FunctionInstance;
-
-                    // 2.3.3.2 If retrieving the property x.then results in a
-                    //         thrown exception e, reject promise with e as the reason.
-                }
-                catch (JavaScriptException jex)
-                {
-                    state = PromiseState.Rejected;
-                    result = jex.ErrorObject;
-                    return;
-                }
-
-                // 2.3.3.3. If then is a function, call it with x as this, first argument resolvePromise, and second argument rejectPromise.
-                if (then != null)
-                {
-                    try
-                    {
-                        state = PromiseState.Pending;
-                        var thisObj = result;
-                        result = null;
-                        then.Call(thisObj, resolvePromise, rejectPromise);
-                        return;
-                    }
-                    catch (JavaScriptException jex)
-                    {
-                        state = PromiseState.Rejected;
-                        result = jex.ErrorObject;
-                        return;
-                    }
-                }
+                this.rejectReactions = null;
+                foreach (var reaction in reactions)
+                    EnqueueJob(reaction);
             }
         }
 
         /// <summary>
-        /// Creates the Map prototype object.
+        /// Creates the Promise prototype object.
         /// </summary>
         /// <param name="engine"> The script environment. </param>
         /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
@@ -271,6 +189,8 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "finally")]
         public PromiseInstance Finally(object onFinally)
         {
+            if (!(onFinally is FunctionInstance))
+                return Then(onFinally, onFinally);
             return Then(onFinally, onFinally);
         }
 
@@ -296,62 +216,74 @@ namespace Jurassic.Library
         /// <param name="onRejected"> A Function called when the Promise is rejected. This function
         /// has one argument, the rejection reason. </param>
         /// <returns></returns>
-        internal PromiseInstance Then(Action<object> onFulfilled, Action<object> onRejected)
-        {
-            lock (sync)
-            {
-                var fulfilled = new Reaction(onFulfilled, PromiseState.Fulfilled);
-                var rejected = new Reaction(onRejected, PromiseState.Rejected);
-
-                if (state == PromiseState.Pending)
-                {
-                    if (fulfilled.Action != null) reactions.Add(fulfilled);
-                    if (rejected.Action != null) reactions.Add(rejected);
-                }
-                else if (state == PromiseState.Fulfilled)
-                {
-                    ResolveOrReject(fulfilled);
-                }
-                else if (state == PromiseState.Rejected)
-                {
-                    ResolveOrReject(rejected);
-                }
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Returns a Promise. It takes two arguments: callback functions for the success and
-        /// failure cases of the Promise.
-        /// </summary>
-        /// <param name="onFulfilled"> A Function called when the Promise is fulfilled. This
-        /// function has one argument, the fulfillment value. </param>
-        /// <param name="onRejected"> A Function called when the Promise is rejected. This function
-        /// has one argument, the rejection reason. </param>
-        /// <returns></returns>
         [JSInternalFunction(Name = "then")]
         public PromiseInstance Then(object onFulfilled, object onRejected)
         {
-            lock (sync)
-            {
-                var fulfilled = new Reaction(onFulfilled, PromiseState.Fulfilled);
-                var rejected = new Reaction(onRejected, PromiseState.Rejected);
+            return PerformPromiseThen(onFulfilled as FunctionInstance, onRejected as FunctionInstance,
+                new PromiseInstance(Prototype));
+        }
 
-                if (state == PromiseState.Pending)
-                {
-                    if (fulfilled.Callback != null) reactions.Add(fulfilled);
-                    if (rejected.Callback != null) reactions.Add(rejected);
-                }
-                else if (state == PromiseState.Fulfilled)
-                {
-                    ResolveOrReject(fulfilled);
-                }
-                else if (state == PromiseState.Rejected)
-                {
-                    ResolveOrReject(rejected);
-                }
+        private PromiseInstance PerformPromiseThen(FunctionInstance onFulfilled, FunctionInstance onRejected, PromiseInstance result = null)
+        {
+            var fulfilled = new Reaction { Promise = result, Type = ReactionType.Fulfill, Handler = onFulfilled };
+            var rejected = new Reaction { Promise = result, Type = ReactionType.Reject, Handler = onRejected };
+
+            if (state == PromiseState.Pending)
+            {
+                if (fulfillReactions == null)
+                    fulfillReactions = new List<Reaction>(1);
+                fulfillReactions.Add(fulfilled);
+                if (rejectReactions == null)
+                    rejectReactions = new List<Reaction>(1);
+                rejectReactions.Add(rejected);
             }
-            return this;
+            else if (state == PromiseState.Fulfilled)
+            {
+                EnqueueJob(fulfilled);
+            }
+            else if (state == PromiseState.Rejected)
+            {
+                EnqueueJob(rejected);
+            }
+
+            return result;
+        }
+
+        private void EnqueueJob(Reaction reaction)
+        {
+            // If handler is undefined and type is Fulfill, then the handler result should be result.
+            // If handler is undefined and type is Reject, then the handler should throw result.
+            Engine.AddPendingCallback(() =>
+            {
+                if (reaction.Handler != null)
+                {
+                    // If a handler has been provided, call it and resolve or reject depending on
+                    // the return value.
+                    try
+                    {
+                        var handlerResult = reaction.Handler.Call(Undefined.Value, this.result);
+                        if (reaction.Promise != null)
+                            reaction.Promise.Resolve(handlerResult ?? Undefined.Value);
+                    }
+                    catch (JavaScriptException ex)
+                    {
+                        if (reaction.Promise != null)
+                            reaction.Promise.Reject(ex.ErrorObject);
+                    }
+                }
+                else if (reaction.Type == ReactionType.Fulfill)
+                {
+                    // The default onFulfilled action is to resolve with the passed-in value.
+                    if (reaction.Promise != null)
+                        reaction.Promise.Resolve(this.result ?? Undefined.Value);
+                }
+                else
+                {
+                    // The default onRejected action is to reject with the passed-in value.
+                    if (reaction.Promise != null)
+                        reaction.Promise.Reject(this.result);
+                }
+            });
         }
 
         /// <summary>
@@ -360,16 +292,13 @@ namespace Jurassic.Library
         /// <returns>The task that completes when this promise completes.</returns>
         public Task<object> CreateTask()
         {
-            lock (sync)
+            if (state == PromiseState.Fulfilled)
             {
-                if (state == PromiseState.Fulfilled)
-                {
-                    return Task.FromResult(result);
-                }
-                else if (state == PromiseState.Rejected)
-                {
-                    throw new JavaScriptException(result, 0, null);
-                }
+                return Task.FromResult(result);
+            }
+            else if (state == PromiseState.Rejected)
+            {
+                throw new JavaScriptException(result, 0, null);
             }
 
             // These callbacks shouldn't deadlock on this.sync as they will not immediately fire
@@ -415,7 +344,7 @@ namespace Jurassic.Library
         /// </summary>
         internal FunctionInstance ResolvePromise
         {
-            get { return this.resolvePromise; }
+            get { return this.resolveFunction; }
         }
 
         /// <summary>
@@ -423,7 +352,7 @@ namespace Jurassic.Library
         /// </summary>
         internal FunctionInstance RejectPromise
         {
-            get { return this.rejectPromise; }
+            get { return this.rejectFunction; }
         }
 
         /// <summary>
@@ -434,7 +363,10 @@ namespace Jurassic.Library
         {
             get
             {
-                return this.state.ToString();
+                if (state == PromiseState.Pending)
+                    return state.ToString();
+                else
+                    return $"{state}: {result}";
             }
         }
 
@@ -455,6 +387,5 @@ namespace Jurassic.Library
         {
             get { return "Promise"; }
         }
-
     }
 }
