@@ -74,29 +74,40 @@ namespace Jurassic.Library
         /// <param name="prototype"></param>
         internal PromiseInstance(ObjectInstance prototype) : base(prototype)
         {
-            resolveFunction = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, Resolve);
-            rejectFunction = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, Reject);
+            resolveFunction = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1,
+                (engine, thisObj, args) =>
+                {
+                    Resolve(args.Length >= 1 ? args[0] : Undefined.Value);
+                    return Undefined.Value;
+                });
+            rejectFunction = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1,
+                (engine, thisObj, args) =>
+                {
+                    Reject(args.Length >= 1 ? args[0] : Undefined.Value);
+                    return Undefined.Value;
+                });
         }
 
-        private object Resolve(ScriptEngine engine, object thisObj, object[] param)
-        {
-            Resolve(param.Length >= 1 ? param[0] : Undefined.Value);
-            return Undefined.Value;
-        }
-
-        internal void Resolve(object resolution)
+        /// <summary>
+        /// Resolves the promise with the given value.  If the value is an object with a "then"
+        /// function, the returned promise will "follow" that thenable, adopting its eventual
+        /// state; otherwise the returned promise will be fulfilled with the value.
+        /// </summary>
+        /// <param name="value"> The resolved value of the promise, or a promise or thenable to
+        /// follow. </param>
+        internal void Resolve(object value)
         {
             // Do nothing if the promise has already been resolved.
             if (state != PromiseState.Pending)
                 return;
 
-            if (resolution == this)
+            if (value == this)
             {
                 // Reject promise.
                 Reject(Engine.TypeError.Construct("A promise cannot be resolved with itself."));
                 return;
             }
-            else if (resolution is ObjectInstance thenObject)
+            else if (value is ObjectInstance thenObject)
             {
                 // Try to call a method on the object called "then".
                 try
@@ -116,6 +127,7 @@ namespace Jurassic.Library
                         });
                         return;
                     }
+                    // If 'then' doesn't exist or is not a function, then fulfill normally.
                 }
                 catch (JavaScriptException ex)
                 {
@@ -127,7 +139,7 @@ namespace Jurassic.Library
 
             // Fulfill promise.
             this.state = PromiseState.Fulfilled;
-            this.result = resolution;
+            this.result = value;
             var reactions = this.fulfillReactions;
             if (reactions != null)
             {
@@ -137,20 +149,18 @@ namespace Jurassic.Library
             }
         }
 
-        private object Reject(ScriptEngine engine, object thisObj, object[] param)
-        {
-            Reject(param.Length >= 1 ? param[0] : Undefined.Value);
-            return Undefined.Value;
-        }
-
-        internal void Reject(object resolution)
+        /// <summary>
+        /// Rejects the promise with the given reason.
+        /// </summary>
+        /// <param name="reason"> The reason why this promise rejected. Can be an Error instance. </param>
+        internal void Reject(object reason)
         {
             // Do nothing if the promise has already been resolved.
             if (state != PromiseState.Pending)
                 return;
 
             this.state = PromiseState.Rejected;
-            this.result = resolution;
+            this.result = reason;
             var reactions = this.rejectReactions;
             if (reactions != null)
             {
@@ -181,17 +191,29 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Returns a Promise and deals with all cases. It behaves the same as calling
-        /// Promise.prototype.then(onFinally, onFinally).
+        /// When the promise is completed, i.e either fulfilled or rejected, the specified callback
+        /// function is executed.
         /// </summary>
         /// <param name="onFinally"> A Function called when the Promise is completed.</param>
         /// <returns></returns>
         [JSInternalFunction(Name = "finally")]
         public PromiseInstance Finally(object onFinally)
         {
-            if (!(onFinally is FunctionInstance))
+            if (onFinally is FunctionInstance onFinallyFunction)
+            {
+                return Then(new ClrStubFunction(Engine.Function.InstancePrototype, (engine, thisObj, args) =>
+                {
+                    onFinallyFunction.Call(Undefined.Value);
+                    return this.result;
+                }),
+                new ClrStubFunction(Engine.Function.InstancePrototype, (engine, thisObj, args) =>
+                {
+                    onFinallyFunction.Call(Undefined.Value);
+                    throw new JavaScriptException(this.result, 0, null);
+                }));
+            }
+            else
                 return Then(onFinally, onFinally);
-            return Then(onFinally, onFinally);
         }
 
         /// <summary>
@@ -342,7 +364,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a function that will resolve the promise.
         /// </summary>
-        internal FunctionInstance ResolvePromise
+        internal FunctionInstance ResolveFunction
         {
             get { return this.resolveFunction; }
         }
@@ -350,7 +372,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a function that will reject the promise.
         /// </summary>
-        internal FunctionInstance RejectPromise
+        internal FunctionInstance RejectFunction
         {
             get { return this.rejectFunction; }
         }
