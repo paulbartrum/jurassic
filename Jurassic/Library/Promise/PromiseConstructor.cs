@@ -106,7 +106,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a Promise that is rejected for the specified reason.
         /// </summary>
-        /// <param name="result">The reason.</param>
+        /// <param name="result"> The reason. Can be an Error instance. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "reject")]
         public PromiseInstance Reject(object result)
@@ -117,49 +117,50 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Returns a Promise that is resolved with the specified result.
+        /// Returns either a new promise resolved with the passed argument, or the argument itself
+        /// if the argument is a promise produced by this constructor.
         /// </summary>
-        /// <param name="result">The result.</param>
+        /// <param name="value"> Argument to be resolved by this Promise. Can also be a Promise or
+        /// a thenable to resolve. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "resolve")]
-        public PromiseInstance Resolve(object result)
+        public PromiseInstance Resolve(object value)
         {
-            var promise = new PromiseInstance(this.InstancePrototype);
-            promise.Resolve(result);
-            return promise;
+            // If the constructor of value === this, then return as is.
+            if (value is PromiseInstance promise)
+                return promise;
+
+            var result = new PromiseInstance(this.InstancePrototype);
+            result.Resolve(value);
+            return result;
         }
 
         /// <summary>
-        /// Returns a Promise. It takes one argument: a list of Promises that determine whether
-        /// the new Promise is fulfilled or rejected.
+        /// Returns a new promise which is settled in the same way as the first passed promise to
+        /// settle. All elements of the passed iterable are resolved to promises.
         /// </summary>
-        /// <param name="iterable">The list of Promises.</param>
+        /// <param name="iterable"> An iterable object such as an Array. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "race")]
         public PromiseInstance Race(ObjectInstance iterable)
         {
             if (iterable == null)
-                throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, "The parameter must be an iterable.");
+                throw new JavaScriptException(Engine, ErrorType.TypeError, "The parameter must be an iterable.");
 
-            var iterator = TypeUtilities.GetIterator(iterable.Engine, iterable);
-            var promises = TypeUtilities.Iterate(iterator.Engine, iterator);
+            var iterator = TypeUtilities.GetIterator(Engine, iterable);
+            var promises = TypeUtilities.Iterate(Engine, iterator);
 
-            var promise = new PromiseInstance(iterable.Engine.Promise.InstancePrototype);
-
+            var result = new PromiseInstance(Engine.Promise.InstancePrototype);
             foreach (var promiseOrValue in promises)
-            {
-                if (promise.State != PromiseState.Pending) break;
-                promise.Resolve(promiseOrValue);
-            }
-
-            return promise;
+                Resolve(promiseOrValue).Then(result.ResolveFunction, result.RejectFunction);
+            return result;
         }
 
         /// <summary>
         /// Returns a Promise. It takes one argument: a list of Promises that determine whether
         /// the new Promise is fulfilled or rejected.
         /// </summary>
-        /// <param name="iterable">The list of Promises.</param>
+        /// <param name="iterable"> An iterable object such as an Array. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "all")]
         public PromiseInstance All(ObjectInstance iterable)
@@ -169,10 +170,17 @@ namespace Jurassic.Library
 
             var iterator = TypeUtilities.GetIterator(iterable.Engine, iterable);
             var promises = TypeUtilities.Iterate(iterator.Engine, iterator).ToList();
-            var results = iterable.Engine.Array.Construct(new object[promises.Count]);
+            var results = Engine.Array.Construct(new object[promises.Count]);
             var count = promises.Count;
 
             var promise = new PromiseInstance(iterable.Engine.Promise.InstancePrototype);
+
+            // The promise is resolved immediately if the iterable is empty.
+            if (promises.Count == 0)
+            {
+                promise.Resolve(results);
+                return promise;
+            }
 
             for (var i = 0; i < promises.Count; i++)
             {
@@ -197,22 +205,24 @@ namespace Jurassic.Library
                     }
 
                     var j = i; // Some C# versions need this.
-                    p.Then(
-                        arg =>
+                    p.Then(new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
                         {
-                            if (promise.State != PromiseState.Pending) return;
+                            if (promise.State != PromiseState.Pending)
+                                return Undefined.Value;
 
-                            results[j] = arg;
+                            results[j] = args[0];
 
                             if (--count == 0)
                             {
                                 promise.Resolve(results);
                             }
-                        },
-                        arg =>
+                            return Undefined.Value;
+                        }),
+                        new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
                         {
-                            promise.Reject(arg);
-                        });
+                            promise.Reject(args[0]);
+                            return Undefined.Value;
+                        }));
 
                     continue;
                 }
@@ -249,7 +259,7 @@ namespace Jurassic.Library
                                 return Undefined.Value;
                             });
 
-                            then.Call(obj, resolve, promise.RejectPromise);
+                            then.Call(obj, resolve, promise.RejectFunction);
                             continue;
                         }
                         catch (JavaScriptException jex)

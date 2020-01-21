@@ -35,8 +35,8 @@ namespace UnitTests
             // Construct
             Assert.AreEqual("TypeError", EvaluateExceptionType("new Promise()"));
             Assert.AreEqual("[object Promise]", Evaluate("new Promise(function(resolve, reject) { }).toString()"));
-            Assert.AreEqual("s", Evaluate("var f; var x = new Promise(function(resolve, reject) { f = resolve; }); f.name"));
-            Assert.AreEqual("t", Evaluate("var f; var x = new Promise(function(resolve, reject) { f = reject; }); f.name"));
+            Assert.AreEqual("", Evaluate("var f; var x = new Promise(function(resolve, reject) { f = resolve; }); f.name"));
+            Assert.AreEqual("", Evaluate("var f; var x = new Promise(function(resolve, reject) { f = reject; }); f.name"));
 
             // toString and valueOf.
             Assert.AreEqual("function Promise() { [native code] }", Evaluate("Promise.toString()"));
@@ -61,6 +61,10 @@ namespace UnitTests
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
             Assert.AreEqual(Undefined.Value, promise.Result);
 
+            promise = EvaluatePromise("var resolver; p = new Promise(function(resolve, reject) { resolver = resolve; }); resolver(2); p");
+            Assert.AreEqual(PromiseState.Fulfilled, promise.State);
+            Assert.AreEqual(2, promise.Result);
+
             promise = EvaluatePromise("Promise.resolve(1)");
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
             Assert.AreEqual(1, (int)promise.Result);
@@ -68,6 +72,43 @@ namespace UnitTests
             promise = EvaluatePromise("Promise.resolve()");
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
             Assert.AreEqual(Undefined.Value, promise.Result);
+
+            // Resolve to a static value.
+            Execute(@"
+                Promise.resolve('success').then(function(value) {
+                    testingContext.push(value);
+                }, function(value) {
+                    testingContext.push('fail');
+                });
+                testingContext.push('end of script');
+            ");
+            Assert.AreEqual(2, (int)testingContext.Length);
+            Assert.AreEqual("end of script", testingContext[0]);
+            Assert.AreEqual("success", testingContext[1]);
+
+            // Resolve another promise.
+            Execute(@"
+                var original = Promise.resolve('success');
+                var cast = Promise.resolve(original);
+                cast.then(function(value) {
+                    testingContext.push(value);
+                }, function(value) {
+                    testingContext.push('fail');
+                });
+                testingContext.push('identical: ' + (cast === original));
+            ");
+            Assert.AreEqual(2, (int)testingContext.Length);
+            Assert.AreEqual("identical: true", testingContext[0].ToString());
+            Assert.AreEqual("success", testingContext[1]);
+
+            Execute(@"
+                (function() {
+                    Promise.resolve({ ""then"": function() { testingContext.push(""then() called""); } });
+                    testingContext.push(""end of script"");
+                })()");
+            Assert.AreEqual(2, (int)testingContext.Length);
+            Assert.AreEqual("end of script", testingContext[0]);
+            Assert.AreEqual("then() called", testingContext[1]);
 
             // Pending callbacks are called at the very end of the execution process.
             Assert.AreEqual(1, Evaluate("var f = 1; Promise.resolve().then(function() { f = 2; }); f"));
@@ -101,33 +142,87 @@ namespace UnitTests
         [TestMethod]
         public void Then()
         {
+            // A pending promise will not call onResolve or onReject.
             Execute(@"
                 (function(){
-                    p = new Promise(function(resolve, reject) { }).then(function(r) { testingContext.push(r) }, function(r) { testingContext.push(r) }); 
+                    new Promise(function(resolve, reject) { }).then(function(r) { testingContext.push(r) }, function(r) { testingContext.push(r) }); 
                 })()");
             Assert.AreEqual(0, (int)testingContext.Length);
 
+            // then() should call the onResolve function if the promise is fulfilled (asynchronously).
             Execute(@"
                 (function(){ 
-                    p = new Promise(function(resolve, reject) { resolve(2) }).then(function(r) { testingContext.push(r) }, function(r) { throw r });
+                    new Promise(function(resolve, reject) { resolve('success') }).then(function(r) { testingContext.push(r) }, function(r) { throw r });
+                    testingContext.push('end of script');
                 })()");
-            Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(2, (int)testingContext[0]);
+            Assert.AreEqual(2, (int)testingContext.Length);
+            Assert.AreEqual("end of script", testingContext[0]);
+            Assert.AreEqual("success", testingContext[1]);
 
-            Execute(@"
-                (function(){ 
-                    p = new Promise(function(resolve, reject) { reject(3) }).then(function(r) { throw r }, function(r) { testingContext.push(r) });
+            // then() should call the onReject function if the promise is rejected.
+            Execute(@"(function() { 
+                    new Promise(function(resolve, reject) { reject(3) }).then(function(r) { throw r }, function(r) { testingContext.push(r) });
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(3, (int)testingContext[0]);
 
-            var exception = EvaluateExceptionMessage(@"
+            // then() should return a new Promise.
+            Assert.AreEqual(false, Evaluate(@"(function() { 
+                    p = new Promise(function(resolve, reject) { reject(3) });
+                    return p === p.then(function(r) { }, function(r) { });
+                })()"));
+
+            // then() should accept parameters that are not functions (treating them as undefined).
+            Assert.AreEqual(true, Evaluate(@"(function() { 
+                    return new Promise(function(resolve, reject) { }).then(5, 6);
+                })()") is PromiseInstance);
+
+            // If then() returns a value, that's the value of the new promise.
+            Execute(@"(function() { 
+                    new Promise(function(resolve, reject) { resolve(10) })
+                        .then(function(r) { return 11; })
+                        .then(function(r) { testingContext.push(r) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(11, (int)testingContext[0]);
+
+            // If then() doesn't return a value, then the value of the new promise is undefined.
+            Execute(@"(function() { 
+                    new Promise(function(resolve, reject) { resolve(10) })
+                        .then(function(r) { })
+                        .then(function(r) { testingContext.push(r) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(Undefined.Value, testingContext[0]);
+
+            // The default onResolve is a function that returns the value that was passed in.
+            Execute(@"(function() { 
+                    new Promise(function(resolve, reject) { resolve(10) })
+                        .then()
+                        .then(function(r) { testingContext.push(r) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(10, (int)testingContext[0]);
+
+            // The default onReject throws the value that was passed in.
+            Execute(@"(function() { 
+                    new Promise(function(resolve, reject) { reject(new Error(""rejected!"")) })
+                        .then()
+                        .then(null, function(r) { testingContext.push(r) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual("rejected!", ((ErrorInstance)testingContext[0]).Message);
+
+            // Resolving with the promise instance is an error.
+            var exceptionMessage = EvaluateExceptionMessage(@"
                 (function(){ 
                     var resolver;
-                    p = new Promise(function(resolve, reject) { resolver = resolve }).then(function(r) { throw r }, function(r) { testingContext.push(r) });
+                    p = new Promise(function(resolve, reject) { resolver = resolve });
+                    p.then(null, function(r) { testingContext.push(r) });
                     resolver(p);
                 })()");
-            Assert.AreEqual("TypeError: Cannot resolve a promise with itself.", exception);
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual("A promise cannot be resolved with itself.", ((ErrorInstance)testingContext[0]).Message);
         }
 
         [TestMethod]
@@ -173,6 +268,30 @@ namespace UnitTests
                     p = new Promise(function(resolve, reject) { reject(2) }).finally(function() { testingContext.push('Complete') });
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
+
+            // finally() doesn't pass any values to the supplied function.
+            Execute(@"
+                (function(){ 
+                    p = new Promise(function(resolve, reject) { reject(2) }).finally(function() { testingContext.push(arguments.length) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(0, (int)testingContext[0]);
+
+            // finally() preserves the resolved result.
+            Execute(@"
+                (function(){ 
+                    p = new Promise(function(resolve, reject) { resolve(5) }).finally(function() { }).then(function(r) { testingContext.push(r) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(5, (int)testingContext[0]);
+
+            // finally() preserves the rejected result.
+            Execute(@"
+                (function(){ 
+                    p = new Promise(function(resolve, reject) { reject(6) }).finally(function() { }).then(null, function(r) { testingContext.push(r) });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(6, (int)testingContext[0]);
         }
 
         [TestMethod]
@@ -346,12 +465,9 @@ namespace UnitTests
         [TestMethod]
         public void All()
         {
-            ArrayInstance arrayInstance;
-
             // No action
             Execute(@"
-                (function()
-                {
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -363,9 +479,8 @@ namespace UnitTests
             Assert.AreEqual(0, (int)testingContext.Length);
 
             // Resolve
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -377,9 +492,8 @@ namespace UnitTests
                 })()");
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -391,9 +505,8 @@ namespace UnitTests
                 })()");
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -406,9 +519,8 @@ namespace UnitTests
                 })()");
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -421,16 +533,15 @@ namespace UnitTests
                     complete2[0](3);
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
-            arrayInstance = testingContext[0] as ArrayInstance;
+            var arrayInstance = testingContext[0] as ArrayInstance;
             Assert.IsNotNull(arrayInstance);
             Assert.AreEqual(3, (int)arrayInstance.Length);
             Assert.AreEqual(2, (int)arrayInstance[0]);
             Assert.AreEqual(3, (int)arrayInstance[1]);
             Assert.AreEqual(4, (int)arrayInstance[2]);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -450,9 +561,8 @@ namespace UnitTests
             Assert.AreEqual(3, (int)arrayInstance[1]);
             Assert.AreEqual(4, (int)arrayInstance[2]);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -472,9 +582,8 @@ namespace UnitTests
             Assert.AreEqual(3, (int)arrayInstance[1]);
             Assert.AreEqual(4, (int)arrayInstance[2]);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var promise = Promise.all([promise1, 3, 4]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
@@ -487,9 +596,8 @@ namespace UnitTests
             Assert.AreEqual(3, (int)arrayInstance[1]);
             Assert.AreEqual(4, (int)arrayInstance[2]);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var promise = Promise.all([2, 3, 4]).then(function(r) { testingContext.push(r) }, function(r) { throw r });
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
@@ -500,9 +608,8 @@ namespace UnitTests
             Assert.AreEqual(4, (int)arrayInstance[2]);
 
             // Reject
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -515,9 +622,8 @@ namespace UnitTests
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(2, (int)testingContext[0]);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete2;
@@ -531,9 +637,8 @@ namespace UnitTests
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(2, (int)testingContext[0]);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete3;
@@ -544,9 +649,8 @@ namespace UnitTests
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(2, (int)testingContext[0]);
 
-            Evaluate(@"
-                (function()
-                {
+            Execute(@"
+                (function() {
                     var complete1;
                     var promise1 = new Promise(function(resolve, reject) { complete1 = [ resolve, reject ]; });
                     var complete3;
@@ -556,6 +660,14 @@ namespace UnitTests
                 })()");
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(2, (int)testingContext[0]);
+
+            // An empty iterable will resolve immediately with an empty array as the resolution.
+            Execute(@"
+                (function() {
+                    Promise.all([]).then(function(r) { testingContext.push(r) }, function(r) { testingContext.push('fail') });
+                })()");
+            Assert.AreEqual(1, (int)testingContext.Length);
+            Assert.AreEqual(0, (int)((ArrayInstance)testingContext[0]).Length);
         }
 
         [TestMethod, Timeout(1000)]
@@ -738,16 +850,16 @@ namespace UnitTests
         public void Thenable()
         {
             // Do nothing
-            Evaluate(@"
+            Execute(@"
                 (function() {
                     var thenable = {
                         then: function(resolve, reject) {}
                     };
                     new Promise(function(resolve) { resolve(thenable) }).then(function(r) { throw r }, function(r) { throw r })
                 })()");
-            
+
             // Resolve
-            Evaluate(@"
+            Execute(@"
                 (function() {
                     var thenable = {
                         then: function(resolve, reject) { resolve(2) }
@@ -757,20 +869,8 @@ namespace UnitTests
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(2, (int)testingContext[0]);
 
-            Evaluate(@"
-                (function() {
-                    var resolver;
-                    var thenable = {
-                        then: function(resolve, reject) { resolver = resolve }
-                    };
-                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { testingContext.push(r) }, function(r) { throw r })
-                    resolver(2);
-                })()");
-            Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(2, (int)testingContext[0]);
-
             // Reject
-            Evaluate(@"
+            Execute(@"
                 (function() {
                     var thenable = {
                         then: function(resolve, reject) { reject(2) }
@@ -780,20 +880,8 @@ namespace UnitTests
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(2, (int)testingContext[0]);
 
-            Evaluate(@"
-                (function() {
-                    var rejecter;
-                    var thenable = {
-                        then: function(resolve, reject) { rejecter = reject }
-                    };
-                    new Promise(function(resolve) { resolve(thenable) }).then(function(r) { throw r }, function(r) { testingContext.push(r) })
-                    rejecter(2);
-                })()");
-            Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(2, (int)testingContext[0]);
-
             // Throw
-            Evaluate(@"
+            Execute(@"
                 (function() {
                     var thenable = {};
                     Object.defineProperty(thenable, 'then', {
