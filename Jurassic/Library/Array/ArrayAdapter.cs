@@ -169,7 +169,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="comparer"> A comparison function. </param>
         /// <returns> The array that was sorted. </returns>
-        public ObjectInstance Sort(Func<T, T, int> comparer)
+        public ObjectInstance Sort(Comparison<T> comparer)
         {
             // An array of size 1 or less is already sorted.
             if (Length <= 1)
@@ -730,7 +730,7 @@ namespace Jurassic.Library
         /// <param name="comparer"> A comparison function. </param>
         /// <param name="start"> The first index in the range. </param>
         /// <param name="end"> The last index in the range. </param>
-        private void QuickSort(Func<T, T, int> comparer, int start, int end)
+        private void QuickSort(Comparison<T> comparer, int start, int end)
         {
             if (end - start < 30)
             {
@@ -779,7 +779,7 @@ namespace Jurassic.Library
         /// <param name="comparer"> A comparison function. </param>
         /// <param name="start"> The first index in the range. </param>
         /// <param name="end"> The last index in the range. </param>
-        private void InsertionSort(Func<T, T, int> comparer, int start, int end)
+        private void InsertionSort(Comparison<T> comparer, int start, int end)
         {
             for (int i = start + 1; i <= end; i++)
             {

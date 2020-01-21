@@ -339,5 +339,31 @@ namespace Jurassic.Library
         {
             return TypeComparer.SameValue(value1, value2);
         }
+
+        /// <summary>
+        /// Transforms a list of key-value pairs into an object.
+        /// </summary>
+        /// <param name="iterable"> An iterable such as Array or Map. </param>
+        /// <returns> A new object whose properties are given by the entries of the iterable. </returns>
+        [JSInternalFunction(Name = "fromEntries")]
+        public static ObjectInstance FromEntries(ObjectInstance iterable)
+        {
+            var result = iterable.Engine.Object.Construct();
+            var iterator = TypeUtilities.GetIterator(iterable.Engine, iterable);
+            foreach (var entry in TypeUtilities.Iterate(iterator.Engine, iterator))
+            {
+                if (entry is ObjectInstance entryObject)
+                {
+                    var propertyKey = entryObject[0];
+                    if (!(propertyKey is string) && !(propertyKey is SymbolInstance))
+                        propertyKey = TypeConverter.ToString(propertyKey);
+                    var propertyValue = entryObject[1];
+                    result[propertyKey] = propertyValue;
+                }
+                else
+                    throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, $"Iterator value {TypeConverter.ToString(entry)} is not an entry object.");
+            }
+            return result;
+        }
     }
 }

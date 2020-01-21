@@ -1096,9 +1096,45 @@ namespace UnitTests
             Assert.AreEqual("6.1234", Evaluate("x = new Number(6.1234); x.f = ''.trim; x.f()"));
             Assert.AreEqual(0, Evaluate("''.trim.length"));
 
+            // Other whitespace characters.
+            Assert.AreEqual("hello world", Evaluate(@"'\thello world\t'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\u000Bhello world\u000B'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\u000Chello world\u000C'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\u00A0hello world\u00A0'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\uFEFFhello world\uFEFF'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\rhello world\r'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\nhello world\n'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\u2028hello world\u2028'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\u2029hello world\u2029'.trim()"));
+            Assert.AreEqual("hello world", Evaluate(@"'\u2001hello world\u2001'.trim()"));
+
             // Undefined and null are not allowed as the "this" object.
             Assert.AreEqual("TypeError", EvaluateExceptionType("''.trim.call(undefined)"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("''.trim.call(null)"));
+        }
+
+        [TestMethod]
+        public void trimStart()
+        {
+            Assert.AreEqual("hello world  ", Evaluate("'  hello world  '.trimStart()"));
+            Assert.AreEqual("6.1234", Evaluate("x = new Number(6.1234); x.f = ''.trimStart; x.f()"));
+            Assert.AreEqual(0, Evaluate("''.trimStart.length"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.trimStart.call(undefined)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.trimStart.call(null)"));
+        }
+
+        [TestMethod]
+        public void trimEnd()
+        {
+            Assert.AreEqual("hello world  ", Evaluate("'  hello world  '.trimEnd()"));
+            Assert.AreEqual("6.1234", Evaluate("x = new Number(6.1234); x.f = ''.trimEnd; x.f()"));
+            Assert.AreEqual(0, Evaluate("''.trimEnd.length"));
+
+            // Undefined and null are not allowed as the "this" object.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.trimEnd.call(undefined)"));
+            Assert.AreEqual("TypeError", EvaluateExceptionType("''.trimEnd.call(null)"));
         }
 
         [TestMethod]
