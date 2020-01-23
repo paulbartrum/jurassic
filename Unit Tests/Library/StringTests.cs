@@ -1128,7 +1128,7 @@ namespace UnitTests
         [TestMethod]
         public void trimEnd()
         {
-            Assert.AreEqual("hello world  ", Evaluate("'  hello world  '.trimEnd()"));
+            Assert.AreEqual("  hello world", Evaluate("'  hello world  '.trimEnd()"));
             Assert.AreEqual("6.1234", Evaluate("x = new Number(6.1234); x.f = ''.trimEnd; x.f()"));
             Assert.AreEqual(0, Evaluate("''.trimEnd.length"));
 

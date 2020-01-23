@@ -1184,22 +1184,34 @@ namespace Jurassic.Compiler
                 // Consume the catch token.
                 this.Expect(KeywordToken.Catch);
 
-                // Read the left parenthesis.
-                this.Expect(PunctuatorToken.LeftParenthesis);
-
-                // Read the name of the variable to assign the exception to.
-                result.CatchVariableName = this.ExpectIdentifier();
-                this.ValidateVariableName(result.CatchVariableName);
-
-                // Read the right parenthesis.
-                this.Expect(PunctuatorToken.RightParenthesis);
-
-                // Create a new scope for the catch variable.
-                result.CatchScope = DeclarativeScope.CreateCatchScope(this.currentLetScope, result.CatchVariableName);
-                using (CreateScopeContext(letScope: result.CatchScope, varScope: result.CatchScope))
+                if (this.nextToken == PunctuatorToken.LeftBrace)
                 {
+                    // catch { }
+
                     // Parse the statements inside the catch block.
                     result.CatchBlock = ParseBlock();
+                }
+                else
+                {
+                    // catch (e) { }
+
+                    // Read the left parenthesis.
+                    this.Expect(PunctuatorToken.LeftParenthesis);
+
+                    // Read the name of the variable to assign the exception to.
+                    result.CatchVariableName = this.ExpectIdentifier();
+                    this.ValidateVariableName(result.CatchVariableName);
+
+                    // Read the right parenthesis.
+                    this.Expect(PunctuatorToken.RightParenthesis);
+
+                    // Create a new scope for the catch variable.
+                    result.CatchScope = DeclarativeScope.CreateCatchScope(this.currentLetScope, result.CatchVariableName);
+                    using (CreateScopeContext(letScope: result.CatchScope, varScope: result.CatchScope))
+                    {
+                        // Parse the statements inside the catch block.
+                        result.CatchBlock = ParseBlock();
+                    }
                 }
             }
 
