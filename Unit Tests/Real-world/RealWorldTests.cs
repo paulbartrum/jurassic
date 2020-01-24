@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
+using Jurassic.Extensions;
 
 namespace UnitTests
 {
@@ -1343,7 +1344,7 @@ namespace UnitTests
         public void BigNumber()
         {
             var engine = new ScriptEngine();
-            engine.SetGlobalValue("console", new Jurassic.Library.FirebugConsole(engine));
+            engine.AddFirebugConsole();
             engine.ExecuteFile(@"..\..\..\Real-world\Files\bignumber.js");
             Assert.AreEqual("129963294281830400", engine.Evaluate(@"new BigNumber('129963294281830401').subtract(1).toString()"));
         }

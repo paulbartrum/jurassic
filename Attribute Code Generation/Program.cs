@@ -15,6 +15,8 @@ namespace Attribute_Code_Generation
             foreach (var csFilePath in Directory.EnumerateFiles(@"..\..\..\..\Jurassic", "*.cs", SearchOption.AllDirectories))
             {
                 var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(csFilePath));
+                var classCollector = new ClassCollector();
+                classCollector.Visit(syntaxTree.GetRoot());
 
                 // Construct the output file.
                 var output = new StringBuilder();
@@ -24,14 +26,11 @@ namespace Attribute_Code_Generation
                 output.AppendLine();
                 output.AppendLine("using System.Collections.Generic;");
                 output.AppendLine("using Jurassic;");
-                output.AppendLine();
-                output.AppendLine("namespace Jurassic.Library");
-                output.AppendLine("{");
+                if (classCollector.Classes.Any(classSyntax => ((NamespaceDeclarationSyntax)classSyntax.Parent).Name.ToString() != "Jurassic.Library"))
+                    output.AppendLine("using Jurassic.Library;");
                 output.AppendLine();
 
                 bool outputFile = false;
-                var classCollector = new ClassCollector();
-                classCollector.Visit(syntaxTree.GetRoot());
                 foreach (var classSyntax in classCollector.Classes)
                 {
                     // Find all the methods with [JSInternalFunction], [JSCallFunction], [JSConstructorFunction], [JSProperty] or [JSField].
@@ -48,6 +47,10 @@ namespace Attribute_Code_Generation
 
                     outputFile = true;
                     var methodGroups = JSMethodGroup.FromMethods(memberCollector.JSInternalFunctionMethods);
+
+                    output.AppendLine($"namespace {((NamespaceDeclarationSyntax)classSyntax.Parent).Name}");
+                    output.AppendLine("{");
+                    output.AppendLine();
 
                     output.AppendLine($"\t{classSyntax.Modifiers} class {classSyntax.Identifier}");
                     output.AppendLine("\t{");
@@ -128,10 +131,9 @@ namespace Attribute_Code_Generation
                     }
 
                     output.AppendLine("\t}");
+                    output.AppendLine();
+                    output.AppendLine("}");
                 }
-
-                output.AppendLine();
-                output.AppendLine("}");
 
                 if (outputFile)
                 {

@@ -30,17 +30,17 @@ for (var i in scripts) {
 	  groupElement = groupElement.previousElementSibling;
     }
 
-	result.name = parentCell.innerText;
+	result.name = parentCell.innerText.trim();
 	if (result.name[0] == '§')
-	  result.name = result.name.substr(1);
+	  result.name = result.name.substr(1).trim();
     if (result.name.substr(-1) === "►" || result.name.substr(-1) === "c")
-      result.name = result.name.substr(0, result.name.length - 1);
+      result.name = result.name.substr(0, result.name.length - 1).trim();
 
-    result.group = groupElement.firstElementChild.innerText;
+    result.group = groupElement.firstElementChild.innerText.trim();
 
-    result.detail = scripts[i].previousElementSibling.innerText;
+    result.detail = scripts[i].previousElementSibling.innerText.trim();
 	if (result.detail[0] == '§')
-	  result.detail = result.detail.substr(1);
+	  result.detail = result.detail.substr(1).trim();
 
     result.script = scripts[i].attributes["data-source"].value;
     results.push(result);

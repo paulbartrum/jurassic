@@ -4,8 +4,9 @@
 
 using System.Collections.Generic;
 using Jurassic;
+using Jurassic.Library;
 
-namespace Jurassic.Library
+namespace Jurassic.Extensions
 {
 
 	public partial class FirebugConsole

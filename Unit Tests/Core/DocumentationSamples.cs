@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
 using Jurassic.Library;
+using Jurassic.Extensions;
 
 namespace UnitTests
 {
@@ -15,28 +16,28 @@ namespace UnitTests
         [TestMethod]
         public void EvaluateExpression1()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             Assert.AreEqual(52, engine.Evaluate("5 * 10 + 2"));
         }
 
         [TestMethod]
         public void EvaluateExpression2()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             Assert.AreEqual(3, engine.Evaluate<int>("1.5 + 2.4"));
         }
 
         [TestMethod]
         public void ExecutingScript1()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.ExecuteFile(@"..\..\..\Core\Sample Files\execute1.js");
         }
 
         [TestMethod]
         public void AccessingAndModifyingGlobalVariables1()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.SetGlobalValue("interop", 15);
             engine.ExecuteFile(@"..\..\..\Core\Sample Files\globals1.js");
             Assert.AreEqual(20, engine.GetGlobalValue<int>("interop"));
@@ -45,14 +46,14 @@ namespace UnitTests
         [TestMethod]
         public void ConsoleAPI1()
         {
-            var engine = new Jurassic.ScriptEngine();
-            engine.SetGlobalValue("console", new Jurassic.Library.FirebugConsole(engine));
+            var engine = new ScriptEngine();
+            engine.AddFirebugConsole();
         }
 
         [TestMethod]
         public void CallANETMethod1()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.SetGlobalFunction("test", new Func<int, int, int>((a, b) => a + b));
             Assert.AreEqual(11, engine.Evaluate<int>("test(5, 6)"));
         }
@@ -60,7 +61,7 @@ namespace UnitTests
         [TestMethod]
         public void CallJavaScriptFunction1()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.Evaluate("function test(a, b) { return a + b }");
             Assert.AreEqual(11, engine.CallGlobalFunction<int>("test", 5, 6));
         }
@@ -78,7 +79,7 @@ namespace UnitTests
         [TestMethod]
         public void ExposingANETClass1()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.SetGlobalValue("appInfo", new AppInfo(engine));
             Assert.AreEqual("Test Application 5", engine.Evaluate<string>("appInfo.name + ' ' + appInfo.version"));
         }
@@ -101,7 +102,7 @@ namespace UnitTests
         [TestMethod]
         public void ExposingANETClass2()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.SetGlobalValue("math2", new Math2(engine));
             Assert.AreEqual(3.0, engine.Evaluate<double>("math2.log10(1000)"));
         }
@@ -147,7 +148,7 @@ namespace UnitTests
         [TestMethod]
         public void ExposingANETClass3()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.SetGlobalValue("Random", new RandomConstructor(engine));
             Assert.AreEqual(0.15155745910087481, engine.Evaluate<double>("var rand = new Random(1000); rand.nextDouble()"));
         }
@@ -155,7 +156,7 @@ namespace UnitTests
         [TestMethod]
         public void ExposingANETClass3_Call()
         {
-            var engine = new Jurassic.ScriptEngine();
+            var engine = new ScriptEngine();
             engine.SetGlobalValue("Random", new RandomConstructor(engine));
             Assert.AreEqual(Undefined.Value, engine.Evaluate("Random(1000);"));
         }

@@ -1,5 +1,6 @@
-﻿using Jurassic;
-using System;
+﻿using System;
+using Jurassic;
+using Jurassic.Extensions;
 
 namespace Debugger_Test
 {
@@ -9,7 +10,7 @@ namespace Debugger_Test
         {
             var scriptEngine = new ScriptEngine();
             scriptEngine.EnableDebugging = true;
-            scriptEngine.SetGlobalValue("console", new Jurassic.Library.FirebugConsole(scriptEngine));
+            scriptEngine.AddFirebugConsole();
             scriptEngine.ExecuteFile(@"..\..\prime.js");
             Console.ReadKey();
         }

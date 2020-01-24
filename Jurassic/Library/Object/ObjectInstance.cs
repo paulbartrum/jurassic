@@ -57,7 +57,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Called by derived classes to create a new object instance.
         /// </summary>
-        /// <param name="prototype"> The next object in the prototype chain.  Cannot be <c>null</c>. </param>
+        /// <param name="prototype"> The next object in the prototype chain. Cannot be <c>null</c>. </param>
         protected ObjectInstance(ObjectInstance prototype)
         {
             if (prototype == null)

@@ -1,6 +1,7 @@
 ﻿using Jurassic.Library;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -45,14 +46,22 @@ namespace Jurassic.TestSuiteRunner
         {
             using (var pipeServer = new PipeServer(Id))
             {
-                var entries = JsonConvert.DeserializeObject<CompatTableEntry[]>(File.ReadAllText(@"Kangax\compat-table.json"));
+                var dir = @"..\..\..\Kangax\";
+                var globalScript = File.ReadAllText(Path.Combine(dir, "global.js"));
+                var entries = JsonConvert.DeserializeObject<CompatTableEntry[]>(File.ReadAllText(Path.Combine(dir, "compat-table.json")));
                 foreach (var testCase in entries)
                 {
                     try
                     {
-                        testCase.Response = Send(pipeServer, new WorkerProcessRequest { Script = $"(function () {{ {testCase.script} }})();" });
-                        if (testCase.Response.JsonResult == "true")
+                        testCase.Response = Send(pipeServer, new WorkerProcessRequest
+                        {
+                            VariablesToReturn = new[] { "__asyncTestPassed" },
+                            Script = globalScript + Environment.NewLine + $"(function () {{ {testCase.script} }})();"
+                        });
+
+                        if (testCase.Response.JsonResult == "true" || testCase.Response.Variables?["__asyncTestPassed"] == "true")
                             testCase.Success = true;
+
                         if (testCase.Success == false && Array.IndexOf(
                             new string[]
                             {
@@ -68,6 +77,7 @@ namespace Jurassic.TestSuiteRunner
                                 @"function ""name"" property",
                                 "Array static methods",
                                 "Array.prototype methods",
+                                "Promise"
                             }, testCase.name) >= 0)
                         {
                             Console.WriteLine($"{testCase.name} -- {testCase.detail}, result: {testCase.Response.JsonResult ?? $"{testCase.Response.ErrorType}: {testCase.Response.ErrorMessage}"}");
@@ -138,6 +148,12 @@ namespace Jurassic.TestSuiteRunner
                 // Execute the provided script.
                 object result = engine.Evaluate(request.Script);
                 response.JsonResult = JSONObject.Stringify(engine, result);
+                if (request.VariablesToReturn != null)
+                {
+                    response.Variables = new Dictionary<string, string>();
+                    foreach (var variableName in request.VariablesToReturn)
+                        response.Variables[variableName] = engine.GetGlobalValue<string>(variableName);
+                }
             }
             catch (Exception e)
             {
