@@ -12,10 +12,12 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(5)
+			return new List<PropertyNameAndValue>(8)
 			{
 				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("isArray", new ClrStubFunction(engine.FunctionInstancePrototype, "isArray", 1, __STUB__IsArray), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("of", new ClrStubFunction(engine.FunctionInstancePrototype, "of", 0, __STUB__Of), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("from", new ClrStubFunction(engine.FunctionInstancePrototype, "from", 1, __STUB__From), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -63,6 +65,32 @@ namespace Jurassic.Library
 					return IsArray(Undefined.Value);
 				default:
 					return IsArray(args[0]);
+			}
+		}
+
+		private static object __STUB__Of(ScriptEngine engine, object thisObj, object[] args)
+		{
+			switch (args.Length)
+			{
+				case 0:
+					return Of(engine, new object[0]);
+				default:
+					return Of(engine, args);
+			}
+		}
+
+		private static object __STUB__From(ScriptEngine engine, object thisObj, object[] args)
+		{
+			switch (args.Length)
+			{
+				case 0:
+					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'iterable' was not specified.");
+				case 1:
+					return From(engine, TypeConverter.ToObject(engine, args[0]));
+				case 2:
+					return From(engine, TypeConverter.ToObject(engine, args[0]), TypeConverter.ToObject<FunctionInstance>(engine, args[1]), Undefined.Value);
+				default:
+					return From(engine, TypeConverter.ToObject(engine, args[0]), TypeConverter.ToObject<FunctionInstance>(engine, args[1]), args[2]);
 			}
 		}
 	}

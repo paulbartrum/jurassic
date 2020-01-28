@@ -125,5 +125,70 @@ namespace Jurassic.Library
             return value is ArrayInstance;
         }
 
+        /// <summary>
+        /// Creates a new Array instance from a variable number of arguments.
+        /// 
+        /// The difference between Array.of() and the Array constructor is in the handling of
+        /// integer arguments: Array.of(7) creates an array with a single element, 7, whereas
+        /// Array(7) creates an empty array with a length property of 7.
+        /// </summary>
+        /// <param name="engine"> The script engine to use. </param>
+        /// <param name="elements"> The elements of the new array. </param>
+        [JSInternalFunction(Name = "of", Flags = JSFunctionFlags.HasEngineParameter, Length = 0)]
+        public static ArrayInstance Of(ScriptEngine engine, params object[] elements)
+        {
+            return engine.Array.New(elements);
+        }
+
+        /// <summary>
+        /// The Array.from() method creates a new, shallow-copied Array instance from an array-like
+        /// or iterable object.
+        /// </summary>
+        /// <param name="engine"> The script engine to use. </param>
+        /// <param name="iterable"> An array-like or iterable object to convert to an array. </param>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "from", Flags = JSFunctionFlags.HasEngineParameter, Length = 1, RequiredArgumentCount = 1)]
+        public static ArrayInstance From(ScriptEngine engine, ObjectInstance iterable)
+        {
+            return From(engine, iterable, null, null);
+        }
+
+        /// <summary>
+        /// The Array.from() method creates a new, shallow-copied Array instance from an array-like
+        /// or iterable object.
+        /// </summary>
+        /// <param name="engine"> The script engine to use. </param>
+        /// <param name="iterable"> An array-like or iterable object to convert to an array. </param>
+        /// <param name="mapFunction"> Map function to call on every element of the array. </param>
+        /// <param name="thisArg"> Value to use as <c>this</c> when executing <paramref name="mapFunction"/>. </param>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "from", Flags = JSFunctionFlags.HasEngineParameter, Length = 1, RequiredArgumentCount = 1)]
+        public static ArrayInstance From(ScriptEngine engine, ObjectInstance iterable, FunctionInstance mapFunction, object thisArg)
+        {
+            var result = new List<object>();
+            var iterator = TypeUtilities.GetIterator(engine, iterable);
+            if (iterator != null)
+            {
+                // Initialize the array from an iterator.
+                int index = 0;
+                foreach (var item in TypeUtilities.Iterate(engine, iterator))
+                {
+                    object mappedValue = mapFunction?.Call(thisArg ?? Undefined.Value, item, index) ?? item;
+                    result.Add(mappedValue);
+                    index++;
+                }
+            }
+            else
+            {
+                // Initialize the array from an array-like object.
+                uint length = ArrayInstance.GetLength(iterable);
+                for (int i = 0; i < length; i++)
+                {
+                    object mappedValue = mapFunction?.Call(thisArg ?? Undefined.Value, iterable[i], i) ?? iterable[i];
+                    result.Add(mappedValue);
+                }
+            }
+            return engine.Array.New(result.ToArray());
+        }
     }
 }

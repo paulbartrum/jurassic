@@ -1465,7 +1465,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> The number of items in the array. </returns>
-        private static uint GetLength(ObjectInstance thisObj)
+        internal static uint GetLength(ObjectInstance thisObj)
         {
             if (thisObj is ArrayInstance)
                 return ((ArrayInstance)thisObj).length;
