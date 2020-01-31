@@ -3,6 +3,7 @@
 namespace Jurassic.Extensions.Fetch
 {
     /// <summary>
+    /// The constructor function for the Request object.
     /// </summary>
     public partial class RequestConstructor : ClrStubFunction
     {
@@ -43,7 +44,7 @@ namespace Jurassic.Extensions.Fetch
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Called when the Map object is invoked like a function, e.g. var x = Request().
+        /// Called when the Request object is invoked like a function, e.g. var x = Request().
         /// Throws an error.
         /// </summary>
         [JSCallFunction]

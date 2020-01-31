@@ -15,7 +15,7 @@
         }
 
         /// <summary>
-        /// Adds 'fetch' and related  to the global namespace.
+        /// Adds 'fetch' and related classes to the global namespace.
         /// </summary>
         /// <param name="engine"> The script engine to modify. </param>
         public static void AddFetch(this ScriptEngine engine)

@@ -3,6 +3,7 @@
 namespace Jurassic.Extensions.Fetch
 {
     /// <summary>
+    /// The constructor function for the Response object.
     /// </summary>
     public partial class ResponseConstructor : ClrStubFunction
     {

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using Jurassic.Library;
 
 namespace Jurassic.Extensions.Fetch
 {
-
     /// <summary>
+    /// Represents a resource request.
     /// </summary>
     public partial class RequestInstance : BodyInstance
     {

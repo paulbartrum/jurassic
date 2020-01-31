@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Jurassic.Library;
+﻿using Jurassic.Library;
 
 namespace Jurassic.Extensions.Fetch
 {
     /// <summary>
+    /// The constructor function for the Headers object.
     /// </summary>
     public partial class HeadersConstructor : ClrStubFunction
     {
@@ -13,7 +12,7 @@ namespace Jurassic.Extensions.Fetch
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Creates a new map constructor.
+        /// Creates a new Headers constructor.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         internal HeadersConstructor(ObjectInstance prototype)
@@ -45,7 +44,7 @@ namespace Jurassic.Extensions.Fetch
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Called when the Map object is invoked like a function, e.g. var x = Map().
+        /// Called when the Headers object is invoked like a function, e.g. var x = Headers().
         /// Throws an error.
         /// </summary>
         [JSCallFunction]
@@ -59,7 +58,7 @@ namespace Jurassic.Extensions.Fetch
         /// </summary>
         /// <param name="obj"> A list of key-value pairs, or an object with properties that can be
         /// interpreted as header name/value pairs. </param>
-        /// <returns> A new Map object, either empty or initialised with the given values. </returns>
+        /// <returns> A new Headers object, either empty or initialised with the given values. </returns>
         [JSConstructorFunction]
         public HeadersInstance Construct(object obj)
         {

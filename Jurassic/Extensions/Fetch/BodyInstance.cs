@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using Jurassic.Library;
+﻿using Jurassic.Library;
 
 namespace Jurassic.Extensions.Fetch
 {
