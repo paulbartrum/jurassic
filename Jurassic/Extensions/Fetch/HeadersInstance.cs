@@ -1,7 +1,7 @@
 ﻿using Jurassic.Library;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 
 namespace Jurassic.Extensions.Fetch
 {
@@ -11,22 +11,19 @@ namespace Jurassic.Extensions.Fetch
     /// request and response headers. These actions include retrieving, setting, adding to, and
     /// removing. A Headers object has an associated header list, which is initially empty and
     /// consists of zero or more name and value pairs.  You can add to this using methods like
-    /// append() (see Examples.) In all methods of this interface, header names are matched by
-    /// case-insensitive byte sequence. 
+    /// append(). In all methods of this interface, header names are case-insensitive. 
     /// </summary>
     public partial class HeadersInstance : ObjectInstance
     {
-        private HttpHeaders headers;
+        private Dictionary<string, string> headers = new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new FirebugConsole instance.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. Cannot be <c>null</c>. </param>
-        /// <param name="headers"> The headers object that this class wraps. </param>
-        public HeadersInstance(ObjectInstance prototype, HttpHeaders headers)
+        public HeadersInstance(ObjectInstance prototype)
             : base(prototype)
         {
-            this.headers = headers;
         }
 
         /// <summary>
@@ -40,6 +37,14 @@ namespace Jurassic.Extensions.Fetch
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Headers", PropertyAttributes.Configurable));
+
+            // The initial value of the @@iterator property is the same function object as the
+            // initial value of the Headers.prototype.entries property.
+            PropertyNameAndValue entriesProperty = properties.Find(p => "entries".Equals(p.Key));
+            if (entriesProperty == null)
+                throw new InvalidOperationException("Expected entries property.");
+            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, entriesProperty.Value, PropertyAttributes.NonEnumerable));
+
             result.FastSetProperties(properties);
             return result;
         }
@@ -50,7 +55,11 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "append")]
         public void Append(string name, string value)
         {
-            this.headers.TryAddWithoutValidation(name, NormalizeValue(value));
+            name = NormalizeName(name);
+            if (this.headers.TryGetValue(name, out string existingValue))
+                this.headers[name] = existingValue + ", " + NormalizeValue(value);
+            else
+                this.headers.Add(name, NormalizeValue(value));
         }
 
         /// <summary>
@@ -59,7 +68,7 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "delete")]
         public void Delete(string name)
         {
-            this.headers.Remove(name);
+            this.headers.Remove(NormalizeName(name));
         }
 
         /// <summary>
@@ -68,8 +77,8 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "entries")]
         public ObjectInstance Entries()
         {
-            return new Iterator(Engine.BaseIteratorPrototype,
-                this.headers.Select(keyValuePair => Engine.Array.New(new[] { keyValuePair.Key, CombineValues(keyValuePair.Value) })));
+            return new Iterator(Engine,
+                this.headers.Select(keyValuePair => Engine.Array.New(new[] { keyValuePair.Key, keyValuePair.Value })));
         }
 
         /// <summary>
@@ -82,12 +91,11 @@ namespace Jurassic.Extensions.Fetch
         /// <returns> A ByteString sequence representing the values of the retrieved header or
         /// null if this header is not set. </returns>
         [JSInternalFunction(Name = "get")]
-        public string Get(string name)
+        public object Get(string name)
         {
-            IEnumerable<string> values;
-            if (this.headers.TryGetValues("", out values))
-                return CombineValues(values);
-            return null;
+            if (this.headers.TryGetValue(NormalizeName(name), out string value))
+                return value;
+            return Null.Value;
         }
 
         /// <summary>
@@ -99,7 +107,7 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "has")]
         public bool Has(string name)
         {
-            return this.headers.Contains(name);
+            return this.headers.ContainsKey(NormalizeName(name));
         }
 
         /// <summary>
@@ -108,8 +116,7 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "keys")]
         public ObjectInstance Keys()
         {
-            return new Iterator(Engine.BaseIteratorPrototype,
-                this.headers.Select(keyValuePair => keyValuePair.Key));
+            return new Iterator(Engine, this.headers.Keys);
         }
 
         /// <summary>
@@ -122,8 +129,7 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "set")]
         public void Set(string name, string value)
         {
-            this.headers.Remove(name);
-            this.headers.TryAddWithoutValidation(name, NormalizeValue(value));
+            this.headers[NormalizeName(name)] = NormalizeValue(value);
         }
 
         /// <summary>
@@ -134,19 +140,17 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "values")]
         public ObjectInstance Values()
         {
-            return new Iterator(Engine.BaseIteratorPrototype,
-                this.headers.Select(keyValuePair => CombineValues(keyValuePair.Value)));
+            return new Iterator(Engine, this.headers.Values);
         }
 
+        private string NormalizeName(string name)
+        {
+            return name.ToLowerInvariant();
+        }
 
         private string NormalizeValue(string value)
         {
             return value.Trim(' ', '\t', '\r', '\n');
-        }
-
-        private string CombineValues(IEnumerable<string> values)
-        {
-            return string.Join(",", values);
         }
     }
 }

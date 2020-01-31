@@ -28,7 +28,7 @@ namespace Jurassic.Extensions.Fetch
 				case 1:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
-					return Fetch(engine, TypeConverter.ToString(args[0]), TypeConverter.ToObject(engine, args[1]));
+					return Fetch(engine, args[0], TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 	}

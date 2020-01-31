@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace Attribute_Code_Generation
 {
@@ -245,7 +246,7 @@ namespace Attribute_Code_Generation
             {
                 MethodName = methodSyntax.Identifier.ToString();
                 ReturnType = methodSyntax.ReturnType.ToString();
-                IsStatic = methodSyntax.Modifiers.Any(m => m.ToString() == "static");
+                IsStatic = methodSyntax.Modifiers.Any(m => m.Kind() == SyntaxKind.StaticKeyword);
 
                 int parameterSkipCount = 0;
                 var jsAttribute = methodSyntax.AttributeLists.SelectMany(al => al.Attributes).Single(att =>
@@ -384,9 +385,9 @@ namespace Attribute_Code_Generation
             {
                 PropertyName = propertySyntax.Identifier.ToString();
                 ReturnType = propertySyntax.Type.ToString();
-                if (propertySyntax.Modifiers.Any(m => m.ToString() == "static"))
+                if (propertySyntax.Modifiers.Any(m => m.Kind() == SyntaxKind.StaticKeyword))
                     throw new NotImplementedException("Static properties are not supported.");
-
+                
                 var jsAttribute = propertySyntax.AttributeLists.SelectMany(al => al.Attributes).Single(att =>
                     att.Name.ToString() == "JSProperty");
 
@@ -430,7 +431,8 @@ namespace Attribute_Code_Generation
 
                 // Determine the stub names.
                 GetterStubName = "__GETTER__" + PropertyName;
-                if (propertySyntax.AccessorList.Accessors.Any(a => a.Keyword.ToString() == "set"))
+                if (propertySyntax.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.SetAccessorDeclaration &&
+                    !a.Modifiers.Any(m => m.Kind() == SyntaxKind.PrivateKeyword)))
                     SetterStubName = "__SETTER__" + PropertyName;
             }
 

@@ -11,11 +11,6 @@ namespace UnitTests
         [ThreadStatic]
         public static Jurassic.ScriptEngine jurassicScriptEngine;
 
-        [ThreadStatic]
-        public static TestingContext testingContext;
-
-        public TestContext TestContext { get; set; }
-
         [TestInitialize]
         public void Init()
         {
@@ -23,36 +18,42 @@ namespace UnitTests
             jurassicScriptEngine = null;
         }
 
-        public static Jurassic.CompatibilityMode CompatibilityMode
+        public Jurassic.CompatibilityMode CompatibilityMode
         {
             get { InitializeJurassic(); return jurassicScriptEngine.CompatibilityMode; }
             set { InitializeJurassic(); jurassicScriptEngine.CompatibilityMode = value; }
         }
 
-        public static object Evaluate(string script)
+        public object Evaluate(string script)
         {
             InitializeJurassic();
+            OnBeforeExecute();
             return jurassicScriptEngine.Evaluate(script);
         }
 
-        public static void Execute(string script)
+        public void Execute(string script)
         {
             InitializeJurassic();
+            OnBeforeExecute();
             jurassicScriptEngine.Execute(script);
         }
 
-        protected static void InitializeJurassic()
+        protected void InitializeJurassic()
         {
             if (jurassicScriptEngine == null)
-            {
-                jurassicScriptEngine = new Jurassic.ScriptEngine();
-                testingContext = new TestingContext(jurassicScriptEngine);
-                jurassicScriptEngine.SetGlobalValue("testingContext", testingContext);
-            }
-            testingContext.Clear();
+                jurassicScriptEngine = InitializeScriptEngine();
         }
 
-        public static string EvaluateExceptionType(string script)
+        protected virtual Jurassic.ScriptEngine InitializeScriptEngine()
+        {
+            return new Jurassic.ScriptEngine();
+        }
+
+        protected virtual void OnBeforeExecute()
+        {
+        }
+
+        public string EvaluateExceptionType(string script)
         {
             object result;
             try
@@ -66,7 +67,7 @@ namespace UnitTests
             return string.Format("No error was thrown (result was '{0}')", result);
         }
 
-        public static string EvaluateExceptionMessage(string script)
+        public string EvaluateExceptionMessage(string script)
         {
             object result;
             try
@@ -80,7 +81,7 @@ namespace UnitTests
             return string.Format("No error was thrown (result was '{0}')", result);
         }
 
-        public static Jurassic.Library.PropertyAttributes EvaluateAccessibility(string objectExpression, string propertyName)
+        public Jurassic.Library.PropertyAttributes EvaluateAccessibility(string objectExpression, string propertyName)
         {
             // Surround the script with parentheses to prevent problems with precedence.
             objectExpression = string.Concat("(", objectExpression, ")");

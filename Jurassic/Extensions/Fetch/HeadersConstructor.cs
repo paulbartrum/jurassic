@@ -55,38 +55,36 @@ namespace Jurassic.Extensions.Fetch
         }
 
         /// <summary>
-        /// Creates a new Map.
+        /// Creates a new Headers object.
         /// </summary>
-        /// <param name="iterable"> iterable is an Array or other iterable object whose elements
-        /// are key-value pairs (2-element Arrays). Each key-value pair is added to the new Map.
-        /// <c>null</c> is treated as undefined. </param>
+        /// <param name="obj"> A list of key-value pairs, or an object with properties that can be
+        /// interpreted as header name/value pairs. </param>
         /// <returns> A new Map object, either empty or initialised with the given values. </returns>
         [JSConstructorFunction]
-        public HeadersInstance Construct(object iterable)
+        public HeadersInstance Construct(object obj)
         {
-            // Create a new set.
-            var result = new HeadersInstance(this.InstancePrototype, null);
+            // Create a new headers instance.
+            var result = new HeadersInstance(this.InstancePrototype);
+            if (TypeUtilities.IsUndefined(obj))
+                return result;
 
-            // If iterable is not null or undefined, then iterate through the values and add them to the set.
-            if (iterable != Undefined.Value && iterable != Null.Value)
+            var objectInstance = TypeConverter.ToObject(Engine, obj);
+            var iterator = TypeUtilities.GetIterator(Engine, objectInstance);
+            if (iterator != null)
             {
-                var iterator = TypeUtilities.GetIterator(Engine, TypeConverter.ToObject(Engine, iterable));
-                if (iterator != null)
+                // e.g. [ [ "Content-Type", "text/xml" ], [ "User-Agent", "Test" ] ]
+                foreach (var rawItem in TypeUtilities.Iterate(Engine, iterator))
                 {
-                    // Get a reference to the set function.
-                    var setFunc = result["set"] as FunctionInstance;
-                    if (setFunc == null)
-                        throw new JavaScriptException(Engine, ErrorType.TypeError, "Missing 'set' function");
-
-                    // Call the set function for each value.
-                    foreach (var value in TypeUtilities.Iterate(Engine, iterator))
-                    {
-                        var obj = value as ObjectInstance;
-                        if (obj == null)
-                            throw new JavaScriptException(Engine, ErrorType.TypeError, $"Expected iterator return value to be an object, but was {value}");
-                        setFunc.Call(result, obj[0], obj[1]);
-                    }
+                    var item = TypeConverter.ToObject(Engine, rawItem);
+                    result.Append(TypeConverter.ToString(item[0]), TypeConverter.ToString(item[1]));
                 }
+            }
+            else
+            {
+                // e.g. { "Content-Type": "text/xml", "User-Agent": "Test" }
+                foreach (var property in objectInstance.Properties)
+                    if (property.IsEnumerable && property.Key is string)
+                        result.Append((string)property.Key, TypeConverter.ToString(property.Value));
             }
 
             return result;

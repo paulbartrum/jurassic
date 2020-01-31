@@ -20,7 +20,10 @@
         /// <param name="engine"> The script engine to modify. </param>
         public static void AddFetch(this ScriptEngine engine)
         {
-            engine.Global.SetPropertyValue("fetch", new FirebugConsole(engine), throwOnError: true);
+            Fetch.FetchImplementation.Add(engine);
+            engine.Global.SetPropertyValue("Headers", new Fetch.HeadersConstructor(engine.Function.InstancePrototype), throwOnError: true);
+            engine.Global.SetPropertyValue("Request", new Fetch.RequestConstructor(engine.Function.InstancePrototype), throwOnError: true);
+            engine.Global.SetPropertyValue("Response", new Fetch.ResponseConstructor(engine.Function.InstancePrototype), throwOnError: true);
         }
     }
 }

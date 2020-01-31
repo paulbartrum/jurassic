@@ -19,7 +19,23 @@ namespace UnitTests
             public void OnCompleted(Action continuation) => continuation();
         }
 
-        private static PromiseInstance EvaluatePromise(string script)
+        [ThreadStatic]
+        public static TestingContext testingContext;
+
+        protected override ScriptEngine InitializeScriptEngine()
+        {
+            var scriptEngine = base.InitializeScriptEngine();
+            testingContext = new TestingContext(scriptEngine);
+            scriptEngine.SetGlobalValue("testingContext", testingContext);
+            return scriptEngine;
+        }
+
+        protected override void OnBeforeExecute()
+        {
+            testingContext.Clear();
+        }
+
+        private PromiseInstance EvaluatePromise(string script)
         {
             var result = Evaluate(script);
             Assert.IsInstanceOfType(result, typeof(PromiseInstance));

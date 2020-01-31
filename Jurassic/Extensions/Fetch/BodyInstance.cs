@@ -11,11 +11,11 @@ namespace Jurassic.Extensions.Fetch
     public abstract partial class BodyInstance : ObjectInstance
     {
         /// <summary>
-        /// Creates a new FirebugConsole instance.
+        /// Creates a new Body instance.
         /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        public BodyInstance(ScriptEngine engine)
-            : base(engine.Object.InstancePrototype)
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        public BodyInstance(ObjectInstance prototype)
+            : base(prototype)
         {
         }
 
@@ -23,41 +23,58 @@ namespace Jurassic.Extensions.Fetch
         /// 
         /// </summary>
         [JSProperty(Name = "body")]
-        public ObjectInstance Body
-        {
-            get { throw new JavaScriptException(Engine, ErrorType.TypeError, "Functionality is not implementated."); }
-        }
+        public ObjectInstance Body { get; private set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [JSProperty(Name = "bodyUsed")]
-        public bool BodyUsed
-        {
-            get { throw new JavaScriptException(Engine, ErrorType.TypeError, "Functionality is not implementated."); }
-        }
+        public bool BodyUsed { get; private set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [JSInternalFunction(Name = "arrayBuffer")]
         public PromiseInstance ArrayBuffer()
         {
             throw new JavaScriptException(Engine, ErrorType.TypeError, "Functionality is not implementated.");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [JSInternalFunction(Name = "blob")]
         public PromiseInstance Blob()
         {
             throw new JavaScriptException(Engine, ErrorType.TypeError, "Functionality is not implementated.");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [JSInternalFunction(Name = "formData")]
         public PromiseInstance FormData()
         {
             throw new JavaScriptException(Engine, ErrorType.TypeError, "Functionality is not implementated.");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [JSInternalFunction(Name = "json")]
         public PromiseInstance Json()
         {
             throw new JavaScriptException(Engine, ErrorType.TypeError, "Functionality is not implementated.");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [JSInternalFunction(Name = "text")]
         public PromiseInstance Text()
         {

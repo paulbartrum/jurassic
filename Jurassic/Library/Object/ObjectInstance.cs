@@ -345,6 +345,19 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the value of the property with the given name.
         /// </summary>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
+        /// <param name="value"> Receives the value of the property, or <c>null</c> if the property
+        /// doesn't exist. </param>
+        /// <returns> <c>true</c> if the value exists, <c>false</c> otherwise. </returns>
+        public bool TryGetPropertyValue(object key, out object value)
+        {
+            value = GetPropertyValue(key);
+            return value != null;
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name.
+        /// </summary>
         /// <param name="propertyReference"> The name of the property. </param>
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on

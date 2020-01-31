@@ -16,10 +16,10 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a new iterator.
         /// </summary>
-        /// <param name="prototype"> The next object in the prototype chain. </param>
+        /// <param name="engine"> The script environment. </param>
         /// <param name="enumerable"> The enumerable to iterate over. </param>
-        internal Iterator(ObjectInstance prototype, IEnumerable<object> enumerable)
-            : base(prototype)
+        internal Iterator(ScriptEngine engine, IEnumerable<object> enumerable)
+            : base(CreatePrototype(engine))
         {
             this.enumerator = enumerable.GetEnumerator();
         }
