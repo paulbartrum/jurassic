@@ -5,10 +5,10 @@ using Jurassic.Extensions;
 namespace UnitTests
 {
     /// <summary>
-    /// Test the fetch() API.
+    /// Test the Headers object (part of the fetch() API).
     /// </summary>
     [TestClass]
-    public class FetchTests : TestBase
+    public class HeadersTests : TestBase
     {
         protected override ScriptEngine InitializeScriptEngine()
         {
@@ -16,58 +16,9 @@ namespace UnitTests
             scriptEngine.AddFetch();
             return scriptEngine;
         }
-
+        
         [TestMethod]
-        public void Request_constructor()
-        {
-            // Invalid URL.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new Request('http:::')"));
-
-            // Credentials are not allowed in the URL.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new Request('http://user:password@example.com')"));
-
-            // Invalid modes.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new Request('http://example.com', { mode: 'sdfsdf' })"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new Request('http://example.com', { mode: 'CORS' })"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new Request('http://example.com', { mode: 'navigate' })"));
-        }
-
-        [TestMethod]
-        public void Response_error()
-        {
-            Assert.AreEqual("error", Evaluate("Response.error().type"));
-            Assert.AreEqual("", Evaluate("Response.error().url"));
-            Assert.AreEqual(false, Evaluate("Response.error().redirected"));
-            Assert.AreEqual(0, Evaluate("Response.error().status"));
-            Assert.AreEqual(false, Evaluate("Response.error().ok"));
-            Assert.AreEqual("", Evaluate("Response.error().statusText"));
-            Assert.AreEqual("", Evaluate("Array.from(Response.error().headers).toString()"));
-        }
-
-        [TestMethod]
-        public void Response_redirect()
-        {
-            // redirect(url)
-            Assert.AreEqual("default", Evaluate("Response.redirect('http://about.com').type"));
-            Assert.AreEqual("", Evaluate("Response.redirect('http://about.com').url"));
-            Assert.AreEqual(false, Evaluate("Response.redirect('http://about.com').redirected"));
-            Assert.AreEqual(302, Evaluate("Response.redirect('http://about.com').status"));
-            Assert.AreEqual(false, Evaluate("Response.redirect('http://about.com').ok"));
-            Assert.AreEqual("", Evaluate("Response.redirect('http://about.com').statusText"));
-            Assert.AreEqual("location,http://about.com/", Evaluate("Array.from(Response.redirect('http://about.com').headers).toString()"));
-
-            // redirect(url, status)
-            Assert.AreEqual(301, Evaluate("Response.redirect('http://about.com', 301).status"));
-
-            // Invalid URL.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Response.redirect('http:::')"));
-
-            // Invalid status code.
-            Assert.AreEqual("RangeError", EvaluateExceptionType("Response.redirect('http://about.com', 500)"));
-        }
-
-        [TestMethod]
-        public void Headers_constructor()
+        public void Constructor()
         {
             // Empty Headers instance.
             Assert.AreEqual(Null.Value, Evaluate("new Headers().get('Content-Type')"));
@@ -97,7 +48,7 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void Headers_append()
+        public void Append()
         {
             Assert.AreEqual("text/xml", Evaluate(@"
                 var headers = new Headers();
@@ -111,7 +62,7 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void Headers_delete()
+        public void Delete()
         {
             Assert.AreEqual(Null.Value, Evaluate(@"
                 var headers = new Headers({'Content-Type': 'text/xml'});
@@ -121,14 +72,14 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void Headers_entries()
+        public void Entries()
         {
             Assert.AreEqual(@"[[""content-type"",""text/xml""],[""user-agent"",""MyBrowser""]]",
                 Evaluate("JSON.stringify(Array.from(new Headers({'Content-Type': 'text/xml', 'User-Agent': 'MyBrowser'}).entries()))"));
         }
 
         [TestMethod]
-        public void Headers_get()
+        public void Get()
         {
             // Retrieve a set value.
             Assert.AreEqual("text/xml", Evaluate("new Headers({'Content-Type': 'text/xml'}).get('Content-Type')"));
@@ -142,7 +93,7 @@ namespace UnitTests
 
 
         [TestMethod]
-        public void Headers_has()
+        public void Has()
         {
             Assert.AreEqual(false, Evaluate("new Headers({'Content-Type': 'text/xml'}).has('abc')"));
             Assert.AreEqual(true, Evaluate("new Headers({'Content-Type': 'text/xml'}).has('Content-Type')"));
@@ -151,14 +102,14 @@ namespace UnitTests
 
 
         [TestMethod]
-        public void Headers_keys()
+        public void Keys()
         {
             Assert.AreEqual("content-type,user-agent", Evaluate("Array.from(new Headers({'Content-Type': 'text/xml', 'User-Agent': 'MyBrowser'}).keys()).toString()"));
         }
 
 
         [TestMethod]
-        public void Headers_set()
+        public void Set()
         {
             Assert.AreEqual("text/xml", Evaluate(@"
                 var headers = new Headers();
@@ -173,7 +124,7 @@ namespace UnitTests
 
 
         [TestMethod]
-        public void Headers_values()
+        public void Values()
         {
             Assert.AreEqual("text/xml,MyBrowser", Evaluate("Array.from(new Headers({'Content-Type': 'text/xml', 'User-Agent': 'MyBrowser'}).values()).toString()"));
         }

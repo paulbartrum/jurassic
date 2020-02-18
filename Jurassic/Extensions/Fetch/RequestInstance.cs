@@ -30,19 +30,19 @@ namespace Jurassic.Extensions.Fetch
             Method = "GET";
             Mode = "no-cors";
             Redirect = "follow";
-            Referrer = "client";
+            Referrer = "about:client";
             ReferrerPolicy = "";
 
             // resource can be a URL (string) or a Request object.
             if (resource is string url)
             {
-                if (!Uri.TryCreate(FetchImplementation.GetBaseUri(Engine), url, out var parsedUri))
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, $"Failed to parse URL '{url}'.");
-                if (parsedUri.UserInfo != null)
+                var parsedUri = FetchImplementation.ConvertToAbsoluteUri(Engine, url);
+                if (!string.IsNullOrEmpty(parsedUri.UserInfo))
                     throw new JavaScriptException(Engine, ErrorType.TypeError, "Request cannot be constructed from a URL that includes credentials.");
                 Url = parsedUri.ToString();
                 Mode = "cors";
                 Credentials = "same-origin";
+                Headers = FetchImplementation.GetHeadersConstructor(Engine).Construct();
             }
             else
             {
@@ -51,7 +51,7 @@ namespace Jurassic.Extensions.Fetch
                 Cache = request.Cache;
                 Credentials = request.Credentials;
                 Destination = request.Destination;
-                //Headers = new HeadersConstructor().Construct(request.Headers);
+                Headers = FetchImplementation.GetHeadersConstructor(Engine).Construct(request.Headers);
                 Integrity = request.Integrity;
                 Method = request.Method;
                 Mode = request.Mode;
@@ -68,16 +68,9 @@ namespace Jurassic.Extensions.Fetch
                 {
                     var referrerStr = TypeConverter.ToString(referrer);
                     if (referrerStr == "")
-                        Referrer = "no-referrer";
+                        Referrer = "";
                     else
-                    {
-                        if (!Uri.TryCreate(FetchImplementation.GetBaseUri(Engine), referrerStr, out var referrerUri))
-                            throw new JavaScriptException(Engine, ErrorType.TypeError, $"Failed to parse URL '{referrerStr}'.");
-                        if (referrerUri.Scheme == "about" && referrerUri.PathAndQuery == "client")
-                            Referrer = "client";
-                        else
-                            Referrer = referrerUri.ToString();
-                    }
+                        Referrer = FetchImplementation.ConvertToAbsoluteUri(Engine, referrerStr).ToString();
                 }
 
                 // Referrer policy.
@@ -154,6 +147,8 @@ namespace Jurassic.Extensions.Fetch
                 // If r’s request’s mode is "no-cors", then:
                 // If r’s request’s method is not a CORS - safelisted method, then throw a TypeError.
                 // Set r’s headers’s guard to "request-no-cors".
+                if (init.TryGetPropertyValue("headers", out var headers))
+                    Headers = FetchImplementation.GetHeadersConstructor(Engine).Construct(headers);
 
                 //if (init.TryGetPropertyValue("signal", out var referrer))
                 //    request.Signal = TypeConverter.ToString(referrer);

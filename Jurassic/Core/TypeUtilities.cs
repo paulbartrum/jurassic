@@ -134,7 +134,7 @@ namespace Jurassic
                                 yield return propertyName;
                             }
                         }
-                        
+
                         // Record the name so we can check if it was shadowed.
                         names.Add(propertyName);
                     }
@@ -301,6 +301,24 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Converts an iteratable object into a iterator by looking up the @@iterator property,
+        /// then calling that value as a function. Throws an exception if the object isn't iterable.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="iterable"> The object to get a iterator from. </param>
+        /// <returns> An iterator object, with a next function. </returns>
+        public static ObjectInstance RequireIterator(ScriptEngine engine, object iterable)
+        {
+
+            if (iterable == Undefined.Value || iterable == Null.Value)
+                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
+            var iterator = GetIterator(engine, TypeConverter.ToObject(engine, iterable));
+            if (iterator == null)
+                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
+            return iterator;
+        }
+
+        /// <summary>
         /// Iterate over the values in an iterator.
         /// </summary>
         /// <param name="engine"> The script engine. </param>
@@ -332,6 +350,17 @@ namespace Jurassic
                 // Return the value.
                 yield return iteratorResult["value"];
             }
+        }
+
+        /// <summary>
+        /// Implements the logic for the for-of operator.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="iterable"> The object to get a iterator from. </param>
+        /// <returns> An enumerable list of iterator values. </returns>
+        public static IEnumerable<object> ForOf(ScriptEngine engine, object iterable)
+        {
+            return Iterate(engine, RequireIterator(engine, iterable));
         }
     }
 

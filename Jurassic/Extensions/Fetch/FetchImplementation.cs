@@ -9,9 +9,28 @@ namespace Jurassic.Extensions.Fetch
     /// </summary>
     public static partial class FetchImplementation
     {
-        internal static void Add(ScriptEngine engine)
+        private const string BaseUriKey = "__fetch_baseURI";
+        private const string UserAgentKey = "__fetch_userAgent";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <param name="options"></param>
+        internal static void Add(ScriptEngine engine, FetchOptions options)
         {
-            engine.Global.FastSetProperties(GetDeclarativeProperties(engine));
+            foreach (var property in GetDeclarativeProperties(engine))
+                engine.Global.DefineProperty(property.Key, new PropertyDescriptor(property.Value, property.Attributes), throwOnError: true);
+
+            options = options ?? new FetchOptions();
+            if (options.BaseUri == null)
+                engine.Global.Delete(BaseUriKey, throwOnError: true);
+            else
+                engine.Global.DefineProperty(BaseUriKey, new PropertyDescriptor(options.BaseUri.ToString(), PropertyAttributes.NonEnumerable), throwOnError: true);
+            if (options.UserAgent == null)
+                engine.Global.Delete(UserAgentKey, throwOnError: true);
+            else
+                engine.Global.DefineProperty(UserAgentKey, new PropertyDescriptor(options.UserAgent, PropertyAttributes.NonEnumerable), throwOnError: true);
         }
 
         /// <summary>
@@ -27,7 +46,7 @@ namespace Jurassic.Extensions.Fetch
         /// <param name="init"> An object containing any custom settings that you want to apply to
         /// the request. </param>
         /// <returns> A Promise that resolves to a Response object. </returns>
-        [JSInternalFunction(Name = "fetch", Flags = JSFunctionFlags.HasEngineParameter)]
+        [JSInternalFunction(Name = "fetch", Flags = JSFunctionFlags.HasEngineParameter, IsEnumerable = true)]
         public static PromiseInstance Fetch(ScriptEngine engine, object resource, ObjectInstance init)
         {
             var request = new RequestInstance(GetRequestConstructor(engine).InstancePrototype, resource, init);
@@ -42,9 +61,27 @@ namespace Jurassic.Extensions.Fetch
             return null;
         }
 
-        internal static Uri GetBaseUri(ScriptEngine engine)
+        internal static Uri ConvertToAbsoluteUri(ScriptEngine engine, string uri)
         {
-            return null;
+            var baseUri = engine.Global.GetPropertyValue(BaseUriKey) as string;
+            if (baseUri != null)
+            {
+                // A base URI exists, relative URIs are allowed.
+                if (Uri.TryCreate(new Uri(baseUri, UriKind.Absolute), uri, out Uri result))
+                    return result;
+            }
+            else
+            {
+                // No base URI exists, relative URIs are not allowed.
+                if (Uri.TryCreate(uri, UriKind.Absolute, out Uri result))
+                    return result;
+
+                // Check if the problem is that the URI is relative.
+                if (Uri.TryCreate(uri, UriKind.Relative, out result))
+                    throw new JavaScriptException(engine, ErrorType.TypeError, $"Relative URIs are not allowed unless a BaseUri is specified.");
+            }
+
+            throw new JavaScriptException(engine, ErrorType.TypeError, $"Invalid URI '{uri}'.");
         }
 
         internal static HeadersConstructor GetHeadersConstructor(ScriptEngine engine)

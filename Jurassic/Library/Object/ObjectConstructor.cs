@@ -349,7 +349,7 @@ namespace Jurassic.Library
         public static ObjectInstance FromEntries(ObjectInstance iterable)
         {
             var result = iterable.Engine.Object.Construct();
-            var iterator = TypeUtilities.GetIterator(iterable.Engine, iterable);
+            var iterator = TypeUtilities.RequireIterator(iterable.Engine, iterable);
             foreach (var entry in TypeUtilities.Iterate(iterator.Engine, iterator))
             {
                 if (entry is ObjectInstance entryObject)

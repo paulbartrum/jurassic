@@ -35,8 +35,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo TypeUtilities_Add;
         internal static MethodInfo TypeUtilities_IsPrimitiveOrObject;
         internal static MethodInfo TypeUtilities_VerifyThisObject;
-        internal static MethodInfo TypeUtilities_GetIterator;
-        internal static MethodInfo TypeUtilities_Iterate;
+        internal static MethodInfo TypeUtilities_ForOf;
 
         internal static MethodInfo FunctionInstance_HasInstance;
         internal static MethodInfo FunctionInstance_ConstructWithStackTrace;
@@ -165,8 +164,7 @@ namespace Jurassic.Compiler
             TypeUtilities_Add = GetStaticMethod(typeof(TypeUtilities), "Add", typeof(object), typeof(object));
             TypeUtilities_IsPrimitiveOrObject = GetStaticMethod(typeof(TypeUtilities), "IsPrimitiveOrObject", typeof(object));
             TypeUtilities_VerifyThisObject = GetStaticMethod(typeof(TypeUtilities), "VerifyThisObject", typeof(ScriptEngine), typeof(object), typeof(string));
-            TypeUtilities_GetIterator = GetStaticMethod(typeof(TypeUtilities), "GetIterator", typeof(ScriptEngine), typeof(ObjectInstance));
-            TypeUtilities_Iterate = GetStaticMethod(typeof(TypeUtilities), "Iterate", typeof(ScriptEngine), typeof(ObjectInstance));
+            TypeUtilities_ForOf = GetStaticMethod(typeof(TypeUtilities), "ForOf", typeof(ScriptEngine), typeof(object));
 
             ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(object), typeof(bool));
             ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(object), typeof(PropertyDescriptor), typeof(bool));

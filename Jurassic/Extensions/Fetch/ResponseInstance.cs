@@ -72,8 +72,7 @@ namespace Jurassic.Extensions.Fetch
         /// <returns> A Response object. </returns>
         internal static ResponseInstance Redirect(ScriptEngine engine, string url, int status = 302)
         {
-            if (!Uri.TryCreate(FetchImplementation.GetBaseUri(engine), url, out var parsedUrl))
-                throw new JavaScriptException(engine, ErrorType.TypeError, $"Failed to parse URL '{url}'.");
+            var parsedUrl = FetchImplementation.ConvertToAbsoluteUri(engine, url);
             if (status != 301 && status != 302 && status != 303 && status != 307 && status != 308)
                 throw new JavaScriptException(engine, ErrorType.RangeError, "Invalid status code.");
 

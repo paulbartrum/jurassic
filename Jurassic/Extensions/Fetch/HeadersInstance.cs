@@ -143,6 +143,11 @@ namespace Jurassic.Extensions.Fetch
             return new Iterator(Engine, this.headers.Values);
         }
 
+
+
+        //     INTERNAL/PRIVATE METHODS
+        //_________________________________________________________________________________________
+
         private string NormalizeName(string name)
         {
             return name.ToLowerInvariant();

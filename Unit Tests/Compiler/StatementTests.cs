@@ -152,6 +152,37 @@ namespace UnitTests
             // for (var x of <expression>)
             Assert.AreEqual(206, Evaluate("y = 0; for (var x of [93, 113]) { y += x } y"));
 
+
+            // Iterate over a generator.
+            Assert.AreEqual("2 3 4 5 ", Evaluate(@"
+                var range = {
+                  from: 2,
+                  to: 5
+                };
+
+                // 1. call to for..of initially calls this
+                range[Symbol.iterator] = function() {
+
+                  // ...it returns the iterator object:
+                  // 2. Onward, for..of works only with this iterator, asking it for next values
+                  return {
+                    current: this.from,
+                    last: this.to,
+
+                    // 3. next() is called on each iteration by the for..of loop
+                    next() {
+                      // 4. it should return the value as an object {done:.., value :...}
+                      if (this.current <= this.last) {
+                        return { done: false, value: this.current++ };
+                      } else {
+                        return { done: true };
+                      }
+                    }
+                  };
+                };
+
+                y = ''; for (var x of range) { y += x + ' ' } y"));
+
             // Type errors.
             Assert.AreEqual("TypeError", EvaluateExceptionType("for (x of 1) {}"));
             Assert.AreEqual("TypeError", EvaluateExceptionType("for (x of null) {}"));
@@ -162,8 +193,6 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (x of [1, 2], [3, 4]) {}"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (5 of [1, 2])"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (var 5 of [1, 2])"));
-
-            // TODO: iterate over a generator.
         }
 
         [TestMethod]

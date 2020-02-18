@@ -147,8 +147,7 @@ namespace Jurassic.Library
             if (iterable == null)
                 throw new JavaScriptException(Engine, ErrorType.TypeError, "The parameter must be an iterable.");
 
-            var iterator = TypeUtilities.GetIterator(Engine, iterable);
-            var promises = TypeUtilities.Iterate(Engine, iterator);
+            var promises = TypeUtilities.ForOf(Engine, iterable);
 
             var result = new PromiseInstance(Engine.Promise.InstancePrototype);
             foreach (var promiseOrValue in promises)
@@ -168,8 +167,7 @@ namespace Jurassic.Library
             if (iterable == null)
                 throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, "The parameter must be an iterable.");
 
-            var iterator = TypeUtilities.GetIterator(iterable.Engine, iterable);
-            var promises = TypeUtilities.Iterate(iterator.Engine, iterator).ToList();
+            var promises = TypeUtilities.ForOf(iterable.Engine, iterable).ToList();
             var results = Engine.Array.Construct(new object[promises.Count]);
             var count = promises.Count;
 

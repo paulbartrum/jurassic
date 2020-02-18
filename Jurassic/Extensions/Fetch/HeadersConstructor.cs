@@ -60,13 +60,14 @@ namespace Jurassic.Extensions.Fetch
         /// interpreted as header name/value pairs. </param>
         /// <returns> A new Headers object, either empty or initialised with the given values. </returns>
         [JSConstructorFunction]
-        public HeadersInstance Construct(object obj)
+        public HeadersInstance Construct(object obj = null)
         {
             // Create a new headers instance.
             var result = new HeadersInstance(this.InstancePrototype);
             if (TypeUtilities.IsUndefined(obj))
                 return result;
 
+            // Fill the headers instance.
             var objectInstance = TypeConverter.ToObject(Engine, obj);
             var iterator = TypeUtilities.GetIterator(Engine, objectInstance);
             if (iterator != null)
