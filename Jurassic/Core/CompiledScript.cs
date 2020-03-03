@@ -60,10 +60,18 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="engine"/> is a <c>null</c> reference. </exception>
         public void Execute(ScriptEngine engine)
         {
-            methodGen.Execute(engine);
+            try
+            {
+                methodGen.Execute(engine);
 
-            // Execute any pending callbacks.
-            engine.ExecutePendingCallbacks();
+                // Execute any pending callbacks.
+                engine.ExecutePostExecuteSteps();
+            }
+            finally
+            {
+                // Ensure the list of post-execute steps is cleared if there is an exception.
+                engine.ClearPostExecuteSteps();
+            }
         }
     }
 }

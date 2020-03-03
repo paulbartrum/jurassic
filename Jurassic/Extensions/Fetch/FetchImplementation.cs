@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using Jurassic.Library;
 
 namespace Jurassic.Extensions.Fetch
@@ -9,8 +10,7 @@ namespace Jurassic.Extensions.Fetch
     /// </summary>
     public static partial class FetchImplementation
     {
-        private const string BaseUriKey = "__fetch_baseURI";
-        private const string UserAgentKey = "__fetch_userAgent";
+        private static ConditionalWeakTable<ScriptEngine, FetchOptions> engineOptions = new ConditionalWeakTable<ScriptEngine, FetchOptions>();
 
         /// <summary>
         /// 
@@ -19,18 +19,11 @@ namespace Jurassic.Extensions.Fetch
         /// <param name="options"></param>
         internal static void Add(ScriptEngine engine, FetchOptions options)
         {
+            if (engineOptions.TryGetValue(engine, out var existingOptions))
+                throw new InvalidOperationException("Please call this method only once per script engine.");
             foreach (var property in GetDeclarativeProperties(engine))
                 engine.Global.DefineProperty(property.Key, new PropertyDescriptor(property.Value, property.Attributes), throwOnError: true);
-
-            options = options ?? new FetchOptions();
-            if (options.BaseUri == null)
-                engine.Global.Delete(BaseUriKey, throwOnError: true);
-            else
-                engine.Global.DefineProperty(BaseUriKey, new PropertyDescriptor(options.BaseUri.ToString(), PropertyAttributes.NonEnumerable), throwOnError: true);
-            if (options.UserAgent == null)
-                engine.Global.Delete(UserAgentKey, throwOnError: true);
-            else
-                engine.Global.DefineProperty(UserAgentKey, new PropertyDescriptor(options.UserAgent, PropertyAttributes.NonEnumerable), throwOnError: true);
+            engineOptions.Add(engine, options ?? new FetchOptions());
         }
 
         /// <summary>
@@ -47,27 +40,50 @@ namespace Jurassic.Extensions.Fetch
         /// the request. </param>
         /// <returns> A Promise that resolves to a Response object. </returns>
         [JSInternalFunction(Name = "fetch", Flags = JSFunctionFlags.HasEngineParameter, IsEnumerable = true)]
-        public static PromiseInstance Fetch(ScriptEngine engine, object resource, ObjectInstance init)
+        public static PromiseInstance Fetch(ScriptEngine engine, object resource, ObjectInstance init = null)
         {
-            var request = new RequestInstance(GetRequestConstructor(engine).InstancePrototype, resource, init);
+            var requestInstance = new RequestInstance(GetRequestConstructor(engine).InstancePrototype, resource, init);
 
-            /*var request = new HttpRequestMessage(HttpMethod.Post, $"https://{Authority}/3/device/{pushNotification.DeviceToken}");
-            request.Version = HttpVersion.Version20;
+            var method = HttpMethod.Get;
+            switch (requestInstance.Method)
+            {
+                case "DELETE":
+                    method = HttpMethod.Delete;
+                    break;
+                case "HEAD":
+                    method = HttpMethod.Head;
+                    break;
+                case "OPTIONS":
+                    method = HttpMethod.Options;
+                    break;
+                case "POST":
+                    method = HttpMethod.Post;
+                    break;
+                case "PUT":
+                    method = HttpMethod.Put;
+                    break;
+                case "TRACE":
+                    method = HttpMethod.Trace;
+                    break;
+            }
+
+            var request = new HttpRequestMessage(method, requestInstance.Url);
+            foreach (var keyValuePair in request.Headers)
+                request.Headers.TryAddWithoutValidation(keyValuePair.Key, keyValuePair.Value);
 
             var client = new HttpClient();
             var task = client.SendAsync(request);
-            task = task.ContinueWith(t => 5);
-            return engine.Promise.Construct(task.GetAwaiter());*/
-            return null;
+            //task = task.ContinueWith(t => 5);
+            return engine.Promise.FromTask(task);
         }
 
         internal static Uri ConvertToAbsoluteUri(ScriptEngine engine, string uri)
         {
-            var baseUri = engine.Global.GetPropertyValue(BaseUriKey) as string;
-            if (baseUri != null)
+            var fetchOptions = GetFetchOptions(engine);
+            if (fetchOptions.BaseUri != null)
             {
                 // A base URI exists, relative URIs are allowed.
-                if (Uri.TryCreate(new Uri(baseUri, UriKind.Absolute), uri, out Uri result))
+                if (Uri.TryCreate(fetchOptions.BaseUri, uri, out Uri result))
                     return result;
             }
             else
@@ -82,6 +98,13 @@ namespace Jurassic.Extensions.Fetch
             }
 
             throw new JavaScriptException(engine, ErrorType.TypeError, $"Invalid URI '{uri}'.");
+        }
+
+        internal static FetchOptions GetFetchOptions(ScriptEngine engine)
+        {
+            if (engineOptions.TryGetValue(engine, out var fetchOptions))
+                return fetchOptions;
+            throw new InvalidOperationException("AddFetch() has not been called.");
         }
 
         internal static HeadersConstructor GetHeadersConstructor(ScriptEngine engine)

@@ -35,9 +35,9 @@ namespace Jurassic.Extensions.Fetch
 			switch (args.Length)
 			{
 				case 0:
-					return ((HeadersConstructor)thisObj).Construct(Undefined.Value);
+					return ((HeadersConstructor)thisObj).Construct(null);
 				default:
-					return ((HeadersConstructor)thisObj).Construct(args[0]);
+					return ((HeadersConstructor)thisObj).Construct(TypeUtilities.IsUndefined(args[0]) ? null : args[0]);
 			}
 		}
 

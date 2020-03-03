@@ -1,52 +1,58 @@
-﻿using System;
-using System.Text;
+﻿using Jurassic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text;
+using System.Threading;
 
 namespace UnitTests
 {
     public abstract class TestBase
     {
-        [ThreadStatic]
-        public static Jurassic.ScriptEngine jurassicScriptEngine;
+        private static AsyncLocal<ScriptEngine> scriptEngine = new AsyncLocal<ScriptEngine>();
 
         [TestInitialize]
         public void Init()
         {
             // Each test method gets a fresh script engine instance.
-            jurassicScriptEngine = null;
+            scriptEngine.Value = null;
         }
 
-        public Jurassic.CompatibilityMode CompatibilityMode
+        public ScriptEngine ScriptEngine
         {
-            get { InitializeJurassic(); return jurassicScriptEngine.CompatibilityMode; }
-            set { InitializeJurassic(); jurassicScriptEngine.CompatibilityMode = value; }
+            get { InitializeJurassic(); return scriptEngine.Value; }
+        }
+
+        public CompatibilityMode CompatibilityMode
+        {
+            get { InitializeJurassic(); return scriptEngine.Value.CompatibilityMode; }
+            set { InitializeJurassic(); scriptEngine.Value.CompatibilityMode = value; }
         }
 
         public object Evaluate(string script)
         {
             InitializeJurassic();
             OnBeforeExecute();
-            return jurassicScriptEngine.Evaluate(script);
+            return scriptEngine.Value.Evaluate(script);
         }
 
         public void Execute(string script)
         {
             InitializeJurassic();
             OnBeforeExecute();
-            jurassicScriptEngine.Execute(script);
+            scriptEngine.Value.Execute(script);
         }
 
-        protected void InitializeJurassic()
+        private void InitializeJurassic()
         {
-            if (jurassicScriptEngine == null)
-                jurassicScriptEngine = InitializeScriptEngine();
+            if (scriptEngine.Value == null)
+                scriptEngine.Value = InitializeScriptEngine();
         }
 
-        protected virtual Jurassic.ScriptEngine InitializeScriptEngine()
+        protected virtual ScriptEngine InitializeScriptEngine()
         {
-            return new Jurassic.ScriptEngine();
+            return new ScriptEngine();
         }
 
         protected virtual void OnBeforeExecute()
@@ -60,7 +66,7 @@ namespace UnitTests
             {
                 result = Evaluate(script);
             }
-            catch (Jurassic.JavaScriptException ex)
+            catch (JavaScriptException ex)
             {
                 return ex.Name;
             }
@@ -74,7 +80,7 @@ namespace UnitTests
             {
                 result = Evaluate(script);
             }
-            catch (Jurassic.JavaScriptException ex)
+            catch (JavaScriptException ex)
             {
                 return ex.Message;
             }
@@ -111,8 +117,8 @@ namespace UnitTests
         public static void Benchmark(Action codeToTest)
         {
             // Up the thread priority.
-            var priorPriority = System.Threading.Thread.CurrentThread.Priority;
-            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
+            var priorPriority = Thread.CurrentThread.Priority;
+            Thread.CurrentThread.Priority = ThreadPriority.Highest;
             try
             {
                 // Get the test name from a stack trace.
@@ -187,7 +193,7 @@ namespace UnitTests
             finally
             {
                 // Revert the thread priority.
-                System.Threading.Thread.CurrentThread.Priority = priorPriority;
+                Thread.CurrentThread.Priority = priorPriority;
             }
         }
 
@@ -277,10 +283,10 @@ namespace UnitTests
         public static T ChangeLocale<T>(string cultureName, Func<T> action)
         {
             // Save the current culture.
-            var previousCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            var previousCulture = Thread.CurrentThread.CurrentCulture;
 
             // Replace it with a new culture.
-            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(cultureName, false);
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(cultureName, false);
 
             try
             {
@@ -290,7 +296,7 @@ namespace UnitTests
             finally
             {
                 // Restore the previous culture.
-                System.Threading.Thread.CurrentThread.CurrentCulture = previousCulture;
+                Thread.CurrentThread.CurrentCulture = previousCulture;
             }
         }
     }

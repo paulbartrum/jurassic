@@ -114,7 +114,7 @@ namespace Jurassic.Library
                 {
                     if (thenObject.GetPropertyValue("then") is FunctionInstance thenFunction)
                     {
-                        Engine.AddPendingCallback(() =>
+                        Engine.AddPostExecuteStep(() =>
                         {
                             try
                             {
@@ -275,7 +275,7 @@ namespace Jurassic.Library
         {
             // If handler is undefined and type is Fulfill, then the handler result should be result.
             // If handler is undefined and type is Reject, then the handler should throw result.
-            Engine.AddPendingCallback(() =>
+            Engine.AddPostExecuteStep(() =>
             {
                 if (reaction.Handler != null)
                 {

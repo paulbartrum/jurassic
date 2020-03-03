@@ -1,5 +1,6 @@
 ﻿using Jurassic.Library;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +14,7 @@ namespace Jurassic.Extensions.Fetch
     /// consists of zero or more name and value pairs.  You can add to this using methods like
     /// append(). In all methods of this interface, header names are case-insensitive. 
     /// </summary>
-    public partial class HeadersInstance : ObjectInstance
+    public partial class HeadersInstance : ObjectInstance, IEnumerable<KeyValuePair<string, string>>
     {
         private Dictionary<string, string> headers = new Dictionary<string, string>();
 
@@ -156,6 +157,16 @@ namespace Jurassic.Extensions.Fetch
         private string NormalizeValue(string value)
         {
             return value.Trim(' ', '\t', '\r', '\n');
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)headers).GetEnumerator();
+        }
+
+        IEnumerator<KeyValuePair<string, string>> IEnumerable<KeyValuePair<string, string>>.GetEnumerator()
+        {
+            return ((IEnumerable<KeyValuePair<string, string>>)headers).GetEnumerator();
         }
     }
 }

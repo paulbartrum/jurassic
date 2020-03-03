@@ -479,7 +479,7 @@ namespace UnitTests
             // AND if the catch block is not run then the finally block shouldn't run either.
             scriptEngine.SetGlobalFunction("test", new Action(() =>
             {
-                throw new JavaScriptException(jurassicScriptEngine, ErrorType.Error, "This is a test.");
+                throw new JavaScriptException(ScriptEngine, ErrorType.Error, "This is a test.");
             }));
             try
             {
@@ -525,7 +525,7 @@ namespace UnitTests
             // The finally block shouldn't run for exceptions from other script engines.
             scriptEngine.SetGlobalFunction("test", new Action(() =>
             {
-                throw new JavaScriptException(jurassicScriptEngine, ErrorType.Error, "This is a test.");
+                throw new JavaScriptException(ScriptEngine, ErrorType.Error, "This is a test.");
             }));
             try
             {

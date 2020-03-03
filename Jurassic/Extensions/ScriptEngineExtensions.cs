@@ -1,5 +1,6 @@
 ﻿using Jurassic.Library;
 using System;
+using System.Net.Http;
 
 namespace Jurassic.Extensions
 {
@@ -20,6 +21,11 @@ namespace Jurassic.Extensions
         /// which does not send a User-Agent header.
         /// </summary>
         public string UserAgent { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Func<HttpClient> HttpClientFactory { get; set; }
     }
 
     /// <summary>
@@ -47,6 +53,16 @@ namespace Jurassic.Extensions
             engine.Global.DefineProperty("Headers", new PropertyDescriptor(new Fetch.HeadersConstructor(engine.Function.InstancePrototype), PropertyAttributes.NonEnumerable), throwOnError: true);
             engine.Global.DefineProperty("Request", new PropertyDescriptor(new Fetch.RequestConstructor(engine.Function.InstancePrototype), PropertyAttributes.NonEnumerable), throwOnError: true);
             engine.Global.DefineProperty("Response", new PropertyDescriptor(new Fetch.ResponseConstructor(engine.Function.InstancePrototype), PropertyAttributes.NonEnumerable), throwOnError: true);
+        }
+
+        /// <summary>
+        /// Adds the 'setTimeout', 'setInterval', 'clearTimeout' and 'clearInterval' functions to
+        /// the global object.
+        /// </summary>
+        /// <param name="engine"> The script engine to modify. </param>
+        public static void AddSimpleTiming(this ScriptEngine engine)
+        {
+            SimpleTiming.SimpleTimingImplementation.Add(engine);
         }
     }
 }

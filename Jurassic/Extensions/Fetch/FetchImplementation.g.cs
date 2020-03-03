@@ -15,7 +15,7 @@ namespace Jurassic.Extensions.Fetch
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue("fetch", new ClrStubFunction(engine.FunctionInstancePrototype, "fetch", 2, __STUB__Fetch), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("fetch", new ClrStubFunction(engine.FunctionInstancePrototype, "fetch", 2, __STUB__Fetch), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
 			};
 		}
 
@@ -24,11 +24,11 @@ namespace Jurassic.Extensions.Fetch
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return Fetch(engine, Undefined.Value, null);
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return Fetch(engine, args[0], null);
 				default:
-					return Fetch(engine, args[0], TypeConverter.ToObject(engine, args[1]));
+					return Fetch(engine, args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject(engine, args[1]));
 			}
 		}
 	}
