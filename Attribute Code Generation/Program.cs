@@ -13,7 +13,9 @@ namespace Attribute_Code_Generation
     {
         static void Main(string[] args)
         {
-            foreach (var csFilePath in Directory.EnumerateFiles(@"..\..\..\..\Jurassic", "*.cs", SearchOption.AllDirectories))
+            IEnumerable<string> files = Directory.EnumerateFiles(@"..\..\..\..\Jurassic", "*.cs", SearchOption.AllDirectories);
+            files = files.Union(Directory.EnumerateFiles(@"..\..\..\..\Jurassic.Extensions", "*.cs", SearchOption.AllDirectories));
+            foreach (var csFilePath in files)
             {
                 var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(csFilePath));
                 var classCollector = new ClassCollector();
@@ -78,21 +80,21 @@ namespace Attribute_Code_Generation
                             if (property.SetterStubName == null)
                             {
                                 output.AppendLine($"\t\t\t\tnew PropertyNameAndValue({property.PropertyKey}, new PropertyDescriptor(" +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.FunctionName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(engine, \"get {property.FunctionName}\", 0, {property.GetterStubName}), " +
                                     $"null, {property.JSPropertyAttributes})),");
                             }
                             else
                             {
                                 output.AppendLine($"\t\t\t\tnew PropertyNameAndValue({property.PropertyKey}, new PropertyDescriptor(" +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"get {property.FunctionName}\", 0, {property.GetterStubName}), " +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"set {property.FunctionName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(engine, \"get {property.FunctionName}\", 0, {property.GetterStubName}), " +
+                                    $"new ClrStubFunction(engine, \"set {property.FunctionName}\", 0, {property.GetterStubName}), " +
                                     $"{property.JSPropertyAttributes})),");
                             }
                         }
                         foreach (var methodGroup in methodGroups)
                         {
                             output.AppendLine($"\t\t\t\tnew PropertyNameAndValue({methodGroup.PropertyKey}, " +
-                                    $"new ClrStubFunction(engine.FunctionInstancePrototype, \"{methodGroup.FunctionName}\", " +
+                                    $"new ClrStubFunction(engine, \"{methodGroup.FunctionName}\", " +
                                     $"{methodGroup.JSLength}, {methodGroup.StubName}), {methodGroup.JSPropertyAttributes}),");
                         }
                         output.AppendLine("\t\t\t};");

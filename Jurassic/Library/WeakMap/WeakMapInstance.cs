@@ -42,7 +42,7 @@ namespace Jurassic.Library
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "WeakMap", PropertyAttributes.Configurable));
-            result.FastSetProperties(properties);
+            result.InitializeProperties(properties);
             return result;
         }
 

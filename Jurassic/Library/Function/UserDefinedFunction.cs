@@ -136,13 +136,13 @@ namespace Jurassic.Library
         {
             // Create an object to serve as the instance prototype.
             var instancePrototype = this.Engine.Object.Construct();
-            instancePrototype.FastSetProperties(new List<PropertyNameAndValue>
+            instancePrototype.InitializeProperties(new List<PropertyNameAndValue>
             {
                 new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable)
             });
 
             // Now add properties to this object.
-            FastSetProperties(new List<PropertyNameAndValue>()
+            InitializeProperties(new List<PropertyNameAndValue>()
             {
                 new PropertyNameAndValue("name", name, PropertyAttributes.Configurable),
                 new PropertyNameAndValue("length", length, PropertyAttributes.Configurable),

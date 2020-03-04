@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Jurassic;
 using Jurassic.Library;
 
-namespace Jurassic.Extensions
+namespace Jurassic.Extensions.FirebugConsole
 {
 
 	public partial class FirebugConsole
@@ -15,18 +15,18 @@ namespace Jurassic.Extensions
 		{
 			return new List<PropertyNameAndValue>(16)
 			{
-				new PropertyNameAndValue("log", new ClrStubFunction(engine.FunctionInstancePrototype, "log", 1, __STUB__Log), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("debug", new ClrStubFunction(engine.FunctionInstancePrototype, "debug", 1, __STUB__Debug), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("info", new ClrStubFunction(engine.FunctionInstancePrototype, "info", 1, __STUB__Info), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("warn", new ClrStubFunction(engine.FunctionInstancePrototype, "warn", 1, __STUB__Warn), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("error", new ClrStubFunction(engine.FunctionInstancePrototype, "error", 1, __STUB__Error), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("assert", new ClrStubFunction(engine.FunctionInstancePrototype, "assert", 2, __STUB__Assert), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clear", new ClrStubFunction(engine.FunctionInstancePrototype, "clear", 1, __STUB__Clear), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("group", new ClrStubFunction(engine.FunctionInstancePrototype, "group", 1, __STUB__Group), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("groupCollapsed", new ClrStubFunction(engine.FunctionInstancePrototype, "groupCollapsed", 1, __STUB__GroupCollapsed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("groupEnd", new ClrStubFunction(engine.FunctionInstancePrototype, "groupEnd", 0, __STUB__GroupEnd), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("time", new ClrStubFunction(engine.FunctionInstancePrototype, "time", 1, __STUB__Time), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("timeEnd", new ClrStubFunction(engine.FunctionInstancePrototype, "timeEnd", 1, __STUB__TimeEnd), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("log", new ClrStubFunction(engine, "log", 1, __STUB__Log), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("debug", new ClrStubFunction(engine, "debug", 1, __STUB__Debug), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("info", new ClrStubFunction(engine, "info", 1, __STUB__Info), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("warn", new ClrStubFunction(engine, "warn", 1, __STUB__Warn), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("error", new ClrStubFunction(engine, "error", 1, __STUB__Error), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("assert", new ClrStubFunction(engine, "assert", 2, __STUB__Assert), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("clear", new ClrStubFunction(engine, "clear", 1, __STUB__Clear), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("group", new ClrStubFunction(engine, "group", 1, __STUB__Group), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("groupCollapsed", new ClrStubFunction(engine, "groupCollapsed", 1, __STUB__GroupCollapsed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("groupEnd", new ClrStubFunction(engine, "groupEnd", 0, __STUB__GroupEnd), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("time", new ClrStubFunction(engine, "time", 1, __STUB__Time), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("timeEnd", new ClrStubFunction(engine, "timeEnd", 1, __STUB__TimeEnd), PropertyAttributes.NonEnumerable),
 			};
 		}
 

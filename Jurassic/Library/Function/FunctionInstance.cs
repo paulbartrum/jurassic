@@ -59,7 +59,7 @@ namespace Jurassic.Library
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("name", "Empty", PropertyAttributes.Configurable));
             properties.Add(new PropertyNameAndValue("length", 0, PropertyAttributes.Configurable));
-            obj.FastSetProperties(properties);
+            obj.InitializeProperties(properties);
         }
 
 

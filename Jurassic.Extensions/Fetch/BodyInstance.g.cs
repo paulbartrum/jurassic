@@ -15,13 +15,13 @@ namespace Jurassic.Extensions.Fetch
 		{
 			return new List<PropertyNameAndValue>(9)
 			{
-				new PropertyNameAndValue("body", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get body", 0, __GETTER__Body), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("bodyUsed", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get bodyUsed", 0, __GETTER__BodyUsed), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("arrayBuffer", new ClrStubFunction(engine.FunctionInstancePrototype, "arrayBuffer", 0, __STUB__ArrayBuffer), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("blob", new ClrStubFunction(engine.FunctionInstancePrototype, "blob", 0, __STUB__Blob), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("formData", new ClrStubFunction(engine.FunctionInstancePrototype, "formData", 0, __STUB__FormData), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("json", new ClrStubFunction(engine.FunctionInstancePrototype, "json", 0, __STUB__Json), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("text", new ClrStubFunction(engine.FunctionInstancePrototype, "text", 0, __STUB__Text), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("body", new PropertyDescriptor(new ClrStubFunction(engine, "get body", 0, __GETTER__Body), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("bodyUsed", new PropertyDescriptor(new ClrStubFunction(engine, "get bodyUsed", 0, __GETTER__BodyUsed), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("arrayBuffer", new ClrStubFunction(engine, "arrayBuffer", 0, __STUB__ArrayBuffer), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("blob", new ClrStubFunction(engine, "blob", 0, __STUB__Blob), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("formData", new ClrStubFunction(engine, "formData", 0, __STUB__FormData), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("json", new ClrStubFunction(engine, "json", 0, __STUB__Json), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("text", new ClrStubFunction(engine, "text", 0, __STUB__Text), PropertyAttributes.NonEnumerable),
 			};
 		}
 

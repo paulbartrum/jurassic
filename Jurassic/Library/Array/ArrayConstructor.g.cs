@@ -14,10 +14,10 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("isArray", new ClrStubFunction(engine.FunctionInstancePrototype, "isArray", 1, __STUB__IsArray), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("of", new ClrStubFunction(engine.FunctionInstancePrototype, "of", 0, __STUB__Of), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("from", new ClrStubFunction(engine.FunctionInstancePrototype, "from", 1, __STUB__From), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("isArray", new ClrStubFunction(engine, "isArray", 1, __STUB__IsArray), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("of", new ClrStubFunction(engine, "of", 0, __STUB__Of), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("from", new ClrStubFunction(engine, "from", 1, __STUB__From), PropertyAttributes.NonEnumerable),
 			};
 		}
 

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Paul Bartrum</Authors>
+    <Company />
+    <Description>A .NET library to parse and execute JavaScript code.</Description>
+    <Version>3.0.0</Version>
+    <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/paulbartrum/jurassic</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/nuget-logo.png</PackageIconUrl>
+    <PackageTags>JavaScript ECMAScript</PackageTags>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);DEBUG</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);NETSTANDARD</DefineConstants>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Jurassic.Extensions.xml</DocumentationFile>
+    <PackageReleaseNotes>This first release includes the following non-ECMAScript extensions:
+* fetch
+* console
+* setTimeout, setInterval, et al</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/paulbartrum/jurassic.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>master</RepositoryBranch>
+    <RepositoryCommit>3ce05b3455dce546d36f08902546a61ac50c6c81</RepositoryCommit>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jurassic\Jurassic.csproj" />
+  </ItemGroup>
+
+</Project>

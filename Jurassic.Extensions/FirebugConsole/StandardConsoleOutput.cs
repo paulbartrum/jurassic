@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Jurassic.Extensions
+namespace Jurassic.Extensions.FirebugConsole
 {
 
     /// <summary>

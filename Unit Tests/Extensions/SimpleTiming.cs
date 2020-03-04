@@ -53,16 +53,16 @@ namespace UnitTests
             ScriptEngine.ExecuteNextEventQueueAction();
             Assert.AreEqual(20, ScriptEngine.GetGlobalValue<int>("a"));
 
-            // Test a 10ms timeout.
-            Execute("a = 10; setTimeout(function (val) { a = val }, 10, 15)");
+            // Test a 20ms timeout.
+            Execute("a = 10; setTimeout(function (val) { a = val }, 20, 15)");
             
             // Wait 5ms. The timeout should not have been queued yet.
             await Task.Delay(5);
             ScriptEngine.ExecuteNextEventQueueAction();
             Assert.AreEqual(10, ScriptEngine.GetGlobalValue<int>("a"));
 
-            // Wait 10ms. The timeout should have been queued now.
-            await Task.Delay(10);
+            // Wait 40ms. The timeout should have been queued now.
+            await Task.Delay(40);
             ScriptEngine.ExecuteNextEventQueueAction();
             Assert.AreEqual(15, ScriptEngine.GetGlobalValue<int>("a"));
         }

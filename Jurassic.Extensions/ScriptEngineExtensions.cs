@@ -1,33 +1,7 @@
 ﻿using Jurassic.Library;
-using System;
-using System.Net.Http;
 
 namespace Jurassic.Extensions
 {
-    /// <summary>
-    /// Options that control various aspects of the fetch() API.
-    /// </summary>
-    public class FetchOptions
-    {
-        /// <summary>
-        /// The URI to use as a base URI if any relative URIs are passed to the fetch API (or
-        /// related classes). This affects request URIs as well as referrers. The default is
-        /// <c>null</c>, which prohibits relative URIs.
-        /// </summary>
-        public Uri BaseUri { get; set; }
-
-        /// <summary>
-        /// The User-Agent header value to use when sending requests. The default is <c>null</c>,
-        /// which does not send a User-Agent header.
-        /// </summary>
-        public string UserAgent { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Func<HttpClient> HttpClientFactory { get; set; }
-    }
-
     /// <summary>
     /// Extension methods that add non-standard functionality to a ScriptEngine.
     /// </summary>
@@ -39,7 +13,7 @@ namespace Jurassic.Extensions
         /// <param name="engine"> The script engine to modify. </param>
         public static void AddFirebugConsole(this ScriptEngine engine)
         {
-            engine.Global.SetPropertyValue("console", new FirebugConsole(engine), throwOnError: true);
+            engine.Global.SetPropertyValue("console", new FirebugConsole.FirebugConsole(engine), throwOnError: true);
         }
 
         /// <summary>
@@ -47,7 +21,7 @@ namespace Jurassic.Extensions
         /// </summary>
         /// <param name="engine"> The script engine to modify. </param>
         /// <param name="options"> Custom </param>
-        public static void AddFetch(this ScriptEngine engine, FetchOptions options = null)
+        public static void AddFetch(this ScriptEngine engine, Fetch.FetchOptions options = null)
         {
             Fetch.FetchImplementation.Add(engine, options);
             engine.Global.DefineProperty("Headers", new PropertyDescriptor(new Fetch.HeadersConstructor(engine.Function.InstancePrototype), PropertyAttributes.NonEnumerable), throwOnError: true);

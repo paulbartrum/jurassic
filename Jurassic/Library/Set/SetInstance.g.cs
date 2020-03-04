@@ -14,15 +14,15 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(12)
 			{
-				new PropertyNameAndValue("size", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get size", 0, __GETTER__Size), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("add", new ClrStubFunction(engine.FunctionInstancePrototype, "add", 1, __STUB__Add), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clear", new ClrStubFunction(engine.FunctionInstancePrototype, "clear", 0, __STUB__Clear), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("delete", new ClrStubFunction(engine.FunctionInstancePrototype, "delete", 1, __STUB__Delete), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("entries", new ClrStubFunction(engine.FunctionInstancePrototype, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("forEach", new ClrStubFunction(engine.FunctionInstancePrototype, "forEach", 1, __STUB__ForEach), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("has", new ClrStubFunction(engine.FunctionInstancePrototype, "has", 1, __STUB__Has), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("keys", new ClrStubFunction(engine.FunctionInstancePrototype, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("values", new ClrStubFunction(engine.FunctionInstancePrototype, "values", 0, __STUB__Values), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("size", new PropertyDescriptor(new ClrStubFunction(engine, "get size", 0, __GETTER__Size), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("add", new ClrStubFunction(engine, "add", 1, __STUB__Add), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("clear", new ClrStubFunction(engine, "clear", 0, __STUB__Clear), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("delete", new ClrStubFunction(engine, "delete", 1, __STUB__Delete), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("entries", new ClrStubFunction(engine, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("forEach", new ClrStubFunction(engine, "forEach", 1, __STUB__ForEach), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("has", new ClrStubFunction(engine, "has", 1, __STUB__Has), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("keys", new ClrStubFunction(engine, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("values", new ClrStubFunction(engine, "values", 0, __STUB__Values), PropertyAttributes.NonEnumerable),
 			};
 		}
 

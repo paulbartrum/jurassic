@@ -35,6 +35,10 @@
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Jurassic.Extensions\Jurassic.Extensions.csproj">
+      <Project>{ef2e4cef-9624-4eed-80a2-b7bf091f7155}</Project>
+      <Name>Jurassic.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Jurassic\Jurassic.csproj">
       <Project>{78658500-2aee-44ef-9b9d-6bf1a0aa5c42}</Project>
       <Name>Jurassic</Name>

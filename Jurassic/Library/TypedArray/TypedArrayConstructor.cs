@@ -28,7 +28,7 @@ namespace Jurassic.Library
             var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, type.ToString(), 3, TypedArrayInstance.CreatePrototype(Engine, this));
             properties.Add(new PropertyNameAndValue("BYTES_PER_ELEMENT", BytesPerElement, PropertyAttributes.Sealed));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

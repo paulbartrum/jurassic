@@ -14,15 +14,15 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue("source", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get source", 0, __GETTER__Source), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("flags", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get flags", 0, __GETTER__Flags), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("global", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get global", 0, __GETTER__Global), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("multiline", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get multiline", 0, __GETTER__Multiline), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("ignoreCase", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get ignoreCase", 0, __GETTER__IgnoreCase), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("compile", new ClrStubFunction(engine.FunctionInstancePrototype, "compile", 2, __STUB__Compile), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("test", new ClrStubFunction(engine.FunctionInstancePrototype, "test", 1, __STUB__Test), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("exec", new ClrStubFunction(engine.FunctionInstancePrototype, "exec", 1, __STUB__Exec), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("source", new PropertyDescriptor(new ClrStubFunction(engine, "get source", 0, __GETTER__Source), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("flags", new PropertyDescriptor(new ClrStubFunction(engine, "get flags", 0, __GETTER__Flags), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("global", new PropertyDescriptor(new ClrStubFunction(engine, "get global", 0, __GETTER__Global), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("multiline", new PropertyDescriptor(new ClrStubFunction(engine, "get multiline", 0, __GETTER__Multiline), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("ignoreCase", new PropertyDescriptor(new ClrStubFunction(engine, "get ignoreCase", 0, __GETTER__IgnoreCase), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("compile", new ClrStubFunction(engine, "compile", 2, __STUB__Compile), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("test", new ClrStubFunction(engine, "test", 1, __STUB__Test), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("exec", new ClrStubFunction(engine, "exec", 1, __STUB__Exec), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 			};
 		}
 

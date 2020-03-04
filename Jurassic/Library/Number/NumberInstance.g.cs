@@ -14,13 +14,13 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(11)
 			{
-				new PropertyNameAndValue("toExponential", new ClrStubFunction(engine.FunctionInstancePrototype, "toExponential", 1, __STUB__ToExponential), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toFixed", new ClrStubFunction(engine.FunctionInstancePrototype, "toFixed", 1, __STUB__ToFixed), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine.FunctionInstancePrototype, "toLocaleString", 0, __STUB__ToLocaleString), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toPrecision", new ClrStubFunction(engine.FunctionInstancePrototype, "toPrecision", 1, __STUB__ToPrecision), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 1, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clz", new ClrStubFunction(engine.FunctionInstancePrototype, "clz", 0, __STUB__Clz), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toExponential", new ClrStubFunction(engine, "toExponential", 1, __STUB__ToExponential), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toFixed", new ClrStubFunction(engine, "toFixed", 1, __STUB__ToFixed), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toLocaleString", new ClrStubFunction(engine, "toLocaleString", 0, __STUB__ToLocaleString), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toPrecision", new ClrStubFunction(engine, "toPrecision", 1, __STUB__ToPrecision), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 1, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("clz", new ClrStubFunction(engine, "clz", 0, __STUB__Clz), PropertyAttributes.NonEnumerable),
 			};
 		}
 

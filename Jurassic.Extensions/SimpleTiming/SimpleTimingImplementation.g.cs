@@ -15,10 +15,10 @@ namespace Jurassic.Extensions.SimpleTiming
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue("setTimeout", new ClrStubFunction(engine.FunctionInstancePrototype, "setTimeout", 3, __STUB__SetTimeout), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
-				new PropertyNameAndValue("clearTimeout", new ClrStubFunction(engine.FunctionInstancePrototype, "clearTimeout", 1, __STUB__ClearTimeout), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
-				new PropertyNameAndValue("setInterval", new ClrStubFunction(engine.FunctionInstancePrototype, "setInterval", 3, __STUB__SetInterval), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
-				new PropertyNameAndValue("clearInterval", new ClrStubFunction(engine.FunctionInstancePrototype, "clearInterval", 1, __STUB__ClearInterval), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
+				new PropertyNameAndValue("setTimeout", new ClrStubFunction(engine, "setTimeout", 3, __STUB__SetTimeout), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
+				new PropertyNameAndValue("clearTimeout", new ClrStubFunction(engine, "clearTimeout", 1, __STUB__ClearTimeout), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
+				new PropertyNameAndValue("setInterval", new ClrStubFunction(engine, "setInterval", 3, __STUB__SetInterval), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
+				new PropertyNameAndValue("clearInterval", new ClrStubFunction(engine, "clearInterval", 1, __STUB__ClearInterval), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
 			};
 		}
 

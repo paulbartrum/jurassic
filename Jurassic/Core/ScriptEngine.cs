@@ -173,7 +173,7 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Float32Array", this.float32ArrayConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Float64Array", this.float64ArrayConstructor, PropertyAttributes.NonEnumerable));
 
-            this.globalObject.FastSetProperties(globalProperties);
+            this.globalObject.InitializeProperties(globalProperties);
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace Jurassic
                 if (this.baseIteratorPrototype == null)
                 {
                     var result = Object.Construct();
-                    result.FastSetProperties(new List<PropertyNameAndValue>(1)
+                    result.InitializeProperties(new List<PropertyNameAndValue>(1)
                     {
                         new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(FunctionInstancePrototype, "[Symbol.iterator]", 0,
                             (engine, thisObj, args) => thisObj), PropertyAttributes.NonEnumerable),
@@ -1483,7 +1483,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="action"> The action to enqueue. </param>
         /// <remarks> This method is thread-safe. </remarks>
-        internal void EnqueueEvent(Action action)
+        public void EnqueueEvent(Action action)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));

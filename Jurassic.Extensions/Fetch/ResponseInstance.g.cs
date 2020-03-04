@@ -15,13 +15,13 @@ namespace Jurassic.Extensions.Fetch
 		{
 			return new List<PropertyNameAndValue>(4)
 			{
-				new PropertyNameAndValue("type", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get type", 0, __GETTER__Type), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("url", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get url", 0, __GETTER__Url), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("redirected", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get redirected", 0, __GETTER__Redirected), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("status", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get status", 0, __GETTER__Status), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("ok", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get ok", 0, __GETTER__Ok), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("statusText", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get statusText", 0, __GETTER__StatusText), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("headers", new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get headers", 0, __GETTER__Headers), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("type", new PropertyDescriptor(new ClrStubFunction(engine, "get type", 0, __GETTER__Type), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("url", new PropertyDescriptor(new ClrStubFunction(engine, "get url", 0, __GETTER__Url), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("redirected", new PropertyDescriptor(new ClrStubFunction(engine, "get redirected", 0, __GETTER__Redirected), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("status", new PropertyDescriptor(new ClrStubFunction(engine, "get status", 0, __GETTER__Status), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("ok", new PropertyDescriptor(new ClrStubFunction(engine, "get ok", 0, __GETTER__Ok), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("statusText", new PropertyDescriptor(new ClrStubFunction(engine, "get statusText", 0, __GETTER__StatusText), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("headers", new PropertyDescriptor(new ClrStubFunction(engine, "get headers", 0, __GETTER__Headers), null, PropertyAttributes.Configurable)),
 			};
 		}
 

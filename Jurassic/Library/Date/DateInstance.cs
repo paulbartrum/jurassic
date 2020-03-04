@@ -96,7 +96,7 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            result.FastSetProperties(properties);
+            result.InitializeProperties(properties);
             return result;
         }
 

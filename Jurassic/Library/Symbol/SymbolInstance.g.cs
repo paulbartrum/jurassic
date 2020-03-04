@@ -14,9 +14,9 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(7)
 			{
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.ToPrimitive, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.toPrimitive]", 1, __STUB__ToPrimitive), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 0, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.ToPrimitive, new ClrStubFunction(engine, "[Symbol.toPrimitive]", 1, __STUB__ToPrimitive), PropertyAttributes.NonEnumerable),
 			};
 		}
 

@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Jurassic.Library;
 
 namespace Jurassic
@@ -42,7 +42,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if the given value is undefined; <c>false</c> otherwise. </returns>
-        internal static bool IsUndefined(object obj)
+        public static bool IsUndefined(object obj)
         {
             return obj == null || obj == Undefined.Value;
         }
@@ -53,7 +53,7 @@ namespace Jurassic
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if the given value is a supported numeric type; <c>false</c>
         /// otherwise. </returns>
-        internal static bool IsNumeric(object obj)
+        public static bool IsNumeric(object obj)
         {
             return obj is double || obj is int || obj is uint;
         }
@@ -64,7 +64,7 @@ namespace Jurassic
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if the given value is a supported string type; <c>false</c>
         /// otherwise. </returns>
-        internal static bool IsString(object obj)
+        public static bool IsString(object obj)
         {
             return obj is string || obj is ConcatenatedString;
         }
@@ -224,7 +224,7 @@ namespace Jurassic
         /// <param name="offset"> The offset to begin the resulting array. </param>
         /// <returns> An array containing the input array elements, excluding the first
         /// <paramref name="offset"/> entries. </returns>
-        internal static object[] SliceArray(object[] args, int offset)
+        public static object[] SliceArray(object[] args, int offset)
         {
             if (offset == 0)
                 return args;
@@ -298,6 +298,20 @@ namespace Jurassic
             if (iterator == null)
                 throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator");
             return iterator;
+        }
+
+        /// <summary>
+        /// Creates an iterator object that can iterate over a .NET enumerable collection. The
+        /// returned object also supports the iterable protocol, meaning it can be used in a for-of
+        /// loop.
+        /// </summary>
+        /// <param name="engine"> The script engine to associate the new object with. </param>
+        /// <param name="enumerable"> The enumerable collection. The item type must be a supported
+        /// type. </param>
+        /// <returns> An iterator object that also supports the iterable protocol. </returns>
+        public static ObjectInstance CreateIterator(ScriptEngine engine, IEnumerable enumerable)
+        {
+            return new Iterator(engine, enumerable);
         }
 
         /// <summary>

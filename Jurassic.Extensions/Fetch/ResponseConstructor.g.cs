@@ -15,9 +15,9 @@ namespace Jurassic.Extensions.Fetch
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue("error", new ClrStubFunction(engine.FunctionInstancePrototype, "error", 0, __STUB__Error), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("redirect", new ClrStubFunction(engine.FunctionInstancePrototype, "redirect", 2, __STUB__Redirect), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue("error", new ClrStubFunction(engine, "error", 0, __STUB__Error), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("redirect", new ClrStubFunction(engine, "redirect", 2, __STUB__Redirect), PropertyAttributes.NonEnumerable),
 			};
 		}
 

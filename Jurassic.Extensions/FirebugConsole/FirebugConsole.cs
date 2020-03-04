@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using Jurassic.Library;
 
-namespace Jurassic.Extensions
+namespace Jurassic.Extensions.FirebugConsole
 {
 
     /// <summary>
@@ -11,8 +11,6 @@ namespace Jurassic.Extensions
     /// non-standard - it is based on the Firebug console API
     /// (http://getfirebug.com/wiki/index.php/Console_API).
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class FirebugConsole : ObjectInstance
     {
         private IFirebugConsoleOutput output;
@@ -26,7 +24,7 @@ namespace Jurassic.Extensions
             : base(engine.Object.InstancePrototype)
         {
             this.Output = new StandardConsoleOutput();
-            FastSetProperties(GetDeclarativeProperties(engine));
+            InitializeProperties(GetDeclarativeProperties(engine));
         }
 
 

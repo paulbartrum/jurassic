@@ -41,7 +41,7 @@ namespace Jurassic.Library
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("name", type.ToString(), PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue("message", string.Empty, PropertyAttributes.NonEnumerable));
-            result.FastSetProperties(properties);
+            result.InitializeProperties(properties);
             return result;
         }
 

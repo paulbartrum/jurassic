@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -7,7 +8,7 @@ namespace Jurassic.Library
     /// </summary>
     internal partial class Iterator : ObjectInstance
     {
-        private IEnumerator<object> enumerator;
+        private IEnumerator enumerator;
 
 
         //     INITIALIZATION
@@ -18,7 +19,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The script environment. </param>
         /// <param name="enumerable"> The enumerable to iterate over. </param>
-        internal Iterator(ScriptEngine engine, IEnumerable<object> enumerable)
+        internal Iterator(ScriptEngine engine, IEnumerable enumerable)
             : base(CreatePrototype(engine))
         {
             this.enumerator = enumerable.GetEnumerator();
@@ -32,7 +33,7 @@ namespace Jurassic.Library
         {
             var result = ObjectInstance.CreateRawObject(engine.BaseIteratorPrototype);
             var properties = GetDeclarativeProperties(engine);
-            result.FastSetProperties(properties);
+            result.InitializeProperties(properties);
             return result;
         }
 
@@ -56,6 +57,16 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
+        /// Returns this iterator.
+        /// </summary>
+        /// <returns> An iterator. </returns>
+        [JSInternalFunction(Name = "@@iterator")]
+        public ObjectInstance GetIterator()
+        {
+            return this;
+        }
+
+        /// <summary>
         /// Moves the iterator to the next element in the array.
         /// </summary>
         /// <returns> An object containing two properies: value and done. </returns>
@@ -68,7 +79,7 @@ namespace Jurassic.Library
 
             // Return the result.
             var result = Engine.Object.Construct();
-            result.FastSetProperties(new List<PropertyNameAndValue>(2)
+            result.InitializeProperties(new List<PropertyNameAndValue>(2)
                 {
                     new PropertyNameAndValue("value", value, PropertyAttributes.FullAccess),
                     new PropertyNameAndValue("done", done, PropertyAttributes.FullAccess),

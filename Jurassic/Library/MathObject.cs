@@ -23,7 +23,7 @@ namespace Jurassic.Library
         {
             var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue(Engine.Symbol.ToStringTag, "Math", PropertyAttributes.Configurable));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

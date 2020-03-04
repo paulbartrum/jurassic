@@ -15,7 +15,7 @@ namespace Jurassic.Extensions.Fetch
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue("fetch", new ClrStubFunction(engine.FunctionInstancePrototype, "fetch", 2, __STUB__Fetch), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
+				new PropertyNameAndValue("fetch", new ClrStubFunction(engine, "fetch", 2, __STUB__Fetch), PropertyAttributes.Writable | PropertyAttributes.Enumerable | PropertyAttributes.Configurable),
 			};
 		}
 

@@ -39,7 +39,7 @@ namespace Jurassic.Library
             properties.Add(new PropertyNameAndValue("toPrimitive", ToPrimitive, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("toStringTag", ToStringTag, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("unscopables", null, PropertyAttributes.Sealed));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

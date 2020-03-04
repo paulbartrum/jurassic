@@ -15,14 +15,14 @@ namespace Jurassic.Extensions.Fetch
 		{
 			return new List<PropertyNameAndValue>(12)
 			{
-				new PropertyNameAndValue("append", new ClrStubFunction(engine.FunctionInstancePrototype, "append", 2, __STUB__Append), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("delete", new ClrStubFunction(engine.FunctionInstancePrototype, "delete", 1, __STUB__Delete), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("entries", new ClrStubFunction(engine.FunctionInstancePrototype, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("get", new ClrStubFunction(engine.FunctionInstancePrototype, "get", 1, __STUB__Get), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("has", new ClrStubFunction(engine.FunctionInstancePrototype, "has", 1, __STUB__Has), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("keys", new ClrStubFunction(engine.FunctionInstancePrototype, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("set", new ClrStubFunction(engine.FunctionInstancePrototype, "set", 2, __STUB__Set), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("values", new ClrStubFunction(engine.FunctionInstancePrototype, "values", 0, __STUB__Values), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("append", new ClrStubFunction(engine, "append", 2, __STUB__Append), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("delete", new ClrStubFunction(engine, "delete", 1, __STUB__Delete), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("entries", new ClrStubFunction(engine, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("get", new ClrStubFunction(engine, "get", 1, __STUB__Get), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("has", new ClrStubFunction(engine, "has", 1, __STUB__Has), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("keys", new ClrStubFunction(engine, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("set", new ClrStubFunction(engine, "set", 2, __STUB__Set), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("values", new ClrStubFunction(engine, "values", 0, __STUB__Values), PropertyAttributes.NonEnumerable),
 			};
 		}
 

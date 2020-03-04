@@ -46,7 +46,7 @@ namespace Jurassic.Extensions.Fetch
                 throw new InvalidOperationException("Expected entries property.");
             properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, entriesProperty.Value, PropertyAttributes.NonEnumerable));
 
-            result.FastSetProperties(properties);
+            result.InitializeProperties(properties);
             return result;
         }
 
@@ -78,7 +78,7 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "entries")]
         public ObjectInstance Entries()
         {
-            return new Iterator(Engine,
+            return TypeUtilities.CreateIterator(Engine,
                 this.headers.Select(keyValuePair => Engine.Array.New(new[] { keyValuePair.Key, keyValuePair.Value })));
         }
 
@@ -117,7 +117,7 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "keys")]
         public ObjectInstance Keys()
         {
-            return new Iterator(Engine, this.headers.Keys);
+            return TypeUtilities.CreateIterator(Engine, this.headers.Keys);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Jurassic.Extensions.Fetch
         [JSInternalFunction(Name = "values")]
         public ObjectInstance Values()
         {
-            return new Iterator(Engine, this.headers.Values);
+            return TypeUtilities.CreateIterator(Engine, this.headers.Values);
         }
 
 
