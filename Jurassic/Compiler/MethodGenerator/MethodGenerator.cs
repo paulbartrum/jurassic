@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection.Emit;
 
 namespace Jurassic.Compiler
 {
@@ -273,7 +275,9 @@ namespace Jurassic.Compiler
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
                         // Create a dynamic module.
-                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
+                        var existing = reflectionEmitInfo.AssemblyBuilder.Modules.FirstOrDefault();
+                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Jurassic");
+                        // reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.Modules.FirstOrDefault() as ModuleBuilder;
 
                         ReflectionEmitInfo = reflectionEmitInfo;
                     }
