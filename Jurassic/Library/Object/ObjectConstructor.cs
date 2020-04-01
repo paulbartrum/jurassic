@@ -78,6 +78,14 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "getPrototypeOf")]
         public static object GetPrototypeOf(ObjectInstance obj)
         {
+            if (obj is FunctionInstance fi && fi.InstancePrototype.Prototype?.Prototype != null)
+            {
+                var p = fi.InstancePrototype?.Prototype?.GetPropertyValue("constructor");
+                if (p != null)
+                {
+                    return p;
+                }
+            }
             var result = obj.Prototype;
             if (result == null)
                 return Null.Value;
