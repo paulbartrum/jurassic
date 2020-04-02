@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection.Emit;
 
 namespace Jurassic.Compiler
 {
