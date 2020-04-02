@@ -276,9 +276,9 @@ namespace Jurassic.Compiler
 
                         // Create a dynamic module.
 #if DROID
-                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Jurassic");
+                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module");
 #else
-                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Jurassic", this.Options.EnableDebugging);
+                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Module", this.Options.EnableDebugging);
 #endif
 
                         ReflectionEmitInfo = reflectionEmitInfo;
