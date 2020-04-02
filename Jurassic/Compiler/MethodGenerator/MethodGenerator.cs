@@ -275,9 +275,11 @@ namespace Jurassic.Compiler
                                 System.Diagnostics.DebuggableAttribute.DebuggingModes.Default }));
 
                         // Create a dynamic module.
-                        var existing = reflectionEmitInfo.AssemblyBuilder.Modules.FirstOrDefault();
+#if DROID
                         reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Jurassic");
-                        // reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.Modules.FirstOrDefault() as ModuleBuilder;
+#else
+                        reflectionEmitInfo.ModuleBuilder = reflectionEmitInfo.AssemblyBuilder.DefineDynamicModule("Jurassic", this.Options.EnableDebugging);
+#endif
 
                         ReflectionEmitInfo = reflectionEmitInfo;
                     }
@@ -318,7 +320,7 @@ namespace Jurassic.Compiler
                 var methodInfo = type.GetMethod(this.GetMethodName());
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
 #else
-                throw new NotImplementedException();
+                        throw new NotImplementedException();
 #endif // ENABLE_DEBUGGING
             }
 
