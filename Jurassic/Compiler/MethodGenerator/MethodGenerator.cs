@@ -320,7 +320,7 @@ namespace Jurassic.Compiler
                 var methodInfo = type.GetMethod(this.GetMethodName());
                 this.GeneratedMethod = new GeneratedMethod(Delegate.CreateDelegate(GetDelegate(), methodInfo), optimizationInfo.NestedFunctions);
 #else
-                        throw new NotImplementedException();
+                throw new NotImplementedException();
 #endif // ENABLE_DEBUGGING
             }
 

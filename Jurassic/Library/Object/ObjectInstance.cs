@@ -133,7 +133,7 @@ namespace Jurassic.Library
         /// javascript (it is is *not* the same as the prototype property), instead use
         /// Object.getPrototypeOf().
         /// </summary>
-        public virtual ObjectInstance Prototype
+        public ObjectInstance Prototype
         {
             get { return this.prototype; }
         }
