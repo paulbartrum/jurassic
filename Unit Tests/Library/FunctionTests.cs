@@ -67,6 +67,37 @@ namespace UnitTests
             // The prototype property becomes the prototype of new objects (as long as the prototype property is an object).
             Assert.AreEqual(true, Evaluate("f = function() { }; x = {}; f.prototype = x; Object.getPrototypeOf(new f()) === x"));
             Assert.AreEqual(true, Evaluate("f = function() { }; x = 5; f.prototype = x; Object.getPrototypeOf(new f()) === Object.prototype"));
+
+            var inheritedClasses = @"var __extends = (this && this.__extends) || (function () {
+                            var extendStatics = function (d, b) {
+                                extendStatics = Object.setPrototypeOf ||
+                                    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                                    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+                                return extendStatics(d, b);
+                            };
+                            return function (d, b) {
+                                extendStatics(d, b);
+                                function __() { this.constructor = d; }
+                                d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+                            };
+                        })();
+                        var A = /** @class */ (function () {
+                            function A() {
+                            }
+                            return A;
+                        }());
+                        var B = /** @class */ (function (_super) {
+                            __extends(B, _super);
+                            function B() {
+                                return _super !== null && _super.apply(this, arguments) || this;
+                            }
+                            return B;
+                        }(A));
+                        Object.getPrototypeOf(B) === A;";
+
+            // Inheritance Test
+            Assert.AreEqual(true, Evaluate(inheritedClasses));
+
         }
 
         [TestMethod]
