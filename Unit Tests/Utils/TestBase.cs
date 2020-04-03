@@ -47,6 +47,7 @@ namespace UnitTests
             {
                 jurassicScriptEngine = new Jurassic.ScriptEngine();
                 testingContext = new TestingContext(jurassicScriptEngine);
+                jurassicScriptEngine.EnableILAnalysis = true;
                 jurassicScriptEngine.SetGlobalValue("testingContext", testingContext);
             }
             testingContext.Clear();

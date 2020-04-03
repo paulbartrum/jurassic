@@ -172,7 +172,7 @@ namespace UnitTests
                     catch (e) {
                         e.stack
                     }"));
-            Assert.AreEqual("TypeError: undefined cannot be converted to an object\r\n" +
+            Assert.AreEqual("TypeError: cannot read property 'sdfsf' of undefined\r\n" +
                 "    at unknown:4",
                 Evaluate(@"
                     try {

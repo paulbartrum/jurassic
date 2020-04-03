@@ -128,10 +128,11 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
-
                 // Load the right-hand side and convert to a uint32.
                 var rhs = this.GetOperand(1);
+                EmitConversion.AssertNotEmpty(generator, $"cannot read property '{rhs}' of", optimizationInfo);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
+
                 rhs.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToUInt32(generator, rhs.ResultType);
             }
@@ -143,6 +144,9 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
+                // Load the right-hand side and convert to a uint32.
+                var rhs = this.GetOperand(1);
+                EmitConversion.AssertNotEmpty(generator, $"cannot read property '{rhs}' of", optimizationInfo);
                 EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
             }
             else
@@ -153,10 +157,14 @@ namespace Jurassic.Compiler
                 // Load the left-hand side and convert to an object instance.
                 var lhs = this.GetOperand(0);
                 lhs.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
                 // Load the value and convert it to a property key.
                 var rhs = this.GetOperand(1);
+
+                // make sure LHS is not null or undefined...
+                EmitConversion.AssertNotEmpty(generator, $"cannot read property '{rhs}' of", optimizationInfo);
+                EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
+
                 rhs.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToPropertyKey(generator, rhs.ResultType);
             }
@@ -360,10 +368,13 @@ namespace Jurassic.Compiler
             // Load the left-hand side and convert to an object instance.
             var lhs = this.GetOperand(0);
             lhs.GenerateCode(generator, optimizationInfo);
-            EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
             // Load the property name and convert to a string.
             var rhs = this.GetOperand(1);
+
+            EmitConversion.AssertNotEmpty(generator, $"cannot set property {rhs} of", optimizationInfo);
+            EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
+
             if (this.OperatorType == OperatorType.MemberAccess)
             {
                 // delete a.b

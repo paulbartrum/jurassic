@@ -454,6 +454,45 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Asserts current stack top is not undefined and not null, this is important when accessing chain of member which value is null or undefined.
+        /// 
+        /// e.g. a = b.c.d;
+        /// if c is undefined, the error displayed is "undefined cannot be converted to object"
+        /// but we need to display error like this "cannot read property 'd' of undefined", this can help in debugging which expression is undefined here.
+        /// </summary>
+        /// <param name="generator"></param>
+        /// <param name="message"></param>
+        /// <param name="optimizationInfo"></param>
+        public static void AssertNotEmpty(ILGenerator generator, string message, OptimizationInfo optimizationInfo)
+        {
+            var checkUndefined = generator.CreateLabel();
+            var checkNull = generator.CreateLabel();
+            var end = generator.CreateLabel();
+            generator.Duplicate();
+            generator.LoadNull();
+            generator.BranchIfNotEqual(checkUndefined);
+
+            EmitHelpers.EmitThrow(generator, ErrorType.TypeError, message + " undefined", optimizationInfo);
+
+            generator.DefineLabelPosition(checkUndefined);
+            generator.Duplicate();
+            generator.LoadField(ReflectionHelpers.Undefined_Value);
+            generator.BranchIfNotEqual(checkNull);
+
+            EmitHelpers.EmitThrow(generator, ErrorType.TypeError, message + " undefined", optimizationInfo);
+
+            generator.DefineLabelPosition(checkNull);
+            generator.Duplicate();
+            generator.LoadField(ReflectionHelpers.Null_Value);
+            generator.BranchIfNotEqual(end);
+
+
+            EmitHelpers.EmitThrow(generator, ErrorType.TypeError, message + " null", optimizationInfo);
+            generator.DefineLabelPosition(end);
+
+        }
+
+        /// <summary>
         /// Pops the value on the stack, converts it to a javascript object, then pushes the result
         /// onto the stack.
         /// </summary>
@@ -499,10 +538,12 @@ namespace Jurassic.Compiler
                 case PrimitiveType.String:
                 case PrimitiveType.ConcatenatedString:
                 case PrimitiveType.Any:
+
                     // Otherwise, fall back to calling TypeConverter.ToObject()
                     ToAny(generator, fromType);
                     var temp = generator.CreateTemporaryVariable(typeof(object));
                     generator.StoreVariable(temp);
+
                     EmitHelpers.LoadScriptEngine(generator);
                     generator.LoadVariable(temp);
                     generator.ReleaseTemporaryVariable(temp);
