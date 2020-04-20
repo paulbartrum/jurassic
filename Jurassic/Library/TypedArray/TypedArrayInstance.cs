@@ -825,7 +825,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.MutatesThisObject, Length = 1)]
         public TypedArrayInstance Sort(FunctionInstance comparisonFunction = null)
         {
-            Func<object, object, int> comparer;
+            Comparison<object> comparer;
             if (comparisonFunction == null)
             {
                 // Default comparer.

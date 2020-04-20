@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(48)
+			return new List<PropertyNameAndValue>(50)
 			{
 				new PropertyNameAndValue("charAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charAt", 1, __STUB__CharAt), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("charCodeAt", new ClrStubFunction(engine.FunctionInstancePrototype, "charCodeAt", 1, __STUB__CharCodeAt), PropertyAttributes.NonEnumerable),
@@ -37,6 +37,8 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("toString", new ClrStubFunction(engine.FunctionInstancePrototype, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toUpperCase", new ClrStubFunction(engine.FunctionInstancePrototype, "toUpperCase", 0, __STUB__ToUpperCase), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("trim", new ClrStubFunction(engine.FunctionInstancePrototype, "trim", 0, __STUB__Trim), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("trimStart", new ClrStubFunction(engine.FunctionInstancePrototype, "trimStart", 0, __STUB__TrimStart), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("trimEnd", new ClrStubFunction(engine.FunctionInstancePrototype, "trimEnd", 0, __STUB__TrimEnd), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("trimLeft", new ClrStubFunction(engine.FunctionInstancePrototype, "trimLeft", 0, __STUB__TrimLeft), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("trimRight", new ClrStubFunction(engine.FunctionInstancePrototype, "trimRight", 0, __STUB__TrimRight), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine.FunctionInstancePrototype, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
@@ -331,6 +333,20 @@ namespace Jurassic.Library
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
 				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Trim(TypeConverter.ToString(thisObj));
+		}
+
+		private static object __STUB__TrimStart(ScriptEngine engine, object thisObj, object[] args)
+		{
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			return TrimStart(TypeConverter.ToString(thisObj));
+		}
+
+		private static object __STUB__TrimEnd(ScriptEngine engine, object thisObj, object[] args)
+		{
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			return TrimEnd(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__TrimLeft(ScriptEngine engine, object thisObj, object[] args)

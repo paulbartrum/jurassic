@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Jurassic.Library;
 using Jurassic.Compiler;
 using System.ComponentModel;
+using System.Collections.Concurrent;
 
 namespace Jurassic
 {
@@ -68,7 +69,6 @@ namespace Jurassic
         private ObjectInstance mapIteratorPrototype;
         private ObjectInstance setIteratorPrototype;
         private ObjectInstance arrayIteratorPrototype;
-
 
         /// <summary>
         /// Initializes a new scripting environment.
@@ -686,7 +686,7 @@ namespace Jurassic
 
         //     EXECUTION
         //_________________________________________________________________________________________
-        
+
         /// <summary>
         /// Compiles the given source code and returns it in a form that can be executed many
         /// times.
@@ -777,6 +777,9 @@ namespace Jurassic
             this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
             var result = methodGen.Execute(this);
 
+            // Execute any pending callbacks.
+            ExecutePendingCallbacks();
+
             // Normalize the result (convert null to Undefined, double to int, etc).
             return TypeUtilities.NormalizeValue(result);
         }
@@ -799,6 +802,17 @@ namespace Jurassic
         /// <param name="code"> The javascript source code to execute. </param>
         public void Execute(string code)
         {
+            // Special case for executing pending callbacks only.
+            if (string.IsNullOrEmpty(code))
+            {
+                ParsingStarted?.Invoke(this, EventArgs.Empty);
+                OptimizationStarted?.Invoke(this, EventArgs.Empty);
+                CodeGenerationStarted?.Invoke(this, EventArgs.Empty);
+                ExecutionStarted?.Invoke(this, EventArgs.Empty);
+                ExecutePendingCallbacks();
+                return;
+            }
+
             Execute(new StringScriptSource(code));
         }
 
@@ -1392,6 +1406,44 @@ namespace Jurassic
                     this.staticTypeWrapperCache = new Dictionary<Type, ClrStaticTypeWrapper>();
                 return this.staticTypeWrapperCache;
             }
+        }
+
+
+
+        //     PENDING CALLBACKS
+        //_________________________________________________________________________________________
+
+        private readonly Queue<Action> pendingCallbacks = new Queue<Action>();
+        private bool processingPendingCallbacks;
+
+        /// <summary>
+        /// Appends a callback to the EventLoop that will be executed at the end of script execution.
+        /// </summary>
+        /// <param name="callback"> The callback function. </param>
+        internal void AddPendingCallback(Action callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+            pendingCallbacks.Enqueue(callback);
+        }
+
+        /// <summary>
+        /// This method is called at the end of script execution in order to execute pending
+        /// callbacks registered with <see cref="AddPendingCallback(Action)"/>.
+        /// </summary>
+        internal void ExecutePendingCallbacks()
+        {
+            // It's possible for pending callbacks to end up calling Execute(). If this is the
+            // case, do nothing.
+            if (processingPendingCallbacks)
+                return;
+            processingPendingCallbacks = true;
+            while (pendingCallbacks.Count > 0)
+            {
+                var instance = pendingCallbacks.Dequeue();
+                instance();
+            }
+            processingPendingCallbacks = false;
         }
     }
 }

@@ -391,6 +391,7 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("e = 5; try { throw 6; } catch (e) { } e"));
             Assert.AreEqual(5, Evaluate("e = 5; try { throw 6; } catch (e) { var e = 10; } e"));
             Assert.AreEqual(5, Evaluate("var b = 2; try { throw 6; } catch (e) { var b = 5; } b"));
+            Assert.AreEqual(5, Evaluate("var b = 2; try { throw 6; } catch { var b = 5; } b"));
 
             // Try without catch or finally is an error.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("try { }"));
@@ -410,6 +411,12 @@ namespace UnitTests
             Assert.AreEqual(6, Evaluate("var j = 0; for (var i = 0; i < 3; i ++) { try { throw 5; } catch (e) { j ++; } finally { j ++; continue; } j = 0; } j"));
             Assert.AreEqual(4, Evaluate("var j = 0; try { for (var i = 0; i < 3; i ++) { j ++; continue; j ++; } } finally { j ++; } j"));
             Assert.AreEqual(4, Evaluate("var j = 0; try { j ++ } finally { for (var i = 0; i < 3; i ++) { j ++; continue; j ++; } } j"));
+
+            // Catch binding is optional in ECMAScript 2019.
+            Assert.AreEqual(6, Evaluate("(function() { try { throw 5 } catch { return 6 } })()"));
+
+            // Errors.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("(function() { try { throw 5 } catch (a, b) { return 6 } })()"));
 
             var scriptEngine = new ScriptEngine();
 

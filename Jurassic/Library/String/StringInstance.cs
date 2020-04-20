@@ -699,6 +699,26 @@ namespace Jurassic.Library
         /// Trims whitespace from the beginning of the string.
         /// </summary>
         /// <returns></returns>
+        [JSInternalFunction(Name = "trimStart", Flags = JSFunctionFlags.HasThisObject)]
+        public static string TrimStart(string thisObject)
+        {
+            return thisObject.TrimStart(trimCharacters);
+        }
+
+        /// <summary>
+        /// Trims whitespace from the beginning of the string.
+        /// </summary>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "trimEnd", Flags = JSFunctionFlags.HasThisObject)]
+        public static string TrimEnd(string thisObject)
+        {
+            return thisObject.TrimEnd(trimCharacters);
+        }
+
+        /// <summary>
+        /// Trims whitespace from the beginning of the string.
+        /// </summary>
+        /// <returns></returns>
         [JSInternalFunction(Name = "trimLeft", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string TrimLeft(string thisObject)
         {

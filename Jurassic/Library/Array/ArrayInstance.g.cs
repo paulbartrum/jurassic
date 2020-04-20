@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(36)
+			return new List<PropertyNameAndValue>(38)
 			{
 				new PropertyNameAndValue("concat", new ClrStubFunction(engine.FunctionInstancePrototype, "concat", 1, __STUB__Concat), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("pop", new ClrStubFunction(engine.FunctionInstancePrototype, "pop", 0, __STUB__Pop), PropertyAttributes.NonEnumerable),
@@ -20,6 +20,8 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("shift", new ClrStubFunction(engine.FunctionInstancePrototype, "shift", 0, __STUB__Shift), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("splice", new ClrStubFunction(engine.FunctionInstancePrototype, "splice", 2, __STUB__Splice), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("unshift", new ClrStubFunction(engine.FunctionInstancePrototype, "unshift", 1, __STUB__Unshift), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("flat", new ClrStubFunction(engine.FunctionInstancePrototype, "flat", 0, __STUB__Flat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("flatMap", new ClrStubFunction(engine.FunctionInstancePrototype, "flatMap", 1, __STUB__FlatMap), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("join", new ClrStubFunction(engine.FunctionInstancePrototype, "join", 1, __STUB__Join), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("reverse", new ClrStubFunction(engine.FunctionInstancePrototype, "reverse", 0, __STUB__Reverse), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("slice", new ClrStubFunction(engine.FunctionInstancePrototype, "slice", 2, __STUB__Slice), PropertyAttributes.NonEnumerable),
@@ -113,6 +115,34 @@ namespace Jurassic.Library
 					return Unshift(TypeConverter.ToObject(engine, thisObj), new object[0]);
 				default:
 					return Unshift(TypeConverter.ToObject(engine, thisObj), args);
+			}
+		}
+
+		private static object __STUB__Flat(ScriptEngine engine, object thisObj, object[] args)
+		{
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			switch (args.Length)
+			{
+				case 0:
+					return Flat(TypeConverter.ToObject(engine, thisObj), 1);
+				default:
+					return Flat(TypeConverter.ToObject(engine, thisObj), TypeUtilities.IsUndefined(args[0]) ? 1 : TypeConverter.ToInteger(args[0]));
+			}
+		}
+
+		private static object __STUB__FlatMap(ScriptEngine engine, object thisObj, object[] args)
+		{
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			switch (args.Length)
+			{
+				case 0:
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+				case 1:
+					return FlatMap(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), Undefined.Value);
+				default:
+					return FlatMap(TypeConverter.ToObject(engine, thisObj), TypeConverter.ToObject<FunctionInstance>(engine, args[0]), args[1]);
 			}
 		}
 

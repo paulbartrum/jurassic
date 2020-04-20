@@ -1,5 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using static Jurassic.Library.PromiseInstance;
 
 namespace Jurassic.Library
 {
@@ -40,14 +42,44 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Creates a new promise instance.
+        /// Creates a new Promise instance.
         /// </summary>
-        /// <param name="executor">  </param>
-        /// <returns></returns>
+        /// <param name="executor">The function that the promise executes.</param>
+        /// <returns>The Promise instance.</returns>
         [JSConstructorFunction]
         public PromiseInstance Construct(FunctionInstance executor)
         {
             return new PromiseInstance(this.InstancePrototype, executor);
+        }
+
+        /// <summary>
+        /// Creates a new Promise instance.
+        /// </summary>
+        /// <param name="notify">A <see cref="INotifyCompletion"/> that will signal the success or failure of the promise.</param>
+        /// <returns>The Promise instance.</returns>
+        public PromiseInstance Construct<T>(T notify)
+            where T : INotifyCompletion
+        {
+            var promise = new PromiseInstance(this.InstancePrototype);
+            if (notify == null) return promise;
+
+            notify.OnCompleted(() =>
+            {
+                try
+                {
+                    promise.Resolve(TaskAwaiterCache.GetResult(notify));
+                }
+                catch (JavaScriptException jex)
+                {
+                    promise.Reject(jex.ErrorObject);
+                }
+                catch (Exception e)
+                {
+                    promise.Reject(e.Message);
+                }
+            });
+
+            return promise;
         }
 
 
@@ -69,53 +101,24 @@ namespace Jurassic.Library
         //     JAVASCRIPT FUNCTIONS
         //_________________________________________________________________________________________
 
-        /// <summary>
-        /// Returns a promise that resolves when all of the promises in the iterable argument have
-        /// resolved, or rejects with the reason of the first passed promise that rejects.
-        /// </summary>
-        /// <param name="iterable"> An iterable object, such as an Array. </param>
-        /// <returns></returns>
-        [JSInternalFunction(Name = "all")]
-        public PromiseInstance All(ObjectInstance iterable)
-        {
-            throw new NotImplementedException();
-        }
+
 
         /// <summary>
-        /// Returns a promise that resolves or rejects as soon as one of the promises in the
-        /// iterable resolves or rejects, with the value or reason from that promise.
+        /// Returns a Promise that is rejected for the specified reason.
         /// </summary>
-        /// <param name="iterable"> An iterable object, such as an Array. </param>
-        /// <returns></returns>
-        [JSInternalFunction(Name = "race")]
-        public PromiseInstance Race(ObjectInstance iterable)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Returns a Promise object that is rejected with the given reason.
-        /// </summary>
-        /// <param name="reason"> The reason why this Promise is rejected. </param>
+        /// <param name="result"> The reason. Can be an Error instance. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "reject")]
-        public PromiseInstance Reject(object reason)
+        public PromiseInstance Reject(object result)
         {
-            ClrStubFunction func = new ClrStubFunction(this.Engine.FunctionInstancePrototype, (engine, thisObj, args) =>
-            {
-                FunctionInstance resolve = (FunctionInstance)args[0];
-                FunctionInstance reject = (FunctionInstance)args[1];
-                reject.Call(thisObj, reason);
-                return Undefined.Value;
-            });
-            return this.Construct(func);
+            var promise = new PromiseInstance(this.InstancePrototype);
+            promise.Reject(result);
+            return promise;
         }
 
         /// <summary>
-        /// Returns a Promise.then object that is resolved with the given value. If the value is a
-        /// thenable (i.e. has a "then" method), the returned promise will "follow" that thenable,
-        /// adopting its eventual state; otherwise the returned promise will be fulfilled with the
-        /// value.
+        /// Returns either a new promise resolved with the passed argument, or the argument itself
+        /// if the argument is a promise produced by this constructor.
         /// </summary>
         /// <param name="value"> Argument to be resolved by this Promise. Can also be a Promise or
         /// a thenable to resolve. </param>
@@ -123,14 +126,159 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "resolve")]
         public PromiseInstance Resolve(object value)
         {
-            ClrStubFunction func = new ClrStubFunction(this.Engine.FunctionInstancePrototype, (engine, thisObj, args) =>
+            // If the constructor of value === this, then return as is.
+            if (value is PromiseInstance promise)
+                return promise;
+
+            var result = new PromiseInstance(this.InstancePrototype);
+            result.Resolve(value);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a new promise which is settled in the same way as the first passed promise to
+        /// settle. All elements of the passed iterable are resolved to promises.
+        /// </summary>
+        /// <param name="iterable"> An iterable object such as an Array. </param>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "race")]
+        public PromiseInstance Race(ObjectInstance iterable)
+        {
+            if (iterable == null)
+                throw new JavaScriptException(Engine, ErrorType.TypeError, "The parameter must be an iterable.");
+
+            var iterator = TypeUtilities.GetIterator(Engine, iterable);
+            var promises = TypeUtilities.Iterate(Engine, iterator);
+
+            var result = new PromiseInstance(Engine.Promise.InstancePrototype);
+            foreach (var promiseOrValue in promises)
+                Resolve(promiseOrValue).Then(result.ResolveFunction, result.RejectFunction);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a Promise. It takes one argument: a list of Promises that determine whether
+        /// the new Promise is fulfilled or rejected.
+        /// </summary>
+        /// <param name="iterable"> An iterable object such as an Array. </param>
+        /// <returns></returns>
+        [JSInternalFunction(Name = "all")]
+        public PromiseInstance All(ObjectInstance iterable)
+        {
+            if (iterable == null)
+                throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, "The parameter must be an iterable.");
+
+            var iterator = TypeUtilities.GetIterator(iterable.Engine, iterable);
+            var promises = TypeUtilities.Iterate(iterator.Engine, iterator).ToList();
+            var results = Engine.Array.Construct(new object[promises.Count]);
+            var count = promises.Count;
+
+            var promise = new PromiseInstance(iterable.Engine.Promise.InstancePrototype);
+
+            // The promise is resolved immediately if the iterable is empty.
+            if (promises.Count == 0)
             {
-                FunctionInstance resolve = (FunctionInstance)args[0];
-                FunctionInstance reject = (FunctionInstance)args[1];
-                resolve.Call(thisObj, value);
-                return Undefined.Value;
-            });
-            return this.Construct(func);
+                promise.Resolve(results);
+                return promise;
+            }
+
+            for (var i = 0; i < promises.Count; i++)
+            {
+                if (promise.State != PromiseState.Pending) break;
+
+                if (promises[i] is PromiseInstance p)
+                {
+                    if (p.State == PromiseState.Rejected)
+                    {
+                        promise.Reject(p.Result);
+                        break;
+                    }
+                    else if (p.State == PromiseState.Fulfilled)
+                    {
+                        results[i] = p.Result;
+                        if (--count == 0)
+                        {
+                            promise.Resolve(results);
+                            break;
+                        }
+                        continue;
+                    }
+
+                    var j = i; // Some C# versions need this.
+                    p.Then(new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
+                        {
+                            if (promise.State != PromiseState.Pending)
+                                return Undefined.Value;
+
+                            results[j] = args[0];
+
+                            if (--count == 0)
+                            {
+                                promise.Resolve(results);
+                            }
+                            return Undefined.Value;
+                        }),
+                        new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
+                        {
+                            promise.Reject(args[0]);
+                            return Undefined.Value;
+                        }));
+
+                    continue;
+                }
+                else if (promises[i] is ObjectInstance obj && obj.HasProperty("then"))
+                {
+                    FunctionInstance then;
+                    try
+                    {
+                        then = obj.GetPropertyValue("then") as FunctionInstance;
+                    }
+                    catch (JavaScriptException jex)
+                    {
+                        promise.Reject(jex.ErrorObject);
+                        break;
+                    }
+
+                    if (then != null)
+                    {
+                        try
+                        {
+                            var j = i; // Some C# versions need this.
+                            var resolve = new ClrStubFunction(iterable.Engine.Function.InstancePrototype, (engine, ths, arg) =>
+                            {
+                                if (promise.State != PromiseState.Pending) return Undefined.Value;
+
+                                results[j] = arg.Length == 0
+                                    ? Undefined.Value
+                                    : arg[0];
+
+                                if (--count == 0)
+                                {
+                                    promise.Resolve(results);
+                                }
+                                return Undefined.Value;
+                            });
+
+                            then.Call(obj, resolve, promise.RejectFunction);
+                            continue;
+                        }
+                        catch (JavaScriptException jex)
+                        {
+                            promise.Reject(jex.ErrorObject);
+                            break;
+                        }
+                    }
+                }
+
+                results[i] = promises[i];
+                if (--count == 0)
+                {
+                    promise.Resolve(results);
+                    break;
+                }
+            }
+
+            return promise;
         }
     }
 }

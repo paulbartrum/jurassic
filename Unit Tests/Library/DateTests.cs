@@ -203,30 +203,46 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 30, 0)), Evaluate("Date.parse('24 Apr 2010 12:30  pm')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 UT')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 GMT')"));
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 4, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 EST')")); // -5
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 3, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 EDT')")); // -4
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 5, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 CST')")); // -6
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 4, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 CDT')")); // -5
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 6, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 MST')")); // -7
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 5, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 MDT')")); // -6
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 7, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 PST')")); // -8
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 6, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 PDT')")); // -7
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 Z')"));   // GMT
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 0, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 A')"));   // -1
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 11, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 M')"));   // -12
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 22, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 N')"));   // +1
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 11, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 Y')"));   // +12
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +1100')"));
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 29, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +0030')"));
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 00, 29, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 -30')"));
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 22, 29, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +90')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 4, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 EST')"));      // -5
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 3, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 EDT')"));      // -4
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 5, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 CST')"));      // -6
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 4, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 CDT')"));      // -5
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 6, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 MST')"));      // -7
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 5, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 MDT')"));      // -6
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 7, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 PST')"));      // -8
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 6, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 PDT')"));      // -7
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 Z')"));       // GMT
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 0, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 A')"));        // -1
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25, 11, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 M')"));       // -12
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 22, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 N')"));       // +1
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 11, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 Y')"));       // +12
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +1100')"));   // +11 hours
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +11:00')"));  // +11 hours
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 29, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +0030')"));   // +30 minutes
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25,  0, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 -1')"));      // -1 hour
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25,  0, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 -1:')"));     // -1 hour
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 25,  0,  0, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 -:1')"));     // -1 minute
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 26,  5, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 -30')"));     // -30 hours
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 21,  5, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +90')"));     // +90 hours
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 21, 29, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 +190')"));    // +1 hour, 90 minutes
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 GMT+1100')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("Date.parse('24 Apr 2010 23:59:59 GMT+1100 (Zone Name)')"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 3, 3)), Evaluate("Date.parse('31 Feb 2010')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2032, 1, 1)), Evaluate("Date.parse('32-1-1')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2049, 1, 1)), Evaluate("Date.parse('49-1-1')"));
+            Assert.AreEqual(ToJSDate(new DateTime(1950, 1, 1)), Evaluate("Date.parse('50-1-1')"));
+            Assert.AreEqual(ToJSDate(new DateTime(1949, 1, 1)), Evaluate("Date.parse('1949-1-1')"));
+            Assert.AreEqual(ToJSDate(new DateTime(1950, 1, 1)), Evaluate("Date.parse('1950-1-1')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 3, 1)), Evaluate("Date.parse('2010-2-29')"));                         // the day wraps around
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 10, 7, 5, 12, 0)), Evaluate("Date.parse('2010-10-7 5:12')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 10, 7, 5, 12, 0)), Evaluate("Date.parse('2010-10-07 05:12')"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 10, 6, 17, 12, 0, DateTimeKind.Utc)), Evaluate("Date.parse('2010-10-07 05:12+12')"));
 
             // Invalid ECMAScript dates.
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('2010-0-2')"));                          // month out of range
-            Assert.AreEqual(double.NaN, Evaluate("Date.parse('2010-2-29')"));                         // day out of range
+            Assert.AreEqual(double.NaN, Evaluate("Date.parse('2010-13-2')"));                         // month out of range
+            Assert.AreEqual(double.NaN, Evaluate("Date.parse('2010-2-0')"));                          // day out of range
+            Assert.AreEqual(double.NaN, Evaluate("Date.parse('2010-2-32')"));                         // day out of range
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('1970-01-01T24:01')"));                  // 24:00 is the last valid time.
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('1970-01-01T24:00:01')"));               // 24:00 is the last valid time.
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('1970-01-01T24:00:00.001')"));           // 24:00 is the last valid time.
@@ -246,7 +262,7 @@ namespace UnitTests
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('5 Jan')"));                         // no year
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('Jan 2010')"));                      // no day
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('5 2010')"));                        // no day
-            Assert.AreEqual(double.NaN, Evaluate("Date.parse('24 Apr 2010 15 : 30 : 01')"));  // spaces between time components
+            Assert.AreEqual(double.NaN, Evaluate("Date.parse('24 Apr 2010 15 : 30 : 01')"));      // spaces between time components
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('24 Apr 2010 15')"));                // extraneous number
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('24 Apr 2010 15:30:01.123')"));      // milliseconds not supported
             Assert.AreEqual(double.NaN, Evaluate("Date.parse('24 Apr 2010 hello')"));             // extraneous text

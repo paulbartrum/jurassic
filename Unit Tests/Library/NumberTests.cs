@@ -112,6 +112,7 @@ namespace UnitTests
         [TestMethod]
         public void toFixed()
         {
+            Assert.AreEqual("1.00", Evaluate("0.9995 .toFixed(2)"));
             Assert.AreEqual("0", Evaluate("0 .toFixed()"));
             Assert.AreEqual("0.00", Evaluate("0 .toFixed(2)"));
             Assert.AreEqual("77", Evaluate("77.1274.toFixed()"));

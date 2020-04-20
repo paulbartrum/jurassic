@@ -61,6 +61,9 @@ namespace Jurassic
         public void Execute(ScriptEngine engine)
         {
             methodGen.Execute(engine);
+
+            // Execute any pending callbacks.
+            engine.ExecutePendingCallbacks();
         }
     }
 }

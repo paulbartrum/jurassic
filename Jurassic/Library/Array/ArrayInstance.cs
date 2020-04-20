@@ -958,6 +958,39 @@ namespace Jurassic.Library
             return arrayLength + (uint)items.Length;
         }
 
+        /// <summary>
+        /// Creates a new array with all sub-array elements concatenated into it recursively up to
+        /// the specified depth.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <param name="depth"> The depth level specifying how deep a nested array structure
+        /// should be flattened. Defaults to 1. </param>
+        /// <returns> A new array with the sub-array elements concatenated into it. </returns>
+        [JSInternalFunction(Name = "flat", Flags = JSFunctionFlags.HasThisObject, Length = 0)]
+        public static ObjectInstance Flat(ObjectInstance thisObj, int depth = 1)
+        {
+            var result = new List<object>((int)GetLength(thisObj));
+            FlattenTo(result, thisObj, null, null, depth);
+            return thisObj.Engine.Array.New(result.ToArray());
+        }
+
+        /// <summary>
+        /// Maps each element using a mapping function, then flattens the result into a new array.
+        /// </summary>
+        /// <param name="thisObj"> The array that is being operated on. </param>
+        /// <param name="callback"> A function that produces an element of the new Array, taking
+        /// three arguments: currentValue, index, array. </param>
+        /// <param name="thisArg"> Value to use as this when executing callback. </param>
+        /// <returns> A new array with each element being the result of the callback function and
+        /// flattened to a depth of 1. </returns>
+        [JSInternalFunction(Name = "flatMap", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static ObjectInstance FlatMap(ObjectInstance thisObj, FunctionInstance callback, object thisArg)
+        {
+            var result = new List<object>((int)GetLength(thisObj));
+            FlattenTo(result, thisObj, callback, thisArg, depth: 1);
+            return thisObj.Engine.Array.New(result.ToArray());
+        }
+
 
 
         //     ARRAY ADAPTER FUNCTIONS
@@ -966,7 +999,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Implements an adapter for regular JS arrays.
         /// </summary>
-        private class ArrayInstanceAdapter : ArrayAdapter<object>
+        internal class ArrayInstanceAdapter : ArrayAdapter<object>
         {
             /// <summary>
             /// Creates a new ArrayInstanceWrapper instance.
@@ -1071,7 +1104,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "sort", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 1)]
         public static ObjectInstance Sort(ObjectInstance thisObj, FunctionInstance comparisonFunction = null)
         {
-            Func<object, object, int> comparer;
+            Comparison<object> comparer;
             if (comparisonFunction == null)
             {
                 // Default comparer.
@@ -1464,6 +1497,38 @@ namespace Jurassic.Library
             var resizedArray = new object[(int)newCapacity];
             Array.Copy(this.dense, resizedArray, (int)length);
             this.dense = resizedArray;
+        }
+
+        /// <summary>
+        /// Recursively appends sub-array elements into the given list.
+        /// </summary>
+        /// <param name="result"> The list to append to. </param>
+        /// <param name="array"> The array elements to append. </param>
+        /// <param name="callback"> A function that produces an element of the new Array, taking
+        /// three arguments: currentValue, index, array. </param>
+        /// <param name="thisArg"> Value to use as this when executing callback. </param>
+        /// <param name="depth"> The depth of recursion when iterating through elements. </param>
+        private static void FlattenTo(List<object> result, ObjectInstance array, FunctionInstance callback, object thisArg, int depth)
+        {
+            for (int i = 0; i < GetLength(array); i++)
+            {
+                // Get the value of the array element.
+                object elementValue = array[i];
+
+                // Ignore missing elements.
+                if (elementValue != null)
+                {
+                    // Transform the value using the mapping function.
+                    if (callback != null)
+                        elementValue = callback.Call(thisArg ?? Undefined.Value, elementValue, i, array);
+
+                    // If the element is an array, flatten it.
+                    if (depth > 0 && elementValue is ArrayInstance childArray)
+                        FlattenTo(result, childArray, null, null, depth - 1);
+                    else
+                        result.Add(elementValue);
+                }
+            }
         }
     }
 }

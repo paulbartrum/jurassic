@@ -324,7 +324,7 @@ namespace Jurassic.Compiler
                 generator.Call(getValue);
 
                 // Now let the normal conversion work.
-                fromType = fromType.GenericTypeArguments[0];
+                fromType = Nullable.GetUnderlyingType(fromType);
             }
 
             switch (Type.GetTypeCode(fromType))
