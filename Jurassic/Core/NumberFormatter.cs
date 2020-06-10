@@ -371,7 +371,7 @@ namespace Jurassic
                                 result.Append('0', -integralDigits);
                             decimalPointOutput = true;
                         }
-                        else if (scientificNotation == true || digitsOutput == integralDigits)
+                        else if (scientificNotation == true || (digitsOutput > 0 && digitsOutput == integralDigits))
                         {
                             // For scientific notation values, or values greater than 1, we only
                             // need to output a decimal point.
@@ -438,7 +438,7 @@ namespace Jurassic
             {
                 // Add the exponent on the end.
                 result.Append(exponentSymbol);
-                if (exponent > 0)
+                if (exponent >= 0)
                     result.Append(numberFormatInfo.PositiveSign);
                 result.Append(exponent);
             }

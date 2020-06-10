@@ -82,6 +82,11 @@ namespace UnitTests
         {
             Assert.AreEqual("0e+0", Evaluate("0 .toExponential()"));
             Assert.AreEqual("0.00e+0", Evaluate("0 .toExponential(2)"));
+            Assert.AreEqual("1.23e+1", Evaluate("(12.345).toExponential(2)"));
+            Assert.AreEqual("1.23e+0", Evaluate("(1.2345).toExponential(2)"));
+            Assert.AreEqual("1.23e-1", Evaluate("(0.12345).toExponential(2)"));
+            Assert.AreEqual("1.23e-2", Evaluate("(0.012345).toExponential(2)"));
+            Assert.AreEqual("1.24e+2", Evaluate("(123.8).toExponential(2)"));
             Assert.AreEqual("7.71234e+1", Evaluate("77.1234.toExponential()"));
             Assert.AreEqual("7.7123e+1", Evaluate("77.1234.toExponential(4)"));
             Assert.AreEqual("7.71e+1", Evaluate("77.1234.toExponential(2)"));
@@ -100,11 +105,11 @@ namespace UnitTests
             Assert.AreEqual("Infinity", Evaluate("Number.POSITIVE_INFINITY.toExponential()"));
             Assert.AreEqual("-Infinity", Evaluate("Number.NEGATIVE_INFINITY.toExponential()"));
             Assert.AreEqual("NaN", Evaluate("NaN.toExponential()"));
-
+            
             // Negative tests.
             Assert.AreEqual("RangeError", EvaluateExceptionType("77.1234.toExponential(-1)"));
             Assert.AreEqual("RangeError", EvaluateExceptionType("77.1234.toExponential(21)"));
-
+            
             // length
             Assert.AreEqual(1, Evaluate("NaN.toExponential.length"));
         }
@@ -122,6 +127,10 @@ namespace UnitTests
             Assert.AreEqual("77", Evaluate("77.1234.toFixed()"));
             Assert.AreEqual("77.13", Evaluate("77.1274.toFixed(2)"));
             Assert.AreEqual("77.00", Evaluate("77 .toFixed(2)"));
+            Assert.AreEqual("12.35", Evaluate("(12.345).toFixed(2)"));
+            Assert.AreEqual("1.23", Evaluate("(1.2345).toFixed(2)"));
+            Assert.AreEqual("0.12", Evaluate("(0.12345).toFixed(2)"));
+            Assert.AreEqual("0.01", Evaluate("(0.012345).toFixed(2)"));
             Assert.AreEqual("0.1", Evaluate("0.09.toFixed(1)"));
             Assert.AreEqual("0.2", Evaluate("0.19.toFixed(1)"));
             Assert.AreEqual("0.0", Evaluate("0.03.toFixed(1)"));

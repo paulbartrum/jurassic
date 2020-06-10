@@ -53,8 +53,8 @@ namespace UnitTests
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 11, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 Y').valueOf()"));   // +12
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 +1100').valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 29, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 +0030').valueOf()"));
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 23, 29, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 +30').valueOf()"));
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 22, 29, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 +90').valueOf()"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 23, 17, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 +30').valueOf()"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 21, 5, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 +90').valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 GMT+1100').valueOf()"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 4, 24, 12, 59, 59, DateTimeKind.Utc)), Evaluate("new Date('24 Apr 2010 23:59:59 GMT+1100 (Zone Name)').valueOf()"));
 
