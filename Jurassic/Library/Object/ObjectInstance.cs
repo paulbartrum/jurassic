@@ -891,7 +891,7 @@ namespace Jurassic.Library
         /// Sets up multiple properties at once. Can only be called on an empty object.
         /// </summary>
         /// <param name="properties"> The list of properties to set. </param>
-        internal void InitializeProperties(IEnumerable<PropertyNameAndValue> properties)
+        public void InitializeProperties(IEnumerable<PropertyNameAndValue> properties)
         {
             if (this.schema.NextValueIndex != 0)
                 throw new InvalidOperationException("This method can only be called on an empty object (one with no properties).");
