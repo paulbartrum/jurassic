@@ -42,7 +42,7 @@ namespace Jurassic
         /// </summary>
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if the given value is undefined; <c>false</c> otherwise. </returns>
-        internal static bool IsUndefined(object obj)
+        public static bool IsUndefined(object obj)
         {
             return obj == null || obj == Undefined.Value;
         }
@@ -53,7 +53,7 @@ namespace Jurassic
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if the given value is a supported numeric type; <c>false</c>
         /// otherwise. </returns>
-        internal static bool IsNumeric(object obj)
+        public static bool IsNumeric(object obj)
         {
             return obj is double || obj is int || obj is uint;
         }
@@ -64,7 +64,7 @@ namespace Jurassic
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if the given value is a supported string type; <c>false</c>
         /// otherwise. </returns>
-        internal static bool IsString(object obj)
+        public static bool IsString(object obj)
         {
             return obj is string || obj is ConcatenatedString;
         }

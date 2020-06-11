@@ -67,7 +67,7 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="construct"> The delegate to call when calling the JS method as a constructor. </param>
         /// <param name="call"> The delegate to call when function is called. </param>
-        internal ClrStubFunction(ObjectInstance prototype,
+        public ClrStubFunction(ObjectInstance prototype,
             Func<ScriptEngine, object, object[], ObjectInstance> construct,
             Func<ScriptEngine, object, object[], object> call)
             : base(prototype)

@@ -57,7 +57,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Called by derived classes to create a new object instance.
         /// </summary>
-        /// <param name="prototype"> The next object in the prototype chain.  Cannot be <c>null</c>. </param>
+        /// <param name="prototype"> The next object in the prototype chain. Cannot be <c>null</c>. </param>
         protected ObjectInstance(ObjectInstance prototype)
         {
             if (prototype == null)
@@ -71,7 +71,7 @@ namespace Jurassic.Library
         /// Called by derived classes to create a new object instance.
         /// </summary>
         /// <param name="engine"> The script engine associated with this object. </param>
-        /// <param name="prototype"> The next object in the prototype chain.  Can be <c>null</c>. </param>
+        /// <param name="prototype"> The next object in the prototype chain. Can be <c>null</c>. </param>
         protected ObjectInstance(ScriptEngine engine, ObjectInstance prototype)
         {
             if (engine == null)
@@ -888,13 +888,13 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Sets up multiple properties at once.
+        /// Sets up multiple properties at once. Can only be called on an empty object.
         /// </summary>
         /// <param name="properties"> The list of properties to set. </param>
-        internal void InitializeProperties(IEnumerable<PropertyNameAndValue> properties)
+        public void InitializeProperties(IEnumerable<PropertyNameAndValue> properties)
         {
             if (this.schema.NextValueIndex != 0)
-                throw new InvalidOperationException("This method can only be called on a virgin object (one with no properties).");
+                throw new InvalidOperationException("This method can only be called on an empty object (one with no properties).");
 
             if (this.propertyValues.Length < properties.Count())
                 this.propertyValues = new object[properties.Count()];
