@@ -152,23 +152,19 @@ namespace UnitTests
             // for (var x of <expression>)
             Assert.AreEqual(206, Evaluate("y = 0; for (var x of [93, 113]) { y += x } y"));
 
-
             // Iterate over a generator.
             Assert.AreEqual("2 3 4 5 ", Evaluate(@"
                 var range = {
                   from: 2,
                   to: 5
                 };
-
                 // 1. call to for..of initially calls this
                 range[Symbol.iterator] = function() {
-
                   // ...it returns the iterator object:
                   // 2. Onward, for..of works only with this iterator, asking it for next values
                   return {
                     current: this.from,
                     last: this.to,
-
                     // 3. next() is called on each iteration by the for..of loop
                     next() {
                       // 4. it should return the value as an object {done:.., value :...}
@@ -180,7 +176,6 @@ namespace UnitTests
                     }
                   };
                 };
-
                 y = ''; for (var x of range) { y += x + ' ' } y"));
 
             // Type errors.

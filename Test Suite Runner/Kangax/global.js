@@ -1,4 +1,4 @@
-﻿var global = this;
+﻿﻿var global = this;
 
 function __createIterableObject(arr, methods) {
     methods = methods || {};

@@ -231,18 +231,18 @@ namespace Jurassic.Library
 
                     var j = i; // Some C# versions need this.
                     p.Then(new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
-                        {
-                            if (promise.State != PromiseState.Pending)
-                                return Undefined.Value;
-
-                            results[j] = args[0];
-
-                            if (--count == 0)
-                            {
-                                promise.Resolve(results);
-                            }
+                    {
+                        if (promise.State != PromiseState.Pending)
                             return Undefined.Value;
-                        }),
+
+                        results[j] = args[0];
+
+                        if (--count == 0)
+                        {
+                            promise.Resolve(results);
+                        }
+                        return Undefined.Value;
+                    }),
                         new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
                         {
                             promise.Reject(args[0]);

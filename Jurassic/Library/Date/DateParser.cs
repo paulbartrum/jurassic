@@ -196,10 +196,13 @@ namespace Jurassic.Library
                         word.StartsWith("UTC", StringComparison.OrdinalIgnoreCase))
                         word = word.Substring(3);
 
-                    // Time zone offset is [+-]hhmm.  Convert to minutes.
-                    int timeZoneOffset;
-                    int.TryParse(word, out timeZoneOffset);
-                    offsetInMinutes -= (timeZoneOffset / 100) * 60 + (timeZoneOffset % 100);
+                    if (word.Length > 0)
+                    {
+                        // Convert time zone offset to minutes.
+                        if (!ParseTimeZone(word, out int timeZoneOffset))
+                            return DateTime.MinValue;
+                        offsetInMinutes -= timeZoneOffset;
+                    }
                 }
                 else if (monthNames.TryGetValue(word, out numericValue) == true)
                 {
@@ -233,20 +236,54 @@ namespace Jurassic.Library
                 }
                 else if (word.IndexOfAny(new char[] { '/', '-' }) >= 0)
                 {
-                    // If the word contains a slash or a dash, guess the word is a date.
+                    // If the word contains a slash or a dash, guess the word is a date, in US (MM-DD-YY) format.
                     string[] components = word.Split('/', '-');
                     if (components.Length != 3)
                         return DateTime.MinValue;
-                    if (int.TryParse(components[0], out month) == false)
+                    if (int.TryParse(components[0], out var component1) == false)
                         return DateTime.MinValue;
-                    if (int.TryParse(components[1], out day) == false)
+                    if (int.TryParse(components[1], out var component2) == false)
                         return DateTime.MinValue;
-                    if (int.TryParse(components[2], out year) == false)
+                    if (int.TryParse(components[2], out var component3) == false)
                         return DateTime.MinValue;
+
+                    // This is weird: if the first number is >= 32, then interpret it as a year, otherwise interpret it as a month.
+                    if (component1 >= 32)
+                    {
+                        // YY-MM-DD
+                        if (component1 >= 100)
+                            year = component1;
+                        else if (component1 >= 50)
+                            year = 1900 + component1;
+                        else
+                            year = 2000 + component1;
+                        month = component2;
+                        day = component3;
+                    }
+                    else
+                    {
+                        // MM-DD-YY
+                        month = component1;
+                        day = component2;
+                        year = component3;
+                    }
                 }
                 else if (word.IndexOf(':') >= 0)
                 {
                     // If the word contains a colon, guess the word is a time.
+                    // First split off the timezone if there is one.
+                    int plusOrMinusIndex = word.IndexOfAny(new char[] { '+', '-' });
+                    if (plusOrMinusIndex >= 0)
+                    {
+                        var timePart = word.Substring(0, plusOrMinusIndex);
+                        var tzPart = word.Substring(plusOrMinusIndex + 1);
+                        kind = DateTimeKind.Utc;
+                        if (!ParseTimeZone(tzPart, out int timeZoneOffset))
+                            return DateTime.MinValue;
+                        offsetInMinutes -= timeZoneOffset;
+                        word = timePart;
+                    }
+
                     string[] components = word.Split(':');
                     if (components.Length < 2 || components.Length > 3)
                         return DateTime.MinValue;
@@ -324,6 +361,83 @@ namespace Jurassic.Library
             if (offsetInMinutes != 0)
                 result = result.AddMinutes(offsetInMinutes);
             return result;
+        }
+
+        /// <summary>
+        /// Converts a timezone string to a timezone offset.
+        /// </summary>
+        /// <param name="timezoneStr"> The timezone string e.g. "+1300", "+13", "-1". </param>
+        /// <param name="offsetInMinutes"> The timezone offset, in minutes. e.g. +1200 will return 12*60=700. </param>
+        /// <returns> Indicates whether parsing was successful. </returns>
+        private static bool ParseTimeZone(string timezoneStr, out int offsetInMinutes)
+        {
+            offsetInMinutes = 0;
+
+            // If there's a colon character, use it to separate the hours and minutes.
+            int colonIndex = timezoneStr.IndexOf(':');
+            if (colonIndex >= 0)
+            {
+                // Compute the sign (1 or -1) of the result.
+                int sign = 1;
+                if (timezoneStr[0] == '+')
+                {
+                    sign = 1;
+                    timezoneStr = timezoneStr.Substring(1);
+                    colonIndex--;
+                }
+                else if (timezoneStr[0] == '-')
+                {
+                    sign = -1;
+                    timezoneStr = timezoneStr.Substring(1);
+                    colonIndex--;
+                }
+
+                int hours = 0, minutes = 0;
+                if (colonIndex == 0)
+                {
+                    // :mm
+                    if (!int.TryParse(timezoneStr.Substring(1), out minutes))
+                        return false;
+                }
+                else if (colonIndex == timezoneStr.Length - 1)
+                {
+                    // hh:
+                    if (!int.TryParse(timezoneStr.Substring(0, timezoneStr.Length - 1), out hours))
+                        return false;
+                }
+                else
+                {
+                    // hh:mm
+                    if (!int.TryParse(timezoneStr.Substring(0, colonIndex), out hours))
+                        return false;
+                    if (!int.TryParse(timezoneStr.Substring(colonIndex + 1), out minutes))
+                        return false;
+                }
+                offsetInMinutes = sign * (hours * 60 + minutes);
+                return true;
+            }
+            else
+            {
+                // Check length.
+                if (timezoneStr.Length > 5)
+                    return false;
+
+                // Attempt to parse the timezone string as an integer.
+                if (!int.TryParse(timezoneStr, out int timezoneInt))
+                    return false;
+
+                if (timezoneStr.Length < 4)
+                {
+                    // [+-]h or [+-]hh
+                    offsetInMinutes = timezoneInt * 60;
+                }
+                else
+                {
+                    // [+-]hmm or [+-]hhmm
+                    offsetInMinutes = (timezoneInt / 100) * 60 + (timezoneInt % 100);
+                }
+                return true;
+            }
         }
 
         // A dictionary containing the names of all the days of the week.

@@ -145,57 +145,8 @@ namespace Jurassic
             mantissa >>= trailingZeroBits;
             base2Exponent += trailingZeroBits;
 
-            // Calculate the logarithm of the number.
-            int exponent;
-            if (radix == 10)
-            {
-                exponent = (int)Math.Floor(Math.Log10(value));
-
-                // We need to calculate k = floor(log10(x)).
-                // log(x)	~=~ log(1.5) + (x-1.5)/1.5 (taylor series approximation)
-                // log10(x) ~=~ log(1.5) / log(10) + (x - 1.5) / (1.5 * log(10))
-                // d = x * 2^l (1 <= x < 2)
-                // log10(d) = l * log10(2) + log10(x)
-                // log10(d) ~=~ l * log10(2)           + (x - 1.5) * (1 / (1.5 * log(10)))  + log(1.5) / log(10)
-                // log10(d) ~=~ l * 0.301029995663981  + (x - 1.5) * 0.289529654602168      + 0.1760912590558
-                // The last term (0.1760912590558) is rounded so that k = floor(log10(x)) or
-                // k = floor(log10(x)) + 1 (i.e. it's the exact value or one higher).
-
-
-                //double log10;
-                //if ((int)(bits.LongValue >> MantissaExplicitBits) == 0)
-                //{
-                //    // The number is denormalized.
-                //    int mantissaShift = CountLeadingZeroBits((ulong)mantissa) - (64 - MantissaImplicitBits);
-                //    bits.LongValue = (mantissa << mantissaShift) & MantissaMask |
-                //        ((long)ExponentBias << MantissaExplicitBits);
-
-                //    // Calculate an overestimate of log-10 of the value.
-                //    log10 = (bits.DoubleValue - 1.5) * 0.289529654602168 + 0.1760912590558 +
-                //        (base2Exponent - mantissaShift) * 0.301029995663981;
-                //}
-                //else
-                //{
-                //    // Set the base-2 exponent to biased zero.
-                //    bits.LongValue = (bits.LongValue & ~ExponentMask) | ((long)ExponentBias << MantissaExplicitBits);
-
-                //    // Calculate an overestimate of log-10 of the value.
-                //    log10 = (bits.DoubleValue - 1.5) * 0.289529654602168 + 0.1760912590558 + base2Exponent * 0.301029995663981;
-                //}
-
-                //// (int)Math.Floor(log10)
-                //exponent = (int)log10;
-                //if (log10 < 0 && log10 != exponent)
-                //    exponent--;
-
-                //if (exponent >= 0 && exponent < tens.Length)
-                //{
-                //    if (value < tens[exponent])
-                //        exponent--;
-                //}
-            }
-            else
-                exponent = (int)Math.Floor(Math.Log(value, radix));
+            // Calculate the logarithm of the number. exponent = (int)Math.Floor(Math.Log(value, radix))
+            int exponent = IntegralLog(value, radix);
 
             if (radix == 10 && style == Style.Regular)
             {
@@ -203,13 +154,7 @@ namespace Jurassic
                 if (base2Exponent >= 0 && exponent <= 14)
                 {
                     // Yes.
-                    for (int i = exponent; i >= 0; i--)
-                    {
-                        double scaleFactor = tens[i];
-                        int digit = (int)(value / scaleFactor);
-                        result.Append((char)(digit + '0'));
-                        value -= digit * scaleFactor;
-                    }
+                    result.Append(mantissa << base2Exponent);
                     return result.ToString();
                 }
             }
@@ -371,7 +316,7 @@ namespace Jurassic
                                 result.Append('0', -integralDigits);
                             decimalPointOutput = true;
                         }
-                        else if (scientificNotation == true || digitsOutput == integralDigits)
+                        else if (scientificNotation == true || (digitsOutput > 0 && digitsOutput == integralDigits))
                         {
                             // For scientific notation values, or values greater than 1, we only
                             // need to output a decimal point.
@@ -438,7 +383,7 @@ namespace Jurassic
             {
                 // Add the exponent on the end.
                 result.Append(exponentSymbol);
-                if (exponent > 0)
+                if (exponent >= 0)
                     result.Append(numberFormatInfo.PositiveSign);
                 result.Append(exponent);
             }
@@ -604,20 +549,15 @@ namespace Jurassic
         /// <returns> The number of trailing zero bits in the given 64-bit value. </returns>
         private static int CountTrailingZeroBits(ulong value)
         {
-            int k = 0;
             if ((value & 7) != 0)
             {
                 if ((value & 1) != 0)
                     return 0;
                 if ((value & 2) != 0)
-                {
-                    value >>= 1;
                     return 1;
-                }
-                value >>= 2;
                 return 2;
             }
-            k = 0;
+            int k = 0;
             if ((value & 0xFFFFFFFF) == 0)
             {
                 k = 32;
@@ -653,7 +593,20 @@ namespace Jurassic
             return k;
         }
 
-
+        /// <summary>
+        /// Calculates (int)Math.Floor(Math.Log(value, radix)).
+        /// </summary>
+        /// <param name="value"> The value to calculate the log for. </param>
+        /// <param name="radix"> 10 for base-10. </param>
+        /// <returns> The logarithm of the provided value, rounded down to the nearest integer. </returns>
+        private static int IntegralLog(double value, int radix)
+        {
+            // For radix 10, fails for 999999999999998, 999999999999999 and 0.00000000000999999999999999.
+            int result = radix == 10 ? (int)Math.Floor(Math.Log10(value)) : (int)Math.Floor(Math.Log(value, radix));
+            if ((result >= 15 || result <= -11) && value < Math.Pow(radix, result))
+                return result - 1;
+            return result;
+        }
     }
 
 }

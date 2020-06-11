@@ -58,7 +58,7 @@ namespace Jurassic.Library
             if (iterable != Undefined.Value && iterable != Null.Value)
             {
                 var iterator = TypeUtilities.RequireIterator(Engine, iterable);
-                
+
                 // Get a reference to the set function.
                 var setFunc = result["set"] as FunctionInstance;
                 if (setFunc == null)

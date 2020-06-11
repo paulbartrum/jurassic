@@ -732,12 +732,23 @@ namespace UnitTests
         }
 
         [TestMethod]
-        [Ignore]    // not supported yet.
         public void setPrototypeOf()
         {
-            Assert.AreEqual(5, Evaluate("var a = {}; Object.setPrototypeOf(a, Math); a.abs(-5)"));
             Assert.AreEqual(true, Evaluate("var a = {}; Object.setPrototypeOf(a, Math); Object.getPrototypeOf(a) === Math"));
+            Assert.AreEqual(true, Evaluate("var a = {}; Object.setPrototypeOf(a, null); Object.getPrototypeOf(a) === null"));
+            Assert.AreEqual(5, Evaluate("var a = {}; Object.setPrototypeOf(a, Math); a.abs(-5)"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Object.setPrototypeOf.length"));
+
+            // Argument must be an object or null.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.setPrototypeOf({}, undefined)"));
+
+            // Object must be extensible.
             Assert.AreEqual("TypeError", EvaluateExceptionType("Object.setPrototypeOf(Object.preventExtensions({}), {})"));
+
+            // No cyclic references.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("var a = {}; Object.setPrototypeOf(a, a)"));
         }
 
         [TestMethod]

@@ -249,6 +249,35 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
+        /// Implements Object.setPrototypeOf().
+        /// </summary>
+        /// <param name="prototype"> The new prototype. </param>
+        /// <returns> <c>true</c> if the prototype was successfully applied; <c>false</c> otherwise. </returns>
+        internal bool SetPrototype(ObjectInstance prototype)
+        {
+            // If the new prototype is the same as the existing one, return success.
+            if (this.prototype == prototype)
+                return true;
+
+            // Can only set the prototype on extensible objects.
+            if (!IsExtensible)
+                return false;
+
+            // Check there are no circular references in the prototype chain.
+            var ancestor = prototype;
+            while (ancestor != null)
+            {
+                if (ancestor == this)
+                    return false;
+                ancestor = ancestor.Prototype;
+            }
+
+            // Set the new prototype.
+            this.prototype = prototype;
+            return true;
+        }
+
+        /// <summary>
         /// Determines if a property with the given name exists.
         /// </summary>
         /// <param name="key"> The property key (either a string or a Symbol). </param>
@@ -862,7 +891,7 @@ namespace Jurassic.Library
         /// Sets up multiple properties at once. Can only be called on an empty object.
         /// </summary>
         /// <param name="properties"> The list of properties to set. </param>
-        public void InitializeProperties(IEnumerable<PropertyNameAndValue> properties)
+        internal void InitializeProperties(IEnumerable<PropertyNameAndValue> properties)
         {
             if (this.schema.NextValueIndex != 0)
                 throw new InvalidOperationException("This method can only be called on an empty object (one with no properties).");

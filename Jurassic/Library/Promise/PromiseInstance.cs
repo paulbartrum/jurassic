@@ -327,11 +327,11 @@ namespace Jurassic.Library
             // (they are added to a queue and will execute after the current Evaluate/Execute).
             var tcs = new TaskCompletionSource<object>();
             Then(new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
-                {
-                    var result = arg.Length == 0 ? Undefined.Value : arg[0];
-                    tcs.SetResult(result);
-                    return Undefined.Value;
-                }),
+            {
+                var result = arg.Length == 0 ? Undefined.Value : arg[0];
+                tcs.SetResult(result);
+                return Undefined.Value;
+            }),
                 new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
                 {
                     var result = arg.Length == 0 ? Undefined.Value : arg[0];

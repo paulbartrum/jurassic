@@ -58,10 +58,8 @@ namespace Jurassic.TestSuiteRunner
                             VariablesToReturn = new[] { "__asyncTestPassed" },
                             Script = globalScript + Environment.NewLine + $"(function () {{ {testCase.script} }})();"
                         });
-
                         if (testCase.Response.JsonResult == "true" || testCase.Response.Variables?["__asyncTestPassed"] == "true")
                             testCase.Success = true;
-
                         if (testCase.Success == false && Array.IndexOf(
                             new string[]
                             {

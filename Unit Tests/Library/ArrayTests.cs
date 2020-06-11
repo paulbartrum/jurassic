@@ -1450,6 +1450,7 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("Array.prototype.flat.length"));
         }
 
+
         [TestMethod]
         public void of()
         {
@@ -1464,7 +1465,7 @@ namespace UnitTests
             // Many elements.
             Assert.AreEqual("1,2,3", Evaluate("Array.of(1, 2, 3).toString()"));
             Assert.AreEqual(3, Evaluate("Array.of(1, 2, 3).length"));
-            
+
             // length
             Assert.AreEqual(0, Evaluate("Array.of.length"));
         }
@@ -1478,16 +1479,13 @@ namespace UnitTests
                   from: 1,
                   to: 5
                 };
-
                 // 1. call to for..of initially calls this
                 range[Symbol.iterator] = function() {
-
                   // ...it returns the iterator object:
                   // 2. Onward, for..of works only with this iterator, asking it for next values
                   return {
                     current: this.from,
                     last: this.to,
-
                     // 3. next() is called on each iteration by the for..of loop
                     next() {
                       // 4. it should return the value as an object {done:.., value :...}
@@ -1499,7 +1497,6 @@ namespace UnitTests
                     }
                   };
                 };
-
                 Array.from(range).toString();"));
 
             // Array-like.
