@@ -111,7 +111,7 @@ namespace Jurassic.Library
             var engine = obj.Engine;
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            obj.FastSetProperties(properties);
+            obj.InitializeProperties(properties);
         }
 
 
@@ -891,7 +891,7 @@ namespace Jurassic.Library
         /// Sets up multiple properties at once.
         /// </summary>
         /// <param name="properties"> The list of properties to set. </param>
-        internal void FastSetProperties(IEnumerable<PropertyNameAndValue> properties)
+        internal void InitializeProperties(IEnumerable<PropertyNameAndValue> properties)
         {
             if (this.schema.NextValueIndex != 0)
                 throw new InvalidOperationException("This method can only be called on a virgin object (one with no properties).");

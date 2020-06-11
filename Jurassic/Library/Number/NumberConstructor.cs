@@ -21,7 +21,7 @@ namespace Jurassic.Library
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "Number", 1, NumberInstance.CreatePrototype(Engine, this));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

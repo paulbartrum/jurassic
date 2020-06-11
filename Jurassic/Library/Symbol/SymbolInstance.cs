@@ -42,7 +42,7 @@ namespace Jurassic.Library
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
             properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Symbol", PropertyAttributes.Configurable));
-            obj.FastSetProperties(properties);
+            obj.InitializeProperties(properties);
         }
 
 

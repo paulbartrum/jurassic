@@ -26,7 +26,7 @@ namespace Jurassic.Library
             var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "RegExp", 2, RegExpInstance.CreatePrototype(Engine, this));
             AddDeprecatedProperties(properties);
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

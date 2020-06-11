@@ -23,7 +23,7 @@ namespace Jurassic.Library
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>(3);
             InitializeConstructorProperties(properties, "DataView", 3, DataViewInstance.CreatePrototype(Engine, this));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

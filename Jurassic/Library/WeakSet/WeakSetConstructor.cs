@@ -22,7 +22,7 @@ namespace Jurassic.Library
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>();
             InitializeConstructorProperties(properties, "WeakSet", 0, WeakSetInstance.CreatePrototype(Engine, this));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

@@ -14,17 +14,17 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(15)
 			{
-				new PropertyNameAndValue("decodeURI", new ClrStubFunction(engine.FunctionInstancePrototype, "decodeURI", 1, __STUB__DecodeURI), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("decodeURIComponent", new ClrStubFunction(engine.FunctionInstancePrototype, "decodeURIComponent", 1, __STUB__DecodeURIComponent), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("encodeURI", new ClrStubFunction(engine.FunctionInstancePrototype, "encodeURI", 1, __STUB__EncodeURI), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("encodeURIComponent", new ClrStubFunction(engine.FunctionInstancePrototype, "encodeURIComponent", 1, __STUB__EncodeURIComponent), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("escape", new ClrStubFunction(engine.FunctionInstancePrototype, "escape", 1, __STUB__Escape), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("eval", new ClrStubFunction(engine.FunctionInstancePrototype, "eval", 1, __STUB__Eval), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine.FunctionInstancePrototype, "isFinite", 1, __STUB__IsFinite), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine.FunctionInstancePrototype, "isNaN", 1, __STUB__IsNaN), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__ParseFloat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine.FunctionInstancePrototype, "parseInt", 2, __STUB__ParseInt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("unescape", new ClrStubFunction(engine.FunctionInstancePrototype, "unescape", 1, __STUB__Unescape), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("decodeURI", new ClrStubFunction(engine, "decodeURI", 1, __STUB__DecodeURI), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("decodeURIComponent", new ClrStubFunction(engine, "decodeURIComponent", 1, __STUB__DecodeURIComponent), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("encodeURI", new ClrStubFunction(engine, "encodeURI", 1, __STUB__EncodeURI), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("encodeURIComponent", new ClrStubFunction(engine, "encodeURIComponent", 1, __STUB__EncodeURIComponent), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("escape", new ClrStubFunction(engine, "escape", 1, __STUB__Escape), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("eval", new ClrStubFunction(engine, "eval", 1, __STUB__Eval), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine, "isFinite", 1, __STUB__IsFinite), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine, "isNaN", 1, __STUB__IsNaN), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine, "parseFloat", 1, __STUB__ParseFloat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine, "parseInt", 2, __STUB__ParseInt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("unescape", new ClrStubFunction(engine, "unescape", 1, __STUB__Unescape), PropertyAttributes.NonEnumerable),
 			};
 		}
 

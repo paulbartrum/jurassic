@@ -30,6 +30,19 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Creates a new instance of a function which calls a .NET method. The prototype of the
+        /// new function is set to the default function prototype.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="name"> The name of the function. </param>
+        /// <param name="length"> The "typical" number of arguments expected by the function. </param>
+        /// <param name="call"> The delegate to call when calling the JS method. </param>
+        public ClrStubFunction(ScriptEngine engine, string name, int length, Func<ScriptEngine, object, object[], object> call)
+            : this(engine.FunctionInstancePrototype, name, length, call)
+        {
+        }
+
+        /// <summary>
         /// Creates a new instance of a function which calls a .NET method.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
@@ -45,7 +58,7 @@ namespace Jurassic.Library
             var properties = new List<PropertyNameAndValue>(2);
             properties.Add(new PropertyNameAndValue("name", name, PropertyAttributes.Configurable));
             properties.Add(new PropertyNameAndValue("length", length, PropertyAttributes.Configurable));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
         /// <summary>
@@ -97,7 +110,7 @@ namespace Jurassic.Library
 
             var properties = new List<PropertyNameAndValue>(3);
             InitializeConstructorProperties(properties, name, length, instancePrototype);
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

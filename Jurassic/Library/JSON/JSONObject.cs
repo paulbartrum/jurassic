@@ -24,7 +24,7 @@ namespace Jurassic.Library
         {
             var properties = GetDeclarativeProperties(Engine);
             properties.Add(new PropertyNameAndValue(Engine.Symbol.ToStringTag, "JSON", PropertyAttributes.Configurable));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 

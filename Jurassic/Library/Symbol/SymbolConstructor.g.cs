@@ -14,8 +14,8 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue("for", new ClrStubFunction(engine.FunctionInstancePrototype, "for", 1, __STUB__For), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("keyFor", new ClrStubFunction(engine.FunctionInstancePrototype, "keyFor", 1, __STUB__KeyFor), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("for", new ClrStubFunction(engine, "for", 1, __STUB__For), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("keyFor", new ClrStubFunction(engine, "keyFor", 1, __STUB__KeyFor), PropertyAttributes.NonEnumerable),
 			};
 		}
 

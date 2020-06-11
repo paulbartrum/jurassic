@@ -50,7 +50,7 @@ namespace Jurassic.Library
                 throw new InvalidOperationException("Expected entries property.");
             properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, entriesProperty.Value, PropertyAttributes.NonEnumerable));
 
-            result.FastSetProperties(properties);
+            result.InitializeProperties(properties);
             return result;
         }
 

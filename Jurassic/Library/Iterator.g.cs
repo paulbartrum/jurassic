@@ -14,9 +14,9 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(6)
 			{
-				new PropertyNameAndValue(engine.Symbol.ToStringTag, new PropertyDescriptor(new ClrStubFunction(engine.FunctionInstancePrototype, "get [Symbol.toStringTag]", 0, __GETTER__ToStringTag), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue(engine.Symbol.Iterator, new ClrStubFunction(engine.FunctionInstancePrototype, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("next", new ClrStubFunction(engine.FunctionInstancePrototype, "next", 0, __STUB__Next), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.ToStringTag, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.toStringTag]", 0, __GETTER__ToStringTag), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue(engine.Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("next", new ClrStubFunction(engine, "next", 0, __STUB__Next), PropertyAttributes.NonEnumerable),
 			};
 		}
 

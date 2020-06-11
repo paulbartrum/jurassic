@@ -22,12 +22,12 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("EPSILON", EPSILON, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("MAX_SAFE_INTEGER", MAX_SAFE_INTEGER, PropertyAttributes.Sealed),
 				new PropertyNameAndValue("MIN_SAFE_INTEGER", MIN_SAFE_INTEGER, PropertyAttributes.Sealed),
-				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine.FunctionInstancePrototype, "isFinite", 1, __STUB__IsFinite), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine.FunctionInstancePrototype, "isNaN", 1, __STUB__IsNaN), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isInteger", 1, __STUB__IsInteger), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("isSafeInteger", new ClrStubFunction(engine.FunctionInstancePrototype, "isSafeInteger", 1, __STUB__IsSafeInteger), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine.FunctionInstancePrototype, "parseInt", 2, __STUB__ParseInt), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine.FunctionInstancePrototype, "parseFloat", 1, __STUB__ParseFloat), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine, "isFinite", 1, __STUB__IsFinite), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine, "isNaN", 1, __STUB__IsNaN), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isInteger", new ClrStubFunction(engine, "isInteger", 1, __STUB__IsInteger), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("isSafeInteger", new ClrStubFunction(engine, "isSafeInteger", 1, __STUB__IsSafeInteger), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine, "parseInt", 2, __STUB__ParseInt), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine, "parseFloat", 1, __STUB__ParseFloat), PropertyAttributes.NonEnumerable),
 			};
 		}
 

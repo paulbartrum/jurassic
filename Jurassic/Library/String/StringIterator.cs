@@ -38,7 +38,7 @@ namespace Jurassic.Library
         {
             var result = ObjectInstance.CreateRawObject(engine.BaseIteratorPrototype);
             var properties = GetDeclarativeProperties(engine);
-            result.FastSetProperties(properties);
+            result.InitializeProperties(properties);
             return result;
         }
 
@@ -85,7 +85,7 @@ namespace Jurassic.Library
 
             // Return the result.
             var result = Engine.Object.Construct();
-            result.FastSetProperties(new List<PropertyNameAndValue>(2)
+            result.InitializeProperties(new List<PropertyNameAndValue>(2)
                 {
                     new PropertyNameAndValue("value", value, PropertyAttributes.FullAccess),
                     new PropertyNameAndValue("done", done, PropertyAttributes.FullAccess),

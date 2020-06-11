@@ -23,7 +23,7 @@ namespace Jurassic.Library
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>();
             InitializeConstructorProperties(properties, "WeakMap", 0, WeakMapInstance.CreatePrototype(Engine, this));
-            FastSetProperties(properties);
+            InitializeProperties(properties);
         }
 
 
