@@ -1449,5 +1449,70 @@ namespace UnitTests
             // length
             Assert.AreEqual(0, Evaluate("Array.prototype.flat.length"));
         }
+
+
+        [TestMethod]
+        public void of()
+        {
+            // Zero element.
+            Assert.AreEqual("", Evaluate("Array.of().toString()"));
+            Assert.AreEqual(0, Evaluate("Array.of().length"));
+
+            // One element.
+            Assert.AreEqual("4", Evaluate("Array.of(4).toString()"));
+            Assert.AreEqual(1, Evaluate("Array.of(4).length"));
+
+            // Many elements.
+            Assert.AreEqual("1,2,3", Evaluate("Array.of(1, 2, 3).toString()"));
+            Assert.AreEqual(3, Evaluate("Array.of(1, 2, 3).length"));
+
+            // length
+            Assert.AreEqual(0, Evaluate("Array.of.length"));
+        }
+
+        [TestMethod]
+        public void from()
+        {
+            // Iterable.
+            Assert.AreEqual("1,2,3,4,5", Evaluate(@"
+                var range = {
+                  from: 1,
+                  to: 5
+                };
+                // 1. call to for..of initially calls this
+                range[Symbol.iterator] = function() {
+                  // ...it returns the iterator object:
+                  // 2. Onward, for..of works only with this iterator, asking it for next values
+                  return {
+                    current: this.from,
+                    last: this.to,
+                    // 3. next() is called on each iteration by the for..of loop
+                    next() {
+                      // 4. it should return the value as an object {done:.., value :...}
+                      if (this.current <= this.last) {
+                        return { done: false, value: this.current++ };
+                      } else {
+                        return { done: true };
+                      }
+                    }
+                  };
+                };
+                Array.from(range).toString();"));
+
+            // Array-like.
+            Assert.AreEqual("5,6", Evaluate("var x = { length: 2 }; x[0] = 5; x[1] = 6; Array.from(x).toString()"));
+            Assert.AreEqual(2, Evaluate("var x = { length: 2 }; x[0] = 5; x[1] = 6; Array.from(x).length"));
+
+            // Mapping function.
+            Assert.AreEqual("4,5", Evaluate("Array.from([3, 4], function (value, index) { return value + 1; }).toString()"));
+            Assert.AreEqual("0,1", Evaluate("Array.from([1, 2], function (value, index) { return index; }).toString()"));
+            Assert.AreEqual("6,6", Evaluate("Array.from([1, 2], function (value, index) { return this; }, 6).toString()"));
+
+            // The first parameter is required.
+            Assert.AreEqual("TypeError", EvaluateExceptionType("Array.from()"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Array.from.length"));
+        }
     }
 }

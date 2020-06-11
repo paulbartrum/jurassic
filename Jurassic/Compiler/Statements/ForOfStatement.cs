@@ -90,11 +90,9 @@ namespace Jurassic.Compiler
             // Then call: IEnumerable<object> Iterate(ScriptEngine engine, ObjectInstance iterator)
             optimizationInfo.MarkSequencePoint(generator, this.TargetObjectSourceSpan);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.Duplicate();
             this.TargetObject.GenerateCode(generator, optimizationInfo);
-            EmitConversion.ToObject(generator, this.TargetObject.ResultType, optimizationInfo);
-            generator.Call(ReflectionHelpers.TypeUtilities_GetIterator);
-            generator.Call(ReflectionHelpers.TypeUtilities_Iterate);
+            EmitConversion.ToAny(generator, this.TargetObject.ResultType);
+            generator.Call(ReflectionHelpers.TypeUtilities_ForOf);
 
             // Call IEnumerable<object>.GetEnumerator()
             generator.Call(ReflectionHelpers.IEnumerable_Object_GetEnumerator);

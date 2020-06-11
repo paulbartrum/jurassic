@@ -71,22 +71,20 @@ namespace Jurassic.Library
             // If iterable is not null or undefined, then iterate through the values and add them to the set.
             if (iterable != Undefined.Value && iterable != Null.Value)
             {
-                var iterator = TypeUtilities.GetIterator(Engine, TypeConverter.ToObject(Engine, iterable));
-                if (iterator != null)
-                {
-                    // Get a reference to the set function.
-                    var setFunc = result["set"] as FunctionInstance;
-                    if (setFunc == null)
-                        throw new JavaScriptException(Engine, ErrorType.TypeError, "Missing 'set' function");
+                var iterator = TypeUtilities.RequireIterator(Engine, iterable);
 
-                    // Call the set function for each value.
-                    foreach (var value in TypeUtilities.Iterate(Engine, iterator))
-                    {
-                        var obj = value as ObjectInstance;
-                        if (obj == null)
-                            throw new JavaScriptException(Engine, ErrorType.TypeError, $"Expected iterator return value to be an object, but was {value}");
-                        setFunc.Call(result, obj[0], obj[1]);
-                    }
+                // Get a reference to the set function.
+                var setFunc = result["set"] as FunctionInstance;
+                if (setFunc == null)
+                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Missing 'set' function");
+
+                // Call the set function for each value.
+                foreach (var value in TypeUtilities.Iterate(Engine, iterator))
+                {
+                    var obj = value as ObjectInstance;
+                    if (obj == null)
+                        throw new JavaScriptException(Engine, ErrorType.TypeError, $"Expected iterator return value to be an object, but was {value}");
+                    setFunc.Call(result, obj[0], obj[1]);
                 }
             }
 

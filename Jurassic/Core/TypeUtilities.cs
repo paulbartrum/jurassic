@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Jurassic.Library;
 
 namespace Jurassic
@@ -285,7 +285,7 @@ namespace Jurassic
 
             // Get the iterator symbol value.
             var iteratorValue = iterable[engine.Symbol.Iterator];
-            if (iteratorValue == Undefined.Value || iteratorValue == Null.Value)
+            if (iteratorValue == null || iteratorValue == Undefined.Value || iteratorValue == Null.Value)
                 return null;
 
             // If a value is present, it must be a function.
@@ -297,6 +297,38 @@ namespace Jurassic
             var iterator = iteratorFunc.Call(iterable) as ObjectInstance;
             if (iterator == null)
                 throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator");
+            return iterator;
+        }
+
+        /// <summary>
+        /// Creates an iterator object that can iterate over a .NET enumerable collection. The
+        /// returned object also supports the iterable protocol, meaning it can be used in a for-of
+        /// loop.
+        /// </summary>
+        /// <param name="engine"> The script engine to associate the new object with. </param>
+        /// <param name="enumerable"> The enumerable collection. The item type must be a supported
+        /// type. </param>
+        /// <returns> An iterator object that also supports the iterable protocol. </returns>
+        public static ObjectInstance CreateIterator(ScriptEngine engine, IEnumerable enumerable)
+        {
+            return new Iterator(engine, enumerable);
+        }
+
+        /// <summary>
+        /// Converts an iteratable object into a iterator by looking up the @@iterator property,
+        /// then calling that value as a function. Throws an exception if the object isn't iterable.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="iterable"> The object to get a iterator from. </param>
+        /// <returns> An iterator object, with a next function. </returns>
+        public static ObjectInstance RequireIterator(ScriptEngine engine, object iterable)
+        {
+
+            if (iterable == Undefined.Value || iterable == Null.Value)
+                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
+            var iterator = GetIterator(engine, TypeConverter.ToObject(engine, iterable));
+            if (iterator == null)
+                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
             return iterator;
         }
 
@@ -332,6 +364,17 @@ namespace Jurassic
                 // Return the value.
                 yield return iteratorResult["value"];
             }
+        }
+
+        /// <summary>
+        /// Implements the logic for the for-of operator.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="iterable"> The object to get a iterator from. </param>
+        /// <returns> An enumerable list of iterator values. </returns>
+        public static IEnumerable<object> ForOf(ScriptEngine engine, object iterable)
+        {
+            return Iterate(engine, RequireIterator(engine, iterable));
         }
     }
 
