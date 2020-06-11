@@ -114,7 +114,7 @@ namespace Jurassic.Library
                 {
                     if (thenObject.GetPropertyValue("then") is FunctionInstance thenFunction)
                     {
-                        Engine.AddPendingCallback(() =>
+                        Engine.AddPostExecuteStep(() =>
                         {
                             try
                             {
@@ -275,7 +275,7 @@ namespace Jurassic.Library
         {
             // If handler is undefined and type is Fulfill, then the handler result should be result.
             // If handler is undefined and type is Reject, then the handler should throw result.
-            Engine.AddPendingCallback(() =>
+            Engine.AddPostExecuteStep(() =>
             {
                 if (reaction.Handler != null)
                 {
@@ -327,11 +327,11 @@ namespace Jurassic.Library
             // (they are added to a queue and will execute after the current Evaluate/Execute).
             var tcs = new TaskCompletionSource<object>();
             Then(new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
-                {
-                    var result = arg.Length == 0 ? Undefined.Value : arg[0];
-                    tcs.SetResult(result);
-                    return Undefined.Value;
-                }),
+            {
+                var result = arg.Length == 0 ? Undefined.Value : arg[0];
+                tcs.SetResult(result);
+                return Undefined.Value;
+            }),
                 new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
                 {
                     var result = arg.Length == 0 ? Undefined.Value : arg[0];

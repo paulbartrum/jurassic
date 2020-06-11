@@ -14,12 +14,23 @@ namespace UnitTests
     [TestClass]
     public class PromiseTests : TestBase
     {
-        private struct NotifyCompletionWithNoResult : INotifyCompletion
+        [ThreadStatic]
+        public static TestingContext testingContext;
+
+        protected override ScriptEngine InitializeScriptEngine()
         {
-            public void OnCompleted(Action continuation) => continuation();
+            var scriptEngine = base.InitializeScriptEngine();
+            testingContext = new TestingContext(scriptEngine);
+            scriptEngine.SetGlobalValue("testingContext", testingContext);
+            return scriptEngine;
         }
 
-        private static PromiseInstance EvaluatePromise(string script)
+        protected override void OnBeforeExecute()
+        {
+            testingContext.Clear();
+        }
+
+        private PromiseInstance EvaluatePromise(string script)
         {
             var result = Evaluate(script);
             Assert.IsInstanceOfType(result, typeof(PromiseInstance));
@@ -719,14 +730,11 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void FromTask()
+        public void FromTask_Object()
         {
-            InitializeJurassic();
-
-            // Result
-            var tcs = new TaskCompletionSource<int>();
-            var promise = TypeConverter.ToObject(jurassicScriptEngine, tcs.Task.GetAwaiter());
-            jurassicScriptEngine.SetGlobalValue("promise", promise);
+            var tcs = new TaskCompletionSource<object>();
+            var promise = ScriptEngine.Promise.FromTask(tcs.Task);
+            ScriptEngine.SetGlobalValue("promise", promise);
 
             Execute("promise.then(function (r) { testingContext.push(r) }, function (r) { throw r })");
             Assert.AreEqual(0, (int)testingContext.Length);
@@ -734,35 +742,17 @@ namespace UnitTests
             tcs.SetResult(100);
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.ExecutePendingCallbacks();
-            Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(100, (int)testingContext[0]);
-
-            // Exception
-            tcs = new TaskCompletionSource<int>();
-            promise = TypeConverter.ToObject(jurassicScriptEngine, tcs.Task.GetAwaiter());
-            jurassicScriptEngine.SetGlobalValue("promise", promise);
-
-            Execute("promise.then(function (r) { throw r }, function (r) { testingContext.push(r) })");
-            Assert.AreEqual(0, (int)testingContext.Length);
-
-            tcs.SetException(new JavaScriptException(100, 0, null));
-            Assert.AreEqual(0, (int)testingContext.Length);
-
-            jurassicScriptEngine.ExecutePendingCallbacks();
+            while (ScriptEngine.ExecuteNextEventQueueAction()) { }
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(100, (int)testingContext[0]);
         }
 
         [TestMethod]
-        public void FromTask_Strong()
+        public void FromTask_Void()
         {
-            InitializeJurassic();
-
-            // Result
-            var tcs = new TaskCompletionSource<int>();
-            var promise = TypeConverter.ToPromise(jurassicScriptEngine, tcs.Task.GetAwaiter());
-            jurassicScriptEngine.SetGlobalValue("promise", promise);
+            var tcs = new TaskCompletionSource<object>();
+            var promise = ScriptEngine.Promise.FromTask(Task.Delay(0));
+            ScriptEngine.SetGlobalValue("promise", promise);
 
             Execute("promise.then(function (r) { testingContext.push(r) }, function (r) { throw r })");
             Assert.AreEqual(0, (int)testingContext.Length);
@@ -770,56 +760,17 @@ namespace UnitTests
             tcs.SetResult(100);
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.ExecutePendingCallbacks();
-            Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(100, (int)testingContext[0]);
-
-            // Exception
-            tcs = new TaskCompletionSource<int>();
-            promise = TypeConverter.ToPromise(jurassicScriptEngine, tcs.Task.GetAwaiter());
-            jurassicScriptEngine.SetGlobalValue("promise", promise);
-
-            Execute("promise.then(function (r) { throw r }, function (r) { testingContext.push(r) })");
-            Assert.AreEqual(0, (int)testingContext.Length);
-
-            tcs.SetException(new JavaScriptException(100, 0, null));
-            Assert.AreEqual(0, (int)testingContext.Length);
-
-            jurassicScriptEngine.ExecutePendingCallbacks();
-            Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(100, (int)testingContext[0]);
-        }
-
-        [TestMethod]
-        public void FromTask_ExceptionResult()
-        {
-            InitializeJurassic();
-
-            var tcs = new TaskCompletionSource<int>();
-
-            async Task DoNothingAsync()
-            {
-                await tcs.Task;
-            }
-
-            // Result
-            var promise = TypeConverter.ToPromise(jurassicScriptEngine, DoNothingAsync().GetAwaiter());
-            jurassicScriptEngine.SetGlobalValue("promise", promise);
-
-            Execute("promise.then(function (r) { testingContext.push(r) }, function (r) { throw r })");
-            Assert.AreEqual(0, (int)testingContext.Length);
-
-            tcs.SetResult(100);
-            Assert.AreEqual(0, (int)testingContext.Length);
-
-            jurassicScriptEngine.ExecutePendingCallbacks();
+            while (ScriptEngine.ExecuteNextEventQueueAction()) { }
             Assert.AreEqual(1, (int)testingContext.Length);
             Assert.AreEqual(Undefined.Value, testingContext[0]);
+        }
 
-            // Exception
-            tcs = new TaskCompletionSource<int>();
-            promise = TypeConverter.ToPromise(jurassicScriptEngine, DoNothingAsync().GetAwaiter());
-            jurassicScriptEngine.SetGlobalValue("promise", promise);
+        [TestMethod]
+        public void FromTask_JavaScriptException()
+        {
+            var tcs = new TaskCompletionSource<object>();
+            var promise = ScriptEngine.Promise.FromTask(tcs.Task);
+            ScriptEngine.SetGlobalValue("promise", promise);
 
             Execute("promise.then(function (r) { throw r }, function (r) { testingContext.push(r) })");
             Assert.AreEqual(0, (int)testingContext.Length);
@@ -827,23 +778,27 @@ namespace UnitTests
             tcs.SetException(new JavaScriptException(100, 0, null));
             Assert.AreEqual(0, (int)testingContext.Length);
 
-            jurassicScriptEngine.ExecutePendingCallbacks();
+            while (ScriptEngine.ExecuteNextEventQueueAction()) { }
             Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(100, testingContext[0]);
+            Assert.AreEqual(100, (int)testingContext[0]);
         }
 
         [TestMethod]
-        public void FromTask_NoResult()
+        public void FromTask_Exception()
         {
-            InitializeJurassic();
+            var tcs = new TaskCompletionSource<object>();
+            var promise = ScriptEngine.Promise.FromTask(tcs.Task);
+            ScriptEngine.SetGlobalValue("promise", promise);
 
-            // Result
-            var promise = TypeConverter.ToPromise(jurassicScriptEngine, new NotifyCompletionWithNoResult());
-            jurassicScriptEngine.SetGlobalValue("promise", promise);
+            Execute("promise.then(function (r) { throw r }, function (r) { testingContext.push(r) })");
+            Assert.AreEqual(0, (int)testingContext.Length);
 
-            Execute("promise.then(function (r) { testingContext.push(r) }, function (r) { throw r })");
+            tcs.SetException(new InvalidOperationException("This is an invalid operation exception."));
+            Assert.AreEqual(0, (int)testingContext.Length);
+
+            while (ScriptEngine.ExecuteNextEventQueueAction()) { }
             Assert.AreEqual(1, (int)testingContext.Length);
-            Assert.AreEqual(Undefined.Value, testingContext[0]);
+            Assert.AreEqual("This is an invalid operation exception.", (string)testingContext[0]);
         }
 
         [TestMethod]

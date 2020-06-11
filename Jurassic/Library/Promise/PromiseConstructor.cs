@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using static Jurassic.Library.PromiseInstance;
 
 namespace Jurassic.Library
@@ -53,30 +53,57 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Creates a new Promise instance.
+        /// Creates a new Promise instance from a task.
         /// </summary>
-        /// <param name="notify">A <see cref="INotifyCompletion"/> that will signal the success or failure of the promise.</param>
-        /// <returns>The Promise instance.</returns>
-        public PromiseInstance Construct<T>(T notify)
-            where T : INotifyCompletion
+        /// <param name="task"> A task to wait on. </param>
+        /// <returns> The Promise instance. </returns>
+        /// <remarks>
+        /// If the task is of type Task&lt;object&gt; then the result of the task will be used to
+        /// resolve the promise. Otherwise, the promise is resolved with "undefined" as the value.
+        /// </remarks>
+        public PromiseInstance FromTask(Task task)
         {
-            var promise = new PromiseInstance(this.InstancePrototype);
-            if (notify == null) return promise;
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
 
-            notify.OnCompleted(() =>
+            // Create a new promise.
+            var promise = new PromiseInstance(this.InstancePrototype);
+
+            // Execute some code after the task completes.
+            task.ConfigureAwait(continueOnCapturedContext: false).GetAwaiter().OnCompleted(() =>
             {
-                try
+                // Enqueue an event which resolves the promise.
+                Engine.EnqueueEvent(() =>
                 {
-                    promise.Resolve(TaskAwaiterCache.GetResult(notify));
-                }
-                catch (JavaScriptException jex)
-                {
-                    promise.Reject(jex.ErrorObject);
-                }
-                catch (Exception e)
-                {
-                    promise.Reject(e.Message);
-                }
+                    try
+                    {
+                        if (task is Task<object> objectTask)
+                            promise.Resolve(objectTask.Result);
+                        else
+                            promise.Resolve(Undefined.Value);
+                    }
+                    catch (AggregateException ex)
+                    {
+                        if (ex.InnerExceptions.Count == 1)
+                        {
+                            var innerException = ex.InnerExceptions[0];
+                            if (innerException is JavaScriptException innerJSException)
+                                promise.Reject(innerJSException.ErrorObject);
+                            else
+                                promise.Reject(innerException.Message);
+                        }
+                        else
+                            promise.Reject(ex.Message);
+                    }
+                    catch (JavaScriptException ex)
+                    {
+                        promise.Reject(ex.ErrorObject);
+                    }
+                    catch (Exception ex)
+                    {
+                        promise.Reject(ex.Message);
+                    }
+                });
             });
 
             return promise;
@@ -147,8 +174,7 @@ namespace Jurassic.Library
             if (iterable == null)
                 throw new JavaScriptException(Engine, ErrorType.TypeError, "The parameter must be an iterable.");
 
-            var iterator = TypeUtilities.GetIterator(Engine, iterable);
-            var promises = TypeUtilities.Iterate(Engine, iterator);
+            var promises = TypeUtilities.ForOf(Engine, iterable);
 
             var result = new PromiseInstance(Engine.Promise.InstancePrototype);
             foreach (var promiseOrValue in promises)
@@ -168,8 +194,7 @@ namespace Jurassic.Library
             if (iterable == null)
                 throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, "The parameter must be an iterable.");
 
-            var iterator = TypeUtilities.GetIterator(iterable.Engine, iterable);
-            var promises = TypeUtilities.Iterate(iterator.Engine, iterator).ToList();
+            var promises = TypeUtilities.ForOf(iterable.Engine, iterable).ToList();
             var results = Engine.Array.Construct(new object[promises.Count]);
             var count = promises.Count;
 
@@ -206,18 +231,18 @@ namespace Jurassic.Library
 
                     var j = i; // Some C# versions need this.
                     p.Then(new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
-                        {
-                            if (promise.State != PromiseState.Pending)
-                                return Undefined.Value;
-
-                            results[j] = args[0];
-
-                            if (--count == 0)
-                            {
-                                promise.Resolve(results);
-                            }
+                    {
+                        if (promise.State != PromiseState.Pending)
                             return Undefined.Value;
-                        }),
+
+                        results[j] = args[0];
+
+                        if (--count == 0)
+                        {
+                            promise.Resolve(results);
+                        }
+                        return Undefined.Value;
+                    }),
                         new ClrStubFunction(Engine.FunctionInstancePrototype, "", 1, (engine, thisObj, args) =>
                         {
                             promise.Reject(args[0]);
