@@ -60,23 +60,19 @@ namespace Jurassic.TestSuiteRunner
                         });
                         if (testCase.Response.JsonResult == "true" || testCase.Response.Variables?["__asyncTestPassed"] == "true")
                             testCase.Success = true;
-                        if (testCase.Success == false && Array.IndexOf(
-                            new string[]
-                            {
-                                "default function parameters",
-                                "for..of loops",
-                                "template literals",
-                                "typed arrays",
-                                "WeakMap",
-                                "Set",
-                                "WeakMap",
-                                "WeakSet",
-                                "Object static methods",
-                                @"function ""name"" property",
-                                "Array static methods",
-                                "Array.prototype methods",
-                                "Promise"
-                            }, testCase.name) >= 0)
+                        if (testCase.Success == false &&
+                            !testCase.name.StartsWith("Proxy") &&
+                            !testCase.name.StartsWith("Reflect") &&
+                            !testCase.name.StartsWith("generators") &&
+                            !testCase.name.StartsWith("class") &&
+                            !testCase.name.StartsWith("super") &&
+                            !testCase.name.StartsWith("arrow functions") &&
+                            !testCase.name.StartsWith("let") &&
+                            !testCase.name.StartsWith("const") &&
+                            !testCase.name.StartsWith("destructuring") &&
+                            !testCase.name.StartsWith("spread syntax for iterable objects") &&
+                            !testCase.name.StartsWith("miscellaneous subclassables") &&
+                            !testCase.name.Contains("is subclassable"))
                         {
                             Console.WriteLine($"{testCase.name} -- {testCase.detail}, result: {testCase.Response.JsonResult ?? $"{testCase.Response.ErrorType}: {testCase.Response.ErrorMessage}"}");
                         }
