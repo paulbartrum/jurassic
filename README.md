@@ -30,55 +30,56 @@ See the [wiki](https://github.com/paulbartrum/jurassic/wiki) for full usage deta
 
 ## ECMAScript 6 status
 
-Support for ECMAScript 6 is in progress. See http://kangax.github.io/compat-table/es6/ for the definition of each feature.
+Support for ECMAScript 6 is in progress. See http://kangax.github.io/compat-table/es6/
+for the definition of each feature. The table below is correct as of version 3.1.
 
 Feature|Status
 -------|------
 **Optimisation**|
 &nbsp;&nbsp;proper tail calls (tail call optimisation)|:x:
 **Syntax**|
-&nbsp;&nbsp;default function parameters|:x:
+&nbsp;&nbsp;default function parameters|4/7
 &nbsp;&nbsp;rest parameters|:x:
-&nbsp;&nbsp;spread (...) operator|:x:
-&nbsp;&nbsp;object literal extensions|:x:
-&nbsp;&nbsp;for..of loops|4/9
+&nbsp;&nbsp;spread syntax for iterable objects|:x:
+&nbsp;&nbsp;object literal extensions|:white_check_mark: 6/6
+&nbsp;&nbsp;for..of loops|6/9
 &nbsp;&nbsp;octal and binary literals|:white_check_mark: 4/4
-&nbsp;&nbsp;template literals|2/5
+&nbsp;&nbsp;template literals|4/7
 &nbsp;&nbsp;RegExp "y" and "u" flags|:x:
 &nbsp;&nbsp;destructuring, declarations|:x:
 &nbsp;&nbsp;destructuring, assignment|:x:
 &nbsp;&nbsp;destructuring, parameters|:x:
-&nbsp;&nbsp;Unicode code point escapes|:white_check_mark: 2/2
+&nbsp;&nbsp;Unicode code point escapes|:white_check_mark: 4/4
 &nbsp;&nbsp;new.target|:x:
 **Bindings**|
-&nbsp;&nbsp;const|2/16
-&nbsp;&nbsp;let|1/12
-&nbsp;&nbsp;block-level function declaration[13]|:x:
+&nbsp;&nbsp;const|4/18
+&nbsp;&nbsp;let|2/16
+&nbsp;&nbsp;block-level function declaration[18]|:x:
 **Functions**|
 &nbsp;&nbsp;arrow functions|:x:
 &nbsp;&nbsp;class|:x:
 &nbsp;&nbsp;super|:x:
 &nbsp;&nbsp;generators|:x:
 **Built-ins**|
-&nbsp;&nbsp;typed arrays|44/46
-&nbsp;&nbsp;Map|17/19
-&nbsp;&nbsp;Set|17/19
-&nbsp;&nbsp;WeakMap|10/12
-&nbsp;&nbsp;WeakSet|9/11
-&nbsp;&nbsp;Proxy[18]|:x:
-&nbsp;&nbsp;Reflect[20]|:x:
-&nbsp;&nbsp;Promise|:white_check_mark:
-&nbsp;&nbsp;Symbol|5/11
-&nbsp;&nbsp;well-known symbols[21]|5/26
+&nbsp;&nbsp;typed arrays|45/46
+&nbsp;&nbsp;Map|18/19
+&nbsp;&nbsp;Set|18/19
+&nbsp;&nbsp;WeakMap|11/12
+&nbsp;&nbsp;WeakSet|10/11
+&nbsp;&nbsp;Proxy  [25]|:x:
+&nbsp;&nbsp;Reflect  [26]|:x:
+&nbsp;&nbsp;Promise|4/8
+&nbsp;&nbsp;Symbol|6/12
+&nbsp;&nbsp;well-known symbols[27]|5/26
 **Built-in extensions**|
-&nbsp;&nbsp;Object static methods|3/4
-&nbsp;&nbsp;function "name" property|5/17
+&nbsp;&nbsp;Object static methods|:white_check_mark: 4/4
+&nbsp;&nbsp;function "name" property|6/17
 &nbsp;&nbsp;String static methods|:white_check_mark: 2/2
 &nbsp;&nbsp;String.prototype methods|:white_check_mark: 10/10
 &nbsp;&nbsp;RegExp.prototype properties|2/6
-&nbsp;&nbsp;Array static methods|1/11
+&nbsp;&nbsp;Array static methods|8/11
 &nbsp;&nbsp;Array.prototype methods|9/10
-&nbsp;&nbsp;Number properties|:white_check_mark: 7/7
+&nbsp;&nbsp;Number properties|7/9
 &nbsp;&nbsp;Math methods|:white_check_mark: 17/17
 &nbsp;&nbsp;Date.prototype[Symbol.toPrimitive]|:white_check_mark: 1/1
 **Subclassing**|
@@ -97,12 +98,13 @@ Feature|Status
 &nbsp;&nbsp;Proxy, internal 'ownKeys' calls|:x:
 &nbsp;&nbsp;Object static methods accept primitives|7/10
 &nbsp;&nbsp;own property order|2/7
-&nbsp;&nbsp;miscellaneous|6/10
+&nbsp;&nbsp;Updated identifier syntax|1/3
+&nbsp;&nbsp;miscellaneous|6/9
 **Annex b**|
-&nbsp;&nbsp;non-strict function semantics[29]|2/3
-&nbsp;&nbsp;\_\_proto\_\_ in object literals[30]|:x:
+&nbsp;&nbsp;non-strict function semantics[35]|2/3
+&nbsp;&nbsp;\_\_proto\_\_ in object literals  [36]|:x:
 &nbsp;&nbsp;Object.prototype.\_\_proto\_\_|1/6
 &nbsp;&nbsp;String.prototype HTML methods|:white_check_mark: 3/3
-&nbsp;&nbsp;RegExp.prototype.compile|:white_check_mark: 1/1
+&nbsp;&nbsp;RegExp.prototype.compile|1/2
 &nbsp;&nbsp;RegExp syntax extensions|4/8
 &nbsp;&nbsp;HTML-style comments|:x:
