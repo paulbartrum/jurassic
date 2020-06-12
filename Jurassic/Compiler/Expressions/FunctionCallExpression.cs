@@ -236,14 +236,14 @@ namespace Jurassic.Compiler
             }
             new LiteralExpression(rawStringsExpression).GenerateCode(generator, optimizationInfo);
 
-            // Freeze array by calling ObjectInstance Freeze(ObjectInstance).
+            // Freeze array by calling object Freeze(object).
             generator.CallStatic(ReflectionHelpers.ObjectConstructor_Freeze);
 
             // Now store the raw strings as a property of the base strings array.
             generator.LoadBoolean(optimizationInfo.StrictMode);
             generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
 
-            // Freeze array by calling ObjectInstance Freeze(ObjectInstance).
+            // Freeze array by calling object Freeze(object).
             generator.CallStatic(ReflectionHelpers.ObjectConstructor_Freeze);
 
             // Store in the array.

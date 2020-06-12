@@ -233,7 +233,7 @@ namespace Jurassic.Compiler
             RegExp_Construct = GetInstanceMethod(typeof(RegExpConstructor), "Construct", typeof(object), typeof(string));
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
-            ObjectConstructor_Freeze = GetStaticMethod(typeof(ObjectConstructor), "Freeze", typeof(ObjectInstance));
+            ObjectConstructor_Freeze = GetStaticMethod(typeof(ObjectConstructor), "Freeze", typeof(object));
             UserDefinedFunction_Constructor = GetConstructor(typeof(UserDefinedFunction), typeof(ObjectInstance),
                 typeof(string), typeof(IList<string>), typeof(Scope), typeof(string), typeof(GeneratedMethod), typeof(bool));
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));

@@ -432,10 +432,11 @@ namespace UnitTests
             // length
             Assert.AreEqual(1, Evaluate("Object.seal.length"));
 
-            // Argument must be an object.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal(undefined)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.seal(null)"));
+            // If the argument is not an object, this method does nothing.
+            Assert.AreEqual(true, Evaluate("Object.seal() === undefined"));
+            Assert.AreEqual(true, Evaluate("Object.seal(undefined) === undefined"));
+            Assert.AreEqual(true, Evaluate("Object.seal(null) === null"));
+            Assert.AreEqual(true, Evaluate("Object.seal(5) === 5"));
         }
 
         [TestMethod]
@@ -454,10 +455,11 @@ namespace UnitTests
             // length
             Assert.AreEqual(1, Evaluate("Object.freeze.length"));
 
-            // Argument must be an object.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze(undefined)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.freeze(null)"));
+            // If the argument is not an object, this method does nothing.
+            Assert.AreEqual(true, Evaluate("Object.freeze() === undefined"));
+            Assert.AreEqual(true, Evaluate("Object.freeze(undefined) === undefined"));
+            Assert.AreEqual(true, Evaluate("Object.freeze(null) === null"));
+            Assert.AreEqual(true, Evaluate("Object.freeze(5) === 5"));
         }
 
         [TestMethod]
@@ -476,10 +478,11 @@ namespace UnitTests
             // length
             Assert.AreEqual(1, Evaluate("Object.preventExtensions.length"));
 
-            // Argument must be an object.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions(undefined)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Object.preventExtensions(null)"));
+            // If the argument is not an object, this method does nothing.
+            Assert.AreEqual(true, Evaluate("Object.preventExtensions() === undefined"));
+            Assert.AreEqual(true, Evaluate("Object.preventExtensions(undefined) === undefined"));
+            Assert.AreEqual(true, Evaluate("Object.preventExtensions(null) === null"));
+            Assert.AreEqual(true, Evaluate("Object.preventExtensions(5) === 5"));
         }
 
         [TestMethod]

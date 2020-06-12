@@ -181,9 +181,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return Seal(Undefined.Value);
 				default:
-					return Seal(TypeConverter.ToObject(engine, args[0]));
+					return Seal(args[0]);
 			}
 		}
 
@@ -192,9 +192,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return Freeze(Undefined.Value);
 				default:
-					return Freeze(TypeConverter.ToObject(engine, args[0]));
+					return Freeze(args[0]);
 			}
 		}
 
@@ -203,9 +203,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return PreventExtensions(Undefined.Value);
 				default:
-					return PreventExtensions(TypeConverter.ToObject(engine, args[0]));
+					return PreventExtensions(args[0]);
 			}
 		}
 

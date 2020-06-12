@@ -250,17 +250,20 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to modify. </param>
         /// <returns> The object that was affected. </returns>
         [JSInternalFunction(Name = "seal")]
-        public static ObjectInstance Seal(ObjectInstance obj)
+        public static object Seal(object obj)
         {
-            var properties = new List<PropertyNameAndValue>();
-            foreach (var property in obj.Properties)
-                properties.Add(property);
-            foreach (var property in properties)
+            if (obj is ObjectInstance objectInstance)
             {
-                obj.FastSetProperty(property.Key, property.Value,
-                    property.Attributes & ~PropertyAttributes.Configurable, overwriteAttributes: true);
+                var properties = new List<PropertyNameAndValue>();
+                foreach (var property in objectInstance.Properties)
+                    properties.Add(property);
+                foreach (var property in properties)
+                {
+                    objectInstance.FastSetProperty(property.Key, property.Value,
+                        property.Attributes & ~PropertyAttributes.Configurable, overwriteAttributes: true);
+                }
+                objectInstance.IsExtensible = false;
             }
-            obj.IsExtensible = false;
             return obj;
         }
 
@@ -270,17 +273,20 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to modify. </param>
         /// <returns> The object that was affected. </returns>
         [JSInternalFunction(Name = "freeze")]
-        public static ObjectInstance Freeze(ObjectInstance obj)
+        public static object Freeze(object obj)
         {
-            var properties = new List<PropertyNameAndValue>();
-            foreach (var property in obj.Properties)
-                properties.Add(property);
-            foreach (var property in properties)
+            if (obj is ObjectInstance objectInstance)
             {
-                obj.FastSetProperty(property.Key, property.Value,
-                    property.Attributes & ~(PropertyAttributes.NonEnumerable), overwriteAttributes: true);
+                var properties = new List<PropertyNameAndValue>();
+                foreach (var property in objectInstance.Properties)
+                    properties.Add(property);
+                foreach (var property in properties)
+                {
+                    objectInstance.FastSetProperty(property.Key, property.Value,
+                        property.Attributes & ~(PropertyAttributes.NonEnumerable), overwriteAttributes: true);
+                }
+                objectInstance.IsExtensible = false;
             }
-            obj.IsExtensible = false;
             return obj;
         }
 
@@ -290,9 +296,12 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to modify. </param>
         /// <returns> The object that was affected. </returns>
         [JSInternalFunction(Name = "preventExtensions")]
-        public static ObjectInstance PreventExtensions(ObjectInstance obj)
+        public static object PreventExtensions(object obj)
         {
-            obj.IsExtensible = false;
+            if (obj is ObjectInstance objectInstance)
+            {
+                objectInstance.IsExtensible = false;
+            }
             return obj;
         }
 
