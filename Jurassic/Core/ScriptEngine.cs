@@ -169,7 +169,8 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Uint32Array", this.uint32ArrayConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Float32Array", this.float32ArrayConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Float64Array", this.float64ArrayConstructor, PropertyAttributes.NonEnumerable));
-
+            globalProperties.Add(new PropertyNameAndValue("parseFloat", numberConstructor["parseFloat"], PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("parseInt", numberConstructor["parseInt"], PropertyAttributes.NonEnumerable));
             this.globalObject.InitializeProperties(globalProperties);
         }
 

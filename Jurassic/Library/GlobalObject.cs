@@ -36,6 +36,8 @@ namespace Jurassic.Library
             properties.Add(new PropertyNameAndValue("Infinity", double.PositiveInfinity, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("NaN", double.NaN, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("undefined", Undefined.Value, PropertyAttributes.Sealed));
+            // parseFloat and parseInt are defined in NumberConstructor.cs and then added to the global
+            // object in ScriptEngine.cs.
             return properties;
         }
 
@@ -200,44 +202,6 @@ namespace Jurassic.Library
         public static bool IsNaN(double value)
         {
             return double.IsNaN(value);
-        }
-
-        /// <summary>
-        /// Parses the given string and returns the equivalent numeric value. 
-        /// </summary>
-        /// <param name="input"> The string to parse. </param>
-        /// <returns> The equivalent numeric value of the given string. </returns>
-        /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
-        /// character, at which point parsing stops.  No error is returned in this case. </remarks>
-        [JSInternalFunction(Name = "parseFloat")]
-        public static double ParseFloat(string input)
-        {
-            return NumberParser.ParseFloat(input);
-        }
-
-        /// <summary>
-        /// Parses the given string and returns the equivalent integer value. 
-        /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        /// <param name="input"> The string to parse. </param>
-        /// <param name="radix"> The numeric base to use for parsing.  Pass zero to use base 10
-        /// except when the input string starts with '0' in which case base 16 or base 8 are used
-        /// instead (base 8 is only supported in compatibility mode). </param>
-        /// <returns> The equivalent integer value of the given string. </returns>
-        /// <remarks> Leading whitespace is ignored.  Parsing continues until the first invalid
-        /// character, at which point parsing stops.  No error is returned in this case. </remarks>
-        [JSInternalFunction(Name = "parseInt", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static double ParseInt(ScriptEngine engine, string input, double radix = 0.0)
-        {
-            // Check for a valid radix.
-            // Note: this is the only function that uses TypeConverter.ToInt32() for parameter
-            // conversion (as opposed to the normal method which is TypeConverter.ToInteger() so
-            // the radix parameter must be converted to an integer in code.
-            int radix2 = TypeConverter.ToInt32(radix);
-            if (radix2 < 0 || radix2 == 1 || radix2 > 36)
-                return double.NaN;
-
-            return NumberParser.ParseInt(input, radix2, engine.CompatibilityMode == CompatibilityMode.ECMAScript3);
         }
 
         /// <summary>

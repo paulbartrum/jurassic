@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(15)
+			return new List<PropertyNameAndValue>(13)
 			{
 				new PropertyNameAndValue("decodeURI", new ClrStubFunction(engine, "decodeURI", 1, __STUB__DecodeURI), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("decodeURIComponent", new ClrStubFunction(engine, "decodeURIComponent", 1, __STUB__DecodeURIComponent), PropertyAttributes.NonEnumerable),
@@ -22,8 +22,6 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("eval", new ClrStubFunction(engine, "eval", 1, __STUB__Eval), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("isFinite", new ClrStubFunction(engine, "isFinite", 1, __STUB__IsFinite), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("isNaN", new ClrStubFunction(engine, "isNaN", 1, __STUB__IsNaN), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseFloat", new ClrStubFunction(engine, "parseFloat", 1, __STUB__ParseFloat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("parseInt", new ClrStubFunction(engine, "parseInt", 2, __STUB__ParseInt), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("unescape", new ClrStubFunction(engine, "unescape", 1, __STUB__Unescape), PropertyAttributes.NonEnumerable),
 			};
 		}
@@ -113,30 +111,6 @@ namespace Jurassic.Library
 					return IsNaN(double.NaN);
 				default:
 					return IsNaN(TypeConverter.ToNumber(args[0]));
-			}
-		}
-
-		private static object __STUB__ParseFloat(ScriptEngine engine, object thisObj, object[] args)
-		{
-			switch (args.Length)
-			{
-				case 0:
-					return ParseFloat("undefined");
-				default:
-					return ParseFloat(TypeConverter.ToString(args[0]));
-			}
-		}
-
-		private static object __STUB__ParseInt(ScriptEngine engine, object thisObj, object[] args)
-		{
-			switch (args.Length)
-			{
-				case 0:
-					return ParseInt(engine, "undefined", 0.0);
-				case 1:
-					return ParseInt(engine, TypeConverter.ToString(args[0]), 0.0);
-				default:
-					return ParseInt(engine, TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? 0.0 : TypeConverter.ToNumber(args[1]));
 			}
 		}
 

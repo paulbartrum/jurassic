@@ -209,7 +209,15 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "parseInt", Flags = JSFunctionFlags.HasEngineParameter)]
         public static double ParseInt(ScriptEngine engine, string input, double radix = 0.0)
         {
-            return GlobalObject.ParseInt(engine, input, radix);
+            // Check for a valid radix.
+            // Note: this is the only function that uses TypeConverter.ToInt32() for parameter
+            // conversion (as opposed to the normal method which is TypeConverter.ToInteger() so
+            // the radix parameter must be converted to an integer in code.
+            int radix2 = TypeConverter.ToInt32(radix);
+            if (radix2 < 0 || radix2 == 1 || radix2 > 36)
+                return double.NaN;
+
+            return NumberParser.ParseInt(input, radix2, engine.CompatibilityMode == CompatibilityMode.ECMAScript3);
         }
 
         /// <summary>
@@ -222,7 +230,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "parseFloat")]
         public static double ParseFloat(string input)
         {
-            return GlobalObject.ParseFloat(input);
+            return NumberParser.ParseFloat(input);
         }
     }
 }
