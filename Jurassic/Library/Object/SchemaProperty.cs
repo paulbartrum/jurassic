@@ -94,6 +94,14 @@ namespace Jurassic.Library
         {
             get { return (this.Attributes & PropertyAttributes.IsLengthProperty) != 0; }
         }
+
+        /// <summary>
+        /// Gets a value that indicates whether the property is indexer property.
+        /// </summary>
+        public bool IsIndexer
+        {
+            get { return (this.Attributes & PropertyAttributes.IsIndexProperty) != 0; }
+        }
     }
 
 }

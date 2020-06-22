@@ -45,24 +45,25 @@ namespace Jurassic.Library
         /// Gets the property value by calling the getter, if one is present.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword inside the getter. </param>
+        /// <param name="argumentValues"></param>
         /// <returns> The property value returned by the getter. </returns>
-        public object GetValue(ObjectInstance thisObject)
+        public object GetValue(ObjectInstance thisObject, params object[] argumentValues)
         {
             if (this.getter == null)
                 return Undefined.Value;
-            return this.getter.CallLateBound(thisObject);
+            return this.getter.CallLateBound(thisObject, argumentValues);
         }
 
         /// <summary>
         /// Sets the property value by calling the setter, if one is present.
         /// </summary>
         /// <param name="thisObject"> The value of the "this" keyword inside the setter. </param>
-        /// <param name="value"> The desired value. </param>
-        public void SetValue(ObjectInstance thisObject, object value)
+        /// <param name="argumentValues"> The values as arguments list. </param>
+        public void SetValue(ObjectInstance thisObject, params object[] argumentValues)
         {
             if (this.setter == null)
                 return;
-            this.setter.CallLateBound(thisObject, value);
+            this.setter.CallLateBound(thisObject, argumentValues);
         }
 
         /// <summary>

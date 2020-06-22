@@ -350,7 +350,16 @@ namespace Jurassic.Library
             // The property might exist in the prototype.
             if (this.prototype == null)
                 return thisValue.GetMissingPropertyValue(index.ToString());
-            return this.prototype.GetPropertyValue(index, thisValue);
+            object result = this.prototype.GetPropertyValue(index, thisValue);
+            if (result == null)
+            {
+                result = GetArrayElementPropertyValue(index, thisValue);
+            }
+            if (result == null)
+            {
+                result = GetIndexerPropertyValue(index, thisValue);
+            }
+            return result;
         }
 
         /// <summary>
@@ -368,7 +377,12 @@ namespace Jurassic.Library
                 return GetPropertyValue(arrayIndex);
 
             // Otherwise, the property is a name.
-            return GetNamedPropertyValue(key, this);
+            object result = GetNamedPropertyValue(key, this);
+
+            // Otherwise, the property can be an indexer
+            if (result == null)
+                result = GetIndexerPropertyValue(key, this);
+            return result;
         }
 
         /// <summary>
@@ -427,7 +441,11 @@ namespace Jurassic.Library
                 propertyReference.ClearCache();
                 if (this.Prototype == null)
                     return this.GetMissingPropertyValue(propertyReference.Name);
-                return this.Prototype.GetNamedPropertyValue(propertyReference.Name, this);
+
+                var propertyValuePrototype = this.Prototype.GetNamedPropertyValue(propertyReference.Name, this);
+                if (propertyValuePrototype == null)
+                    propertyValuePrototype = GetIndexerPropertyValue(propertyReference.Name, this);
+                return propertyValuePrototype;
             }
         }
 
@@ -467,6 +485,71 @@ namespace Jurassic.Library
 
             // The property doesn't exist.
             return thisValue.GetMissingPropertyValue(key);
+        }
+
+        /// <summary>
+        /// Gets the value of the property using indexer.
+        /// </summary>
+        /// <param name="key"> The property key - string, int, and so on. 
+        /// The type should be the same as the type of the indexer parameter</param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the indexer property does not exist directly on
+        /// this object. </remarks>
+        private object GetIndexerPropertyValue(object key, ObjectInstance thisValue)
+        {
+            if (!IsClrWrapper)
+                return null;    // This method is only for CLR clases
+
+            ObjectInstance prototypeObject = thisValue;
+            do
+            {
+                // Retrieve information about the property.
+                IEnumerable<SchemaProperty> properties = prototypeObject.schema.GetIndexers();
+                foreach (SchemaProperty property in properties)
+                {
+                    if (property.Exists == true)
+                    {
+                        // The property was found!
+                        object value = prototypeObject.propertyValues[property.Index];
+                        try
+                        {
+                            return ((PropertyAccessorValue)value).GetValue(thisValue, new object[] { key });
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+
+                // Traverse the prototype chain.
+                prototypeObject = prototypeObject.prototype;
+            } while (prototypeObject != null);
+
+            // The indexer property doesn't exist.
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given array index if current object is an Array.
+        /// </summary>
+        /// <param name="index"> The array index of the property. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the object is not an Array. </returns>
+        private object GetArrayElementPropertyValue(uint index, ObjectInstance thisValue)
+        {
+            if (!IsClrWrapper)
+                return null;   //This method is only for CLR clases
+
+            object result = null;
+            ClrInstanceWrapper thisWrapper = thisValue as ClrInstanceWrapper;
+            if (thisWrapper != null && thisWrapper.WrappedInstance.GetType().IsArray)
+            {
+                Array thisArray = thisWrapper.WrappedInstance as Array;
+                result = thisArray.GetValue(index);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -543,6 +626,11 @@ namespace Jurassic.Library
             bool exists = SetPropertyValueIfExists(indexStr, value, throwOnError);
             if (exists == false)
             {
+                exists = SetArrayElementPropertyValue(index, this, value);
+            }
+            if (exists == false &&
+                SetIndexerPropertyValue(index, value, this) == false)
+            {
                 // The property doesn't exist - add it.
                 AddProperty(indexStr, value, PropertyAttributes.FullAccess, throwOnError);
             }
@@ -570,7 +658,8 @@ namespace Jurassic.Library
             }
 
             bool exists = SetPropertyValueIfExists(key, value, throwOnError);
-            if (exists == false)
+            if (exists == false &&
+                SetIndexerPropertyValue(key, value, this) == false)
             {
                 // The property doesn't exist - add it.
                 AddProperty(key, value, PropertyAttributes.FullAccess, throwOnError);
@@ -708,7 +797,95 @@ namespace Jurassic.Library
             // The property does not exist.
             return false;
         }
-        
+
+        /// <summary>
+        /// Sets the value of the property using indexer.
+        /// </summary>
+        /// <param name="key"> The property key - string, int, and so on. 
+        /// The type should be the same as the type of the indexer parameter</param>
+        /// <param name="value"> The value to set </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <returns> <c>true</c> if the property exists; <c>false</c> otherwise. </returns>
+        /// <remarks> The prototype chain is searched if the indexer property does not exist directly on
+        /// this object. </remarks>
+        private bool SetIndexerPropertyValue(object key, object value, ObjectInstance thisValue)
+        {
+            if (!IsClrWrapper)
+                return false;   // This method is only for CLR clases
+
+            ObjectInstance prototypeObject = thisValue;
+            do
+            {
+                // Retrieve information about the property.
+                IEnumerable<SchemaProperty> properties = prototypeObject.schema.GetIndexers();
+                foreach (SchemaProperty property in properties)
+                {
+                    if (property.Exists == true)
+                    {
+                        // The property was found!
+                        object propertyAccessor = prototypeObject.propertyValues[property.Index];
+                        try
+                        {
+                            ((PropertyAccessorValue)propertyAccessor).SetValue(thisValue, key, value);
+                            return true;
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+
+                // Traverse the prototype chain.
+                prototypeObject = prototypeObject.prototype;
+            } while (prototypeObject != null);
+
+            // The indexer property doesn't exist.
+            return false;
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given array index if current object is an Array
+        /// </summary>
+        /// <param name="index"> The array index of the property to set. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <param name="value"> The value to set </param>
+        /// <returns> <c>true</c> if the value is set; <c>false</c> otherwise. </returns>
+        private bool SetArrayElementPropertyValue(uint index, ObjectInstance thisValue, object value)
+        {
+            if (!IsClrWrapper)
+                return false;   // This method is only for CLR clases
+
+            ClrInstanceWrapper thisWrapper = thisValue as ClrInstanceWrapper;
+            if (thisWrapper != null && thisWrapper.WrappedInstance.GetType().IsArray)
+            {
+                Array thisArray = thisWrapper.WrappedInstance as Array;
+                object unwrappedValue = value;
+                if (value is ClrStaticTypeWrapper)
+                {
+                    unwrappedValue = (value as ClrStaticTypeWrapper).WrappedType;
+                }
+                else if (value is ClrInstanceTypeWrapper)
+                {
+                    unwrappedValue = (value as ClrInstanceTypeWrapper).WrappedType;
+                }
+                else if (value is ClrInstanceWrapper)
+                {
+                    unwrappedValue = (value as ClrInstanceWrapper).WrappedInstance;
+                }
+
+                // Convert to element type if possible
+                if (unwrappedValue != null && unwrappedValue is IConvertible)
+                {
+                    Type elementType = thisArray.GetType().GetElementType();
+                    unwrappedValue = Convert.ChangeType(unwrappedValue, elementType);
+                }
+                thisArray.SetValue(unwrappedValue, (long)index);
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Deletes the property with the given array index.
         /// </summary>
@@ -1093,6 +1270,14 @@ namespace Jurassic.Library
             {
                 return "<error>";
             }
+        }
+
+        /// <summary>
+        /// Returns true when JavaScript object is a Clr Wrapper
+        /// </summary>
+        protected virtual bool IsClrWrapper
+        {
+            get { return false; }
         }
 
 

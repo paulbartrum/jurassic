@@ -199,6 +199,7 @@ namespace Jurassic.Library
         {
             // Register static methods as functions.
             var methodGroups = new Dictionary<string, List<MethodBase>>();
+            int indexerCounter = 0;
             foreach (var member in type.GetMembers(BindingFlags.Public | BindingFlags.DeclaredOnly | flags))
             {
                 switch (member.MemberType)
@@ -218,7 +219,17 @@ namespace Jurassic.Library
                         ClrFunction getter = getMethod == null ? null : new ClrFunction(target.Engine.Function.InstancePrototype, new ClrBinder(getMethod));
                         var setMethod = property.GetSetMethod();
                         ClrFunction setter = setMethod == null ? null : new ClrFunction(target.Engine.Function.InstancePrototype, new ClrBinder(setMethod));
-                        target.DefineProperty(property.Name, new PropertyDescriptor(getter, setter, PropertyAttributes.NonEnumerable), false);
+
+                        PropertyAttributes propertyAttributes = PropertyAttributes.NonEnumerable;
+                        if (property.GetIndexParameters().Length > 0)
+                        {
+                            propertyAttributes |= PropertyAttributes.IsIndexProperty;
+                            // Put index after name of indexer property to avoid conflict with other properties with same name and other indexers
+                            target.DefineProperty(string.Format("{0}{1}", property.Name, indexerCounter++), 
+                                new PropertyDescriptor(getter, setter, propertyAttributes), false);
+                        }
+                        else
+                            target.DefineProperty(property.Name, new PropertyDescriptor(getter, setter, propertyAttributes), false);
 
                         // Property getters and setters also show up as methods, so remove them here.
                         // NOTE: only works if properties are enumerated after methods.
@@ -252,6 +263,18 @@ namespace Jurassic.Library
             }
         }
 
+
+
+        //     OBJECTINSTANCE OVERRIDES
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// This object is a Clr Wrapper
+        /// </summary>
+        protected override bool IsClrWrapper
+        {
+            get { return true; }
+        }
 
 
 
