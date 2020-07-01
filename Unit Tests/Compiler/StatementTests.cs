@@ -672,6 +672,23 @@ namespace UnitTests
                 }
                 A.b()"));
 
+            // Class with static accessor properties.
+            Assert.AreEqual(true, Evaluate(@"
+                var baz = false;
+                class C {
+                   static get foo() { return 'foo'; }
+                   static set bar(x) { baz = x; }
+                }
+                C.bar = true;
+                C.foo === 'foo' && baz"));
+
+            // Class expression.
+            Assert.AreEqual(17, Evaluate(@"
+                A = class {
+                    b() { return 17; }
+                }
+                new A().b()"));
+
             // Not supported yet.
             // Class with extends.
             //Assert.AreEqual("bark", Evaluate(@"

@@ -64,7 +64,6 @@ namespace Jurassic.TestSuiteRunner
                             !testCase.name.StartsWith("Proxy") &&
                             !testCase.name.StartsWith("Reflect") &&
                             !testCase.name.StartsWith("generators") &&
-                            !testCase.name.StartsWith("class") &&
                             !testCase.name.StartsWith("super") &&
                             !testCase.name.StartsWith("arrow functions") &&
                             !testCase.name.StartsWith("let") &&

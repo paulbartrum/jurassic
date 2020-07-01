@@ -1560,6 +1560,7 @@ namespace Jurassic.Compiler
                 if ((this.nextToken is LiteralToken && (!(this.nextToken is TemplateLiteralToken) || this.expressionState == ParserExpressionState.Literal)) ||
                     this.nextToken is IdentifierToken ||
                     this.nextToken == KeywordToken.Function ||
+                    this.nextToken == KeywordToken.Class ||
                     this.nextToken == KeywordToken.This ||
                     (this.expressionState == ParserExpressionState.Literal &&
                         (this.nextToken == PunctuatorToken.LeftBrace || this.nextToken == PunctuatorToken.LeftBracket)) ||
@@ -1629,6 +1630,8 @@ namespace Jurassic.Compiler
                         terminal = ParseObjectLiteral();
                     else if (this.nextToken == KeywordToken.Function)
                         terminal = ParseFunctionExpression();
+                    else if (this.nextToken == KeywordToken.Class)
+                        terminal = ParseClassExpression();
                     else
                         throw new InvalidOperationException("Unsupported literal type.");
 
@@ -2059,7 +2062,7 @@ namespace Jurassic.Compiler
                 // In ES5 a keyword like 'if' is also okay.
                 if (keywordToken == KeywordToken.Static && context == PropertyNameContext.ClassBody &&
                     (!(this.nextToken is PunctuatorToken) || this.nextToken == PunctuatorToken.LeftBracket))
-                    return ReadPropertyName(PropertyNameContext.AfterGetOrSet).WithFlags(PropertyNameFlags.Static);
+                    return ReadPropertyName(PropertyNameContext.AfterStatic).WithFlags(PropertyNameFlags.Static);
                 return new PropertyName(keywordToken.Name);
             }
             else if (token == PunctuatorToken.LeftBracket)
@@ -2162,6 +2165,9 @@ namespace Jurassic.Compiler
             // Parse the class body.
             var classExpression = ParseClassBody(FunctionDeclarationType.Declaration, className, extends, startPosition);
 
+            // Consume the end token.
+            this.Consume();
+
             // For 'class A' construct an expression like 'A = class A'.
             var result = new ExpressionStatement(this.labelsForCurrentStatement,
                 new AssignmentExpression(this.currentVarScope, className, classExpression));
@@ -2249,8 +2255,8 @@ namespace Jurassic.Compiler
                     members.Add(expression);
             }
 
-            // Consume the end brace.
-            this.Consume();
+            // The end token '}' will be consumed by the parent function.
+            Debug.Assert(this.nextToken == PunctuatorToken.RightBrace);
 
             // Restore strict mode.
             this.StrictMode = originalStrictMode;
