@@ -23,10 +23,8 @@ namespace Jurassic.Compiler
         {
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
-            if (functionName == null)
-                throw new ArgumentNullException(nameof(functionName));
             var result = new DeclarativeScope(parentScope, 0);
-            if (string.IsNullOrEmpty(functionName) == false)
+            if (functionName != null)
                 result.DeclareVariable(functionName);
             result.DeclareVariable("this");
             result.DeclareVariable("arguments");

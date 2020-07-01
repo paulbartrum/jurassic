@@ -1296,6 +1296,8 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("x = {false: 1}; x.false"));
             Assert.AreEqual(1, Evaluate("x = {true: 1}; x.true"));
             Assert.AreEqual(1, Evaluate("x = {null: 1}; x.null"));
+            Assert.AreEqual(2, Evaluate("x = {get: 2}; x.get"));
+            Assert.AreEqual(3, Evaluate("x = {set: 3}; x.set"));
 
             // Object literals can have getters and setters.
             Assert.AreEqual(1, Evaluate("x = {get f() { return 1; }}; x.f"));
@@ -1303,11 +1305,10 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("x = {get f() { return this.a; }, set f(value) { this.a = value; }}; x.f = 5; x.f"));
             Assert.AreEqual(1, Evaluate("x = {get f() { return 1; }}; x.f = 5; x.f"));
             Assert.AreEqual(Undefined.Value, Evaluate("x = {set f(value) { this.a = value; }}; x.f"));
-            Assert.AreEqual(2, Evaluate("x = {get: 2}; x.get"));
-            Assert.AreEqual(3, Evaluate("x = {set: 3}; x.set"));
             Assert.AreEqual(1, Evaluate("x = {get 'f'() { return 1; }}; x.f = 5; x.f"));
             Assert.AreEqual(1, Evaluate("x = {get 0() { return 1; }}; x[0] = 5; x[0]"));
             Assert.AreEqual(4, Evaluate("var f = 4; x = {get f() { return f; }}; x.f"));
+            Assert.AreEqual(3, Evaluate("var x = { get get() { return 3; } }; x.get"));
 
             // Check accessibility of getters and setters.
             Assert.AreEqual(true, Evaluate("Object.getOwnPropertyDescriptor({ get a() {} }, 'a').configurable"));
@@ -1371,10 +1372,9 @@ namespace UnitTests
             Assert.AreEqual(19, Evaluate("var x = { [1+2]() { return 19; } }; x[3]()"));
             Assert.AreEqual("1", Evaluate("var x = { [1]() { return 19; } }; x[1].name"));
             Assert.AreEqual("test", Evaluate("var x = { ['test']() { return 19; } }; x.test.name"));
-
-            // TODO: we currently cannot compute function names at runtime.
-            Assert.AreEqual("", Evaluate("var x = { [1+2]() { return 19; } }; x[3].name"));
-            Assert.AreEqual("", Evaluate("var y = { a: 1, b: 2 }; var x = {[y]() { return 10; }}; x[y].name"));
+            Assert.AreEqual(3, Evaluate("var x = { get() { return 3; } }; x.get()"));
+            Assert.AreEqual("3", Evaluate("var x = { [1+2]() { return 19; } }; x[3].name"));
+            Assert.AreEqual("[object Object]", Evaluate("var y = { a: 1, b: 2 }; var x = {[y]() { return 10; }}; x[y].name"));
         }
 
         [TestMethod]

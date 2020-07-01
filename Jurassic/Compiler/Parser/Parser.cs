@@ -447,6 +447,8 @@ namespace Jurassic.Compiler
                 return ParseDebugger();
             if (this.nextToken == KeywordToken.Function)
                 return ParseFunctionDeclaration();
+            if (this.nextToken == KeywordToken.Class)
+                return ParseClassDeclaration();
             if (this.nextToken == null)
                 throw new SyntaxErrorException("Unexpected end of input", this.LineNumber, this.SourcePath);
 
@@ -1271,10 +1273,10 @@ namespace Jurassic.Compiler
             ValidateVariableName(functionName);
 
             // Parse the function declaration.
-            var expression = ParseFunction(FunctionDeclarationType.Declaration, this.initialScope, functionName, startPosition);
+            var expression = ParseFunction(FunctionDeclarationType.Declaration, this.initialScope, new PropertyName(functionName), startPosition);
 
             // Add the function to the top-level scope.
-            this.initialScope.DeclareVariable(expression.FunctionName, expression, writable: true, deletable: this.context == CodeContext.Eval);
+            this.initialScope.DeclareVariable(functionName, expression, writable: true, deletable: this.context == CodeContext.Eval);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1286,17 +1288,17 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="functionType"> The type of function to parse. </param>
         /// <param name="parentScope"> The parent scope for the function. </param>
-        /// <param name="functionName"> The name of the function (can be empty). </param>
+        /// <param name="name"> The name of the function (can be computed at runtime). </param>
         /// <param name="startPosition"> The position of the start of the function. </param>
         /// <returns> A function expression. </returns>
-        private FunctionExpression ParseFunction(FunctionDeclarationType functionType, Scope parentScope, string functionName, SourceCodePosition startPosition)
+        private FunctionExpression ParseFunction(FunctionDeclarationType functionType, Scope parentScope, PropertyName name, SourceCodePosition startPosition)
         {
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
             // Create a new scope and assign variables within the function body to the scope.
-            bool includeNameInScope = functionType != FunctionDeclarationType.Getter && functionType != FunctionDeclarationType.Setter;
-            var scope = DeclarativeScope.CreateFunctionScope(parentScope, includeNameInScope ? functionName : string.Empty, null);
+            var functionName = !name.IsGetter && !name.IsSetter && name.HasStaticName ? name.StaticName : null;
+            var scope = DeclarativeScope.CreateFunctionScope(parentScope, functionName, null);
 
             // Replace scope and methodOptimizationHints.
             var originalScope = this.currentVarScope;
@@ -1313,11 +1315,11 @@ namespace Jurassic.Compiler
             this.currentVarScope = originalScope;
 
             // Getters must have zero arguments.
-            if (functionType == FunctionDeclarationType.Getter && arguments.Count != 0)
+            if (name.IsGetter && arguments.Count != 0)
                 throw new SyntaxErrorException("Getters cannot have arguments", this.LineNumber, this.SourcePath);
 
             // Setters must have one argument.
-            if (functionType == FunctionDeclarationType.Setter && arguments.Count != 1)
+            if (name.IsSetter && arguments.Count != 1)
                 throw new SyntaxErrorException("Setters must have a single argument", this.LineNumber, this.SourcePath);
 
             // Read the right parenthesis.
@@ -1367,7 +1369,7 @@ namespace Jurassic.Compiler
             // Create a new function expression.
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
-            var context = new FunctionMethodGenerator(scope, functionName,
+            var context = new FunctionMethodGenerator(scope, name,
                 functionType, arguments,
                 bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body,
                 this.SourcePath, new SourceCodeSpan(startPosition, endPosition), options);
@@ -1559,8 +1561,8 @@ namespace Jurassic.Compiler
                     this.nextToken is IdentifierToken ||
                     this.nextToken == KeywordToken.Function ||
                     this.nextToken == KeywordToken.This ||
-                    this.nextToken == PunctuatorToken.LeftBrace ||
-                    (this.nextToken == PunctuatorToken.LeftBracket && this.expressionState == ParserExpressionState.Literal) ||
+                    (this.expressionState == ParserExpressionState.Literal &&
+                        (this.nextToken == PunctuatorToken.LeftBrace || this.nextToken == PunctuatorToken.LeftBracket)) ||
                     (this.nextToken is KeywordToken && unboundOperator != null && unboundOperator.OperatorType == OperatorType.MemberAccess && this.expressionState == ParserExpressionState.Literal))
                 {
                     // If a literal was found where an operator was expected, insert a semi-colon
@@ -1898,7 +1900,7 @@ namespace Jurassic.Compiler
         /// Parses an array literal (e.g. "[1, 2]").
         /// </summary>
         /// <returns> A literal expression that represents the array literal. </returns>
-        private LiteralExpression ParseArrayLiteral()
+        private ArrayLiteralExpression ParseArrayLiteral()
         {
             // Read past the initial '[' token.
             Debug.Assert(this.nextToken == PunctuatorToken.LeftBracket);
@@ -1927,20 +1929,20 @@ namespace Jurassic.Compiler
             // The end token ']' will be consumed by the parent function.
             Debug.Assert(this.nextToken == PunctuatorToken.RightBracket);
 
-            return new LiteralExpression(items);
+            return new ArrayLiteralExpression(items);
         }
 
         /// <summary>
         /// Parses an object literal (e.g. "{a: 5}").
         /// </summary>
         /// <returns> A literal expression that represents the object literal. </returns>
-        private LiteralExpression ParseObjectLiteral()
+        private ObjectLiteralExpression ParseObjectLiteral()
         {
             // Read past the initial '{' token.
             Debug.Assert(this.nextToken == PunctuatorToken.LeftBrace);
             this.Consume();
 
-            var properties = new List<KeyValuePair<Expression, Expression>>();
+            var properties = new List<PropertyDeclaration>();
             while (true)
             {
                 // If the next token is '}', then the object literal is complete.
@@ -1950,52 +1952,39 @@ namespace Jurassic.Compiler
                 // Record the position in case it's a function.
                 var startPosition = this.PositionAfterWhitespace;
 
-                // Read the next property name.
-                PropertyNameType nameType;
-                Expression propertyName = ReadPropertyNameExpression(out nameType);
+                // Read the property name.
+                var propertyName = ReadPropertyName(PropertyNameContext.ObjectLiteral);
 
                 // Check if this is a getter or setter.
                 Expression propertyValue;
-                if (this.nextToken != PunctuatorToken.Colon && (nameType == PropertyNameType.Get || nameType == PropertyNameType.Set))
+                if (propertyName.IsGetter || propertyName.IsSetter)
                 {
-                    // Getters and setters can have any name that is allowed of a property.
-                    PropertyNameType nameType2;
-                    propertyName = ReadPropertyNameExpression(out nameType2);
-
-                    // Parse the function name and body.
-                    string nameAsString = propertyName is LiteralExpression ? (string)((LiteralExpression)propertyName).Value : string.Empty;
-                    var function = ParseFunction(nameType == PropertyNameType.Get ? FunctionDeclarationType.Getter : FunctionDeclarationType.Setter, this.currentVarScope, nameAsString, startPosition);
+                    // Parse the function body.
+                    var function = ParseFunction(FunctionDeclarationType.Declaration, this.currentVarScope, propertyName, startPosition);
 
                     // Add the getter or setter to the list of properties to set.
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, function));
+                    properties.Add(new PropertyDeclaration(propertyName, function));
                 }
-                else if (nameType != PropertyNameType.Expression && (this.nextToken == PunctuatorToken.Comma || this.nextToken == PunctuatorToken.RightBrace))
+                else if (propertyName.HasStaticName && (this.nextToken == PunctuatorToken.Comma || this.nextToken == PunctuatorToken.RightBrace))
                 {
                     // This is a shorthand property e.g. "var a = 1, b = 2, c = { a, b }" is the
                     // same as "var a = 1, b = 2, c = { a: a, b: b }".
-                    string nameAsString = (string)((LiteralExpression)propertyName).Value;
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, new NameExpression(this.currentVarScope, nameAsString)));
+                    properties.Add(new PropertyDeclaration(propertyName, new NameExpression(this.currentVarScope, propertyName.StaticName)));
                 }
                 else if (this.nextToken == PunctuatorToken.LeftParenthesis)
                 {
                     // This is a shorthand function e.g. "var a = { b() { return 2; } }" is the
                     // same as "var a = { b: function() { return 2; } }".
 
-                    // Determine the function name. TODO: the function name can be dynamic, i.e.
-                    // only available at runtime, figure out how to accommodate this.
-                    string nameAsString = string.Empty;
-                    if (propertyName is LiteralExpression literalExpression && literalExpression.ResultType != PrimitiveType.Object)
-                        nameAsString = TypeConverter.ToString(literalExpression.Value);
-
                     // Parse the function.
-                    var function = ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, nameAsString, startPosition);
+                    var function = ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, propertyName, startPosition);
 
                     // Strangely enough, if declarationType is Expression then the last right
                     // brace ('}') is not consumed.
                     this.Expect(PunctuatorToken.RightBrace);
 
                     // Add the function to the list of properties to set.
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, function));
+                    properties.Add(new PropertyDeclaration(propertyName, function));
                 }
                 else
                 {
@@ -2008,7 +1997,7 @@ namespace Jurassic.Compiler
                     propertyValue = ParseExpression(PunctuatorToken.Comma, PunctuatorToken.RightBrace);
 
                     // Add the property to the list.
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, propertyValue));
+                    properties.Add(new PropertyDeclaration(propertyName, propertyValue));
                 }
 
                 // Read past the comma.
@@ -2020,81 +2009,68 @@ namespace Jurassic.Compiler
             // The end token '}' will be consumed by the parent function.
             Debug.Assert(this.nextToken == PunctuatorToken.RightBrace);
 
-            return new LiteralExpression(properties);
+            return new ObjectLiteralExpression(properties);
+        }
+
+        private enum PropertyNameContext
+        {
+            ObjectLiteral,
+            ClassBody,
+            AfterStatic,
+            AfterGetOrSet,
         }
 
         /// <summary>
-        /// Distinguishes between the different ways of specifying a property name.
+        /// Reads a property name, as used in object literals and class bodies.
         /// </summary>
-        private enum PropertyNameType
+        /// <param name="context">  </param>
+        /// <returns> Details on the property name. </returns>
+        private PropertyName ReadPropertyName(PropertyNameContext context)
         {
-            Name,
-            Get,
-            Set,
-            Expression,
-        }
+            // Read and consume the next token.
+            var token = this.nextToken;
+            Consume();
 
-        /// <summary>
-        /// Reads a property name, used in object literals.
-        /// </summary>
-        /// <param name="nameType"> Identifies the particular way the property was specified. </param>
-        /// <returns> An expression that evaluates to the property name. </returns>
-        private Expression ReadPropertyNameExpression(out PropertyNameType nameType)
-        {
-            Expression result;
-            if (this.nextToken is LiteralToken)
+            if (token is LiteralToken literalToken)
             {
-                // The property name can be a string or a number or (in ES5) a keyword.
-                if (((LiteralToken)this.nextToken).IsKeyword == true)
-                {
-                    // false, true or null.
-                    result = new LiteralExpression(this.nextToken.Text);
-                }
-                else
-                {
-                    object literalValue = ((LiteralToken)this.nextToken).Value;
-                    if (literalValue is string || literalValue is int)
-                        result = new LiteralExpression(((LiteralToken)this.nextToken).Value.ToString());
-                    else if (literalValue is double)
-                        result = new LiteralExpression(((double)((LiteralToken)this.nextToken).Value).ToString(CultureInfo.InvariantCulture));
-                    else
-                        throw new SyntaxErrorException(string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
-                }
-                nameType = PropertyNameType.Name;
+                // The property name can be a string or a number or (in ES5) a keyword like false, true or null.
+                return new PropertyName(literalToken.ToPropertyName());
             }
-            else if (this.nextToken is IdentifierToken)
+            else if (token is IdentifierToken identifierToken)
             {
                 // An identifier is also okay.
-                var name = ((IdentifierToken)this.nextToken).Name;
-                if (name == "get")
-                    nameType = PropertyNameType.Get;
-                else if (name == "set")
-                    nameType = PropertyNameType.Set;
-                else
-                    nameType = PropertyNameType.Name;
-                result = new LiteralExpression(name);
+                // Note: that { get() { return 1; } } is valid (creates a function called 'get'),
+                // and { get get() { return 1; } } is valid (creates a getter called 'get'),
+                // but { get get get() { return 1; } } is not.
+                if (context != PropertyNameContext.AfterGetOrSet)
+                {
+                    var flags = PropertyNameFlags.None;
+                    if (identifierToken.Name == "get")
+                        flags = PropertyNameFlags.Get;
+                    else if (identifierToken.Name == "set")
+                        flags = PropertyNameFlags.Set;
+                    if (flags != PropertyNameFlags.None && (!(this.nextToken is PunctuatorToken) || this.nextToken == PunctuatorToken.LeftBracket))
+                        return ReadPropertyName(PropertyNameContext.AfterGetOrSet).WithFlags(flags);
+                }
+                return new PropertyName(identifierToken.Name);
             }
-            else if (this.nextToken is KeywordToken)
+            else if (token is KeywordToken keywordToken)
             {
-                // In ES5 a keyword is also okay.
-                result = new LiteralExpression(((KeywordToken)this.nextToken).Name);
-                nameType = PropertyNameType.Name;
+                // In ES5 a keyword like 'if' is also okay.
+                if (keywordToken == KeywordToken.Static && context == PropertyNameContext.ClassBody &&
+                    (!(this.nextToken is PunctuatorToken) || this.nextToken == PunctuatorToken.LeftBracket))
+                    return ReadPropertyName(PropertyNameContext.AfterGetOrSet).WithFlags(PropertyNameFlags.Static);
+                return new PropertyName(keywordToken.Name);
             }
-            else if (this.nextToken == PunctuatorToken.LeftBracket)
+            else if (token == PunctuatorToken.LeftBracket)
             {
                 // ES6 computed property.
+                var expression = ParseExpression(PunctuatorToken.RightBracket);
                 this.Consume();
-                result = ParseExpression(PunctuatorToken.RightBracket);
-                nameType = PropertyNameType.Expression;
+                return new PropertyName(expression);
             }
             else
                 throw new SyntaxErrorException(string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
-
-            // Consume the token.
-            this.Consume();
-
-            // Return the property name.
-            return result;
         }
 
         /// <summary>
@@ -2118,7 +2094,7 @@ namespace Jurassic.Compiler
             }
 
             // Parse the rest of the function.
-            return ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, functionName, startPosition);
+            return ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, new PropertyName(functionName), startPosition);
         }
 
         /// <summary>
@@ -2155,6 +2131,131 @@ namespace Jurassic.Compiler
 
             // If this is an untagged template literal, return a UntaggedTemplateExpression.
             return new TemplateLiteralExpression(strings, values, rawStrings);
+        }
+
+
+
+        /// <summary>
+        /// Parses a class declaration.
+        /// </summary>
+        /// <returns> A statement representing the class. </returns>
+        private Statement ParseClassDeclaration()
+        {
+            // Record the start of the function.
+            var startPosition = this.PositionAfterWhitespace;
+
+            // Consume the function keyword.
+            this.Expect(KeywordToken.Class);
+
+            // Read the class name.
+            var className = this.ExpectIdentifier();
+            ValidateVariableName(className);
+
+            // Parse the extends bit.
+            Expression extends = null;
+            if (this.nextToken == KeywordToken.Extends)
+            {
+                this.Consume();
+                extends = ParseExpression(PunctuatorToken.LeftBrace);
+            }
+
+            // Parse the class body.
+            var classExpression = ParseClassBody(FunctionDeclarationType.Declaration, className, extends, startPosition);
+
+            // For 'class A' construct an expression like 'A = class A'.
+            var result = new ExpressionStatement(this.labelsForCurrentStatement,
+                new AssignmentExpression(this.currentVarScope, className, classExpression));
+            result.SourceSpan = new SourceCodeSpan(startPosition, this.PositionBeforeWhitespace);
+            return result;
+        }
+
+        /// <summary>
+        /// Parses a class expression.
+        /// </summary>
+        /// <returns> A class expression. </returns>
+        private ClassExpression ParseClassExpression()
+        {
+            // Record the start of the function.
+            var startPosition = this.PositionAfterWhitespace;
+
+            // Consume the function keyword.
+            this.Expect(KeywordToken.Class);
+
+            // The class name is optional for class expressions.
+            var className = string.Empty;
+            if (this.nextToken is IdentifierToken)
+            {
+                className = this.ExpectIdentifier();
+                ValidateVariableName(className);
+            }
+
+            // Parse the extends bit.
+            Expression extends = null;
+            if (this.nextToken == KeywordToken.Extends)
+            {
+                this.Consume();
+                extends = ParseExpression(PunctuatorToken.LeftBrace);
+            }
+
+            // Parse the rest of the class.
+            return ParseClassBody(FunctionDeclarationType.Expression, className, extends, startPosition);
+        }
+
+        /// <summary>
+        /// Parses the body of a class declaration or a class expression.
+        /// </summary>
+        /// <param name="functionType"> The type of function to parse. </param>
+        /// <param name="className"> The name of the class (can be empty). </param>
+        /// <param name="extends"> The base class, or <c>null</c> if this class doesn't inherit
+        /// from another class. </param>
+        /// <param name="startPosition"> The position of the start of the function. </param>
+        /// <returns> A class expression. </returns>
+        private ClassExpression ParseClassBody(FunctionDeclarationType functionType, string className, Expression extends, SourceCodePosition startPosition)
+        {
+            // The contents of the class should all be considered to be strict mode.
+            var originalStrictMode = StrictMode;
+            this.StrictMode = true;
+
+            // Read the left brace.
+            this.Expect(PunctuatorToken.LeftBrace);
+
+            var members = new List<FunctionExpression>();
+            FunctionExpression constructor = null;
+            while (true)
+            {
+                // If the next token is '}', then the class is complete.
+                if (this.nextToken == PunctuatorToken.RightBrace)
+                    break;
+
+                // Record the start of the member.
+                var memberStartPosition = this.PositionAfterWhitespace;
+
+                // Read the name of the next class member.
+                // This will start with 'get', 'set', 'constructor' or a function name.
+                var memberName = ReadPropertyName(PropertyNameContext.ClassBody);
+
+                // Parse the function declaration.
+                var expression = ParseFunction(FunctionDeclarationType.Declaration, this.initialScope, memberName, memberStartPosition);
+
+                if (memberName.HasStaticName && memberName.StaticName == "constructor")
+                {
+                    // Only one constructor is allowed.
+                    if (constructor == null)
+                        constructor = expression;
+                    else
+                        throw new SyntaxErrorException("A class may only have one constructor.", this.LineNumber, this.SourcePath);
+                }
+                else
+                    members.Add(expression);
+            }
+
+            // Consume the end brace.
+            this.Consume();
+
+            // Restore strict mode.
+            this.StrictMode = originalStrictMode;
+
+            return new ClassExpression(className, extends, constructor, members);
         }
     }
 

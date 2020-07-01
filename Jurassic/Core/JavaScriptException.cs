@@ -65,12 +65,14 @@ namespace Jurassic
         /// <param name="engine"> The current script environment. </param>
         /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
         /// <param name="message"> A description of the error. </param>
-        /// <param name="innerException"> The exception that is the cause of the current exception,
-        /// or <c>null</c> if no inner exception is specified. </param>
-        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, Exception innerException)
-            : base(string.Format("{0}: {1}", type, message), innerException)
+        /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string sourcePath)
+            : base(string.Format("{0}: {1}", type, message))
         {
             this.ErrorObject = CreateError(engine, type, message);
+            this.LineNumber = lineNumber;
+            this.SourcePath = sourcePath;
             this.PopulateStackTrace();
         }
 
@@ -82,8 +84,10 @@ namespace Jurassic
         /// <param name="message"> A description of the error. </param>
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
-        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string sourcePath)
-            : base(string.Format("{0}: {1}", type, message))
+        /// <param name="innerException"> The exception that is the cause of the current exception,
+        /// or <c>null</c> if no inner exception is specified. </param>
+        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string sourcePath, Exception innerException)
+            : base(string.Format("{0}: {1}", type, message), innerException)
         {
             this.ErrorObject = CreateError(engine, type, message);
             this.LineNumber = lineNumber;

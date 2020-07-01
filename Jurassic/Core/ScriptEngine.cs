@@ -754,7 +754,7 @@ namespace Jurassic
                 }
                 catch (SyntaxErrorException ex)
                 {
-                    throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+                    throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath, ex);
                 }
 
                 // Execute

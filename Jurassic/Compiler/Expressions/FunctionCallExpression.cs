@@ -222,7 +222,7 @@ namespace Jurassic.Compiler
             {
                 stringsExpression.Add(new LiteralExpression(templateString));
             }
-            new LiteralExpression(stringsExpression).GenerateCode(generator, optimizationInfo);
+            new ArrayLiteralExpression(stringsExpression).GenerateCode(generator, optimizationInfo);
             generator.Duplicate();
 
             // Now we need the name of the property.
@@ -234,7 +234,7 @@ namespace Jurassic.Compiler
             {
                 rawStringsExpression.Add(new LiteralExpression(rawString));
             }
-            new LiteralExpression(rawStringsExpression).GenerateCode(generator, optimizationInfo);
+            new ArrayLiteralExpression(rawStringsExpression).GenerateCode(generator, optimizationInfo);
 
             // Freeze array by calling object Freeze(object).
             generator.CallStatic(ReflectionHelpers.ObjectConstructor_Freeze);

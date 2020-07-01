@@ -142,7 +142,7 @@ namespace Jurassic.Library
             {
                 if (ex.FunctionName == null && ex.SourcePath == null && ex.LineNumber == 0)
                 {
-                    ex.FunctionName = this.DisplayName;
+                    ex.FunctionName = this.Name;
                     ex.SourcePath = "native";
                     ex.PopulateStackTrace();
                 }

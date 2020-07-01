@@ -53,6 +53,7 @@ namespace Jurassic.Compiler
 
         internal static ConstructorInfo String_Constructor_Char_Int;
         internal static MethodInfo String_Concat;
+        internal static MethodInfo String_Concat_String_String;
         internal static MethodInfo String_Length;
         internal static MethodInfo String_CompareOrdinal;
         internal static MethodInfo String_Format;
@@ -86,6 +87,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo Type_GetTypeFromHandle;
         internal static MethodInfo MethodBase_GetMethodFromHandle;
         internal static MethodInfo GeneratedMethod_Load;
+        internal static ConstructorInfo ClassFunction_Constructor;
         internal static MethodInfo ClrInstanceWrapper_GetWrappedInstance;
         internal static MethodInfo ClrInstanceWrapper_Create;
         internal static MethodInfo Decimal_ToDouble;
@@ -204,6 +206,7 @@ namespace Jurassic.Compiler
 
             String_Constructor_Char_Int = GetConstructor(typeof(string), typeof(char), typeof(int));
             String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string[]));
+            String_Concat_String_String = GetStaticMethod(typeof(string), "Concat", typeof(string), typeof(string));
             String_Length = GetInstanceMethod(typeof(string), "get_Length");
             String_CompareOrdinal = GetStaticMethod(typeof(string), "CompareOrdinal", typeof(string), typeof(string));
             String_Format = GetStaticMethod(typeof(string), "Format", typeof(string), typeof(object[]));
@@ -247,6 +250,7 @@ namespace Jurassic.Compiler
             PropertyName_Constructor = GetConstructor(typeof(PropertyReference), typeof(string));
 
             GeneratedMethod_Load = GetStaticMethod(typeof(GeneratedMethod), "Load", typeof(long));
+            ClassFunction_Constructor = GetConstructor(typeof(ClassFunction), typeof(ObjectInstance), typeof(string), typeof(FunctionInstance));
             ClrInstanceWrapper_GetWrappedInstance = GetInstanceMethod(typeof(ClrInstanceWrapper), "get_WrappedInstance");
             ClrInstanceWrapper_Create = GetStaticMethod(typeof(ClrInstanceWrapper), "Create", new Type[] { typeof(ScriptEngine), typeof(object) });
             Decimal_ToDouble = GetStaticMethod(typeof(decimal), "ToDouble", typeof(decimal));
@@ -290,7 +294,7 @@ namespace Jurassic.Compiler
 
 
 
-        //     CODE GEN METHODS
+        //     CODE-GEN METHODS
         //_________________________________________________________________________________________
 
         /// <summary>

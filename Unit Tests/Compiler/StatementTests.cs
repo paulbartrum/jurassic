@@ -619,5 +619,91 @@ namespace UnitTests
             //Assert.AreEqual("ReferenceError", EvaluateExceptionType("(function(a, b = c*2) { var c = 3; return b })(5)"));
             //Assert.AreEqual("ReferenceError", EvaluateExceptionType("(function(a = a) { return a; })()"));
         }
+
+        [TestMethod]
+        public void Class()
+        {
+            // Class with single function.
+            Assert.AreEqual(17, Evaluate(@"
+                class A {
+                    b() { return 17; }
+                }
+                new A().b()"));
+
+            // Class with getter.
+            Assert.AreEqual(17, Evaluate(@"
+                class A {
+                    get b() { return 17; }
+                }
+                new A().b"));
+
+            // Class with getter and setter.
+            Assert.AreEqual(400, Evaluate(@"
+                class A {
+                    get b() { return this.c * 2; }
+                    set b(value) { this.c = value * 2; }
+                }
+                var a = new A();
+                a.b = 100;
+                a.b"));
+
+            // Class with constructor.
+            Assert.AreEqual(15, Evaluate(@"
+                class A {
+                    constructor() {
+                        this.b = 15;
+                    }
+                    getB() { return this.b; }
+                }
+                new A().getB()"));
+            Assert.AreEqual(99, Evaluate(@"
+                class A {
+                    constructor(value) {
+                        this.b = value;
+                    }
+                    getB() { return this.b; }
+                }
+                new A(99).getB()"));
+
+            // Class with static member.
+            Assert.AreEqual(12, Evaluate(@"
+                class A {
+                    static b() { return 12; }
+                }
+                A.b()"));
+
+            // Not supported yet.
+            // Class with extends.
+            //Assert.AreEqual("bark", Evaluate(@"
+            //    class Animal {
+            //        speak() { return 'oof'; }
+            //    }
+            //    class Dog extends Animal {
+            //        speak() { return 'bark'; }
+            //    }
+            //    new Dog().speak()"));
+            //
+            //// Class with super.
+            //Assert.AreEqual("bark", Evaluate(@"
+            //    class Animal {
+            //        constructor(sound) { this.sound = sound; }
+            //        speak() { return sound; }
+            //    }
+            //    class Dog extends Animal {
+            //        constructor() { super('bark'); }
+            //    }
+            //    new Dog().speak()"));
+            //
+            //// Classes may only have one constructor.
+            //Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
+            //    class A {
+            //        constructor() {
+            //            this.b = 15;
+            //        }
+            //        constructor() {
+            //            this.b = 16;
+            //        }
+            //    }"));
+        }
     }
 }

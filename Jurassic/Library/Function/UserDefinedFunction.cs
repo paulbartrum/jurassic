@@ -8,9 +8,6 @@ namespace Jurassic.Library
 {
     /// <summary>
     /// Represents a JavaScript function implemented in javascript.
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
     [DebuggerTypeProxy(typeof(UserDefinedFunctionDebugView))]
@@ -52,7 +49,7 @@ namespace Jurassic.Library
             this.Scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(this.Engine.Global), name, null);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(this.Scope, name, argumentsText, bodyText, new CompilerOptions() {
+            var context = new FunctionMethodGenerator(this.Scope, new PropertyName(name), argumentsText, bodyText, new CompilerOptions() {
 #if ENABLE_DEBUGGING
                EnableDebugging = this.Engine.EnableDebugging,
 #endif

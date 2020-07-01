@@ -184,10 +184,6 @@ namespace Jurassic.Compiler
             var rhs = this.GetOperand(1);
             rhs.GenerateCode(generator, optimizationInfo);
 
-            // Support the inferred function displayName property.
-            if (rhs is FunctionExpression)
-                ((FunctionExpression)rhs).GenerateDisplayName(generator, optimizationInfo, target.ToString(), false);
-
             // Store the RHS value so we can return it as the result of the expression.
             var result = generator.CreateTemporaryVariable(rhs.ResultType);
             generator.Duplicate();

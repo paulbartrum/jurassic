@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -19,16 +18,6 @@ namespace Jurassic.Compiler
         /// The function was declared as an expression.
         /// </summary>
         Expression,
-
-        /// <summary>
-        /// The function is a getter in an object literal.
-        /// </summary>
-        Getter,
-
-        /// <summary>
-        /// The function is a setter in an object literal.
-        /// </summary>
-        Setter,
     }
 
     /// <summary>
@@ -67,7 +56,7 @@ namespace Jurassic.Compiler
         /// Creates a new FunctionMethodGenerator instance.
         /// </summary>
         /// <param name="scope"> The function scope. </param>
-        /// <param name="functionName"> The name of the function. </param>
+        /// <param name="name"> The name of the function (can be computed at runtime). </param>
         /// <param name="declarationType"> Indicates how the function was declared. </param>
         /// <param name="arguments"> The names and default values of the arguments. </param>
         /// <param name="bodyText"> The source code of the function. </param>
@@ -75,12 +64,12 @@ namespace Jurassic.Compiler
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="span"> The extent of the function in the source code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(DeclarativeScope scope, string functionName, FunctionDeclarationType declarationType,
+        public FunctionMethodGenerator(DeclarativeScope scope, PropertyName name, FunctionDeclarationType declarationType,
             IList<FunctionArgument> arguments, string bodyText, Statement body, string scriptPath, SourceCodeSpan span,
             CompilerOptions options)
             : base(scope, new DummyScriptSource(scriptPath), options)
         {
-            this.Name = functionName;
+            this.Name = name;
             this.DeclarationType = declarationType;
             this.Arguments = arguments;
             this.BodyRoot = body;
@@ -115,24 +104,24 @@ namespace Jurassic.Compiler
         /// Creates a new FunctionContext instance.
         /// </summary>
         /// <param name="scope"> The function scope. </param>
-        /// <param name="functionName"> The name of the function. </param>
+        /// <param name="name"> The name of the function (can be computed at runtime). </param>
         /// <param name="argumentsText"> A comma-separated list of arguments. </param>
         /// <param name="body"> The source code for the body of the function. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(DeclarativeScope scope, string functionName,
+        public FunctionMethodGenerator(DeclarativeScope scope, PropertyName name,
             string argumentsText, string body, CompilerOptions options)
             : base(scope, new StringScriptSource(body), options)
         {
-            this.Name = functionName;
+            this.Name = name;
             this.ArgumentsText = argumentsText;
             this.BodyText = body;
         }
 
         /// <summary>
-        /// The name of the function.  Getters and setters do not include "get" and "set" in their
-        /// name.
+        /// An expression that evaluates to the name of the function.  For getters and setters,
+        /// this does not include the "get" or "set".
         /// </summary>
-        public string Name
+        public PropertyName Name
         {
             get;
             private set;
@@ -147,7 +136,7 @@ namespace Jurassic.Compiler
             private set;
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Gets or sets the display name for the function.  This is statically inferred from the
         /// context if the function is the target of an assignment or if the function is within an
         /// object literal.  Only set if the function name is empty.
@@ -156,7 +145,7 @@ namespace Jurassic.Compiler
         {
             get;
             set;
-        }
+        }*/
 
         /// <summary>
         /// Gets a comma-separated list of arguments.
@@ -200,12 +189,10 @@ namespace Jurassic.Compiler
         /// <returns> A name for the generated method. </returns>
         protected override string GetMethodName()
         {
-            if (this.DisplayName != null)
-                return this.DisplayName;
-            else if (string.IsNullOrEmpty(this.Name))
-                return "anonymous";
+            if (Name.HasStaticName && !string.IsNullOrEmpty(Name.StaticName))
+                return Name.StaticName;
             else
-                return this.Name;
+                return "anonymous";
         }
 
         /// <summary>
@@ -254,7 +241,7 @@ namespace Jurassic.Compiler
             if (this.StrictMode == true)
             {
                 // If the function body is strict mode, then the function name cannot be 'eval' or 'arguments'.
-                if (this.Name == "arguments" || this.Name == "eval")
+                if (Name.HasStaticName && (Name.StaticName == "arguments" || Name.StaticName == "eval"))
                     throw new SyntaxErrorException(string.Format("Functions cannot be named '{0}' in strict mode.", this.Name), lineNumber, sourcePath);
 
                 // If the function body is strict mode, then the argument names cannot be 'eval' or 'arguments'.
@@ -362,13 +349,12 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the function name into the scope.
-            if (string.IsNullOrEmpty(this.Name) == false &&
-                (this.DeclarationType != FunctionDeclarationType.Getter && this.DeclarationType != FunctionDeclarationType.Setter) &&
-                this.Arguments.Any(a => a.Name == this.Name) == false &&
-                optimizationInfo.MethodOptimizationHints.HasVariable(this.Name))
+            if (Name.HasStaticName && !Name.IsGetter && !Name.IsSetter &&
+                this.Arguments.Any(a => a.Name == Name.StaticName) == false &&
+                optimizationInfo.MethodOptimizationHints.HasVariable(Name.StaticName))
             {
                 EmitHelpers.LoadFunction(generator);
-                var functionName = new NameExpression(this.InitialScope, this.Name);
+                var functionName = new NameExpression(this.InitialScope, Name.StaticName);
                 functionName.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
             }
 
@@ -480,9 +466,10 @@ namespace Jurassic.Compiler
         /// <returns> A string representing this object. </returns>
         public override string ToString()
         {
+            var name = Name.HasStaticName ? Name.StaticName : null;
             if (this.BodyRoot != null)
-                return string.Format("function {0}({1}) {2}", this.Name, StringHelpers.Join(", ", this.Arguments), this.BodyRoot);
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.Name, StringHelpers.Join(", ", this.Arguments), this.BodyText);
+                return string.Format("function {0}({1}) {2}", name, StringHelpers.Join(", ", this.Arguments), this.BodyRoot);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", name, StringHelpers.Join(", ", this.Arguments), this.BodyText);
         }
     }
 
