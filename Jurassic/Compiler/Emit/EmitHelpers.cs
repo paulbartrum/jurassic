@@ -216,13 +216,28 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Pushes a reference to the 'new.target' value for the current function onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void LoadNewTarget(ILGenerator generator)
+        {
+            var label = generator.CreateLabel();
+            generator.LoadArgument(4);
+            generator.Duplicate();
+            generator.BranchIfNotNull(label);
+            generator.Pop();
+            generator.LoadField(ReflectionHelpers.Undefined_Value);
+            generator.DefineLabelPosition(label);
+        }
+
+        /// <summary>
         /// Pushes a reference to the array of argument values for the current function onto the
         /// stack.
         /// </summary>
         /// <param name="generator"> The IL generator. </param>
         public static void LoadArgumentsArray(ILGenerator generator)
         {
-            generator.LoadArgument(4);
+            generator.LoadArgument(5);
         }
     }
 

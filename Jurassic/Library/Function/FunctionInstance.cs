@@ -221,22 +221,12 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
+        /// <param name="newTarget"> The value of 'new.target'. </param>
         /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The object that was created. </returns>
-        public virtual ObjectInstance ConstructLateBound(params object[] argumentValues)
+        public virtual ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
-            // Create a new object and set the prototype to the instance prototype of the function.
-            var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
-
-            // Run the function, with the new object as the "this" keyword.
-            var result = CallLateBound(newObject, argumentValues);
-
-            // Return the result of the function if it is an object.
-            if (result is ObjectInstance)
-                return (ObjectInstance)result;
-
-            // Otherwise, return the new object.
-            return newObject;
+            throw new JavaScriptException(Engine, ErrorType.TypeError, $"{Name} is not a constructor.");
         }
 
         /// <summary>
@@ -245,14 +235,15 @@ namespace Jurassic.Library
         /// <param name="path"> The path of the javascript source file that contains the caller. </param>
         /// <param name="function"> The name of the caller function. </param>
         /// <param name="line"> The line number of the statement that is calling this function. </param>
+        /// <param name="newTarget"> The value of 'new.target'. </param>
         /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The object that was created. </returns>
-        public ObjectInstance ConstructWithStackTrace(string path, string function, int line, object[] argumentValues)
+        public ObjectInstance ConstructWithStackTrace(string path, string function, int line, FunctionInstance newTarget, object[] argumentValues)
         {
             this.Engine.PushStackFrame(path, function, line, ScriptEngine.CallType.NewOperator);
             try
             {
-                return ConstructLateBound(argumentValues);
+                return ConstructLateBound(newTarget, argumentValues);
             }
             finally
             {

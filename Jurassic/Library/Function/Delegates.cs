@@ -10,9 +10,10 @@ namespace Jurassic.Library
     /// context). </param>
     /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
     /// <param name="functionObject"> The function object. </param>
+    /// <param name="newTarget"> The value of 'new.target'. </param>
     /// <param name="arguments"> The arguments that were passed to the function. </param>
     /// <returns> The result of calling the method. </returns>
-    public delegate object FunctionDelegate(ScriptEngine engine, Scope scope, object thisObject, FunctionInstance functionObject, object[] arguments);
+    public delegate object FunctionDelegate(ScriptEngine engine, Scope scope, object thisObject, FunctionInstance functionObject, FunctionInstance newTarget, object[] arguments);
 
     /// <summary>
     /// Called once per element by Array.prototype.every, Array.prototype.some and Array.prototype.filter.

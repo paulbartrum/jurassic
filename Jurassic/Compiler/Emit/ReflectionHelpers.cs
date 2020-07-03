@@ -119,7 +119,6 @@ namespace Jurassic.Compiler
         internal static ConstructorInfo JavaScriptException_Constructor_Error;
         internal static ConstructorInfo JavaScriptException_Constructor_Object;
         internal static ConstructorInfo UserDefinedFunction_Constructor;
-        internal static ConstructorInfo FunctionDelegate_Constructor;
         internal static ConstructorInfo Arguments_Constructor;
         internal static ConstructorInfo PropertyDescriptor_Constructor2;
         internal static ConstructorInfo PropertyDescriptor_Constructor3;
@@ -194,7 +193,7 @@ namespace Jurassic.Compiler
             Scope_Delete = GetInstanceMethod(typeof(Scope), "Delete", typeof(string));
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));
-            FunctionInstance_ConstructWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "ConstructWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(object[]));
+            FunctionInstance_ConstructWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "ConstructWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(FunctionInstance), typeof(object[]));
             FunctionInstance_CallWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "CallWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(object), typeof(object[]));
             FunctionInstance_InstancePrototype = GetInstanceMethod(typeof(FunctionInstance), "get_InstancePrototype");
 
@@ -245,7 +244,6 @@ namespace Jurassic.Compiler
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));
             Type_GetTypeFromHandle = GetStaticMethod(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
-            FunctionDelegate_Constructor = GetConstructor(typeof(FunctionDelegate), typeof(object), typeof(IntPtr));
             Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
             PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(Library.PropertyAttributes));
             PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
@@ -269,7 +267,7 @@ namespace Jurassic.Compiler
             ReflectionHelpers_SetObjectLiteralValue = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralValue", typeof(ObjectInstance), typeof(object), typeof(object));
             ReflectionHelpers_SetObjectLiteralGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetObjectLiteralSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
-            ReflectionHelpers_ConstructClass = GetStaticMethod(typeof(ReflectionHelpers), "ConstructClass", typeof(ScriptEngine), typeof(string), typeof(object), typeof(FunctionInstance));
+            ReflectionHelpers_ConstructClass = GetStaticMethod(typeof(ReflectionHelpers), "ConstructClass", typeof(ScriptEngine), typeof(string), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetClassValue = GetStaticMethod(typeof(ReflectionHelpers), "SetClassValue", typeof(ObjectInstance), typeof(object), typeof(object));
             ReflectionHelpers_SetClassGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetClassGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetClassSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetClassSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
@@ -354,11 +352,11 @@ namespace Jurassic.Compiler
         /// <param name="extends"></param>
         /// <param name="constructor"></param>
         /// <returns></returns>
-        public static FunctionInstance ConstructClass(ScriptEngine engine, string name, object extends, FunctionInstance constructor)
+        public static FunctionInstance ConstructClass(ScriptEngine engine, string name, object extends, UserDefinedFunction constructor)
         {
             if (extends is FunctionInstance extendsFunction)
             {
-                // If extends doesn't have [[Construct]] then throw a TypeError
+                // If extends doesn't have [[Construct]] then throw a TypeError.
                 return new ClassFunction(extendsFunction, name, ObjectInstance.CreateRawObject(extendsFunction.InstancePrototype), constructor);
             }
             else if (extends == Null.Value)

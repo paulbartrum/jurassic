@@ -192,9 +192,10 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
+        /// <param name="newTarget"> The value of 'new.target'. </param>
         /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The object that was created. </returns>
-        public override ObjectInstance ConstructLateBound(params object[] argumentValues)
+        public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
             if (this.constructBinder == null)
                 throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Objects cannot be constructed from built-in functions");

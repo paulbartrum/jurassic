@@ -1658,12 +1658,52 @@ namespace Jurassic.Compiler
                     // Make sure the token is actually an operator and not just a random keyword.
                     if (newOperator == null)
                     {
+                        if (this.nextToken == PunctuatorToken.Dot &&
+                            unboundOperator != null &&
+                            unboundOperator.OperatorType == OperatorType.New &&
+                            unboundOperator.AcceptingOperands &&
+                            expressionState == ParserExpressionState.Literal)
+                        {
+                            // new.target is a pseudo-property, ugh.
+                            Consume();
+                            if (this.nextToken is IdentifierToken identifierToken && identifierToken.Name == "target")
+                            {
+                                Consume();
+                                if (root == unboundOperator)
+                                {
+                                    root = new NewTargetExpression();
+                                    unboundOperator = null;
+                                }
+                                else
+                                {
+                                    var node = root as OperatorExpression;
+                                    while (node != null)
+                                    {
+                                        if (node.RightBranch == unboundOperator)
+                                        {
+                                            node.Pop();
+                                            node.Push(new NewTargetExpression());
+                                            unboundOperator = node;
+                                            break;
+                                        }
+                                        node = node.RightBranch;
+                                    }
+                                }
+                                expressionState = ParserExpressionState.Operator;
+                                continue;
+                            }
+                            else
+                                throw new SyntaxErrorException("Expected 'target'", this.LineNumber, this.SourcePath);
+                        }
+
                         // Check if the token is an end token, for example a semi-colon.
                         if (Array.IndexOf(endTokens, this.nextToken) >= 0)
                             break;
+
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && (this.consumedLineTerminator == true || this.nextToken == PunctuatorToken.RightBrace))
                             break;
+
                         throw new SyntaxErrorException(string.Format("Unexpected token {0} in expression.", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 

@@ -13,9 +13,6 @@ namespace Jurassic.Library
     [DebuggerTypeProxy(typeof(UserDefinedFunctionDebugView))]
     public class UserDefinedFunction : FunctionInstance
     {
-        [ThreadStatic]
-        private static int currentRecursionDepth;
-
         [NonSerialized]
         private GeneratedMethod generatedMethod;
 
@@ -219,7 +216,7 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
+        /// Gets the value that will be displayed in debugger watch window.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override string DebuggerDisplayValue
@@ -232,6 +229,22 @@ namespace Jurassic.Library
                 string result = string.Format("{0}({1})", name, this.ArgumentsText);
                 return result;
             }
+        }
+
+        /// <summary>
+        /// Gets a reference to the generated method. For internal use only.
+        /// </summary>
+        internal GeneratedMethod GeneratedMethod
+        {
+            get { return generatedMethod; }
+        }
+
+        /// <summary>
+        /// Gets a reference to the generated method. For internal use only.
+        /// </summary>
+        internal FunctionDelegate Body
+        {
+            get { return body; }
         }
 
 
@@ -247,20 +260,29 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            // Check the allowed recursion depth.
-            if (this.Engine.RecursionDepthLimit > 0 && currentRecursionDepth >= this.Engine.RecursionDepthLimit)
-                throw new StackOverflowException("The allowed recursion depth of the script engine has been exceeded.");
+            return this.body(this.Engine, this.ParentScope, thisObject, this, null, argumentValues);
+        }
 
-            currentRecursionDepth++;
-            try
-            {
-                // Call the function.
-                return this.body(this.Engine, this.ParentScope, thisObject, this, argumentValues);
-            }
-            finally
-            {
-                currentRecursionDepth--;
-            }
+        /// <summary>
+        /// Creates an object, using this function as the constructor.
+        /// </summary>
+        /// <param name="newTarget"> The value of 'new.target'. </param>
+        /// <param name="argumentValues"> An array of argument values. </param>
+        /// <returns> The object that was created. </returns>
+        public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
+        {
+            // Create a new object and set the prototype to the instance prototype of the function.
+            var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
+
+            // Run the function, with the new object as the "this" keyword.
+            var result = this.body(this.Engine, this.ParentScope, newObject, this, newTarget, argumentValues);
+
+            // Return the result of the function if it is an object.
+            if (result is ObjectInstance)
+                return (ObjectInstance)result;
+
+            // Otherwise, return the new object.
+            return newObject;
         }
 
         /// <summary>

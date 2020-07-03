@@ -1345,6 +1345,9 @@ namespace Jurassic
         /// <param name="callType"> The type of call that is being made. </param>
         internal void PushStackFrame(string path, string function, int line, CallType callType)
         {
+            // Check the allowed recursion depth.
+            if (this.RecursionDepthLimit > 0 && this.stackFrames.Count >= this.RecursionDepthLimit)
+                throw new StackOverflowException("The allowed recursion depth of the script engine has been exceeded.");
             this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line, CallType = callType });
         }
 

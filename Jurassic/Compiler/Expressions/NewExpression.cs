@@ -69,6 +69,11 @@ namespace Jurassic.Compiler
                 EmitConversion.ToAny(generator, operand.ResultType);
             }
 
+            // Store this for later.
+            var functionReference = generator.CreateTemporaryVariable(PrimitiveType.Any);
+            generator.Duplicate();
+            generator.StoreVariable(functionReference);
+
             // Check the object really is a function - if not, throw an exception.
             generator.Duplicate();
             generator.IsInstance(typeof(Library.FunctionInstance));
@@ -102,6 +107,10 @@ namespace Jurassic.Compiler
             generator.LoadStringOrNull(optimizationInfo.FunctionName);
             generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
 
+            // Pass in the value of 'new.target'.
+            generator.LoadVariable(functionReference);
+            generator.ReleaseTemporaryVariable(functionReference);
+
             if (operand is FunctionCallExpression)
             {
                 // Emit an array containing the function arguments.
@@ -114,7 +123,7 @@ namespace Jurassic.Compiler
                 generator.NewArray(typeof(object));
             }
 
-            // Call FunctionInstance.ConstructLateBound(argumentValues)
+            // FunctionInstance.ConstructLateBound(string path, string function, int line, FunctionInstance newTarget, object[] argumentValues)
             generator.Call(ReflectionHelpers.FunctionInstance_ConstructWithStackTrace);
         }
     }

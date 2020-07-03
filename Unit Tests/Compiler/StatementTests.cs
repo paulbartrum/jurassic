@@ -623,6 +623,20 @@ namespace UnitTests
         [TestMethod]
         public void Class()
         {
+            // new.target
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                new function f() {
+                  passed = new.target === f;
+                }();
+                class Animal {
+                    constructor() { passed = passed && new.target === Dog; }
+                }
+                class Dog extends Animal {
+                }
+                new Dog();
+                passed"));
+
             // Class with single function.
             Assert.AreEqual(17, Evaluate(@"
                 class A {

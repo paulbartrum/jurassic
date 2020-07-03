@@ -217,6 +217,7 @@ namespace Jurassic.Compiler
                 typeof(Scope),                      // The parent scope.
                 typeof(object),                     // The "this" object.
                 typeof(Library.FunctionInstance),   // The function object.
+                typeof(Library.FunctionInstance),   // The "new.target" value.
                 typeof(object[])                    // The argument values.
             };
         }
@@ -227,7 +228,7 @@ namespace Jurassic.Compiler
         /// <returns> An array of parameter names. </returns>
         protected override string[] GetParameterNames()
         {
-            return new string[] { "engine", "scope", "this", "body", "arguments" };
+            return new string[] { "engine", "scope", "this", "body", "newTarget", "arguments" };
         }
 
         /// <summary>

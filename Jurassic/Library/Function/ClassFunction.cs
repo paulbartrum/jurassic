@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jurassic.Compiler;
+using System;
 using System.Collections.Generic;
 
 namespace Jurassic.Library
@@ -9,7 +10,13 @@ namespace Jurassic.Library
     /// </summary>
     public class ClassFunction : FunctionInstance
     {
-        private FunctionInstance constructor;
+        private Scope constructorScope;
+
+        [NonSerialized]
+        private GeneratedMethod constructorGeneratedMethod;
+
+        [NonSerialized]
+        private FunctionDelegate constructorBody;
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
@@ -32,14 +39,19 @@ namespace Jurassic.Library
         /// A class that extends null looks like this:
         /// new ClassFunction(engine.Function.InstancePrototype, name, ObjectInstance.CreateRawObject(null), constructor)
         /// </remarks>
-        public ClassFunction(ObjectInstance prototype, string name, ObjectInstance instancePrototype, FunctionInstance constructor)
+        public ClassFunction(ObjectInstance prototype, string name, ObjectInstance instancePrototype, UserDefinedFunction constructor)
             : base(prototype)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
             if (instancePrototype == null)
                 throw new ArgumentNullException(nameof(instancePrototype));
-            this.constructor = constructor;
+            if (constructor != null)
+            {
+                this.constructorScope = constructor.ParentScope;
+                this.constructorGeneratedMethod = constructor.GeneratedMethod;
+                this.constructorBody = constructor.Body;
+            }
 
             // Initialize the instance prototype.
             instancePrototype.InitializeProperties(new List<PropertyNameAndValue>
@@ -70,24 +82,38 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, "Class constructor A cannot be invoked without 'new'");
+            throw new JavaScriptException(Engine, ErrorType.TypeError, $"Class constructor {Name} cannot be invoked without 'new'");
         }
 
         /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
+        /// <param name="newTarget"> The value of 'new.target'. </param>
         /// <param name="argumentValues"> An array of argument values. </param>
         /// <returns> The object that was created. </returns>
-        public override ObjectInstance ConstructLateBound(params object[] argumentValues)
+        public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
+            bool doesExtend = Prototype != null && Prototype != Engine.Function.InstancePrototype;
+
+
             // Create a new object and set the prototype to the instance prototype of the function.
             var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
 
-            if (constructor != null)
+            if (this.constructorBody != null)
             {
                 // Run the function, with the new object as the "this" keyword.
                 // The return value is ignored!
-                constructor.CallLateBound(newObject, argumentValues);
+                this.constructorBody(this.Engine, this.constructorScope, newObject, this, newTarget, argumentValues);
+            }
+            else if (Prototype != Engine.Function.InstancePrototype)
+            {
+                // Call the base class constructor.
+                if (Prototype is FunctionInstance super)
+                {
+                    super.ConstructLateBound(newTarget, argumentValues);
+                }
+                else
+                    throw new JavaScriptException(Engine, ErrorType.TypeError, $"Super constructor {Prototype} of {Name} is not a constructor.");
             }
 
             // Otherwise, return the new object.
