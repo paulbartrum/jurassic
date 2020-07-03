@@ -87,7 +87,6 @@ namespace Jurassic.Compiler
         internal static MethodInfo Type_GetTypeFromHandle;
         internal static MethodInfo MethodBase_GetMethodFromHandle;
         internal static MethodInfo GeneratedMethod_Load;
-        internal static ConstructorInfo ClassFunction_Constructor;
         internal static MethodInfo ClrInstanceWrapper_GetWrappedInstance;
         internal static MethodInfo ClrInstanceWrapper_Create;
         internal static MethodInfo Decimal_ToDouble;
@@ -136,6 +135,10 @@ namespace Jurassic.Compiler
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralValue;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralGetter;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralSetter;
+        internal static MethodInfo ReflectionHelpers_ConstructClass;
+        internal static MethodInfo ReflectionHelpers_SetClassValue;
+        internal static MethodInfo ReflectionHelpers_SetClassGetter;
+        internal static MethodInfo ReflectionHelpers_SetClassSetter;
 
         /// <summary>
         /// Initializes static members of this class.
@@ -250,7 +253,6 @@ namespace Jurassic.Compiler
             PropertyName_Constructor = GetConstructor(typeof(PropertyReference), typeof(string));
 
             GeneratedMethod_Load = GetStaticMethod(typeof(GeneratedMethod), "Load", typeof(long));
-            ClassFunction_Constructor = GetConstructor(typeof(ClassFunction), typeof(ObjectInstance), typeof(string), typeof(FunctionInstance));
             ClrInstanceWrapper_GetWrappedInstance = GetInstanceMethod(typeof(ClrInstanceWrapper), "get_WrappedInstance");
             ClrInstanceWrapper_Create = GetStaticMethod(typeof(ClrInstanceWrapper), "Create", new Type[] { typeof(ScriptEngine), typeof(object) });
             Decimal_ToDouble = GetStaticMethod(typeof(decimal), "ToDouble", typeof(decimal));
@@ -267,6 +269,10 @@ namespace Jurassic.Compiler
             ReflectionHelpers_SetObjectLiteralValue = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralValue", typeof(ObjectInstance), typeof(object), typeof(object));
             ReflectionHelpers_SetObjectLiteralGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetObjectLiteralSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
+            ReflectionHelpers_ConstructClass = GetStaticMethod(typeof(ReflectionHelpers), "ConstructClass", typeof(ScriptEngine), typeof(string), typeof(object), typeof(FunctionInstance));
+            ReflectionHelpers_SetClassValue = GetStaticMethod(typeof(ReflectionHelpers), "SetClassValue", typeof(ObjectInstance), typeof(object), typeof(object));
+            ReflectionHelpers_SetClassGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetClassGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
+            ReflectionHelpers_SetClassSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetClassSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
 
 #if DEBUG && ENABLE_DEBUGGING
             // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus
@@ -338,6 +344,76 @@ namespace Jurassic.Compiler
                 obj.DefineProperty(key, new PropertyDescriptor(null, setter, Library.PropertyAttributes.FullAccess), throwOnError: false);
             else
                 obj.DefineProperty(key, new PropertyDescriptor(descriptor.Getter, setter, Library.PropertyAttributes.FullAccess), throwOnError: false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <param name="name"></param>
+        /// <param name="extends"></param>
+        /// <param name="constructor"></param>
+        /// <returns></returns>
+        public static FunctionInstance ConstructClass(ScriptEngine engine, string name, object extends, FunctionInstance constructor)
+        {
+            if (extends is FunctionInstance extendsFunction)
+            {
+                // If extends doesn't have [[Construct]] then throw a TypeError
+                return new ClassFunction(extendsFunction, name, ObjectInstance.CreateRawObject(extendsFunction.InstancePrototype), constructor);
+            }
+            else if (extends == Null.Value)
+            {
+                return new ClassFunction(engine.Function.InstancePrototype, name, ObjectInstance.CreateRootObject(engine), constructor);
+            }
+            else
+            {
+                if (extends != null)
+                    throw new JavaScriptException(engine, ErrorType.TypeError, $"Class {name} cannot extend '{extends}' as it is not a constructor.");
+                return new ClassFunction(engine.Function.InstancePrototype, name, engine.Object.Construct(), constructor);
+            }
+        }
+
+        /// <summary>
+        /// Sets the value of a class property to a value.
+        /// </summary>
+        /// <param name="obj"> The object to set the property on. </param>
+        /// <param name="key"> The property key (can be a string or a symbol). </param>
+        /// <param name="value"> The value to set. </param>
+        public static void SetClassValue(ObjectInstance obj, object key, object value)
+        {
+            obj.DefineProperty(key, new PropertyDescriptor(value, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
+        }
+
+        /// <summary>
+        /// Sets the value of a class property to a getter.  If the value already has a
+        /// setter then it will be retained.
+        /// </summary>
+        /// <param name="obj"> The object to set the property on. </param>
+        /// <param name="key"> The property key (can be a string or a symbol). </param>
+        /// <param name="getter"> The getter function. </param>
+        public static void SetClassGetter(ObjectInstance obj, object key, UserDefinedFunction getter)
+        {
+            var descriptor = obj.GetOwnPropertyDescriptor(key);
+            if (descriptor.Exists == false || !descriptor.IsAccessor)
+                obj.DefineProperty(key, new PropertyDescriptor(getter, null, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
+            else
+                obj.DefineProperty(key, new PropertyDescriptor(getter, descriptor.Setter, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
+        }
+
+        /// <summary>
+        /// Sets the value of a class property to a setter.  If the value already has a
+        /// getter then it will be retained.
+        /// </summary>
+        /// <param name="obj"> The object to set the property on. </param>
+        /// <param name="key"> The property key (can be a string or a symbol).</param>
+        /// <param name="setter"> The setter function. </param>
+        public static void SetClassSetter(ObjectInstance obj, object key, UserDefinedFunction setter)
+        {
+            var descriptor = obj.GetOwnPropertyDescriptor(key);
+            if (descriptor.Exists == false || !descriptor.IsAccessor)
+                obj.DefineProperty(key, new PropertyDescriptor(null, setter, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
+            else
+                obj.DefineProperty(key, new PropertyDescriptor(descriptor.Getter, setter, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
         }
 
 

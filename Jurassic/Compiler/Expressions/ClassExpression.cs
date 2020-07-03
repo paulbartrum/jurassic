@@ -60,13 +60,20 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // prototype
+            // engine
             EmitHelpers.LoadScriptEngine(generator);
-            generator.Call(ReflectionHelpers.ScriptEngine_Function);
-            generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
 
             // name
             generator.LoadString(this.Name);
+
+            // extends
+            if (Extends == null)
+                generator.LoadNull();
+            else
+            {
+                Extends.GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToAny(generator, Extends.ResultType);
+            }
 
             // constructor
             if (Constructor == null)
@@ -74,9 +81,8 @@ namespace Jurassic.Compiler
             else
                 Constructor.GenerateCode(generator, optimizationInfo);
 
-            // new ClassFunction(ObjectInstance prototype, string name, FunctionInstance constructor)
-            generator.NewObject(ReflectionHelpers.ClassFunction_Constructor);
-            
+            // ConstructClass(ScriptEngine engine, string name, object extends, FunctionInstance constructor)
+            generator.CallStatic(ReflectionHelpers.ReflectionHelpers_ConstructClass);
 
             foreach (var member in this.Members)
             {
@@ -105,17 +111,17 @@ namespace Jurassic.Compiler
                 if (member.Name.IsGetter)
                 {
                     // Add a getter to the object.
-                    generator.Call(ReflectionHelpers.ReflectionHelpers_SetObjectLiteralGetter);
+                    generator.Call(ReflectionHelpers.ReflectionHelpers_SetClassGetter);
                 }
                 else if (member.Name.IsSetter)
                 {
                     // Add a setter to the object.
-                    generator.Call(ReflectionHelpers.ReflectionHelpers_SetObjectLiteralSetter);
+                    generator.Call(ReflectionHelpers.ReflectionHelpers_SetClassSetter);
                 }
                 else
                 {
                     // Add a new property to the object.
-                    generator.Call(ReflectionHelpers.ReflectionHelpers_SetObjectLiteralValue);
+                    generator.Call(ReflectionHelpers.ReflectionHelpers_SetClassValue);
                 }
             }
         }

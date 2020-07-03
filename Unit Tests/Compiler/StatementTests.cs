@@ -689,17 +689,43 @@ namespace UnitTests
                 }
                 new A().b()"));
 
-            // Not supported yet.
             // Class with extends.
-            //Assert.AreEqual("bark", Evaluate(@"
-            //    class Animal {
-            //        speak() { return 'oof'; }
-            //    }
-            //    class Dog extends Animal {
-            //        speak() { return 'bark'; }
-            //    }
-            //    new Dog().speak()"));
-            //
+            Assert.AreEqual("oof", Evaluate(@"
+                class Animal {
+                    speak1() { return 'oof'; }
+                }
+                class Dog extends Animal {
+                    speak2() { return 'bark'; }
+                }
+                new Dog().speak1()"));
+
+            // Property overrides.
+            Assert.AreEqual("bark", Evaluate(@"
+                class Animal {
+                    speak() { return 'oof'; }
+                }
+                class Dog extends Animal {
+                    speak() { return 'bark'; }
+                }
+                new Dog().speak()"));
+
+            // Check the prototypes are correct when extending.
+            Assert.AreEqual(true, Evaluate(@"
+                class Animal {
+                    speak() { return 'oof'; }
+                }
+                class Dog extends Animal {
+                    speak() { return 'bark'; }
+                }
+                new Dog() instanceof Animal && Animal.isPrototypeOf(Dog)"));
+
+            // Extend from null
+            Assert.AreEqual(true, Evaluate(@"
+                class C extends null {
+                    speak() { return 'oof'; }
+                }
+                Function.prototype.isPrototypeOf(C) && Object.getPrototypeOf(C.prototype) === null"));
+
             //// Class with super.
             //Assert.AreEqual("bark", Evaluate(@"
             //    class Animal {
@@ -710,17 +736,20 @@ namespace UnitTests
             //        constructor() { super('bark'); }
             //    }
             //    new Dog().speak()"));
-            //
-            //// Classes may only have one constructor.
-            //Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
-            //    class A {
-            //        constructor() {
-            //            this.b = 15;
-            //        }
-            //        constructor() {
-            //            this.b = 16;
-            //        }
-            //    }"));
+
+
+            // Multiple constructors are not allowed.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
+                class A {
+                    constructor() { }
+                    constructor() { }
+                }"));
+
+            // A static member called 'prototype' is not allowed.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
+                class A {
+                    static prototype() { }
+                }"));
         }
     }
 }

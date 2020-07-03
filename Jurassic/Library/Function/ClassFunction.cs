@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -18,15 +19,29 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="name"> The name of the class. </param>
+        /// <param name="instancePrototype"> The value of the 'prototype' property. </param>
         /// <param name="constructor"> A function that represents the constructor, if the class has
         /// one, or <c>null</c> otherwise. </param>
-        public ClassFunction(ObjectInstance prototype, string name, FunctionInstance constructor)
+        /// <remarks>
+        /// A class that doesn't extend looks like this:
+        /// new ClassFunction(engine.Function.InstancePrototype, name, engine.Object.Construct(), constructor)
+        /// 
+        /// A class that extends A looks like this:
+        /// new ClassFunction(A, name, ObjectInstance.CreateRawObject(A.InstancePrototype), constructor)
+        /// 
+        /// A class that extends null looks like this:
+        /// new ClassFunction(engine.Function.InstancePrototype, name, ObjectInstance.CreateRawObject(null), constructor)
+        /// </remarks>
+        public ClassFunction(ObjectInstance prototype, string name, ObjectInstance instancePrototype, FunctionInstance constructor)
             : base(prototype)
         {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            if (instancePrototype == null)
+                throw new ArgumentNullException(nameof(instancePrototype));
             this.constructor = constructor;
 
-            // Create an object to serve as the instance prototype.
-            var instancePrototype = this.Engine.Object.Construct();
+            // Initialize the instance prototype.
             instancePrototype.InitializeProperties(new List<PropertyNameAndValue>
             {
                 new PropertyNameAndValue("constructor", this, PropertyAttributes.NonEnumerable)

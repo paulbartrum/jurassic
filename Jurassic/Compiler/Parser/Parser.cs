@@ -2251,6 +2251,11 @@ namespace Jurassic.Compiler
                     else
                         throw new SyntaxErrorException("A class may only have one constructor.", this.LineNumber, this.SourcePath);
                 }
+                else if (memberName.IsStatic && memberName.HasStaticName && memberName.StaticName == "prototype")
+                {
+                    // A static function called 'prototype' is not allowed.
+                    throw new SyntaxErrorException("Classes may not have a static property named 'prototype'.", this.LineNumber, this.SourcePath);
+                }
                 else
                     members.Add(expression);
             }
