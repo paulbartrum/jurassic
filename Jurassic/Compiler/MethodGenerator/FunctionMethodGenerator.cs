@@ -239,7 +239,7 @@ namespace Jurassic.Compiler
             {
                 // If the function body is strict mode, then the function name cannot be 'eval' or 'arguments'.
                 if (Name.HasStaticName && (Name.StaticName == "arguments" || Name.StaticName == "eval"))
-                    throw new SyntaxErrorException(string.Format("Functions cannot be named '{0}' in strict mode.", this.Name), lineNumber, sourcePath);
+                    throw new SyntaxErrorException(string.Format("Functions cannot be named '{0}' in strict mode.", Name.StaticName), lineNumber, sourcePath);
 
                 // If the function body is strict mode, then the argument names cannot be 'eval' or 'arguments'.
                 foreach (var argument in this.Arguments)
