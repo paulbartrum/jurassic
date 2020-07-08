@@ -688,13 +688,35 @@ namespace UnitTests
                 new A().b()"));
 
             // The class name should be valid inside of class functions.
-            //Assert.AreEqual(17, Evaluate(@"
+            //Assert.AreEqual(true, Evaluate(@"
             //    class C {
             //        method() { return typeof C === ""function""; }
             //    }
             //    var M = C.prototype.method;
             //    C = void undefined;
             //    C === void undefined && M();"));
+
+            // Classes are block-scoped.
+            /*Assert.AreEqual(true, Evaluate(@"
+                class C {}
+                var c1 = C;
+                {
+                    class C {}
+                    var c2 = C;
+                }
+                C === c1;"));*/
+
+            // Semi-colons are allowed within class bodies.
+            Assert.AreEqual(true, Evaluate(@"
+                class C {
+                    ;
+                    method() { return 2; };
+                    method2() { return 2; }
+                    method3() { return 2; };
+                }
+                typeof C.prototype.method === 'function'
+                    && typeof C.prototype.method2 === 'function'
+                    && typeof C.prototype.method3 === 'function';"));
 
             // Multiple constructors are not allowed.
             Assert.AreEqual("SyntaxError: A class may only have one constructor.", EvaluateExceptionMessage(@"
@@ -761,15 +783,47 @@ namespace UnitTests
                 }
                 new Dog().speak()"));
 
+            // If a constructor returns an object, then that is used as the instance.
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {
+                    constructor(a) { return ['foo' + a]; }
+                }
+                class C extends B {
+                    constructor(a) { return super('bar' + a); }
+                }
+                new C('baz')[0]"));
+
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {}
+                B.prototype.qux = 'foo';
+                B.prototype.corge = 'baz';
+                class C extends B {
+                    quux(a) { return super.qux + a + super['corge']; }
+                }
+                C.prototype.qux = 'garply';
+                new C().quux('bar');"));
+
             // 'super' must be called before accessing 'this'.
-            // Must call super constructor in derived class before accessing 'this' or returning from derived constructor
-            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before accessing 'this' or returning from derived constructor.", EvaluateExceptionMessage(@"
+            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before accessing 'this'.", EvaluateExceptionMessage(@"
                 class Animal {
                     constructor() { }
                 }
                 class Dog extends Animal {
                     constructor() {
                         this.a = 'test';
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // 'super' must be called before returning.
+            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before returning.", EvaluateExceptionMessage(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        return;
                         super();
                     }
                 }
@@ -788,7 +842,7 @@ namespace UnitTests
                 }
                 new Dog()"));
 
-            // 'super' keyword unexpected here.
+            // 'super' keyword can only be used in a derived constructor.
             Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"super();"));
             Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
                 class Dog {
@@ -797,7 +851,7 @@ namespace UnitTests
                     }
                 }
                 new Dog()"));
-            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
+            /*Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
                 class Animal {
                 }
                 class Dog extends Animal {
@@ -805,42 +859,7 @@ namespace UnitTests
                         super;
                     }
                 }
-                new Dog()"));
-        }
-
-        [TestMethod]
-        public void Class_NewTarget()
-        {
-            // new.target should be undefined in the context of a function call.
-            Assert.AreEqual(true, Evaluate(@"
-                var passed = false;
-                (function f() {
-                  passed = new.target === undefined;
-                })();
-                passed"));
-
-            // new.target should be set if 'new' is used.
-            Assert.AreEqual(true, Evaluate(@"
-                var passed = false;
-                new function f() {
-                  passed = new.target === f;
-                }();
-                passed"));
-
-            // new.target should be set in a constructor.
-            Assert.AreEqual(true, Evaluate(@"
-                var passed = false;
-                class Animal {
-                    constructor() { passed = new.target === Dog; }
-                }
-                class Dog extends Animal {
-                }
-                new Dog();
-                passed"));
-
-            // new.target can only be used in the context of a function.
-            // "new.target expression is not allowed here."
-            Assert.AreEqual("SyntaxError: new.target expression is not allowed here.", EvaluateExceptionMessage(@"new.target"));
+                new Dog()"));*/
         }
     }
 }

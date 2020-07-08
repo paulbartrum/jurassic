@@ -1642,9 +1642,6 @@ namespace Jurassic.Compiler
                     }
                     else if (this.nextToken == KeywordToken.Super)
                     {
-                        if (this.context != CodeContext.DerivedConstructor)
-                            throw new SyntaxErrorException("'super' keyword unexpected here.", this.LineNumber, this.SourcePath);
-
                         // Convert "super" to an expression.
                         terminal = new SuperExpression();
 
@@ -1927,7 +1924,7 @@ namespace Jurassic.Compiler
                 throw new SyntaxErrorException(string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Check the AST is valid.
-            root.CheckValidity(this.LineNumber, this.SourcePath);
+            root.CheckValidity(this.context, this.LineNumber, this.SourcePath);
 
             // A literal is the next valid expression token.
             this.expressionState = ParserExpressionState.Literal;
@@ -2285,6 +2282,13 @@ namespace Jurassic.Compiler
                 // If the next token is '}', then the class is complete.
                 if (this.nextToken == PunctuatorToken.RightBrace)
                     break;
+
+                // A bare semi-colon is an allowed class element.
+                if (this.nextToken == PunctuatorToken.Semicolon)
+                {
+                    Consume();
+                    continue;
+                }
 
                 // Record the start of the member.
                 var memberStartPosition = this.PositionAfterWhitespace;

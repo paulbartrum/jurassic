@@ -66,7 +66,6 @@ namespace Jurassic.TestSuiteRunner
                             !testCase.name.StartsWith("Proxy") &&
                             !testCase.name.StartsWith("Reflect") &&
                             !testCase.name.StartsWith("generators") &&
-                            !testCase.name.StartsWith("super") &&
                             !testCase.name.StartsWith("arrow functions") &&
                             !testCase.name.StartsWith("let") &&
                             !testCase.name.StartsWith("const") &&
@@ -76,6 +75,12 @@ namespace Jurassic.TestSuiteRunner
                             !testCase.name.Contains("is subclassable"))
                         {
                             Console.WriteLine($"{testCase.name} -- {testCase.detail}, result: {testCase.Response.JsonResult ?? $"{testCase.Response.ErrorType}: {testCase.Response.ErrorMessage}"}");
+                        }
+
+                        if (testCase.Success == false &&
+                            testCase.name.StartsWith("super"))
+                        {
+                            Console.WriteLine(testCase.script);
                         }
                     }
                     catch (IOException)

@@ -11,6 +11,13 @@ namespace Jurassic.Compiler
     {
         object thisValue;
 
+        /// <summary>
+        /// Creates an execution context for code running in the global scope. The value of the
+        /// 'this' keyword will be the global object.
+        /// </summary>
+        /// <param name="engine"> A script engine. </param>
+        /// <param name="scope"> Variable storage, to be attached to the global object. </param>
+        /// <returns> A new execution context instance. </returns>
         public static ExecutionContext CreateGlobalContext(ScriptEngine engine, ObjectScope scope)
         {
             // Convert the initial scope into a runtime scope.
@@ -19,21 +26,54 @@ namespace Jurassic.Compiler
             return new ExecutionContext(engine, runtimeScope, BindingStatus.Initialized, engine.Global, null, null);
         }
 
+        /// <summary>
+        /// Creates an execution context for code running in an eval() scope.
+        /// </summary>
+        /// <param name="engine"> A script engine. </param>
+        /// <param name="scope"> Variable storage. </param>
+        /// <param name="thisValue"> The value of the 'this' keyword. </param>
+        /// <returns> A new execution context instance. </returns>
         public static ExecutionContext CreateEvalContext(ScriptEngine engine, Scope scope, object thisValue)
         {
             return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, null, null);
         }
 
+        /// <summary>
+        /// Creates an execution context for code running as a result of a function call.
+        /// </summary>
+        /// <param name="engine"> A script engine. </param>
+        /// <param name="scope"> Variable storage. </param>
+        /// <param name="thisValue"> The value of the 'this' keyword. </param>
+        /// <param name="executingFunction"> The function that is being called. </param>
+        /// <returns> A new execution context instance. </returns>
         public static ExecutionContext CreateFunctionContext(ScriptEngine engine, Scope scope, object thisValue, FunctionInstance executingFunction)
         {
             return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, null);
         }
 
+        /// <summary>
+        /// Creates an execution context for code running as a result of the new operator.
+        /// </summary>
+        /// <param name="engine"> A script engine. </param>
+        /// <param name="scope"> Variable storage. </param>
+        /// <param name="thisValue"> The value of the 'this' keyword. </param>
+        /// <param name="executingFunction"> The function that is being called. </param>
+        /// <param name="newTarget"> The target of the new operator. </param>
+        /// <returns> A new execution context instance. </returns>
         public static ExecutionContext CreateConstructContext(ScriptEngine engine, Scope scope, object thisValue, FunctionInstance executingFunction, FunctionInstance newTarget)
         {
             return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, newTarget);
         }
 
+        /// <summary>
+        /// Creates an execution context for code running as a result of the new operator. The
+        /// 'this' value is unavailable.
+        /// </summary>
+        /// <param name="engine"> A script engine. </param>
+        /// <param name="scope"> Variable storage. </param>
+        /// <param name="executingFunction"> The function that is being called. </param>
+        /// <param name="newTarget"> The target of the new operator. </param>
+        /// <returns> A new execution context instance. </returns>
         public static ExecutionContext CreateDerivedContext(ScriptEngine engine, Scope scope, FunctionInstance executingFunction, FunctionInstance newTarget)
         {
             return new ExecutionContext(engine, scope, BindingStatus.Uninitialized, null, executingFunction, newTarget);
@@ -96,8 +136,24 @@ namespace Jurassic.Compiler
             get
             {
                 if (ThisBindingStatus == BindingStatus.Uninitialized)
-                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, "Must call super constructor in derived class before accessing 'this' or returning from derived constructor.");
+                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, "Must call super constructor in derived class before accessing 'this'.");
                 return thisValue;
+            }
+        }
+
+        /// <summary>
+        /// The value of the 'super' keyword.
+        /// </summary>
+        public ObjectInstance SuperValue
+        {
+            get
+            {
+                if (ThisValue is ObjectInstance thisObject && thisObject.Prototype != null)
+                {
+                    return thisObject.Prototype.Prototype;
+                }
+                else
+                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, "super.");
             }
         }
 

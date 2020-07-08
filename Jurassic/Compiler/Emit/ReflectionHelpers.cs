@@ -135,6 +135,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo ExecutionContext_GetScope;
         internal static MethodInfo ExecutionContext_SetScope;
         internal static MethodInfo ExecutionContext_GetThisValue;
+        internal static MethodInfo ExecutionContext_GetSuperValue;
         internal static MethodInfo ExecutionContext_GetExecutingFunction;
         internal static MethodInfo ExecutionContext_GetNewTargetObject;
         internal static MethodInfo ExecutionContext_ConvertThisToObject;
@@ -277,6 +278,7 @@ namespace Jurassic.Compiler
             ExecutionContext_GetScope = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Scope));
             ExecutionContext_SetScope = GetInstanceMethod(typeof(ExecutionContext), "set_" + nameof(ExecutionContext.Scope), typeof(Scope));
             ExecutionContext_GetThisValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ThisValue));
+            ExecutionContext_GetSuperValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.SuperValue));
             ExecutionContext_GetExecutingFunction = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ExecutingFunction));
             ExecutionContext_GetNewTargetObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.NewTargetObject));
             ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));

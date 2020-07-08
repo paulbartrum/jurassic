@@ -8,26 +8,11 @@ namespace Jurassic.Compiler
     internal sealed class SuperExpression : Expression
     {
         /// <summary>
-        /// Creates a new instance of SuperExpression.
-        /// </summary>
-        public SuperExpression()
-        {
-        }
-
-        /// <summary>
         /// Gets the type that results from evaluating this expression.
         /// </summary>
         public override PrimitiveType ResultType
         {
-            get { return PrimitiveType.Any; }
-        }
-
-        /// <summary>
-        /// Gets the static type of the reference.
-        /// </summary>
-        public PrimitiveType Type
-        {
-            get { return PrimitiveType.Any; }
+            get { return PrimitiveType.Object; }
         }
 
         /// <summary>
@@ -37,18 +22,8 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Checks the expression is valid and throws a SyntaxErrorException if not.
-        /// Called after the expression tree is fully built out.
-        /// </summary>
-        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
-        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
-        public override void CheckValidity(int lineNumber, string sourcePath)
-        {
-            throw new SyntaxErrorException("'super' keyword unexpected here.", lineNumber, sourcePath);
+            EmitHelpers.LoadExecutionContext(generator);
+            generator.Call(ReflectionHelpers.ExecutionContext_GetSuperValue);
         }
 
         /// <summary>

@@ -118,8 +118,18 @@ namespace Jurassic.Library
                         executingFunction: this,
                         newTarget: newTarget);
                 }
-                this.constructorBody(context, argumentValues);
-                return (ObjectInstance)context.ThisValue;
+
+                // Call the function.
+                var result = this.constructorBody(context, argumentValues);
+
+                // If the constructor returned an object, use that, otherwise use the 'this' value.
+                if (result is ObjectInstance resultObject)
+                    return resultObject;
+
+                // Make sure super() was called in derived classes.
+                if (context.ThisBindingStatus == ExecutionContext.BindingStatus.Uninitialized)
+                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, "Must call super constructor in derived class before returning.");
+                return (ObjectInstance)context.ThisValue;   // Must be ObjectInstance since it is only set in ExecutionContext.CallSuperClass().
             }
             else if (Prototype != Engine.Function.InstancePrototype)
             {

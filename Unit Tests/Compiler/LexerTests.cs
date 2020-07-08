@@ -53,7 +53,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError: Expected identifier but found '='", EvaluateExceptionMessage("class = 1"));
             Assert.AreEqual("SyntaxError: Unexpected token 'enum' in expression.", EvaluateExceptionMessage("enum = 1"));
             Assert.AreEqual("SyntaxError: Unexpected token 'extends' in expression.", EvaluateExceptionMessage("extends = 1"));
-            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage("super = 1"));
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in assignment.", EvaluateExceptionMessage("super = 1"));
             Assert.AreEqual("SyntaxError: Expected identifier but found '='", EvaluateExceptionMessage("const = 1"));
             Assert.AreEqual("SyntaxError: Unexpected token 'export' in expression.", EvaluateExceptionMessage("export = 1"));
             Assert.AreEqual("SyntaxError: Unexpected token 'import' in expression.", EvaluateExceptionMessage("import = 1"));

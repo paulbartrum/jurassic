@@ -1468,6 +1468,18 @@ namespace UnitTests
 
             // Errors
             Assert.AreEqual("SyntaxError: Invalid member access", EvaluateExceptionMessage("delete[].(0)"));
+
+            // Deleting a super reference is not allowed.
+            Assert.AreEqual("ReferenceError: Unsupported reference to 'super'.", EvaluateExceptionMessage(@"
+                class Base {
+                  foo() {}
+                }
+                class Derived extends Base {
+                  delFoo() {
+                    delete super.foo;
+                  }
+                }
+                new Derived().delFoo();"));
         }
 
         [TestMethod]
@@ -1621,6 +1633,40 @@ namespace UnitTests
             Assert.AreEqual(double.PositiveInfinity, Evaluate("(-0) ** -2"));
             Assert.AreEqual(double.NaN, Evaluate("(-1) ** 1.5"));
             Assert.AreEqual(double.NaN, Evaluate("(-1) ** -1.5"));
+        }
+
+        [TestMethod]
+        public void NewTarget()
+        {
+            // new.target should be undefined in the context of a function call.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                (function f() {
+                  passed = new.target === undefined;
+                })();
+                passed"));
+
+            // new.target should be set if 'new' is used.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                new function f() {
+                  passed = new.target === f;
+                }();
+                passed"));
+
+            // new.target should be set in a constructor.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                class Animal {
+                    constructor() { passed = new.target === Dog; }
+                }
+                class Dog extends Animal {
+                }
+                new Dog();
+                passed"));
+
+            // new.target can only be used in the context of a function.
+            Assert.AreEqual("SyntaxError: new.target expression is not allowed here.", EvaluateExceptionMessage(@"new.target"));
         }
     }
 }

@@ -311,21 +311,23 @@ namespace Jurassic.Compiler
         /// Checks the expression is valid and throws a SyntaxErrorException if not.
         /// Called after the expression tree is fully built out.
         /// </summary>
+        /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
         /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
         /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
-        public override void CheckValidity(int lineNumber, string sourcePath)
+        public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
         {
-            // Special-case the super call(). SuperExpression.CheckValidity always fails, but it's
-            // valid in the case of a function call, so don't call CheckValidity on it.
+            // Special-case the super call().
             if (this.Target is SuperExpression)
             {
+                if (context != CodeContext.DerivedConstructor)
+                    throw new SyntaxErrorException("'super' keyword unexpected here.", lineNumber, sourcePath);
                 for (int i = 1; i < OperandCount; i++)
-                    GetRawOperand(i).CheckValidity(lineNumber, sourcePath);
+                    GetRawOperand(i).CheckValidity(context, lineNumber, sourcePath);
                 return;
             }
 
             // Otherwise, just use the standard validation.
-            base.CheckValidity(lineNumber, sourcePath);
+            base.CheckValidity(context, lineNumber, sourcePath);
         }
     }
 }

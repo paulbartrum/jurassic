@@ -359,6 +359,12 @@ namespace Jurassic.Compiler
         {
             // Load the left-hand side and convert to an object instance.
             var lhs = this.GetOperand(0);
+            if (lhs is SuperExpression)
+            {
+                // Deleting a super reference is not allowed.
+                EmitHelpers.EmitThrow(generator, ErrorType.ReferenceError, "Unsupported reference to 'super'.");
+                return;
+            }
             lhs.GenerateCode(generator, optimizationInfo);
             EmitConversion.ToObject(generator, lhs.ResultType, optimizationInfo);
 
