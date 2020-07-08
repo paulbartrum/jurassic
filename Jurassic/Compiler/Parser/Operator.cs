@@ -63,6 +63,7 @@ namespace Jurassic.Compiler
         Index,
         MemberAccess,
         FunctionCall,
+        Super,
         New,
 
         // Unary postfix operators.

@@ -90,10 +90,10 @@ namespace Jurassic.Compiler
                 GenerateCode();
 
             // Convert the initial scope into a runtime scope.
-            var runtimeScope = ((ObjectScope)this.InitialScope).ConvertPlaceholderToRuntimeScope(engine.Global);
+            var context = ExecutionContext.CreateGlobalContext(engine, (ObjectScope)this.InitialScope);
 
             // Execute the compiled delegate and store the result.
-            object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(engine, runtimeScope, engine.Global);
+            object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(context);
 
             // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
             GC.KeepAlive(this);

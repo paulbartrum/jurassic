@@ -162,12 +162,22 @@ namespace Jurassic.Compiler
         //_________________________________________________________________________________________
 
         /// <summary>
+        /// Pushes the value of the execution context onto the stack.
+        /// </summary>
+        /// <param name="generator"> The IL generator. </param>
+        public static void LoadExecutionContext(ILGenerator generator)
+        {
+            generator.LoadArgument(0);
+        }
+
+        /// <summary>
         /// Pushes a reference to the script engine onto the stack.
         /// </summary>
         /// <param name="generator"> The IL generator. </param>
         public static void LoadScriptEngine(ILGenerator generator)
         {
             generator.LoadArgument(0);
+            generator.Call(ReflectionHelpers.ExecutionContext_GetEngine);
         }
 
         /// <summary>
@@ -176,7 +186,8 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The IL generator. </param>
         public static void LoadScope(ILGenerator generator)
         {
-            generator.LoadArgument(1);
+            generator.LoadArgument(0);
+            generator.Call(ReflectionHelpers.ExecutionContext_GetScope);
         }
 
         /// <summary>
@@ -185,7 +196,12 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The IL generator. </param>
         public static void StoreScope(ILGenerator generator)
         {
-            generator.StoreArgument(1);
+            var temp = generator.CreateTemporaryVariable(PrimitiveType.Any);
+            generator.StoreVariable(temp);
+            generator.LoadArgument(0);
+            generator.LoadVariable(temp);
+            generator.Call(ReflectionHelpers.ExecutionContext_SetScope);
+            generator.ReleaseTemporaryVariable(temp);
         }
 
         /// <summary>
@@ -194,17 +210,18 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The IL generator. </param>
         public static void LoadThis(ILGenerator generator)
         {
-            generator.LoadArgument(2);
+            generator.LoadArgument(0);
+            generator.Call(ReflectionHelpers.ExecutionContext_GetThisValue);
         }
 
         /// <summary>
         /// Stores the reference on top of the stack as the new value of the <c>this</c> keyword.
         /// </summary>
         /// <param name="generator"> The IL generator. </param>
-        public static void StoreThis(ILGenerator generator)
+        /*public static void StoreThis(ILGenerator generator)
         {
             generator.StoreArgument(2);
-        }
+        }*/
 
         /// <summary>
         /// Pushes a reference to the current function onto the stack.
@@ -212,7 +229,8 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The IL generator. </param>
         public static void LoadFunction(ILGenerator generator)
         {
-            generator.LoadArgument(3);
+            generator.LoadArgument(0);
+            generator.Call(ReflectionHelpers.ExecutionContext_GetExecutingFunction);
         }
 
         /// <summary>
@@ -221,13 +239,8 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The IL generator. </param>
         public static void LoadNewTarget(ILGenerator generator)
         {
-            var label = generator.CreateLabel();
-            generator.LoadArgument(4);
-            generator.Duplicate();
-            generator.BranchIfNotNull(label);
-            generator.Pop();
-            generator.LoadField(ReflectionHelpers.Undefined_Value);
-            generator.DefineLabelPosition(label);
+            generator.LoadArgument(0);
+            generator.Call(ReflectionHelpers.ExecutionContext_GetNewTargetObject);
         }
 
         /// <summary>
@@ -237,7 +250,7 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The IL generator. </param>
         public static void LoadArgumentsArray(ILGenerator generator)
         {
-            generator.LoadArgument(5);
+            generator.LoadArgument(1);
         }
     }
 

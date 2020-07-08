@@ -1054,7 +1054,7 @@ namespace Jurassic
             var value = this.Global.GetPropertyValue(functionName);
             if ((value is FunctionInstance) == false)
                 throw new InvalidOperationException(string.Format("'{0}' is not a function.", functionName));
-            return ((FunctionInstance)value).CallLateBound(null, argumentValues);
+            return ((FunctionInstance)value).CallLateBound(Global, argumentValues);
         }
 
         /// <summary>

@@ -16,6 +16,9 @@ namespace Jurassic.Compiler
         /// The context inside function bodies.
         /// </summary>
         Function,
+        ClassFunction,
+        Constructor,
+        DerivedConstructor,
 
         /// <summary>
         /// The context inside the eval() function.

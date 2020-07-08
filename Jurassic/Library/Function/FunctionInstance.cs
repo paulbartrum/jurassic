@@ -188,7 +188,7 @@ namespace Jurassic.Library
             this.Engine.PushStackFrame("native", function, 0, ScriptEngine.CallType.MethodCall);
             try
             {
-                return CallLateBound(thisObject, argumentValues);
+                return CallLateBound(thisObject ?? Undefined.Value, argumentValues);
             }
             finally
             {

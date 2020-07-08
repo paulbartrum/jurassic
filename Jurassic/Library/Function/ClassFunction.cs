@@ -93,31 +93,49 @@ namespace Jurassic.Library
         /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
-            bool doesExtend = Prototype != null && Prototype != Engine.Function.InstancePrototype;
-
-
-            // Create a new object and set the prototype to the instance prototype of the function.
-            var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
-
             if (this.constructorBody != null)
             {
-                // Run the function, with the new object as the "this" keyword.
-                // The return value is ignored!
-                this.constructorBody(this.Engine, this.constructorScope, newObject, this, newTarget, argumentValues);
+                // This class has a constructor.
+                ExecutionContext context;
+
+                if (Prototype != null && Prototype != Engine.Function.InstancePrototype)
+                {
+                    // This class extends another. In that case 'this' is unavailable.
+                    context = ExecutionContext.CreateDerivedContext(
+                        engine: this.Engine,
+                        scope: this.constructorScope,
+                        executingFunction: this,
+                        newTarget: newTarget);
+                }
+                else
+                {
+                    // This class doesn't extend from another class. Create a new object and set
+                    // 'this' equal to the newly created object.
+                    context = ExecutionContext.CreateConstructContext(
+                        engine: this.Engine,
+                        scope: this.constructorScope,
+                        thisValue: ObjectInstance.CreateRawObject(newTarget.InstancePrototype),
+                        executingFunction: this,
+                        newTarget: newTarget);
+                }
+                this.constructorBody(context, argumentValues);
+                return (ObjectInstance)context.ThisValue;
             }
             else if (Prototype != Engine.Function.InstancePrototype)
             {
                 // Call the base class constructor.
                 if (Prototype is FunctionInstance super)
                 {
-                    super.ConstructLateBound(newTarget, argumentValues);
+                    return super.ConstructLateBound(newTarget, argumentValues);
                 }
                 else
                     throw new JavaScriptException(Engine, ErrorType.TypeError, $"Super constructor {Prototype} of {Name} is not a constructor.");
             }
-
-            // Otherwise, return the new object.
-            return newObject;
+            else
+            {
+                // There's no constructor and no base class.
+                return ObjectInstance.CreateRawObject(newTarget.InstancePrototype);
+            }
         }
 
         /// <summary>

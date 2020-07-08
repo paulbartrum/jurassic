@@ -108,8 +108,11 @@ namespace Jurassic.Compiler
             if (this.StrictMode == true)
                 scope = scope.ParentScope;
 
+            // Package up all the runtime state.
+            var context = ExecutionContext.CreateEvalContext(engine, scope, this.ThisObject);
+
             // Execute the compiled delegate and store the result.
-            object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(engine, scope, this.ThisObject);
+            object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(context);
 
             // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
             GC.KeepAlive(this);

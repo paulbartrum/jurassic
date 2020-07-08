@@ -62,13 +62,14 @@ namespace Jurassic.Compiler
         /// <param name="parser"> The parser for the parent context. </param>
         /// <param name="scope"> The function scope. </param>
         /// <param name="optimizationHints"> Hints about whether optimization is possible. </param>
+        /// <param name="codeContext"> Indicates the parsing context. </param>
         /// <returns> A new parser. </returns>
-        private static Parser CreateFunctionBodyParser(Parser parser, Scope scope, MethodOptimizationHints optimizationHints)
+        private static Parser CreateFunctionBodyParser(Parser parser, Scope scope, MethodOptimizationHints optimizationHints, CodeContext codeContext)
         {
             var result = (Parser)parser.MemberwiseClone();
             result.SetInitialScope(scope);
             result.methodOptimizationHints = optimizationHints;
-            result.context = CodeContext.Function;
+            result.context = codeContext;
             result.endToken = PunctuatorToken.RightBrace;
             return result;
         }
@@ -138,6 +139,15 @@ namespace Jurassic.Compiler
         public MethodOptimizationHints MethodOptimizationHints
         {
             get { return this.methodOptimizationHints; }
+        }
+
+        /// <summary>
+        /// Indicates whether we are parsing in a function context (including constructors and class functions).
+        /// </summary>
+        public bool IsInFunctionContext
+        {
+            get {  return this.context == CodeContext.Function || this.context == CodeContext.ClassFunction ||
+                    this.context == CodeContext.Constructor || this.context == CodeContext.DerivedConstructor;  }
         }
 
 
@@ -979,7 +989,7 @@ namespace Jurassic.Compiler
         /// <returns> A return statement. </returns>
         private ReturnStatement ParseReturn()
         {
-            if (this.context != CodeContext.Function)
+            if (!IsInFunctionContext)
                 throw new SyntaxErrorException("Return statements are only allowed inside functions", this.LineNumber, this.SourcePath);
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
@@ -1273,7 +1283,12 @@ namespace Jurassic.Compiler
             ValidateVariableName(functionName);
 
             // Parse the function declaration.
-            var expression = ParseFunction(FunctionDeclarationType.Declaration, this.initialScope, new PropertyName(functionName), startPosition);
+            var expression = ParseFunction(
+                        functionType: FunctionDeclarationType.Declaration,
+                        parentScope: this.initialScope,
+                        name: new PropertyName(functionName),
+                        startPosition: startPosition,
+                        codeContext: CodeContext.Function);
 
             // Add the function to the top-level scope.
             this.initialScope.DeclareVariable(functionName, expression, writable: true, deletable: this.context == CodeContext.Eval);
@@ -1290,14 +1305,16 @@ namespace Jurassic.Compiler
         /// <param name="parentScope"> The parent scope for the function. </param>
         /// <param name="name"> The name of the function (can be computed at runtime). </param>
         /// <param name="startPosition"> The position of the start of the function. </param>
+        /// <param name="codeContext"> Indicates the parsing context. </param>
         /// <returns> A function expression. </returns>
-        private FunctionExpression ParseFunction(FunctionDeclarationType functionType, Scope parentScope, PropertyName name, SourceCodePosition startPosition)
+        private FunctionExpression ParseFunction(FunctionDeclarationType functionType, Scope parentScope, PropertyName name, SourceCodePosition startPosition, CodeContext codeContext)
         {
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
             // Create a new scope and assign variables within the function body to the scope.
-            var functionName = !name.IsGetter && !name.IsSetter && name.HasStaticName ? name.StaticName : null;
+            var functionName = !name.IsGetter && !name.IsSetter && name.HasStaticName &&
+                codeContext != CodeContext.Constructor && codeContext != CodeContext.DerivedConstructor ? name.StaticName : null;
             var scope = DeclarativeScope.CreateFunctionScope(parentScope, functionName, null);
 
             // Replace scope and methodOptimizationHints.
@@ -1337,7 +1354,7 @@ namespace Jurassic.Compiler
             this.methodOptimizationHints.HasNestedFunction = true;
 
             // Read the function body.
-            var functionParser = CreateFunctionBodyParser(this, scope, newMethodOptimizationHints);
+            var functionParser = CreateFunctionBodyParser(this, scope, newMethodOptimizationHints, codeContext);
             var body = functionParser.Parse();
 
             // Transfer state back from the function parser.
@@ -1562,6 +1579,7 @@ namespace Jurassic.Compiler
                     this.nextToken == KeywordToken.Function ||
                     this.nextToken == KeywordToken.Class ||
                     this.nextToken == KeywordToken.This ||
+                    this.nextToken == KeywordToken.Super ||
                     (this.expressionState == ParserExpressionState.Literal &&
                         (this.nextToken == PunctuatorToken.LeftBrace || this.nextToken == PunctuatorToken.LeftBracket)) ||
                     (this.nextToken is KeywordToken && unboundOperator != null && unboundOperator.OperatorType == OperatorType.MemberAccess && this.expressionState == ParserExpressionState.Literal))
@@ -1622,6 +1640,17 @@ namespace Jurassic.Compiler
                         // Add method optimization info.
                         this.methodOptimizationHints.HasThis = true;
                     }
+                    else if (this.nextToken == KeywordToken.Super)
+                    {
+                        if (this.context != CodeContext.DerivedConstructor)
+                            throw new SyntaxErrorException("'super' keyword unexpected here.", this.LineNumber, this.SourcePath);
+
+                        // Convert "super" to an expression.
+                        terminal = new SuperExpression();
+
+                        // Add method optimization info.
+                        this.methodOptimizationHints.HasThis = true;
+                    }
                     else if (this.nextToken == PunctuatorToken.LeftBracket)
                         // Array literal.
                         terminal = ParseArrayLiteral();
@@ -1668,6 +1697,8 @@ namespace Jurassic.Compiler
                             Consume();
                             if (this.nextToken is IdentifierToken identifierToken && identifierToken.Name == "target")
                             {
+                                if (!IsInFunctionContext)
+                                    throw new SyntaxErrorException("new.target expression is not allowed here.", this.LineNumber, this.SourcePath);
                                 Consume();
                                 if (root == unboundOperator)
                                 {
@@ -1896,7 +1927,7 @@ namespace Jurassic.Compiler
                 throw new SyntaxErrorException(string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Check the AST is valid.
-            CheckASTValidity(root);
+            root.CheckValidity(this.LineNumber, this.SourcePath);
 
             // A literal is the next valid expression token.
             this.expressionState = ParserExpressionState.Literal;
@@ -1904,39 +1935,6 @@ namespace Jurassic.Compiler
 
             // Resolve all the unbound operators into real operators.
             return root;
-        }
-
-        /// <summary>
-        /// Checks the given AST is valid.
-        /// </summary>
-        /// <param name="root"> The root of the AST. </param>
-        private void CheckASTValidity(Expression root)
-        {
-            // Push the root expression onto a stack.
-            Stack<Expression> stack = new Stack<Expression>();
-            stack.Push(root);
-
-            while (stack.Count > 0)
-            {
-                // Pop the next expression from the stack.
-                var expression = stack.Pop() as OperatorExpression;
-                
-                // Only operator expressions are checked for validity.
-                if (expression == null)
-                    continue;
-
-                // Check the operator expression has the right number of operands.
-                if (expression.Operator.IsValidNumberOfOperands(expression.OperandCount) == false)
-                    throw new SyntaxErrorException("Wrong number of operands", this.LineNumber, this.SourcePath);
-
-                // Check the operator expression is closed.
-                if (expression.Operator.SecondaryToken != null && expression.SecondTokenEncountered == false)
-                    throw new SyntaxErrorException(string.Format("Missing closing token '{0}'", expression.Operator.SecondaryToken.Text), this.LineNumber, this.SourcePath);
-
-                // Check the child nodes.
-                for (int i = 0; i < expression.OperandCount; i++)
-                    stack.Push(expression.GetRawOperand(i));
-            }
         }
 
         /// <summary>
@@ -2003,7 +2001,12 @@ namespace Jurassic.Compiler
                 if (propertyName.IsGetter || propertyName.IsSetter)
                 {
                     // Parse the function body.
-                    var function = ParseFunction(FunctionDeclarationType.Declaration, this.currentVarScope, propertyName, startPosition);
+                    var function = ParseFunction(
+                        functionType: FunctionDeclarationType.Declaration,
+                        parentScope: this.currentVarScope,
+                        name: propertyName,
+                        startPosition: startPosition,
+                        codeContext: CodeContext.Function);
 
                     // Add the getter or setter to the list of properties to set.
                     properties.Add(new PropertyDeclaration(propertyName, function));
@@ -2020,7 +2023,12 @@ namespace Jurassic.Compiler
                     // same as "var a = { b: function() { return 2; } }".
 
                     // Parse the function.
-                    var function = ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, propertyName, startPosition);
+                    var function = ParseFunction(
+                        functionType: FunctionDeclarationType.Expression,
+                        parentScope: this.currentVarScope,
+                        name: propertyName,
+                        startPosition: startPosition,
+                        codeContext: CodeContext.Function);
 
                     // Strangely enough, if declarationType is Expression then the last right
                     // brace ('}') is not consumed.
@@ -2137,7 +2145,12 @@ namespace Jurassic.Compiler
             }
 
             // Parse the rest of the function.
-            return ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, new PropertyName(functionName), startPosition);
+            return ParseFunction(
+                    functionType: FunctionDeclarationType.Expression,
+                    parentScope: this.currentVarScope,
+                    name: new PropertyName(functionName),
+                    startPosition: startPosition,
+                    codeContext: CodeContext.Function);
         }
 
         /// <summary>
@@ -2280,8 +2293,17 @@ namespace Jurassic.Compiler
                 // This will start with 'get', 'set', 'constructor' or a function name.
                 var memberName = ReadPropertyName(PropertyNameContext.ClassBody);
 
+                // Determine the parser context.
+                bool isConstructor = memberName.HasStaticName && memberName.StaticName == "constructor";
+                var parserContext = isConstructor ? (extends != null ? CodeContext.DerivedConstructor : CodeContext.Constructor) : CodeContext.ClassFunction;
+
                 // Parse the function declaration.
-                var expression = ParseFunction(FunctionDeclarationType.Declaration, this.initialScope, memberName, memberStartPosition);
+                var expression = ParseFunction(
+                    functionType: FunctionDeclarationType.Declaration,
+                    parentScope: this.initialScope,
+                    name: memberName,
+                    startPosition: memberStartPosition,
+                    codeContext: parserContext);
 
                 if (memberName.HasStaticName && memberName.StaticName == "constructor")
                 {

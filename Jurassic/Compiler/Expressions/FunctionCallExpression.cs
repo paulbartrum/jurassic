@@ -70,6 +70,16 @@ namespace Jurassic.Compiler
                 return;
             }
 
+            // Check if this is a super() call.
+            if (this.Target is SuperExpression)
+            {
+                // executionContext.CallSuperClass(arguments)
+                EmitHelpers.LoadExecutionContext(generator);
+                GenerateArgumentsArray(generator, optimizationInfo);
+                generator.Call(ReflectionHelpers.ExecutionContext_CallSuperClass);
+                return;
+            }
+
             // Emit the function instance first.
             ILLocalVariable targetBase = null;
             if (this.Target is MemberAccessExpression)
@@ -92,7 +102,7 @@ namespace Jurassic.Compiler
             }
             else
             {
-                // Something else (e.g. "eval()").
+                // Something else (e.g. "my_func()").
                 this.Target.GenerateCode(generator, optimizationInfo);
                 EmitConversion.ToAny(generator, this.Target.ResultType);
             }
@@ -296,6 +306,26 @@ namespace Jurassic.Compiler
             // Call Global.Eval(engine, code, scope, thisValue, strictMode)
             generator.Call(ReflectionHelpers.Global_Eval);
         }
-    }
 
+        /// <summary>
+        /// Checks the expression is valid and throws a SyntaxErrorException if not.
+        /// Called after the expression tree is fully built out.
+        /// </summary>
+        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
+        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
+        public override void CheckValidity(int lineNumber, string sourcePath)
+        {
+            // Special-case the super call(). SuperExpression.CheckValidity always fails, but it's
+            // valid in the case of a function call, so don't call CheckValidity on it.
+            if (this.Target is SuperExpression)
+            {
+                for (int i = 1; i < OperandCount; i++)
+                    GetRawOperand(i).CheckValidity(lineNumber, sourcePath);
+                return;
+            }
+
+            // Otherwise, just use the standard validation.
+            base.CheckValidity(lineNumber, sourcePath);
+        }
+    }
 }

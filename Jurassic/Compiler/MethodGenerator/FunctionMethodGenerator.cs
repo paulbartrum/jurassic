@@ -213,12 +213,8 @@ namespace Jurassic.Compiler
         protected override Type[] GetParameterTypes()
         {
             return new Type[] {
-                typeof(ScriptEngine),               // The script engine.
-                typeof(Scope),                      // The parent scope.
-                typeof(object),                     // The "this" object.
-                typeof(Library.FunctionInstance),   // The function object.
-                typeof(Library.FunctionInstance),   // The "new.target" value.
-                typeof(object[])                    // The argument values.
+                typeof(ExecutionContext),   // The script engine, this value, etc.
+                typeof(object[])            // The argument values.
             };
         }
 
@@ -314,39 +310,9 @@ namespace Jurassic.Compiler
             // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
             if (this.StrictMode == false && this.MethodOptimizationHints.HasThis == true)
             {
-                // if (thisObject == null || thisObject == Null.Value || thisObject == Undefined.Value)
-                EmitHelpers.LoadThis(generator);
-                generator.LoadNull();
-                generator.CompareEqual();
-                EmitHelpers.LoadThis(generator);
-                EmitHelpers.EmitNull(generator);
-                generator.CompareEqual();
-                generator.BitwiseOr();
-                EmitHelpers.LoadThis(generator);
-                EmitHelpers.EmitUndefined(generator);
-                generator.CompareEqual();
-                generator.BitwiseOr();
-
-                // {
-                var startOfFalse = generator.CreateLabel();
-                generator.BranchIfFalse(startOfFalse);
-
-                // thisObject = engine.Global;
-                EmitHelpers.LoadScriptEngine(generator);
-                generator.Call(ReflectionHelpers.ScriptEngine_Global);
-                
-                // } else {
-                var endOfIf = generator.CreateLabel();
-                generator.Branch(endOfIf);
-                generator.DefineLabelPosition(startOfFalse);
-                
-                // thisObject = TypeConverter.ToObject(thisObject);
-                EmitHelpers.LoadThis(generator);
-                EmitConversion.ToObject(generator, PrimitiveType.Any, optimizationInfo);
-
-                // }
-                generator.DefineLabelPosition(endOfIf);
-                EmitHelpers.StoreThis(generator);
+                // context.ConvertThisToObject();
+                EmitHelpers.LoadExecutionContext(generator);
+                generator.Call(ReflectionHelpers.ExecutionContext_ConvertThisToObject);
             }
 
             // Transfer the function name into the scope.

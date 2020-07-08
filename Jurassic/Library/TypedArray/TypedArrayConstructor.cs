@@ -233,7 +233,7 @@ namespace Jurassic.Library
                 for (int i = 0; i < values.Count; i++)
                 {
                     if (mapFn != null)
-                        result[i] = mapFn.Call(thisArg, values[i], i);
+                        result[i] = mapFn.CallFromNative("from", thisArg, values[i], i);
                     else
                         result[i] = values[i];
                 }
@@ -247,7 +247,7 @@ namespace Jurassic.Library
                 for (int i = 0; i < length; i++)
                 {
                     if (mapFn != null)
-                        result[i] = mapFn.Call(thisArg, items[i], i);
+                        result[i] = mapFn.CallFromNative("from", thisArg, items[i], i);
                     else
                         result[i] = items[i];
                 }

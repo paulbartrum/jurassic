@@ -108,34 +108,24 @@ namespace Jurassic.Library
         /// <summary>
         /// Used to retrieve the value of an argument.
         /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        /// <param name="scope"> The scope (global or eval context) or the parent scope (function
-        /// context). </param>
-        /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
-        /// <param name="functionObject"> The function object. </param>
-        /// <param name="newTarget"> The value of 'new.target'. </param>
+        /// <param name="context"> The script engine, this value, etc. </param>
         /// <param name="argumentValues"> The arguments that were passed to the function. </param>
         /// <returns> The result of calling the method. </returns>
-        private object ArgumentGetter(ScriptEngine engine, Compiler.Scope scope, object thisObject, FunctionInstance functionObject, FunctionInstance newTarget, object[] argumentValues)
+        private object ArgumentGetter(ExecutionContext context, object[] argumentValues)
         {
-            int argumentIndex = TypeConverter.ToInteger(functionObject.GetPropertyValue("argumentIndex"));
+            int argumentIndex = TypeConverter.ToInteger(context.ExecutingFunction.GetPropertyValue("argumentIndex"));
             return this.scope.GetValue(this.callee.ArgumentNames[argumentIndex]);
         }
 
         /// <summary>
         /// Used to set the value of an argument.
         /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        /// <param name="scope"> The scope (global or eval context) or the parent scope (function
-        /// context). </param>
-        /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
-        /// <param name="functionObject"> The function object. </param>
-        /// <param name="newTarget"> The value of 'new.target'. </param>
+        /// <param name="context"> The script engine, this value, etc. </param>
         /// <param name="argumentValues"> The arguments that were passed to the function. </param>
         /// <returns> The result of calling the method. </returns>
-        private object ArgumentSetter(ScriptEngine engine, Compiler.Scope scope, object thisObject, FunctionInstance functionObject, FunctionInstance newTarget, object[] argumentValues)
+        private object ArgumentSetter(ExecutionContext context, object[] argumentValues)
         {
-            int argumentIndex = TypeConverter.ToInteger(functionObject.GetPropertyValue("argumentIndex"));
+            int argumentIndex = TypeConverter.ToInteger(context.ExecutingFunction.GetPropertyValue("argumentIndex"));
             if (argumentValues != null && argumentValues.Length >= 1)
             {
                 object value = argumentValues[0];

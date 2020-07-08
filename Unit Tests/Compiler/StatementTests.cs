@@ -623,20 +623,6 @@ namespace UnitTests
         [TestMethod]
         public void Class()
         {
-            // new.target
-            Assert.AreEqual(true, Evaluate(@"
-                var passed = false;
-                new function f() {
-                  passed = new.target === f;
-                }();
-                class Animal {
-                    constructor() { passed = passed && new.target === Dog; }
-                }
-                class Dog extends Animal {
-                }
-                new Dog();
-                passed"));
-
             // Class with single function.
             Assert.AreEqual(17, Evaluate(@"
                 class A {
@@ -703,6 +689,23 @@ namespace UnitTests
                 }
                 new A().b()"));
 
+            // Multiple constructors are not allowed.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
+                class A {
+                    constructor() { }
+                    constructor() { }
+                }"));
+
+            // A static member called 'prototype' is not allowed.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
+                class A {
+                    static prototype() { }
+                }"));
+        }
+
+        [TestMethod]
+        public void Class_Extends()
+        {
             // Class with extends.
             Assert.AreEqual("oof", Evaluate(@"
                 class Animal {
@@ -740,30 +743,97 @@ namespace UnitTests
                 }
                 Function.prototype.isPrototypeOf(C) && Object.getPrototypeOf(C.prototype) === null"));
 
-            //// Class with super.
-            //Assert.AreEqual("bark", Evaluate(@"
-            //    class Animal {
-            //        constructor(sound) { this.sound = sound; }
-            //        speak() { return sound; }
-            //    }
-            //    class Dog extends Animal {
-            //        constructor() { super('bark'); }
-            //    }
-            //    new Dog().speak()"));
+            // Class with super.
+            Assert.AreEqual("bark", Evaluate(@"
+                class Animal {
+                    constructor(sound) { this.sound = sound; }
+                    speak() { return this.sound; }
+                }
+                class Dog extends Animal {
+                    constructor() { super('bark'); }
+                }
+                new Dog().speak()"));
 
-
-            // Multiple constructors are not allowed.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
-                class A {
+            // 'super' must be called before accessing 'this'.
+            // Must call super constructor in derived class before accessing 'this' or returning from derived constructor
+            Assert.AreEqual("ReferenceError", EvaluateExceptionType(@"
+                class Animal {
                     constructor() { }
-                    constructor() { }
-                }"));
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        this.a = 'test';
+                        super();
+                    }
+                }
+                new Dog()"));
 
-            // A static member called 'prototype' is not allowed.
+            // Super constructor may only be called once.
+            Assert.AreEqual("ReferenceError", EvaluateExceptionType(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        super();
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // 'super' keyword unexpected here.
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"super();"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
-                class A {
-                    static prototype() { }
-                }"));
+                class Dog {
+                    constructor() {
+                        super();
+                    }
+                }
+                new Dog()"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
+                class Animal {
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        super;
+                    }
+                }
+                new Dog()"));
+        }
+
+        [TestMethod]
+        public void Class_NewTarget()
+        {
+            // new.target should be undefined in the context of a function call.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                (function f() {
+                  passed = new.target === undefined;
+                })();
+                passed"));
+
+            // new.target should be set if 'new' is used.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                new function f() {
+                  passed = new.target === f;
+                }();
+                passed"));
+
+            // new.target should be set in a constructor.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                class Animal {
+                    constructor() { passed = new.target === Dog; }
+                }
+                class Dog extends Animal {
+                }
+                new Dog();
+                passed"));
+
+            // new.target can only be used in the context of a function.
+            // "new.target expression is not allowed here."
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"new.target"));
         }
     }
 }

@@ -213,6 +213,27 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Checks the expression is valid and throws a SyntaxErrorException if not.
+        /// Called after the expression tree is fully built out.
+        /// </summary>
+        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
+        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
+        public override void CheckValidity(int lineNumber, string sourcePath)
+        {
+            // Check the operator expression has the right number of operands.
+            if (Operator.IsValidNumberOfOperands(OperandCount) == false)
+                throw new SyntaxErrorException("Wrong number of operands", lineNumber, sourcePath);
+
+            // Check the operator expression is closed.
+            if (Operator.SecondaryToken != null && SecondTokenEncountered == false)
+                throw new SyntaxErrorException(string.Format("Missing closing token '{0}'", Operator.SecondaryToken.Text), lineNumber, sourcePath);
+
+            // Check the child nodes.
+            for (int i = 0; i < OperandCount; i++)
+                GetRawOperand(i).CheckValidity(lineNumber, sourcePath);
+        }
+
+        /// <summary>
         /// Converts the expression to a string.
         /// </summary>
         /// <returns> A string representing this expression. </returns>

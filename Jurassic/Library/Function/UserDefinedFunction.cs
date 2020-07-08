@@ -260,7 +260,12 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            return this.body(this.Engine, this.ParentScope, thisObject, this, null, argumentValues);
+            var context = ExecutionContext.CreateFunctionContext(
+                engine: this.Engine,
+                scope: this.ParentScope,
+                thisValue: thisObject,
+                executingFunction: this);
+            return this.body(context, argumentValues);
         }
 
         /// <summary>
@@ -275,7 +280,13 @@ namespace Jurassic.Library
             var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
 
             // Run the function, with the new object as the "this" keyword.
-            var result = this.body(this.Engine, this.ParentScope, newObject, this, newTarget, argumentValues);
+            var context = ExecutionContext.CreateConstructContext(
+                engine: this.Engine,
+                scope: this.ParentScope,
+                thisValue: newObject,
+                executingFunction: this,
+                newTarget: newTarget);
+            var result = this.body(context, argumentValues);
 
             // Return the result of the function if it is an object.
             if (result is ObjectInstance)

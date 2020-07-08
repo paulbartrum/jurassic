@@ -131,6 +131,15 @@ namespace Jurassic.Compiler
         internal static ConstructorInfo LongJumpException_Constructor;
         internal static MethodInfo LongJumpException_RouteID;
 
+        internal static MethodInfo ExecutionContext_GetEngine;
+        internal static MethodInfo ExecutionContext_GetScope;
+        internal static MethodInfo ExecutionContext_SetScope;
+        internal static MethodInfo ExecutionContext_GetThisValue;
+        internal static MethodInfo ExecutionContext_GetExecutingFunction;
+        internal static MethodInfo ExecutionContext_GetNewTargetObject;
+        internal static MethodInfo ExecutionContext_ConvertThisToObject;
+        internal static MethodInfo ExecutionContext_CallSuperClass;
+
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralValue;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralGetter;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralSetter;
@@ -263,6 +272,15 @@ namespace Jurassic.Compiler
 
             LongJumpException_Constructor = GetConstructor(typeof(LongJumpException), typeof(int));
             LongJumpException_RouteID = GetInstanceMethod(typeof(LongJumpException), "get_RouteID");
+
+            ExecutionContext_GetEngine = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Engine));
+            ExecutionContext_GetScope = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Scope));
+            ExecutionContext_SetScope = GetInstanceMethod(typeof(ExecutionContext), "set_" + nameof(ExecutionContext.Scope), typeof(Scope));
+            ExecutionContext_GetThisValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ThisValue));
+            ExecutionContext_GetExecutingFunction = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ExecutingFunction));
+            ExecutionContext_GetNewTargetObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.NewTargetObject));
+            ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));
+            ExecutionContext_CallSuperClass = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CallSuperClass), typeof(object[]));
 
             ReflectionHelpers_SetObjectLiteralValue = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralValue", typeof(ObjectInstance), typeof(object), typeof(object));
             ReflectionHelpers_SetObjectLiteralGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
