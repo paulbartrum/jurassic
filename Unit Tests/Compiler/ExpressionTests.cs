@@ -950,6 +950,14 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { arguments += 5; } f()"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; eval += 5; } f()"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; arguments += 5; } f()"));
+
+            // Left-side must be a valid reference.
+            // "Invalid left-hand side in assignment"
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5 = 6"));
+            // "Invalid target of postfix operation."
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5 ++"));
+            // "Invalid target of prefix operation."
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("++ 5"));
         }
 
         [TestMethod]

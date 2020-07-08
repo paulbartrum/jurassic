@@ -689,6 +689,15 @@ namespace UnitTests
                 }
                 new A().b()"));
 
+            // The class name should be valid inside of class functions.
+            Assert.AreEqual(17, Evaluate(@"
+                class C {
+                    method() { return typeof C === ""function""; }
+                }
+                var M = C.prototype.method;
+                C = void undefined;
+                C === void undefined && M();"));
+
             // Multiple constructors are not allowed.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"
                 class A {

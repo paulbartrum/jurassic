@@ -397,6 +397,26 @@ namespace Jurassic.Compiler
             generator.LoadVariable(result);
             generator.ReleaseTemporaryVariable(result);
         }
+
+        /// <summary>
+        /// Checks the expression is valid and throws a SyntaxErrorException if not.
+        /// Called after the expression tree is fully built out.
+        /// </summary>
+        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
+        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
+        public override void CheckValidity(int lineNumber, string sourcePath)
+        {
+            base.CheckValidity(lineNumber, sourcePath);
+            if (!(GetOperand(0) is IReferenceExpression))
+            {
+                if (Operator.HasLHSOperand && Operator.HasRHSOperand)
+                    throw new SyntaxErrorException("Invalid left-hand side in assignment.", lineNumber, sourcePath);
+                if (Operator.HasLHSOperand)
+                    throw new SyntaxErrorException("Invalid target of postfix operation.", lineNumber, sourcePath);
+                if (Operator.HasRHSOperand)
+                    throw new SyntaxErrorException("Invalid target of prefix operation.", lineNumber, sourcePath);
+            }
+        }
     }
 
 }

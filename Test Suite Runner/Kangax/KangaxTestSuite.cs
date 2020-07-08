@@ -60,6 +60,8 @@ namespace Jurassic.TestSuiteRunner
                         });
                         if (testCase.Response.JsonResult == "true" || testCase.Response.Variables?["__asyncTestPassed"] == "true")
                             testCase.Success = true;
+                        if (int.TryParse(testCase.Response.JsonResult, out int resultAsInteger) && resultAsInteger != 0)
+                            testCase.Success = true;
                         if (testCase.Success == false &&
                             !testCase.name.StartsWith("Proxy") &&
                             !testCase.name.StartsWith("Reflect") &&
