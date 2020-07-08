@@ -33,13 +33,13 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("delete $; $ = 5; $"));
             Assert.AreEqual(6, Evaluate("delete dung; d\\u0075ng = 6; dung"));
             Assert.AreEqual(7, Evaluate("delete another; \\u0061nother = 7; another"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("ident\\u0020ifier"));
+            Assert.AreEqual("SyntaxError: Invalid character in identifier.", EvaluateExceptionMessage("ident\\u0020ifier"));
             Assert.AreEqual(12, Evaluate(@"delete \u{20BB7}; \u{20BB7} = 12; \u{20BB7}"));
             Assert.AreEqual(13, Evaluate(@"delete Te\u{20BB7}st; Te\u{20BB7}st = 13; Te\u{20BB7}st"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"ident\u{20}ifier"));
+            Assert.AreEqual("SyntaxError: Invalid character in identifier.", EvaluateExceptionMessage(@"ident\u{20}ifier"));
             Assert.AreEqual(3, Evaluate("delete _\u200c\u200d; _\u200c\u200d = 3; _\u200c\u200d"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("ident\\u{}ifier"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("ident\\u{AB}ifier"));
+            Assert.AreEqual("SyntaxError: Invalid Unicode escape sequence.", EvaluateExceptionMessage("ident\\u{}ifier"));
+            Assert.AreEqual("SyntaxError: Invalid character in identifier.", EvaluateExceptionMessage("ident\\u{AB}ifier"));
         }
 
         [TestMethod]
@@ -50,13 +50,13 @@ namespace UnitTests
             Assert.AreEqual(Null.Value, Evaluate("null"));
 
             // Reserved words.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("class = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("enum = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("extends = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("super = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("const = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("export = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("import = 1"));
+            Assert.AreEqual("SyntaxError: Expected identifier but found '='", EvaluateExceptionMessage("class = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'enum' in expression.", EvaluateExceptionMessage("enum = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'extends' in expression.", EvaluateExceptionMessage("extends = 1"));
+            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage("super = 1"));
+            Assert.AreEqual("SyntaxError: Expected identifier but found '='", EvaluateExceptionMessage("const = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'export' in expression.", EvaluateExceptionMessage("export = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'import' in expression.", EvaluateExceptionMessage("import = 1"));
 
             // These are not reserved words.
             Assert.AreEqual(true, Evaluate("var abstract, boolean, byte, char, double, final, float, goto, int, long, native, short, synchronized, transient, volatile; true; "));
@@ -71,15 +71,15 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("package = 1"));
             Assert.AreEqual(1, Evaluate("protected = 1"));
             Assert.AreEqual(1, Evaluate("static = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; implements = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; let = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; private = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; public = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; yield = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; interface = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; package = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; protected = 1"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; static = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'implements' in expression.", EvaluateExceptionMessage("'use strict'; implements = 1"));
+            Assert.AreEqual("SyntaxError: Expected identifier but found '='", EvaluateExceptionMessage("'use strict'; let = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'private' in expression.", EvaluateExceptionMessage("'use strict'; private = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'public' in expression.", EvaluateExceptionMessage("'use strict'; public = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'yield' in expression.", EvaluateExceptionMessage("'use strict'; yield = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'interface' in expression.", EvaluateExceptionMessage("'use strict'; interface = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'package' in expression.", EvaluateExceptionMessage("'use strict'; package = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'protected' in expression.", EvaluateExceptionMessage("'use strict'; protected = 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token 'static' in expression.", EvaluateExceptionMessage("'use strict'; static = 1"));
 
             Assert.AreEqual(Null.Value, Evaluate("null"));
             Assert.AreEqual(Null.Value, Evaluate("null"));
@@ -140,18 +140,18 @@ namespace UnitTests
             Assert.AreEqual(255, Evaluate("0xff"));
             Assert.AreEqual(241, Evaluate("0xF1"));
             Assert.AreEqual(244837814094590.0, Evaluate("0xdeadbeefcafe"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("0xgg"));
+            Assert.AreEqual("SyntaxError: Invalid hexidecimal literal.", EvaluateExceptionMessage("0xgg"));
 
             // ES6 binary literals.
             Assert.AreEqual(21, Evaluate("0b10101"));
             Assert.AreEqual(1, Evaluate("0b1"));
             Assert.AreEqual(-21, Evaluate("-0B10101"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("0b2"));
+            Assert.AreEqual("SyntaxError: Invalid binary literal.", EvaluateExceptionMessage("0b2"));
 
             // ES6 octal literals.
             Assert.AreEqual(61, Evaluate("0o75"));
             Assert.AreEqual(4095, Evaluate("0O7777"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("0o80"));
+            Assert.AreEqual("SyntaxError: Invalid octal literal.", EvaluateExceptionMessage("0o80"));
 
             // Overflow and underflow.
             Assert.AreEqual(double.PositiveInfinity, Evaluate("1.8e+308"));
@@ -186,11 +186,11 @@ namespace UnitTests
             Assert.AreEqual("1.1111111111111111111111111111111111111111111111111111 x 2^52", ToBinary(Evaluate("9007199254740991.4999999999999999999999999999999995")));
             Assert.AreEqual("1.1111111111111111111111111111111111111111111111111111 x 2^-1023", ToBinary(Evaluate("2.2250738585072011e-308")));
 
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5.e"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5e"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5e+"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5e.5"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("0x"));
+            Assert.AreEqual("SyntaxError: Invalid number.", EvaluateExceptionMessage("5.e"));
+            Assert.AreEqual("SyntaxError: Invalid number.", EvaluateExceptionMessage("5e"));
+            Assert.AreEqual("SyntaxError: Invalid number.", EvaluateExceptionMessage("5e+"));
+            Assert.AreEqual("SyntaxError: Invalid number.", EvaluateExceptionMessage("5e.5"));
+            Assert.AreEqual("SyntaxError: Invalid hexidecimal literal.", EvaluateExceptionMessage("0x"));
         }
 
         [TestMethod]
@@ -202,13 +202,13 @@ namespace UnitTests
             Assert.AreEqual("ÿ", Evaluate(@"'\xfF'"));
             Assert.AreEqual("①ﬄ", Evaluate(@"'\u2460\ufB04'"));
             Assert.AreEqual("line-\r\ncon\rtin\nuation", Evaluate(@"'line-\r\ncon\rtin\nuation'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'unterminated"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'unterminated\r\n"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"'sd\xfgf'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType(@"'te\ufffg'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'te\r\nst'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'test\""));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("\"test'"));
+            Assert.AreEqual("SyntaxError: Unexpected end of input in string literal.", EvaluateExceptionMessage("'unterminated"));
+            Assert.AreEqual("SyntaxError: Unexpected line terminator in string literal.", EvaluateExceptionMessage("'unterminated\r\n"));
+            Assert.AreEqual("SyntaxError: Invalid hex digit 'g' in escape sequence.", EvaluateExceptionMessage(@"'sd\xfgf'"));
+            Assert.AreEqual("SyntaxError: Invalid hex digit 'g' in escape sequence.", EvaluateExceptionMessage(@"'te\ufffg'"));
+            Assert.AreEqual("SyntaxError: Unexpected line terminator in string literal.", EvaluateExceptionMessage("'te\r\nst'"));
+            Assert.AreEqual("SyntaxError: Unexpected end of input in string literal.", EvaluateExceptionMessage("'test\""));
+            Assert.AreEqual("SyntaxError: Unexpected end of input in string literal.", EvaluateExceptionMessage("\"test'"));
             Assert.AreEqual("test", Evaluate(@"'te\1st'"));
 
             // ECMAScript 6
@@ -233,12 +233,12 @@ namespace UnitTests
             Assert.AreEqual("/abc/g", Evaluate("(/abc/\u0067).toString()"));
 
             // Line terminators are not allowed in regexps - even if the line terminator is escaped.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("/\u000A/"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("/\\\u000A/"));
+            Assert.AreEqual("SyntaxError: Unexpected line terminator in regular expression literal.", EvaluateExceptionMessage("/\u000A/"));
+            Assert.AreEqual("SyntaxError: Unexpected line terminator in regular expression literal.", EvaluateExceptionMessage("/\\\u000A/"));
 
             // Unexpected end of input.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("/"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("/\\"));
+            Assert.AreEqual("SyntaxError: Unexpected end of input in regular expression literal.", EvaluateExceptionMessage("/"));
+            Assert.AreEqual("SyntaxError: Unexpected end of input in regular expression literal.", EvaluateExceptionMessage("/\\"));
         }
 
         [TestMethod]
@@ -246,17 +246,17 @@ namespace UnitTests
         {
             // Octal numbers and escape sequences are not supported in strict mode.
             Assert.AreEqual(0, Evaluate("'use strict'; 0"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; 05"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; 011"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; 0123456701234567"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; 09"));
+            Assert.AreEqual("SyntaxError: Octal numbers are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; 05"));
+            Assert.AreEqual("SyntaxError: Octal numbers are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; 011"));
+            Assert.AreEqual("SyntaxError: Octal numbers are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; 0123456701234567"));
+            Assert.AreEqual("SyntaxError: Invalid octal literal.", EvaluateExceptionMessage("'use strict'; 09"));
 
             // Octal numbers and escape sequences are supported in ECMAScript 5 mode.
             Assert.AreEqual(0, Evaluate("0"));
             Assert.AreEqual(5, Evaluate("05"));
             Assert.AreEqual(9, Evaluate("011"));
             Assert.AreEqual(5744368105847.0, Evaluate("0123456701234567"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("09"));
+            Assert.AreEqual("SyntaxError: Invalid octal literal.", EvaluateExceptionMessage("09"));
 
             // And they are supported in compatibility mode.
             CompatibilityMode = CompatibilityMode.ECMAScript3;
@@ -266,7 +266,7 @@ namespace UnitTests
                 Assert.AreEqual(5, Evaluate("05"));
                 Assert.AreEqual(9, Evaluate("011"));
                 Assert.AreEqual(5744368105847.0, Evaluate("0123456701234567"));
-                Assert.AreEqual("SyntaxError", EvaluateExceptionType("09"));
+                Assert.AreEqual("SyntaxError: Invalid octal literal.", EvaluateExceptionMessage("09"));
             }
             finally
             {
@@ -279,14 +279,14 @@ namespace UnitTests
         {
             // Octal escape sequences are not supported in strict mode.
             Assert.AreEqual("\0", Evaluate("'use strict'; '\\0'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\05'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\05a'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\011'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\0377'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\0400'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\09'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\0444'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; '\\44'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\05'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\05a'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\011'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\0377'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\0400'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\09'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\0444'"));
+            Assert.AreEqual("SyntaxError: Octal escape sequences are not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; '\\44'"));
 
             // Octal escape sequences are supported in ECMAScript 5 mode.
             Assert.AreEqual("\0", Evaluate("'\\0'"));
@@ -297,7 +297,7 @@ namespace UnitTests
             Assert.AreEqual("\u00200", Evaluate("'\\0400'"));
             Assert.AreEqual("$4", Evaluate("'\\0444'"));
             Assert.AreEqual("$", Evaluate("'\\44'"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'\\09'"));
+            Assert.AreEqual("SyntaxError: Invalid octal escape sequence.", EvaluateExceptionMessage("'\\09'"));
 
             // And they are supported in compatibility mode.
             CompatibilityMode = CompatibilityMode.ECMAScript3;
@@ -311,7 +311,7 @@ namespace UnitTests
                 Assert.AreEqual("\u00200", Evaluate("'\\0400'"));
                 Assert.AreEqual("$4", Evaluate("'\\0444'"));
                 Assert.AreEqual("$", Evaluate("'\\44'"));
-                Assert.AreEqual("SyntaxError", EvaluateExceptionType("'\\09'"));
+                Assert.AreEqual("SyntaxError: Invalid octal escape sequence.", EvaluateExceptionMessage("'\\09'"));
             }
             finally
             {
@@ -330,7 +330,7 @@ namespace UnitTests
             Assert.AreEqual(1.5, Evaluate("g = 2; (5 + 1) /2/g"));
             Assert.AreEqual("/abc/", Evaluate("if (true) {} /abc/.toString()"));
             Assert.AreEqual(double.NaN, Evaluate("a = {} / 2"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("{} / 2"));
+            Assert.AreEqual("SyntaxError: Unexpected end of input in regular expression literal.", EvaluateExceptionMessage("{} / 2"));
         }
 
 
