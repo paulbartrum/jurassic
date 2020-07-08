@@ -951,13 +951,8 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; eval += 5; } f()"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; arguments += 5; } f()"));
 
-            // Left-side must be a valid reference.
-            // "Invalid left-hand side in assignment"
+            // Invalid left-hand side in assignment.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("5 = 6"));
-            // "Invalid target of postfix operation."
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5 ++"));
-            // "Invalid target of prefix operation."
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("++ 5"));
         }
 
         [TestMethod]
@@ -965,7 +960,7 @@ namespace UnitTests
         {
             Assert.AreEqual(1, Evaluate("x = 0; ++ x"));
             Assert.AreEqual(1, Evaluate("x = 0; ++ x; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("++ 2"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("++ 2"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(3, Evaluate("x = [[2]]; ++(x = x[0])[0]"));
@@ -985,7 +980,7 @@ namespace UnitTests
         {
             Assert.AreEqual(-1, Evaluate("x = 0; -- x"));
             Assert.AreEqual(-1, Evaluate("x = 0; -- x; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("-- 2"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("-- 2"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(1, Evaluate("x = [[2]]; --(x = x[0])[0]"));
@@ -1005,7 +1000,7 @@ namespace UnitTests
         {
             Assert.AreEqual(0, Evaluate("x = 0; x ++"));
             Assert.AreEqual(1, Evaluate("x = 0; x ++; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("2 ++"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("2 ++"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(2, Evaluate("x = [[2]]; (x = x[0])[0]++"));
@@ -1025,7 +1020,7 @@ namespace UnitTests
         {
             Assert.AreEqual(0, Evaluate("x = 0; x --"));
             Assert.AreEqual(-1, Evaluate("x = 0; x --; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("2 --"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("2 --"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(2, Evaluate("x = [[2]]; (x = x[0])[0]--"));
@@ -1517,7 +1512,7 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("function x() { this.a = 5; this.f = function() { return this } }; new x().f().a"));
 
             // The "this" value cannot be modified.
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("this = 5;"));
+            Assert.AreEqual("SyntaxError", EvaluateExceptionType("this = 5;"));
 
             // Strict mode: the "this" object is not coerced to an object.
             Assert.AreEqual(Null.Value, Evaluate("'use strict'; (function(){ return this; }).call(null)"));
