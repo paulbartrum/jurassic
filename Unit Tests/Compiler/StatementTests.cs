@@ -687,25 +687,6 @@ namespace UnitTests
                 }
                 new A().b()"));
 
-            // The class name should be valid inside of class functions.
-            //Assert.AreEqual(true, Evaluate(@"
-            //    class C {
-            //        method() { return typeof C === ""function""; }
-            //    }
-            //    var M = C.prototype.method;
-            //    C = void undefined;
-            //    C === void undefined && M();"));
-
-            // Classes are block-scoped.
-            /*Assert.AreEqual(true, Evaluate(@"
-                class C {}
-                var c1 = C;
-                {
-                    class C {}
-                    var c2 = C;
-                }
-                C === c1;"));*/
-
             // Semi-colons are allowed within class bodies.
             Assert.AreEqual(true, Evaluate(@"
                 class C {
@@ -730,11 +711,7 @@ namespace UnitTests
                 class A {
                     static prototype() { }
                 }"));
-        }
 
-        [TestMethod]
-        public void Class_Extends()
-        {
             // Class with extends.
             Assert.AreEqual("oof", Evaluate(@"
                 class Animal {
@@ -772,94 +749,24 @@ namespace UnitTests
                 }
                 Function.prototype.isPrototypeOf(C) && Object.getPrototypeOf(C.prototype) === null"));
 
-            // Class with super.
-            Assert.AreEqual("bark", Evaluate(@"
-                class Animal {
-                    constructor(sound) { this.sound = sound; }
-                    speak() { return this.sound; }
+            // The class name should be valid inside of class functions.
+            Assert.AreEqual(true, Evaluate(@"
+                class C {
+                    method() { return typeof C === ""function""; }
                 }
-                class Dog extends Animal {
-                    constructor() { super('bark'); }
-                }
-                new Dog().speak()"));
+                var M = C.prototype.method;
+                C = void undefined;
+                C === void undefined && M();"));
 
-            // If a constructor returns an object, then that is used as the instance.
-            Assert.AreEqual("foobarbaz", Evaluate(@"
-                class B {
-                    constructor(a) { return ['foo' + a]; }
+            // Classes are block-scoped.
+            Assert.AreEqual(true, Evaluate(@"
+                class C {}
+                var c1 = C;
+                {
+                    class C {}
+                    var c2 = C;
                 }
-                class C extends B {
-                    constructor(a) { return super('bar' + a); }
-                }
-                new C('baz')[0]"));
-
-            Assert.AreEqual("foobarbaz", Evaluate(@"
-                class B {}
-                B.prototype.qux = 'foo';
-                B.prototype.corge = 'baz';
-                class C extends B {
-                    quux(a) { return super.qux + a + super['corge']; }
-                }
-                C.prototype.qux = 'garply';
-                new C().quux('bar');"));
-
-            // 'super' must be called before accessing 'this'.
-            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before accessing 'this'.", EvaluateExceptionMessage(@"
-                class Animal {
-                    constructor() { }
-                }
-                class Dog extends Animal {
-                    constructor() {
-                        this.a = 'test';
-                        super();
-                    }
-                }
-                new Dog()"));
-
-            // 'super' must be called before returning.
-            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before returning.", EvaluateExceptionMessage(@"
-                class Animal {
-                    constructor() { }
-                }
-                class Dog extends Animal {
-                    constructor() {
-                        return;
-                        super();
-                    }
-                }
-                new Dog()"));
-
-            // Super constructor may only be called once.
-            Assert.AreEqual("ReferenceError: Super constructor may only be called once.", EvaluateExceptionMessage(@"
-                class Animal {
-                    constructor() { }
-                }
-                class Dog extends Animal {
-                    constructor() {
-                        super();
-                        super();
-                    }
-                }
-                new Dog()"));
-
-            // 'super' keyword can only be used in a derived constructor.
-            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"super();"));
-            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
-                class Dog {
-                    constructor() {
-                        super();
-                    }
-                }
-                new Dog()"));
-            /*Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
-                class Animal {
-                }
-                class Dog extends Animal {
-                    constructor() {
-                        super;
-                    }
-                }
-                new Dog()"));*/
+                C === c1;"));
         }
     }
 }

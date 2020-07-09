@@ -124,20 +124,25 @@ namespace Jurassic.Compiler
             generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
 
             // Generate code to produce the "this" value.  There are three cases.
-            if (this.Target is NameExpression)
+            if (this.Target is NameExpression targetNameExpression)
             {
                 // 1. The function is a name expression (e.g. "parseInt()").
                 //    In this case this = scope.ImplicitThisValue, if there is one, otherwise undefined.
-                ((NameExpression)this.Target).GenerateThis(generator);
+                targetNameExpression.GenerateThis(generator);
             }
-            else if (this.Target is MemberAccessExpression)
+            else if (this.Target is MemberAccessExpression targetMemberAccessExpression)
             {
                 // 2. The function is a member access expression (e.g. "Math.cos()").
                 //    In this case this = Math.
-                //var baseExpression = ((MemberAccessExpression)this.Target).Base;
-                //baseExpression.GenerateCode(generator, optimizationInfo);
-                //EmitConversion.ToAny(generator, baseExpression.ResultType);
-                generator.LoadVariable(targetBase);
+                //    Unless it's a super call like super.blah().
+                if (targetMemberAccessExpression.Base is SuperExpression)
+                {
+                    EmitHelpers.LoadThis(generator);
+                }
+                else
+                {
+                    generator.LoadVariable(targetBase);
+                }
             }
             else
             {

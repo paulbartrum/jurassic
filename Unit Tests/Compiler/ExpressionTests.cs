@@ -1667,6 +1667,146 @@ namespace UnitTests
 
             // new.target can only be used in the context of a function.
             Assert.AreEqual("SyntaxError: new.target expression is not allowed here.", EvaluateExceptionMessage(@"new.target"));
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in assignment.", EvaluateExceptionMessage(@"function f() { new.target = 5; }"));
+        }
+
+        [TestMethod]
+        public void SuperCall()
+        {
+            // Class with super.
+            Assert.AreEqual("bark", Evaluate(@"
+                class Animal {
+                    constructor(sound) { this.sound = sound; }
+                    speak() { return this.sound; }
+                }
+                class Dog extends Animal {
+                    constructor() { super('bark'); }
+                }
+                new Dog().speak()"));
+
+            // Empty constructors act like constructor(...args) { super(...args); }
+            Assert.AreEqual("woof", Evaluate(@"
+                class Animal {
+                    constructor(sound) { this.sound = sound; }
+                    speak() { return this.sound; }
+                }
+                class Dog extends Animal {
+                }
+                class Hound extends Dog {
+                    constructor() { super('woof'); }
+                }
+                new Hound().speak()"));
+
+            // If a constructor returns an object, then that is used as the instance.
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {
+                    constructor(a) { return ['foo' + a]; }
+                }
+                class C extends B {
+                    constructor(a) { return super('bar' + a); }
+                }
+                new C('baz')[0]"));
+
+            // 'super' must be called before accessing 'this'.
+            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before accessing 'this'.", EvaluateExceptionMessage(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        this.a = 'test';
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // 'super' must be called before returning.
+            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before returning.", EvaluateExceptionMessage(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        return;
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // Super constructor may only be called once.
+            Assert.AreEqual("ReferenceError: Super constructor may only be called once.", EvaluateExceptionMessage(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        super();
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // 'super' keyword can only be used in a derived constructor.
+            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"super();"));
+            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
+                class Dog {
+                    constructor() {
+                        super();
+                    }
+                }
+                new Dog()"));
+        }
+
+        [TestMethod]
+        public void SuperAccessor()
+        {
+            // Super should access the super class prototype.
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {}
+                B.prototype.qux = 'foo';
+                B.prototype.corge = 'baz';
+                class C extends B {
+                    quux(a) { return super.qux + a + super['corge']; }
+                }
+                C.prototype.qux = 'garply';
+                new C().quux('bar');"));
+
+            // Super method calls should use the correct "this" binding.
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {
+                    qux(a) { return this.foo + a; }
+                }
+                class C extends B {
+                    qux(a) { return super.qux('bar' + a); }
+                }
+                var obj = new C();
+                obj.foo = 'foo';
+                obj.qux('baz');"));
+
+            // Super is statically bound.
+            Assert.AreEqual("barley", Evaluate(@"
+                class B {
+                    qux() { return 'bar'; }
+                }
+                class C extends B {
+                    qux() { return super.qux() + this.corge; }
+                }
+                var obj = {
+                    qux: C.prototype.qux,
+                    corge: 'ley'
+                };
+                obj.qux();"));
+
+            // Super cannot be used on it's own.
+            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
+                class Animal {
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        super;
+                    }
+                }
+                new Dog()"));
         }
     }
 }
