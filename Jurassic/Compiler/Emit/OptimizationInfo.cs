@@ -512,7 +512,6 @@ namespace Jurassic.Compiler
                 }
             }
         }
-
     }
 
 }

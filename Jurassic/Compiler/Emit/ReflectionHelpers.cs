@@ -118,7 +118,6 @@ namespace Jurassic.Compiler
 
         internal static ConstructorInfo JavaScriptException_Constructor_Error;
         internal static ConstructorInfo JavaScriptException_Constructor_Object;
-        internal static ConstructorInfo UserDefinedFunction_Constructor;
         internal static ConstructorInfo Arguments_Constructor;
         internal static ConstructorInfo PropertyDescriptor_Constructor2;
         internal static ConstructorInfo PropertyDescriptor_Constructor3;
@@ -135,12 +134,13 @@ namespace Jurassic.Compiler
         internal static MethodInfo ExecutionContext_GetScope;
         internal static MethodInfo ExecutionContext_SetScope;
         internal static MethodInfo ExecutionContext_GetThisValue;
-        internal static MethodInfo ExecutionContext_GetSuperValue;
+        internal static MethodInfo ExecutionContext_GetSuperObject;
         internal static MethodInfo ExecutionContext_GetExecutingFunction;
         internal static MethodInfo ExecutionContext_GetNewTargetObject;
         internal static MethodInfo ExecutionContext_ConvertThisToObject;
         internal static MethodInfo ExecutionContext_CallSuperClass;
 
+        internal static MethodInfo ReflectionHelpers_CreateFunction;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralValue;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralGetter;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralSetter;
@@ -249,8 +249,6 @@ namespace Jurassic.Compiler
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
             ObjectConstructor_Freeze = GetStaticMethod(typeof(ObjectConstructor), "Freeze", typeof(object));
-            UserDefinedFunction_Constructor = GetConstructor(typeof(UserDefinedFunction), typeof(ObjectInstance),
-                typeof(string), typeof(IList<string>), typeof(Scope), typeof(string), typeof(GeneratedMethod), typeof(bool));
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));
             Type_GetTypeFromHandle = GetStaticMethod(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
@@ -278,12 +276,14 @@ namespace Jurassic.Compiler
             ExecutionContext_GetScope = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Scope));
             ExecutionContext_SetScope = GetInstanceMethod(typeof(ExecutionContext), "set_" + nameof(ExecutionContext.Scope), typeof(Scope));
             ExecutionContext_GetThisValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ThisValue));
-            ExecutionContext_GetSuperValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.SuperValue));
+            ExecutionContext_GetSuperObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.SuperObject));
             ExecutionContext_GetExecutingFunction = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ExecutingFunction));
             ExecutionContext_GetNewTargetObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.NewTargetObject));
             ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));
             ExecutionContext_CallSuperClass = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CallSuperClass), typeof(object[]));
 
+            ReflectionHelpers_CreateFunction = GetStaticMethod(typeof(ReflectionHelpers), "CreateFunction", typeof(ObjectInstance),
+                typeof(string), typeof(IList<string>), typeof(Scope), typeof(string), typeof(GeneratedMethod), typeof(bool), typeof(ObjectInstance));
             ReflectionHelpers_SetObjectLiteralValue = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralValue", typeof(ObjectInstance), typeof(object), typeof(object));
             ReflectionHelpers_SetObjectLiteralGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetObjectLiteralSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
@@ -320,6 +320,24 @@ namespace Jurassic.Compiler
 
         //     CODE-GEN METHODS
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Creates a new instance of a user-defined function.
+        /// </summary>
+        /// <param name="prototype"> The next object in the prototype chain. </param>
+        /// <param name="name"> The name of the function. </param>
+        /// <param name="argumentNames"> The names of the arguments. </param>
+        /// <param name="parentScope"> The scope at the point the function is declared. </param>
+        /// <param name="bodyText"> The source code for the function body. </param>
+        /// <param name="generatedMethod"> A delegate which represents the body of the function plus any dependencies. </param>
+        /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
+        /// <param name="container"> A reference to the containing class prototype or object literal (or <c>null</c>). </param>
+        /// <remarks> This is used by functions declared in JavaScript code (including getters and setters). </remarks>
+        public static UserDefinedFunction CreateFunction(ObjectInstance prototype, string name, IList<string> argumentNames,
+            Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
+        {
+            return new UserDefinedFunction(prototype, name, argumentNames, parentScope, bodyText, generatedMethod, strictMode, container);
+        }
 
         /// <summary>
         /// Sets the value of a object literal property to a value.

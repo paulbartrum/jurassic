@@ -16,6 +16,7 @@ namespace Jurassic.Compiler
         /// The context inside function bodies.
         /// </summary>
         Function,
+        ObjectLiteralFunction,
         ClassFunction,
         Constructor,
         DerivedConstructor,

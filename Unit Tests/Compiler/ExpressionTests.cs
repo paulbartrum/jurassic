@@ -1747,8 +1747,8 @@ namespace UnitTests
                 new Dog()"));
 
             // 'super' keyword can only be used in a derived constructor.
-            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"super();"));
-            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
+            Assert.AreEqual("SyntaxError: 'super' calls can only be made from a derived constructor.", EvaluateExceptionMessage(@"super();"));
+            Assert.AreEqual("SyntaxError: 'super' calls can only be made from a derived constructor.", EvaluateExceptionMessage(@"
                 class Dog {
                     constructor() {
                         super();
@@ -1765,10 +1765,12 @@ namespace UnitTests
                 class B {}
                 B.prototype.qux = 'foo';
                 B.prototype.corge = 'baz';
+
                 class C extends B {
                     quux(a) { return super.qux + a + super['corge']; }
                 }
                 C.prototype.qux = 'garply';
+
                 new C().quux('bar');"));
 
             // Super method calls should use the correct "this" binding.
@@ -1776,9 +1778,11 @@ namespace UnitTests
                 class B {
                     qux(a) { return this.foo + a; }
                 }
+
                 class C extends B {
                     qux(a) { return super.qux('bar' + a); }
                 }
+
                 var obj = new C();
                 obj.foo = 'foo';
                 obj.qux('baz');"));
@@ -1788,24 +1792,61 @@ namespace UnitTests
                 class B {
                     qux() { return 'bar'; }
                 }
+
                 class C extends B {
                     qux() { return super.qux() + this.corge; }
                 }
+
                 var obj = {
                     qux: C.prototype.qux,
                     corge: 'ley'
                 };
+
                 obj.qux();"));
 
-            // Super cannot be used on it's own.
+            // Super works inside an object literal.
+            Assert.AreEqual("method1", Evaluate(@"
+                var obj1 = {
+                    method1() {
+                        return 'method1';
+                    }
+                }
+
+                var obj2 = {
+                    method2() {
+                        return super.method1();
+                    }
+                }
+
+                Object.setPrototypeOf(obj2, obj1);
+                obj2.method2()"));
+
+            // If the prototype is not set it defaults to the object prototype.
+            Assert.AreEqual("[object Object]", Evaluate(@"
+                var obj = {
+                    method() {
+                        return super.valueOf();
+                    }
+                }
+                obj.method().toString()"));
+
+            // Super cannot be used in plain function calls.
             Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
+                (function() {
+                    return super.valueOf();
+                })()"));
+
+            // Super cannot be used on it's own.
+            Assert.AreEqual("SyntaxError: 'super' keyword cannot be used on it's own.", EvaluateExceptionMessage(@"
                 class Animal {
                 }
+
                 class Dog extends Animal {
                     constructor() {
                         super;
                     }
                 }
+
                 new Dog()"));
         }
     }

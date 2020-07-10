@@ -321,17 +321,14 @@ namespace Jurassic.Compiler
         /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
         public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
         {
-            // Special-case the super call().
-            if (this.Target is SuperExpression)
+            // Super calls are valid only in derived constructors.
+            if (this.Target is SuperExpression superExpression)
             {
-                if (context != CodeContext.DerivedConstructor)
-                    throw new SyntaxErrorException("'super' keyword unexpected here.", lineNumber, sourcePath);
-                for (int i = 1; i < OperandCount; i++)
-                    GetRawOperand(i).CheckValidity(context, lineNumber, sourcePath);
-                return;
+                if (context == CodeContext.DerivedConstructor)
+                    superExpression.IsInValidContext = true;
+                else
+                    throw new SyntaxErrorException("'super' calls can only be made from a derived constructor.", lineNumber, sourcePath);
             }
-
-            // Otherwise, just use the standard validation.
             base.CheckValidity(context, lineNumber, sourcePath);
         }
     }

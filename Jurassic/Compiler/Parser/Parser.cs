@@ -146,8 +146,11 @@ namespace Jurassic.Compiler
         /// </summary>
         public bool IsInFunctionContext
         {
-            get {  return this.context == CodeContext.Function || this.context == CodeContext.ClassFunction ||
-                    this.context == CodeContext.Constructor || this.context == CodeContext.DerivedConstructor;  }
+            get {  return this.context == CodeContext.Function ||
+                    this.context == CodeContext.ObjectLiteralFunction ||
+                    this.context == CodeContext.ClassFunction ||
+                    this.context == CodeContext.Constructor ||
+                    this.context == CodeContext.DerivedConstructor;  }
         }
 
 
@@ -2003,7 +2006,7 @@ namespace Jurassic.Compiler
                         parentScope: this.currentVarScope,
                         name: propertyName,
                         startPosition: startPosition,
-                        codeContext: CodeContext.Function);
+                        codeContext: CodeContext.ObjectLiteralFunction);
 
                     // Add the getter or setter to the list of properties to set.
                     properties.Add(new PropertyDeclaration(propertyName, function));
@@ -2025,7 +2028,7 @@ namespace Jurassic.Compiler
                         parentScope: this.currentVarScope,
                         name: propertyName,
                         startPosition: startPosition,
-                        codeContext: CodeContext.Function);
+                        codeContext: CodeContext.ObjectLiteralFunction);
 
                     // Strangely enough, if declarationType is Expression then the last right
                     // brace ('}') is not consumed.

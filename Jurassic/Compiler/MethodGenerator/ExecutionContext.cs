@@ -23,7 +23,7 @@ namespace Jurassic.Compiler
             // Convert the initial scope into a runtime scope.
             Debug.Assert(scope != null && scope.ScopeObject == null);
             var runtimeScope = scope.ConvertPlaceholderToRuntimeScope(engine.Global);
-            return new ExecutionContext(engine, runtimeScope, BindingStatus.Initialized, engine.Global, null, null);
+            return new ExecutionContext(engine, runtimeScope, BindingStatus.Initialized, engine.Global, null, null, null);
         }
 
         /// <summary>
@@ -35,7 +35,9 @@ namespace Jurassic.Compiler
         /// <returns> A new execution context instance. </returns>
         public static ExecutionContext CreateEvalContext(ScriptEngine engine, Scope scope, object thisValue)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, null, null);
+            if (thisValue == null)
+                throw new ArgumentNullException(nameof(thisValue));
+            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, null, null, null);
         }
 
         /// <summary>
@@ -46,9 +48,13 @@ namespace Jurassic.Compiler
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
         /// <param name="executingFunction"> The function that is being called. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateFunctionContext(ScriptEngine engine, Scope scope, object thisValue, FunctionInstance executingFunction)
+        public static ExecutionContext CreateFunctionContext(ScriptEngine engine, Scope scope, object thisValue, UserDefinedFunction executingFunction)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, null);
+            if (thisValue == null)
+                throw new ArgumentNullException(nameof(thisValue));
+            if (executingFunction == null)
+                throw new ArgumentNullException(nameof(executingFunction));
+            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, null, executingFunction.Container);
         }
 
         /// <summary>
@@ -57,12 +63,11 @@ namespace Jurassic.Compiler
         /// <param name="engine"> A script engine. </param>
         /// <param name="scope"> Variable storage. </param>
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
-        /// <param name="executingFunction"> The function that is being called. </param>
         /// <param name="newTarget"> The target of the new operator. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateConstructContext(ScriptEngine engine, Scope scope, object thisValue, FunctionInstance executingFunction, FunctionInstance newTarget)
+        public static ExecutionContext CreateConstructContext(ScriptEngine engine, Scope scope, object thisValue, FunctionInstance newTarget, ObjectInstance functionContainer)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, newTarget);
+            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, null, newTarget, functionContainer);
         }
 
         /// <summary>
@@ -71,17 +76,17 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="engine"> A script engine. </param>
         /// <param name="scope"> Variable storage. </param>
-        /// <param name="executingFunction"> The function that is being called. </param>
         /// <param name="newTarget"> The target of the new operator. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateDerivedContext(ScriptEngine engine, Scope scope, FunctionInstance executingFunction, FunctionInstance newTarget)
+        public static ExecutionContext CreateDerivedContext(ScriptEngine engine, Scope scope, FunctionInstance newTarget, ObjectInstance functionContainer)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Uninitialized, null, executingFunction, newTarget);
+            return new ExecutionContext(engine, scope, BindingStatus.Uninitialized, null, null, newTarget, functionContainer);
         }
 
         private ExecutionContext(ScriptEngine engine, Scope scope,
             BindingStatus thisBindingStatus, object thisValue,
-            FunctionInstance executingFunction, FunctionInstance newTarget)
+            FunctionInstance executingFunction, FunctionInstance newTarget,
+            ObjectInstance functionContainer)
         {
             this.Engine = engine ?? throw new ArgumentNullException(nameof(engine));
             this.Scope = scope ?? throw new ArgumentNullException(nameof(scope));
@@ -89,6 +94,7 @@ namespace Jurassic.Compiler
             this.thisValue = thisValue;
             this.ExecutingFunction = executingFunction;
             this.NewTarget = newTarget;
+            this.FunctionContainer = functionContainer;
         }
 
         /// <summary>
@@ -142,22 +148,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// The value of the 'super' keyword.
-        /// </summary>
-        public ObjectInstance SuperValue
-        {
-            get
-            {
-                if (ThisValue is ObjectInstance thisObject && thisObject.Prototype != null)
-                {
-                    return thisObject.Prototype.Prototype;
-                }
-                else
-                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, "super.");
-            }
-        }
-
-        /// <summary>
         /// Converts <see cref="ThisValue"/> to an object. If <c>this</c> is null or undefined,
         /// then it will be set to the global object.
         /// </summary>
@@ -172,6 +162,22 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// The value of the 'super' keyword, or <c>null</c> if it is not available.
+        /// </summary>
+        public ObjectInstance SuperValue
+        {
+            get { return FunctionContainer?.Prototype; }
+        }
+
+        /// <summary>
+        /// The value of the 'super' keyword, or <see cref="Undefined.Value"/> if it is not available.
+        /// </summary>
+        public object SuperObject
+        {
+            get { return (object)SuperValue ?? Undefined.Value; }
+        }
+
+        /// <summary>
         /// Corresponds to a super(...argumentValues) call.
         /// </summary>
         /// <param name="argumentValues"> The parameter values to pass to the base class. </param>
@@ -181,7 +187,7 @@ namespace Jurassic.Compiler
             if (ThisBindingStatus != BindingStatus.Uninitialized)
                 throw new JavaScriptException(Engine, ErrorType.ReferenceError, "Super constructor may only be called once.");
 
-            if (ExecutingFunction.Prototype is FunctionInstance super)
+            if (FunctionContainer.Prototype is FunctionInstance super)
             {
                 // Call the base class constructor.
                 var result = super.ConstructLateBound(NewTarget, argumentValues);
@@ -190,7 +196,7 @@ namespace Jurassic.Compiler
                 return result;
             }
             else
-                throw new JavaScriptException(Engine, ErrorType.TypeError, $"Super constructor {ExecutingFunction.Prototype} of {ExecutingFunction.Name} is not a constructor.");
+                throw new JavaScriptException(Engine, ErrorType.TypeError, $"Super constructor {FunctionContainer.Prototype} of {ExecutingFunction.Name} is not a constructor.");
         }
 
         /// <summary>
@@ -204,6 +210,12 @@ namespace Jurassic.Compiler
         /// operator. This value can be accessed by JS using the 'new.target' expression.
         /// </summary>
         public FunctionInstance NewTarget { get; private set; }
+
+        /// <summary>
+        /// Contains a reference to the object literal or class prototype the executing function
+        /// was defined within. Used by the 'super' keyword.
+        /// </summary>
+        public ObjectInstance FunctionContainer { get; private set; }
 
         /// <summary>
         /// The same as <see cref="NewTarget"/> except that it returns <see cref="Undefined.Value"/>

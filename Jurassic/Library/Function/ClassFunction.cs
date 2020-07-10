@@ -10,13 +10,7 @@ namespace Jurassic.Library
     /// </summary>
     public class ClassFunction : FunctionInstance
     {
-        private Scope constructorScope;
-
-        [NonSerialized]
-        private GeneratedMethod constructorGeneratedMethod;
-
-        [NonSerialized]
-        private FunctionDelegate constructorBody;
+        private UserDefinedFunction constructor;
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
@@ -46,12 +40,7 @@ namespace Jurassic.Library
                 throw new ArgumentNullException(nameof(name));
             if (instancePrototype == null)
                 throw new ArgumentNullException(nameof(instancePrototype));
-            if (constructor != null)
-            {
-                this.constructorScope = constructor.ParentScope;
-                this.constructorGeneratedMethod = constructor.GeneratedMethod;
-                this.constructorBody = constructor.Body;
-            }
+            this.constructor = constructor;
 
             // Initialize the instance prototype.
             instancePrototype.InitializeProperties(new List<PropertyNameAndValue>
@@ -93,7 +82,7 @@ namespace Jurassic.Library
         /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
-            if (this.constructorBody != null)
+            if (this.constructor != null)
             {
                 // This class has a constructor.
                 ExecutionContext context;
@@ -103,9 +92,9 @@ namespace Jurassic.Library
                     // This class extends another. In that case 'this' is unavailable.
                     context = ExecutionContext.CreateDerivedContext(
                         engine: this.Engine,
-                        scope: this.constructorScope,
-                        executingFunction: this,
-                        newTarget: newTarget);
+                        scope: this.constructor.ParentScope,
+                        newTarget: newTarget,
+                        functionContainer: this);
                 }
                 else
                 {
@@ -113,14 +102,14 @@ namespace Jurassic.Library
                     // 'this' equal to the newly created object.
                     context = ExecutionContext.CreateConstructContext(
                         engine: this.Engine,
-                        scope: this.constructorScope,
+                        scope: this.constructor.ParentScope,
                         thisValue: ObjectInstance.CreateRawObject(newTarget.InstancePrototype),
-                        executingFunction: this,
-                        newTarget: newTarget);
+                        newTarget: newTarget,
+                        functionContainer: this);
                 }
 
                 // Call the function.
-                var result = this.constructorBody(context, argumentValues);
+                var result = this.constructor.Body(context, argumentValues);
 
                 // If the constructor returned an object, use that, otherwise use the 'this' value.
                 if (result is ObjectInstance resultObject)

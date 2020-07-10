@@ -107,8 +107,9 @@ namespace Jurassic.Library
         /// <param name="bodyText"> The source code for the function body. </param>
         /// <param name="generatedMethod"> A delegate which represents the body of the function plus any dependencies. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
+        /// <param name="container"> A reference to the containing class prototype or object literal (or <c>null</c>). </param>
         /// <remarks> This is used by functions declared in JavaScript code (including getters and setters). </remarks>
-        public UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode)
+        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
             : base(prototype)
         {
             this.ArgumentsText = string.Join(", ", argumentNames);
@@ -118,6 +119,7 @@ namespace Jurassic.Library
             this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
             this.ParentScope = parentScope;
             this.StrictMode = strictMode;
+            this.Container = container;
             InitProperties(name, argumentNames.Count);
         }
 
@@ -247,6 +249,12 @@ namespace Jurassic.Library
             get { return body; }
         }
 
+        /// <summary>
+        /// A reference to the containing class prototype or object literal (or <c>null</c>). Used
+        /// by the 'super' property accessor.
+        /// </summary>
+        internal ObjectInstance Container { get; private set; }
+
 
 
         //     OVERRIDES
@@ -284,8 +292,8 @@ namespace Jurassic.Library
                 engine: this.Engine,
                 scope: this.ParentScope,
                 thisValue: newObject,
-                executingFunction: this,
-                newTarget: newTarget);
+                newTarget: newTarget,
+                functionContainer: null);
             var result = this.body(context, argumentValues);
 
             // Return the result of the function if it is an object.

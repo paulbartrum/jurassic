@@ -60,6 +60,15 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// A variable that contains the declaring object.
+        /// 1. In an object literal, the object literal instance.
+        /// 2. In a class instance method, the class prototype.
+        /// 3. In a class static method, the class itself.
+        /// Used when generating code.
+        /// </summary>
+        public ILLocalVariable ContainerVariable { get; set; }
+
+        /// <summary>
         /// Generates CIL for the expression.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
@@ -134,8 +143,16 @@ namespace Jurassic.Compiler
             // strictMode
             generator.LoadBoolean(this.context.StrictMode);
 
-            // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body, bool strictMode)
-            generator.NewObject(ReflectionHelpers.UserDefinedFunction_Constructor);
+            // container
+            if (ContainerVariable != null)
+                generator.LoadVariable(ContainerVariable);
+            else
+                generator.LoadNull();
+
+            // CreateFunction(ObjectInstance prototype, string name, IList<string> argumentNames,
+            //   DeclarativeScope scope, Func<Scope, object, object[], object> body,
+            //   bool strictMode, FunctionInstance container)
+            generator.CallStatic(ReflectionHelpers.ReflectionHelpers_CreateFunction);
         }
 
         /// <summary>

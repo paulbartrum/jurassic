@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jurassic.Library;
+using System;
 using System.Collections.Generic;
 
 namespace Jurassic.Compiler
@@ -83,12 +84,19 @@ namespace Jurassic.Compiler
             // ConstructClass(ScriptEngine engine, string name, object extends, FunctionInstance constructor)
             generator.CallStatic(ReflectionHelpers.ReflectionHelpers_ConstructClass);
 
+            // Create a variable to hold the container instance value.
+            var containerVariable = generator.CreateTemporaryVariable(typeof(ObjectInstance));
+
             foreach (var member in this.Members)
             {
                 // class.InstancePrototype
                 generator.Duplicate();
                 if (!member.Name.IsStatic)
                     generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
+
+                // Store this in a variable so that FunctionExpression.GenerateCode can retrieve it.
+                generator.Duplicate();
+                generator.StoreVariable(containerVariable);
 
                 // The key can be a property name or an expression that evaluates to a name.
                 if (member.Name.HasStaticName)
@@ -100,7 +108,9 @@ namespace Jurassic.Compiler
                 }
 
                 // Emit the function value.
+                member.ContainerVariable = containerVariable;
                 member.GenerateCode(generator, optimizationInfo);
+                member.ContainerVariable = null;
 
                 // Support the inferred function displayName property.
                 //if (property.Name is LiteralExpression && ((LiteralExpression)property.Name).Value is string)
@@ -123,6 +133,9 @@ namespace Jurassic.Compiler
                     generator.Call(ReflectionHelpers.ReflectionHelpers_SetClassValue);
                 }
             }
+
+            // Release the variable that we created above.
+            generator.ReleaseTemporaryVariable(containerVariable);
         }
 
         /// <summary>

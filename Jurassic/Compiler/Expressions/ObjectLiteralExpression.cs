@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Jurassic.Library;
+using System.Collections.Generic;
 
 namespace Jurassic.Compiler
 {
@@ -45,6 +46,11 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.ScriptEngine_Object);
             generator.Call(ReflectionHelpers.Object_Construct);
 
+            // Create a variable to hold the container instance value.
+            var containerVariable = generator.CreateTemporaryVariable(typeof(ObjectInstance));
+            generator.Duplicate();
+            generator.StoreVariable(containerVariable);
+
             foreach (var property in this.Properties)
             {
                 generator.Duplicate();
@@ -59,7 +65,16 @@ namespace Jurassic.Compiler
                 }
 
                 // Emit the property value.
-                property.Value.GenerateCode(generator, optimizationInfo);
+                if (property.Value is FunctionExpression functionExpression)
+                {
+                    functionExpression.ContainerVariable = containerVariable;
+                    property.Value.GenerateCode(generator, optimizationInfo);
+                    functionExpression.ContainerVariable = null;
+                }
+                else
+                {
+                    property.Value.GenerateCode(generator, optimizationInfo);
+                }
                 EmitConversion.ToAny(generator, property.Value.ResultType);
                 if (property.Name.IsGetter)
                 {
@@ -77,6 +92,9 @@ namespace Jurassic.Compiler
                     generator.Call(ReflectionHelpers.ReflectionHelpers_SetObjectLiteralValue);
                 }
             }
+
+            // Release the variable that we created above.
+            generator.ReleaseTemporaryVariable(containerVariable);
         }
 
         /// <summary>
