@@ -20,6 +20,9 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("(function(a, b, c) { a = 5; return arguments[0] })(1, 2, 3)"));
             Assert.AreEqual(5, Evaluate("(function(a, b, c) { arguments[0] = 5; return a })(1, 2, 3)"));
 
+            // The argument doesn't need to have a name.
+            Assert.AreEqual(11, Evaluate("(function() { return arguments[0] })(11)"));
+
             // Duplicate argument names are not mapped (since there is nothing to map to).
             Assert.AreEqual(2, Evaluate("(function(a, a) { return a; })(1, 2)"));
             Assert.AreEqual(1, Evaluate("(function(a, a) { return arguments[0]; })(1, 2)"));
@@ -40,11 +43,8 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("(function(a, b, c) { delete arguments[0]; arguments[0] = 9; return a })(1, 2, 3)"));
 
             // However, deleting the parameter doesn't break the mapping.
-            //if (Engine != JSEngine.JScript)   // JScript bug?
-            //{
-                Assert.AreEqual(1, Evaluate("(function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
-                Assert.AreEqual(1, Evaluate("a = 5; (function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
-            //}
+            Assert.AreEqual(1, Evaluate("(function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
+            Assert.AreEqual(1, Evaluate("a = 5; (function(a, b, c) { delete a; return arguments[0] })(1, 2, 3)"));
 
             // The callee property is the function that is associated with the arguments object.
             Assert.AreEqual(true, Evaluate("f = function(a, b, c) { return arguments.callee }; f() === f"));
@@ -55,6 +55,9 @@ namespace UnitTests
             // The argument array indices are enumerable.
             Assert.AreEqual("01", Evaluate("(function(a, b, c) { var str = ''; for (var key in arguments) str += key; return str; })(1, 2)"));
             Assert.AreEqual("012", Evaluate("(function(a, b, c) { arguments[1] = 3; arguments[2] = 4; var str = ''; for (var key in arguments) str += key; return str; })(1, 2)"));
+
+            // The prototype should be the object prototype.
+            Assert.AreEqual(true, Evaluate("(function() { return Object.getPrototypeOf(arguments) === Object.getPrototypeOf({}); })()"));
         }
 
         [TestMethod]
@@ -112,6 +115,13 @@ namespace UnitTests
         {
             Assert.AreEqual("[object Arguments]", Evaluate("(function() { return arguments.toString(); })()"));
             Assert.AreEqual("[object Arguments]", Evaluate("(function() { return Object.prototype.toString.call(arguments); })()"));
+        }
+
+        [TestMethod]
+        public void iterator()
+        {
+            Assert.AreEqual(33, Evaluate("(function() { return arguments[Symbol.iterator]().next().value; })(33);"));
+            Assert.AreEqual(true, Evaluate("function f() { return arguments.hasOwnProperty(Symbol.iterator); } f()"));
         }
     }
 }

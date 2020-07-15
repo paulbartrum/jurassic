@@ -12,7 +12,7 @@ namespace Jurassic.Library
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
     [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
-    public class ArgumentsInstance : ObjectInstance
+    public partial class ArgumentsInstance : ObjectInstance
     {
         private UserDefinedFunction callee;
         private DeclarativeScope scope;
@@ -41,6 +41,7 @@ namespace Jurassic.Library
                 throw new ArgumentNullException(nameof(argumentValues));
             this.callee = callee;
             this.scope = scope;
+            InitializeProperties(GetDeclarativeProperties(Engine));
             this.FastSetProperty("length", argumentValues.Length, PropertyAttributes.NonEnumerable);
 
             if (this.callee.StrictMode == false)
@@ -213,6 +214,21 @@ namespace Jurassic.Library
         public override string DebuggerDisplayType
         {
             get { return string.Format("Arguments({0})", this["length"]); }
+        }
+
+
+
+        //     JS FUNCTIONS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Returns an iterator that iterates over the argument values.
+        /// </summary>
+        /// <returns> An iterator for the arguments instance. </returns>
+        [JSInternalFunction(Name = "@@iterator")]
+        public ObjectInstance GetIterator()
+        {
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Value);
         }
     }
 }
