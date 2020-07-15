@@ -65,9 +65,9 @@ namespace Jurassic.Compiler
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
         /// <param name="newTarget"> The target of the new operator. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateConstructContext(ScriptEngine engine, Scope scope, object thisValue, FunctionInstance newTarget, ObjectInstance functionContainer)
+        public static ExecutionContext CreateConstructContext(ScriptEngine engine, Scope scope, object thisValue, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, null, newTarget, functionContainer);
+            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, newTarget, functionContainer);
         }
 
         /// <summary>
@@ -78,9 +78,9 @@ namespace Jurassic.Compiler
         /// <param name="scope"> Variable storage. </param>
         /// <param name="newTarget"> The target of the new operator. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateDerivedContext(ScriptEngine engine, Scope scope, FunctionInstance newTarget, ObjectInstance functionContainer)
+        public static ExecutionContext CreateDerivedContext(ScriptEngine engine, Scope scope, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Uninitialized, null, null, newTarget, functionContainer);
+            return new ExecutionContext(engine, scope, BindingStatus.Uninitialized, null, executingFunction, newTarget, functionContainer);
         }
 
         private ExecutionContext(ScriptEngine engine, Scope scope,

@@ -292,6 +292,7 @@ namespace Jurassic.Library
                 engine: this.Engine,
                 scope: this.ParentScope,
                 thisValue: newObject,
+                executingFunction: this,
                 newTarget: newTarget,
                 functionContainer: null);
             var result = this.body(context, argumentValues);

@@ -407,8 +407,7 @@ namespace Jurassic.Compiler
         /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
         public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
         {
-            base.CheckValidity(context, lineNumber, sourcePath);
-            if (!(GetOperand(0) is IReferenceExpression))
+            if (OperandCount > 0 && !(GetOperand(0) is IReferenceExpression))
             {
                 if (Operator.HasLHSOperand && Operator.HasRHSOperand)
                     throw new SyntaxErrorException("Invalid left-hand side in assignment.", lineNumber, sourcePath);
@@ -417,6 +416,7 @@ namespace Jurassic.Compiler
                 if (Operator.HasRHSOperand)
                     throw new SyntaxErrorException("Invalid target of prefix operation.", lineNumber, sourcePath);
             }
+            base.CheckValidity(context, lineNumber, sourcePath);
         }
     }
 

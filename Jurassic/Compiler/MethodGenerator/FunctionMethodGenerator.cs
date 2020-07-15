@@ -334,7 +334,6 @@ namespace Jurassic.Compiler
                 generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
                 // callee
                 EmitHelpers.LoadFunction(generator);
-                generator.CastClass(typeof(Library.UserDefinedFunction));
                 // scope
                 EmitHelpers.LoadScope(generator);
                 generator.CastClass(typeof(DeclarativeScope));

@@ -93,6 +93,7 @@ namespace Jurassic.Library
                     context = ExecutionContext.CreateDerivedContext(
                         engine: this.Engine,
                         scope: this.constructor.ParentScope,
+                        executingFunction: this.constructor,
                         newTarget: newTarget,
                         functionContainer: this);
                 }
@@ -104,6 +105,7 @@ namespace Jurassic.Library
                         engine: this.Engine,
                         scope: this.constructor.ParentScope,
                         thisValue: ObjectInstance.CreateRawObject(newTarget.InstancePrototype),
+                        executingFunction: this.constructor,
                         newTarget: newTarget,
                         functionContainer: this);
                 }
