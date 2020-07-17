@@ -1411,6 +1411,47 @@ namespace Jurassic
 
 
 
+        //     TEMPLATE STRINGS ARRAY CACHE
+        //_________________________________________________________________________________________
+
+        private object templateArraysLock = new object();
+        private Dictionary<int, ArrayInstance> templateArraysCache;
+
+        /// <summary>
+        /// Returns a cached template array, suitable for passing to a tag function.
+        /// </summary>
+        /// <param name="cacheKey"> The cache key that identifies the array to return. </param>
+        /// <returns> The cached template array, or <c>null</c> if no array with the given cache
+        /// key has been cached. </returns>
+        internal ArrayInstance GetCachedTemplateStringsArray(int cacheKey)
+        {
+            lock (templateArraysLock)
+            {
+                if (templateArraysCache == null)
+                    return null;
+                if (templateArraysCache.TryGetValue(cacheKey, out ArrayInstance result))
+                    return result;
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Caches a template array using the given cache key.
+        /// </summary>
+        /// <param name="cacheKey"> The cache key that identifies the array to cache. </param>
+        /// <param name="cachedValue"> The cached value. </param>
+        internal void SetCachedTemplateStringsArray(int cacheKey, ArrayInstance cachedValue)
+        {
+            lock (templateArraysLock)
+            {
+                if (templateArraysCache == null)
+                    templateArraysCache = new Dictionary<int, ArrayInstance>();
+                templateArraysCache[cacheKey] = cachedValue;
+            }
+        }
+
+
+
         //     POST EXECUTE STEPS
         //_________________________________________________________________________________________
         //

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Jurassic.Library;
+using PropertyAttributes = Jurassic.Library.PropertyAttributes;
 
 namespace Jurassic.Compiler
 {
@@ -79,7 +80,6 @@ namespace Jurassic.Compiler
         internal static MethodInfo JavaScriptException_ErrorObject;
         internal static MethodInfo Boolean_Construct;
         internal static MethodInfo Object_Construct;
-        internal static MethodInfo ObjectConstructor_Freeze;
 
         internal static MethodInfo RegExp_Construct;
         internal static MethodInfo Array_New;
@@ -148,6 +148,8 @@ namespace Jurassic.Compiler
         internal static MethodInfo ReflectionHelpers_SetClassValue;
         internal static MethodInfo ReflectionHelpers_SetClassGetter;
         internal static MethodInfo ReflectionHelpers_SetClassSetter;
+        internal static MethodInfo ReflectionHelpers_GetCachedTemplateStringsArray;
+        internal static MethodInfo ReflectionHelpers_CreateTemplateStringsArray;
 
         /// <summary>
         /// Initializes static members of this class.
@@ -190,7 +192,7 @@ namespace Jurassic.Compiler
             ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(PropertyReference), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(object), typeof(object), typeof(bool));
-            ObjectInstance_InitializeMissingProperty = GetInstanceMethod(typeof(ObjectInstance), "InitializeMissingProperty", typeof(object), typeof(Library.PropertyAttributes));
+            ObjectInstance_InitializeMissingProperty = GetInstanceMethod(typeof(ObjectInstance), "InitializeMissingProperty", typeof(object), typeof(PropertyAttributes));
 
             Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
             ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance), typeof(bool), typeof(bool));
@@ -248,13 +250,12 @@ namespace Jurassic.Compiler
             RegExp_Construct = GetInstanceMethod(typeof(RegExpConstructor), "Construct", typeof(object), typeof(string));
             Array_New = GetInstanceMethod(typeof(ArrayConstructor), "New", typeof(object[]));
             Object_Construct = GetInstanceMethod(typeof(ObjectConstructor), "Construct");
-            ObjectConstructor_Freeze = GetStaticMethod(typeof(ObjectConstructor), "Freeze", typeof(object));
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));
             Type_GetTypeFromHandle = GetStaticMethod(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
             Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
-            PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(Library.PropertyAttributes));
-            PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(Library.PropertyAttributes));
+            PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(PropertyAttributes));
+            PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(PropertyAttributes));
             Decimal_Constructor_Double = GetConstructor(typeof(decimal), typeof(double));
             PropertyName_Constructor = GetConstructor(typeof(PropertyReference), typeof(string));
 
@@ -284,13 +285,21 @@ namespace Jurassic.Compiler
 
             ReflectionHelpers_CreateFunction = GetStaticMethod(typeof(ReflectionHelpers), "CreateFunction", typeof(ObjectInstance),
                 typeof(string), typeof(IList<string>), typeof(Scope), typeof(string), typeof(GeneratedMethod), typeof(bool), typeof(ObjectInstance));
+
+            // Object literals
             ReflectionHelpers_SetObjectLiteralValue = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralValue", typeof(ObjectInstance), typeof(object), typeof(object));
             ReflectionHelpers_SetObjectLiteralGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetObjectLiteralSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
+
+            // Classes
             ReflectionHelpers_ConstructClass = GetStaticMethod(typeof(ReflectionHelpers), "ConstructClass", typeof(ScriptEngine), typeof(string), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetClassValue = GetStaticMethod(typeof(ReflectionHelpers), "SetClassValue", typeof(ObjectInstance), typeof(object), typeof(object));
             ReflectionHelpers_SetClassGetter = GetStaticMethod(typeof(ReflectionHelpers), "SetClassGetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
             ReflectionHelpers_SetClassSetter = GetStaticMethod(typeof(ReflectionHelpers), "SetClassSetter", typeof(ObjectInstance), typeof(object), typeof(UserDefinedFunction));
+
+            // Template literals
+            ReflectionHelpers_GetCachedTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(GetCachedTemplateStringsArray), typeof(ScriptEngine), typeof(int));
+            ReflectionHelpers_CreateTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(CreateTemplateStringsArray), typeof(ScriptEngine), typeof(int), typeof(string[]), typeof(string[]));
 
 #if DEBUG && ENABLE_DEBUGGING
             // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus
@@ -347,7 +356,7 @@ namespace Jurassic.Compiler
         /// <param name="value"> The value to set. </param>
         public static void SetObjectLiteralValue(ObjectInstance obj, object key, object value)
         {
-            obj.DefineProperty(key, new PropertyDescriptor(value, Library.PropertyAttributes.FullAccess), throwOnError: false);
+            obj.DefineProperty(key, new PropertyDescriptor(value, PropertyAttributes.FullAccess), throwOnError: false);
         }
 
         /// <summary>
@@ -361,9 +370,9 @@ namespace Jurassic.Compiler
         {
             var descriptor = obj.GetOwnPropertyDescriptor(key);
             if (descriptor.Exists == false || !descriptor.IsAccessor)
-                obj.DefineProperty(key, new PropertyDescriptor(getter, null, Library.PropertyAttributes.FullAccess), throwOnError: false);
+                obj.DefineProperty(key, new PropertyDescriptor(getter, null, PropertyAttributes.FullAccess), throwOnError: false);
             else
-                obj.DefineProperty(key, new PropertyDescriptor(getter, descriptor.Setter, Library.PropertyAttributes.FullAccess), throwOnError: false);
+                obj.DefineProperty(key, new PropertyDescriptor(getter, descriptor.Setter, PropertyAttributes.FullAccess), throwOnError: false);
         }
 
         /// <summary>
@@ -377,9 +386,40 @@ namespace Jurassic.Compiler
         {
             var descriptor = obj.GetOwnPropertyDescriptor(key);
             if (descriptor.Exists == false || !descriptor.IsAccessor)
-                obj.DefineProperty(key, new PropertyDescriptor(null, setter, Library.PropertyAttributes.FullAccess), throwOnError: false);
+                obj.DefineProperty(key, new PropertyDescriptor(null, setter, PropertyAttributes.FullAccess), throwOnError: false);
             else
-                obj.DefineProperty(key, new PropertyDescriptor(descriptor.Getter, setter, Library.PropertyAttributes.FullAccess), throwOnError: false);
+                obj.DefineProperty(key, new PropertyDescriptor(descriptor.Getter, setter, PropertyAttributes.FullAccess), throwOnError: false);
+        }
+
+        /// <summary>
+        /// Retrieves a cached template string array, using the given call site ID as the cache key.
+        /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
+        /// <param name="callSiteId"> The call site ID to use as a cache key. </param>
+        /// <returns></returns>
+        public static ArrayInstance GetCachedTemplateStringsArray(ScriptEngine engine, int callSiteId)
+        {
+            return engine.GetCachedTemplateStringsArray(callSiteId);
+        }
+
+        /// <summary>
+        /// Creates an array suitable for passing to a tag function.
+        /// </summary>
+        /// <param name="engine"> The associated script engine. </param>
+        /// <param name="callSiteId"> The call site ID to use as a cache key. </param>
+        /// <param name="strings"> An array of strings that make up the template literal,
+        /// with escape character processing. </param>
+        /// <param name="rawStrings"> An array of strings that make up the template literal,
+        /// without any escape character processing. </param>
+        /// <returns> A JS array suitable for passing to a tag function. </returns>
+        public static ArrayInstance CreateTemplateStringsArray(ScriptEngine engine, int callSiteId, string[] strings, string[] rawStrings)
+        {
+            // The result is an array with a 'raw' property which is also an array.
+            var result = engine.Array.New(strings);
+            result["raw"] = ObjectConstructor.Freeze(engine.Array.New(rawStrings));
+            ObjectConstructor.Freeze(result);
+            engine.SetCachedTemplateStringsArray(callSiteId, result);
+            return result;
         }
 
         /// <summary>

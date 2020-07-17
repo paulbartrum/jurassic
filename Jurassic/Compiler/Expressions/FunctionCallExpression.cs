@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Jurassic.Library;
+using System.Collections.Generic;
 using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
@@ -214,6 +215,8 @@ namespace Jurassic.Compiler
             }
         }
 
+        private static int templateCallSiteId = 0;
+
         /// <summary>
         /// Generates an array containing the argument values for a tagged template literal.
         /// </summary>
@@ -231,35 +234,53 @@ namespace Jurassic.Compiler
             generator.Duplicate();
             generator.LoadInt32(0);
 
-            // The first parameter to the tag function is an array of strings.
-            var stringsExpression = new List<Expression>(templateLiteral.Strings.Count);
-            foreach (var templateString in templateLiteral.Strings)
-            {
-                stringsExpression.Add(new LiteralExpression(templateString));
-            }
-            new ArrayLiteralExpression(stringsExpression).GenerateCode(generator, optimizationInfo);
+            // Generate a unique integer that is used as the cache key.
+            int callSiteId = System.Threading.Interlocked.Increment(ref templateCallSiteId);
+
+            // Call GetCachedTemplateStringsArray(ScriptEngine engine, int callSiteId)
+            EmitHelpers.LoadScriptEngine(generator);
+            generator.LoadInt32(callSiteId);
+            generator.CallStatic(ReflectionHelpers.ReflectionHelpers_GetCachedTemplateStringsArray);
+
+            // If that's null, do it the long way.
+            var afterCreateTemplateStringsArray = generator.CreateLabel();
             generator.Duplicate();
+            generator.BranchIfNotNull(afterCreateTemplateStringsArray);
+            generator.Pop();
 
-            // Now we need the name of the property.
-            generator.LoadString("raw");
+            // Start emitting arguments for CreateTemplateStringsArray.
+            EmitHelpers.LoadScriptEngine(generator);
 
-            // Now generate an array of raw strings.
-            var rawStringsExpression = new List<Expression>(templateLiteral.RawStrings.Count);
-            foreach (var rawString in templateLiteral.RawStrings)
+            // int callSiteId
+            generator.LoadInt32(callSiteId);
+
+            // string[] strings
+            generator.LoadInt32(templateLiteral.Strings.Count);
+            generator.NewArray(typeof(string));
+            for (int i = 0; i < templateLiteral.Strings.Count; i++)
             {
-                rawStringsExpression.Add(new LiteralExpression(rawString));
+                // strings[i] = templateLiteral.Strings[i]
+                generator.Duplicate();
+                generator.LoadInt32(i);
+                generator.LoadString(templateLiteral.Strings[i]);
+                generator.StoreArrayElement(typeof(string));
             }
-            new ArrayLiteralExpression(rawStringsExpression).GenerateCode(generator, optimizationInfo);
 
-            // Freeze array by calling object Freeze(object).
-            generator.CallStatic(ReflectionHelpers.ObjectConstructor_Freeze);
+            // string[] raw
+            generator.LoadInt32(templateLiteral.RawStrings.Count);
+            generator.NewArray(typeof(string));
+            for (int i = 0; i < templateLiteral.RawStrings.Count; i++)
+            {
+                // raw[i] = templateLiteral.RawStrings[i]
+                generator.Duplicate();
+                generator.LoadInt32(i);
+                generator.LoadString(templateLiteral.RawStrings[i]);
+                generator.StoreArrayElement(typeof(string));
+            }
 
-            // Now store the raw strings as a property of the base strings array.
-            generator.LoadBoolean(optimizationInfo.StrictMode);
-            generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
-
-            // Freeze array by calling object Freeze(object).
-            generator.CallStatic(ReflectionHelpers.ObjectConstructor_Freeze);
+            // CreateTemplateStringsArray(ScriptEngine engine, int callSiteId, object[] strings, object[] rawStrings)
+            generator.CallStatic(ReflectionHelpers.ReflectionHelpers_CreateTemplateStringsArray);
+            generator.DefineLabelPosition(afterCreateTemplateStringsArray);
 
             // Store in the array.
             generator.StoreArrayElement(typeof(object));
