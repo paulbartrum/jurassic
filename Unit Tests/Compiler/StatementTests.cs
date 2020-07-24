@@ -305,6 +305,16 @@ namespace UnitTests
             // 'let' is not a valid name in a let declaration.
             Assert.AreEqual("SyntaxError: 'let' is not allowed here.", EvaluateExceptionMessage("let let"));
             Assert.AreEqual("SyntaxError: 'let' is not allowed here.", EvaluateExceptionMessage("let let = 5"));
+
+            // Each loop of a scope is a new one.
+            Assert.AreEqual("ReferenceError: Cannot access 'a' before initialization", EvaluateExceptionMessage(@"
+                var b = 0;
+                for (let i = 0; i < 2; i++) {
+                    if (i == 1) {
+                        b = a;
+                    }
+                    let a = 7;
+                }"));
         }
 
         [TestMethod]

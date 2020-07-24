@@ -156,12 +156,6 @@ namespace Jurassic.Compiler
         public bool IsVarScope { get; private set; }
 
         /// <summary>
-        /// Gets a value that indicates whether an implicit "this" value is supplied to function
-        /// calls in this scope.
-        /// </summary>
-        public bool ProvidesImplicitThisValue { get; private set; }
-
-        /// <summary>
         /// Gets the number of variables declared in this scope.
         /// </summary>
         private int DeclaredVariableCount
@@ -272,7 +266,7 @@ namespace Jurassic.Compiler
 
             return variable;
         }
-        
+
         /// <summary>
         /// Generates code that creates a new scope.
         /// </summary>
@@ -350,6 +344,12 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.Scope_ParentScope);
             EmitHelpers.StoreScope(generator);
         }*/
+
+        
+        internal void GenerateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+
+        }
     }
 
 }

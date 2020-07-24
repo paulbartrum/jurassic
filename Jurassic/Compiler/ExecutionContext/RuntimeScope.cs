@@ -24,10 +24,10 @@ namespace Jurassic.Compiler
     /// 
     /// object f(ExecutionContext executionContext, object[] arguments)
     /// {
-    ///   var scope1 = new RuntimeScope(executionContext, null);
-    ///   var scope2 = new RuntimeScope(executionContext, scope1);
+    ///   var scope1 = executionContext.CreateRuntimeScope(null);
     ///   var g = ReflectionHelpers.CreateFunction(..., scope3, ...)
     ///   scope1.SetValue("a", 5);
+    ///   var scope2 = executionContext.CreateRuntimeScope(scope1);
     ///   scope2.SetValue("a", 4);
     ///   g.Call()
     ///   ((FunctionInstance)TypeConverter.ToObject(scope2.GetValue("console"))["log"]).Call(scope2.GetValue("a"));
@@ -35,7 +35,7 @@ namespace Jurassic.Compiler
     /// 
     /// object g(ExecutionContext executionContext, object[] arguments)
     /// {
-    ///   var scope1 = new RuntimeScope(executionContext, null);
+    ///   var scope1 = executionContext.CreateRuntimeScope(null);
     ///   scope1.SetValue("a", 6);
     /// }
     /// 
@@ -51,8 +51,8 @@ namespace Jurassic.Compiler
     /// 
     /// object f(ExecutionContext executionContext, object[] arguments)
     /// {
-    ///   var scope1 = new RuntimeScope(executionContext, null);
-    ///   var scope2 = new RuntimeScope(executionContext, scope1);
+    ///   var scope1 = executionContext.CreateRuntimeScope(null);
+    ///   var scope2 = executionContext.CreateRuntimeScope(scope1);
     ///   scope2.BindTo(scope1.GetValue("Math"));
     ///   ((FunctionInstance)TypeConverter.ToObject(scope2.GetValue("console"))["log"]).Call(scope2.GetValue("E"));
     /// }
