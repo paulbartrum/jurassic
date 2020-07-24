@@ -64,7 +64,7 @@ namespace Jurassic.Compiler
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="span"> The extent of the function in the source code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(DeclarativeScope scope, PropertyName name, FunctionDeclarationType declarationType,
+        public FunctionMethodGenerator(Scope scope, PropertyName name, FunctionDeclarationType declarationType,
             IList<FunctionArgument> arguments, string bodyText, Statement body, string scriptPath, SourceCodeSpan span,
             CompilerOptions options)
             : base(scope, new DummyScriptSource(scriptPath), options)
@@ -103,16 +103,15 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new FunctionContext instance.
         /// </summary>
-        /// <param name="scope"> The function scope. </param>
-        /// <param name="name"> The name of the function (can be computed at runtime). </param>
+        /// <param name="name"> The name of the function. </param>
         /// <param name="argumentsText"> A comma-separated list of arguments. </param>
         /// <param name="body"> The source code for the body of the function. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(DeclarativeScope scope, PropertyName name,
+        public FunctionMethodGenerator(string name,
             string argumentsText, string body, CompilerOptions options)
-            : base(scope, new StringScriptSource(body), options)
+            : base(Scope.CreateFunctionScope(Scope.CreateGlobalScope(), name, null), new StringScriptSource(body), options)
         {
-            this.Name = name;
+            this.Name = new PropertyName(name);
             this.ArgumentsText = argumentsText;
             this.BodyText = body;
         }
@@ -224,7 +223,7 @@ namespace Jurassic.Compiler
         /// <returns> An array of parameter names. </returns>
         protected override string[] GetParameterNames()
         {
-            return new string[] { "engine", "scope", "this", "body", "newTarget", "arguments" };
+            return new string[] { "executionContext", "arguments" };
         }
 
         /// <summary>
@@ -328,18 +327,10 @@ namespace Jurassic.Compiler
             // Transfer the arguments object into the scope.
             if (this.MethodOptimizationHints.HasArguments == true && this.Arguments.Any(a => a.Name == "arguments") == false)
             {
-                // prototype
-                EmitHelpers.LoadScriptEngine(generator);
-                generator.Call(ReflectionHelpers.ScriptEngine_Object);
-                generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
-                // callee
-                EmitHelpers.LoadFunction(generator);
-                // scope
-                EmitHelpers.LoadScope(generator);
-                generator.CastClass(typeof(DeclarativeScope));
-                // argumentValues
+                // executionContext.CreateArgumentsInstance(object[] arguments)
+                EmitHelpers.LoadExecutionContext(generator);
                 EmitHelpers.LoadArgumentsArray(generator);
-                generator.NewObject(ReflectionHelpers.Arguments_Constructor);
+                generator.Call(ReflectionHelpers.ExecutionContext_CreateArgumentsInstance);
                 var arguments = new NameExpression(this.InitialScope, "arguments");
                 arguments.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
             }

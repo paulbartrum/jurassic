@@ -17,8 +17,7 @@ namespace Jurassic.Compiler
         private bool consumedLineTerminator;
         private ParserExpressionState expressionState;
         private Scope initialScope;
-        private Scope currentVarScope;
-        private Scope currentLetScope;
+        private Scope currentScope;
         private MethodOptimizationHints methodOptimizationHints;
         private List<string> labelsForCurrentStatement = new List<string>();
         private Token endToken;
@@ -291,7 +290,7 @@ namespace Jurassic.Compiler
         {
             if (initialScope == null)
                 throw new ArgumentNullException(nameof(initialScope));
-            this.currentLetScope = this.currentVarScope = this.initialScope = initialScope;
+            this.currentScope = this.initialScope = initialScope;
         }
 
         /// <summary>
@@ -300,20 +299,17 @@ namespace Jurassic.Compiler
         private class ScopeContext : IDisposable
         {
             private readonly Parser parser;
-            private readonly Scope previousLetScope;
-            private readonly Scope previousVarScope;
+            private readonly Scope previousScope;
 
             public ScopeContext(Parser parser)
             {
                 this.parser = parser;
-                previousLetScope = parser.currentLetScope;
-                previousVarScope = parser.currentVarScope;
+                previousScope = parser.currentScope;
             }
 
             public void Dispose()
             {
-                parser.currentLetScope = previousLetScope;
-                parser.currentVarScope = previousVarScope;
+                parser.currentScope = previousScope;
             }
         }
 
@@ -321,18 +317,12 @@ namespace Jurassic.Compiler
         /// Sets the current scope and returns an object which can be disposed to restore the
         /// previous scope.
         /// </summary>
-        /// <param name="letScope"> The new let scope. </param>
-        /// <param name="varScope"> The new var scope. </param>
+        /// <param name="scope"> The new scope. </param>
         /// <returns> An object which can be disposed to restore the previous scope. </returns>
-        private ScopeContext CreateScopeContext(Scope letScope, Scope varScope = null)
+        private ScopeContext CreateScopeContext(Scope scope)
         {
-            if (letScope == null)
-                throw new ArgumentNullException(nameof(letScope));
-            var result = new ScopeContext(this);
-            this.currentLetScope = letScope;
-            if (varScope != null)
-                this.currentVarScope = varScope;
-            return result;
+            this.currentScope = scope ?? throw new ArgumentNullException(nameof(scope));
+            return new ScopeContext(this);
         }
 
 
@@ -390,7 +380,7 @@ namespace Jurassic.Compiler
 
             // If this is an eval, and strict mode is on, redefine the scope.
             if (this.StrictMode == true && this.context == CodeContext.Eval)
-                SetInitialScope(DeclarativeScope.CreateEvalScope(this.initialScope));
+                SetInitialScope(Scope.CreateEvalScope(this.initialScope));
 
             // Read zero or more regular statements.
             while (true)
@@ -477,24 +467,29 @@ namespace Jurassic.Compiler
         /// or undefined if there are no statements in the block. </remarks>
         private BlockStatement ParseBlock()
         {
-            // Consume the start brace ({).
-            this.Expect(PunctuatorToken.LeftBrace);
-
-            // Read zero or more statements.
-            var result = new BlockStatement(this.labelsForCurrentStatement);
-            while (true)
+            using (CreateScopeContext(Scope.CreateBlockScope(this.currentScope)))
             {
-                // Check for the end brace (}).
-                if (this.nextToken == PunctuatorToken.RightBrace)
-                    break;
 
-                // Parse a single statement.
-                result.Statements.Add(ParseStatement());
+                // Consume the start brace ({).
+                this.Expect(PunctuatorToken.LeftBrace);
+
+                // Read zero or more statements.
+                var result = new BlockStatement(this.labelsForCurrentStatement);
+                while (true)
+                {
+                    // Check for the end brace (}).
+                    if (this.nextToken == PunctuatorToken.RightBrace)
+                        break;
+
+                    // Parse a single statement.
+                    result.Statements.Add(ParseStatement());
+                }
+
+                // Consume the end brace.
+                this.Expect(PunctuatorToken.RightBrace);
+                return result;
+
             }
-
-            // Consume the end brace.
-            this.Expect(PunctuatorToken.RightBrace);
-            return result;
         }
 
         /// <summary>
@@ -502,13 +497,15 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="keyword"> Indicates which type of statement is being parsed.  Must be var,
         /// let or const. </param>
+        /// <param name="consumeKeyword"> Indicates whether the keyword token needs to be consumed. </param>
         /// <returns> A variable declaration statement. </returns>
-        private VarStatement ParseVarLetOrConst(KeywordToken keyword)
+        private VarStatement ParseVarLetOrConst(KeywordToken keyword, bool consumeKeyword = true)
         {
-            var result = new VarStatement(this.labelsForCurrentStatement, keyword == KeywordToken.Var ? this.currentVarScope : this.currentLetScope);
+            var result = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
 
             // Read past the first token (var, let or const).
-            this.Expect(keyword);
+            if (consumeKeyword)
+                this.Expect(keyword);
 
             // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
@@ -521,9 +518,11 @@ namespace Jurassic.Compiler
                 // The next token must be a variable name.
                 declaration.VariableName = this.ExpectIdentifier();
                 ValidateVariableName(declaration.VariableName);
+                if (keyword == KeywordToken.Let && declaration.VariableName == "let")
+                    throw new SyntaxErrorException("'let' is not allowed here.", this.LineNumber, this.SourcePath);
 
                 // Add the variable to the current function's list of local variables.
-                this.currentVarScope.DeclareVariable(declaration.VariableName,
+                this.currentScope.DeclareVariable(keyword, declaration.VariableName,
                     writable: true, deletable: this.context == CodeContext.Eval);
 
                 // The next token is either an equals sign (=), a semi-colon or a comma.
@@ -730,7 +729,7 @@ namespace Jurassic.Compiler
                 this.Expect(KeywordToken.Var);
 
                 // There can be multiple initializers (but not for for-in statements).
-                var varStatement = new VarStatement(this.labelsForCurrentStatement, this.currentVarScope);
+                var varStatement = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
                 initializationStatement = varStatement;
 
                 while (true)
@@ -742,7 +741,7 @@ namespace Jurassic.Compiler
                     ValidateVariableName(declaration.VariableName);
 
                     // Add the variable to the current function's list of local variables.
-                    this.currentVarScope.DeclareVariable(declaration.VariableName,
+                    this.currentScope.DeclareVariable(KeywordToken.Var, declaration.VariableName,
                         writable: true, deletable: this.context == CodeContext.Eval);
 
                     // The next token is either an equals sign (=), a semi-colon, a comma, or the "in" keyword.
@@ -772,14 +771,14 @@ namespace Jurassic.Compiler
                     else if (this.nextToken == KeywordToken.In && type == ForStatementType.Unknown)
                     {
                         // This is a for-in statement.
-                        forInOfReference = new NameExpression(this.currentVarScope, declaration.VariableName);
+                        forInOfReference = new NameExpression(this.currentScope, declaration.VariableName);
                         type = ForStatementType.ForIn;
                         break;
                     }
                     else if (this.nextToken == IdentifierToken.Of && type == ForStatementType.Unknown)
                     {
                         // This is a for-of statement.
-                        forInOfReference = new NameExpression(this.currentVarScope, declaration.VariableName);
+                        forInOfReference = new NameExpression(this.currentScope, declaration.VariableName);
                         type = ForStatementType.ForOf;
                         break;
                     }
@@ -1040,7 +1039,7 @@ namespace Jurassic.Compiler
             var start = this.PositionAfterWhitespace;
 
             // Read an object reference.
-            var objectEnvironment = ParseExpression(PunctuatorToken.RightParenthesis);
+            result.WithObject = ParseExpression(PunctuatorToken.RightParenthesis);
 
             // Record the portion of the source document that will be highlighted when debugging.
             result.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
@@ -1049,8 +1048,7 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Create a new scope and assign variables within the with statement to the scope.
-            result.Scope = ObjectScope.CreateWithScope(this.currentLetScope, objectEnvironment);
-            using (CreateScopeContext(letScope: result.Scope, varScope: result.Scope))
+            using (CreateScopeContext(Scope.CreateWithScope(this.currentScope)))
             {
                 // Read the body of the with statement.
                 result.Body = ParseStatement();
@@ -1221,8 +1219,8 @@ namespace Jurassic.Compiler
                     this.Expect(PunctuatorToken.RightParenthesis);
 
                     // Create a new scope for the catch variable.
-                    result.CatchScope = DeclarativeScope.CreateCatchScope(this.currentLetScope, result.CatchVariableName);
-                    using (CreateScopeContext(letScope: result.CatchScope, varScope: result.CatchScope))
+                    result.CatchScope = Scope.CreateCatchScope(this.currentScope, result.CatchVariableName);
+                    using (CreateScopeContext(result.CatchScope))
                     {
                         // Parse the statements inside the catch block.
                         result.CatchBlock = ParseBlock();
@@ -1294,7 +1292,8 @@ namespace Jurassic.Compiler
                         codeContext: CodeContext.Function);
 
             // Add the function to the top-level scope.
-            this.initialScope.DeclareVariable(functionName, expression, writable: true, deletable: this.context == CodeContext.Eval);
+            this.initialScope.DeclareVariable(KeywordToken.Var, functionName,
+                valueAtTopOfScope: expression, writable: true, deletable: this.context == CodeContext.Eval);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1318,21 +1317,21 @@ namespace Jurassic.Compiler
             // Create a new scope and assign variables within the function body to the scope.
             var functionName = !name.IsGetter && !name.IsSetter && name.HasStaticName &&
                 codeContext != CodeContext.Constructor && codeContext != CodeContext.DerivedConstructor ? name.StaticName : null;
-            var scope = DeclarativeScope.CreateFunctionScope(parentScope, functionName, null);
+            var scope = Scope.CreateFunctionScope(parentScope, functionName, null);
 
             // Replace scope and methodOptimizationHints.
-            var originalScope = this.currentVarScope;
+            var originalScope = this.currentScope;
             var originalMethodOptimizationHints = this.methodOptimizationHints;
             var newMethodOptimizationHints = new MethodOptimizationHints();
             this.methodOptimizationHints = newMethodOptimizationHints;
-            this.currentVarScope = scope;
+            this.currentScope = scope;
 
             // Read zero or more arguments.
             var arguments = ParseFunctionArguments(PunctuatorToken.RightParenthesis);
 
             // Restore scope and methodOptimizationHints.
             this.methodOptimizationHints = originalMethodOptimizationHints;
-            this.currentVarScope = originalScope;
+            this.currentScope = originalScope;
 
             // Getters must have zero arguments.
             if (name.IsGetter && arguments.Count != 0)
@@ -1426,7 +1425,7 @@ namespace Jurassic.Compiler
 
                     // Add the variable to the scope so that it can be used in the default value of
                     // the next argument.  Do this *after* parsing the default value.
-                    this.currentVarScope.DeclareVariable(argument.Name);
+                    this.currentScope.DeclareVariable(KeywordToken.Var, argument.Name);
 
                     // Add the argument to the list.
                     arguments.Add(argument);
@@ -1471,6 +1470,10 @@ namespace Jurassic.Compiler
 
                 // Read the rest of the statement.
                 return ParseStatementNoNewContext();
+            }
+            else if (this.nextToken is IdentifierToken && expression is NameExpression nameExpression && nameExpression.Name == "let")
+            {
+                return ParseVarLetOrConst(KeywordToken.Let, consumeKeyword: false);
             }
             else
             {
@@ -1595,9 +1598,15 @@ namespace Jurassic.Compiler
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                             break;
-                        // Check for "of" contextual keyword.
+
+                        // Check for 'of' contextual keyword.
                         if (Array.IndexOf(endTokens, IdentifierToken.Of) >= 0)
                             break;
+
+                        // Check for 'let' contextual keyword.
+                        if (root is NameExpression nameExpression && nameExpression.Name == "let" && this.nextToken is IdentifierToken)
+                            break;
+
                         throw new SyntaxErrorException(string.Format("Expected operator but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
@@ -1629,7 +1638,7 @@ namespace Jurassic.Compiler
                     {
                         // If the token is an identifier, convert it to a NameExpression.
                         var identifierName = ((IdentifierToken)this.nextToken).Name;
-                        terminal = new NameExpression(this.currentVarScope, identifierName);
+                        terminal = new NameExpression(this.currentScope, identifierName);
 
                         // Record each occurance of a variable name.
                         if (unboundOperator == null || unboundOperator.OperatorType != OperatorType.MemberAccess)
@@ -2003,7 +2012,7 @@ namespace Jurassic.Compiler
                     // Parse the function body.
                     var function = ParseFunction(
                         functionType: FunctionDeclarationType.Declaration,
-                        parentScope: this.currentVarScope,
+                        parentScope: this.currentScope,
                         name: propertyName,
                         startPosition: startPosition,
                         codeContext: CodeContext.ObjectLiteralFunction);
@@ -2015,7 +2024,7 @@ namespace Jurassic.Compiler
                 {
                     // This is a shorthand property e.g. "var a = 1, b = 2, c = { a, b }" is the
                     // same as "var a = 1, b = 2, c = { a: a, b: b }".
-                    properties.Add(new PropertyDeclaration(propertyName, new NameExpression(this.currentVarScope, propertyName.StaticName)));
+                    properties.Add(new PropertyDeclaration(propertyName, new NameExpression(this.currentScope, propertyName.StaticName)));
                 }
                 else if (this.nextToken == PunctuatorToken.LeftParenthesis)
                 {
@@ -2025,7 +2034,7 @@ namespace Jurassic.Compiler
                     // Parse the function.
                     var function = ParseFunction(
                         functionType: FunctionDeclarationType.Expression,
-                        parentScope: this.currentVarScope,
+                        parentScope: this.currentScope,
                         name: propertyName,
                         startPosition: startPosition,
                         codeContext: CodeContext.ObjectLiteralFunction);
@@ -2147,7 +2156,7 @@ namespace Jurassic.Compiler
             // Parse the rest of the function.
             return ParseFunction(
                     functionType: FunctionDeclarationType.Expression,
-                    parentScope: this.currentVarScope,
+                    parentScope: this.currentScope,
                     name: new PropertyName(functionName),
                     startPosition: startPosition,
                     codeContext: CodeContext.Function);
@@ -2223,7 +2232,7 @@ namespace Jurassic.Compiler
 
             // For 'class A' construct an expression like 'A = class A'.
             var result = new ExpressionStatement(this.labelsForCurrentStatement,
-                new AssignmentExpression(this.currentVarScope, className, classExpression));
+                new AssignmentExpression(this.currentScope, className, classExpression));
             result.SourceSpan = new SourceCodeSpan(startPosition, this.PositionBeforeWhitespace);
             return result;
         }

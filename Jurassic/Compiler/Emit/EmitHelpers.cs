@@ -181,30 +181,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Pushes a reference to the current scope onto the stack.
-        /// </summary>
-        /// <param name="generator"> The IL generator. </param>
-        public static void LoadScope(ILGenerator generator)
-        {
-            generator.LoadArgument(0);
-            generator.Call(ReflectionHelpers.ExecutionContext_GetScope);
-        }
-
-        /// <summary>
-        /// Stores the reference on top of the stack as the new scope.
-        /// </summary>
-        /// <param name="generator"> The IL generator. </param>
-        public static void StoreScope(ILGenerator generator)
-        {
-            var temp = generator.CreateTemporaryVariable(PrimitiveType.Any);
-            generator.StoreVariable(temp);
-            generator.LoadArgument(0);
-            generator.LoadVariable(temp);
-            generator.Call(ReflectionHelpers.ExecutionContext_SetScope);
-            generator.ReleaseTemporaryVariable(temp);
-        }
-
-        /// <summary>
         /// Pushes the value of the <c>this</c> keyword onto the stack.
         /// </summary>
         /// <param name="generator"> The IL generator. </param>
@@ -213,15 +189,6 @@ namespace Jurassic.Compiler
             generator.LoadArgument(0);
             generator.Call(ReflectionHelpers.ExecutionContext_GetThisValue);
         }
-
-        /// <summary>
-        /// Stores the reference on top of the stack as the new value of the <c>this</c> keyword.
-        /// </summary>
-        /// <param name="generator"> The IL generator. </param>
-        /*public static void StoreThis(ILGenerator generator)
-        {
-            generator.StoreArgument(2);
-        }*/
 
         /// <summary>
         /// Pushes a reference to the current function onto the stack.

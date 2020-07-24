@@ -13,7 +13,7 @@ namespace Jurassic.Compiler
         /// <param name="source"> The source of javascript code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         public GlobalMethodGenerator(ScriptSource source, CompilerOptions options)
-            : base(ObjectScope.CreateGlobalPlaceholder(), source, options)
+            : base(Scope.CreateGlobalScope(), source, options)
         {
         }
 

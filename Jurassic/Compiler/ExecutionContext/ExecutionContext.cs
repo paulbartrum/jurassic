@@ -1,6 +1,5 @@
 ﻿using Jurassic.Library;
 using System;
-using System.Diagnostics;
 
 namespace Jurassic.Compiler
 {
@@ -16,58 +15,56 @@ namespace Jurassic.Compiler
         /// 'this' keyword will be the global object.
         /// </summary>
         /// <param name="engine"> A script engine. </param>
-        /// <param name="scope"> Variable storage, to be attached to the global object. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateGlobalContext(ScriptEngine engine, ObjectScope scope)
+        internal static ExecutionContext CreateGlobalContext(ScriptEngine engine)
         {
-            // Convert the initial scope into a runtime scope.
-            Debug.Assert(scope != null && scope.ScopeObject == null);
-            var runtimeScope = scope.ConvertPlaceholderToRuntimeScope(engine.Global);
-            return new ExecutionContext(engine, runtimeScope, BindingStatus.Initialized, engine.Global, null, null, null);
+            return new ExecutionContext(engine, null, BindingStatus.Initialized, engine.Global, null, null, null);
         }
 
         /// <summary>
         /// Creates an execution context for code running in an eval() scope.
         /// </summary>
         /// <param name="engine"> A script engine. </param>
-        /// <param name="scope"> Variable storage. </param>
+        /// <param name="parentScope"> The scope that was active when eval() was called. </param>
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateEvalContext(ScriptEngine engine, Scope scope, object thisValue)
+        internal static ExecutionContext CreateEvalContext(ScriptEngine engine, RuntimeScope parentScope, object thisValue)
         {
             if (thisValue == null)
                 throw new ArgumentNullException(nameof(thisValue));
-            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, null, null, null);
+            return new ExecutionContext(engine, parentScope, BindingStatus.Initialized, thisValue, null, null, null);
         }
 
         /// <summary>
         /// Creates an execution context for code running as a result of a function call.
         /// </summary>
         /// <param name="engine"> A script engine. </param>
-        /// <param name="scope"> Variable storage. </param>
+        /// <param name="parentScope"> The scope that was active when the function was declared
+        /// (NOT when it was called). </param>
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
         /// <param name="executingFunction"> The function that is being called. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateFunctionContext(ScriptEngine engine, Scope scope, object thisValue, UserDefinedFunction executingFunction)
+        internal static ExecutionContext CreateFunctionContext(ScriptEngine engine, RuntimeScope parentScope, object thisValue, UserDefinedFunction executingFunction)
         {
             if (thisValue == null)
                 throw new ArgumentNullException(nameof(thisValue));
             if (executingFunction == null)
                 throw new ArgumentNullException(nameof(executingFunction));
-            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, null, executingFunction.Container);
+            return new ExecutionContext(engine, parentScope, BindingStatus.Initialized, thisValue, executingFunction, null, executingFunction.Container);
         }
 
         /// <summary>
         /// Creates an execution context for code running as a result of the new operator.
         /// </summary>
         /// <param name="engine"> A script engine. </param>
-        /// <param name="scope"> Variable storage. </param>
+        /// <param name="parentScope"> The scope that was active when the class was declared. </param>
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
+        /// <param name="executingFunction"> A </param>
         /// <param name="newTarget"> The target of the new operator. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateConstructContext(ScriptEngine engine, Scope scope, object thisValue, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
+        internal static ExecutionContext CreateConstructContext(ScriptEngine engine, RuntimeScope parentScope, object thisValue, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Initialized, thisValue, executingFunction, newTarget, functionContainer);
+            return new ExecutionContext(engine, parentScope, BindingStatus.Initialized, thisValue, executingFunction, newTarget, functionContainer);
         }
 
         /// <summary>
@@ -75,21 +72,21 @@ namespace Jurassic.Compiler
         /// 'this' value is unavailable.
         /// </summary>
         /// <param name="engine"> A script engine. </param>
-        /// <param name="scope"> Variable storage. </param>
+        /// <param name="parentScope"> The scope that was active when the class was declared. </param>
         /// <param name="newTarget"> The target of the new operator. </param>
         /// <returns> A new execution context instance. </returns>
-        public static ExecutionContext CreateDerivedContext(ScriptEngine engine, Scope scope, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
+        internal static ExecutionContext CreateDerivedContext(ScriptEngine engine, RuntimeScope parentScope, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
         {
-            return new ExecutionContext(engine, scope, BindingStatus.Uninitialized, null, executingFunction, newTarget, functionContainer);
+            return new ExecutionContext(engine, parentScope, BindingStatus.Uninitialized, null, executingFunction, newTarget, functionContainer);
         }
 
-        private ExecutionContext(ScriptEngine engine, Scope scope,
+        private ExecutionContext(ScriptEngine engine, RuntimeScope parentScope,
             BindingStatus thisBindingStatus, object thisValue,
-            FunctionInstance executingFunction, FunctionInstance newTarget,
+            UserDefinedFunction executingFunction, FunctionInstance newTarget,
             ObjectInstance functionContainer)
         {
             this.Engine = engine ?? throw new ArgumentNullException(nameof(engine));
-            this.Scope = scope ?? throw new ArgumentNullException(nameof(scope));
+            this.ParentScope = parentScope;
             this.ThisBindingStatus = thisBindingStatus;
             this.thisValue = thisValue;
             this.ExecutingFunction = executingFunction;
@@ -103,9 +100,9 @@ namespace Jurassic.Compiler
         public ScriptEngine Engine { get; private set; }
 
         /// <summary>
-        /// Holds variable bindings.
+        /// The scope that was active when this execution context was declared. Can be <c>null</c>.
         /// </summary>
-        public Scope Scope { get; set; }
+        public RuntimeScope ParentScope { get; private set; }
 
         /// <summary>
         /// Represents the state of the 'this' value.
@@ -203,7 +200,7 @@ namespace Jurassic.Compiler
         /// A reference to the executing function. Will be <c>null</c> if running in a global or
         /// eval context.
         /// </summary>
-        public FunctionInstance ExecutingFunction { get; private set; }
+        public UserDefinedFunction ExecutingFunction { get; private set; }
 
         /// <summary>
         /// If this context was created by the 'new' operator, contains the target of the new
@@ -224,6 +221,27 @@ namespace Jurassic.Compiler
         public object NewTargetObject
         {
             get { return (object)NewTarget ?? Undefined.Value; }
+        }
+
+        /// <summary>
+        /// Creates a new instance of the 'arguments' object.
+        /// </summary>
+        /// <param name="arguments"> The argument values that were passed to the function. </param>
+        /// <returns> A new instance of the 'arguments' object. </returns>
+        public ArgumentsInstance CreateArgumentsInstance(object[] arguments)
+        {
+            return new ArgumentsInstance(Engine.Object.Prototype, ExecutingFunction, ParentScope, arguments);
+        }
+
+        /// <summary>
+        /// Creates a new RuntimeScope instance, which is used for passing captured variables
+        /// between methods.
+        /// </summary>
+        /// <param name="parent"> The parent scope. </param>
+        /// <returns> A new RuntimeScope instance. </returns>
+        public RuntimeScope CreateRuntimeScope(RuntimeScope parent)
+        {
+            return new RuntimeScope(this, parent);
         }
     }
 }

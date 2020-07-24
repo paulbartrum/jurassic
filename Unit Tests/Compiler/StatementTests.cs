@@ -277,9 +277,16 @@ namespace UnitTests
         }
 
         [TestMethod]
-        [Ignore]    // not supported yet
         public void Let()
         {
+            Assert.AreEqual(24, Evaluate(@"
+                let a = 11, b;
+                {
+                    let a = 13;
+                    b = a;
+                }
+                b += a; b"));
+
             Assert.AreEqual(Undefined.Value, Evaluate("let x"));
             Assert.AreEqual(Undefined.Value, Evaluate("let x; x"));
             Assert.AreEqual(Undefined.Value, Evaluate("let x, y"));
@@ -288,12 +295,16 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("let x = 1, y = 2; x"));
             Assert.AreEqual(2, Evaluate("let x = 1, y = 2; y"));
             Assert.AreEqual(2, Evaluate("let x = Math.max(1, 2); x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
+            Assert.AreEqual("ReferenceError: i is not defined", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
             Assert.AreEqual("undefined", Evaluate("delete i; (function() { i = 5; var i = 3; })(); typeof(i);"));
 
             // Duplicate names are not allowed.
             Assert.AreEqual("SyntaxError", EvaluateExceptionMessage("let x = 3, x = 5; x"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionMessage("let x = 3; let x = 5; x"));
+
+            // 'let' is not a valid name in a let declaration.
+            Assert.AreEqual("SyntaxError: 'let' is not allowed here.", EvaluateExceptionMessage("let let"));
+            Assert.AreEqual("SyntaxError: 'let' is not allowed here.", EvaluateExceptionMessage("let let = 5"));
         }
 
         [TestMethod]

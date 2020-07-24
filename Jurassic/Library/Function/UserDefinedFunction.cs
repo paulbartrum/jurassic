@@ -9,8 +9,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a JavaScript function implemented in javascript.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(UserDefinedFunctionDebugView))]
     public class UserDefinedFunction : FunctionInstance
     {
         [NonSerialized]
@@ -43,10 +41,10 @@ namespace Jurassic.Library
                 throw new ArgumentNullException(nameof(bodyText));
 
             // Set up a new function scope.
-            this.Scope = DeclarativeScope.CreateFunctionScope(ObjectScope.CreateGlobalScope(this.Engine.Global), name, null);
+            this.ParentScope = new ObjectVariableStorage(null, this.Engine.Global);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(this.Scope, new PropertyName(name), argumentsText, bodyText, new CompilerOptions() {
+            var context = new FunctionMethodGenerator(name, argumentsText, bodyText, new CompilerOptions() {
 #if ENABLE_DEBUGGING
                EnableDebugging = this.Engine.EnableDebugging,
 #endif
@@ -68,7 +66,6 @@ namespace Jurassic.Library
             this.BodyText = bodyText;
             this.generatedMethod = context.GeneratedMethod;
             this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
-            this.ParentScope = ObjectScope.CreateGlobalScope(this.Engine.Global);
             this.StrictMode = context.StrictMode;
             InitProperties(name, context.Arguments.Count);
         }
@@ -84,7 +81,7 @@ namespace Jurassic.Library
         /// <param name="body"> A delegate which represents the body of the function. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
         /// <remarks> This is used by <c>arguments</c>. </remarks>
-        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, FunctionDelegate body, bool strictMode)
+        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, RuntimeScope parentScope, string bodyText, FunctionDelegate body, bool strictMode)
             : base(prototype)
         {
             this.ArgumentsText = string.Join(", ", argumentNames);
@@ -109,7 +106,7 @@ namespace Jurassic.Library
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
         /// <param name="container"> A reference to the containing class prototype or object literal (or <c>null</c>). </param>
         /// <remarks> This is used by functions declared in JavaScript code (including getters and setters). </remarks>
-        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
+        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, RuntimeScope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
             : base(prototype)
         {
             this.ArgumentsText = string.Join(", ", argumentNames);
@@ -184,7 +181,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the scope at the point the function was declared.
         /// </summary>
-        internal Scope ParentScope
+        internal RuntimeScope ParentScope
         {
             get;
             private set;
@@ -206,15 +203,6 @@ namespace Jurassic.Library
         public string DisassembledIL
         {
             get { return this.generatedMethod.DisassembledIL; }
-        }
-
-        /// <summary>
-        /// The function scope. Internal just to be visible in debugger.
-        /// </summary>
-        internal DeclarativeScope Scope
-        {
-            get;
-            private set;
         }
 
         /// <summary>
@@ -270,7 +258,7 @@ namespace Jurassic.Library
         {
             var context = ExecutionContext.CreateFunctionContext(
                 engine: this.Engine,
-                scope: this.ParentScope,
+                parentScope: this.ParentScope,
                 thisValue: thisObject,
                 executingFunction: this);
             return this.body(context, argumentValues);
@@ -290,7 +278,7 @@ namespace Jurassic.Library
             // Run the function, with the new object as the "this" keyword.
             var context = ExecutionContext.CreateConstructContext(
                 engine: this.Engine,
-                scope: this.ParentScope,
+                parentScope: this.ParentScope,
                 thisValue: newObject,
                 executingFunction: this,
                 newTarget: newTarget,

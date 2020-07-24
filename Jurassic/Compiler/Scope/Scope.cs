@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 
 namespace Jurassic.Compiler
@@ -320,3 +321,4 @@ namespace Jurassic.Compiler
     }
 
 }
+#endif

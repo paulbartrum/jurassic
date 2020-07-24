@@ -300,6 +300,25 @@ namespace Performance
                 }", "f"));
         }
 
+        [TestMethod]
+        public void Let()
+        {
+            Assert.AreEqual(NormalizeText(@"
+                      ldnull
+                      ret
+                "),
+                GetFunctionIL(@"function f() {
+                    let a = 11, b;
+                    {
+                        let a = 13;
+                        b = a;
+                    }
+                    b += a;
+                    return b;
+                }", "f"));
+        }
+
+
         private static string GetFunctionIL(string code, string functionName)
         {
             var scriptEngine = new ScriptEngine();

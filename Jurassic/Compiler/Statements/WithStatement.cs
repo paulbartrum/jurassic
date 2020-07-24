@@ -18,23 +18,12 @@ namespace Jurassic.Compiler
         {
         }
 
-        /// <summary>
-        /// Gets or sets the object scope inside the with statement.
-        /// </summary>
-        public ObjectScope Scope
-        {
-            get;
-            set;
-        }
+        public Expression WithObject { get; set; }
 
         /// <summary>
         /// Gets or sets the body of the with statement.
         /// </summary>
-        public Statement Body
-        {
-            get;
-            set;
-        }
+        public Statement Body { get; set; }
 
         /// <summary>
         /// Generates CIL for the statement.
@@ -47,8 +36,15 @@ namespace Jurassic.Compiler
             var statementLocals = new StatementLocals();
             GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
 
-            // Create the scope.
-            this.Scope.GenerateScopeCreation(generator, optimizationInfo);
+            // executionContext.StartWithBlock(ObjectInstance withObject)
+            EmitHelpers.LoadExecutionContext(generator);
+            this.WithObject.GenerateCode(generator, optimizationInfo);
+            EmitConversion.ToObject(generator, this.WithObject.ResultType, optimizationInfo);
+            generator.Call(ReflectionHelpers.ExecutionContext_StartWithBlock);
+
+            // Store the result of the previous call into a temporary variable.
+            var previousScope = generator.CreateTemporaryVariable(typeof(RuntimeScope));
+            generator.StoreVariable(previousScope);
 
             // Make sure the scope is reverted even if an exception is thrown.
             generator.BeginExceptionBlock();
@@ -64,9 +60,11 @@ namespace Jurassic.Compiler
             // Reset the InsideTryCatchOrFinally flag.
             optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
 
-            // Revert the scope.
+            // finally { executionContext.EndWithBlock(previousScope) }
             generator.BeginFinallyBlock();
-            this.Scope.GenerateScopeDestruction(generator, optimizationInfo);
+            EmitHelpers.LoadExecutionContext(generator);
+            generator.LoadVariable(previousScope);
+            generator.Call(ReflectionHelpers.ExecutionContext_EndWithBlock);
             generator.EndExceptionBlock();
 
             // Generate code for the end of the statement.
@@ -80,7 +78,7 @@ namespace Jurassic.Compiler
         {
             get
             {
-                yield return this.Scope.ScopeObjectExpression;
+                yield return this.WithObject;
                 yield return this.Body;
             }
         }
@@ -95,7 +93,7 @@ namespace Jurassic.Compiler
             var result = new System.Text.StringBuilder();
             result.Append(new string('\t', indentLevel));
             result.Append("with (");
-            result.Append(this.Scope.ScopeObjectExpression);
+            result.Append(this.WithObject);
             result.AppendLine(")");
             result.Append(this.Body.ToString(indentLevel + 1));
             return result.ToString();

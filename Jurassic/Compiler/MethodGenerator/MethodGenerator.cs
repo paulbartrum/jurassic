@@ -13,10 +13,8 @@ namespace Jurassic.Compiler
         /// <param name="scope"> The initial scope. </param>
         /// <param name="source"> The source of javascript code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        protected MethodGenerator(Scope scope, ScriptSource source, CompilerOptions options)
+        protected MethodGenerator(ScriptSource source, CompilerOptions options)
         {
-            if (scope == null)
-                throw new ArgumentNullException(nameof(scope));
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
             if (options == null)
@@ -49,15 +47,6 @@ namespace Jurassic.Compiler
         /// Gets a value that indicates whether strict mode is enabled.
         /// </summary>
         public bool StrictMode
-        {
-            get;
-            protected set;
-        }
-
-        /// <summary>
-        /// Gets the top-level scope associated with the context.
-        /// </summary>
-        public Scope InitialScope
         {
             get;
             protected set;
@@ -126,7 +115,7 @@ namespace Jurassic.Compiler
         protected virtual Type[] GetParameterTypes()
         {
             return new Type[] {
-                typeof(ExecutionContext),   // The script engine, this value, etc.
+                typeof(ExecutionContext),   // The script engine, scope, this value, etc.
             };
         }
 
@@ -136,7 +125,7 @@ namespace Jurassic.Compiler
         /// <returns> An array of parameter names. </returns>
         protected virtual string[] GetParameterNames()
         {
-            return new string[] { "engine", "scope", "this" };
+            return new string[] { "executionContext" };
         }
 
         /// <summary>

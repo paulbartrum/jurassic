@@ -14,11 +14,17 @@ namespace Jurassic.Compiler
         /// <param name="source"> The script code to execute. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         /// <param name="thisObject"> The value of the "this" keyword in the calling code. </param>
-        public EvalMethodGenerator(Scope parentScope, ScriptSource source, CompilerOptions options, object thisObject)
-            : base(parentScope, source, options)
+        public EvalMethodGenerator(RuntimeScope parentScope, ScriptSource source, CompilerOptions options, object thisObject)
+            : base(source, options)
         {
+            this.ParentScope = parentScope;
             this.ThisObject = thisObject;
         }
+
+        /// <summary>
+        /// The scope at the place where eval() is called.
+        /// </summary>
+        public RuntimeScope ParentScope { get; private set; }
 
         /// <summary>
         /// Gets the value of the "this" keyword inside the eval statement.

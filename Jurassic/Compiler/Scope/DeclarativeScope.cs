@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 
 namespace Jurassic.Compiler
@@ -63,6 +64,18 @@ namespace Jurassic.Compiler
         {
             if (parentScope == null)
                 throw new ArgumentNullException("parentScope", "Eval scopes must have a parent scope.");
+            return new DeclarativeScope(parentScope, 0);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parentScope"></param>
+        /// <returns></returns>
+        internal static DeclarativeScope CreateBlockScope(Scope parentScope)
+        {
+            if (parentScope == null)
+                throw new ArgumentNullException("parentScope", "Block scopes must have a parent scope.");
             return new DeclarativeScope(parentScope, 0);
         }
 
@@ -260,3 +273,4 @@ namespace Jurassic.Compiler
     }
 
 }
+#endif

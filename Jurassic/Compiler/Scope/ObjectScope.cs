@@ -1,4 +1,5 @@
-﻿using Jurassic.Library;
+﻿#if false
+using Jurassic.Library;
 using System;
 
 namespace Jurassic.Compiler
@@ -459,3 +460,4 @@ namespace Jurassic.Compiler
     }
 
 }
+#endif
