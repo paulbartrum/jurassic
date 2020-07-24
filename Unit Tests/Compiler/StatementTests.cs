@@ -108,11 +108,13 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("x = 0; for (x in null) { x = 1 } x"));
             Assert.AreEqual(0, Evaluate("x = 0; for (x in undefined) { x = 1 } x"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (5 in [1, 2]) {}"));
+            Assert.AreEqual("2", Evaluate("var x = { a: 1 }; for (x.a in [1, 2, 3]) { } x.a"));
 
             // for (var x in <expression>)
             Assert.AreEqual("1", Evaluate("y = 0; for (var x in [7, 5]) { y = x } y"));
             Assert.AreEqual("01234", Evaluate("y = ''; for (var x in 'hello') { y += x } y"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("for (var 5 in [1, 2])"));
+            Assert.AreEqual("SyntaxError: Unexpected token '.'", EvaluateExceptionMessage("var x = { a: 1 }; for (var x.a in [1, 2, 3]) { } x.a"));
 
             // All properties in the prototype chain should be enumerated, but the same property
             // name is never enumerated twice.  Properties in the prototype chain with the same
@@ -148,9 +150,11 @@ namespace UnitTests
             Assert.AreEqual("0, 255", Evaluate("y = ''; for (x of new Uint8Array([0x00, 0xff])) { y += (y ? ', ' : '') + x } y"));
             Assert.AreEqual("a,1, b,2, c,3", Evaluate("y = ''; for (x of new Map([['a', 1], ['b', 2], ['c', 3]])) { y += (y ? ', ' : '') + x } y"));
             Assert.AreEqual("1, 2, 3", Evaluate("y = ''; for (x of new Set([1, 1, 2, 2, 3, 3])) { y += (y ? ', ' : '') + x } y"));
+            Assert.AreEqual(3, Evaluate("var x = { a: 1 }; for (x.a of [1, 2, 3]) { } x.a"));
 
             // for (var x of <expression>)
             Assert.AreEqual(206, Evaluate("y = 0; for (var x of [93, 113]) { y += x } y"));
+            Assert.AreEqual("SyntaxError: Unexpected token '.'", EvaluateExceptionMessage("var x = { a: 1 }; for (var x.a of [1, 2, 3]) { } x.a"));
 
             // Iterate over a generator.
             Assert.AreEqual("2 3 4 5 ", Evaluate(@"
