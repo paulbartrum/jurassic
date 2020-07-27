@@ -562,6 +562,10 @@ namespace Jurassic.Compiler
         {
             if (PrimitiveTypeUtilities.IsValueType(fromType))
                 generator.Box(fromType);
+#if DEBUG
+            else
+                generator.CastClass(typeof(object));
+#endif
         }
 
         /// <summary>

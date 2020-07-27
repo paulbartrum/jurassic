@@ -8,20 +8,7 @@ namespace Jurassic.Compiler
     /// </summary>
     internal abstract class ILGenerator
     {
-        ///// <summary>
-        ///// Gets or sets a value which indicates whether diagnostics are enabled.  Better error
-        ///// messages are provided in some cases if this property is set to <c>true</c>, however
-        ///// performance and memory usage are negatively impacted.
-        ///// </summary>
-        //public bool EnableDiagnostics
-        //{
-        //    get;
-        //    set;
-        //}
-
-
-
-        //     BUFFER MANAGEMENT
+        //     LIFECYCLE MANAGEMENT
         //_________________________________________________________________________________________
 
         /// <summary>
@@ -98,7 +85,7 @@ namespace Jurassic.Compiler
         /// null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfFalse(ILLabel label)
+        public virtual void BranchIfFalse(ILLabel label)
         {
             BranchIfZero(label);
         }
@@ -108,7 +95,7 @@ namespace Jurassic.Compiler
         /// non-null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfTrue(ILLabel label)
+        public virtual void BranchIfTrue(ILLabel label)
         {
             BranchIfNotZero(label);
         }
@@ -118,7 +105,7 @@ namespace Jurassic.Compiler
         /// null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfNull(ILLabel label)
+        public virtual void BranchIfNull(ILLabel label)
         {
             BranchIfZero(label);
         }
@@ -128,7 +115,7 @@ namespace Jurassic.Compiler
         /// non-null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfNotNull(ILLabel label)
+        public virtual void BranchIfNotNull(ILLabel label)
         {
             BranchIfNotZero(label);
         }
@@ -349,7 +336,7 @@ namespace Jurassic.Compiler
         /// Pushes a constant value onto the stack.
         /// </summary>
         /// <param name="value"> The boolean to push onto the stack. </param>
-        public void LoadBoolean(bool value)
+        public virtual void LoadBoolean(bool value)
         {
             LoadInt32(value ? 1 : 0);
         }
@@ -406,6 +393,15 @@ namespace Jurassic.Compiler
                 LoadNull();
             else
                 LoadString(value);
+        }
+
+        /// <summary>
+        /// Pushes a constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The enum value to push onto the stack. </param>
+        public virtual void LoadEnumValue<T>(int value) where T : Enum
+        {
+            LoadInt32(value);
         }
 
 
@@ -638,7 +634,7 @@ namespace Jurassic.Compiler
         /// method (or is declared on a value type) or CallVirtual() otherwise.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public void Call(System.Reflection.MethodBase method)
+        public void Call(System.Reflection.MethodInfo method)
         {
             if (method.IsStatic == true || method.DeclaringType.IsValueType == true)
                 CallStatic(method);
@@ -653,7 +649,7 @@ namespace Jurassic.Compiler
         /// callsite.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public abstract void CallStatic(System.Reflection.MethodBase method);
+        public abstract void CallStatic(System.Reflection.MethodInfo method);
 
         /// <summary>
         /// Pops the method arguments off the stack, calls the given method, then pushes the result
@@ -662,7 +658,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public abstract void CallVirtual(System.Reflection.MethodBase method);
+        public abstract void CallVirtual(System.Reflection.MethodInfo method);
 
         /// <summary>
         /// Pushes the value of the given field onto the stack.

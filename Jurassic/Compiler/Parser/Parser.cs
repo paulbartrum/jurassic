@@ -1382,7 +1382,7 @@ namespace Jurassic.Compiler
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
             var context = new FunctionMethodGenerator(name, functionType, arguments,
-                bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body,
+                bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body, scope,
                 this.SourcePath, new SourceCodeSpan(startPosition, endPosition), options);
             context.MethodOptimizationHints = functionParser.methodOptimizationHints;
             return new FunctionExpression(context, this.currentScope);

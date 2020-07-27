@@ -204,7 +204,7 @@ namespace Jurassic.Compiler
 #if USE_DYNAMIC_IL_INFO
                 generator = new DynamicILGenerator(dynamicMethod);
 #else
-                generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator(), emitDebugInfo: false);
+                generator = new ReflectionEmitILGenerator(dynamicMethod, emitDebugInfo: false);
 #endif
 
                 if (this.Options.EnableILAnalysis == true)
@@ -267,7 +267,7 @@ namespace Jurassic.Compiler
                     typeof(object), GetParameterTypes());
 
                 // Generate the IL for the method.
-                generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator(), emitDebugInfo: true);
+                generator = new ReflectionEmitILGenerator(methodBuilder, emitDebugInfo: true);
 
                 if (this.Options.EnableILAnalysis == true)
                 {

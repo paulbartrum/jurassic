@@ -60,12 +60,13 @@ namespace Jurassic.Compiler
         /// <param name="arguments"> The names and default values of the arguments. </param>
         /// <param name="bodyText"> The source code of the function. </param>
         /// <param name="body"> The root of the abstract syntax tree for the body of the function. </param>
+        /// <param name="baseScope"> The scope that contains the function name and arguments. </param>
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="span"> The extent of the function in the source code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         public FunctionMethodGenerator(PropertyName name, FunctionDeclarationType declarationType,
-            IList<FunctionArgument> arguments, string bodyText, Statement body, string scriptPath, SourceCodeSpan span,
-            CompilerOptions options)
+            IList<FunctionArgument> arguments, string bodyText, Statement body, Scope baseScope,
+            string scriptPath, SourceCodeSpan span, CompilerOptions options)
             : base(new DummyScriptSource(scriptPath), options)
         {
             this.Name = name;
@@ -73,6 +74,7 @@ namespace Jurassic.Compiler
             this.Arguments = arguments;
             this.BodyRoot = body;
             this.BodyText = bodyText;
+            this.BaseScope = baseScope;
             Validate(span.StartLine, scriptPath);
         }
 

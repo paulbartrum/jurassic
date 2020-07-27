@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jurassic.Library;
+using System;
 using System.Collections.Generic;
 using ErrorType = Jurassic.Library.ErrorType;
 
@@ -117,10 +118,10 @@ namespace Jurassic.Compiler
             }
 
             // Check the object really is a function - if not, throw an exception.
-            generator.IsInstance(typeof(Library.FunctionInstance));
+            generator.IsInstance(typeof(FunctionInstance));
             generator.Duplicate();
             var endOfTypeCheck = generator.CreateLabel();
-            generator.BranchIfNotNull(endOfTypeCheck);
+            generator.BranchIfTrue(endOfTypeCheck);
 
             // Throw an nicely formatted exception.
             generator.Pop();
@@ -128,12 +129,15 @@ namespace Jurassic.Compiler
             generator.DefineLabelPosition(endOfTypeCheck);
 
             // Pass in the path, function name and line.
+#if DEBUG
+            generator.CastClass(typeof(FunctionInstance));
+#endif
             generator.LoadStringOrNull(optimizationInfo.Source.Path);
             generator.LoadStringOrNull(optimizationInfo.FunctionName);
             generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
 
             // Generate code to produce the "this" value.  There are three cases.
-            if (this.Target is NameExpression targetNameExpression)
+            if (this.Target is NameExpression)
             {
                 // 1. The function is a name expression (e.g. "parseInt()").
                 //    If we are inside a with() block, then there is an implicit 'this' value,
@@ -149,13 +153,9 @@ namespace Jurassic.Compiler
                 //    In this case this = Math.
                 //    Unless it's a super call like super.blah().
                 if (targetMemberAccessExpression.Base is SuperExpression)
-                {
                     EmitHelpers.LoadThis(generator);
-                }
                 else
-                {
                     generator.LoadVariable(targetBase);
-                }
             }
             else
             {
