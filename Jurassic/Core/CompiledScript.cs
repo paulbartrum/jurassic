@@ -54,6 +54,16 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Gets the body of the generated method in the form of disassembled IL code.  Will be
+        /// <c>null</c> unless <see cref="CompilerOptions.EnableILAnalysis"/> was set to
+        /// <c>true</c>.
+        /// </summary>
+        public string DisassembledIL
+        {
+            get { return this.methodGen.GeneratedMethod.DisassembledIL; }
+        }
+
+        /// <summary>
         /// Executes the compiled script.
         /// </summary>
         /// <param name="engine"> The script engine to use to execute the script. </param>
@@ -62,7 +72,7 @@ namespace Jurassic
         {
             try
             {
-                methodGen.Execute(engine);
+                methodGen.Execute(engine, RuntimeScope.CreateGlobalScope(engine), engine.Global);
 
                 // Execute any pending callbacks.
                 engine.ExecutePostExecuteSteps();

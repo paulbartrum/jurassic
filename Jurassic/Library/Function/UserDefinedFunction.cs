@@ -41,7 +41,7 @@ namespace Jurassic.Library
                 throw new ArgumentNullException(nameof(bodyText));
 
             // Set up a new function scope.
-            this.ParentScope = new ObjectVariableStorage(null, this.Engine.Global);
+            this.ParentScope = RuntimeScope.CreateGlobalScope(Engine);
 
             // Compile the code.
             var context = new FunctionMethodGenerator(name, argumentsText, bodyText, new CompilerOptions() {
@@ -198,7 +198,7 @@ namespace Jurassic.Library
 
         /// <summary>
         /// Gets the body of the method in the form of disassembled IL code.  Will be <c>null</c>
-        /// unless ScriptEngine.EnableILAnalysis has been set to <c>true</c>.
+        /// unless <see cref="CompilerOptions.EnableILAnalysis"/> was set to <c>true</c>.
         /// </summary>
         public string DisassembledIL
         {

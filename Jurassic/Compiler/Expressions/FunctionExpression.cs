@@ -14,9 +14,11 @@ namespace Jurassic.Compiler
         /// Creates a new instance of FunctionExpression.
         /// </summary>
         /// <param name="functionContext"> The function context to base this expression on. </param>
-        public FunctionExpression(FunctionMethodGenerator functionContext)
+        /// <param name="scope"> The scope that was in effect where the function was declared. </param>
+        public FunctionExpression(FunctionMethodGenerator functionContext, Scope scope)
         {
             this.context = functionContext ?? throw new ArgumentNullException(nameof(functionContext));
+            this.Scope = scope;
         }
 
         /// <summary>
@@ -58,6 +60,11 @@ namespace Jurassic.Compiler
         {
             get { return PrimitiveType.Object; }
         }
+
+        /// <summary>
+        /// The scope that was in effect where the function was declared.
+        /// </summary>
+        private Scope Scope { get; set; }
 
         /// <summary>
         /// A variable that contains the declaring object.
@@ -131,7 +138,7 @@ namespace Jurassic.Compiler
             }
 
             // scope
-            EmitHelpers.LoadScope(generator);
+            Scope.GenerateReference(generator, optimizationInfo);
 
             // bodyText
             generator.LoadString(this.BodyText);
@@ -150,7 +157,7 @@ namespace Jurassic.Compiler
                 generator.LoadNull();
 
             // CreateFunction(ObjectInstance prototype, string name, IList<string> argumentNames,
-            //   DeclarativeScope scope, Func<Scope, object, object[], object> body,
+            //   RuntimeScope scope, Func<Scope, object, object[], object> body,
             //   bool strictMode, FunctionInstance container)
             generator.CallStatic(ReflectionHelpers.ReflectionHelpers_CreateFunction);
         }

@@ -1,4 +1,4 @@
-﻿using Jurassic.Library;
+﻿using System;
 using System.Collections.Generic;
 using ErrorType = Jurassic.Library.ErrorType;
 
@@ -13,9 +13,12 @@ namespace Jurassic.Compiler
         /// Creates a new instance of FunctionCallExpression.
         /// </summary>
         /// <param name="operator"> The binary operator to base this expression on. </param>
-        public FunctionCallExpression(Operator @operator)
+        /// <param name="scope"> The scope that was in effect at the time of the function call
+        /// (used by eval() calls). </param>
+        public FunctionCallExpression(Operator @operator, Scope scope)
             : base(@operator)
         {
+            this.Scope = scope ?? throw new ArgumentNullException(nameof(scope));
         }
 
         /// <summary>
@@ -33,6 +36,11 @@ namespace Jurassic.Compiler
         {
             get { return PrimitiveType.Any; }
         }
+
+        /// <summary>
+        /// The scope that was in effect at the time of the function call (used by eval() calls.)
+        /// </summary>
+        private Scope Scope { get; set; }
 
         /// <summary>
         /// Used to implement function calls without evaluating the left operand twice.
@@ -128,8 +136,12 @@ namespace Jurassic.Compiler
             if (this.Target is NameExpression targetNameExpression)
             {
                 // 1. The function is a name expression (e.g. "parseInt()").
-                //    In this case this = scope.ImplicitThisValue, if there is one, otherwise undefined.
-                targetNameExpression.GenerateThis(generator);
+                //    If we are inside a with() block, then there is an implicit 'this' value,
+                //    otherwise 'this' is undefined.
+                if (optimizationInfo.ImplicitThisValue != null)
+                    generator.LoadVariable(optimizationInfo.ImplicitThisValue);
+                else
+                    EmitHelpers.EmitUndefined(generator);
             }
             else if (this.Target is MemberAccessExpression targetMemberAccessExpression)
             {
@@ -321,7 +333,7 @@ namespace Jurassic.Compiler
             }
 
             // scope
-            EmitHelpers.LoadScope(generator);
+            Scope.GenerateReference(generator, optimizationInfo);
 
             // thisObject
             EmitHelpers.LoadThis(generator);

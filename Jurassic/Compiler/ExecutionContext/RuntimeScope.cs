@@ -59,23 +59,37 @@ namespace Jurassic.Compiler
     /// </summary>
     public sealed class RuntimeScope
     {
-        private Dictionary<string, object> values = new Dictionary<string, object>();
+        private Dictionary<string, object> values;
+
+        public static RuntimeScope CreateGlobalScope(ScriptEngine engine)
+        {
+            var result = new RuntimeScope(engine, null, null);
+            result.BindTo(engine.Global);
+            return result;
+        }
 
         /// <summary>
         /// Creates a new RuntimeScope instance.
         /// </summary>
-        /// <param name="executionContext"> The current execution context. </param>
+        /// <param name="engine"> The script engine this scope is associated with. </param>
         /// <param name="parent"> The parent scope, or <c>null</c> if this is the root scope. </param>
-        public RuntimeScope(ExecutionContext executionContext, RuntimeScope parent)
+        /// <param name="declaredVariableNames"> A list of variable names that were declared in this scope. </param>
+        public RuntimeScope(ScriptEngine engine, RuntimeScope parent, string[] declaredVariableNames)
         {
-            this.ExecutionContext = executionContext ?? throw new ArgumentNullException(nameof(executionContext));
-            this.Parent = parent ?? executionContext.ParentScope;
+            this.Engine = engine ?? throw new ArgumentNullException(nameof(engine));
+            this.Parent = parent;
+            if (declaredVariableNames != null)
+            {
+                values = new Dictionary<string, object>(declaredVariableNames.Length);
+                foreach (string variableName in declaredVariableNames)
+                    values[variableName] = Undefined.Value;
+            }
         }
 
         /// <summary>
         /// The current execution context.
         /// </summary>
-        public ExecutionContext ExecutionContext { get; private set; }
+        public ScriptEngine Engine { get; private set; }
 
         /// <summary>
         /// A reference to the parent scope. If a variable cannot be found in this scope then the
@@ -94,7 +108,7 @@ namespace Jurassic.Compiler
         /// <param name="scopeObject"> The object to use. </param>
         public void BindTo(object scopeObject)
         {
-            ScopeObject = TypeConverter.ToObject(ExecutionContext.Engine, scopeObject);
+            ScopeObject = TypeConverter.ToObject(Engine, scopeObject);
         }
 
         /// <summary>
@@ -105,13 +119,13 @@ namespace Jurassic.Compiler
         /// in the scope. </returns>
         public object GetValue(string variableName)
         {
-            if (values.TryGetValue(variableName, out var value))
+            if (values != null && values.TryGetValue(variableName, out var value))
                 return value;
             if (ScopeObject != null)
                 return ScopeObject[variableName];
             if (Parent != null)
-                return null;
-            throw new JavaScriptException(ExecutionContext.Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
+                return Parent.GetValue(variableName);
+            throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
         }
 
         /// <summary>
@@ -121,10 +135,14 @@ namespace Jurassic.Compiler
         /// <param name="value"> The new value of the variable. </param>
         public void SetValue(string variableName, object value)
         {
-            if (values.ContainsKey(variableName))
+            if (values != null && values.ContainsKey(variableName))
                 values[variableName] = value;
             else if (ScopeObject != null)
                 ScopeObject[variableName] = value;
+            else if (Parent != null)
+                Parent.SetValue(variableName, value);
+            else
+                throw new InvalidOperationException("urgh");
         }
 
         /// <summary>

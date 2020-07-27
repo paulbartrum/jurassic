@@ -284,7 +284,7 @@ namespace Jurassic.Compiler
             ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));
             ExecutionContext_CallSuperClass = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CallSuperClass), typeof(object[]));
             ExecutionContext_CreateArgumentsInstance = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateArgumentsInstance), typeof(object[]));
-            ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope));
+            ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope), typeof(string[]));
 
             // RuntimeScope
             RuntimeScope_GetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValue), typeof(string));

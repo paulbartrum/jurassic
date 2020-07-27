@@ -21,6 +21,12 @@ namespace Jurassic.Compiler
         public Expression WithObject { get; set; }
 
         /// <summary>
+        /// The Scope associated with the with body. This is special as "var a" weirdly refers to
+        /// the scope object, if a property named "a" exists.
+        /// </summary>
+        public Scope WithScope { get; set; }
+
+        /// <summary>
         /// Gets or sets the body of the with statement.
         /// </summary>
         public Statement Body { get; set; }
@@ -36,36 +42,27 @@ namespace Jurassic.Compiler
             var statementLocals = new StatementLocals();
             GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
 
-            // executionContext.StartWithBlock(ObjectInstance withObject)
-            EmitHelpers.LoadExecutionContext(generator);
-            this.WithObject.GenerateCode(generator, optimizationInfo);
-            EmitConversion.ToObject(generator, this.WithObject.ResultType, optimizationInfo);
-            generator.Call(ReflectionHelpers.ExecutionContext_StartWithBlock);
+            // Create the scope instance.
+            WithScope.GenerateScopeCreation(generator, optimizationInfo);
 
-            // Store the result of the previous call into a temporary variable.
-            var previousScope = generator.CreateTemporaryVariable(typeof(RuntimeScope));
-            generator.StoreVariable(previousScope);
+            // Bind the scope to the with() object.
+            WithScope.GenerateReference(generator, optimizationInfo);
+            WithObject.GenerateCode(generator, optimizationInfo);
+            ILLocalVariable withObject = generator.CreateTemporaryVariable(typeof(object));
+            generator.Duplicate();
+            generator.StoreVariable(withObject);
+            generator.Call(ReflectionHelpers.RuntimeScope_BindTo);
 
-            // Make sure the scope is reverted even if an exception is thrown.
-            generator.BeginExceptionBlock();
-
-            // Setting the InsideTryCatchOrFinally flag converts BR instructions into LEAVE
-            // instructions so that the finally block is executed correctly.
-            var previousInsideTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
-            optimizationInfo.InsideTryCatchOrFinally = true;
+            // Provide an implicit 'this' value.
+            var previousImplicitThisValue = optimizationInfo.ImplicitThisValue;
+            optimizationInfo.ImplicitThisValue = withObject;
 
             // Generate code for the body statements.
             this.Body.GenerateCode(generator, optimizationInfo);
 
-            // Reset the InsideTryCatchOrFinally flag.
-            optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
-
-            // finally { executionContext.EndWithBlock(previousScope) }
-            generator.BeginFinallyBlock();
-            EmitHelpers.LoadExecutionContext(generator);
-            generator.LoadVariable(previousScope);
-            generator.Call(ReflectionHelpers.ExecutionContext_EndWithBlock);
-            generator.EndExceptionBlock();
+            // Restore the ImplicitThisValue value.
+            optimizationInfo.ImplicitThisValue = previousImplicitThisValue;
+            generator.ReleaseTemporaryVariable(withObject);
 
             // Generate code for the end of the statement.
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);

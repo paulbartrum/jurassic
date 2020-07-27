@@ -92,7 +92,7 @@ namespace Jurassic.Library
                     // This class extends another. In that case 'this' is unavailable.
                     context = ExecutionContext.CreateDerivedContext(
                         engine: this.Engine,
-                        scope: this.constructor.ParentScope,
+                        parentScope: this.constructor.ParentScope,
                         executingFunction: this.constructor,
                         newTarget: newTarget,
                         functionContainer: this);
@@ -103,7 +103,7 @@ namespace Jurassic.Library
                     // 'this' equal to the newly created object.
                     context = ExecutionContext.CreateConstructContext(
                         engine: this.Engine,
-                        scope: this.constructor.ParentScope,
+                        parentScope: this.constructor.ParentScope,
                         thisValue: ObjectInstance.CreateRawObject(newTarget.InstancePrototype),
                         executingFunction: this.constructor,
                         newTarget: newTarget,

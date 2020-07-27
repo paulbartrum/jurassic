@@ -10,30 +10,22 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new EvalMethodGenerator instance.
         /// </summary>
-        /// <param name="parentScope"> The scope of the calling code. </param>
         /// <param name="source"> The script code to execute. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        /// <param name="thisObject"> The value of the "this" keyword in the calling code. </param>
-        public EvalMethodGenerator(RuntimeScope parentScope, ScriptSource source, CompilerOptions options, object thisObject)
+        public EvalMethodGenerator(ScriptSource source, CompilerOptions options)
             : base(source, options)
         {
-            this.ParentScope = parentScope;
-            this.ThisObject = thisObject;
         }
+
+        /// <summary>
+        /// Overridden in GlobalMethodGenerator.
+        /// </summary>
+        protected virtual CodeContext ParserContext { get; } = CodeContext.Eval;
 
         /// <summary>
         /// The scope at the place where eval() is called.
         /// </summary>
         public RuntimeScope ParentScope { get; private set; }
-
-        /// <summary>
-        /// Gets the value of the "this" keyword inside the eval statement.
-        /// </summary>
-        public object ThisObject
-        {
-            get;
-            set;
-        }
 
         /// <summary>
         /// Gets a name for the generated method.
@@ -51,13 +43,12 @@ namespace Jurassic.Compiler
         {
             using (var lexer = new Lexer(this.Source))
             {
-                var parser = new Parser(lexer, this.InitialScope, this.Options, CodeContext.Eval);
+                var parser = new Parser(lexer, this.Options, ParserContext);
                 
                 this.AbstractSyntaxTree = parser.Parse();
-
                 this.StrictMode = parser.StrictMode;
-                this.InitialScope = parser.BaseScope;
                 this.MethodOptimizationHints = parser.MethodOptimizationHints;
+                this.BaseScope = parser.BaseScope;
             }
         }
 
@@ -68,39 +59,30 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // Declare a variable to store the eval result.
-            optimizationInfo.EvalResult = generator.DeclareVariable(typeof(object));
-
-            if (this.StrictMode == true)
+            if (ParserContext == CodeContext.Eval)
             {
-                // Create a new scope.
-                this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
+                // Declare a variable to store the eval result.
+                optimizationInfo.EvalResult = generator.DeclareVariable(typeof(object));
             }
-
-            // Initialize any declarations.
-            this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
 
             // Generate the main body of code.
             this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);
 
-            // Make the return value from the method the eval result.
-            generator.LoadVariable(optimizationInfo.EvalResult);
-
-            // If the result is null, convert it to undefined.
-            var end = generator.CreateLabel();
-            generator.Duplicate();
-            generator.BranchIfNotNull(end);
-            generator.Pop();
-            EmitHelpers.EmitUndefined(generator);
-            generator.DefineLabelPosition(end);
+            if (ParserContext == CodeContext.Eval)
+            {
+                // Make the return value from the method the eval result.
+                generator.LoadVariable(optimizationInfo.EvalResult);
+            }
         }
 
         /// <summary>
         /// Executes the script.
         /// </summary>
         /// <param name="engine"> The script engine to use to execute the script. </param>
+        /// <param name="parentScope"> The scope of the calling code. </param>
+        /// <param name="thisObject"> The value of the "this" keyword in the calling code. </param>
         /// <returns> The result of evaluating the script. </returns>
-        public object Execute(ScriptEngine engine)
+        public object Execute(ScriptEngine engine, RuntimeScope parentScope, object thisObject)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
@@ -109,16 +91,13 @@ namespace Jurassic.Compiler
             if (this.GeneratedMethod == null)
                 GenerateCode();
 
-            // Strict mode creates a new scope so pass the parent scope in this case.
-            var scope = this.InitialScope;
-            if (this.StrictMode == true)
-                scope = scope.ParentScope;
-
             // Package up all the runtime state.
-            var context = ExecutionContext.CreateEvalContext(engine, scope, this.ThisObject);
+            var context = ExecutionContext.CreateGlobalOrEvalContext(engine, parentScope, thisObject);
 
             // Execute the compiled delegate and store the result.
             object result = ((GlobalCodeDelegate)this.GeneratedMethod.GeneratedDelegate)(context);
+            if (result == null)
+                result = Undefined.Value;
 
             // Ensure the abstract syntax tree is kept alive until the eval code finishes running.
             GC.KeepAlive(this);

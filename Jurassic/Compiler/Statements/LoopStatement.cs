@@ -168,7 +168,7 @@ namespace Jurassic.Compiler
                 // Keep a record of the variable types before strengthening.
                 previousVariableTypes = new List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>>();
 
-                var typedVariables = FindTypedVariables();
+                /*var typedVariables = FindTypedVariables();
                 foreach (var variableAndType in typedVariables)
                 {
                     var variable = variableAndType.Key;
@@ -188,7 +188,7 @@ namespace Jurassic.Compiler
                         variable.Type = variableInfo.Type;
                         nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
                     }
-                }
+                }*/
 
                 // The variables must be reverted even in the presence of exceptions.
                 if (previousVariableTypes.Count > 0)
@@ -267,6 +267,8 @@ namespace Jurassic.Compiler
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
 
+#if false
+
         private struct InferredTypeInfo
         {
             // The inferred type of the variable.
@@ -307,9 +309,9 @@ namespace Jurassic.Compiler
                 // for (var i = <int>; ?; ?)
                 loopVariableScope = this.InitVarStatement.Scope;
                 loopVariableName = this.InitVarStatement.Declarations[0].VariableName;
-                initIsOkay = loopVariableScope is DeclarativeScope && loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
+                initIsOkay = loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
             }
-            else if (this.InitExpression != null &&
+            /*else if (this.InitExpression != null &&
                 this.InitExpression is AssignmentExpression &&
                 ((AssignmentExpression)this.InitExpression).ResultType == PrimitiveType.Int32 &&
                 ((AssignmentExpression)this.InitExpression).Target is NameExpression)
@@ -317,8 +319,8 @@ namespace Jurassic.Compiler
                 // for (i = <int>; ?; ?)
                 loopVariableScope = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Scope;
                 loopVariableName = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Name;
-                initIsOkay = loopVariableScope is DeclarativeScope && loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
-            }
+                initIsOkay = loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
+            }*/
 
             // Next, check the condition expression.
             bool conditionAndInitIsOkay = false;
@@ -452,6 +454,8 @@ namespace Jurassic.Compiler
             foreach (var node in root.ChildNodes)
                 FindTypedVariables(node, variableTypes, conditional: conditional, continueEncountered: ref continueEncountered);
         }
+
+#endif
 
         /// <summary>
         /// Gets an enumerable list of child nodes in the abstract syntax tree.

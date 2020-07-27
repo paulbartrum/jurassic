@@ -730,10 +730,8 @@ namespace Jurassic
         public object Evaluate(ScriptSource source)
         {
             var methodGen = new EvalMethodGenerator(
-                ObjectScope.CreateGlobalScope(this.Global), // The variable scope.
                 source,                                     // The source code.
-                CreateOptions(),                            // The compiler options.
-                this.Global);                               // The value of the "this" keyword.
+                CreateOptions());                           // The compiler options.
 
             try
             {
@@ -759,7 +757,7 @@ namespace Jurassic
 
                 // Execute
                 this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
-                var result = methodGen.Execute(this);
+                var result = methodGen.Execute(this, RuntimeScope.CreateGlobalScope(this), Global);
 
                 // Execute any pending callbacks.
                 ExecutePostExecuteSteps();
@@ -1213,11 +1211,7 @@ namespace Jurassic
 
             // Parse the eval string into an AST.
             var options = new CompilerOptions() { ForceStrictMode = strictMode };
-            var evalGen = new EvalMethodGenerator(
-                scope,                                                  // The scope to run the code in.
-                new StringScriptSource(code, "eval"),                   // The source code to execute.
-                options,                                                // Options.
-                thisObject);                                            // The value of the "this" keyword.
+            var evalGen = new EvalMethodGenerator(new StringScriptSource(code, "eval"), options);
 
             // Make sure the eval cache doesn't get too big.  TODO: add some sort of LRU strategy?
             //if (evalCache.Count > 100)
@@ -1230,7 +1224,7 @@ namespace Jurassic
             {
 
                 // Compile and run the eval code.
-                return evalGen.Execute(this);
+                return evalGen.Execute(this, scope, thisObject);
 
             }
             catch (SyntaxErrorException ex)

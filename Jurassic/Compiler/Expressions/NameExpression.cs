@@ -118,7 +118,7 @@ namespace Jurassic.Compiler
             //EmitHelpers.LoadExecutionContext(generator);
             //generator.Call(ReflectionHelpers.ExecutionContext_CreateRuntimeScope);
 
-            generator.LoadVariable(Scope.GeneratedRuntimeVariable);
+            Scope.GenerateReference(generator, optimizationInfo);
             generator.LoadString(Name);
             generator.Call(ReflectionHelpers.RuntimeScope_GetValue);
         }
@@ -166,11 +166,12 @@ namespace Jurassic.Compiler
             // Dup/Store in variable
             // GenerateSet
             // Load variable
-            var temp = generator.CreateTemporaryVariable(typeof(object));
+            var temp = generator.CreateTemporaryVariable(valueType);
             generator.StoreVariable(temp);
-            generator.LoadVariable(Scope.GeneratedRuntimeVariable);
+            Scope.GenerateReference(generator, optimizationInfo);
             generator.LoadString(Name);
             generator.LoadVariable(temp);
+            EmitConversion.ToAny(generator, valueType);
             generator.Call(ReflectionHelpers.RuntimeScope_SetValue);
             generator.ReleaseTemporaryVariable(temp);
         }
@@ -186,18 +187,9 @@ namespace Jurassic.Compiler
             // Deleting a variable is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
                 throw new SyntaxErrorException($"Cannot delete {Name} because deleting a variable or argument is not allowed in strict mode", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
-            generator.LoadVariable(Scope.GeneratedRuntimeVariable);
+            Scope.GenerateReference(generator, optimizationInfo);
             generator.LoadString(Name);
             generator.Call(ReflectionHelpers.RuntimeScope_Delete);
-        }
-
-        /// <summary>
-        /// Generates code to push the "this" value for a function call.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        public void GenerateThis(ILGenerator generator)
-        {
-            EmitHelpers.EmitUndefined(generator);
         }
 
         /// <summary>

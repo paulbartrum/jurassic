@@ -11,24 +11,13 @@ namespace Jurassic.Compiler
         object thisValue;
 
         /// <summary>
-        /// Creates an execution context for code running in the global scope. The value of the
-        /// 'this' keyword will be the global object.
-        /// </summary>
-        /// <param name="engine"> A script engine. </param>
-        /// <returns> A new execution context instance. </returns>
-        internal static ExecutionContext CreateGlobalContext(ScriptEngine engine)
-        {
-            return new ExecutionContext(engine, null, BindingStatus.Initialized, engine.Global, null, null, null);
-        }
-
-        /// <summary>
         /// Creates an execution context for code running in an eval() scope.
         /// </summary>
         /// <param name="engine"> A script engine. </param>
         /// <param name="parentScope"> The scope that was active when eval() was called. </param>
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
         /// <returns> A new execution context instance. </returns>
-        internal static ExecutionContext CreateEvalContext(ScriptEngine engine, RuntimeScope parentScope, object thisValue)
+        internal static ExecutionContext CreateGlobalOrEvalContext(ScriptEngine engine, RuntimeScope parentScope, object thisValue)
         {
             if (thisValue == null)
                 throw new ArgumentNullException(nameof(thisValue));
@@ -237,11 +226,12 @@ namespace Jurassic.Compiler
         /// Creates a new RuntimeScope instance, which is used for passing captured variables
         /// between methods.
         /// </summary>
-        /// <param name="parent"> The parent scope. </param>
+        /// <param name="parent"> The parent scope, or <c>null</c> to use the ParentScope from this
+        /// execution context. </param>
         /// <returns> A new RuntimeScope instance. </returns>
-        public RuntimeScope CreateRuntimeScope(RuntimeScope parent)
+        public RuntimeScope CreateRuntimeScope(RuntimeScope parent, string[] declaredVariableNames)
         {
-            return new RuntimeScope(this, parent);
+            return new RuntimeScope(Engine, parent ?? ParentScope, declaredVariableNames);
         }
     }
 }

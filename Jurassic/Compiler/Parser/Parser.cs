@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -34,20 +32,15 @@ namespace Jurassic.Compiler
         /// Creates a Parser instance with the given lexer supplying the tokens.
         /// </summary>
         /// <param name="lexer"> The lexical analyser that provides the tokens. </param>
-        /// <param name="initialScope"> The initial variable scope. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         /// <param name="context"> The context of the code (global, function or eval). </param>
         /// <param name="methodOptimizationHints"> Hints about whether optimization is possible. </param>
-        public Parser(Lexer lexer, Scope initialScope, CompilerOptions options, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
+        public Parser(Lexer lexer, CompilerOptions options, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
         {
-            if (lexer == null)
-                throw new ArgumentNullException(nameof(lexer));
-            if (initialScope == null)
-                throw new ArgumentNullException(nameof(initialScope));
-            this.lexer = lexer;
+            this.lexer = lexer ?? throw new ArgumentNullException(nameof(lexer)); ;
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
             this.lexer.CompatibilityMode = options.CompatibilityMode;
-            SetInitialScope(initialScope);
+            SetInitialScope(Scope.CreateBlockScope(null));
             this.methodOptimizationHints = methodOptimizationHints ?? new MethodOptimizationHints();
             this.options = options;
             this.context = context;
@@ -338,7 +331,7 @@ namespace Jurassic.Compiler
         public Statement Parse()
         {
             // Read the directive prologue.
-            var result = new BlockStatement(new string[0]);
+            var result = new BlockStatement(new string[0], this.initialScope);
             while (true)
             {
                 // Check if we should stop parsing.
@@ -380,7 +373,7 @@ namespace Jurassic.Compiler
 
             // If this is an eval, and strict mode is on, redefine the scope.
             if (this.StrictMode == true && this.context == CodeContext.Eval)
-                SetInitialScope(Scope.CreateEvalScope(this.initialScope));
+                this.initialScope.IsVarScope = true;
 
             // Read zero or more regular statements.
             while (true)
@@ -467,14 +460,15 @@ namespace Jurassic.Compiler
         /// or undefined if there are no statements in the block. </remarks>
         private BlockStatement ParseBlock()
         {
-            using (CreateScopeContext(Scope.CreateBlockScope(this.currentScope)))
+            var scope = Scope.CreateBlockScope(this.currentScope);
+            using (CreateScopeContext(scope))
             {
 
                 // Consume the start brace ({).
                 this.Expect(PunctuatorToken.LeftBrace);
 
                 // Read zero or more statements.
-                var result = new BlockStatement(this.labelsForCurrentStatement);
+                var result = new BlockStatement(this.labelsForCurrentStatement, scope);
                 while (true)
                 {
                     // Check for the end brace (}).
@@ -1048,7 +1042,8 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Create a new scope and assign variables within the with statement to the scope.
-            using (CreateScopeContext(Scope.CreateWithScope(this.currentScope)))
+            result.WithScope = Scope.CreateWithScope(this.currentScope);
+            using (CreateScopeContext(result.WithScope))
             {
                 // Read the body of the with statement.
                 result.Body = ParseStatement();
@@ -1218,13 +1213,11 @@ namespace Jurassic.Compiler
                     // Read the right parenthesis.
                     this.Expect(PunctuatorToken.RightParenthesis);
 
-                    // Create a new scope for the catch variable.
-                    result.CatchScope = Scope.CreateCatchScope(this.currentScope, result.CatchVariableName);
-                    using (CreateScopeContext(result.CatchScope))
-                    {
-                        // Parse the statements inside the catch block.
-                        result.CatchBlock = ParseBlock();
-                    }
+                    // Parse the statements inside the catch block.
+                    result.CatchBlock = ParseBlock();
+
+                    // Add the catch variable to the scope.
+                    result.CatchBlock.Scope.DeclareVariable(KeywordToken.Let, result.CatchVariableName);
                 }
             }
 
@@ -1388,12 +1381,11 @@ namespace Jurassic.Compiler
             // Create a new function expression.
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
-            var context = new FunctionMethodGenerator(scope, name,
-                functionType, arguments,
+            var context = new FunctionMethodGenerator(name, functionType, arguments,
                 bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body,
                 this.SourcePath, new SourceCodeSpan(startPosition, endPosition), options);
             context.MethodOptimizationHints = functionParser.methodOptimizationHints;
-            return new FunctionExpression(context);
+            return new FunctionExpression(context, this.currentScope);
         }
 
         /// <summary>
@@ -1814,7 +1806,7 @@ namespace Jurassic.Compiler
                         }
 
                         // All the other situations involve the creation of a new operator.
-                        var newExpression = OperatorExpression.FromOperator(newOperator);
+                        var newExpression = OperatorExpression.FromOperator(newOperator, this.currentScope);
 
                         // 2. The new operator is a prefix operator.  The new operator becomes an operand
                         //    of the previous operator.

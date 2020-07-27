@@ -10,7 +10,6 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new MethodGenerator instance.
         /// </summary>
-        /// <param name="scope"> The initial scope. </param>
         /// <param name="source"> The source of javascript code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         protected MethodGenerator(ScriptSource source, CompilerOptions options)
@@ -19,7 +18,6 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException(nameof(source));
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
-            this.InitialScope = scope;
             this.Source = source;
             this.Options = options;
             this.StrictMode = this.Options.ForceStrictMode;
@@ -37,30 +35,23 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the source of javascript code.
         /// </summary>
-        public ScriptSource Source
-        {
-            get;
-            private set;
-        }
+        public ScriptSource Source { get; private set; }
 
         /// <summary>
         /// Gets a value that indicates whether strict mode is enabled.
         /// </summary>
-        public bool StrictMode
-        {
-            get;
-            protected set;
-        }
+        public bool StrictMode { get; protected set; }
 
         /// <summary>
         /// Gets the root node of the abstract syntax tree.  This will be <c>null</c> until Parse()
         /// is called.
         /// </summary>
-        public Statement AbstractSyntaxTree
-        {
-            get;
-            protected set;
-        }
+        public Statement AbstractSyntaxTree { get; protected set; }
+
+        /// <summary>
+        /// Gets the top-level scope.  This will be <c>null</c> until Parse() is called.
+        /// </summary>
+        public Scope BaseScope { get; protected set; }
 
         /// <summary>
         /// Gets or sets optimization information.

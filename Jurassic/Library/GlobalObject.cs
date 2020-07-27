@@ -158,7 +158,7 @@ namespace Jurassic.Library
         {
             if (TypeUtilities.IsString(code) == false)
                 return code;
-            return engine.Eval(TypeConverter.ToString(code), ObjectScope.CreateGlobalScope(engine.Global), engine.Global, false);
+            return engine.Eval(TypeConverter.ToString(code), RuntimeScope.CreateGlobalScope(engine), engine.Global, false);
         }
 
         /// <summary>
