@@ -86,8 +86,7 @@ namespace Jurassic.Compiler
 
                 // if (sharedRegExp == null) {
                 generator.LoadVariable(sharedRegExpVariable);
-                generator.LoadNull();
-                generator.BranchIfNotEqual(label1);
+                generator.BranchIfNotNull(label1);
 
                 // sharedRegExp = Global.RegExp.Construct(source, flags)
                 EmitHelpers.LoadScriptEngine(generator);

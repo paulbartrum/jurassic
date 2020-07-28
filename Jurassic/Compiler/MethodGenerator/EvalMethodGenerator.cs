@@ -73,6 +73,12 @@ namespace Jurassic.Compiler
                 // Make the return value from the method the eval result.
                 generator.LoadVariable(optimizationInfo.EvalResult);
             }
+            else
+            {
+                // Code in the global context always returns undefined.
+                EmitHelpers.EmitUndefined(generator);
+                generator.ReinterpretCast(typeof(object));
+            }
         }
 
         /// <summary>

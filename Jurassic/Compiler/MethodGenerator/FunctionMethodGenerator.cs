@@ -377,6 +377,7 @@ namespace Jurassic.Compiler
                         // Load undefined.
                         generator.DefineLabelPosition(loadDefaultValue);
                         EmitHelpers.EmitUndefined(generator);
+                        generator.ReinterpretCast(typeof(object));
                     }
                     else
                     {

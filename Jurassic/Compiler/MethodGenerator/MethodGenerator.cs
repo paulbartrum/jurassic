@@ -213,6 +213,11 @@ namespace Jurassic.Compiler
                     generator = new LoggingILGenerator(generator);
                 }
 
+#if DEBUG
+                // Replace the generator with one that verifies correctness.
+                generator = new VerifyingILGenerator(generator);
+#endif
+
                 // Initialization code will appear to come from line 1.
                 optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
 
@@ -274,6 +279,11 @@ namespace Jurassic.Compiler
                     // Replace the generator with one that logs.
                     generator = new LoggingILGenerator(generator);
                 }
+
+#if DEBUG
+                // Replace the generator with one that verifies correctness.
+                generator = new VerifyingILGenerator(generator);
+#endif
 
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {

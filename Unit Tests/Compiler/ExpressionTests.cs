@@ -923,8 +923,8 @@ namespace UnitTests
             Assert.AreEqual("1/9", Evaluate("x = [[2],[5]]; (x = x[0])[0] += 7; x.length + '/' + x.toString()"));
 
             // Strict mode: attempts to set a variable that has not been declared is disallowed.
-            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined", EvaluateExceptionMessage("'use strict'; asddfsgwqewert = 'test'"));
-            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined", EvaluateExceptionMessage("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
+            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("'use strict'; asddfsgwqewert = 'test'"));
+            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
 
             // Strict mode: cannot write to a non-writable property.
             Assert.AreEqual("TypeError: The property 'a' is read-only.", EvaluateExceptionMessage("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: true}); x.a = 5;"));
@@ -1045,6 +1045,12 @@ namespace UnitTests
 
             Assert.AreEqual("SyntaxError: Missing closing token ')'", EvaluateExceptionMessage("(5"));
             Assert.AreEqual("SyntaxError: Expected identifier but found end of input", EvaluateExceptionMessage("({[0]("));
+        }
+
+        [TestMethod]
+        public void temp()
+        {
+            Assert.AreEqual(5, Evaluate("function test(test) { return test; } test(5, 4, 3);"));
         }
 
         [TestMethod]
@@ -1253,9 +1259,9 @@ namespace UnitTests
                     x['prop' + i] = i;
                 x.prop16383"));
 
-            Assert.AreEqual("ReferenceError: abcdefghij is not defined", EvaluateExceptionMessage("abcdefghij"));
+            Assert.AreEqual("ReferenceError: abcdefghij is not defined.", EvaluateExceptionMessage("abcdefghij"));
             Assert.AreEqual("SyntaxError: Expected operator but found 'toString'", EvaluateExceptionMessage("5.toString"));
-            Assert.AreEqual("ReferenceError: qwerty345 is not defined", EvaluateExceptionMessage("qwerty345.prop"));
+            Assert.AreEqual("ReferenceError: qwerty345 is not defined.", EvaluateExceptionMessage("qwerty345.prop"));
             Assert.AreEqual("TypeError: Null cannot be converted to an object", EvaluateExceptionMessage("null.prop"));
             Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("undefined.prop"));
             Assert.AreEqual("SyntaxError: Wrong number of operands", EvaluateExceptionMessage("[].()"));
@@ -1441,7 +1447,7 @@ namespace UnitTests
             // Deleting variables defined within an eval statement inside a global scope succeeds.
             Assert.AreEqual(true, Evaluate("abcdefg = 1; delete abcdefg"));
             Assert.AreEqual(false, Evaluate("abcdefg = 1; delete abcdefg; this.hasOwnProperty('abcdefg')"));
-            Assert.AreEqual("ReferenceError: x is not defined", EvaluateExceptionMessage("x = 5; delete x; x"));
+            Assert.AreEqual("ReferenceError: x is not defined.", EvaluateExceptionMessage("x = 5; delete x; x"));
 
             // Deleting variables defined within an eval statement inside a function scope succeeds.
             Assert.AreEqual(true, Evaluate("(function() { var a = 5; return eval('var b = a; delete b'); })()"));

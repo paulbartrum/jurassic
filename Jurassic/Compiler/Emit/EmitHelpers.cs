@@ -85,7 +85,7 @@ namespace Jurassic.Compiler
         public static void EmitThrow(ILGenerator generator, ErrorType type, string message, string path, string function, int line)
         {
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadEnumValue<ErrorType>((int)type);
+            generator.LoadEnumValue(type);
             generator.LoadString(message);
             generator.LoadInt32(line);
             generator.LoadStringOrNull(path);

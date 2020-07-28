@@ -122,7 +122,11 @@ namespace Jurassic.Compiler
             if (values != null && values.TryGetValue(variableName, out var value))
                 return value;
             if (ScopeObject != null)
-                return ScopeObject[variableName];
+            {
+                var result = ScopeObject[variableName];
+                if (result != null)
+                    return result;
+            }
             if (Parent != null)
                 return Parent.GetValue(variableName);
             throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
@@ -142,7 +146,28 @@ namespace Jurassic.Compiler
             else if (Parent != null)
                 Parent.SetValue(variableName, value);
             else
-                throw new InvalidOperationException("urgh");
+                throw new InvalidOperationException("Missing root of scope chain.");
+        }
+
+        /// <summary>
+        /// Sets the value of the given variable, using strict mode behaviour.
+        /// </summary>
+        /// <param name="variableName"> The name of the variable. </param>
+        /// <param name="value"> The new value of the variable. </param>
+        public void SetValueStrict(string variableName, object value)
+        {
+            if (values != null && values.ContainsKey(variableName))
+                values[variableName] = value;
+            else if (ScopeObject != null)
+            {
+                bool exists = ScopeObject.SetPropertyValueIfExists(variableName, value, false);
+                if (!exists)
+                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
+            }
+            else if (Parent != null)
+                Parent.SetValueStrict(variableName, value);
+            else
+                throw new InvalidOperationException("Missing root of scope chain.");
         }
 
         /// <summary>
@@ -151,7 +176,12 @@ namespace Jurassic.Compiler
         /// <param name="variableName"> The name of the variable. </param>
         public bool Delete(string variableName)
         {
-            return this.ScopeObject.Delete(variableName, false);
+            if (values != null && values.TryGetValue(variableName, out var value))
+                return false;   // Can't delete a local variable.
+            if (ScopeObject != null)
+                return ScopeObject.Delete(variableName, false);
+            if (Parent != null)
+                return Parent.Delete(variableName);
             return false;
         }
     }

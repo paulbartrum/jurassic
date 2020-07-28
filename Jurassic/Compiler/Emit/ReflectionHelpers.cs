@@ -142,6 +142,7 @@ namespace Jurassic.Compiler
 
         internal static MethodInfo RuntimeScope_GetValue;
         internal static MethodInfo RuntimeScope_SetValue;
+        internal static MethodInfo RuntimeScope_SetValueStrict;
         internal static MethodInfo RuntimeScope_Delete;
         internal static MethodInfo RuntimeScope_BindTo;
 
@@ -289,6 +290,7 @@ namespace Jurassic.Compiler
             // RuntimeScope
             RuntimeScope_GetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValue), typeof(string));
             RuntimeScope_SetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValue), typeof(string), typeof(object));
+            RuntimeScope_SetValueStrict = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValueStrict), typeof(string), typeof(object));
             RuntimeScope_Delete = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.Delete), typeof(string));
             RuntimeScope_BindTo = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.BindTo), typeof(object));
 

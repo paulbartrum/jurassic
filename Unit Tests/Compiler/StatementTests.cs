@@ -323,7 +323,7 @@ namespace UnitTests
             // 'let' variables do not get stored in the global object.
             Assert.AreEqual(Undefined.Value, Evaluate(@"let notAGlobal = 5; this.notAGlobal"));
 
-            Assert.AreEqual("ReferenceError: i is not defined", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
+            Assert.AreEqual("ReferenceError: i is not defined.", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
             Assert.AreEqual("undefined", Evaluate("delete i; (function() { i = 5; var i = 3; })(); typeof(i);"));
 
             // Let is not a keyword in non-strict mode.
@@ -406,7 +406,7 @@ namespace UnitTests
             Assert.AreEqual(42, Evaluate("delete a; x = { a: 42 }; with (x) { y = { get z() { return a; }} } y.z"));
 
             // With and function declarations.
-            Assert.AreEqual("ReferenceError: a is not defined", EvaluateExceptionMessage("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
+            Assert.AreEqual("ReferenceError: a is not defined.", EvaluateExceptionMessage("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
             Assert.AreEqual("function", Evaluate("result = typeof _f; with ({a: 2}) { function _f() { return 5 } } result"));
   
             // With statements are syntax errors in strict mode.

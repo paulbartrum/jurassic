@@ -118,8 +118,8 @@ namespace Jurassic.Compiler
             }
 
             // Check the object really is a function - if not, throw an exception.
-            generator.IsInstance(typeof(FunctionInstance));
             generator.Duplicate();
+            generator.IsInstance(typeof(FunctionInstance));
             var endOfTypeCheck = generator.CreateLabel();
             generator.BranchIfTrue(endOfTypeCheck);
 
@@ -129,9 +129,7 @@ namespace Jurassic.Compiler
             generator.DefineLabelPosition(endOfTypeCheck);
 
             // Pass in the path, function name and line.
-#if DEBUG
-            generator.CastClass(typeof(FunctionInstance));
-#endif
+            generator.ReinterpretCast(typeof(FunctionInstance));
             generator.LoadStringOrNull(optimizationInfo.Source.Path);
             generator.LoadStringOrNull(optimizationInfo.FunctionName);
             generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);

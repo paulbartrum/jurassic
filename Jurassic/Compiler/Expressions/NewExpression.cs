@@ -80,7 +80,7 @@ namespace Jurassic.Compiler
             var targetValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(targetValue);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadEnumValue<ErrorType>((int)ErrorType.TypeError);
+            generator.LoadEnumValue(ErrorType.TypeError);
             generator.LoadString("The new operator requires a function, found a '{0}' instead");
             generator.LoadInt32(1);
             generator.NewArray(typeof(object));
@@ -99,9 +99,7 @@ namespace Jurassic.Compiler
             generator.ReleaseTemporaryVariable(targetValue);
 
             // Store the function reference.
-#if DEBUG
-            generator.CastClass(typeof(FunctionInstance));
-#endif
+            generator.ReinterpretCast(typeof(FunctionInstance));
             var functionReference = generator.CreateTemporaryVariable(typeof(FunctionInstance));
             generator.Duplicate();
             generator.StoreVariable(functionReference);

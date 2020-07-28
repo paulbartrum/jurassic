@@ -1,4 +1,4 @@
-﻿using ErrorType = Jurassic.Library.ErrorType;
+﻿using Jurassic.Library;
 
 namespace Jurassic.Compiler
 {
@@ -175,7 +175,7 @@ namespace Jurassic.Compiler
             if (memberAccessType == TypeOfMemberAccess.ArrayIndex)
             {
                 // Array indexer
-                var arg1 = generator.CreateTemporaryVariable(typeof(object));
+                var arg1 = generator.CreateTemporaryVariable(typeof(ObjectInstance));
                 var arg2 = generator.CreateTemporaryVariable(typeof(uint));
                 generator.StoreVariable(arg2);
                 generator.StoreVariable(arg1);

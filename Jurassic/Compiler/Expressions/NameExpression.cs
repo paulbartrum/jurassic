@@ -172,7 +172,7 @@ namespace Jurassic.Compiler
             generator.LoadString(Name);
             generator.LoadVariable(temp);
             EmitConversion.ToAny(generator, valueType);
-            generator.Call(ReflectionHelpers.RuntimeScope_SetValue);
+            generator.Call(optimizationInfo.StrictMode ? ReflectionHelpers.RuntimeScope_SetValueStrict : ReflectionHelpers.RuntimeScope_SetValue);
             generator.ReleaseTemporaryVariable(temp);
         }
 

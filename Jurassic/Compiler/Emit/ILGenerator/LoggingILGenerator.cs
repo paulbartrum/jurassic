@@ -38,6 +38,14 @@ namespace Jurassic.Compiler
             this.fixUps = new List<LabelFixUp>();
         }
 
+        /// <summary>
+        /// Gets a reference to the method that we are generating IL for.
+        /// </summary>
+        public override System.Reflection.MethodInfo MethodInfo
+        {
+            get { return this.generator.MethodInfo; }
+        }
+
 
 
         //     LIFECYCLE MANAGEMENT
