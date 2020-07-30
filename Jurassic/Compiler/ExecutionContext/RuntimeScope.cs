@@ -63,8 +63,8 @@ namespace Jurassic.Compiler
 
         public static RuntimeScope CreateGlobalScope(ScriptEngine engine)
         {
-            var result = new RuntimeScope(engine, null, null);
-            result.BindTo(engine.Global);
+            var result = new RuntimeScope(engine, null, null, null, null);
+            result.With(engine.Global);
             return result;
         }
 
@@ -73,16 +73,39 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="engine"> The script engine this scope is associated with. </param>
         /// <param name="parent"> The parent scope, or <c>null</c> if this is the root scope. </param>
-        /// <param name="declaredVariableNames"> A list of variable names that were declared in this scope. </param>
-        public RuntimeScope(ScriptEngine engine, RuntimeScope parent, string[] declaredVariableNames)
+        /// <param name="varNames"></param>
+        /// <param name="letNames"></param>
+        /// <param name="constNames"></param>
+        public RuntimeScope(ScriptEngine engine, RuntimeScope parent, string[] varNames, string[] letNames, string[] constNames)
         {
             this.Engine = engine ?? throw new ArgumentNullException(nameof(engine));
             this.Parent = parent;
-            if (declaredVariableNames != null)
+            if (varNames != null)
             {
-                values = new Dictionary<string, object>(declaredVariableNames.Length);
-                foreach (string variableName in declaredVariableNames)
-                    values[variableName] = Undefined.Value;
+                var scope = this;
+                while (scope != null && scope.ScopeObject == null)
+                    scope = scope.Parent;
+                if (scope != null)
+                {
+                    foreach (var name in varNames)
+                        scope.ScopeObject.InitializeMissingProperty(name, PropertyAttributes.Enumerable | PropertyAttributes.Writable);
+                }
+            }
+            if (letNames != null || constNames != null)
+            {
+                values = new Dictionary<string, object>(
+                    (varNames != null ? varNames.Length : 0) +
+                    (constNames != null ? constNames.Length : 0));
+            }
+            if (letNames != null)
+            {
+                foreach (string variableName in letNames)
+                    values[variableName] = null;
+            }
+            if (constNames != null)
+            {
+                foreach (string variableName in constNames)
+                    values[variableName] = null;
             }
         }
 
@@ -103,10 +126,30 @@ namespace Jurassic.Compiler
         public ObjectInstance ScopeObject { get; private set; }
 
         /// <summary>
+        /// Determines the 'this' value passed to a function when the function call is of the form
+        /// simple_func(). This is normally 'undefined' but can be some other value inside a with()
+        /// statement.
+        /// </summary>
+        public object ImplicitThis
+        {
+            get
+            {
+                var scope = this;
+                while (scope.Parent != null)
+                {
+                    if (scope.ScopeObject != null)
+                        return scope.ScopeObject;
+                    scope = scope.Parent;
+                }
+                return Undefined.Value;
+            }
+        }
+
+        /// <summary>
         /// Binds the scope to a scope object. This is used by the 'with' statement.
         /// </summary>
         /// <param name="scopeObject"> The object to use. </param>
-        public void BindTo(object scopeObject)
+        public void With(object scopeObject)
         {
             ScopeObject = TypeConverter.ToObject(Engine, scopeObject);
         }
@@ -119,17 +162,51 @@ namespace Jurassic.Compiler
         /// in the scope. </returns>
         public object GetValue(string variableName)
         {
-            if (values != null && values.TryGetValue(variableName, out var value))
-                return value;
-            if (ScopeObject != null)
+            var scope = this;
+            do
             {
-                var result = ScopeObject[variableName];
-                if (result != null)
-                    return result;
-            }
-            if (Parent != null)
-                return Parent.GetValue(variableName);
+                if (scope.values != null && scope.values.TryGetValue(variableName, out var value))
+                {
+                    if (value == null)
+                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.");
+                    return value;
+                }
+                if (scope.ScopeObject != null)
+                {
+                    var result = scope.ScopeObject[variableName];
+                    if (result != null)
+                        return result;
+                }
+                scope = scope.Parent;
+            } while (scope != null);
             throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="variableName"></param>
+        /// <returns></returns>
+        public object GetValueNoThrow(string variableName)
+        {
+            var scope = this;
+            do
+            {
+                if (scope.values != null && scope.values.TryGetValue(variableName, out var value))
+                {
+                    if (value == null)
+                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.");
+                    return value;
+                }
+                if (scope.ScopeObject != null)
+                {
+                    var result = scope.ScopeObject[variableName];
+                    if (result != null)
+                        return result;
+                }
+                scope = scope.Parent;
+            } while (scope != null);
+            return Undefined.Value;
         }
 
         /// <summary>
@@ -139,14 +216,31 @@ namespace Jurassic.Compiler
         /// <param name="value"> The new value of the variable. </param>
         public void SetValue(string variableName, object value)
         {
-            if (values != null && values.ContainsKey(variableName))
-                values[variableName] = value;
-            else if (ScopeObject != null)
-                ScopeObject[variableName] = value;
-            else if (Parent != null)
-                Parent.SetValue(variableName, value);
-            else
-                throw new InvalidOperationException("Missing root of scope chain.");
+            var scope = this;
+            do
+            {
+                if (scope.values != null && scope.values.ContainsKey(variableName))
+                {
+                    values[variableName] = value;
+                    return;
+                }
+                if (scope.ScopeObject != null)
+                {
+                    // If there's no parent and the property doesn't exist, set it anyway.
+                    if (scope.Parent == null)
+                    {
+                        scope.ScopeObject[variableName] = value;
+                        return;
+                    }
+
+                    // For a with() scope, only set the value if it exists.
+                    var exists = scope.ScopeObject.SetPropertyValueIfExists(variableName, value, throwOnError: false);
+                    if (exists)
+                        return;
+                }
+                scope = scope.Parent;
+            } while (scope != null);
+            throw new InvalidOperationException("Expected scope with ScopeObject at root of chain.");
         }
 
         /// <summary>
@@ -156,18 +250,26 @@ namespace Jurassic.Compiler
         /// <param name="value"> The new value of the variable. </param>
         public void SetValueStrict(string variableName, object value)
         {
-            if (values != null && values.ContainsKey(variableName))
-                values[variableName] = value;
-            else if (ScopeObject != null)
+            var scope = this;
+            do
             {
-                bool exists = ScopeObject.SetPropertyValueIfExists(variableName, value, false);
-                if (!exists)
-                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
-            }
-            else if (Parent != null)
-                Parent.SetValueStrict(variableName, value);
-            else
-                throw new InvalidOperationException("Missing root of scope chain.");
+                if (scope.values != null && scope.values.ContainsKey(variableName))
+                {
+                    values[variableName] = value;
+                    return;
+                }
+                if (scope.ScopeObject != null)
+                {
+                    // Only set the value if it exists.
+                    var exists = scope.ScopeObject.SetPropertyValueIfExists(variableName, value, throwOnError: true);
+                    if (exists)
+                        return;
+                    if (scope.Parent == null)
+                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
+                }
+                scope = scope.Parent;
+            } while (scope != null);
+            throw new InvalidOperationException("Expected scope with ScopeObject at root of chain.");
         }
 
         /// <summary>

@@ -9,6 +9,18 @@ namespace Jurassic.Compiler
     /// </summary>
     public sealed class Scope
     {
+        private enum ScopeType
+        {
+            Global,
+            With,
+            TopLevelFunction,
+            Block,
+            Eval,
+            EvalStrict,
+        }
+
+        private ScopeType Type { get; set; }
+
         // A dictionary containing the variables declared in this scope.
         private Dictionary<string, DeclaredVariable> variables;
 
@@ -23,18 +35,11 @@ namespace Jurassic.Compiler
             // The index of the variable (in the order it was added).
             public int Index;
 
+            // The keyword that was used to declare the variable (var, let or const).
+            public KeywordToken Keyword;
+
             // The name of the variable.
             public string Name;
-
-            // The initial value of the variable (used for function declarations only).
-            [NonSerialized]
-            public Expression ValueAtTopOfScope;
-
-            // true if the variable can be modified.
-            public bool Writable;
-
-            // true if the variable can be deleted.
-            public bool Deletable;
 
             // The storage container for the variable.
             [NonSerialized]
@@ -45,22 +50,31 @@ namespace Jurassic.Compiler
             public PrimitiveType Type = PrimitiveType.Any;
         }
 
+        private Dictionary<string, Expression> hoistedFunctions;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="codeContext"></param>
+        /// <returns></returns>
+        internal static Scope CreateGlobalOrEvalScope(CodeContext codeContext)
+        {
+            return new Scope(null, 0) { Type = codeContext == CodeContext.Eval ? ScopeType.Eval : ScopeType.Global };
+        }
+
         /// <summary>
         /// Creates a new declarative scope for use inside a function body (and within function
         /// argument default values).
         /// </summary>
-        /// <param name="parentScope"> A reference to the parent scope.  Can not be <c>null</c>. </param>
         /// <param name="functionName"> The name of the function.  Can be empty for an anonymous function. </param>
         /// <param name="argumentNames"> The names of each of the function arguments.  Can be <c>null</c>. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        internal static Scope CreateFunctionScope(Scope parentScope, string functionName, IEnumerable<string> argumentNames)
+        internal static Scope CreateFunctionScope(string functionName, IEnumerable<string> argumentNames)
         {
-            if (parentScope == null)
-                throw new ArgumentNullException("parentScope", "Function scopes must have a parent scope.");
-            var result = new Scope(parentScope, (argumentNames != null ? argumentNames.Count() : 0) + 3);
-            result.IsVarScope = true;
+            var result = new Scope(null, (argumentNames != null ? argumentNames.Count() : 0) + 3);
+            result.Type = ScopeType.TopLevelFunction;
             if (functionName != null)
-                result.DeclareVariable(KeywordToken.Let, functionName);
+                result.DeclareVariable(KeywordToken.Const, functionName);
             result.DeclareVariable(KeywordToken.Let, "arguments");
             if (argumentNames != null)
             {
@@ -77,7 +91,9 @@ namespace Jurassic.Compiler
         /// <returns></returns>
         internal static Scope CreateBlockScope(Scope parentScope)
         {
-            return new Scope(parentScope, 0);
+            if (parentScope == null)
+                throw new ArgumentException("Block scopes must have a parent scope.");
+            return new Scope(parentScope, 0) { Type = ScopeType.Block };
         }
 
         /// <summary>
@@ -89,7 +105,7 @@ namespace Jurassic.Compiler
         {
             if (parentScope == null)
                 throw new ArgumentException("With scopes must have a parent scope.");
-            return new Scope(parentScope, 0) { IsVarScope = true };
+            return new Scope(parentScope, 0) { Type = ScopeType.With };
         }
 
         /// <summary>
@@ -102,18 +118,21 @@ namespace Jurassic.Compiler
         {
             this.ParentScope = parentScope;
             this.variables = new Dictionary<string, DeclaredVariable>(declaredVariableCount);
-            this.IsVarScope = false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ConvertToStrictMode()
+        {
+            if (Type == ScopeType.Eval)
+                Type = ScopeType.EvalStrict;
         }
 
         /// <summary>
         /// Gets a reference to the parent scope.  Can be <c>null</c> if this is the global scope.
         /// </summary>
         public Scope ParentScope { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether 'var' variables can be declared within this scope.
-        /// </summary>
-        public bool IsVarScope { get; set; }
 
         /// <summary>
         /// Gets the number of variables declared in this scope.
@@ -128,23 +147,6 @@ namespace Jurassic.Compiler
         /// instance. Can be <c>null</c> if this scope contains no variables.
         /// </summary>
         private ILLocalVariable GeneratedRuntimeScope { get; set; }
-
-        /// <summary>
-        /// Gets an enumerable list of the names of all the declared variables (including function
-        /// declarations), listed in the order they were declared.
-        /// </summary>
-        internal IEnumerable<string> DeclaredVariableNames
-        {
-            get
-            {
-                var declaredVariables = new List<DeclaredVariable>(this.variables.Values);
-                declaredVariables.Sort((a, b) => a.Index - b.Index);
-                var names = new string[declaredVariables.Count];
-                for (int i = 0; i < declaredVariables.Count; i++)
-                    names[i] = declaredVariables[i].Name;
-                return names;
-            }
-        }
 
         /// <summary>
         /// Gets an enumerable list of the declared variables, in no particular order.
@@ -185,50 +187,51 @@ namespace Jurassic.Compiler
         /// Declares a variable or function in this scope.  This will be initialized with the value
         /// of the given expression.
         /// </summary>
+        /// <param name="keyword"> The keyword that was used to declare the variable (var, let or
+        /// const). </param>
         /// <param name="name"> The name of the variable. </param>
         /// <param name="valueAtTopOfScope"> The value of the variable at the top of the scope.
         /// Can be <c>null</c> to indicate the variable does not need initializing. </param>
-        /// <param name="writable"> <c>true</c> if the variable can be modified; <c>false</c>
-        /// otherwise.  Defaults to <c>true</c>. </param>
-        /// <param name="deletable"> <c>true</c> if the variable can be deleted; <c>false</c>
-        /// otherwise.  Defaults to <c>true</c>. </param>
         /// <returns> A reference to the variable that was declared. </returns>
-        internal void DeclareVariable(KeywordToken keyword, string name, Expression valueAtTopOfScope = null, bool writable = true, bool deletable = false)
+        internal void DeclareVariable(KeywordToken keyword, string name, Expression valueAtTopOfScope = null)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
             // If variables cannot be declared in the scope, try the parent scope instead.
-            if (keyword == KeywordToken.Var && this.IsVarScope == false)
+            var declarationScope = this;
+            if (keyword == KeywordToken.Var)
             {
-                // If we run out of scopes, then the variable is defined by the (runtime-only) parent scope.
-                if (this.ParentScope == null)
-                    return;
-                this.ParentScope.DeclareVariable(keyword, name, valueAtTopOfScope, writable, deletable);
+                while (declarationScope != null && declarationScope.Type == ScopeType.Block)
+                    declarationScope = declarationScope.ParentScope;
             }
 
-            DeclaredVariable variable;
-            this.variables.TryGetValue(name, out variable);
-            if (variable == null)
+            if (declarationScope != null && !declarationScope.variables.TryGetValue(name, out DeclaredVariable variable))
             {
                 // This is a local variable that has not been declared before.
                 variable = new DeclaredVariable()
                 {
-                    Scope = this,
-                    Index = this.variables.Count,
+                    Scope = declarationScope,
+                    Index = declarationScope.variables.Count,
+                    Keyword = keyword,
                     Name = name,
-                    Writable = writable && keyword != KeywordToken.Const,
-                    Deletable = deletable
                 };
-                this.variables.Add(name, variable);
+                declarationScope.variables.Add(name, variable);
             }
 
             // Set the initial value, if one was provided.
-            if (valueAtTopOfScope != null)
+            /*if (valueAtTopOfScope != null)
             {
                 // Function expressions override literals.
                 if ((valueAtTopOfScope is LiteralExpression && variable.ValueAtTopOfScope is FunctionExpression) == false)
                     variable.ValueAtTopOfScope = valueAtTopOfScope;
+            }*/
+
+            if (valueAtTopOfScope != null)
+            {
+                if (declarationScope.hoistedFunctions == null)
+                    declarationScope.hoistedFunctions = new Dictionary<string, Expression>();
+                declarationScope.hoistedFunctions[name] = valueAtTopOfScope;
             }
         }
 
@@ -310,14 +313,6 @@ namespace Jurassic.Compiler
             EmitHelpers.StoreScope(generator);
         }*/
 
-        
-        internal void GenerateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
-        {
-            if (GeneratedRuntimeScope == null)
-                throw new InvalidOperationException("Call GenerateScopeCreation() first.");
-            generator.LoadVariable(GeneratedRuntimeScope);
-        }
-
         /// <summary>
         /// Generates code that creates a new scope.
         /// </summary>
@@ -328,29 +323,111 @@ namespace Jurassic.Compiler
             // TODO:
             // optimizationInfo.OptimizeDeclarativeScopes
 
+            // We can optimize this away if there are zero variables declared in the scope,
+            // UNLESS it's a with scope (as then we need something to bind to).
+            if (this.variables.Count == 0 && Type != ScopeType.With)
+                return;
+
             EmitHelpers.LoadExecutionContext(generator);
 
             // parentScope
-            generator.LoadNull();
+            if (ParentScope != null)
+                ParentScope.GenerateReference(generator, optimizationInfo);
+            else
+                generator.LoadNull();
 
-            // declaredVariableNames
-            generator.LoadInt32(this.DeclaredVariableCount);
-            generator.NewArray(typeof(string));
-            int i = 0;
-            foreach (string variableName in this.DeclaredVariableNames)
+            var varList = new List<DeclaredVariable>();
+            var letList = new List<DeclaredVariable>();
+            var constList = new List<DeclaredVariable>();
+            foreach (var variable in this.variables.Values)
             {
-                generator.Duplicate();
-                generator.LoadInt32(i++);
-                generator.LoadString(variableName);
-                generator.StoreArrayElement(typeof(string));
+                if (variable.Keyword == KeywordToken.Var && Type != ScopeType.TopLevelFunction)
+                    varList.Add(variable);
+                else if (variable.Keyword == KeywordToken.Const)
+                    constList.Add(variable);
+                else
+                    letList.Add(variable);
+            }
+            varList.Sort((a, b) => a.Index - b.Index);
+            letList.Sort((a, b) => a.Index - b.Index);
+            constList.Sort((a, b) => a.Index - b.Index);
+            int i;
+
+            // varNames
+            if (varList.Count == 0)
+                generator.LoadNull();
+            else
+            {
+                generator.LoadInt32(varList.Count);
+                generator.NewArray(typeof(string));
+                i = 0;
+                foreach (var variable in varList)
+                {
+                    generator.Duplicate();
+                    generator.LoadInt32(i++);
+                    generator.LoadString(variable.Name);
+                    generator.StoreArrayElement(typeof(string));
+                }
             }
 
-            // executionContext.CreateRuntimeScope(parentScope, declaredVariableNames)
+            // letNames
+            if (letList.Count == 0)
+                generator.LoadNull();
+            else
+            {
+                generator.LoadInt32(letList.Count);
+                generator.NewArray(typeof(string));
+                i = 0;
+                foreach (var variable in letList)
+                {
+                    generator.Duplicate();
+                    generator.LoadInt32(i++);
+                    generator.LoadString(variable.Name);
+                    generator.StoreArrayElement(typeof(string));
+                }
+            }
+
+            // constNames
+            if (constList.Count == 0)
+                generator.LoadNull();
+            else
+            {
+                generator.LoadInt32(constList.Count);
+                generator.NewArray(typeof(string));
+                i = 0;
+                foreach (var variable in constList)
+                {
+                    generator.Duplicate();
+                    generator.LoadInt32(i++);
+                    generator.LoadString(variable.Name);
+                    generator.StoreArrayElement(typeof(string));
+                }
+            }
+
+            // executionContext.CreateRuntimeScope(parentScope, varNames, letNames, constNames)
             generator.Call(ReflectionHelpers.ExecutionContext_CreateRuntimeScope);
 
             // Store the RuntimeScope instance in a variable.
             GeneratedRuntimeScope = generator.DeclareVariable(typeof(RuntimeScope), "scope");
             generator.StoreVariable(GeneratedRuntimeScope);
+        }
+
+        /// <summary>
+        /// Generates code that pushes a RuntimeScope instance to the top of the stack.
+        /// </summary>
+        /// <param name="generator"> The generator to output the CIL to. </param>
+        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
+        internal void GenerateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
+        {
+            if (GeneratedRuntimeScope != null)
+                generator.LoadVariable(GeneratedRuntimeScope);
+            else if (ParentScope != null)
+                ParentScope.GenerateReference(generator, optimizationInfo);
+            else
+            {
+                EmitHelpers.LoadExecutionContext(generator);
+                generator.CallVirtual(ReflectionHelpers.ExecutionContext_ParentScope);
+            }
         }
 
         /// <summary>
@@ -360,6 +437,16 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         internal void GenerateDeclarations(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            if (this.hoistedFunctions != null)
+            {
+                foreach (var nameAndValue in this.hoistedFunctions)
+                {
+                    nameAndValue.Value.GenerateCode(generator, optimizationInfo);
+                    var name = new NameExpression(this, nameAndValue.Key);
+                    name.GenerateSet(generator, optimizationInfo, nameAndValue.Value.ResultType, false);
+                }
+            }
+
             // Initialize the declared variables and functions.
             /*foreach (var variable in this.variables.Values)
             {

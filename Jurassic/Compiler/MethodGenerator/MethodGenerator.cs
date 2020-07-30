@@ -188,7 +188,7 @@ namespace Jurassic.Compiler
             optimizationInfo.FunctionName = this.GetStackName();
             optimizationInfo.Source = this.Source;
 
-            ILGenerator generator;
+            ILGenerator generator, loggingILGenerator = null;
             if (this.Options.EnableDebugging == false)
             {
                 // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
@@ -210,7 +210,7 @@ namespace Jurassic.Compiler
                 if (this.Options.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
-                    generator = new LoggingILGenerator(generator);
+                    generator = loggingILGenerator = new LoggingILGenerator(generator);
                 }
 
 #if DEBUG
@@ -277,7 +277,7 @@ namespace Jurassic.Compiler
                 if (this.Options.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
-                    generator = new LoggingILGenerator(generator);
+                    generator = loggingILGenerator = new LoggingILGenerator(generator);
                 }
 
 #if DEBUG
@@ -306,10 +306,10 @@ namespace Jurassic.Compiler
 #endif // ENABLE_DEBUGGING
             }
 
-            if (this.Options.EnableILAnalysis == true)
+            if (loggingILGenerator != null)
             {
                 // Store the disassembled IL so it can be retrieved for analysis purposes.
-                this.GeneratedMethod.DisassembledIL = generator.ToString();
+                this.GeneratedMethod.DisassembledIL = loggingILGenerator.ToString();
             }
         }
 

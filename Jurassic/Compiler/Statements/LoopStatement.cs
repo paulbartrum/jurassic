@@ -30,9 +30,9 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the var statement that initializes the loop variable.
         /// </summary>
-        public VarStatement InitVarStatement
+        public VarLetOrConstStatement InitVarStatement
         {
-            get { return this.InitStatement as VarStatement; }
+            get { return this.InitStatement as VarLetOrConstStatement; }
         }
 
         /// <summary>

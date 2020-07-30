@@ -40,7 +40,7 @@ namespace Jurassic.Compiler
             this.lexer = lexer ?? throw new ArgumentNullException(nameof(lexer)); ;
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
             this.lexer.CompatibilityMode = options.CompatibilityMode;
-            SetInitialScope(Scope.CreateBlockScope(null));
+            SetInitialScope(Scope.CreateGlobalOrEvalScope(context));
             this.methodOptimizationHints = methodOptimizationHints ?? new MethodOptimizationHints();
             this.options = options;
             this.context = context;
@@ -314,8 +314,9 @@ namespace Jurassic.Compiler
         /// <returns> An object which can be disposed to restore the previous scope. </returns>
         private ScopeContext CreateScopeContext(Scope scope)
         {
+            var result = new ScopeContext(this);
             this.currentScope = scope ?? throw new ArgumentNullException(nameof(scope));
-            return new ScopeContext(this);
+            return result;
         }
 
 
@@ -372,8 +373,8 @@ namespace Jurassic.Compiler
             }
 
             // If this is an eval, and strict mode is on, redefine the scope.
-            if (this.StrictMode == true && this.context == CodeContext.Eval)
-                this.initialScope.IsVarScope = true;
+            if (this.StrictMode == true)
+                this.initialScope.ConvertToStrictMode();
 
             // Read zero or more regular statements.
             while (true)
@@ -493,9 +494,9 @@ namespace Jurassic.Compiler
         /// let or const. </param>
         /// <param name="consumeKeyword"> Indicates whether the keyword token needs to be consumed. </param>
         /// <returns> A variable declaration statement. </returns>
-        private VarStatement ParseVarLetOrConst(KeywordToken keyword, bool consumeKeyword = true)
+        private VarLetOrConstStatement ParseVarLetOrConst(KeywordToken keyword, bool consumeKeyword = true)
         {
-            var result = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
+            var result = new VarLetOrConstStatement(this.labelsForCurrentStatement, this.currentScope);
 
             // Read past the first token (var, let or const).
             if (consumeKeyword)
@@ -507,17 +508,14 @@ namespace Jurassic.Compiler
             // There can be multiple declarations.
             while (true)
             {
-                var declaration = new VariableDeclaration();
-
                 // The next token must be a variable name.
-                declaration.VariableName = this.ExpectIdentifier();
+                var declaration = new VariableDeclaration(keyword, ExpectIdentifier());
                 ValidateVariableName(declaration.VariableName);
                 if (keyword == KeywordToken.Let && declaration.VariableName == "let")
                     throw new SyntaxErrorException("'let' is not allowed here.", this.LineNumber, this.SourcePath);
 
                 // Add the variable to the current function's list of local variables.
-                this.currentScope.DeclareVariable(keyword, declaration.VariableName,
-                    writable: true, deletable: this.context == CodeContext.Eval);
+                this.currentScope.DeclareVariable(keyword, declaration.VariableName);
 
                 // The next token is either an equals sign (=), a semi-colon or a comma.
                 if (this.nextToken == PunctuatorToken.Assignment)
@@ -527,10 +525,10 @@ namespace Jurassic.Compiler
 
                     // Read the setter expression.
                     declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
-
-                    // Record the portion of the source document that will be highlighted when debugging.
-                    declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
                 }
+
+                // Record the portion of the source document that will be highlighted when debugging.
+                declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                 // Add the declaration to the result.
                 result.Declarations.Add(declaration);
@@ -720,23 +718,21 @@ namespace Jurassic.Compiler
             if (this.nextToken == KeywordToken.Var)
             {
                 // Read past the var token.
-                this.Expect(KeywordToken.Var);
+                var declarationKeyword = (KeywordToken)this.nextToken;
+                this.Expect(declarationKeyword);
 
                 // There can be multiple initializers (but not for for-in statements).
-                var varStatement = new VarStatement(this.labelsForCurrentStatement, this.currentScope);
+                var varStatement = new VarLetOrConstStatement(this.labelsForCurrentStatement, this.currentScope);
                 initializationStatement = varStatement;
 
                 while (true)
                 {
-                    var declaration = new VariableDeclaration();
-
                     // The next token must be a variable name.
-                    declaration.VariableName = this.ExpectIdentifier();
+                    var declaration = new VariableDeclaration(declarationKeyword, ExpectIdentifier());
                     ValidateVariableName(declaration.VariableName);
 
                     // Add the variable to the current function's list of local variables.
-                    this.currentScope.DeclareVariable(KeywordToken.Var, declaration.VariableName,
-                        writable: true, deletable: this.context == CodeContext.Eval);
+                    this.currentScope.DeclareVariable(declarationKeyword, declaration.VariableName);
 
                     // The next token is either an equals sign (=), a semi-colon, a comma, or the "in" keyword.
                     if (this.nextToken == PunctuatorToken.Assignment)
@@ -747,12 +743,12 @@ namespace Jurassic.Compiler
                         // Read the setter expression.
                         declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
 
-                        // Record the portion of the source document that will be highlighted when debugging.
-                        declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-
                         // This must be a regular for statement.
                         type = ForStatementType.For;
                     }
+
+                    // Record the portion of the source document that will be highlighted when debugging.
+                    declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                     // Add the declaration to the initialization statement.
                     varStatement.Declarations.Add(declaration);
@@ -828,6 +824,7 @@ namespace Jurassic.Compiler
             {
                 // for (x in y)
                 // for (var x in y)
+                // for (let x in y)
                 var result = new ForInStatement(this.labelsForCurrentStatement);
                 result.Variable = forInOfReference;
                 result.VariableSourceSpan = initializationStatement.SourceSpan;
@@ -852,6 +849,7 @@ namespace Jurassic.Compiler
             {
                 // for (x of y)
                 // for (var x of y)
+                // for (let x of y)
                 var result = new ForOfStatement(this.labelsForCurrentStatement);
                 result.Variable = forInOfReference;
                 result.VariableSourceSpan = initializationStatement.SourceSpan;
@@ -1285,8 +1283,8 @@ namespace Jurassic.Compiler
                         codeContext: CodeContext.Function);
 
             // Add the function to the top-level scope.
-            this.initialScope.DeclareVariable(KeywordToken.Var, functionName,
-                valueAtTopOfScope: expression, writable: true, deletable: this.context == CodeContext.Eval);
+            this.currentScope.DeclareVariable(KeywordToken.Var, functionName,
+                valueAtTopOfScope: expression);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1310,7 +1308,7 @@ namespace Jurassic.Compiler
             // Create a new scope and assign variables within the function body to the scope.
             var functionName = !name.IsGetter && !name.IsSetter && name.HasStaticName &&
                 codeContext != CodeContext.Constructor && codeContext != CodeContext.DerivedConstructor ? name.StaticName : null;
-            var scope = Scope.CreateFunctionScope(parentScope, functionName, null);
+            var scope = Scope.CreateFunctionScope(functionName, null);
 
             // Replace scope and methodOptimizationHints.
             var originalScope = this.currentScope;

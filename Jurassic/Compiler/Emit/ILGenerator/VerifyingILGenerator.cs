@@ -1164,7 +1164,7 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void Leave(ILLabel label)
         {
-            this.generator.Leave(label);
+            this.generator.Leave(((VerifyingILLabel)label).UnderlyingLabel);
         }
 
         /// <summary>

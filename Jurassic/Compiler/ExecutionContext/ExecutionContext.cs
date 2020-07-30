@@ -156,14 +156,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// The value of the 'super' keyword, or <see cref="Undefined.Value"/> if it is not available.
-        /// </summary>
-        public object SuperObject
-        {
-            get { return (object)SuperValue ?? Undefined.Value; }
-        }
-
-        /// <summary>
         /// Corresponds to a super(...argumentValues) call.
         /// </summary>
         /// <param name="argumentValues"> The parameter values to pass to the base class. </param>
@@ -228,10 +220,13 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="parent"> The parent scope, or <c>null</c> to use the ParentScope from this
         /// execution context. </param>
+        /// <param name="varNames"></param>
+        /// <param name="letNames"></param>
+        /// <param name="constNames"></param>
         /// <returns> A new RuntimeScope instance. </returns>
-        public RuntimeScope CreateRuntimeScope(RuntimeScope parent, string[] declaredVariableNames)
+        public RuntimeScope CreateRuntimeScope(RuntimeScope parent, string[] varNames, string[] letNames, string[] constNames)
         {
-            return new RuntimeScope(Engine, parent ?? ParentScope, declaredVariableNames);
+            return new RuntimeScope(Engine, parent ?? ParentScope, varNames, letNames, constNames);
         }
     }
 }

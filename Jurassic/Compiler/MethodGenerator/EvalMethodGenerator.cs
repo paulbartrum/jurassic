@@ -75,9 +75,8 @@ namespace Jurassic.Compiler
             }
             else
             {
-                // Code in the global context always returns undefined.
-                EmitHelpers.EmitUndefined(generator);
-                generator.ReinterpretCast(typeof(object));
+                // Code in the global context always returns null.
+                generator.LoadNull();
             }
         }
 

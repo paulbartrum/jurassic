@@ -512,20 +512,6 @@ namespace Jurassic.Compiler
                 }
             }
         }
-
-
-
-        //     WITH SUPPORT
-        //_________________________________________________________________________________________
-
-        /// <summary>
-        /// When within a with block unadorned function calls have an implicit 'this' value.
-        /// </summary>
-        /// <example>
-        /// <code>with(obj) { f() }</code>
-        /// Here the value of 'this' inside f() is whatever the value of 'obj' is.
-        /// </example>
-        public ILLocalVariable ImplicitThisValue { get; set; }
     }
 
 }

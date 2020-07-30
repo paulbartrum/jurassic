@@ -51,18 +51,10 @@ namespace Jurassic.Compiler
             ILLocalVariable withObject = generator.CreateTemporaryVariable(typeof(object));
             generator.Duplicate();
             generator.StoreVariable(withObject);
-            generator.Call(ReflectionHelpers.RuntimeScope_BindTo);
-
-            // Provide an implicit 'this' value.
-            var previousImplicitThisValue = optimizationInfo.ImplicitThisValue;
-            optimizationInfo.ImplicitThisValue = withObject;
+            generator.Call(ReflectionHelpers.RuntimeScope_With);
 
             // Generate code for the body statements.
             this.Body.GenerateCode(generator, optimizationInfo);
-
-            // Restore the ImplicitThisValue value.
-            optimizationInfo.ImplicitThisValue = previousImplicitThisValue;
-            generator.ReleaseTemporaryVariable(withObject);
 
             // Generate code for the end of the statement.
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);

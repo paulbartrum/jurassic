@@ -120,7 +120,7 @@ namespace Jurassic.Compiler
 
             Scope.GenerateReference(generator, optimizationInfo);
             generator.LoadString(Name);
-            generator.Call(ReflectionHelpers.RuntimeScope_GetValue);
+            generator.Call(throwIfUnresolvable ? ReflectionHelpers.RuntimeScope_GetValue : ReflectionHelpers.RuntimeScope_GetValueNoThrow);
         }
 
         /// <summary>

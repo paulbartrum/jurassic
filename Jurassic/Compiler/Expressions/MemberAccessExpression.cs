@@ -194,7 +194,7 @@ namespace Jurassic.Compiler
             else
             {
                 // Dynamic property access
-                var arg1 = generator.CreateTemporaryVariable(typeof(object));
+                var arg1 = generator.CreateTemporaryVariable(typeof(ObjectInstance));
                 var arg2 = generator.CreateTemporaryVariable(typeof(object));
                 generator.StoreVariable(arg2);
                 generator.StoreVariable(arg1);

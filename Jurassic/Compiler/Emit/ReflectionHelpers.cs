@@ -132,19 +132,22 @@ namespace Jurassic.Compiler
 
         internal static MethodInfo ExecutionContext_GetEngine;
         internal static MethodInfo ExecutionContext_GetThisValue;
-        internal static MethodInfo ExecutionContext_GetSuperObject;
+        internal static MethodInfo ExecutionContext_GetSuperValue;
         internal static MethodInfo ExecutionContext_GetExecutingFunction;
         internal static MethodInfo ExecutionContext_GetNewTargetObject;
         internal static MethodInfo ExecutionContext_ConvertThisToObject;
         internal static MethodInfo ExecutionContext_CallSuperClass;
         internal static MethodInfo ExecutionContext_CreateArgumentsInstance;
+        internal static MethodInfo ExecutionContext_ParentScope;
         internal static MethodInfo ExecutionContext_CreateRuntimeScope;
 
         internal static MethodInfo RuntimeScope_GetValue;
+        internal static MethodInfo RuntimeScope_GetValueNoThrow;
         internal static MethodInfo RuntimeScope_SetValue;
         internal static MethodInfo RuntimeScope_SetValueStrict;
         internal static MethodInfo RuntimeScope_Delete;
-        internal static MethodInfo RuntimeScope_BindTo;
+        internal static MethodInfo RuntimeScope_With;
+        internal static MethodInfo RuntimeScope_ImplicitThis;
 
         /// <summary>
         /// Initializes static members of this class.
@@ -279,21 +282,23 @@ namespace Jurassic.Compiler
             // ExecutionContext
             ExecutionContext_GetEngine = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Engine));
             ExecutionContext_GetThisValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ThisValue));
-            ExecutionContext_GetSuperObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.SuperObject));
+            ExecutionContext_GetSuperValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.SuperValue));
             ExecutionContext_GetExecutingFunction = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ExecutingFunction));
             ExecutionContext_GetNewTargetObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.NewTargetObject));
             ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));
             ExecutionContext_CallSuperClass = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CallSuperClass), typeof(object[]));
             ExecutionContext_CreateArgumentsInstance = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateArgumentsInstance), typeof(object[]));
-            ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope), typeof(string[]));
+            ExecutionContext_ParentScope = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ParentScope));
+            ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope), typeof(string[]), typeof(string[]), typeof(string[]));
 
             // RuntimeScope
             RuntimeScope_GetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValue), typeof(string));
+            RuntimeScope_GetValueNoThrow = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValueNoThrow), typeof(string));
             RuntimeScope_SetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValue), typeof(string), typeof(object));
             RuntimeScope_SetValueStrict = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValueStrict), typeof(string), typeof(object));
             RuntimeScope_Delete = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.Delete), typeof(string));
-            RuntimeScope_BindTo = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.BindTo), typeof(object));
-
+            RuntimeScope_With = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.With), typeof(object));
+            RuntimeScope_ImplicitThis = GetInstanceMethod(typeof(RuntimeScope), "get_" + nameof(RuntimeScope.ImplicitThis));
 
 #if DEBUG && ENABLE_DEBUGGING
             // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus

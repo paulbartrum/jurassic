@@ -56,6 +56,7 @@ namespace Jurassic.Compiler
             {
                 // Generate scope creation.
                 Scope.GenerateScopeCreation(generator, optimizationInfo);
+                Scope.GenerateDeclarations(generator, optimizationInfo);
             }
 
             foreach (var statement in this.Statements)

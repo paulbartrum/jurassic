@@ -277,21 +277,32 @@ namespace UnitTests
                 var inGlobal = 'globalVar1' in this;
                 var globalVar1 = 7;
                 inGlobal"));
-            Assert.AreEqual(7, Evaluate(@"
+            Assert.AreEqual(@"{""value"":7,""writable"":true,""enumerable"":true,""configurable"":false}", Evaluate(@"
                 var globalVar2 = 7;
-                this.globalVar2"));
+                JSON.stringify(Object.getOwnPropertyDescriptor(this, 'globalVar2'))"));
             Assert.AreEqual(Undefined.Value, Evaluate(@"
                 var x = this.globalVar3;
                 var globalVar3 = 7;
                 x"));
 
+            // Strict mode.
+            Assert.AreEqual("ReferenceError: globalVar4 is not defined.",
+                EvaluateExceptionMessage(@"'use strict'; var x = globalVar4; x"));
+            Assert.AreEqual(Undefined.Value,
+                Evaluate(@"'use strict'; var x = globalVar5; var globalVar5; x"));
+            Assert.AreEqual("ReferenceError: globalVar6 is not defined.",
+                EvaluateExceptionMessage(@"'use strict'; globalVar6 = 10"));
+
             // Strict mode: the name "eval" is not allowed in strict mode.
-            Assert.AreEqual("SyntaxError: The variable name cannot be 'eval' in strict mode.", EvaluateExceptionMessage("'use strict'; var eval = 5"));
+            Assert.AreEqual("SyntaxError: The variable name cannot be 'eval' in strict mode.",
+                EvaluateExceptionMessage("'use strict'; var eval = 5"));
         }
 
         [TestMethod]
         public void Let()
         {
+            Assert.AreEqual("ReferenceError: i is not defined.", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
+
             // Basic declaration syntax checks.
             Assert.AreEqual(Undefined.Value, Evaluate("let x"));
             Assert.AreEqual(Undefined.Value, Evaluate("let x; x"));
@@ -312,7 +323,7 @@ namespace UnitTests
                 a"));
 
             // 'let' declarations cannot be accessed before they are initialized.
-            Assert.AreEqual("ReferenceError: Cannot access 'a' before initialization", Evaluate(@"
+            Assert.AreEqual("ReferenceError: Cannot access 'a' before initialization.", EvaluateExceptionMessage(@"
                 let a = 15, b = 16;
                 {
                     b = a;
@@ -341,7 +352,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError: 'let' is not allowed here.", EvaluateExceptionMessage("let let = 5"));
 
             // Each loop of a scope is a new one.
-            Assert.AreEqual("ReferenceError: Cannot access 'a' before initialization", EvaluateExceptionMessage(@"
+            Assert.AreEqual("ReferenceError: Cannot access 'a' before initialization.", EvaluateExceptionMessage(@"
                 var b = 0;
                 for (let i = 0; i < 2; i++) {
                     if (i == 1) {
@@ -379,7 +390,6 @@ namespace UnitTests
             // Implicit this.
             Assert.AreEqual(1970, Evaluate("x = new Date(86400000); x.f = x.getFullYear; with (x) { f() }"));
             Assert.AreEqual(true, Evaluate("x = { a: 1, b: 2 }; with (x) { (function() { return this })() === this }"));
-            Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("x = new Date(5); f = x.getFullYear; with (x) { f() }"));
             Assert.AreEqual(1970, Evaluate("x = new Date(86400000); x.f = x.getFullYear; with (x) { (function b() { return f() })() }"));
 
             // With and var.
@@ -406,9 +416,11 @@ namespace UnitTests
             Assert.AreEqual(42, Evaluate("delete a; x = { a: 42 }; with (x) { y = { get z() { return a; }} } y.z"));
 
             // With and function declarations.
-            Assert.AreEqual("ReferenceError: a is not defined.", EvaluateExceptionMessage("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
-            Assert.AreEqual("function", Evaluate("result = typeof _f; with ({a: 2}) { function _f() { return 5 } } result"));
-  
+            Assert.AreEqual(43, Evaluate("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
+            Execute("_f = undefined");
+            Assert.AreEqual("undefined", Evaluate("result = typeof _f; with ({a: 2}) { function _f() { return 5 } } result"));
+            Assert.AreEqual("function", Evaluate("typeof _f"));
+
             // With statements are syntax errors in strict mode.
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage("'use strict'; var x = {}; with (x) { }"));
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage(@"eval(""'use strict'; var o = {}; with (o) {}"")"));
@@ -660,6 +672,27 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError: Duplicate argument name 'arg' is not allowed in strict mode.", EvaluateExceptionMessage("'use strict'; function f(arg, arg) { }"));
             Assert.AreEqual("SyntaxError: Duplicate argument name 'arg' is not allowed in strict mode.", EvaluateExceptionMessage("function f(arg, arg) { 'use strict' }"));
             Assert.AreEqual("SyntaxError: Duplicate argument name 'arg' is not allowed in strict mode.", EvaluateExceptionMessage("f = new Function('arg', 'arg', \"'use strict'; return true\"); f()"));
+
+            // Hoisting.
+            Assert.AreEqual("function", Evaluate(@"
+                var x = typeof double;
+                var double = 22;
+                function double(num) {
+                  return (num*2);
+                }
+                x"));
+            Assert.AreEqual("number", Evaluate(@"
+                var double = 22;
+                function double(num) {
+                  return (num*2);
+                }
+                typeof double"));
+            Assert.AreEqual("function", Evaluate(@"
+                var double;
+                function double(num) {
+                  return (num*2);
+                }
+                typeof double"));
 
             // Default function parameters.
             Execute("function f(a = 1, b = 2, c = 3) { return a + b + c; }");

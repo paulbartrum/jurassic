@@ -140,10 +140,8 @@ namespace Jurassic.Compiler
                 // 1. The function is a name expression (e.g. "parseInt()").
                 //    If we are inside a with() block, then there is an implicit 'this' value,
                 //    otherwise 'this' is undefined.
-                if (optimizationInfo.ImplicitThisValue != null)
-                    generator.LoadVariable(optimizationInfo.ImplicitThisValue);
-                else
-                    EmitHelpers.EmitUndefined(generator);
+                Scope.GenerateReference(generator, optimizationInfo);
+                generator.Call(ReflectionHelpers.RuntimeScope_ImplicitThis);
             }
             else if (this.Target is MemberAccessExpression targetMemberAccessExpression)
             {
