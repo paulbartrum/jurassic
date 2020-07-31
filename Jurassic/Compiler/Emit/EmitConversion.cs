@@ -259,8 +259,15 @@ namespace Jurassic.Compiler
         public static void ToInt32(ILGenerator generator, PrimitiveType fromType)
         {
             // Check that a conversion is actually necessary.
-            if (fromType == PrimitiveType.Int32 || fromType == PrimitiveType.UInt32 || fromType == PrimitiveType.Bool)
+            if (fromType == PrimitiveType.Int32 || fromType == PrimitiveType.UInt32)
                 return;
+            if (fromType == PrimitiveType.Bool)
+            {
+                // ToInt32(false) = 0, ToInt32(true) = 1, this corresponds exactly with the .NET
+                // representation of booleans.
+                generator.ReinterpretCast(typeof(int));
+                return;
+            }
 
             switch (fromType)
             {

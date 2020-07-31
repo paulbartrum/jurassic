@@ -59,11 +59,25 @@ namespace Jurassic.Compiler
     /// </summary>
     public sealed class RuntimeScope
     {
-        private Dictionary<string, object> values;
+        private struct LocalValue
+        {
+            public bool Deletable;
+            public object Value;
+            public override string ToString()
+            {
+                return Value == null ? string.Empty : Value.ToString();
+            }
+        }
+        private Dictionary<string, LocalValue> values;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <returns></returns>
         public static RuntimeScope CreateGlobalScope(ScriptEngine engine)
         {
-            var result = new RuntimeScope(engine, null, null, null, null);
+            var result = new RuntimeScope(engine, null, ScopeType.Global, null, null, null);
             result.With(engine.Global);
             return result;
         }
@@ -73,39 +87,60 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="engine"> The script engine this scope is associated with. </param>
         /// <param name="parent"> The parent scope, or <c>null</c> if this is the root scope. </param>
+        /// <param name="scopeType"></param>
         /// <param name="varNames"></param>
         /// <param name="letNames"></param>
         /// <param name="constNames"></param>
-        public RuntimeScope(ScriptEngine engine, RuntimeScope parent, string[] varNames, string[] letNames, string[] constNames)
+        internal RuntimeScope(ScriptEngine engine, RuntimeScope parent, ScopeType scopeType,
+            string[] varNames, string[] letNames, string[] constNames)
         {
             this.Engine = engine ?? throw new ArgumentNullException(nameof(engine));
             this.Parent = parent;
-            if (varNames != null)
+            this.ScopeType = scopeType;
+            if (varNames != null && scopeType != ScopeType.TopLevelFunction && scopeType != ScopeType.EvalStrict)
             {
                 var scope = this;
-                while (scope != null && scope.ScopeObject == null)
+                while (scope != null && scope.ScopeObject == null &&
+                    scope.ScopeType != ScopeType.TopLevelFunction && scopeType != ScopeType.EvalStrict)
                     scope = scope.Parent;
                 if (scope != null)
                 {
-                    foreach (var name in varNames)
-                        scope.ScopeObject.InitializeMissingProperty(name, PropertyAttributes.Enumerable | PropertyAttributes.Writable);
+                    if (scope.ScopeType == ScopeType.TopLevelFunction || scopeType == ScopeType.EvalStrict)
+                    {
+                        foreach (var name in varNames)
+                            if (!scope.values.ContainsKey(name))
+                                scope.values[name] = new LocalValue { Value = Undefined.Value, Deletable = true };
+                    }
+                    else
+                    {
+                        var attributes = scopeType == ScopeType.Eval ? PropertyAttributes.FullAccess : PropertyAttributes.Enumerable | PropertyAttributes.Writable;
+                        foreach (var name in varNames)
+                            scope.ScopeObject.InitializeMissingProperty(name, attributes);
+                    }
                 }
+                varNames = null;
             }
-            if (letNames != null || constNames != null)
+            if (varNames != null || letNames != null || constNames != null)
             {
-                values = new Dictionary<string, object>(
+                values = new Dictionary<string, LocalValue>(
                     (varNames != null ? varNames.Length : 0) +
+                    (letNames != null ? letNames.Length : 0) +
                     (constNames != null ? constNames.Length : 0));
+            }
+            if (varNames != null)
+            {
+                foreach (string variableName in varNames)
+                    values[variableName] = new LocalValue { Value = Undefined.Value };
             }
             if (letNames != null)
             {
                 foreach (string variableName in letNames)
-                    values[variableName] = null;
+                    values[variableName] = new LocalValue { Value = Undefined.Value };
             }
             if (constNames != null)
             {
                 foreach (string variableName in constNames)
-                    values[variableName] = null;
+                    values[variableName] = new LocalValue { Value = Undefined.Value };
             }
         }
 
@@ -119,6 +154,11 @@ namespace Jurassic.Compiler
         /// parent scope can be checked instead.
         /// </summary>
         public RuntimeScope Parent { get; private set; }
+
+        /// <summary>
+        /// Gets the type of scope, e.g. global, function, eval, with, etc.
+        /// </summary>
+        public ScopeType ScopeType { get; private set; }
 
         /// <summary>
         /// Gets the object that stores the values of the variables in the scope, if any. Can be <c>null</c>.
@@ -151,6 +191,8 @@ namespace Jurassic.Compiler
         /// <param name="scopeObject"> The object to use. </param>
         public void With(object scopeObject)
         {
+            if (scopeObject == null)
+                throw new ArgumentNullException(nameof(scopeObject));
             ScopeObject = TypeConverter.ToObject(Engine, scopeObject);
         }
 
@@ -162,18 +204,20 @@ namespace Jurassic.Compiler
         /// in the scope. </returns>
         public object GetValue(string variableName)
         {
+            if (variableName == null)
+                throw new ArgumentNullException(nameof(variableName));
             var scope = this;
             do
             {
-                if (scope.values != null && scope.values.TryGetValue(variableName, out var value))
+                if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
-                    if (value == null)
+                    if (localValue.Value == null)
                         throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.");
-                    return value;
+                    return localValue.Value;
                 }
                 if (scope.ScopeObject != null)
                 {
-                    var result = scope.ScopeObject[variableName];
+                    var result = scope.ScopeObject.GetPropertyValue(variableName);
                     if (result != null)
                         return result;
                 }
@@ -189,18 +233,20 @@ namespace Jurassic.Compiler
         /// <returns></returns>
         public object GetValueNoThrow(string variableName)
         {
+            if (variableName == null)
+                throw new ArgumentNullException(nameof(variableName));
             var scope = this;
             do
             {
-                if (scope.values != null && scope.values.TryGetValue(variableName, out var value))
+                if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
-                    if (value == null)
+                    if (localValue.Value == null)
                         throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.");
-                    return value;
+                    return localValue.Value;
                 }
                 if (scope.ScopeObject != null)
                 {
-                    var result = scope.ScopeObject[variableName];
+                    var result = scope.ScopeObject.GetPropertyValue(variableName);
                     if (result != null)
                         return result;
                 }
@@ -216,12 +262,16 @@ namespace Jurassic.Compiler
         /// <param name="value"> The new value of the variable. </param>
         public void SetValue(string variableName, object value)
         {
+            if (variableName == null)
+                throw new ArgumentNullException(nameof(variableName));
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
             var scope = this;
             do
             {
-                if (scope.values != null && scope.values.ContainsKey(variableName))
+                if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
-                    values[variableName] = value;
+                    scope.values[variableName] = new LocalValue { Value = value, Deletable = localValue.Deletable };
                     return;
                 }
                 if (scope.ScopeObject != null)
@@ -250,12 +300,16 @@ namespace Jurassic.Compiler
         /// <param name="value"> The new value of the variable. </param>
         public void SetValueStrict(string variableName, object value)
         {
+            if (variableName == null)
+                throw new ArgumentNullException(nameof(variableName));
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
             var scope = this;
             do
             {
-                if (scope.values != null && scope.values.ContainsKey(variableName))
+                if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
-                    values[variableName] = value;
+                    scope.values[variableName] = new LocalValue { Value = value, Deletable = localValue.Deletable };
                     return;
                 }
                 if (scope.ScopeObject != null)
@@ -278,8 +332,17 @@ namespace Jurassic.Compiler
         /// <param name="variableName"> The name of the variable. </param>
         public bool Delete(string variableName)
         {
-            if (values != null && values.TryGetValue(variableName, out var value))
-                return false;   // Can't delete a local variable.
+            if (variableName == null)
+                throw new ArgumentNullException(nameof(variableName));
+            if (values != null && values.TryGetValue(variableName, out var localValue))
+            {
+                if (localValue.Deletable)
+                {
+                    values.Remove(variableName);
+                    return true;
+                }
+                return false;
+            }
             if (ScopeObject != null)
                 return ScopeObject.Delete(variableName, false);
             if (Parent != null)

@@ -47,6 +47,8 @@ namespace UnitTests
             Assert.AreEqual(19, Evaluate("~-20"));
             Assert.AreEqual(-9, Evaluate("~4294967304"));
             Assert.AreEqual(-21, Evaluate("~ '20'"));
+            Assert.AreEqual(-1, Evaluate("~false"));
+            Assert.AreEqual(-2, Evaluate("~true"));
 
             // Double bitwise not converts the input to a Int32.
             Assert.AreEqual(1, Evaluate("~~'1.2'"));
@@ -707,6 +709,8 @@ namespace UnitTests
             Assert.AreEqual(16, Evaluate("42949673042 & -401929233123"));
             Assert.AreEqual(1, Evaluate("11.9 & 1.5"));
             Assert.AreEqual(0, Evaluate("NaN & NaN"));
+            Assert.AreEqual(0, Evaluate("true & false"));
+            Assert.AreEqual(0, Evaluate("false & false"));
 
             // Variables
             Assert.AreEqual(3, Evaluate("x = 11; x & 7"));
@@ -726,6 +730,8 @@ namespace UnitTests
             Assert.AreEqual(10, Evaluate("11.5 ^ 1.5"));
             Assert.AreEqual(3, Evaluate("'5' ^ '6'"));
             Assert.AreEqual(1, Evaluate("'a' ^ 1"));
+            Assert.AreEqual(1, Evaluate("true ^ false"));
+            Assert.AreEqual(0, Evaluate("false ^ false"));
 
             // Variables
             Assert.AreEqual(12, Evaluate("x = 11; x ^ 7"));
@@ -744,6 +750,8 @@ namespace UnitTests
             Assert.AreEqual(11, Evaluate("11.5 | 1.5"));
             Assert.AreEqual(7, Evaluate("'5' | '6'"));
             Assert.AreEqual(1, Evaluate("'a' | 1"));
+            Assert.AreEqual(1, Evaluate("true | false"));
+            Assert.AreEqual(0, Evaluate("false | false"));
 
             // Variables
             Assert.AreEqual(15, Evaluate("x = 11; x | 7"));

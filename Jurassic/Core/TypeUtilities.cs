@@ -285,7 +285,7 @@ namespace Jurassic
 
             // Get the iterator symbol value.
             var iteratorValue = iterable[engine.Symbol.Iterator];
-            if (iteratorValue == null || iteratorValue == Undefined.Value || iteratorValue == Null.Value)
+            if (iteratorValue == Undefined.Value || iteratorValue == Null.Value)
                 return null;
 
             // If a value is present, it must be a function.

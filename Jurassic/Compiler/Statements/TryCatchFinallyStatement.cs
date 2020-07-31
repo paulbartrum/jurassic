@@ -132,11 +132,19 @@ namespace Jurassic.Compiler
                 CatchBlock.GenerateScopeCreation = false;
                 CatchBlock.Scope.GenerateScopeCreation(generator, optimizationInfo);
 
-                // Store the error object in the variable provided.
-                generator.ReinterpretCast(typeof(JavaScriptException));
-                generator.Call(ReflectionHelpers.JavaScriptException_ErrorObject);
-                var catchVariable = new NameExpression(CatchBlock.Scope, this.CatchVariableName);
-                catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                if (this.CatchVariableName != null)
+                {
+                    // Store the error object in the variable provided.
+                    generator.ReinterpretCast(typeof(JavaScriptException));
+                    generator.Call(ReflectionHelpers.JavaScriptException_ErrorObject);
+                    var catchVariable = new NameExpression(CatchBlock.Scope, this.CatchVariableName);
+                    catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                }
+                else
+                {
+                    // Remove the exception object from the stack.
+                    generator.Pop();
+                }
 
                 // Emit code for the statements within the catch block.
                 this.CatchBlock.GenerateCode(generator, optimizationInfo);
@@ -202,6 +210,10 @@ namespace Jurassic.Compiler
                         generator.DefineLabelPosition(switchLabels[i]);
                         generator.Leave(branches[i]);
                     }
+                }
+                else
+                {
+                    generator.Pop();
                 }
 
                 // Reset the state we clobbered.

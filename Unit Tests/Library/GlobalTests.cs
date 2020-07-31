@@ -208,6 +208,7 @@ namespace UnitTests
             Evaluate("delete a");
             Assert.AreEqual("undefined", Evaluate("'use strict'; eval('var a = false'); typeof a"));
             Assert.AreEqual("undefined", Evaluate(@"eval(""'use strict'; var a = false""); typeof a"));
+            Assert.AreEqual("undefined", Evaluate("'use strict'; (function() { eval('var a = false'); return typeof a; })()"));
 
             // Return is not allowed.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("e = eval; (function() { var a = 5; e('return a'); })()"));

@@ -9,16 +9,6 @@ namespace Jurassic.Compiler
     /// </summary>
     public sealed class Scope
     {
-        private enum ScopeType
-        {
-            Global,
-            With,
-            TopLevelFunction,
-            Block,
-            Eval,
-            EvalStrict,
-        }
-
         private ScopeType Type { get; set; }
 
         // A dictionary containing the variables declared in this scope.
@@ -341,7 +331,7 @@ namespace Jurassic.Compiler
             var constList = new List<DeclaredVariable>();
             foreach (var variable in this.variables.Values)
             {
-                if (variable.Keyword == KeywordToken.Var && Type != ScopeType.TopLevelFunction)
+                if (variable.Keyword == KeywordToken.Var)
                     varList.Add(variable);
                 else if (variable.Keyword == KeywordToken.Const)
                     constList.Add(variable);
@@ -352,6 +342,9 @@ namespace Jurassic.Compiler
             letList.Sort((a, b) => a.Index - b.Index);
             constList.Sort((a, b) => a.Index - b.Index);
             int i;
+
+            // scopeType
+            generator.LoadEnumValue(Type);
 
             // varNames
             if (varList.Count == 0)

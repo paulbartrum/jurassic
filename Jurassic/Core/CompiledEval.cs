@@ -8,9 +8,9 @@ namespace Jurassic
     /// </summary>
     public sealed class CompiledEval
     {
-        private EvalMethodGenerator methodGen;
+        private GlobalOrEvalMethodGenerator methodGen;
 
-        internal CompiledEval(EvalMethodGenerator methodGen)
+        internal CompiledEval(GlobalOrEvalMethodGenerator methodGen)
         {
             if (methodGen == null)
                 throw new ArgumentNullException(nameof(methodGen));
@@ -26,9 +26,10 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public static CompiledEval Compile(ScriptSource source, CompilerOptions options = null)
         {
-            var methodGen = new EvalMethodGenerator(
+            var methodGen = new GlobalOrEvalMethodGenerator(
                 source,                             // The source code.
-                options ?? new CompilerOptions());  // The compiler options.
+                options ?? new CompilerOptions(),   // The compiler options.
+                GlobalOrEvalMethodGenerator.GeneratorContext.GlobalEval);
 
             // Parse
             methodGen.Parse();

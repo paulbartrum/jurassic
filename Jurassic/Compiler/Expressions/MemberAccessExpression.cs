@@ -226,7 +226,7 @@ namespace Jurassic.Compiler
                 // xxx = object[index]
 
                 // Call the indexer.
-                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Int);
+                generator.Call(ReflectionHelpers.ObjectInstance_Indexer_UInt);
             }
             else if (memberAccessType == TypeOfMemberAccess.Static)
             {
@@ -260,7 +260,7 @@ namespace Jurassic.Compiler
                     // value = object.GetPropertyValue("property")
 
                     generator.LoadString(propertyName);
-                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                    generator.Call(ReflectionHelpers.ObjectInstance_Indexer_Object);
                 }
             }
             else
@@ -269,7 +269,7 @@ namespace Jurassic.Compiler
                 // -----------------------
                 // x = y.GetPropertyValue("property")
 
-                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                generator.Call(ReflectionHelpers.ObjectInstance_Indexer_Object);
             }
         }
 
@@ -363,6 +363,7 @@ namespace Jurassic.Compiler
             {
                 // Deleting a super reference is not allowed.
                 EmitHelpers.EmitThrow(generator, ErrorType.ReferenceError, "Unsupported reference to 'super'.");
+                generator.LoadNull();   // Extraneous, but helps with verification.
                 return;
             }
             lhs.GenerateCode(generator, optimizationInfo);

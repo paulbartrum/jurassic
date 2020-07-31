@@ -97,8 +97,8 @@ namespace Jurassic.Compiler
         internal static MethodInfo ObjectInstance_Delete;
         internal static MethodInfo ObjectInstance_DefineProperty;
         internal static MethodInfo ObjectInstance_HasProperty;
-        internal static MethodInfo ObjectInstance_GetPropertyValue_Object;
-        internal static MethodInfo ObjectInstance_GetPropertyValue_Int;
+        internal static MethodInfo ObjectInstance_Indexer_Object;
+        internal static MethodInfo ObjectInstance_Indexer_UInt;
         internal static MethodInfo ObjectInstance_GetPropertyValue_PropertyReference;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Object;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Int;
@@ -183,8 +183,8 @@ namespace Jurassic.Compiler
             ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(object), typeof(bool));
             ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(object), typeof(PropertyDescriptor), typeof(bool));
             ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(object));
-            ObjectInstance_GetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(object));
-            ObjectInstance_GetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(uint));
+            ObjectInstance_Indexer_Object = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(object));
+            ObjectInstance_Indexer_UInt = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(uint));
             ObjectInstance_GetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(PropertyReference));
             ObjectInstance_SetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
@@ -287,9 +287,9 @@ namespace Jurassic.Compiler
             ExecutionContext_GetNewTargetObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.NewTargetObject));
             ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));
             ExecutionContext_CallSuperClass = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CallSuperClass), typeof(object[]));
-            ExecutionContext_CreateArgumentsInstance = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateArgumentsInstance), typeof(object[]));
+            ExecutionContext_CreateArgumentsInstance = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateArgumentsInstance), typeof(RuntimeScope), typeof(object[]));
             ExecutionContext_ParentScope = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ParentScope));
-            ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope), typeof(string[]), typeof(string[]), typeof(string[]));
+            ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope), typeof(ScopeType), typeof(string[]), typeof(string[]), typeof(string[]));
 
             // RuntimeScope
             RuntimeScope_GetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValue), typeof(string));

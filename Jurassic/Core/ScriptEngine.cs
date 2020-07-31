@@ -678,9 +678,10 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public CompiledScript Compile(ScriptSource source)
         {
-            var methodGen = new GlobalMethodGenerator(
+            var methodGen = new GlobalOrEvalMethodGenerator(
                 source,                             // The source code.
-                CreateOptions());                   // The compiler options.
+                CreateOptions(),                    // The compiler options.
+                GlobalOrEvalMethodGenerator.GeneratorContext.Global);
 
             // Parse
             this.ParsingStarted?.Invoke(this, EventArgs.Empty);
@@ -729,9 +730,10 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public object Evaluate(ScriptSource source)
         {
-            var methodGen = new EvalMethodGenerator(
+            var methodGen = new GlobalOrEvalMethodGenerator(
                 source,                                     // The source code.
-                CreateOptions());                           // The compiler options.
+                CreateOptions(),                            // The compiler options.
+                GlobalOrEvalMethodGenerator.GeneratorContext.GlobalEval);
 
             try
             {
@@ -1211,7 +1213,9 @@ namespace Jurassic
 
             // Parse the eval string into an AST.
             var options = new CompilerOptions() { ForceStrictMode = strictMode };
-            var evalGen = new EvalMethodGenerator(new StringScriptSource(code, "eval"), options);
+            var evalGen = new GlobalOrEvalMethodGenerator(new StringScriptSource(code, "eval"),
+                options,
+                GlobalOrEvalMethodGenerator.GeneratorContext.Eval);
 
             // Make sure the eval cache doesn't get too big.  TODO: add some sort of LRU strategy?
             //if (evalCache.Count > 100)

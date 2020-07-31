@@ -155,8 +155,9 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfEqual(ILLabel label)
         {
-            ExpectNumber();
-            ExpectNumber();
+            // The top two types on the stack should be the same.
+            var type1 = this.stack.Pop();
+            Expect(t => t == type1, type1.ToString());
             ValidateBranch((VerifyingILLabel)label);
 
             this.generator.BranchIfEqual(((VerifyingILLabel)label).UnderlyingLabel);
@@ -168,8 +169,9 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void BranchIfNotEqual(ILLabel label)
         {
-            ExpectNumber();
-            ExpectNumber();
+            // The top two types on the stack should be the same.
+            var type1 = this.stack.Pop();
+            Expect(t => t == type1, type1.ToString());
             ValidateBranch((VerifyingILLabel)label);
 
             this.generator.BranchIfNotEqual(((VerifyingILLabel)label).UnderlyingLabel);
@@ -368,7 +370,11 @@ namespace Jurassic.Compiler
         public override void Switch(ILLabel[] labels)
         {
             ExpectInt();
-            this.generator.Switch(labels);
+
+            var underlyingLabels = new ILLabel[labels.Length];
+            for (int i = 0; i < labels.Length; i++)
+                underlyingLabels[i] = ((VerifyingILLabel)labels[i]).UnderlyingLabel;
+            this.generator.Switch(underlyingLabels);
         }
 
 
@@ -533,10 +539,10 @@ namespace Jurassic.Compiler
         {
             Expect(t => t == typeof(int) || t == typeof(uint) ||
                 t == typeof(long) || t == typeof(ulong) ||
-                t == typeof(bool), "number or boolean");
+                t == typeof(double) || t == typeof(bool), "number or boolean");
             Expect(t => t == typeof(int) || t == typeof(uint) ||
                 t == typeof(long) || t == typeof(ulong) ||
-                t == typeof(bool), "number or boolean");
+                t == typeof(double) || t == typeof(bool), "number or boolean");
             Push(typeof(bool));
             this.generator.CompareEqual();
         }
@@ -1120,6 +1126,11 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void EndExceptionBlock()
         {
+            if (this.stack.Count != 0 && !this.stackIsIndeterminate)
+                throw new InvalidOperationException("The stack should be empty or indeterminate.");
+            this.stack.Clear();
+            this.stackIsIndeterminate = false;
+
             this.generator.EndExceptionBlock();
         }
 
@@ -1129,7 +1140,12 @@ namespace Jurassic.Compiler
         /// <param name="exceptionType"> The type of exception to handle. </param>
         public override void BeginCatchBlock(Type exceptionType)
         {
+            if (this.stack.Count != 0 && !this.stackIsIndeterminate)
+                throw new InvalidOperationException("The stack should be empty or indeterminate.");
+            this.stack.Clear();
+            this.stackIsIndeterminate = false;
             Push(exceptionType);
+
             this.generator.BeginCatchBlock(exceptionType);
         }
 
@@ -1138,6 +1154,11 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BeginFinallyBlock()
         {
+            if (this.stack.Count != 0 && !this.stackIsIndeterminate)
+                throw new InvalidOperationException("The stack should be empty or indeterminate.");
+            this.stack.Clear();
+            this.stackIsIndeterminate = false;
+
             this.generator.BeginFinallyBlock();
         }
 
@@ -1146,6 +1167,11 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BeginFilterBlock()
         {
+            if (this.stack.Count != 0 && !this.stackIsIndeterminate)
+                throw new InvalidOperationException("The stack should be empty or indeterminate.");
+            this.stack.Clear();
+            this.stackIsIndeterminate = false;
+
             this.generator.BeginFilterBlock();
         }
 
@@ -1154,6 +1180,11 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void BeginFaultBlock()
         {
+            if (this.stack.Count != 0 && !this.stackIsIndeterminate)
+                throw new InvalidOperationException("The stack should be empty or indeterminate.");
+            this.stack.Clear();
+            this.stackIsIndeterminate = false;
+
             this.generator.BeginFaultBlock();
         }
 
@@ -1164,6 +1195,9 @@ namespace Jurassic.Compiler
         /// <param name="label"> The label to branch to. </param>
         public override void Leave(ILLabel label)
         {
+            ValidateBranch((VerifyingILLabel)label);
+            this.stackIsIndeterminate = true;
+
             this.generator.Leave(((VerifyingILLabel)label).UnderlyingLabel);
         }
 
@@ -1173,6 +1207,11 @@ namespace Jurassic.Compiler
         /// </summary>
         public override void EndFinally()
         {
+            if (this.stack.Count != 0 && !this.stackIsIndeterminate)
+                throw new InvalidOperationException("The stack should be empty or indeterminate.");
+            this.stack.Clear();
+            this.stackIsIndeterminate = false;
+
             this.generator.EndFinally();
         }
 
@@ -1185,6 +1224,11 @@ namespace Jurassic.Compiler
         public override void EndFilter()
         {
             ExpectInt();
+            if (this.stack.Count != 0 && !this.stackIsIndeterminate)
+                throw new InvalidOperationException("The stack should be empty or indeterminate.");
+            this.stack.Clear();
+            this.stackIsIndeterminate = false;
+
             this.generator.EndFilter();
         }
 

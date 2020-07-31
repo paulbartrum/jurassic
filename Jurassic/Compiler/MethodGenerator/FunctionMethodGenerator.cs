@@ -332,6 +332,7 @@ namespace Jurassic.Compiler
             {
                 // executionContext.CreateArgumentsInstance(object[] arguments)
                 EmitHelpers.LoadExecutionContext(generator);
+                this.BaseScope.GenerateReference(generator, optimizationInfo);
                 EmitHelpers.LoadArgumentsArray(generator);
                 generator.Call(ReflectionHelpers.ExecutionContext_CreateArgumentsInstance);
                 var arguments = new NameExpression(this.BaseScope, "arguments");
@@ -384,6 +385,7 @@ namespace Jurassic.Compiler
                         // Check if it's undefined.
                         generator.Duplicate();
                         EmitHelpers.EmitUndefined(generator);
+                        generator.ReinterpretCast(typeof(object));
                         generator.BranchIfNotEqual(storeValue);
                         generator.Pop();
 
@@ -417,8 +419,11 @@ namespace Jurassic.Compiler
                 // of the function without encountering any return statements.
                 generator.LoadVariable(optimizationInfo.ReturnVariable);
             else
-                // There were no return statements - return null.
-                generator.LoadNull();
+            {
+                // There were no return statements - return undefined.
+                EmitHelpers.EmitUndefined(generator);
+                generator.ReinterpretCast(typeof(object));
+            }
         }
 
         /// <summary>

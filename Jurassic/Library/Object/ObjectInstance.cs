@@ -157,42 +157,45 @@ namespace Jurassic.Library
         /// Gets or sets the value of a named property.
         /// </summary>
         /// <param name="key"> The property key (either a string or a Symbol). </param>
-        /// <returns> The property value, or <c>null</c> if the property doesn't exist. </returns>
+        /// <returns> The property value, or <see cref="Undefined.Value"/> if the property doesn't
+        /// exist. </returns>
         public object this[object key]
         {
-            get { return GetPropertyValue(key); }
-            set { SetPropertyValue(key, value, false); }
+            get { return GetPropertyValue(key) ?? Undefined.Value; }
+            set { SetPropertyValue(key, value, throwOnError: false); }
         }
 
         /// <summary>
         /// Gets or sets the value of an array-indexed property.
         /// </summary>
         /// <param name="index"> The index of the property to retrieve. </param>
-        /// <returns> The property value, or <c>null</c> if the property doesn't exist. </returns>
+        /// <returns> The property value, or <see cref="Undefined.Value"/> if the property doesn't
+        /// exist. </returns>
         public object this[uint index]
         {
-            get { return GetPropertyValue(index); }
-            set { SetPropertyValue(index, value, false); }
+            get { return GetPropertyValue(index) ?? Undefined.Value; }
+            set { SetPropertyValue(index, value, throwOnError: false); }
         }
 
         /// <summary>
         /// Gets or sets the value of an array-indexed property.
         /// </summary>
         /// <param name="index"> The index of the property to retrieve. </param>
-        /// <returns> The property value, or <c>null</c> if the property doesn't exist. </returns>
+        /// <returns> The property value, or <see cref="Undefined.Value"/> if the property doesn't
+        /// exist. </returns>
         public object this[int index]
         {
             get
             {
                 if (index < 0)
                     throw new ArgumentOutOfRangeException("index");
-                return GetPropertyValue((uint)index);
+                return GetPropertyValue((uint)index) ?? Undefined.Value;
             }
             set
             {
                 if (index < 0)
                     throw new ArgumentOutOfRangeException("index");
-                SetPropertyValue((uint)index, value, false);
+                SetPropertyValue((uint)index, value, throwOnError: false);
             }
         }
 

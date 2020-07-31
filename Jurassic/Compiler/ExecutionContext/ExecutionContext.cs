@@ -207,11 +207,12 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new instance of the 'arguments' object.
         /// </summary>
+        /// <param name="functionScope"> The top-level scope for the function. </param>
         /// <param name="arguments"> The argument values that were passed to the function. </param>
         /// <returns> A new instance of the 'arguments' object. </returns>
-        public ArgumentsInstance CreateArgumentsInstance(object[] arguments)
+        public ArgumentsInstance CreateArgumentsInstance(RuntimeScope functionScope, object[] arguments)
         {
-            return new ArgumentsInstance(Engine.Object.Prototype, ExecutingFunction, ParentScope, arguments);
+            return new ArgumentsInstance(Engine.Object.InstancePrototype, ExecutingFunction, functionScope, arguments);
         }
 
         /// <summary>
@@ -220,13 +221,14 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="parent"> The parent scope, or <c>null</c> to use the ParentScope from this
         /// execution context. </param>
+        /// <param name="scopeType"></param>
         /// <param name="varNames"></param>
         /// <param name="letNames"></param>
         /// <param name="constNames"></param>
         /// <returns> A new RuntimeScope instance. </returns>
-        public RuntimeScope CreateRuntimeScope(RuntimeScope parent, string[] varNames, string[] letNames, string[] constNames)
+        public RuntimeScope CreateRuntimeScope(RuntimeScope parent, ScopeType scopeType, string[] varNames, string[] letNames, string[] constNames)
         {
-            return new RuntimeScope(Engine, parent ?? ParentScope, varNames, letNames, constNames);
+            return new RuntimeScope(Engine, parent ?? ParentScope, scopeType, varNames, letNames, constNames);
         }
     }
 }
