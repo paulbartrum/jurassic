@@ -493,8 +493,10 @@ namespace Jurassic.Compiler
         /// <param name="keyword"> Indicates which type of statement is being parsed.  Must be var,
         /// let or const. </param>
         /// <param name="consumeKeyword"> Indicates whether the keyword token needs to be consumed. </param>
+        /// <param name="insideForLoop"> Indicates whether we are parsing the initial declaration
+        /// inside a for() statement. </param>
         /// <returns> A variable declaration statement. </returns>
-        private VarLetOrConstStatement ParseVarLetOrConst(KeywordToken keyword, bool consumeKeyword = true)
+        private VarLetOrConstStatement ParseVarLetOrConst(KeywordToken keyword, bool consumeKeyword = true, bool insideForLoop = false)
         {
             var result = new VarLetOrConstStatement(this.labelsForCurrentStatement, this.currentScope);
 
@@ -515,6 +517,8 @@ namespace Jurassic.Compiler
                     throw new SyntaxErrorException("'let' is not allowed here.", this.LineNumber, this.SourcePath);
 
                 // Add the variable to the current function's list of local variables.
+                if (keyword != KeywordToken.Var && this.currentScope.HasDeclaredVariable(declaration.VariableName))
+                    throw new SyntaxErrorException($"Identifier '{declaration.VariableName}' has already been declared.", this.LineNumber, this.SourcePath);
                 this.currentScope.DeclareVariable(keyword, declaration.VariableName);
 
                 // The next token is either an equals sign (=), a semi-colon or a comma.
@@ -526,12 +530,20 @@ namespace Jurassic.Compiler
                     // Read the setter expression.
                     declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
                 }
+                else if (keyword == KeywordToken.Const)
+                    throw new SyntaxErrorException("Missing initializer in const declaration.", this.LineNumber, this.SourcePath);
 
                 // Record the portion of the source document that will be highlighted when debugging.
                 declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                 // Add the declaration to the result.
                 result.Declarations.Add(declaration);
+
+                // If we are inside a for loop, then 'in' and 'of' are valid terminators.
+                // Also, to match ParseExpression(), we don't consume the final semi-colon.
+                if (insideForLoop && (this.nextToken == KeywordToken.In || this.nextToken == IdentifierToken.Of ||
+                    (this.AtValidEndOfStatement() == true && this.nextToken != PunctuatorToken.Comma)))
+                    return result;
 
                 // Check if we are at the end of the statement.
                 if (this.AtValidEndOfStatement() == true && this.nextToken != PunctuatorToken.Comma)
@@ -703,213 +715,153 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // The initialization statement.
-            Statement initializationStatement = null;
-
-            // The type of for statement.
-            ForStatementType type = ForStatementType.Unknown;
-
-            // The for-in and for-of expressions need a variable to assign to.  Is null for a regular for statement.
-            IReferenceExpression forInOfReference = null;
-
-            // Keep track of the start of the statement so that source debugging works correctly.
-            var start = this.PositionAfterWhitespace;
-
-            if (this.nextToken == KeywordToken.Var)
+            // 'let' variables should have their own scope.
+            using (CreateScopeContext(Scope.CreateBlockScope(this.currentScope)))
             {
-                // Read past the var token.
-                var declarationKeyword = (KeywordToken)this.nextToken;
-                this.Expect(declarationKeyword);
+                // Keep track of the start of the statement so that source debugging works correctly.
+                var start = this.PositionAfterWhitespace;
 
-                // There can be multiple initializers (but not for for-in statements).
-                var varStatement = new VarLetOrConstStatement(this.labelsForCurrentStatement, this.currentScope);
-                initializationStatement = varStatement;
-
-                while (true)
+                // There are lots of possibilities for the initialization statement:
+                // i = 0;
+                // var i = 0, j = 1;
+                // var i in
+                // var i of
+                // let i in
+                // let i of
+                Statement initStatement = null;
+                if (this.nextToken == KeywordToken.Var || this.nextToken == KeywordToken.Let || this.nextToken == KeywordToken.Const)
                 {
-                    // The next token must be a variable name.
-                    var declaration = new VariableDeclaration(declarationKeyword, ExpectIdentifier());
-                    ValidateVariableName(declaration.VariableName);
-
-                    // Add the variable to the current function's list of local variables.
-                    this.currentScope.DeclareVariable(declarationKeyword, declaration.VariableName);
-
-                    // The next token is either an equals sign (=), a semi-colon, a comma, or the "in" keyword.
-                    if (this.nextToken == PunctuatorToken.Assignment)
+                    // If the next token is var or const then we know we are parsing a declaration.
+                    // This doesn't always work for 'let' unfortunately, because 'let' is only a
+                    // reserved word in strict mode.
+                    initStatement = ParseVarLetOrConst((KeywordToken)this.nextToken, consumeKeyword: true, insideForLoop: true);
+                }
+                else if (this.nextToken != PunctuatorToken.Semicolon)
+                {
+                    // Parse the init statement as an expression.
+                    var initExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In, IdentifierToken.Of);
+                    if (this.nextToken is IdentifierToken && initExpression is NameExpression nameExpression && nameExpression.Name == "let")
                     {
-                        // Read past the equals token (=).
-                        this.Expect(PunctuatorToken.Assignment);
-
-                        // Read the setter expression.
-                        declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
-
-                        // This must be a regular for statement.
-                        type = ForStatementType.For;
+                        initStatement = ParseVarLetOrConst(KeywordToken.Let, consumeKeyword: false, insideForLoop: true);
                     }
-
-                    // Record the portion of the source document that will be highlighted when debugging.
-                    declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-
-                    // Add the declaration to the initialization statement.
-                    varStatement.Declarations.Add(declaration);
-
-                    if (this.nextToken == PunctuatorToken.Semicolon)
+                    else
                     {
-                        // This is a regular for statement.
-                        break;
+                        initStatement = new ExpressionStatement(initExpression);
+                        initStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
                     }
-                    else if (this.nextToken == KeywordToken.In && type == ForStatementType.Unknown)
-                    {
-                        // This is a for-in statement.
-                        forInOfReference = new NameExpression(this.currentScope, declaration.VariableName);
-                        type = ForStatementType.ForIn;
-                        break;
-                    }
-                    else if (this.nextToken == IdentifierToken.Of && type == ForStatementType.Unknown)
-                    {
-                        // This is a for-of statement.
-                        forInOfReference = new NameExpression(this.currentScope, declaration.VariableName);
-                        type = ForStatementType.ForOf;
-                        break;
-                    }
-                    else if (this.nextToken != PunctuatorToken.Comma)
-                        throw new SyntaxErrorException(string.Format("Unexpected token {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                }
 
-                    // Read past the comma token.
-                    this.Expect(PunctuatorToken.Comma);
+                // The for-in and for-of expressions need a variable to assign to.  Is null for a regular for statement.
+                IReferenceExpression forInOfReference = null;
+                if (this.nextToken == KeywordToken.In || this.nextToken == IdentifierToken.Of)
+                {
+                    // This is a for-in statement or a for-of statement.
+                    if (initStatement is ExpressionStatement initExpressionStatement)
+                    {
+                        if ((initExpressionStatement.Expression is IReferenceExpression) == false)
+                            throw new SyntaxErrorException("Invalid left-hand side in for loop.", this.LineNumber, this.SourcePath);
+                        forInOfReference = (IReferenceExpression)initExpressionStatement.Expression;
+                    }
+                    else if (initStatement is VarLetOrConstStatement initVarLetOrConstStatement)
+                    {
+                        if (initVarLetOrConstStatement.Declarations.Count != 1)
+                            throw new SyntaxErrorException("Invalid left-hand side in for loop; must have a single binding.", this.LineNumber, this.SourcePath);
+                        forInOfReference = new NameExpression(this.currentScope, initVarLetOrConstStatement.Declarations[0].VariableName);
+                    }
+                }
 
-                    // Keep track of the start of the statement so that source debugging works correctly.
+
+                if (this.nextToken == KeywordToken.In)
+                {
+                    // for (x in y)
+                    // for (var x in y)
+                    // for (let x in y)
+                    var result = new ForInStatement(this.labelsForCurrentStatement);
+                    result.Variable = forInOfReference;
+                    result.VariableSourceSpan = initStatement.SourceSpan;
+
+                    // Consume the "in".
+                    this.Expect(KeywordToken.In);
+
+                    // Parse the right-hand-side expression.
                     start = this.PositionAfterWhitespace;
+                    result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis);
+                    result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
-                    // Multiple initializers are not allowed in for-in statements.
-                    type = ForStatementType.For;
+                    // Read the right parenthesis.
+                    this.Expect(PunctuatorToken.RightParenthesis);
+
+                    // Read the statements that will be executed in the loop body.
+                    result.Body = ParseStatement();
+
+                    return result;
                 }
-
-                // Record the portion of the source document that will be highlighted when debugging.
-                varStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-            }
-            else
-            {
-                // Not a var initializer - can be a simple variable name then "in" or any expression ending with a semi-colon.
-                // The expression can be empty.
-                if (this.nextToken != PunctuatorToken.Semicolon)
+                else if (this.nextToken == IdentifierToken.Of)
                 {
-                    // Parse an expression.
-                    var initializationExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In, IdentifierToken.Of);
+                    // for (x of y)
+                    // for (var x of y)
+                    // for (let x of y)
+                    var result = new ForOfStatement(this.labelsForCurrentStatement);
+                    result.Variable = forInOfReference;
+                    result.VariableSourceSpan = initStatement.SourceSpan;
 
-                    // Record debug info for the expression.
-                    initializationStatement = new ExpressionStatement(initializationExpression);
-                    initializationStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    // Consume the "of".
+                    this.Expect(IdentifierToken.Of);
 
-                    if (this.nextToken == KeywordToken.In)
-                    {
-                        // This is a for-in statement.
-                        if ((initializationExpression is IReferenceExpression) == false)
-                            throw new SyntaxErrorException("Invalid left-hand side in for-in", this.LineNumber, this.SourcePath);
-                        forInOfReference = (IReferenceExpression)initializationExpression;
-                        type = ForStatementType.ForIn;
-                    }
-                    else if (this.nextToken == IdentifierToken.Of)
-                    {
-                        // This is a for-of statement.
-                        if ((initializationExpression is IReferenceExpression) == false)
-                            throw new SyntaxErrorException("Invalid left-hand side in for-of", this.LineNumber, this.SourcePath);
-                        forInOfReference = (IReferenceExpression)initializationExpression;
-                        type = ForStatementType.ForOf;
-                    }
-                }
-            }
-
-            if (type == ForStatementType.ForIn)
-            {
-                // for (x in y)
-                // for (var x in y)
-                // for (let x in y)
-                var result = new ForInStatement(this.labelsForCurrentStatement);
-                result.Variable = forInOfReference;
-                result.VariableSourceSpan = initializationStatement.SourceSpan;
-                
-                // Consume the "in".
-                this.Expect(KeywordToken.In);
-
-                // Parse the right-hand-side expression.
-                start = this.PositionAfterWhitespace;
-                result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis);
-                result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-
-                // Read the right parenthesis.
-                this.Expect(PunctuatorToken.RightParenthesis);
-
-                // Read the statements that will be executed in the loop body.
-                result.Body = ParseStatement();
-
-                return result;
-            }
-            else if (type == ForStatementType.ForOf)
-            {
-                // for (x of y)
-                // for (var x of y)
-                // for (let x of y)
-                var result = new ForOfStatement(this.labelsForCurrentStatement);
-                result.Variable = forInOfReference;
-                result.VariableSourceSpan = initializationStatement.SourceSpan;
-
-                // Consume the "of".
-                this.Expect(IdentifierToken.Of);
-
-                // Parse the right-hand-side expression.
-                start = this.PositionAfterWhitespace;
-                result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis, PunctuatorToken.Comma); // Comma is not allowed.
-                result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-
-                // Read the right parenthesis.
-                this.Expect(PunctuatorToken.RightParenthesis);
-
-                // Read the statements that will be executed in the loop body.
-                result.Body = ParseStatement();
-
-                return result;
-            }
-            else
-            {
-                var result = new ForStatement(this.labelsForCurrentStatement);
-
-                // Set the initialization statement.
-                if (initializationStatement != null)
-                    result.InitStatement = initializationStatement;
-
-                // Read the semicolon.
-                this.Expect(PunctuatorToken.Semicolon);
-
-                // Parse the optional condition expression.
-                // Note: if the condition is omitted then it is considered to always be true.
-                if (this.nextToken != PunctuatorToken.Semicolon)
-                {
+                    // Parse the right-hand-side expression.
                     start = this.PositionAfterWhitespace;
-                    result.ConditionStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.Semicolon));
-                    result.ConditionStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis, PunctuatorToken.Comma); // Comma is not allowed.
+                    result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
+                    // Read the right parenthesis.
+                    this.Expect(PunctuatorToken.RightParenthesis);
+
+                    // Read the statements that will be executed in the loop body.
+                    result.Body = ParseStatement();
+
+                    return result;
                 }
-
-                // Read the semicolon.
-                // Note: automatic semicolon insertion never inserts a semicolon in the header of a
-                // for statement.
-                this.Expect(PunctuatorToken.Semicolon);
-
-                // Parse the optional increment expression.
-                if (this.nextToken != PunctuatorToken.RightParenthesis)
+                else
                 {
-                    start = this.PositionAfterWhitespace;
-                    result.IncrementStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.RightParenthesis));
-                    result.IncrementStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    var result = new ForStatement(this.labelsForCurrentStatement);
+
+                    // Set the initialization statement.
+                    if (initStatement != null)
+                        result.InitStatement = initStatement;
+
+                    // Read the semicolon.
+                    this.Expect(PunctuatorToken.Semicolon);
+
+                    // Parse the optional condition expression.
+                    // Note: if the condition is omitted then it is considered to always be true.
+                    if (this.nextToken != PunctuatorToken.Semicolon)
+                    {
+                        start = this.PositionAfterWhitespace;
+                        result.ConditionStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.Semicolon));
+                        result.ConditionStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    }
+
+                    // Read the semicolon.
+                    // Note: automatic semicolon insertion never inserts a semicolon in the header of a
+                    // for statement.
+                    this.Expect(PunctuatorToken.Semicolon);
+
+                    // Parse the optional increment expression.
+                    if (this.nextToken != PunctuatorToken.RightParenthesis)
+                    {
+                        start = this.PositionAfterWhitespace;
+                        result.IncrementStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.RightParenthesis));
+                        result.IncrementStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    }
+
+                    // Read the right parenthesis.
+                    this.Expect(PunctuatorToken.RightParenthesis);
+
+                    // Read the statements that will be executed in the loop body.
+                    result.Body = ParseStatement();
+
+                    return result;
                 }
-
-                // Read the right parenthesis.
-                this.Expect(PunctuatorToken.RightParenthesis);
-
-                // Read the statements that will be executed in the loop body.
-                result.Body = ParseStatement();
-
-                return result;
             }
         }
 

@@ -138,7 +138,7 @@ namespace Jurassic.Compiler
                     generator.ReinterpretCast(typeof(JavaScriptException));
                     generator.Call(ReflectionHelpers.JavaScriptException_ErrorObject);
                     var catchVariable = new NameExpression(CatchBlock.Scope, this.CatchVariableName);
-                    catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                    catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
                 }
                 else
                 {

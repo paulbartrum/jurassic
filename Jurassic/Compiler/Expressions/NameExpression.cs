@@ -129,9 +129,7 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         /// <param name="valueType"> The primitive type of the value that is on the top of the stack. </param>
-        /// <param name="throwIfUnresolvable"> <c>true</c> to throw a ReferenceError exception if
-        /// the name is unresolvable; <c>false</c> to create a new property instead. </param>
-        public void GenerateSet(ILGenerator generator, OptimizationInfo optimizationInfo, PrimitiveType valueType, bool throwIfUnresolvable)
+        public void GenerateSet(ILGenerator generator, OptimizationInfo optimizationInfo, PrimitiveType valueType)
         {
             // TODO: Optimize this.
             //

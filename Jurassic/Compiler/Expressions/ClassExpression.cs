@@ -147,7 +147,7 @@ namespace Jurassic.Compiler
             if (Name != null)
             {
                 generator.Duplicate();
-                new NameExpression(Scope, Name).GenerateSet(generator, optimizationInfo, PrimitiveType.Object, false);
+                new NameExpression(Scope, Name).GenerateSet(generator, optimizationInfo, PrimitiveType.Object);
             }
         }
 

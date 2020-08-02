@@ -43,34 +43,37 @@ namespace Performance
                 .local [0] Jurassic.Compiler.RuntimeScope scope
                 .local [1] System.Int32
                 .local [2] System.Int32
-                .local [3] Jurassic.Compiler.RuntimeScope scope
-                .local [4] System.Object
-                .local [5] System.Object
-                .local [6] System.Object returnValue
+                .local [3] Jurassic.Undefined
+                .local [4] Jurassic.Undefined
+                .local [5] Jurassic.Compiler.RuntimeScope scope
+                .local [6] System.Object
+                .local [7] System.Object
+                .local [8] System.Object returnValue
                       ldarg      0
                       ldnull
-                      ldnull
-                      ldc.i4     3
-                      newarr     System.String
-                      dup
-                      ldc.i4     0
-                      ldstr      ""arguments""
-                      stelem     System.String
-                      dup
-                      ldc.i4     1
-                      ldstr      ""a""
-                      stelem     System.String
-                      dup
                       ldc.i4     2
-                      ldstr      ""b""
-                      stelem     System.String
-                      ldc.i4     1
+                      ldc.i4     2
                       newarr     System.String
                       dup
                       ldc.i4     0
                       ldstr      ""f""
                       stelem     System.String
-                      callvirt   Jurassic.Compiler.RuntimeScope CreateRuntimeScope(Jurassic.Compiler.RuntimeScope, System.String[], System.String[], System.String[])/Jurassic.Compiler.ExecutionContext
+                      dup
+                      ldc.i4     1
+                      ldstr      ""arguments""
+                      stelem     System.String
+                      ldc.i4     2
+                      newarr     System.String
+                      dup
+                      ldc.i4     0
+                      ldstr      ""a""
+                      stelem     System.String
+                      dup
+                      ldc.i4     1
+                      ldstr      ""b""
+                      stelem     System.String
+                      ldnull
+                      callvirt   Jurassic.Compiler.RuntimeScope CreateRuntimeScope(Jurassic.Compiler.RuntimeScope, Jurassic.Compiler.ScopeType, System.String[], System.String[], System.String[])/Jurassic.Compiler.ExecutionContext
                       stloc      V0 (scope)
                       ldc.i4     11
                       dup
@@ -83,8 +86,19 @@ namespace Performance
                       callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
                       ldloc      V1
                       pop
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                      dup
+                      stloc      V3
+                      stloc      V4
+                      ldloc      V0 (scope)
+                      ldstr      ""b""
+                      ldloc      V4
+                      callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
+                      ldloc      V3
+                      pop
                       ldarg      0
                       ldloc      V0 (scope)
+                      ldc.i4     3
                       ldnull
                       ldc.i4     1
                       newarr     System.String
@@ -93,30 +107,30 @@ namespace Performance
                       ldstr      ""a""
                       stelem     System.String
                       ldnull
-                      callvirt   Jurassic.Compiler.RuntimeScope CreateRuntimeScope(Jurassic.Compiler.RuntimeScope, System.String[], System.String[], System.String[])/Jurassic.Compiler.ExecutionContext
-                      stloc      V3 (scope)
+                      callvirt   Jurassic.Compiler.RuntimeScope CreateRuntimeScope(Jurassic.Compiler.RuntimeScope, Jurassic.Compiler.ScopeType, System.String[], System.String[], System.String[])/Jurassic.Compiler.ExecutionContext
+                      stloc      V5 (scope)
                       ldc.i4     13
                       dup
                       stloc      V2
                       stloc      V1
-                      ldloc      V3 (scope)
+                      ldloc      V5 (scope)
                       ldstr      ""a""
                       ldloc      V1
                       box        System.Int32
                       callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
                       ldloc      V2
                       pop
-                      ldloc      V3 (scope)
+                      ldloc      V5 (scope)
                       ldstr      ""a""
                       callvirt   System.Object GetValue(System.String)/Jurassic.Compiler.RuntimeScope
                       dup
-                      stloc      V4
-                      stloc      V5
-                      ldloc      V3 (scope)
+                      stloc      V6
+                      stloc      V7
+                      ldloc      V5 (scope)
                       ldstr      ""b""
-                      ldloc      V5
+                      ldloc      V7
                       callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V4
+                      ldloc      V6
                       pop
                       ldloc      V0 (scope)
                       ldstr      ""b""
@@ -126,21 +140,20 @@ namespace Performance
                       callvirt   System.Object GetValue(System.String)/Jurassic.Compiler.RuntimeScope
                       call       System.Object Add(System.Object, System.Object)/Jurassic.TypeUtilities
                       dup
-                      stloc      V5
-                      stloc      V4
+                      stloc      V7
+                      stloc      V6
                       ldloc      V0 (scope)
                       ldstr      ""b""
-                      ldloc      V4
+                      ldloc      V6
                       callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V5
+                      ldloc      V7
                       pop
                       ldloc      V0 (scope)
                       ldstr      ""b""
                       callvirt   System.Object GetValue(System.String)/Jurassic.Compiler.RuntimeScope
-                      stloc      V6 (returnValue)
-                      ldloc      V6 (returnValue)
-                      ret
-                "),
+                      stloc      V8 (returnValue)
+                      ldloc      V8 (returnValue)
+                      ret"),
                 GetFunctionIL(@"function f() {
                     let a = 11, b;
                     {

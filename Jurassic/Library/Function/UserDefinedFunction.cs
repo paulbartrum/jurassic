@@ -261,7 +261,7 @@ namespace Jurassic.Library
                 parentScope: this.ParentScope,
                 thisValue: thisObject,
                 executingFunction: this);
-            return this.body(context, argumentValues);
+            return this.body(context, argumentValues) ?? Undefined.Value;
         }
 
         /// <summary>

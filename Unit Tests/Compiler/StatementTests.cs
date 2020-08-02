@@ -79,7 +79,7 @@ namespace UnitTests
             Assert.AreEqual(0, Evaluate("x = 0; for (var x; x < 5; x ++) { }"));
             Assert.AreEqual(11, Evaluate("y = 1; for (var x = 1; x < 5; x ++) { y = y + x } y"));
             Assert.AreEqual(11, Evaluate("for (var x = 1, y = 1; x < 5; x ++) { y = y + x } y"));
-            Assert.AreEqual("SyntaxError: Unexpected token '+'", EvaluateExceptionMessage("for (var x + 1; x < 5; x ++) { }"));
+            Assert.AreEqual("SyntaxError: Expected ',' but found '+'", EvaluateExceptionMessage("for (var x + 1; x < 5; x ++) { }"));
             Assert.AreEqual("SyntaxError: Invalid target of postfix operation.", EvaluateExceptionMessage("for (var x = 0; x < 1; 0 ++) { }"));
 
             // Strict mode.
@@ -107,14 +107,14 @@ namespace UnitTests
             Assert.AreEqual("1", Evaluate("y = 0; for (x in [7, 5]) { y = x } y"));
             Assert.AreEqual(0, Evaluate("x = 0; for (x in null) { x = 1 } x"));
             Assert.AreEqual(0, Evaluate("x = 0; for (x in undefined) { x = 1 } x"));
-            Assert.AreEqual("SyntaxError: Invalid left-hand side in for-in", EvaluateExceptionMessage("for (5 in [1, 2]) {}"));
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in for loop.", EvaluateExceptionMessage("for (5 in [1, 2]) {}"));
             Assert.AreEqual("2", Evaluate("var x = { a: 1 }; for (x.a in [1, 2, 3]) { } x.a"));
 
             // for (var x in <expression>)
             Assert.AreEqual("1", Evaluate("y = 0; for (var x in [7, 5]) { y = x } y"));
             Assert.AreEqual("01234", Evaluate("y = ''; for (var x in 'hello') { y += x } y"));
             Assert.AreEqual("SyntaxError: Expected identifier but found '5'", EvaluateExceptionMessage("for (var 5 in [1, 2])"));
-            Assert.AreEqual("SyntaxError: Unexpected token '.'", EvaluateExceptionMessage("var x = { a: 1 }; for (var x.a in [1, 2, 3]) { } x.a"));
+            Assert.AreEqual("SyntaxError: Expected ',' but found '.'", EvaluateExceptionMessage("var x = { a: 1 }; for (var x.a in [1, 2, 3]) { } x.a"));
 
             // All properties in the prototype chain should be enumerated, but the same property
             // name is never enumerated twice.  Properties in the prototype chain with the same
@@ -154,7 +154,7 @@ namespace UnitTests
 
             // for (var x of <expression>)
             Assert.AreEqual(206, Evaluate("y = 0; for (var x of [93, 113]) { y += x } y"));
-            Assert.AreEqual("SyntaxError: Unexpected token '.'", EvaluateExceptionMessage("var x = { a: 1 }; for (var x.a of [1, 2, 3]) { } x.a"));
+            Assert.AreEqual("SyntaxError: Expected ',' but found '.'", EvaluateExceptionMessage("var x = { a: 1 }; for (var x.a of [1, 2, 3]) { } x.a"));
 
             // Iterate over a generator.
             Assert.AreEqual("2 3 4 5 ", Evaluate(@"
@@ -190,8 +190,9 @@ namespace UnitTests
 
             // Syntax errors.
             Assert.AreEqual("SyntaxError: Expected ')' but found ','", EvaluateExceptionMessage("for (x of [1, 2], [3, 4]) {}"));
-            Assert.AreEqual("SyntaxError: Invalid left-hand side in for-of", EvaluateExceptionMessage("for (5 of [1, 2])"));
-            Assert.AreEqual("SyntaxError: Expected identifier but found '5'", EvaluateExceptionMessage("for (var 5 of [1, 2])"));
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in for loop.", EvaluateExceptionMessage("for (5 of [1, 2]) {}"));
+            Assert.AreEqual("SyntaxError: Expected identifier but found '5'", EvaluateExceptionMessage("for (var 5 of [1, 2]) {}"));
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in for loop; must have a single binding.", EvaluateExceptionMessage("for (var x, y of [1, 2]) {}"));
         }
 
         [TestMethod]
@@ -305,18 +306,6 @@ namespace UnitTests
         [TestMethod]
         public void Let()
         {
-            Assert.AreEqual(13, Evaluate("var i = 10, g = i; for (let i = 0; i < 3; i ++) { g += i; } g;"));
-            Assert.AreEqual("ReferenceError: _letVar1 is not defined.", EvaluateExceptionMessage("do { let _letVar1 = 5; } while (_letVar1 > 5);"));
-            Assert.AreEqual("ReferenceError: _letVar2 is not defined.", EvaluateExceptionMessage("for (; _letVar2 < 2; _letVar2++) { let _letVar2; }"));
-            
-
-
-
-
-
-
-            Assert.AreEqual("ReferenceError: i is not defined.", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
-
             // Basic declaration syntax checks.
             Assert.AreEqual(Undefined.Value, Evaluate("let x"));
             Assert.AreEqual(Undefined.Value, Evaluate("let x; x"));
@@ -359,7 +348,7 @@ namespace UnitTests
             // 'let' variables do not get stored in the global object.
             Assert.AreEqual(Undefined.Value, Evaluate(@"let notAGlobal = 5; this.notAGlobal"));
 
-            Assert.AreEqual("ReferenceError: i is not defined.", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
+            Assert.AreEqual("ReferenceError: _letVar3 is not defined.", EvaluateExceptionMessage("(function() { for (let _letVar3 = 0; _letVar3 < 2; _letVar3 ++) { } return _letVar3; })();"));
             Assert.AreEqual("undefined", Evaluate("delete i; (function() { i = 5; var i = 3; })(); typeof(i);"));
 
             // Let is not a keyword in non-strict mode.
@@ -369,8 +358,8 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError: Expected identifier but found 'let'", EvaluateExceptionMessage("'use strict'; var let = 5; let"));
 
             // Duplicate names are not allowed.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionMessage("let x = 3, x = 5; x"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionMessage("let x = 3; let x = 5; x"));
+            Assert.AreEqual("SyntaxError: Identifier 'x' has already been declared.", EvaluateExceptionMessage("let x = 3, x = 5; x"));
+            Assert.AreEqual("SyntaxError: Identifier 'x' has already been declared.", EvaluateExceptionMessage("let x = 3; let x = 5; x"));
 
             // 'let' is not a valid name in a let declaration.
             Assert.AreEqual("SyntaxError: 'let' is not allowed here.", EvaluateExceptionMessage("let let"));
@@ -385,6 +374,62 @@ namespace UnitTests
                     }
                     let a = 7;
                 }"));
+
+            // for (let i ...) { }
+            Assert.AreEqual(13, Evaluate("var i = 10, g = i; for (let i = 0; i < 3; i ++) { g += i; } g;"));
+            Assert.AreEqual("ReferenceError: _letVar1 is not defined.", EvaluateExceptionMessage("do { let _letVar1 = 5; } while (_letVar1 > 5);"));
+            Assert.AreEqual("ReferenceError: _letVar2 is not defined.", EvaluateExceptionMessage("for (; _letVar2 < 2; _letVar2++) { let _letVar2; }"));
+        }
+
+        [TestMethod]
+        public void Const()
+        {
+            // Basic declaration syntax checks.
+            Assert.AreEqual(Undefined.Value, Evaluate("const x = 5"));
+            Assert.AreEqual(5, Evaluate("const x = 5; x"));
+            Assert.AreEqual(6, Evaluate("const x = 5, y = 6; y"));
+            Assert.AreEqual(3, Evaluate("'use strict'; const x = 3; x"));
+
+            // 'const' declaration require an initializer.
+            Assert.AreEqual("SyntaxError: Missing initializer in const declaration.", EvaluateExceptionMessage("const x"));
+
+            // 'const' declarations are specific to the block they're in.
+            Assert.AreEqual(15, Evaluate(@"
+                const a = 15;
+                {
+                    const a = 3;
+                }
+                a"));
+
+            // 'const' declarations cannot be accessed before they are initialized.
+            Assert.AreEqual("ReferenceError: Cannot access 'a' before initialization.", EvaluateExceptionMessage(@"
+                let a = 15, b = 16;
+                {
+                    b = a;
+                    const a = 3;
+                }
+                b"));
+            Assert.AreEqual("ReferenceError: Cannot access 'foo' before initialization.", EvaluateExceptionMessage(@"
+                (function do_something() {
+                    let x = foo;
+                    const foo = 2;
+                })()"));
+            Assert.AreEqual("ReferenceError: Cannot access 'foo' before initialization.", EvaluateExceptionMessage(@"
+                (function do_something() {
+                    let x = typeof foo;
+                    const foo = 2;
+                })()"));
+
+
+            // 'const' variables do not get stored in the global object.
+            Assert.AreEqual(Undefined.Value, Evaluate(@"const notAGlobal = 5; this.notAGlobal"));
+
+            // Duplicate names are not allowed.
+            Assert.AreEqual("SyntaxError: Identifier 'x' has already been declared.", EvaluateExceptionMessage("const x = 3, x = 5; x"));
+            Assert.AreEqual("SyntaxError: Identifier 'x' has already been declared.", EvaluateExceptionMessage("const x = 3; const x = 5; x"));
+
+            // 'const' variables are read-only.
+            Assert.AreEqual("TypeError: Illegal assignment to constant variable 'x'.", EvaluateExceptionMessage("const x = 5; x = 6"));
         }
 
         [TestMethod]
@@ -401,9 +446,6 @@ namespace UnitTests
         [TestMethod]
         public void With()
         {
-            Assert.AreEqual(43, Evaluate("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
-            return;
-
             Assert.AreEqual(234, Evaluate("x = { a: 234 }; with (x) { a }"));
             Assert.AreEqual(234, Evaluate("x = { a: 234 }; a = 5; with (x) { a }"));
             Assert.AreEqual(15, Evaluate("x = { a: 234 }; b = 15; with (x) { b }"));
@@ -642,7 +684,10 @@ namespace UnitTests
         public void Function()
         {
             Assert.AreEqual(6, Evaluate("function f(a, b, c) { return a + b + c; } f(1, 2, 3)"));
+
+            // No return means the function returns undefined.
             Assert.AreEqual(Undefined.Value, Evaluate("function f(a, b, c) { c = a + b; } f(1, 2, 3)"));
+            Assert.AreEqual(Undefined.Value, Evaluate("function f(a, b, c) { if (c > 3) return 3; } f(1, 2, 3)"));
 
             // Multiple variable definitions.
             Assert.AreEqual(5, Evaluate("var a = 5; function a() { return 6 }; a"));

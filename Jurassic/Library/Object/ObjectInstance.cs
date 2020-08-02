@@ -391,7 +391,8 @@ namespace Jurassic.Library
         /// Gets the value of the property with the given name.
         /// </summary>
         /// <param name="propertyReference"> The name of the property. </param>
-        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <returns> The value of the property, or <see cref="Undefined.Value"/> if the property
+        /// doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
         public object GetPropertyValue(PropertyReference propertyReference)
@@ -429,8 +430,8 @@ namespace Jurassic.Library
                 // The property is in the prototype or is non-existent.
                 propertyReference.ClearCache();
                 if (this.Prototype == null)
-                    return this.GetMissingPropertyValue(propertyReference.Name);
-                return this.Prototype.GetNamedPropertyValue(propertyReference.Name, this);
+                    return this.GetMissingPropertyValue(propertyReference.Name) ?? Undefined.Value;
+                return this.Prototype.GetNamedPropertyValue(propertyReference.Name, this) ?? Undefined.Value;
             }
         }
 

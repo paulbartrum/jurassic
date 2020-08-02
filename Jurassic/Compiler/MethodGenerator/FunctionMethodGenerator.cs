@@ -324,7 +324,7 @@ namespace Jurassic.Compiler
             {
                 EmitHelpers.LoadFunction(generator);
                 var functionName = new NameExpression(this.BaseScope, Name.StaticName);
-                functionName.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                functionName.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
             }
 
             // Transfer the arguments object into the scope.
@@ -336,7 +336,7 @@ namespace Jurassic.Compiler
                 EmitHelpers.LoadArgumentsArray(generator);
                 generator.Call(ReflectionHelpers.ExecutionContext_CreateArgumentsInstance);
                 var arguments = new NameExpression(this.BaseScope, "arguments");
-                arguments.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                arguments.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
             }
 
             // Transfer the argument values into the scope.
@@ -398,7 +398,7 @@ namespace Jurassic.Compiler
                     // Store the value in the scope.
                     generator.DefineLabelPosition(storeValue);
                     var argument = new NameExpression(this.BaseScope, this.Arguments[i].Name);
-                    argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                    argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
                 }
             }
 
@@ -415,14 +415,15 @@ namespace Jurassic.Compiler
 
             // Load the return value.  If the variable is null, there were no return statements.
             if (optimizationInfo.ReturnVariable != null)
+            {
                 // Return the value stored in the variable.  Will be null if execution hits the end
                 // of the function without encountering any return statements.
                 generator.LoadVariable(optimizationInfo.ReturnVariable);
+            }
             else
             {
-                // There were no return statements - return undefined.
-                EmitHelpers.EmitUndefined(generator);
-                generator.ReinterpretCast(typeof(object));
+                // There were no return statements - return null.
+                generator.LoadNull();
             }
         }
 

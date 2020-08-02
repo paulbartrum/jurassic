@@ -25,18 +25,17 @@ namespace Jurassic.Compiler
     /// object f(ExecutionContext executionContext, object[] arguments)
     /// {
     ///   var scope1 = executionContext.CreateRuntimeScope(null);
-    ///   var g = ReflectionHelpers.CreateFunction(..., scope3, ...)
-    ///   scope1.SetValue("a", 5);
     ///   var scope2 = executionContext.CreateRuntimeScope(scope1);
-    ///   scope2.SetValue("a", 4);
+    ///   var g = ReflectionHelpers.CreateFunction(..., scope2, ...)
+    ///   scope1.SetValue("a", 1);
+    ///   scope2.SetValue("a", 2);
     ///   g.Call()
     ///   ((FunctionInstance)TypeConverter.ToObject(scope2.GetValue("console"))["log"]).Call(scope2.GetValue("a"));
     /// }
     /// 
     /// object g(ExecutionContext executionContext, object[] arguments)
     /// {
-    ///   var scope1 = executionContext.CreateRuntimeScope(null);
-    ///   scope1.SetValue("a", 6);
+    ///   executionContext.ParentScope.SetValue("a", 3);
     /// }
     /// 
     /// The with(...) statement is handled specially:
@@ -59,15 +58,25 @@ namespace Jurassic.Compiler
     /// </summary>
     public sealed class RuntimeScope
     {
+        [Flags]
+        private enum LocalFlags
+        {
+            Deletable = 1,
+            ReadOnly = 2,
+        }
+
         private struct LocalValue
         {
-            public bool Deletable;
+            public LocalFlags Flags;
+
             public object Value;
+
             public override string ToString()
             {
                 return Value == null ? string.Empty : Value.ToString();
             }
         }
+
         private Dictionary<string, LocalValue> values;
 
         /// <summary>
@@ -115,7 +124,7 @@ namespace Jurassic.Compiler
                     {
                         foreach (var name in varNames)
                             if (!scope.values.ContainsKey(name))
-                                scope.values[name] = new LocalValue { Value = Undefined.Value, Deletable = true };
+                                scope.values[name] = new LocalValue { Value = Undefined.Value, Flags = LocalFlags.Deletable };
                     }
                     else
                     {
@@ -146,7 +155,7 @@ namespace Jurassic.Compiler
             if (constNames != null)
             {
                 foreach (string variableName in constNames)
-                    values[variableName] = new LocalValue();
+                    values[variableName] = new LocalValue { Flags = LocalFlags.ReadOnly };
             }
         }
 
@@ -210,26 +219,7 @@ namespace Jurassic.Compiler
         /// in the scope. </returns>
         public object GetValue(string variableName)
         {
-            if (variableName == null)
-                throw new ArgumentNullException(nameof(variableName));
-            var scope = this;
-            do
-            {
-                if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
-                {
-                    if (localValue.Value == null)
-                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.");
-                    return localValue.Value;
-                }
-                if (scope.ScopeObject != null)
-                {
-                    var result = scope.ScopeObject.GetPropertyValue(variableName);
-                    if (result != null)
-                        return result;
-                }
-                scope = scope.Parent;
-            } while (scope != null);
-            throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
+            return GetValueCore(variableName) ?? throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
         }
 
         /// <summary>
@@ -239,6 +229,11 @@ namespace Jurassic.Compiler
         /// <returns></returns>
         public object GetValueNoThrow(string variableName)
         {
+            return GetValueCore(variableName) ?? Undefined.Value;
+        }
+
+        private object GetValueCore(string variableName)
+        {
             if (variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
             var scope = this;
@@ -258,7 +253,7 @@ namespace Jurassic.Compiler
                 }
                 scope = scope.Parent;
             } while (scope != null);
-            return Undefined.Value;
+            return null;
         }
 
         /// <summary>
@@ -268,35 +263,7 @@ namespace Jurassic.Compiler
         /// <param name="value"> The new value of the variable. </param>
         public void SetValue(string variableName, object value)
         {
-            if (variableName == null)
-                throw new ArgumentNullException(nameof(variableName));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            var scope = this;
-            do
-            {
-                if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
-                {
-                    scope.values[variableName] = new LocalValue { Value = value, Deletable = localValue.Deletable };
-                    return;
-                }
-                if (scope.ScopeObject != null)
-                {
-                    // If there's no parent and the property doesn't exist, set it anyway.
-                    if (scope.Parent == null)
-                    {
-                        scope.ScopeObject[variableName] = value;
-                        return;
-                    }
-
-                    // For a with() scope, only set the value if it exists.
-                    var exists = scope.ScopeObject.SetPropertyValueIfExists(variableName, value, throwOnError: false);
-                    if (exists)
-                        return;
-                }
-                scope = scope.Parent;
-            } while (scope != null);
-            throw new InvalidOperationException("Expected scope with ScopeObject at root of chain.");
+            SetValueCore(variableName, value, strictMode: false);
         }
 
         /// <summary>
@@ -305,6 +272,11 @@ namespace Jurassic.Compiler
         /// <param name="variableName"> The name of the variable. </param>
         /// <param name="value"> The new value of the variable. </param>
         public void SetValueStrict(string variableName, object value)
+        {
+            SetValueCore(variableName, value, strictMode: true);
+        }
+
+        private void SetValueCore(string variableName, object value, bool strictMode)
         {
             if (variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
@@ -315,15 +287,26 @@ namespace Jurassic.Compiler
             {
                 if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
-                    scope.values[variableName] = new LocalValue { Value = value, Deletable = localValue.Deletable };
+                    if (localValue.Value != null && localValue.Flags.HasFlag(LocalFlags.ReadOnly))
+                        throw new JavaScriptException(Engine, ErrorType.TypeError, $"Illegal assignment to constant variable '{variableName}'.");
+                    scope.values[variableName] = new LocalValue { Value = value, Flags = localValue.Flags };
                     return;
                 }
                 if (scope.ScopeObject != null)
                 {
+                    // If there's no parent and the property doesn't exist, set it anyway.
+                    if (!strictMode && scope.Parent == null)
+                    {
+                        scope.ScopeObject[variableName] = value;
+                        return;
+                    }
+
                     // Only set the value if it exists.
                     var exists = scope.ScopeObject.SetPropertyValueIfExists(variableName, value, throwOnError: true);
                     if (exists)
                         return;
+                    
+                    // Strict mode: throw an exception if the variable is undefined.
                     if (scope.Parent == null)
                         throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
                 }
@@ -342,7 +325,7 @@ namespace Jurassic.Compiler
                 throw new ArgumentNullException(nameof(variableName));
             if (values != null && values.TryGetValue(variableName, out var localValue))
             {
-                if (localValue.Deletable)
+                if (localValue.Flags.HasFlag(LocalFlags.Deletable))
                 {
                     values.Remove(variableName);
                     return true;

@@ -64,12 +64,12 @@ namespace Jurassic.Compiler
             var result = new Scope(null, (argumentNames != null ? argumentNames.Count() : 0) + 3);
             result.Type = ScopeType.TopLevelFunction;
             if (functionName != null)
-                result.DeclareVariable(KeywordToken.Const, functionName);
-            result.DeclareVariable(KeywordToken.Let, "arguments");
+                result.DeclareVariable(KeywordToken.Var, functionName);
+            result.DeclareVariable(KeywordToken.Var, "arguments");
             if (argumentNames != null)
             {
                 foreach (var argumentName in argumentNames)
-                    result.DeclareVariable(KeywordToken.Let, argumentName);
+                    result.DeclareVariable(KeywordToken.Var, argumentName);
             }
             return result;
         }
@@ -198,23 +198,14 @@ namespace Jurassic.Compiler
             var declarationScope = this;
             if (keyword == KeywordToken.Var)
             {
-                if (hoistedFunction == null)
-                {
-                    while (declarationScope != null && declarationScope.Type == ScopeType.Block)
-                        declarationScope = declarationScope.ParentScope;
-                }
-                else
-                {
-                    // Function declarations ignore with() scopes.
-                    while (declarationScope != null && (declarationScope.Type == ScopeType.Block || declarationScope.Type == ScopeType.With))
-                        declarationScope = declarationScope.ParentScope;
-                }
+                while (declarationScope != null && (declarationScope.Type == ScopeType.Block || declarationScope.Type == ScopeType.With))
+                    declarationScope = declarationScope.ParentScope;
             }
 
-            if (declarationScope != null && !declarationScope.variables.TryGetValue(name, out DeclaredVariable variable))
+            if (declarationScope != null && !declarationScope.variables.ContainsKey(name))
             {
                 // This is a local variable that has not been declared before.
-                variable = new DeclaredVariable()
+                var variable = new DeclaredVariable()
                 {
                     Scope = declarationScope,
                     Index = declarationScope.variables.Count,
@@ -224,99 +215,16 @@ namespace Jurassic.Compiler
                 declarationScope.variables.Add(name, variable);
             }
 
-            // Set the initial value, if one was provided.
-            /*if (valueAtTopOfScope != null)
-            {
-                // Function expressions override literals.
-                if ((valueAtTopOfScope is LiteralExpression && variable.ValueAtTopOfScope is FunctionExpression) == false)
-                    variable.ValueAtTopOfScope = valueAtTopOfScope;
-            }*/
-
             if (hoistedFunction != null)
             {
-                if (declarationScope.hoistedFunctions == null)
-                    declarationScope.hoistedFunctions = new Dictionary<string, FunctionExpression>();
-                declarationScope.hoistedFunctions[name] = hoistedFunction;
+                var hoistedScope = this;
+                while (hoistedScope != null && hoistedScope.Type == ScopeType.Block)
+                    hoistedScope = hoistedScope.ParentScope;
+                if (hoistedScope.hoistedFunctions == null)
+                    hoistedScope.hoistedFunctions = new Dictionary<string, FunctionExpression>();
+                hoistedScope.hoistedFunctions[name] = hoistedFunction;
             }
         }
-
-        /// <summary>
-        /// Generates code that creates a new scope.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        //internal abstract void GenerateScopeCreation(ILGenerator generator, OptimizationInfo optimizationInfo);
-
-        /// <summary>
-        /// Generates code that initializes the variable and function declarations.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        /*internal virtual void GenerateDeclarations(ILGenerator generator, OptimizationInfo optimizationInfo)
-        {
-            // Initialize the declared variables and functions.
-            foreach (var variable in this.variables.Values)
-            {
-                // Emit the initialization code.
-                if (this is ObjectScope)
-                {
-                    // Determine the property attributes.
-                    var attributes = Library.PropertyAttributes.Enumerable;
-                    if (variable.Writable == true)
-                        attributes |= Library.PropertyAttributes.Writable;
-                    if (variable.Deletable == true)
-                        attributes |= Library.PropertyAttributes.Configurable;
-
-                    if (variable.ValueAtTopOfScope == null)
-                    {
-                        // void InitializeMissingProperty(object key, PropertyAttributes attributes)
-                        EmitHelpers.LoadScope(generator);
-                        generator.CastClass(typeof(ObjectScope));
-                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
-                        generator.LoadString(variable.Name);
-                        generator.LoadInt32((int)attributes);
-                        generator.Call(ReflectionHelpers.ObjectInstance_InitializeMissingProperty);
-                    }
-                    else
-                    {
-                        // bool DefineProperty(string propertyName, PropertyDescriptor descriptor, bool throwOnError)
-                        EmitHelpers.LoadScope(generator);
-                        generator.CastClass(typeof(ObjectScope));
-                        generator.Call(ReflectionHelpers.ObjectScope_ScopeObject);
-                        generator.LoadString(variable.Name);
-                        variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
-                        EmitConversion.Convert(generator, variable.ValueAtTopOfScope.ResultType, PrimitiveType.Any, optimizationInfo);
-                        generator.LoadInt32((int)attributes);
-                        generator.NewObject(ReflectionHelpers.PropertyDescriptor_Constructor2);
-                        generator.LoadBoolean(false);
-                        generator.Call(ReflectionHelpers.ObjectInstance_DefineProperty);
-                        generator.Pop();
-                    }
-                }
-                else if (variable.ValueAtTopOfScope != null)
-                {
-                    variable.ValueAtTopOfScope.GenerateCode(generator, optimizationInfo);
-                    var name = new NameExpression(this, variable.Name);
-                    name.GenerateSet(generator, optimizationInfo, variable.ValueAtTopOfScope.ResultType, false);
-                }
-            }
-        }*/
-
-        /// <summary>
-        /// Generates code that restores the parent scope as the active scope.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        /*internal void GenerateScopeDestruction(ILGenerator generator, OptimizationInfo optimizationInfo)
-        {
-            if (this.ExistsAtRuntime == false)
-                return;
-
-            // Modify the scope variable so it points at the parent scope.
-            EmitHelpers.LoadScope(generator);
-            generator.Call(ReflectionHelpers.Scope_ParentScope);
-            EmitHelpers.StoreScope(generator);
-        }*/
 
         /// <summary>
         /// Generates code that creates a new scope.
@@ -464,7 +372,7 @@ namespace Jurassic.Compiler
 
                     // Assign it to the variable.
                     var name = new NameExpression(this, nameAndValue.Key);
-                    name.GenerateSet(generator, optimizationInfo, nameAndValue.Value.ResultType, false);
+                    name.GenerateSet(generator, optimizationInfo, nameAndValue.Value.ResultType);
                 }
             }
 

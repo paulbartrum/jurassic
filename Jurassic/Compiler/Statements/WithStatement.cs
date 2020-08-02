@@ -44,6 +44,7 @@ namespace Jurassic.Compiler
 
             // Create the scope instance.
             WithScope.GenerateScopeCreation(generator, optimizationInfo);
+            WithScope.GenerateHoistedDeclarations(generator, optimizationInfo);
 
             // Bind the scope to the with() object.
             WithScope.GenerateReference(generator, optimizationInfo);
