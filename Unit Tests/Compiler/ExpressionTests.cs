@@ -930,11 +930,16 @@ namespace UnitTests
             Assert.AreEqual("1/3", Evaluate("x = [[2],[5]]; (x = x[0])[0] = 3; x.length + '/' + x.toString()"));
             Assert.AreEqual("1/9", Evaluate("x = [[2],[5]]; (x = x[0])[0] += 7; x.length + '/' + x.toString()"));
 
+            // Writing to a read-only property is ignored.
+            Assert.AreEqual(8, Evaluate("Object.defineProperty(this, '_g1', {value: 8, enumerable: true, writable: false, configurable: true}); _g1 = 9; _g1"));
+            Assert.AreEqual(7, Evaluate("var x = {}; Object.defineProperty(x, 'b', {value: 7, enumerable: true, writable: false, configurable: true}); x.b = 5; x.b"));
+
             // Strict mode: attempts to set a variable that has not been declared is disallowed.
             Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("'use strict'; asddfsgwqewert = 'test'"));
             Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
 
             // Strict mode: cannot write to a non-writable property.
+            Assert.AreEqual("TypeError: The property '_g2' is read-only.", EvaluateExceptionMessage("'use strict'; Object.defineProperty(this, '_g2', {value: 8, enumerable: true, writable: false, configurable: true}); _g2 = 9; _g2"));
             Assert.AreEqual("TypeError: The property 'a' is read-only.", EvaluateExceptionMessage("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: true}); x.a = 5;"));
 
             // Strict mode: cannot write to a non-existant property when the object is non-extensible.
