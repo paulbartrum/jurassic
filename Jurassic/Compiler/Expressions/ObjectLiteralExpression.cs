@@ -69,13 +69,15 @@ namespace Jurassic.Compiler
                 {
                     functionExpression.ContainerVariable = containerVariable;
                     property.Value.GenerateCode(generator, optimizationInfo);
+                    generator.ReinterpretCast(typeof(UserDefinedFunction));
                     functionExpression.ContainerVariable = null;
                 }
                 else
                 {
                     property.Value.GenerateCode(generator, optimizationInfo);
+                    EmitConversion.ToAny(generator, property.Value.ResultType);
                 }
-                EmitConversion.ToAny(generator, property.Value.ResultType);
+                
                 if (property.Name.IsGetter)
                 {
                     // Add a getter to the object.

@@ -19,7 +19,7 @@ namespace Jurassic.Library
         /// Creates a new instance of a user-defined class.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        /// <param name="name"> The name of the class. </param>
+        /// <param name="name"> The name of the class. Can be <c>null</c> if none were supplied. </param>
         /// <param name="instancePrototype"> The value of the 'prototype' property. </param>
         /// <param name="constructor"> A function that represents the constructor, if the class has
         /// one, or <c>null</c> otherwise. </param>
@@ -36,8 +36,6 @@ namespace Jurassic.Library
         public ClassFunction(ObjectInstance prototype, string name, ObjectInstance instancePrototype, UserDefinedFunction constructor)
             : base(prototype)
         {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
             if (instancePrototype == null)
                 throw new ArgumentNullException(nameof(instancePrototype));
             this.constructor = constructor;
@@ -52,7 +50,7 @@ namespace Jurassic.Library
             int length = constructor == null ? 0 : constructor.Length;
             InitializeProperties(new List<PropertyNameAndValue>()
             {
-                new PropertyNameAndValue("name", name, PropertyAttributes.Configurable),
+                new PropertyNameAndValue("name", name ?? string.Empty, PropertyAttributes.Configurable),
                 new PropertyNameAndValue("length", length, PropertyAttributes.Configurable),
                 new PropertyNameAndValue("prototype", instancePrototype, PropertyAttributes.Writable),
             });
@@ -92,7 +90,7 @@ namespace Jurassic.Library
                     // This class extends another. In that case 'this' is unavailable.
                     context = ExecutionContext.CreateDerivedContext(
                         engine: this.Engine,
-                        scope: this.constructor.ParentScope,
+                        parentScope: this.constructor.ParentScope,
                         executingFunction: this.constructor,
                         newTarget: newTarget,
                         functionContainer: this);
@@ -103,7 +101,7 @@ namespace Jurassic.Library
                     // 'this' equal to the newly created object.
                     context = ExecutionContext.CreateConstructContext(
                         engine: this.Engine,
-                        scope: this.constructor.ParentScope,
+                        parentScope: this.constructor.ParentScope,
                         thisValue: ObjectInstance.CreateRawObject(newTarget.InstancePrototype),
                         executingFunction: this.constructor,
                         newTarget: newTarget,

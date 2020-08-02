@@ -790,7 +790,7 @@ namespace Jurassic.Library
             // Shift all the other elements down one place.
             for (uint i = 1; i < arrayLength; i++)
             {
-                object elementValue = thisObj[i];
+                object elementValue = thisObj.GetPropertyValue(i);
                 if (elementValue != null)
                     thisObj[i - 1] = elementValue;
                 else
@@ -1017,8 +1017,8 @@ namespace Jurassic.Library
             /// <returns> The value at the given index. </returns>
             public override object this[int index]
             {
-                get { return WrappedInstance[index]; }
-                set { WrappedInstance[index] = value; }
+                get { return WrappedInstance.GetPropertyValue((uint)index); }
+                set { WrappedInstance.SetPropertyValue((uint)index, value, throwOnError: false); }
             }
 
             /// <summary>
@@ -1513,7 +1513,7 @@ namespace Jurassic.Library
             for (int i = 0; i < GetLength(array); i++)
             {
                 // Get the value of the array element.
-                object elementValue = array[i];
+                object elementValue = array.GetPropertyValue((uint)i);
 
                 // Ignore missing elements.
                 if (elementValue != null)

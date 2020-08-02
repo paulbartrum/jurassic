@@ -12,21 +12,28 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new class expression.
         /// </summary>
+        /// <param name="scope"> The scope that contains the class. </param>
         /// <param name="name"> The class name. </param>
         /// <param name="extends"> The base class, or <c>null</c> if this class doesn't inherit
         /// from another class. </param>
         /// <param name="constructor"> The constructor, or <c>null</c> if the class doesn't have one. </param>
         /// <param name="members"> A list of class members. </param>
-        public ClassExpression(string name, Expression extends, FunctionExpression constructor, List<FunctionExpression> members)
+        public ClassExpression(Scope scope, string name, Expression extends, FunctionExpression constructor, List<FunctionExpression> members)
         {
+            this.Scope = scope ?? throw new ArgumentNullException(nameof(scope));
             this.Name = name;
             this.Extends = extends;
             this.Constructor = constructor;
-            this.Members = members ?? throw new ArgumentNullException(nameof(name));
+            this.Members = members ?? throw new ArgumentNullException(nameof(members));
         }
 
         /// <summary>
-        /// The class name, or <c>string.Empty</c> if none were specified.
+        /// The scope that contains the class.
+        /// </summary>
+        public Scope Scope { get; private set; }
+
+        /// <summary>
+        /// The class name, or <c>null</c> if none were specified.
         /// </summary>
         public string Name { get; private set; }
 
@@ -60,11 +67,15 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            // If the class was named, then we need to create a new scope to hold the name.
+            if (Name != null)
+                Scope.GenerateScopeCreation(generator, optimizationInfo);
+
             // engine
             EmitHelpers.LoadScriptEngine(generator);
 
             // name
-            generator.LoadString(this.Name);
+            generator.LoadStringOrNull(this.Name);
 
             // extends
             if (Extends == null)
@@ -112,11 +123,6 @@ namespace Jurassic.Compiler
                 member.GenerateCode(generator, optimizationInfo);
                 member.ContainerVariable = null;
 
-                // Support the inferred function displayName property.
-                //if (property.Name is LiteralExpression && ((LiteralExpression)property.Name).Value is string)
-                //    functionValue.GenerateDisplayName(generator, optimizationInfo, "get " + (string)((LiteralExpression)property.Name).Value, true);
-
-                var functionValue = member;
                 if (member.Name.IsGetter)
                 {
                     // Add a getter to the object.
@@ -136,6 +142,13 @@ namespace Jurassic.Compiler
 
             // Release the variable that we created above.
             generator.ReleaseTemporaryVariable(containerVariable);
+
+            // Store the class name in the scope.
+            if (Name != null)
+            {
+                generator.Duplicate();
+                new NameExpression(Scope, Name).GenerateSet(generator, optimizationInfo, PrimitiveType.Object);
+            }
         }
 
         /// <summary>

@@ -55,25 +55,26 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new FunctionMethodGenerator instance.
         /// </summary>
-        /// <param name="scope"> The function scope. </param>
         /// <param name="name"> The name of the function (can be computed at runtime). </param>
         /// <param name="declarationType"> Indicates how the function was declared. </param>
         /// <param name="arguments"> The names and default values of the arguments. </param>
         /// <param name="bodyText"> The source code of the function. </param>
         /// <param name="body"> The root of the abstract syntax tree for the body of the function. </param>
+        /// <param name="baseScope"> The scope that contains the function name and arguments. </param>
         /// <param name="scriptPath"> The URL or file system path that the script was sourced from. </param>
         /// <param name="span"> The extent of the function in the source code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(DeclarativeScope scope, PropertyName name, FunctionDeclarationType declarationType,
-            IList<FunctionArgument> arguments, string bodyText, Statement body, string scriptPath, SourceCodeSpan span,
-            CompilerOptions options)
-            : base(scope, new DummyScriptSource(scriptPath), options)
+        public FunctionMethodGenerator(PropertyName name, FunctionDeclarationType declarationType,
+            IList<FunctionArgument> arguments, string bodyText, Statement body, Scope baseScope,
+            string scriptPath, SourceCodeSpan span, CompilerOptions options)
+            : base(new DummyScriptSource(scriptPath), options)
         {
             this.Name = name;
             this.DeclarationType = declarationType;
             this.Arguments = arguments;
             this.BodyRoot = body;
             this.BodyText = bodyText;
+            this.BaseScope = baseScope;
             Validate(span.StartLine, scriptPath);
         }
 
@@ -103,16 +104,14 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new FunctionContext instance.
         /// </summary>
-        /// <param name="scope"> The function scope. </param>
-        /// <param name="name"> The name of the function (can be computed at runtime). </param>
+        /// <param name="name"> The name of the function. </param>
         /// <param name="argumentsText"> A comma-separated list of arguments. </param>
         /// <param name="body"> The source code for the body of the function. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        public FunctionMethodGenerator(DeclarativeScope scope, PropertyName name,
-            string argumentsText, string body, CompilerOptions options)
-            : base(scope, new StringScriptSource(body), options)
+        public FunctionMethodGenerator(string name, string argumentsText, string body, CompilerOptions options)
+            : base(new StringScriptSource(body), options)
         {
-            this.Name = name;
+            this.Name = new PropertyName(name);
             this.ArgumentsText = argumentsText;
             this.BodyText = body;
         }
@@ -224,7 +223,7 @@ namespace Jurassic.Compiler
         /// <returns> An array of parameter names. </returns>
         protected override string[] GetParameterNames()
         {
-            return new string[] { "engine", "scope", "this", "body", "newTarget", "arguments" };
+            return new string[] { "executionContext", "arguments" };
         }
 
         /// <summary>
@@ -272,15 +271,16 @@ namespace Jurassic.Compiler
                 Parser argumentsParser;
                 using (var argumentsLexer = new Lexer(new StringScriptSource(this.ArgumentsText)))
                 {
-                    argumentsParser = new Parser(argumentsLexer, this.InitialScope, this.Options, CodeContext.Function);
+                    argumentsParser = new Parser(argumentsLexer, this.Options, CodeContext.Function);
                     this.Arguments = argumentsParser.ParseFunctionArguments(endToken: null);
                 }
                 using (var lexer = new Lexer(this.Source))
                 {
-                    var parser = new Parser(lexer, this.InitialScope, this.Options, CodeContext.Function, argumentsParser.MethodOptimizationHints);
+                    var parser = new Parser(lexer, this.Options, CodeContext.Function, argumentsParser.MethodOptimizationHints);
                     this.AbstractSyntaxTree = parser.Parse();
                     this.StrictMode = parser.StrictMode;
                     this.MethodOptimizationHints = parser.MethodOptimizationHints;
+                    this.BaseScope = parser.BaseScope;
                 }
                 Validate(1, this.Source.Path);
             }
@@ -305,7 +305,9 @@ namespace Jurassic.Compiler
             // Method signature: object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments)
 
             // Initialize the scope (note: the initial scope for a function is always declarative).
-            this.InitialScope.GenerateScopeCreation(generator, optimizationInfo);
+            if (this.AbstractSyntaxTree is BlockStatement blockAst)
+                blockAst.GenerateScopeCreation = false;
+            this.BaseScope.GenerateScopeCreation(generator, optimizationInfo);
 
             // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.
             if (this.StrictMode == false && this.MethodOptimizationHints.HasThis == true)
@@ -321,27 +323,20 @@ namespace Jurassic.Compiler
                 optimizationInfo.MethodOptimizationHints.HasVariable(Name.StaticName))
             {
                 EmitHelpers.LoadFunction(generator);
-                var functionName = new NameExpression(this.InitialScope, Name.StaticName);
-                functionName.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                var functionName = new NameExpression(this.BaseScope, Name.StaticName);
+                functionName.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
             }
 
             // Transfer the arguments object into the scope.
             if (this.MethodOptimizationHints.HasArguments == true && this.Arguments.Any(a => a.Name == "arguments") == false)
             {
-                // prototype
-                EmitHelpers.LoadScriptEngine(generator);
-                generator.Call(ReflectionHelpers.ScriptEngine_Object);
-                generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
-                // callee
-                EmitHelpers.LoadFunction(generator);
-                // scope
-                EmitHelpers.LoadScope(generator);
-                generator.CastClass(typeof(DeclarativeScope));
-                // argumentValues
+                // executionContext.CreateArgumentsInstance(object[] arguments)
+                EmitHelpers.LoadExecutionContext(generator);
+                this.BaseScope.GenerateReference(generator, optimizationInfo);
                 EmitHelpers.LoadArgumentsArray(generator);
-                generator.NewObject(ReflectionHelpers.Arguments_Constructor);
-                var arguments = new NameExpression(this.InitialScope, "arguments");
-                arguments.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                generator.Call(ReflectionHelpers.ExecutionContext_CreateArgumentsInstance);
+                var arguments = new NameExpression(this.BaseScope, "arguments");
+                arguments.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
             }
 
             // Transfer the argument values into the scope.
@@ -383,12 +378,14 @@ namespace Jurassic.Compiler
                         // Load undefined.
                         generator.DefineLabelPosition(loadDefaultValue);
                         EmitHelpers.EmitUndefined(generator);
+                        generator.ReinterpretCast(typeof(object));
                     }
                     else
                     {
                         // Check if it's undefined.
                         generator.Duplicate();
                         EmitHelpers.EmitUndefined(generator);
+                        generator.ReinterpretCast(typeof(object));
                         generator.BranchIfNotEqual(storeValue);
                         generator.Pop();
 
@@ -400,13 +397,13 @@ namespace Jurassic.Compiler
 
                     // Store the value in the scope.
                     generator.DefineLabelPosition(storeValue);
-                    var argument = new NameExpression(this.InitialScope, this.Arguments[i].Name);
-                    argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+                    var argument = new NameExpression(this.BaseScope, this.Arguments[i].Name);
+                    argument.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
                 }
             }
 
             // Initialize any declarations.
-            this.InitialScope.GenerateDeclarations(generator, optimizationInfo);
+            this.BaseScope.GenerateHoistedDeclarations(generator, optimizationInfo);
 
             // Generate code for the body of the function.
             this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);
@@ -418,12 +415,16 @@ namespace Jurassic.Compiler
 
             // Load the return value.  If the variable is null, there were no return statements.
             if (optimizationInfo.ReturnVariable != null)
+            {
                 // Return the value stored in the variable.  Will be null if execution hits the end
                 // of the function without encountering any return statements.
                 generator.LoadVariable(optimizationInfo.ReturnVariable);
+            }
             else
+            {
                 // There were no return statements - return null.
                 generator.LoadNull();
+            }
         }
 
         /// <summary>

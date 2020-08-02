@@ -1,4 +1,4 @@
-﻿using ErrorType = Jurassic.Library.ErrorType;
+﻿using Jurassic.Library;
 
 namespace Jurassic.Compiler
 {
@@ -175,7 +175,7 @@ namespace Jurassic.Compiler
             if (memberAccessType == TypeOfMemberAccess.ArrayIndex)
             {
                 // Array indexer
-                var arg1 = generator.CreateTemporaryVariable(typeof(object));
+                var arg1 = generator.CreateTemporaryVariable(typeof(ObjectInstance));
                 var arg2 = generator.CreateTemporaryVariable(typeof(uint));
                 generator.StoreVariable(arg2);
                 generator.StoreVariable(arg1);
@@ -194,7 +194,7 @@ namespace Jurassic.Compiler
             else
             {
                 // Dynamic property access
-                var arg1 = generator.CreateTemporaryVariable(typeof(object));
+                var arg1 = generator.CreateTemporaryVariable(typeof(ObjectInstance));
                 var arg2 = generator.CreateTemporaryVariable(typeof(object));
                 generator.StoreVariable(arg2);
                 generator.StoreVariable(arg1);
@@ -226,7 +226,7 @@ namespace Jurassic.Compiler
                 // xxx = object[index]
 
                 // Call the indexer.
-                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Int);
+                generator.Call(ReflectionHelpers.ObjectInstance_Indexer_UInt);
             }
             else if (memberAccessType == TypeOfMemberAccess.Static)
             {
@@ -260,7 +260,7 @@ namespace Jurassic.Compiler
                     // value = object.GetPropertyValue("property")
 
                     generator.LoadString(propertyName);
-                    generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                    generator.Call(ReflectionHelpers.ObjectInstance_Indexer_Object);
                 }
             }
             else
@@ -269,7 +269,7 @@ namespace Jurassic.Compiler
                 // -----------------------
                 // x = y.GetPropertyValue("property")
 
-                generator.Call(ReflectionHelpers.ObjectInstance_GetPropertyValue_Object);
+                generator.Call(ReflectionHelpers.ObjectInstance_Indexer_Object);
             }
         }
 
@@ -279,9 +279,7 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         /// <param name="valueType"> The primitive type of the value that is on the top of the stack. </param>
-        /// <param name="throwIfUnresolvable"> <c>true</c> to throw a ReferenceError exception if
-        /// the name is unresolvable; <c>false</c> to create a new property instead. </param>
-        public void GenerateSet(ILGenerator generator, OptimizationInfo optimizationInfo, PrimitiveType valueType, bool throwIfUnresolvable)
+        public void GenerateSet(ILGenerator generator, OptimizationInfo optimizationInfo, PrimitiveType valueType)
         {
             string propertyName = null;
             TypeOfMemberAccess memberAccessType = DetermineTypeOfMemberAccess(optimizationInfo, out propertyName);
@@ -363,6 +361,7 @@ namespace Jurassic.Compiler
             {
                 // Deleting a super reference is not allowed.
                 EmitHelpers.EmitThrow(generator, ErrorType.ReferenceError, "Unsupported reference to 'super'.");
+                generator.LoadNull();   // Extraneous, but helps with verification.
                 return;
             }
             lhs.GenerateCode(generator, optimizationInfo);

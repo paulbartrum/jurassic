@@ -184,17 +184,26 @@ namespace Jurassic.Compiler
             var rhs = this.GetOperand(1);
             rhs.GenerateCode(generator, optimizationInfo);
 
-            // Store the RHS value so we can return it as the result of the expression.
-            var result = generator.CreateTemporaryVariable(rhs.ResultType);
-            generator.Duplicate();
-            generator.StoreVariable(result);
+            ILLocalVariable result = null;
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Store the RHS value so we can return it as the result of the expression.
+                result = generator.CreateTemporaryVariable(rhs.ResultType);
+                generator.Duplicate();
+                generator.StoreVariable(result);
+            }
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, rhs.ResultType, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, rhs.ResultType);
 
-            // Restore the RHS value.
-            generator.LoadVariable(result);
-            generator.ReleaseTemporaryVariable(result);
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Restore the RHS value.
+                generator.LoadVariable(result);
+                generator.ReleaseTemporaryVariable(result);
+            }
+            else
+                optimizationInfo.ReturnValueWasNotGenerated = true;
         }
 
         /// <summary>
@@ -225,10 +234,11 @@ namespace Jurassic.Compiler
             if (target.Type != PrimitiveType.Int32)
                 EmitConversion.ToNumber(generator, target.Type);
 
-            // If this is PostIncrement or PostDecrement, store the value so it can be returned later.
-            var result = generator.CreateTemporaryVariable(target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
-            if (postfix == true)
+            ILLocalVariable result = null;
+            if (optimizationInfo.IgnoreReturnValue != this && postfix == true)
             {
+                // If this is PostIncrement or PostDecrement, store the value so it can be returned later.
+                result = generator.CreateTemporaryVariable(target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
                 generator.Duplicate();
                 generator.StoreVariable(result);
             }
@@ -245,19 +255,25 @@ namespace Jurassic.Compiler
             else
                 generator.Subtract();
 
-            // If this is PreIncrement or PreDecrement, store the value so it can be returned later.
-            if (postfix == false)
+            if (optimizationInfo.IgnoreReturnValue != this && postfix == false)
             {
+                // If this is PreIncrement or PreDecrement, store the value so it can be returned later.
+                result = generator.CreateTemporaryVariable(target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
                 generator.Duplicate();
                 generator.StoreVariable(result);
             }
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
 
-            // Restore the expression result.
-            generator.LoadVariable(result);
-            generator.ReleaseTemporaryVariable(result);
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Restore the expression result.
+                generator.LoadVariable(result);
+                generator.ReleaseTemporaryVariable(result);
+            }
+            else
+                optimizationInfo.ReturnValueWasNotGenerated = true;
         }
 
         /// <summary>
@@ -385,17 +401,26 @@ namespace Jurassic.Compiler
             var compoundOperator = new BinaryExpression(GetCompoundBaseOperator(this.OperatorType), new ReferenceGetExpression(target), this.GetOperand(1));
             compoundOperator.GenerateCode(generator, optimizationInfo);
 
-            // Store the resulting value so we can return it as the result of the expression.
-            var result = generator.CreateTemporaryVariable(compoundOperator.ResultType);
-            generator.Duplicate();
-            generator.StoreVariable(result);
+            ILLocalVariable result = null;
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Store the resulting value so we can return it as the result of the expression.
+                result = generator.CreateTemporaryVariable(compoundOperator.ResultType);
+                generator.Duplicate();
+                generator.StoreVariable(result);
+            }
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType);
 
-            // Restore the expression result.
-            generator.LoadVariable(result);
-            generator.ReleaseTemporaryVariable(result);
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Restore the expression result.
+                generator.LoadVariable(result);
+                generator.ReleaseTemporaryVariable(result);
+            }
+            else
+                optimizationInfo.ReturnValueWasNotGenerated = true;
         }
 
         /// <summary>

@@ -10,18 +10,14 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Creates a new MethodGenerator instance.
         /// </summary>
-        /// <param name="scope"> The initial scope. </param>
         /// <param name="source"> The source of javascript code. </param>
         /// <param name="options"> Options that influence the compiler. </param>
-        protected MethodGenerator(Scope scope, ScriptSource source, CompilerOptions options)
+        protected MethodGenerator(ScriptSource source, CompilerOptions options)
         {
-            if (scope == null)
-                throw new ArgumentNullException(nameof(scope));
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
-            this.InitialScope = scope;
             this.Source = source;
             this.Options = options;
             this.StrictMode = this.Options.ForceStrictMode;
@@ -39,39 +35,23 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the source of javascript code.
         /// </summary>
-        public ScriptSource Source
-        {
-            get;
-            private set;
-        }
+        public ScriptSource Source { get; private set; }
 
         /// <summary>
         /// Gets a value that indicates whether strict mode is enabled.
         /// </summary>
-        public bool StrictMode
-        {
-            get;
-            protected set;
-        }
-
-        /// <summary>
-        /// Gets the top-level scope associated with the context.
-        /// </summary>
-        public Scope InitialScope
-        {
-            get;
-            protected set;
-        }
+        public bool StrictMode { get; protected set; }
 
         /// <summary>
         /// Gets the root node of the abstract syntax tree.  This will be <c>null</c> until Parse()
         /// is called.
         /// </summary>
-        public Statement AbstractSyntaxTree
-        {
-            get;
-            protected set;
-        }
+        public Statement AbstractSyntaxTree { get; protected set; }
+
+        /// <summary>
+        /// Gets the top-level scope.  This will be <c>null</c> until Parse() is called.
+        /// </summary>
+        public Scope BaseScope { get; protected set; }
 
         /// <summary>
         /// Gets or sets optimization information.
@@ -126,7 +106,7 @@ namespace Jurassic.Compiler
         protected virtual Type[] GetParameterTypes()
         {
             return new Type[] {
-                typeof(ExecutionContext),   // The script engine, this value, etc.
+                typeof(ExecutionContext),   // The script engine, scope, this value, etc.
             };
         }
 
@@ -136,7 +116,7 @@ namespace Jurassic.Compiler
         /// <returns> An array of parameter names. </returns>
         protected virtual string[] GetParameterNames()
         {
-            return new string[] { "engine", "scope", "this" };
+            return new string[] { "executionContext" };
         }
 
         /// <summary>
@@ -208,7 +188,7 @@ namespace Jurassic.Compiler
             optimizationInfo.FunctionName = this.GetStackName();
             optimizationInfo.Source = this.Source;
 
-            ILGenerator generator;
+            ILGenerator generator, loggingILGenerator = null;
             if (this.Options.EnableDebugging == false)
             {
                 // DynamicMethod requires full trust because of generator.LoadMethodPointer in the
@@ -224,14 +204,19 @@ namespace Jurassic.Compiler
 #if USE_DYNAMIC_IL_INFO
                 generator = new DynamicILGenerator(dynamicMethod);
 #else
-                generator = new ReflectionEmitILGenerator(dynamicMethod.GetILGenerator(), emitDebugInfo: false);
+                generator = new ReflectionEmitILGenerator(dynamicMethod, emitDebugInfo: false);
 #endif
 
                 if (this.Options.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
-                    generator = new LoggingILGenerator(generator);
+                    generator = loggingILGenerator = new LoggingILGenerator(generator);
                 }
+
+#if DEBUG
+                // Replace the generator with one that verifies correctness.
+                generator = new VerifyingILGenerator(generator);
+#endif
 
                 // Initialization code will appear to come from line 1.
                 optimizationInfo.MarkSequencePoint(generator, new SourceCodeSpan(1, 1, 1, 1));
@@ -287,13 +272,18 @@ namespace Jurassic.Compiler
                     typeof(object), GetParameterTypes());
 
                 // Generate the IL for the method.
-                generator = new ReflectionEmitILGenerator(methodBuilder.GetILGenerator(), emitDebugInfo: true);
+                generator = new ReflectionEmitILGenerator(methodBuilder, emitDebugInfo: true);
 
                 if (this.Options.EnableILAnalysis == true)
                 {
                     // Replace the generator with one that logs.
-                    generator = new LoggingILGenerator(generator);
+                    generator = loggingILGenerator = new LoggingILGenerator(generator);
                 }
+
+#if DEBUG
+                // Replace the generator with one that verifies correctness.
+                generator = new VerifyingILGenerator(generator);
+#endif
 
                 if (this.Source.Path != null && this.Options.EnableDebugging == true)
                 {
@@ -316,10 +306,10 @@ namespace Jurassic.Compiler
 #endif // ENABLE_DEBUGGING
             }
 
-            if (this.Options.EnableILAnalysis == true)
+            if (loggingILGenerator != null)
             {
                 // Store the disassembled IL so it can be retrieved for analysis purposes.
-                this.GeneratedMethod.DisassembledIL = generator.ToString();
+                this.GeneratedMethod.DisassembledIL = loggingILGenerator.ToString();
             }
         }
 

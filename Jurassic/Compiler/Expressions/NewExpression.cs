@@ -1,4 +1,5 @@
-﻿using ErrorType = Jurassic.Library.ErrorType;
+﻿using Jurassic.Library;
+using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -69,22 +70,17 @@ namespace Jurassic.Compiler
                 EmitConversion.ToAny(generator, operand.ResultType);
             }
 
-            // Store this for later.
-            var functionReference = generator.CreateTemporaryVariable(PrimitiveType.Any);
-            generator.Duplicate();
-            generator.StoreVariable(functionReference);
-
             // Check the object really is a function - if not, throw an exception.
             generator.Duplicate();
-            generator.IsInstance(typeof(Library.FunctionInstance));
+            generator.IsInstance(typeof(FunctionInstance));
             var endOfTypeCheck = generator.CreateLabel();
-            generator.BranchIfNotNull(endOfTypeCheck);
+            generator.BranchIfTrue(endOfTypeCheck);
 
             // Throw an nicely formatted exception.
             var targetValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(targetValue);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadInt32((int)ErrorType.TypeError);
+            generator.LoadEnumValue(ErrorType.TypeError);
             generator.LoadString("The new operator requires a function, found a '{0}' instead");
             generator.LoadInt32(1);
             generator.NewArray(typeof(object));
@@ -101,6 +97,12 @@ namespace Jurassic.Compiler
             generator.Throw();
             generator.DefineLabelPosition(endOfTypeCheck);
             generator.ReleaseTemporaryVariable(targetValue);
+
+            // Store the function reference.
+            generator.ReinterpretCast(typeof(FunctionInstance));
+            var functionReference = generator.CreateTemporaryVariable(typeof(FunctionInstance));
+            generator.Duplicate();
+            generator.StoreVariable(functionReference);
 
             // Pass in the path, function name and line.
             generator.LoadStringOrNull(optimizationInfo.Source.Path);

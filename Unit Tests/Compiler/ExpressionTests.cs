@@ -47,6 +47,8 @@ namespace UnitTests
             Assert.AreEqual(19, Evaluate("~-20"));
             Assert.AreEqual(-9, Evaluate("~4294967304"));
             Assert.AreEqual(-21, Evaluate("~ '20'"));
+            Assert.AreEqual(-1, Evaluate("~false"));
+            Assert.AreEqual(-2, Evaluate("~true"));
 
             // Double bitwise not converts the input to a Int32.
             Assert.AreEqual(1, Evaluate("~~'1.2'"));
@@ -707,6 +709,8 @@ namespace UnitTests
             Assert.AreEqual(16, Evaluate("42949673042 & -401929233123"));
             Assert.AreEqual(1, Evaluate("11.9 & 1.5"));
             Assert.AreEqual(0, Evaluate("NaN & NaN"));
+            Assert.AreEqual(0, Evaluate("true & false"));
+            Assert.AreEqual(0, Evaluate("false & false"));
 
             // Variables
             Assert.AreEqual(3, Evaluate("x = 11; x & 7"));
@@ -726,6 +730,8 @@ namespace UnitTests
             Assert.AreEqual(10, Evaluate("11.5 ^ 1.5"));
             Assert.AreEqual(3, Evaluate("'5' ^ '6'"));
             Assert.AreEqual(1, Evaluate("'a' ^ 1"));
+            Assert.AreEqual(1, Evaluate("true ^ false"));
+            Assert.AreEqual(0, Evaluate("false ^ false"));
 
             // Variables
             Assert.AreEqual(12, Evaluate("x = 11; x ^ 7"));
@@ -744,6 +750,8 @@ namespace UnitTests
             Assert.AreEqual(11, Evaluate("11.5 | 1.5"));
             Assert.AreEqual(7, Evaluate("'5' | '6'"));
             Assert.AreEqual(1, Evaluate("'a' | 1"));
+            Assert.AreEqual(1, Evaluate("true | false"));
+            Assert.AreEqual(0, Evaluate("false | false"));
 
             // Variables
             Assert.AreEqual(15, Evaluate("x = 11; x | 7"));
@@ -922,11 +930,16 @@ namespace UnitTests
             Assert.AreEqual("1/3", Evaluate("x = [[2],[5]]; (x = x[0])[0] = 3; x.length + '/' + x.toString()"));
             Assert.AreEqual("1/9", Evaluate("x = [[2],[5]]; (x = x[0])[0] += 7; x.length + '/' + x.toString()"));
 
+            // Writing to a read-only property is ignored.
+            Assert.AreEqual(8, Evaluate("Object.defineProperty(this, '_g1', {value: 8, enumerable: true, writable: false, configurable: true}); _g1 = 9; _g1"));
+            Assert.AreEqual(7, Evaluate("var x = {}; Object.defineProperty(x, 'b', {value: 7, enumerable: true, writable: false, configurable: true}); x.b = 5; x.b"));
+
             // Strict mode: attempts to set a variable that has not been declared is disallowed.
-            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined", EvaluateExceptionMessage("'use strict'; asddfsgwqewert = 'test'"));
-            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined", EvaluateExceptionMessage("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
+            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("'use strict'; asddfsgwqewert = 'test'"));
+            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
 
             // Strict mode: cannot write to a non-writable property.
+            Assert.AreEqual("TypeError: The property '_g2' is read-only.", EvaluateExceptionMessage("'use strict'; Object.defineProperty(this, '_g2', {value: 8, enumerable: true, writable: false, configurable: true}); _g2 = 9; _g2"));
             Assert.AreEqual("TypeError: The property 'a' is read-only.", EvaluateExceptionMessage("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: true}); x.a = 5;"));
 
             // Strict mode: cannot write to a non-existant property when the object is non-extensible.
@@ -1045,6 +1058,12 @@ namespace UnitTests
 
             Assert.AreEqual("SyntaxError: Missing closing token ')'", EvaluateExceptionMessage("(5"));
             Assert.AreEqual("SyntaxError: Expected identifier but found end of input", EvaluateExceptionMessage("({[0]("));
+        }
+
+        [TestMethod]
+        public void temp()
+        {
+            Assert.AreEqual(5, Evaluate("function test(test) { return test; } test(5, 4, 3);"));
         }
 
         [TestMethod]
@@ -1253,9 +1272,9 @@ namespace UnitTests
                     x['prop' + i] = i;
                 x.prop16383"));
 
-            Assert.AreEqual("ReferenceError: abcdefghij is not defined", EvaluateExceptionMessage("abcdefghij"));
+            Assert.AreEqual("ReferenceError: abcdefghij is not defined.", EvaluateExceptionMessage("abcdefghij"));
             Assert.AreEqual("SyntaxError: Expected operator but found 'toString'", EvaluateExceptionMessage("5.toString"));
-            Assert.AreEqual("ReferenceError: qwerty345 is not defined", EvaluateExceptionMessage("qwerty345.prop"));
+            Assert.AreEqual("ReferenceError: qwerty345 is not defined.", EvaluateExceptionMessage("qwerty345.prop"));
             Assert.AreEqual("TypeError: Null cannot be converted to an object", EvaluateExceptionMessage("null.prop"));
             Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("undefined.prop"));
             Assert.AreEqual("SyntaxError: Wrong number of operands", EvaluateExceptionMessage("[].()"));
@@ -1441,7 +1460,7 @@ namespace UnitTests
             // Deleting variables defined within an eval statement inside a global scope succeeds.
             Assert.AreEqual(true, Evaluate("abcdefg = 1; delete abcdefg"));
             Assert.AreEqual(false, Evaluate("abcdefg = 1; delete abcdefg; this.hasOwnProperty('abcdefg')"));
-            Assert.AreEqual("ReferenceError: x is not defined", EvaluateExceptionMessage("x = 5; delete x; x"));
+            Assert.AreEqual("ReferenceError: x is not defined.", EvaluateExceptionMessage("x = 5; delete x; x"));
 
             // Deleting variables defined within an eval statement inside a function scope succeeds.
             Assert.AreEqual(true, Evaluate("(function() { var a = 5; return eval('var b = a; delete b'); })()"));

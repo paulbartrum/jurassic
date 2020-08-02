@@ -21,20 +21,12 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the root of the abstract syntax tree that is being compiled.
         /// </summary>
-        public AstNode AbstractSyntaxTree
-        {
-            get;
-            set;
-        }
+        public AstNode AbstractSyntaxTree { get; set; }
 
         /// <summary>
         /// Gets or sets a value that indicates whether strict mode is enabled.
         /// </summary>
-        public bool StrictMode
-        {
-            get;
-            set;
-        }
+        public bool StrictMode { get; set; }
 
 
 
@@ -44,39 +36,23 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the symbol store to write debugging information to.
         /// </summary>
-        public System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument
-        {
-            get;
-            set;
-        }
+        public System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument { get; set; }
 
         /// <summary>
         /// Gets or sets the source of javascript code.
         /// </summary>
-        public ScriptSource Source
-        {
-            get;
-            set;
-        }
+        public ScriptSource Source { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the function that is being generated.
         /// </summary>
-        public string FunctionName
-        {
-            get;
-            set;
-        }
+        public string FunctionName { get; set; }
 
         /// <summary>
         /// Gets the portion of source code associated with the statement that code is
         /// being generated for.
         /// </summary>
-        public SourceCodeSpan SourceSpan
-        {
-            get;
-            private set;
-        }
+        public SourceCodeSpan SourceSpan { get; private set; }
 
         /// <summary>
         /// Emits a sequence point, and sets the SourceSpan property.
@@ -101,11 +77,7 @@ namespace Jurassic.Compiler
         /// This list is maintained so that the garbage collector does not prematurely collect
         /// the generated code for the nested functions.
         /// </summary>
-        public IList<GeneratedMethod> NestedFunctions
-        {
-            get;
-            set;
-        }
+        public IList<GeneratedMethod> NestedFunctions { get; set; }
 
 
 
@@ -115,11 +87,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets function optimization information.
         /// </summary>
-        public MethodOptimizationHints MethodOptimizationHints
-        {
-            get;
-            set;
-        }
+        public MethodOptimizationHints MethodOptimizationHints { get; set; }
 
         /// <summary>
         /// Gets a value that indicates whether the declarative scopes should be optimized away,
@@ -131,25 +99,19 @@ namespace Jurassic.Compiler
             {
                 return this.MethodOptimizationHints.HasArguments == false &&
                     this.MethodOptimizationHints.HasEval == false &&
-                    this.MethodOptimizationHints.HasNestedFunction == false &&
-                    this.EvalResult == null;
+                    this.MethodOptimizationHints.HasNestedFunction == false;
             }
         }
 
         /// <summary>
-        /// Gets a value that indicates whether the variables should be optimized if the type of
-        /// the variable can be inferred.
+        /// Indicates that the given expression can choose to not generate a return value.
         /// </summary>
-        public bool OptimizeInferredTypes
-        {
-            get
-            {
-                return this.MethodOptimizationHints.HasArguments == false &&
-                    this.MethodOptimizationHints.HasEval == false &&
-                    this.MethodOptimizationHints.HasNestedFunction == false &&
-                    this.EvalResult == null;
-            }
-        }
+        public Expression IgnoreReturnValue { get; set; }
+
+        /// <summary>
+        /// Indicates whether the return value was generated.
+        /// </summary>
+        public bool ReturnValueWasNotGenerated { get; set; }
 
 
 
@@ -160,11 +122,7 @@ namespace Jurassic.Compiler
         /// Gets or sets the local variable to store the result of the eval() call.  Will be
         /// <c>null</c> if code is being generated outside an eval context.
         /// </summary>
-        public ILLocalVariable EvalResult
-        {
-            get;
-            set;
-        }
+        public ILLocalVariable EvalResult { get; set; }
 
         private Dictionary<string, ILLocalVariable> globalVariables;
 
@@ -264,22 +222,14 @@ namespace Jurassic.Compiler
         /// top of the stack).  Will be <c>null</c> if code is being generated outside a function
         /// context.
         /// </summary>
-        public ILLabel ReturnTarget
-        {
-            get;
-            set;
-        }
+        public ILLabel ReturnTarget { get; set; }
 
         /// <summary>
         /// Gets or sets the variable that holds the return value for the function.  Will be
         /// <c>null</c> if code is being generated outside a function context or if no return
         /// statements have been encountered.
         /// </summary>
-        public ILLocalVariable ReturnVariable
-        {
-            get;
-            set;
-        }
+        public ILLocalVariable ReturnVariable { get; set; }
 
 
 
@@ -449,31 +399,19 @@ namespace Jurassic.Compiler
         /// Gets or sets a value that indicates whether code generation is occurring within a
         /// try, catch or finally block.
         /// </summary>
-        public bool InsideTryCatchOrFinally
-        {
-            get;
-            set;
-        }
+        public bool InsideTryCatchOrFinally { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that is called when EmitLongJump() is called and the target
         /// label is outside the LongJumpStackSizeThreshold.
         /// </summary>
-        public Action<ILGenerator, ILLabel> LongJumpCallback
-        {
-            get;
-            set;
-        }
+        public Action<ILGenerator, ILLabel> LongJumpCallback { get; set; }
 
         /// <summary>
         /// Gets or sets the depth of the break/continue stack at the start of the finally
         /// statement.
         /// </summary>
-        public int LongJumpStackSizeThreshold
-        {
-            get;
-            set;
-        }
+        public int LongJumpStackSizeThreshold { get; set; }
 
         /// <summary>
         /// Emits code to branch between statements, even if code generation is within a finally
