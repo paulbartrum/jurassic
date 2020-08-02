@@ -19,19 +19,14 @@ namespace Performance
         {
             Assert.AreEqual(NormalizeText(@"
                 .local [0] System.Int32
-                .local [1] System.Int32
                       ldc.i4     6
-                      dup
                       stloc      V0
-                      stloc      V1
                       ldarg      0
                       callvirt   Jurassic.Compiler.RuntimeScope get_ParentScope()/Jurassic.Compiler.ExecutionContext
                       ldstr      ""x""
-                      ldloc      V1
+                      ldloc      V0
                       box        System.Int32
                       callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V0
-                      pop
                       ldnull
                       ret"), GetGlobalIL(@"x = 6"));
         }
@@ -40,129 +35,93 @@ namespace Performance
         public void Let()
         {
             Assert.AreEqual(NormalizeText(@"
-                .local [0] Jurassic.Compiler.RuntimeScope scope
-                .local [1] System.Int32
-                .local [2] System.Int32
-                .local [3] Jurassic.Undefined
-                .local [4] Jurassic.Undefined
-                .local [5] Jurassic.Compiler.RuntimeScope scope
-                .local [6] System.Object
-                .local [7] System.Object
-                .local [8] System.Object returnValue
-                      ldarg      0
+                .local [0] System.Object f
+                .local [1] System.Object arguments
+                .local [2] System.Object a
+                .local [3] System.Object b
+                .local [4] System.Object a
+                .local [5] System.Object returnValue
                       ldnull
-                      ldc.i4     2
-                      ldc.i4     2
-                      newarr     System.String
-                      dup
-                      ldc.i4     0
-                      ldstr      ""f""
-                      stelem     System.String
-                      dup
-                      ldc.i4     1
-                      ldstr      ""arguments""
-                      stelem     System.String
-                      ldc.i4     2
-                      newarr     System.String
-                      dup
-                      ldc.i4     0
-                      ldstr      ""a""
-                      stelem     System.String
-                      dup
-                      ldc.i4     1
-                      ldstr      ""b""
-                      stelem     System.String
+                      stloc      V0 (f)
                       ldnull
-                      callvirt   Jurassic.Compiler.RuntimeScope CreateRuntimeScope(Jurassic.Compiler.RuntimeScope, Jurassic.Compiler.ScopeType, System.String[], System.String[], System.String[])/Jurassic.Compiler.ExecutionContext
-                      stloc      V0 (scope)
+                      stloc      V1 (arguments)
+                      ldnull
+                      stloc      V2 (a)
+                      ldnull
+                      stloc      V3 (b)
                       ldc.i4     11
-                      dup
-                      stloc      V1
-                      stloc      V2
-                      ldloc      V0 (scope)
-                      ldstr      ""a""
-                      ldloc      V2
                       box        System.Int32
-                      callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V1
-                      pop
+                      stloc      V2 (a)
                       ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
-                      dup
-                      stloc      V3
-                      stloc      V4
-                      ldloc      V0 (scope)
-                      ldstr      ""b""
-                      ldloc      V4
-                      callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V3
-                      pop
-                      ldarg      0
-                      ldloc      V0 (scope)
-                      ldc.i4     3
+                      stloc      V3 (b)
                       ldnull
-                      ldc.i4     1
-                      newarr     System.String
-                      dup
-                      ldc.i4     0
-                      ldstr      ""a""
-                      stelem     System.String
-                      ldnull
-                      callvirt   Jurassic.Compiler.RuntimeScope CreateRuntimeScope(Jurassic.Compiler.RuntimeScope, Jurassic.Compiler.ScopeType, System.String[], System.String[], System.String[])/Jurassic.Compiler.ExecutionContext
-                      stloc      V5 (scope)
+                      stloc      V4 (a)
                       ldc.i4     13
-                      dup
-                      stloc      V2
-                      stloc      V1
-                      ldloc      V5 (scope)
-                      ldstr      ""a""
-                      ldloc      V1
                       box        System.Int32
-                      callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V2
-                      pop
-                      ldloc      V5 (scope)
-                      ldstr      ""a""
-                      callvirt   System.Object GetValue(System.String)/Jurassic.Compiler.RuntimeScope
+                      stloc      V4 (a)
+                      ldloc      V4 (a)
                       dup
-                      stloc      V6
-                      stloc      V7
-                      ldloc      V5 (scope)
-                      ldstr      ""b""
-                      ldloc      V7
-                      callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V6
-                      pop
-                      ldloc      V0 (scope)
-                      ldstr      ""b""
-                      callvirt   System.Object GetValue(System.String)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V0 (scope)
-                      ldstr      ""a""
-                      callvirt   System.Object GetValue(System.String)/Jurassic.Compiler.RuntimeScope
-                      call       System.Object Add(System.Object, System.Object)/Jurassic.TypeUtilities
+                      brtrue     L000
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'a' before initialization.""
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L000: stloc      V3 (b)
+                      ldloc      V3 (b)
                       dup
-                      stloc      V7
-                      stloc      V6
-                      ldloc      V0 (scope)
-                      ldstr      ""b""
-                      ldloc      V6
-                      callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
-                      ldloc      V7
-                      pop
-                      ldloc      V0 (scope)
-                      ldstr      ""b""
-                      callvirt   System.Object GetValue(System.String)/Jurassic.Compiler.RuntimeScope
-                      stloc      V8 (returnValue)
-                      ldloc      V8 (returnValue)
+                      brtrue     L001
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'b' before initialization.""
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L001: ldloc      V2 (a)
+                      dup
+                      brtrue     L002
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'a' before initialization.""
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L002: call       System.Object Add(System.Object, System.Object)/Jurassic.TypeUtilities
+                      stloc      V3 (b)
+                      ldloc      V3 (b)
+                      dup
+                      brtrue     L003
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'b' before initialization.""
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L003: stloc      V5 (returnValue)
+                      ldloc      V5 (returnValue)
                       ret"),
-                GetFunctionIL(@"function f() {
-                    let a = 11, b;
-                    {
-                        let a = 13;
-                        b = a;
-                    }
-                    b += a;
-                    return b;
-                }", "f"));
+            GetFunctionIL(@"function f() {
+                let a = 11, b;
+                {
+                    let a = 13;
+                    b = a;
+                }
+                b += a;
+                return b;
+            }", "f"));
         }
 
         private static string GetGlobalIL(string code)

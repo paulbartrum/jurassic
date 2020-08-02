@@ -129,7 +129,6 @@ namespace Jurassic.Compiler
             if (this.CatchBlock != null) {
 
                 // Create a RuntimeScope instance.
-                CatchBlock.GenerateScopeCreation = false;
                 CatchBlock.Scope.GenerateScopeCreation(generator, optimizationInfo);
 
                 if (this.CatchVariableName != null)

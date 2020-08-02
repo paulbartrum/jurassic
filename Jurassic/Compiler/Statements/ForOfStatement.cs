@@ -19,49 +19,35 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// The scope that encompasses the entire loop statement.
+        /// </summary>
+        public Scope Scope { get; set; }
+
+
+        /// <summary>
         /// Gets or sets a reference to mutate on each iteration of the loop.
         /// </summary>
-        public IReferenceExpression Variable
-        {
-            get;
-            set;
-        }
+        public IReferenceExpression Variable { get; set; }
 
         /// <summary>
         /// Gets or sets the portion of source code associated with the variable.
         /// </summary>
-        public SourceCodeSpan VariableSourceSpan
-        {
-            get;
-            set;
-        }
+        public SourceCodeSpan VariableSourceSpan { get; set; }
 
         /// <summary>
         /// Gets or sets an expression that evaluates to the object to enumerate.
         /// </summary>
-        public Expression TargetObject
-        {
-            get;
-            set;
-        }
+        public Expression TargetObject { get; set; }
 
         /// <summary>
         /// Gets or sets the portion of source code associated with the target object.
         /// </summary>
-        public SourceCodeSpan TargetObjectSourceSpan
-        {
-            get;
-            set;
-        }
+        public SourceCodeSpan TargetObjectSourceSpan { get; set; }
 
         /// <summary>
         /// Gets or sets the loop body.
         /// </summary>
-        public Statement Body
-        {
-            get;
-            set;
-        }
+        public Statement Body { get; set; }
 
         /// <summary>
         /// Generates CIL for the statement.
@@ -85,6 +71,9 @@ namespace Jurassic.Compiler
             //   <body statements>
             // }
             // break-target:
+
+            // Generate the scope variable if necessary.
+            this.Scope.GenerateScopeCreation(generator, optimizationInfo);
 
             // Call: ObjectInstance GetIterator(ScriptEngine engine, ObjectInstance iterable)
             // Then call: IEnumerable<object> Iterate(ScriptEngine engine, ObjectInstance iterator)

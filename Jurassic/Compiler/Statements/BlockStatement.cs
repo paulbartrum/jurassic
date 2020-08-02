@@ -20,7 +20,6 @@ namespace Jurassic.Compiler
             : base(labels)
         {
             Scope = scope ?? throw new ArgumentNullException(nameof(scope));
-            GenerateScopeCreation = true;
         }
 
         /// <summary>
@@ -30,11 +29,6 @@ namespace Jurassic.Compiler
         {
             get { return this.statements; }
         }
-
-        /// <summary>
-        /// Indicates whether to call GenerateScopeCreation() when generating code.
-        /// </summary>
-        public bool GenerateScopeCreation { get; set; }
 
         /// <summary>
         /// The lexical scope associated with this block statement.
@@ -52,12 +46,9 @@ namespace Jurassic.Compiler
             var statementLocals = new StatementLocals() { NonDefaultSourceSpanBehavior = true };
             GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
 
-            if (GenerateScopeCreation)
-            {
-                // Generate scope creation.
-                Scope.GenerateScopeCreation(generator, optimizationInfo);
-                Scope.GenerateHoistedDeclarations(generator, optimizationInfo);
-            }
+            // Generate scope creation.
+            Scope.GenerateScopeCreation(generator, optimizationInfo);
+            Scope.GenerateHoistedDeclarations(generator, optimizationInfo);
 
             foreach (var statement in this.Statements)
             {

@@ -19,13 +19,16 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// The scope that encompasses the entire loop statement. Only needed if there is a
+        /// declaration statement in the loop header, which means it only applies to for
+        /// statements.
+        /// </summary>
+        public Scope Scope { get; set; }
+
+        /// <summary>
         /// Gets or sets the statement that initializes the loop variable.
         /// </summary>
-        public Statement InitStatement
-        {
-            get;
-            set;
-        }
+        public Statement InitStatement { get; set; }
 
         /// <summary>
         /// Gets the var statement that initializes the loop variable.
@@ -46,11 +49,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the statement that checks whether the loop should terminate.
         /// </summary>
-        public ExpressionStatement ConditionStatement
-        {
-            get;
-            set;
-        }
+        public ExpressionStatement ConditionStatement { get; set; }
 
         /// <summary>
         /// Gets the expression that checks whether the loop should terminate.
@@ -63,11 +62,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the statement that increments (or decrements) the loop variable.
         /// </summary>
-        public ExpressionStatement IncrementStatement
-        {
-            get;
-            set;
-        }
+        public ExpressionStatement IncrementStatement { get; set; }
 
         /// <summary>
         /// Gets the expression that increments (or decrements) the loop variable.
@@ -80,11 +75,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the loop body.
         /// </summary>
-        public Statement Body
-        {
-            get;
-            set;
-        }
+        public Statement Body { get; set; }
 
         /// <summary>
         /// Gets a value that indicates whether the condition should be checked at the end of the
@@ -127,6 +118,10 @@ namespace Jurassic.Compiler
             //     break;
             // }
             // break-target:
+
+            // Generate the scope variable if necessary.
+            if (this.Scope != null)
+                this.Scope.GenerateScopeCreation(generator, optimizationInfo);
 
             // Emit the initialization statement.
             if (this.InitStatement != null)

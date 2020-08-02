@@ -1,4 +1,5 @@
 ﻿using System;
+using Jurassic.Library;
 
 namespace Jurassic.Compiler
 {
@@ -108,6 +109,15 @@ namespace Jurassic.Compiler
             if (variableInfo != null && variableInfo.Store != null)
             {
                 generator.LoadVariable(variableInfo.Store);
+                if (variableInfo.Keyword != KeywordToken.Var)
+                {
+                    var afterIf = generator.CreateLabel();
+                    generator.Duplicate();
+                    generator.BranchIfNotNull(afterIf);
+                    EmitHelpers.EmitThrow(generator, ErrorType.ReferenceError, $"Cannot access '{Name}' before initialization.");
+                    generator.DefineLabelPosition(afterIf);
+
+                }
                 return;
             }
 

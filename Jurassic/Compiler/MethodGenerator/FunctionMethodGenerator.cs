@@ -305,8 +305,6 @@ namespace Jurassic.Compiler
             // Method signature: object FunctionDelegate(Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] arguments)
 
             // Initialize the scope (note: the initial scope for a function is always declarative).
-            if (this.AbstractSyntaxTree is BlockStatement blockAst)
-                blockAst.GenerateScopeCreation = false;
             this.BaseScope.GenerateScopeCreation(generator, optimizationInfo);
 
             // In ES3 the "this" value must be an object.  See 10.4.3 in the spec.

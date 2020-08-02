@@ -777,6 +777,7 @@ namespace Jurassic.Compiler
                     // for (var x in y)
                     // for (let x in y)
                     var result = new ForInStatement(this.labelsForCurrentStatement);
+                    result.Scope = this.currentScope;
                     result.Variable = forInOfReference;
                     result.VariableSourceSpan = initStatement.SourceSpan;
 
@@ -802,6 +803,7 @@ namespace Jurassic.Compiler
                     // for (var x of y)
                     // for (let x of y)
                     var result = new ForOfStatement(this.labelsForCurrentStatement);
+                    result.Scope = this.currentScope;
                     result.Variable = forInOfReference;
                     result.VariableSourceSpan = initStatement.SourceSpan;
 
@@ -824,6 +826,7 @@ namespace Jurassic.Compiler
                 else
                 {
                     var result = new ForStatement(this.labelsForCurrentStatement);
+                    result.Scope = this.currentScope;
 
                     // Set the initialization statement.
                     if (initStatement != null)
