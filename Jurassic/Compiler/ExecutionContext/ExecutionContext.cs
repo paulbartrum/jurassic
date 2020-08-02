@@ -48,8 +48,10 @@ namespace Jurassic.Compiler
         /// <param name="engine"> A script engine. </param>
         /// <param name="parentScope"> The scope that was active when the class was declared. </param>
         /// <param name="thisValue"> The value of the 'this' keyword. </param>
-        /// <param name="executingFunction"> A </param>
+        /// <param name="executingFunction"> A reference to the function that is being executed. </param>
         /// <param name="newTarget"> The target of the new operator. </param>
+        /// <param name="functionContainer"> A reference to the object literal or class prototype
+        /// the executing function was defined within. Used by the 'super' keyword. </param>
         /// <returns> A new execution context instance. </returns>
         internal static ExecutionContext CreateConstructContext(ScriptEngine engine, RuntimeScope parentScope, object thisValue, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
         {
@@ -62,7 +64,10 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="engine"> A script engine. </param>
         /// <param name="parentScope"> The scope that was active when the class was declared. </param>
+        /// <param name="executingFunction"> A reference to the function that is being executed. </param>
         /// <param name="newTarget"> The target of the new operator. </param>
+        /// <param name="functionContainer"> A reference to the object literal or class prototype
+        /// the executing function was defined within. Used by the 'super' keyword. </param>
         /// <returns> A new execution context instance. </returns>
         internal static ExecutionContext CreateDerivedContext(ScriptEngine engine, RuntimeScope parentScope, UserDefinedFunction executingFunction, FunctionInstance newTarget, ObjectInstance functionContainer)
         {

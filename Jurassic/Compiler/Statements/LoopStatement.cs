@@ -95,11 +95,11 @@ namespace Jurassic.Compiler
             get { return false; }
         }
 
-        private struct RevertInfo
-        {
-            public PrimitiveType Type;
-            public ILLocalVariable Variable;
-        }
+        //private struct RevertInfo
+        //{
+        //    public PrimitiveType Type;
+        //    public ILLocalVariable Variable;
+        //}
 
         /// <summary>
         /// Generates CIL for the statement.
