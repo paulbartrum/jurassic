@@ -1283,8 +1283,7 @@ namespace Jurassic.Compiler
                         codeContext: CodeContext.Function);
 
             // Add the function to the top-level scope.
-            this.currentScope.DeclareVariable(KeywordToken.Var, functionName,
-                valueAtTopOfScope: expression);
+            this.currentScope.DeclareVariable(KeywordToken.Var, functionName, hoistedFunction: expression);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -2215,12 +2214,13 @@ namespace Jurassic.Compiler
             }
 
             // Parse the class body.
-            var classExpression = ParseClassBody(FunctionDeclarationType.Declaration, className, extends, startPosition);
+            var classExpression = ParseClassBody(className, extends, startPosition);
 
             // Consume the end token.
             this.Consume();
 
             // For 'class A' construct an expression like 'A = class A'.
+            this.currentScope.DeclareVariable(KeywordToken.Let, className);
             var result = new ExpressionStatement(this.labelsForCurrentStatement,
                 new AssignmentExpression(this.currentScope, className, classExpression));
             result.SourceSpan = new SourceCodeSpan(startPosition, this.PositionBeforeWhitespace);
@@ -2240,7 +2240,7 @@ namespace Jurassic.Compiler
             this.Expect(KeywordToken.Class);
 
             // The class name is optional for class expressions.
-            var className = string.Empty;
+            string className = null;
             if (this.nextToken is IdentifierToken)
             {
                 className = this.ExpectIdentifier();
@@ -2256,19 +2256,18 @@ namespace Jurassic.Compiler
             }
 
             // Parse the rest of the class.
-            return ParseClassBody(FunctionDeclarationType.Expression, className, extends, startPosition);
+            return ParseClassBody(className, extends, startPosition);
         }
 
         /// <summary>
         /// Parses the body of a class declaration or a class expression.
         /// </summary>
-        /// <param name="functionType"> The type of function to parse. </param>
         /// <param name="className"> The name of the class (can be empty). </param>
         /// <param name="extends"> The base class, or <c>null</c> if this class doesn't inherit
         /// from another class. </param>
         /// <param name="startPosition"> The position of the start of the function. </param>
         /// <returns> A class expression. </returns>
-        private ClassExpression ParseClassBody(FunctionDeclarationType functionType, string className, Expression extends, SourceCodePosition startPosition)
+        private ClassExpression ParseClassBody(string className, Expression extends, SourceCodePosition startPosition)
         {
             // The contents of the class should all be considered to be strict mode.
             var originalStrictMode = StrictMode;
@@ -2277,64 +2276,76 @@ namespace Jurassic.Compiler
             // Read the left brace.
             this.Expect(PunctuatorToken.LeftBrace);
 
-            var members = new List<FunctionExpression>();
-            FunctionExpression constructor = null;
-            while (true)
+            // Create a new scope to store the class name, if one was supplied.
+            var scope = this.currentScope;
+            if (className != null)
             {
-                // If the next token is '}', then the class is complete.
-                if (this.nextToken == PunctuatorToken.RightBrace)
-                    break;
-
-                // A bare semi-colon is an allowed class element.
-                if (this.nextToken == PunctuatorToken.Semicolon)
-                {
-                    Consume();
-                    continue;
-                }
-
-                // Record the start of the member.
-                var memberStartPosition = this.PositionAfterWhitespace;
-
-                // Read the name of the next class member.
-                // This will start with 'get', 'set', 'constructor' or a function name.
-                var memberName = ReadPropertyName(PropertyNameContext.ClassBody);
-
-                // Determine the parser context.
-                bool isConstructor = memberName.HasStaticName && memberName.StaticName == "constructor";
-                var parserContext = isConstructor ? (extends != null ? CodeContext.DerivedConstructor : CodeContext.Constructor) : CodeContext.ClassFunction;
-
-                // Parse the function declaration.
-                var expression = ParseFunction(
-                    functionType: FunctionDeclarationType.Declaration,
-                    parentScope: this.initialScope,
-                    name: memberName,
-                    startPosition: memberStartPosition,
-                    codeContext: parserContext);
-
-                if (memberName.HasStaticName && memberName.StaticName == "constructor")
-                {
-                    // Only one constructor is allowed.
-                    if (constructor == null)
-                        constructor = expression;
-                    else
-                        throw new SyntaxErrorException("A class may only have one constructor.", this.LineNumber, this.SourcePath);
-                }
-                else if (memberName.IsStatic && memberName.HasStaticName && memberName.StaticName == "prototype")
-                {
-                    // A static function called 'prototype' is not allowed.
-                    throw new SyntaxErrorException("Classes may not have a static property named 'prototype'.", this.LineNumber, this.SourcePath);
-                }
-                else
-                    members.Add(expression);
+                scope = Scope.CreateBlockScope(this.currentScope);
+                scope.DeclareVariable(KeywordToken.Let, className);
             }
+            using (CreateScopeContext(scope))
+            {
 
-            // The end token '}' will be consumed by the parent function.
-            Debug.Assert(this.nextToken == PunctuatorToken.RightBrace);
+                var members = new List<FunctionExpression>();
+                FunctionExpression constructor = null;
+                while (true)
+                {
+                    // If the next token is '}', then the class is complete.
+                    if (this.nextToken == PunctuatorToken.RightBrace)
+                        break;
 
-            // Restore strict mode.
-            this.StrictMode = originalStrictMode;
+                    // A bare semi-colon is an allowed class element.
+                    if (this.nextToken == PunctuatorToken.Semicolon)
+                    {
+                        Consume();
+                        continue;
+                    }
 
-            return new ClassExpression(className, extends, constructor, members);
+                    // Record the start of the member.
+                    var memberStartPosition = this.PositionAfterWhitespace;
+
+                    // Read the name of the next class member.
+                    // This will start with 'get', 'set', 'constructor' or a function name.
+                    var memberName = ReadPropertyName(PropertyNameContext.ClassBody);
+
+                    // Determine the parser context.
+                    bool isConstructor = memberName.HasStaticName && memberName.StaticName == "constructor";
+                    var parserContext = isConstructor ? (extends != null ? CodeContext.DerivedConstructor : CodeContext.Constructor) : CodeContext.ClassFunction;
+
+                    // Parse the function declaration.
+                    var expression = ParseFunction(
+                        functionType: FunctionDeclarationType.Declaration,
+                        parentScope: this.currentScope,
+                        name: memberName,
+                        startPosition: memberStartPosition,
+                        codeContext: parserContext);
+
+                    if (memberName.HasStaticName && memberName.StaticName == "constructor")
+                    {
+                        // Only one constructor is allowed.
+                        if (constructor == null)
+                            constructor = expression;
+                        else
+                            throw new SyntaxErrorException("A class may only have one constructor.", this.LineNumber, this.SourcePath);
+                    }
+                    else if (memberName.IsStatic && memberName.HasStaticName && memberName.StaticName == "prototype")
+                    {
+                        // A static function called 'prototype' is not allowed.
+                        throw new SyntaxErrorException("Classes may not have a static property named 'prototype'.", this.LineNumber, this.SourcePath);
+                    }
+                    else
+                        members.Add(expression);
+                }
+
+                // The end token '}' will be consumed by the parent function.
+                Debug.Assert(this.nextToken == PunctuatorToken.RightBrace);
+
+                // Restore strict mode.
+                this.StrictMode = originalStrictMode;
+
+                return new ClassExpression(this.currentScope, className, extends, constructor, members);
+
+            }
         }
     }
 

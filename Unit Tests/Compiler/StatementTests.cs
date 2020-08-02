@@ -305,6 +305,16 @@ namespace UnitTests
         [TestMethod]
         public void Let()
         {
+            Assert.AreEqual(13, Evaluate("var i = 10, g = i; for (let i = 0; i < 3; i ++) { g += i; } g;"));
+            Assert.AreEqual("ReferenceError: _letVar1 is not defined.", EvaluateExceptionMessage("do { let _letVar1 = 5; } while (_letVar1 > 5);"));
+            Assert.AreEqual("ReferenceError: _letVar2 is not defined.", EvaluateExceptionMessage("for (; _letVar2 < 2; _letVar2++) { let _letVar2; }"));
+            
+
+
+
+
+
+
             Assert.AreEqual("ReferenceError: i is not defined.", EvaluateExceptionMessage("(function() { for (let i = 0; i < 2; i ++) { } return i; })();"));
 
             // Basic declaration syntax checks.
@@ -334,6 +344,17 @@ namespace UnitTests
                     let a = 3;
                 }
                 b"));
+            Assert.AreEqual("ReferenceError: Cannot access 'foo' before initialization.", EvaluateExceptionMessage(@"
+                (function do_something() {
+                    let x = foo;
+                    let foo = 2;
+                })()"));
+            Assert.AreEqual("ReferenceError: Cannot access 'foo' before initialization.", EvaluateExceptionMessage(@"
+                (function do_something() {
+                    let x = typeof foo;
+                    let foo = 2;
+                })()"));
+
 
             // 'let' variables do not get stored in the global object.
             Assert.AreEqual(Undefined.Value, Evaluate(@"let notAGlobal = 5; this.notAGlobal"));
@@ -380,6 +401,9 @@ namespace UnitTests
         [TestMethod]
         public void With()
         {
+            Assert.AreEqual(43, Evaluate("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
+            return;
+
             Assert.AreEqual(234, Evaluate("x = { a: 234 }; with (x) { a }"));
             Assert.AreEqual(234, Evaluate("x = { a: 234 }; a = 5; with (x) { a }"));
             Assert.AreEqual(15, Evaluate("x = { a: 234 }; b = 15; with (x) { b }"));
@@ -863,6 +887,14 @@ namespace UnitTests
                     var c2 = C;
                 }
                 C === c1;"));
+
+            // name property.
+            Assert.AreEqual("C", Evaluate(@"var x = class C {}; x.name"));
+            Assert.AreEqual("", Evaluate(@"var x = []; x[5] = class {}; x[5].name"));
+
+            // length property.
+            Assert.AreEqual(0, Evaluate(@"var x = class C {}; x.length"));
+            Assert.AreEqual(1, Evaluate(@"var x = class C { constructor(a) { } }; x.length"));
         }
     }
 }

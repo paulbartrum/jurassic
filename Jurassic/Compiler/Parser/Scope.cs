@@ -40,7 +40,7 @@ namespace Jurassic.Compiler
             public PrimitiveType Type = PrimitiveType.Any;
         }
 
-        private Dictionary<string, Expression> hoistedFunctions;
+        private Dictionary<string, FunctionExpression> hoistedFunctions;
 
         /// <summary>
         /// 
@@ -139,6 +139,12 @@ namespace Jurassic.Compiler
         private ILLocalVariable GeneratedRuntimeScope { get; set; }
 
         /// <summary>
+        /// Indicates whether <see cref="GenerateScopeCreation(ILGenerator, OptimizationInfo)"/>
+        /// was called.
+        /// </summary>
+        private bool GenerateScopeCreationWasCalled { get; set; }
+
+        /// <summary>
         /// Gets an enumerable list of the declared variables, in no particular order.
         /// </summary>
         internal IEnumerable<DeclaredVariable> DeclaredVariables
@@ -180,10 +186,10 @@ namespace Jurassic.Compiler
         /// <param name="keyword"> The keyword that was used to declare the variable (var, let or
         /// const). </param>
         /// <param name="name"> The name of the variable. </param>
-        /// <param name="valueAtTopOfScope"> The value of the variable at the top of the scope.
-        /// Can be <c>null</c> to indicate the variable does not need initializing. </param>
+        /// <param name="hoistedFunction"> The function value to hoist to the top of the scope.
+        /// Should be <c>null</c> for everything except function declarations. </param>
         /// <returns> A reference to the variable that was declared. </returns>
-        internal void DeclareVariable(KeywordToken keyword, string name, Expression valueAtTopOfScope = null)
+        internal void DeclareVariable(KeywordToken keyword, string name, FunctionExpression hoistedFunction = null)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -192,8 +198,17 @@ namespace Jurassic.Compiler
             var declarationScope = this;
             if (keyword == KeywordToken.Var)
             {
-                while (declarationScope != null && declarationScope.Type == ScopeType.Block)
-                    declarationScope = declarationScope.ParentScope;
+                if (hoistedFunction == null)
+                {
+                    while (declarationScope != null && declarationScope.Type == ScopeType.Block)
+                        declarationScope = declarationScope.ParentScope;
+                }
+                else
+                {
+                    // Function declarations ignore with() scopes.
+                    while (declarationScope != null && (declarationScope.Type == ScopeType.Block || declarationScope.Type == ScopeType.With))
+                        declarationScope = declarationScope.ParentScope;
+                }
             }
 
             if (declarationScope != null && !declarationScope.variables.TryGetValue(name, out DeclaredVariable variable))
@@ -217,11 +232,11 @@ namespace Jurassic.Compiler
                     variable.ValueAtTopOfScope = valueAtTopOfScope;
             }*/
 
-            if (valueAtTopOfScope != null)
+            if (hoistedFunction != null)
             {
                 if (declarationScope.hoistedFunctions == null)
-                    declarationScope.hoistedFunctions = new Dictionary<string, Expression>();
-                declarationScope.hoistedFunctions[name] = valueAtTopOfScope;
+                    declarationScope.hoistedFunctions = new Dictionary<string, FunctionExpression>();
+                declarationScope.hoistedFunctions[name] = hoistedFunction;
             }
         }
 
@@ -312,6 +327,11 @@ namespace Jurassic.Compiler
         {
             // TODO:
             // optimizationInfo.OptimizeDeclarativeScopes
+
+            // Make sure we don't generate the scope twice.
+            if (GenerateScopeCreationWasCalled)
+                return;
+            GenerateScopeCreationWasCalled = true;
 
             // We can optimize this away if there are zero variables declared in the scope,
             // UNLESS it's a with scope (as then we need something to bind to).
@@ -412,6 +432,8 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         internal void GenerateReference(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
+            if (!GenerateScopeCreationWasCalled)
+                GenerateScopeCreation(generator, optimizationInfo);
             if (GeneratedRuntimeScope != null)
                 generator.LoadVariable(GeneratedRuntimeScope);
             else if (ParentScope != null)
@@ -428,13 +450,19 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        internal void GenerateDeclarations(ILGenerator generator, OptimizationInfo optimizationInfo)
+        internal void GenerateHoistedDeclarations(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             if (this.hoistedFunctions != null)
             {
                 foreach (var nameAndValue in this.hoistedFunctions)
                 {
+                    // Make sure the scope is valid.
+                    nameAndValue.Value.Scope.GenerateScopeCreation(generator, optimizationInfo);
+
+                    // Create the function.
                     nameAndValue.Value.GenerateCode(generator, optimizationInfo);
+
+                    // Assign it to the variable.
                     var name = new NameExpression(this, nameAndValue.Key);
                     name.GenerateSet(generator, optimizationInfo, nameAndValue.Value.ResultType, false);
                 }

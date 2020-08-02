@@ -71,15 +71,21 @@ namespace Jurassic.Compiler
         private Dictionary<string, LocalValue> values;
 
         /// <summary>
-        /// 
+        /// Creates a global scope.
         /// </summary>
-        /// <param name="engine"></param>
-        /// <returns></returns>
+        /// <param name="engine"> The associated script engine. </param>
+        /// <returns> A new RuntimeScope instance. </returns>
         public static RuntimeScope CreateGlobalScope(ScriptEngine engine)
         {
-            var result = new RuntimeScope(engine, null, ScopeType.Global, null, null, null);
-            result.With(engine.Global);
-            return result;
+            return new RuntimeScope(engine);
+        }
+
+        private RuntimeScope(ScriptEngine engine)
+        {
+            this.Engine = engine ?? throw new ArgumentNullException(nameof(engine));
+            this.Parent = null;
+            this.ScopeType = ScopeType.Global;
+            this.ScopeObject = engine.Global;
         }
 
         /// <summary>
@@ -135,12 +141,12 @@ namespace Jurassic.Compiler
             if (letNames != null)
             {
                 foreach (string variableName in letNames)
-                    values[variableName] = new LocalValue { Value = Undefined.Value };
+                    values[variableName] = new LocalValue();
             }
             if (constNames != null)
             {
                 foreach (string variableName in constNames)
-                    values[variableName] = new LocalValue { Value = Undefined.Value };
+                    values[variableName] = new LocalValue();
             }
         }
 

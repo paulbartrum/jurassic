@@ -403,7 +403,7 @@ namespace Jurassic.Compiler
             }
 
             // Initialize any declarations.
-            this.BaseScope.GenerateDeclarations(generator, optimizationInfo);
+            this.BaseScope.GenerateHoistedDeclarations(generator, optimizationInfo);
 
             // Generate code for the body of the function.
             this.AbstractSyntaxTree.GenerateCode(generator, optimizationInfo);

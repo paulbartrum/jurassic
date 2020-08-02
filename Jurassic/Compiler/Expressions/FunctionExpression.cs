@@ -64,7 +64,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// The scope that was in effect where the function was declared.
         /// </summary>
-        private Scope Scope { get; set; }
+        public Scope Scope { get; set; }
 
         /// <summary>
         /// A variable that contains the declaring object.
