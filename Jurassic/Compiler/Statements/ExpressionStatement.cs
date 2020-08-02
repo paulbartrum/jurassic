@@ -80,8 +80,11 @@ namespace Jurassic.Compiler
             else
             {
                 // Emit the expression.
+                optimizationInfo.IgnoreReturnValue = this.Expression;
+                optimizationInfo.ReturnValueWasNotGenerated = false;
                 this.Expression.GenerateCode(generator, optimizationInfo);
-                generator.Pop();
+                if (!optimizationInfo.ReturnValueWasNotGenerated)
+                    generator.Pop();
             }
 
             // Generate code for the end of the statement.

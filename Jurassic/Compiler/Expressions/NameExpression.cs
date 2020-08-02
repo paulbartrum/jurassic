@@ -48,18 +48,9 @@ namespace Jurassic.Compiler
         {
             get
             {
-                // Typed variables are only allowed for declarative scopes that have been optimized away.
-                /*if (this.Scope.ExistsAtRuntime == false)
-                {
-                    var scope = this.Scope;
-                    do
-                    {
-                        var variableInfo = this.Scope.GetDeclaredVariable(this.Name);
-                        if (variableInfo != null)
-                            return variableInfo.Type;
-                        scope = scope.ParentScope;
-                    } while (scope != null && scope is DeclarativeScope && scope.ExistsAtRuntime == false);
-                }*/
+                var variableInfo = this.Scope.FindStaticVariable(this.Name);
+                if (variableInfo != null)
+                    return variableInfo.Type;
                 return PrimitiveType.Any;
             }
         }
@@ -112,12 +103,15 @@ namespace Jurassic.Compiler
         /// the name is unresolvable; <c>false</c> to output <c>null</c> instead. </param>
         public void GenerateGet(ILGenerator generator, OptimizationInfo optimizationInfo, bool throwIfUnresolvable)
         {
-            // TODO: optimize this using optimizationInfo.OptimizeDeclarativeScopes
+            // If we have allocated an IL variable, use it.
+            var variableInfo = Scope.FindStaticVariable(Name);
+            if (variableInfo != null && variableInfo.Store != null)
+            {
+                generator.LoadVariable(variableInfo.Store);
+                return;
+            }
 
-            // executionContext.CreateRuntimeScope(parentScope);
-            //EmitHelpers.LoadExecutionContext(generator);
-            //generator.Call(ReflectionHelpers.ExecutionContext_CreateRuntimeScope);
-
+            // Fallback: call RuntimeScope.GetValue() or RuntimeScope.GetValueNoThrow().
             Scope.GenerateReference(generator, optimizationInfo);
             generator.LoadString(Name);
             generator.Call(throwIfUnresolvable ? ReflectionHelpers.RuntimeScope_GetValue : ReflectionHelpers.RuntimeScope_GetValueNoThrow);
@@ -164,6 +158,17 @@ namespace Jurassic.Compiler
             // Dup/Store in variable
             // GenerateSet
             // Load variable
+
+            // If we have allocated an IL variable, use it.
+            var variableInfo = Scope.FindStaticVariable(Name);
+            if (variableInfo != null && variableInfo.Store != null)
+            {
+                EmitConversion.Convert(generator, valueType, variableInfo.Type);
+                generator.StoreVariable(variableInfo.Store);
+                return;
+            }
+
+            // Fallback: call RuntimeScope.SetValue() or RuntimeScope.SetValueStrict().
             var temp = generator.CreateTemporaryVariable(valueType);
             generator.StoreVariable(temp);
             Scope.GenerateReference(generator, optimizationInfo);
@@ -185,6 +190,16 @@ namespace Jurassic.Compiler
             // Deleting a variable is not allowed in strict mode.
             if (optimizationInfo.StrictMode == true)
                 throw new SyntaxErrorException($"Cannot delete {Name} because deleting a variable or argument is not allowed in strict mode", optimizationInfo.SourceSpan.StartLine, optimizationInfo.Source.Path, optimizationInfo.FunctionName);
+
+            // If we have allocated an IL variable, then always return false, as we don't support
+            // optimizing deletable variables.
+            var variableInfo = Scope.FindStaticVariable(Name);
+            if (variableInfo != null && variableInfo.Store != null)
+            {
+                generator.LoadBoolean(false);
+                return;
+            }
+
             Scope.GenerateReference(generator, optimizationInfo);
             generator.LoadString(Name);
             generator.Call(ReflectionHelpers.RuntimeScope_Delete);

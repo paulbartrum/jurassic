@@ -99,25 +99,19 @@ namespace Jurassic.Compiler
             {
                 return this.MethodOptimizationHints.HasArguments == false &&
                     this.MethodOptimizationHints.HasEval == false &&
-                    this.MethodOptimizationHints.HasNestedFunction == false &&
-                    this.EvalResult == null;
+                    this.MethodOptimizationHints.HasNestedFunction == false;
             }
         }
 
         /// <summary>
-        /// Gets a value that indicates whether the variables should be optimized if the type of
-        /// the variable can be inferred.
+        /// Indicates that the given expression can choose to not generate a return value.
         /// </summary>
-        public bool OptimizeInferredTypes
-        {
-            get
-            {
-                return this.MethodOptimizationHints.HasArguments == false &&
-                    this.MethodOptimizationHints.HasEval == false &&
-                    this.MethodOptimizationHints.HasNestedFunction == false &&
-                    this.EvalResult == null;
-            }
-        }
+        public Expression IgnoreReturnValue { get; set; }
+
+        /// <summary>
+        /// Indicates whether the return value was generated.
+        /// </summary>
+        public bool ReturnValueWasNotGenerated { get; set; }
 
 
 

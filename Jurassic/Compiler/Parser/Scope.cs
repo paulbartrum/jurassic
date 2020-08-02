@@ -32,11 +32,9 @@ namespace Jurassic.Compiler
             public string Name;
 
             // The storage container for the variable.
-            [NonSerialized]
             public ILLocalVariable Store;
 
             // The statically-determined storage type for the variable.
-            [NonSerialized]
             public PrimitiveType Type = PrimitiveType.Any;
         }
 
@@ -153,19 +151,24 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the index of the given variable.
+        /// Gets a reference to the variable with the given name, in this scope or any parent
+        /// scope.
         /// </summary>
-        /// <param name="variableName"> The name of the variable. </param>
-        /// <returns> The index of the given variable, or <c>-1</c> if the variable doesn't exist
-        /// in the scope. </returns>
-        internal DeclaredVariable GetDeclaredVariable(string variableName)
+        /// <param name="variableName"> The name of the variable to find. </param>
+        /// <returns> The variable details, or <c>null</c> if the variable doesn't exist in the
+        /// scope. </returns>
+        internal DeclaredVariable FindStaticVariable(string variableName)
         {
             if (variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
-            DeclaredVariable variable;
-            if (this.variables.TryGetValue(variableName, out variable) == false)
-                return null;
-            return variable;
+            Scope scope = this;
+            while (scope != null && (scope.Type == ScopeType.Block || scope.Type == ScopeType.TopLevelFunction || scope.Type == ScopeType.EvalStrict))
+            {
+                if (scope.variables.TryGetValue(variableName, out var variable))
+                    return variable;
+                scope = scope.ParentScope;
+            }
+            return null;
         }
 
         /// <summary>
@@ -233,9 +236,6 @@ namespace Jurassic.Compiler
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         internal void GenerateScopeCreation(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
-            // TODO:
-            // optimizationInfo.OptimizeDeclarativeScopes
-
             // Make sure we don't generate the scope twice.
             if (GenerateScopeCreationWasCalled)
                 return;
@@ -246,6 +246,17 @@ namespace Jurassic.Compiler
             if (this.variables.Count == 0 && Type != ScopeType.With)
                 return;
 
+            // If there is no eval(), no arguments usage and no nested functions, then we can use
+            // IL variables instead of using RuntimeScope.
+            if ((Type == ScopeType.TopLevelFunction || Type == ScopeType.Block) &&
+                optimizationInfo.OptimizeDeclarativeScopes)
+            {
+                foreach (var variable in this.variables.Values)
+                    variable.Store = generator.DeclareVariable(variable.Type, variable.Name);
+                return;
+            }
+
+            // The fallback: use RuntimeScope.
             EmitHelpers.LoadExecutionContext(generator);
 
             // parentScope
