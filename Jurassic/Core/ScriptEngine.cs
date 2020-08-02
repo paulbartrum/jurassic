@@ -678,9 +678,10 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public CompiledScript Compile(ScriptSource source)
         {
-            var methodGen = new GlobalMethodGenerator(
+            var methodGen = new GlobalOrEvalMethodGenerator(
                 source,                             // The source code.
-                CreateOptions());                   // The compiler options.
+                CreateOptions(),                    // The compiler options.
+                GlobalOrEvalMethodGenerator.GeneratorContext.Global);
 
             // Parse
             this.ParsingStarted?.Invoke(this, EventArgs.Empty);
@@ -729,11 +730,10 @@ namespace Jurassic
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
         public object Evaluate(ScriptSource source)
         {
-            var methodGen = new EvalMethodGenerator(
-                ObjectScope.CreateGlobalScope(this.Global), // The variable scope.
+            var methodGen = new GlobalOrEvalMethodGenerator(
                 source,                                     // The source code.
                 CreateOptions(),                            // The compiler options.
-                this.Global);                               // The value of the "this" keyword.
+                GlobalOrEvalMethodGenerator.GeneratorContext.GlobalEval);
 
             try
             {
@@ -759,7 +759,7 @@ namespace Jurassic
 
                 // Execute
                 this.ExecutionStarted?.Invoke(this, EventArgs.Empty);
-                var result = methodGen.Execute(this);
+                var result = methodGen.Execute(this, RuntimeScope.CreateGlobalScope(this), Global);
 
                 // Execute any pending callbacks.
                 ExecutePostExecuteSteps();
@@ -1193,7 +1193,7 @@ namespace Jurassic
         /// strict mode code. </param>
         /// <returns> The value of the last statement that was executed, or <c>undefined</c> if
         /// there were no executed statements. </returns>
-        internal object Eval(string code, Scope scope, object thisObject, bool strictMode)
+        internal object Eval(string code, RuntimeScope scope, object thisObject, bool strictMode)
         {
             // Check if the cache contains the eval already.
             //var key = new EvalCacheKey() { Code = code, Scope = scope, StrictMode = strictMode };
@@ -1213,11 +1213,9 @@ namespace Jurassic
 
             // Parse the eval string into an AST.
             var options = new CompilerOptions() { ForceStrictMode = strictMode };
-            var evalGen = new EvalMethodGenerator(
-                scope,                                                  // The scope to run the code in.
-                new StringScriptSource(code, "eval"),                   // The source code to execute.
-                options,                                                // Options.
-                thisObject);                                            // The value of the "this" keyword.
+            var evalGen = new GlobalOrEvalMethodGenerator(new StringScriptSource(code, "eval"),
+                options,
+                GlobalOrEvalMethodGenerator.GeneratorContext.Eval);
 
             // Make sure the eval cache doesn't get too big.  TODO: add some sort of LRU strategy?
             //if (evalCache.Count > 100)
@@ -1230,7 +1228,7 @@ namespace Jurassic
             {
 
                 // Compile and run the eval code.
-                return evalGen.Execute(this);
+                return evalGen.Execute(this, scope, thisObject);
 
             }
             catch (SyntaxErrorException ex)

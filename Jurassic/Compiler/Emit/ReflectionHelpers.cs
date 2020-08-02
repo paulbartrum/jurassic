@@ -97,8 +97,8 @@ namespace Jurassic.Compiler
         internal static MethodInfo ObjectInstance_Delete;
         internal static MethodInfo ObjectInstance_DefineProperty;
         internal static MethodInfo ObjectInstance_HasProperty;
-        internal static MethodInfo ObjectInstance_GetPropertyValue_Object;
-        internal static MethodInfo ObjectInstance_GetPropertyValue_Int;
+        internal static MethodInfo ObjectInstance_Indexer_Object;
+        internal static MethodInfo ObjectInstance_Indexer_UInt;
         internal static MethodInfo ObjectInstance_GetPropertyValue_PropertyReference;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Object;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Int;
@@ -106,19 +106,8 @@ namespace Jurassic.Compiler
         internal static MethodInfo ObjectInstance_SetPropertyValueIfExists;
         internal static MethodInfo ObjectInstance_InitializeMissingProperty;
 
-        internal static MethodInfo Scope_ParentScope;
-        internal static MethodInfo ObjectScope_CreateRuntimeScope;
-        internal static MethodInfo ObjectScope_ScopeObject;
-        internal static MethodInfo DeclarativeScope_CreateRuntimeScope;
-        internal static MethodInfo DeclarativeScope_Values;
-        internal static MethodInfo Scope_HasValue;
-        internal static MethodInfo Scope_GetValue;
-        internal static MethodInfo Scope_SetValue;
-        internal static MethodInfo Scope_Delete;
-
         internal static ConstructorInfo JavaScriptException_Constructor_Error;
         internal static ConstructorInfo JavaScriptException_Constructor_Object;
-        internal static ConstructorInfo Arguments_Constructor;
         internal static ConstructorInfo PropertyDescriptor_Constructor2;
         internal static ConstructorInfo PropertyDescriptor_Constructor3;
         internal static ConstructorInfo Decimal_Constructor_Double;
@@ -130,16 +119,6 @@ namespace Jurassic.Compiler
         internal static ConstructorInfo LongJumpException_Constructor;
         internal static MethodInfo LongJumpException_RouteID;
 
-        internal static MethodInfo ExecutionContext_GetEngine;
-        internal static MethodInfo ExecutionContext_GetScope;
-        internal static MethodInfo ExecutionContext_SetScope;
-        internal static MethodInfo ExecutionContext_GetThisValue;
-        internal static MethodInfo ExecutionContext_GetSuperObject;
-        internal static MethodInfo ExecutionContext_GetExecutingFunction;
-        internal static MethodInfo ExecutionContext_GetNewTargetObject;
-        internal static MethodInfo ExecutionContext_ConvertThisToObject;
-        internal static MethodInfo ExecutionContext_CallSuperClass;
-
         internal static MethodInfo ReflectionHelpers_CreateFunction;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralValue;
         internal static MethodInfo ReflectionHelpers_SetObjectLiteralGetter;
@@ -150,6 +129,25 @@ namespace Jurassic.Compiler
         internal static MethodInfo ReflectionHelpers_SetClassSetter;
         internal static MethodInfo ReflectionHelpers_GetCachedTemplateStringsArray;
         internal static MethodInfo ReflectionHelpers_CreateTemplateStringsArray;
+
+        internal static MethodInfo ExecutionContext_GetEngine;
+        internal static MethodInfo ExecutionContext_GetThisValue;
+        internal static MethodInfo ExecutionContext_GetSuperValue;
+        internal static MethodInfo ExecutionContext_GetExecutingFunction;
+        internal static MethodInfo ExecutionContext_GetNewTargetObject;
+        internal static MethodInfo ExecutionContext_ConvertThisToObject;
+        internal static MethodInfo ExecutionContext_CallSuperClass;
+        internal static MethodInfo ExecutionContext_CreateArgumentsInstance;
+        internal static MethodInfo ExecutionContext_ParentScope;
+        internal static MethodInfo ExecutionContext_CreateRuntimeScope;
+
+        internal static MethodInfo RuntimeScope_GetValue;
+        internal static MethodInfo RuntimeScope_GetValueNoThrow;
+        internal static MethodInfo RuntimeScope_SetValue;
+        internal static MethodInfo RuntimeScope_SetValueStrict;
+        internal static MethodInfo RuntimeScope_Delete;
+        internal static MethodInfo RuntimeScope_With;
+        internal static MethodInfo RuntimeScope_ImplicitThis;
 
         /// <summary>
         /// Initializes static members of this class.
@@ -185,24 +183,14 @@ namespace Jurassic.Compiler
             ObjectInstance_Delete = GetInstanceMethod(typeof(ObjectInstance), "Delete", typeof(object), typeof(bool));
             ObjectInstance_DefineProperty = GetInstanceMethod(typeof(ObjectInstance), "DefineProperty", typeof(object), typeof(PropertyDescriptor), typeof(bool));
             ObjectInstance_HasProperty = GetInstanceMethod(typeof(ObjectInstance), "HasProperty", typeof(object));
-            ObjectInstance_GetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(object));
-            ObjectInstance_GetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(uint));
+            ObjectInstance_Indexer_Object = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(object));
+            ObjectInstance_Indexer_UInt = GetInstanceMethod(typeof(ObjectInstance), "get_Item", typeof(uint));
             ObjectInstance_GetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "GetPropertyValue", typeof(PropertyReference));
             ObjectInstance_SetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(PropertyReference), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_InitializeMissingProperty = GetInstanceMethod(typeof(ObjectInstance), "InitializeMissingProperty", typeof(object), typeof(PropertyAttributes));
-
-            Scope_ParentScope = GetInstanceMethod(typeof(Scope), "get_ParentScope");
-            ObjectScope_CreateRuntimeScope = GetStaticMethod(typeof(ObjectScope), "CreateRuntimeScope", typeof(Scope), typeof(ObjectInstance), typeof(bool), typeof(bool));
-            ObjectScope_ScopeObject = GetInstanceMethod(typeof(ObjectScope), "get_ScopeObject");
-            DeclarativeScope_CreateRuntimeScope = GetStaticMethod(typeof(DeclarativeScope), "CreateRuntimeScope", typeof(Scope), typeof(string[]));
-            DeclarativeScope_Values = GetInstanceMethod(typeof(DeclarativeScope), "get_Values");
-            Scope_HasValue = GetInstanceMethod(typeof(Scope), "HasValue", typeof(string));
-            Scope_GetValue = GetInstanceMethod(typeof(Scope), "GetValue", typeof(string));
-            Scope_SetValue = GetInstanceMethod(typeof(Scope), "SetValue", typeof(string), typeof(object));
-            Scope_Delete = GetInstanceMethod(typeof(Scope), "Delete", typeof(string));
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));
             FunctionInstance_ConstructWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "ConstructWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(FunctionInstance), typeof(object[]));
@@ -216,7 +204,7 @@ namespace Jurassic.Compiler
             ScriptEngine_Array = GetInstanceMethod(typeof(ScriptEngine), "get_Array");
             ScriptEngine_Object = GetInstanceMethod(typeof(ScriptEngine), "get_Object");
             ScriptEngine_CanCatchException = GetInstanceMethod(typeof(ScriptEngine), "CanCatchException", typeof(object));
-            Global_Eval = GetStaticMethod(typeof(GlobalObject), "Eval", typeof(ScriptEngine), typeof(object), typeof(Scope), typeof(object), typeof(bool));
+            Global_Eval = GetStaticMethod(typeof(GlobalObject), nameof(GlobalObject.Eval), typeof(ScriptEngine), typeof(object), typeof(RuntimeScope), typeof(object), typeof(bool));
 
             String_Constructor_Char_Int = GetConstructor(typeof(string), typeof(char), typeof(int));
             String_Concat = GetStaticMethod(typeof(string), "Concat", typeof(string[]));
@@ -253,7 +241,6 @@ namespace Jurassic.Compiler
             Delegate_CreateDelegate = GetStaticMethod(typeof(Delegate), "CreateDelegate", typeof(Type), typeof(MethodInfo));
             Type_GetTypeFromHandle = GetStaticMethod(typeof(Type), "GetTypeFromHandle", typeof(RuntimeTypeHandle));
             MethodBase_GetMethodFromHandle = GetStaticMethod(typeof(MethodBase), "GetMethodFromHandle", typeof(RuntimeMethodHandle));
-            Arguments_Constructor = GetConstructor(typeof(ArgumentsInstance), typeof(ObjectInstance), typeof(UserDefinedFunction), typeof(DeclarativeScope), typeof(object[]));
             PropertyDescriptor_Constructor2 = GetConstructor(typeof(PropertyDescriptor), typeof(object), typeof(PropertyAttributes));
             PropertyDescriptor_Constructor3 = GetConstructor(typeof(PropertyDescriptor), typeof(FunctionInstance), typeof(FunctionInstance), typeof(PropertyAttributes));
             Decimal_Constructor_Double = GetConstructor(typeof(decimal), typeof(double));
@@ -273,18 +260,9 @@ namespace Jurassic.Compiler
             LongJumpException_Constructor = GetConstructor(typeof(LongJumpException), typeof(int));
             LongJumpException_RouteID = GetInstanceMethod(typeof(LongJumpException), "get_RouteID");
 
-            ExecutionContext_GetEngine = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Engine));
-            ExecutionContext_GetScope = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Scope));
-            ExecutionContext_SetScope = GetInstanceMethod(typeof(ExecutionContext), "set_" + nameof(ExecutionContext.Scope), typeof(Scope));
-            ExecutionContext_GetThisValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ThisValue));
-            ExecutionContext_GetSuperObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.SuperObject));
-            ExecutionContext_GetExecutingFunction = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ExecutingFunction));
-            ExecutionContext_GetNewTargetObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.NewTargetObject));
-            ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));
-            ExecutionContext_CallSuperClass = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CallSuperClass), typeof(object[]));
-
+            // Functions
             ReflectionHelpers_CreateFunction = GetStaticMethod(typeof(ReflectionHelpers), "CreateFunction", typeof(ObjectInstance),
-                typeof(string), typeof(IList<string>), typeof(Scope), typeof(string), typeof(GeneratedMethod), typeof(bool), typeof(ObjectInstance));
+                typeof(string), typeof(IList<string>), typeof(RuntimeScope), typeof(string), typeof(GeneratedMethod), typeof(bool), typeof(ObjectInstance));
 
             // Object literals
             ReflectionHelpers_SetObjectLiteralValue = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralValue", typeof(ObjectInstance), typeof(object), typeof(object));
@@ -300,6 +278,27 @@ namespace Jurassic.Compiler
             // Template literals
             ReflectionHelpers_GetCachedTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(GetCachedTemplateStringsArray), typeof(ScriptEngine), typeof(int));
             ReflectionHelpers_CreateTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(CreateTemplateStringsArray), typeof(ScriptEngine), typeof(int), typeof(string[]), typeof(string[]));
+
+            // ExecutionContext
+            ExecutionContext_GetEngine = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Engine));
+            ExecutionContext_GetThisValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ThisValue));
+            ExecutionContext_GetSuperValue = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.SuperValue));
+            ExecutionContext_GetExecutingFunction = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ExecutingFunction));
+            ExecutionContext_GetNewTargetObject = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.NewTargetObject));
+            ExecutionContext_ConvertThisToObject = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.ConvertThisToObject));
+            ExecutionContext_CallSuperClass = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CallSuperClass), typeof(object[]));
+            ExecutionContext_CreateArgumentsInstance = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateArgumentsInstance), typeof(RuntimeScope), typeof(object[]));
+            ExecutionContext_ParentScope = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.ParentScope));
+            ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope), typeof(ScopeType), typeof(string[]), typeof(string[]), typeof(string[]));
+
+            // RuntimeScope
+            RuntimeScope_GetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValue), typeof(string));
+            RuntimeScope_GetValueNoThrow = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValueNoThrow), typeof(string));
+            RuntimeScope_SetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValue), typeof(string), typeof(object));
+            RuntimeScope_SetValueStrict = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValueStrict), typeof(string), typeof(object));
+            RuntimeScope_Delete = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.Delete), typeof(string));
+            RuntimeScope_With = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.With), typeof(object));
+            RuntimeScope_ImplicitThis = GetInstanceMethod(typeof(RuntimeScope), "get_" + nameof(RuntimeScope.ImplicitThis));
 
 #if DEBUG && ENABLE_DEBUGGING
             // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus
@@ -343,7 +342,7 @@ namespace Jurassic.Compiler
         /// <param name="container"> A reference to the containing class prototype or object literal (or <c>null</c>). </param>
         /// <remarks> This is used by functions declared in JavaScript code (including getters and setters). </remarks>
         public static UserDefinedFunction CreateFunction(ObjectInstance prototype, string name, IList<string> argumentNames,
-            Scope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
+            RuntimeScope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
         {
             return new UserDefinedFunction(prototype, name, argumentNames, parentScope, bodyText, generatedMethod, strictMode, container);
         }

@@ -8,24 +8,13 @@ namespace Jurassic
     /// </summary>
     public sealed class CompiledScript
     {
-        private GlobalMethodGenerator methodGen;
+        private GlobalOrEvalMethodGenerator methodGen;
 
-        internal CompiledScript(GlobalMethodGenerator methodGen)
+        internal CompiledScript(GlobalOrEvalMethodGenerator methodGen)
         {
             if (methodGen == null)
                 throw new ArgumentNullException(nameof(methodGen));
             this.methodGen = methodGen;
-        }
-
-        /// <summary>
-        /// Compiles source code into a quickly executed form.
-        /// </summary>
-        /// <param name="source"> The javascript source code to execute. </param>
-        /// <returns> A CompiledScript instance, which can be executed as many times as needed. </returns>
-        /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
-        public static CompiledScript Compile(ScriptSource source)
-        {
-            return Compile(source, null);
         }
 
         /// <summary>
@@ -35,11 +24,12 @@ namespace Jurassic
         /// <param name="options"> Compiler options, or <c>null</c> to use the default options. </param>
         /// <returns> A CompiledScript instance, which can be executed as many times as needed. </returns>
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
-        public static CompiledScript Compile(ScriptSource source, CompilerOptions options)
+        public static CompiledScript Compile(ScriptSource source, CompilerOptions options = null)
         {
-            var methodGen = new GlobalMethodGenerator(
+            var methodGen = new GlobalOrEvalMethodGenerator(
                 source,                             // The source code.
-                options ?? new CompilerOptions());  // The compiler options.
+                options ?? new CompilerOptions(),   // The compiler options.
+                GlobalOrEvalMethodGenerator.GeneratorContext.Global);
 
             // Parse
             methodGen.Parse();
@@ -54,6 +44,16 @@ namespace Jurassic
         }
 
         /// <summary>
+        /// Gets the body of the generated method in the form of disassembled IL code.  Will be
+        /// <c>null</c> unless <see cref="CompilerOptions.EnableILAnalysis"/> was set to
+        /// <c>true</c>.
+        /// </summary>
+        public string DisassembledIL
+        {
+            get { return this.methodGen.GeneratedMethod.DisassembledIL; }
+        }
+
+        /// <summary>
         /// Executes the compiled script.
         /// </summary>
         /// <param name="engine"> The script engine to use to execute the script. </param>
@@ -62,7 +62,7 @@ namespace Jurassic
         {
             try
             {
-                methodGen.Execute(engine);
+                methodGen.Execute(engine, RuntimeScope.CreateGlobalScope(engine), engine.Global);
 
                 // Execute any pending callbacks.
                 engine.ExecutePostExecuteSteps();

@@ -11,6 +11,7 @@ namespace Jurassic.Compiler
         /// The default context.
         /// </summary>
         Global,
+        GlobalEval,
 
         /// <summary>
         /// The context inside function bodies.

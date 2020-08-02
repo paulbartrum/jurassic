@@ -183,6 +183,7 @@ namespace UnitTests
             // The lexical environment does not change inside an eval if it is a direct call.
             Assert.AreEqual(5, Evaluate("(function() { var a = 5; return eval('a'); })()"));
             Assert.AreEqual(6, Evaluate("(function() { var a = 5; eval('a = 6'); return a; })()"));
+            Assert.AreEqual(5, Evaluate("b = 1; (function() { var a = 5; eval('b = a') })(); b"));
 
             // Variables should not be reinitialized.
             Assert.AreEqual(0, Evaluate("var x = 0; eval('var x'); x"));
@@ -207,6 +208,7 @@ namespace UnitTests
             Evaluate("delete a");
             Assert.AreEqual("undefined", Evaluate("'use strict'; eval('var a = false'); typeof a"));
             Assert.AreEqual("undefined", Evaluate(@"eval(""'use strict'; var a = false""); typeof a"));
+            Assert.AreEqual("undefined", Evaluate("'use strict'; (function() { eval('var a = false'); return typeof a; })()"));
 
             // Return is not allowed.
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("e = eval; (function() { var a = 5; e('return a'); })()"));

@@ -118,7 +118,7 @@ namespace Jurassic.Compiler
             this.Variable.GenerateReference(generator, optimizationInfo);
             generator.LoadVariable(enumerator);
             generator.Call(ReflectionHelpers.IEnumerator_Object_Current);
-            this.Variable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
+            this.Variable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
 
             // Emit the body statement(s).
             optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget, continueTarget, labelledOnly: false);

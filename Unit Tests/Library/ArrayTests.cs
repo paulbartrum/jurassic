@@ -258,7 +258,7 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, x[49]);
             Assert.AreEqual(Undefined.Value, x[88]);
             Assert.AreEqual(12, x[89]);
-            Assert.AreEqual(null, x[90]);
+            Assert.AreEqual(Undefined.Value, x[90]);
 
             // concat is generic.
             Evaluate("var x = new Number(5);");
@@ -569,6 +569,14 @@ namespace UnitTests
         [TestMethod]
         public void sort()
         {
+            Assert.AreEqual(true, Evaluate(@"
+                'use strict';
+                var success = false;
+                [2,3].sort(function (x, y) {
+                    success = this === undefined;
+                });
+                success"));
+
             // Build up a large array.
             var script = new StringBuilder("var array = [");
             foreach (string word in words)

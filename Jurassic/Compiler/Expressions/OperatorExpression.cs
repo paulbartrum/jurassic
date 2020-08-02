@@ -27,8 +27,10 @@ namespace Jurassic.Compiler
         /// Creates a derived instance of OperatorExpression from the given operator.
         /// </summary>
         /// <param name="operator"> The operator to base this expression on. </param>
+        /// <param name="scope"> The scope that was in effect at the time of the function call
+        /// (used by eval() calls). </param>
         /// <returns> A derived OperatorExpression instance. </returns>
-        public static OperatorExpression FromOperator(Operator @operator)
+        public static OperatorExpression FromOperator(Operator @operator, Scope scope)
         {
             if (@operator == null)
                 throw new ArgumentNullException(nameof(@operator));
@@ -38,7 +40,7 @@ namespace Jurassic.Compiler
                     return new GroupingExpression(@operator);
 
                 case OperatorType.FunctionCall:
-                    return new FunctionCallExpression(@operator);
+                    return new FunctionCallExpression(@operator, scope);
 
                 case OperatorType.MemberAccess:
                 case OperatorType.Index:

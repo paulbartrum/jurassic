@@ -190,7 +190,7 @@ namespace Jurassic.Compiler
             generator.StoreVariable(result);
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, rhs.ResultType, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, rhs.ResultType);
 
             // Restore the RHS value.
             generator.LoadVariable(result);
@@ -253,7 +253,7 @@ namespace Jurassic.Compiler
             }
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
 
             // Restore the expression result.
             generator.LoadVariable(result);
@@ -391,7 +391,7 @@ namespace Jurassic.Compiler
             generator.StoreVariable(result);
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType);
 
             // Restore the expression result.
             generator.LoadVariable(result);

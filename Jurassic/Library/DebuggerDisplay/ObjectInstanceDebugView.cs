@@ -38,7 +38,7 @@ namespace Jurassic.Library
         /// Object properties list
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public object[] Properties
+        public PropertyNameAndValue[] Properties
         {
             get
             {

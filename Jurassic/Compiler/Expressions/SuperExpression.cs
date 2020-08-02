@@ -23,7 +23,7 @@ namespace Jurassic.Compiler
         public override void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo)
         {
             EmitHelpers.LoadExecutionContext(generator);
-            generator.Call(ReflectionHelpers.ExecutionContext_GetSuperObject);
+            generator.Call(ReflectionHelpers.ExecutionContext_GetSuperValue);
         }
 
         /// <summary>

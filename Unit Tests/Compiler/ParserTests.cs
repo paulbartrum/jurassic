@@ -46,7 +46,7 @@ namespace UnitTests
                 var a = 1, b = 2, c = 3, d = 4, e = 5;
                 a = b + c
                 (d + e).toString()"));
-            Assert.AreEqual("ReferenceError: z is not defined", EvaluateExceptionMessage(@"
+            Assert.AreEqual("ReferenceError: z is not defined.", EvaluateExceptionMessage(@"
                 var i,s
                 s='here is a string'
                 i=0

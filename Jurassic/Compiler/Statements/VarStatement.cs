@@ -5,9 +5,9 @@ namespace Jurassic.Compiler
 {
 
     /// <summary>
-    /// Represents a javascript var statement.
+    /// Represents a javascript var, let or const statement.
     /// </summary>
-    internal class VarStatement : Statement
+    internal class VarLetOrConstStatement : Statement
     {
         private List<VariableDeclaration> declarations;
 
@@ -16,7 +16,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="labels"> The labels that are associated with this statement. </param>
         /// <param name="scope"> The scope the variables are defined within. </param>
-        public VarStatement(IList<string> labels, Scope scope)
+        public VarLetOrConstStatement(IList<string> labels, Scope scope)
             : base(labels)
         {
             if (scope == null)
@@ -55,11 +55,19 @@ namespace Jurassic.Compiler
 
             foreach (var declaration in this.Declarations)
             {
-                if (declaration.InitExpression != null)
+                var initExpression = declaration.InitExpression;
+                
+                // For 'let' declarations, we initialize the variable to be 'undefined' if there is no initializer.
+                if (declaration.Keyword == KeywordToken.Let && initExpression == null)
+                {
+                    initExpression = new LiteralExpression(Undefined.Value);
+                }
+
+                if (initExpression != null)
                 {
                     // Create a new assignment expression and generate code for it.
                     var initializationStatement = new ExpressionStatement(
-                        new AssignmentExpression(this.Scope, declaration.VariableName, declaration.InitExpression));
+                        new AssignmentExpression(this.Scope, declaration.VariableName, initExpression));
                     initializationStatement.SourceSpan = declaration.SourceSpan;
                     initializationStatement.GenerateCode(generator, optimizationInfo);
                 }
@@ -115,10 +123,21 @@ namespace Jurassic.Compiler
     /// </summary>
     internal class VariableDeclaration
     {
+        public VariableDeclaration(KeywordToken keyword, string name)
+        {
+            Keyword = keyword;
+            VariableName = name;
+        }
+
         /// <summary>
-        /// Gets or sets the name of the variable that is being declared.
+        /// Gets the type of declaration.
         /// </summary>
-        public string VariableName { get; set; }
+        public KeywordToken Keyword { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the variable that is being declared.
+        /// </summary>
+        public string VariableName { get; private set; }
 
         /// <summary>
         /// Gets or sets the initial value of the variable.  Can be <c>null</c>.
