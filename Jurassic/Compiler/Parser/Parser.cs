@@ -384,7 +384,7 @@ namespace Jurassic.Compiler
                     break;
 
                 // Parse a single statement.
-                result.Statements.Add(ParseStatement());
+                result.Statements.Add(ParseStatement(addingToExistingBlock: true));
             }
 
             return result;
@@ -393,14 +393,22 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Parses any statement other than a function declaration.
         /// </summary>
+        /// <param name="addingToExistingBlock"> <c>true</c> if the statement is being added to an
+        /// existing block statement, <c>false</c> if the statement represents a new block. </param>
         /// <returns> An expression that represents the statement. </returns>
-        private Statement ParseStatement()
+        private Statement ParseStatement(bool addingToExistingBlock)
         {
             // This is a new statement so clear any labels.
             this.labelsForCurrentStatement.Clear();
 
             // Parse the statement.
             Statement statement = ParseStatementNoNewContext();
+
+            // Let and const statements are disallowed in single-statement contexts.
+            if (!addingToExistingBlock &&
+                statement is VarLetOrConstStatement varLetOrConstStatement &&
+                varLetOrConstStatement.Keyword != KeywordToken.Var)
+                throw new SyntaxErrorException("Lexical declaration cannot appear in a single-statement context.", this.LineNumber, this.SourcePath);
 
             return statement;
         }
@@ -477,7 +485,7 @@ namespace Jurassic.Compiler
                         break;
 
                     // Parse a single statement.
-                    result.Statements.Add(ParseStatement());
+                    result.Statements.Add(ParseStatement(addingToExistingBlock: true));
                 }
 
                 // Consume the end brace.
@@ -499,6 +507,7 @@ namespace Jurassic.Compiler
         private VarLetOrConstStatement ParseVarLetOrConst(KeywordToken keyword, bool consumeKeyword = true, bool insideForLoop = false)
         {
             var result = new VarLetOrConstStatement(this.labelsForCurrentStatement, this.currentScope);
+            result.Keyword = keyword;
 
             // Read past the first token (var, let or const).
             if (consumeKeyword)
@@ -609,7 +618,7 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Read the statements that will be executed when the condition is true.
-            result.IfClause = ParseStatement();
+            result.IfClause = ParseStatement(addingToExistingBlock: false);
 
             // Optionally, read the else statement.
             if (this.nextToken == KeywordToken.Else)
@@ -618,7 +627,7 @@ namespace Jurassic.Compiler
                 this.Consume();
 
                 // Read the statements that will be executed when the condition is false.
-                result.ElseClause = ParseStatement();
+                result.ElseClause = ParseStatement(addingToExistingBlock: false);
             }
 
             return result;
@@ -636,7 +645,7 @@ namespace Jurassic.Compiler
             this.Expect(KeywordToken.Do);
 
             // Read the statements that will be executed in the loop body.
-            result.Body = ParseStatement();
+            result.Body = ParseStatement(addingToExistingBlock: false);
 
             // Read the while keyword.
             this.Expect(KeywordToken.While);
@@ -687,7 +696,7 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Read the statements that will be executed in the loop body.
-            result.Body = ParseStatement();
+            result.Body = ParseStatement(addingToExistingBlock: false);
 
             return result;
         }
@@ -793,7 +802,7 @@ namespace Jurassic.Compiler
                     this.Expect(PunctuatorToken.RightParenthesis);
 
                     // Read the statements that will be executed in the loop body.
-                    result.Body = ParseStatement();
+                    result.Body = ParseStatement(addingToExistingBlock: false);
 
                     return result;
                 }
@@ -819,7 +828,7 @@ namespace Jurassic.Compiler
                     this.Expect(PunctuatorToken.RightParenthesis);
 
                     // Read the statements that will be executed in the loop body.
-                    result.Body = ParseStatement();
+                    result.Body = ParseStatement(addingToExistingBlock: false);
 
                     return result;
                 }
@@ -861,7 +870,7 @@ namespace Jurassic.Compiler
                     this.Expect(PunctuatorToken.RightParenthesis);
 
                     // Read the statements that will be executed in the loop body.
-                    result.Body = ParseStatement();
+                    result.Body = ParseStatement(addingToExistingBlock: false);
 
                     return result;
                 }
@@ -999,7 +1008,7 @@ namespace Jurassic.Compiler
             using (CreateScopeContext(result.WithScope))
             {
                 // Read the body of the with statement.
-                result.Body = ParseStatement();
+                result.Body = ParseStatement(addingToExistingBlock: false);
             }
 
             return result;
@@ -1052,7 +1061,7 @@ namespace Jurassic.Compiler
 
                     // Zero or more statements can be added to the case statement.
                     while (this.nextToken != KeywordToken.Case && this.nextToken != KeywordToken.Default && this.nextToken != PunctuatorToken.RightBrace)
-                        caseClause.BodyStatements.Add(ParseStatement());
+                        caseClause.BodyStatements.Add(ParseStatement(addingToExistingBlock: true));
 
                     // Add the case clause to the switch statement.
                     result.CaseClauses.Add(caseClause);
@@ -1073,7 +1082,7 @@ namespace Jurassic.Compiler
 
                     // Zero or more statements can be added to the case statement.
                     while (this.nextToken != KeywordToken.Case && this.nextToken != KeywordToken.Default && this.nextToken != PunctuatorToken.RightBrace)
-                        defaultClause.BodyStatements.Add(ParseStatement());
+                        defaultClause.BodyStatements.Add(ParseStatement(addingToExistingBlock: true));
 
                     // Add the default clause to the switch statement.
                     result.CaseClauses.Add(defaultClause);

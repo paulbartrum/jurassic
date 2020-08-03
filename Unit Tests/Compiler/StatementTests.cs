@@ -375,6 +375,11 @@ namespace UnitTests
                     let a = 7;
                 }"));
 
+            // let cannot appear in a single-statement context.
+            Assert.AreEqual("SyntaxError: Lexical declaration cannot appear in a single-statement context.", EvaluateExceptionMessage(@"
+                if (true)
+                    let x = 5;"));
+
             // for (let i ...) { }
             Assert.AreEqual(13, Evaluate("var i = 10, g = i; for (let i = 0; i < 3; i ++) { g += i; } g;"));
             Assert.AreEqual("ReferenceError: _letVar1 is not defined.", EvaluateExceptionMessage("do { let _letVar1 = 5; } while (_letVar1 > 5);"));
@@ -430,6 +435,11 @@ namespace UnitTests
 
             // 'const' variables are read-only.
             Assert.AreEqual("TypeError: Illegal assignment to constant variable 'x'.", EvaluateExceptionMessage("const x = 5; x = 6"));
+
+            // const cannot appear in a single-statement context.
+            Assert.AreEqual("SyntaxError: Lexical declaration cannot appear in a single-statement context.", EvaluateExceptionMessage(@"
+                if (true)
+                    const x = 5;"));
         }
 
         [TestMethod]
