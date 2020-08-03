@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Jurassic.TestSuiteRunner
 {
@@ -36,9 +37,9 @@ namespace Jurassic.TestSuiteRunner
                 try
                 {
                     using (var inPipe = new AnonymousPipeClientStream(PipeDirection.In, inPipeHandle))
-                    using (var reader = new BinaryReader(inPipe))
+                    using (var reader = new BinaryReader(inPipe, Encoding.UTF8))
                     using (var outPipe = new AnonymousPipeClientStream(PipeDirection.Out, outPipeHandle))
-                    using (var writer = new BinaryWriter(outPipe))
+                    using (var writer = new BinaryWriter(outPipe, Encoding.UTF8))
                     {
                         while (true)
                         {

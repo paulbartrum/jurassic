@@ -67,8 +67,6 @@ namespace Jurassic.TestSuiteRunner
                             !testCase.name.StartsWith("Reflect") &&
                             !testCase.name.StartsWith("generators") &&
                             !testCase.name.StartsWith("arrow functions") &&
-                            !testCase.name.StartsWith("let") &&
-                            !testCase.name.StartsWith("const") &&
                             !testCase.name.StartsWith("destructuring") &&
                             !testCase.name.StartsWith("spread syntax for iterable objects") &&
                             !testCase.name.StartsWith("miscellaneous subclassables") &&
@@ -78,7 +76,7 @@ namespace Jurassic.TestSuiteRunner
                         }
 
                         if (testCase.Success == false &&
-                            testCase.name.StartsWith("super"))
+                            (testCase.name.StartsWith("let") || testCase.name.StartsWith("const")))
                         {
                             Console.WriteLine(testCase.script);
                         }

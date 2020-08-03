@@ -38,9 +38,12 @@ namespace UnitTests
         public void Do()
         {
             Assert.AreEqual(7, Evaluate("x = 1; do { x = x + 3 } while (x < 5); x"));
-            Assert.AreEqual(9, Evaluate("x = 6; do { x = x + 3 } while (x < 5); x"));
+            Assert.AreEqual(9, Evaluate("x = 6; do { x = x + 3 } while (x < 5) x"));
             Assert.AreEqual(5, Evaluate("x = 1; do { x = x + 1 } while (x < 5)"));
             Assert.AreEqual(5, Evaluate("5; do { } while(false)"));
+
+            // The scope of 'let' variables inside the loop doesn't include the condition.
+            Assert.AreEqual("ReferenceError: _letVar1 is not defined.", EvaluateExceptionMessage("do { let _letVar1 = 3; } while(_letVar1 == 4)"));
         }
 
         [TestMethod]
@@ -97,6 +100,15 @@ namespace UnitTests
                         test();
                     }());
                 }");
+
+            // The variable declaration can use 'let'.
+            // TODO: fix this.
+            //Assert.AreEqual("2 4", Evaluate(@"
+            //    let scopes = [];
+            //    for(let i = 2; i < 5; i += 2) {
+            //      scopes.push(function() { return i; });
+            //    }
+            //    scopes[0]() + ' ' + scopes[1]()"));
         }
 
         [TestMethod]
@@ -138,6 +150,14 @@ namespace UnitTests
 
             // Strict mode: the name "eval" is not allowed in strict mode.
             Assert.AreEqual("SyntaxError: The variable name cannot be 'eval' in strict mode.", EvaluateExceptionMessage("'use strict'; for (var eval in {a:1}) {}"));
+
+            // The variable declaration can use 'const'.
+            Assert.AreEqual("ab", Evaluate(@"
+                var scopes = [];
+                for(const i in { a:1, b:1 }) {
+                    scopes.push(function(){ return i; });
+                }
+                scopes[0]() + scopes[1]()"));
         }
 
         [TestMethod]
@@ -193,6 +213,14 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError: Invalid left-hand side in for loop.", EvaluateExceptionMessage("for (5 of [1, 2]) {}"));
             Assert.AreEqual("SyntaxError: Expected identifier but found '5'", EvaluateExceptionMessage("for (var 5 of [1, 2]) {}"));
             Assert.AreEqual("SyntaxError: Invalid left-hand side in for loop; must have a single binding.", EvaluateExceptionMessage("for (var x, y of [1, 2]) {}"));
+
+            // The variable declaration can use 'const'.
+            Assert.AreEqual("ab", Evaluate(@"
+                var scopes = [];
+                for(const i of ['a', 'b']) {
+                    scopes.push(function(){ return i; });
+                }
+                scopes[0]() + scopes[1]()"));
         }
 
         [TestMethod]
