@@ -664,6 +664,22 @@ namespace Jurassic
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value that indicates whether to disable conversion of CLR collections, that are
+        /// passed or returned to script code, to script arrays (instances of the <see cref="ArrayInstance"/>
+        /// class). If this is set to <c>true</c>, then CLR collections are wrapped in an instances of the
+        /// <see cref="ClrInstanceWrapper"/> class.
+        /// </summary>
+        /// <remarks>
+        /// <para>This property is ignored if value of the <see cref="EnableExposedClrTypes"/> property is
+        /// <c>false</c>.</para>
+        /// </remarks>
+        public bool DisableClrCollectionsExposingByValue
+        {
+            get;
+            set;
+        }
+
 
 
         //     EXECUTION
@@ -1014,7 +1030,7 @@ namespace Jurassic
                         if (value is Type)
                             value = ClrStaticTypeWrapper.FromCache(this, (Type)value);
                         else if ((value is ObjectInstance) == false)
-                            value = new ClrInstanceWrapper(this, value);
+                            value = ClrInstanceWrapper.Create(this, value);
                         break;
                     case TypeCode.SByte:
                         value = (int)(sbyte)value;

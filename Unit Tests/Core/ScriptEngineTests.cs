@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
 using Jurassic.Library;
@@ -399,6 +400,60 @@ namespace UnitTests
             Assert.AreEqual(2011, engine.Evaluate("date.Year"));
             Assert.AreEqual(3, engine.Evaluate("date.DayOfWeek"));
             Assert.AreEqual(TimeSpan.FromDays(1), engine.Evaluate("date.Subtract(new DateTime(2011, 3, 8, 7, 49, 0))"));
+        }
+
+        [TestMethod]
+        public void SetGlobalValueCollectionInstance()
+        {
+            var engine = new ScriptEngine();
+
+            var testArray = new string[] { "One", "Two", "Three" };
+            var testList = new ArrayList { "One", "Two", "Three", "Four" };
+            var testHashtable = new Hashtable
+            {
+                { "One", 1 },
+                { "Two", 2 },
+                { "Three", 3 },
+                { "Four", 4 },
+                { "Five", 5 }
+            };
+
+            engine.EnableExposedClrTypes = false;
+            ExpectException<JavaScriptException>(() => engine.SetGlobalValue("testArray", testArray));
+            ExpectException<JavaScriptException>(() => engine.SetGlobalValue("testList", testList));
+            ExpectException<JavaScriptException>(() => engine.SetGlobalValue("testHashtable", testHashtable));
+
+            engine.EnableExposedClrTypes = true;
+
+            // Try setting a collection by value.
+            engine.DisableClrCollectionsExposingByValue = false;
+
+            engine.SetGlobalValue("testArray", testArray);
+            engine.SetGlobalValue("testList", testList);
+            engine.SetGlobalValue("testHashtable", testHashtable);
+
+            Assert.AreEqual(3, engine.Evaluate("testArray.length"));
+            Assert.AreEqual(4, engine.Evaluate("testList.length"));
+            Assert.AreEqual(5, engine.Evaluate("testHashtable.length"));
+
+            Assert.AreEqual(Undefined.Value, engine.Evaluate("testArray.Length"));
+            Assert.AreEqual(Undefined.Value, engine.Evaluate("testList.Count"));
+            Assert.AreEqual(Undefined.Value, engine.Evaluate("testHashtable.Count"));
+
+            // Try setting a collection by reference.
+            engine.DisableClrCollectionsExposingByValue = true;
+
+            engine.SetGlobalValue("testArray", testArray);
+            engine.SetGlobalValue("testList", testList);
+            engine.SetGlobalValue("testHashtable", testHashtable);
+
+            Assert.AreEqual(Undefined.Value, engine.Evaluate("testArray.length"));
+            Assert.AreEqual(Undefined.Value, engine.Evaluate("testList.length"));
+            Assert.AreEqual(Undefined.Value, engine.Evaluate("testHashtable.length"));
+
+            Assert.AreEqual(3, engine.Evaluate("testArray.Length"));
+            Assert.AreEqual(4, engine.Evaluate("testList.Count"));
+            Assert.AreEqual(5, engine.Evaluate("testHashtable.Count"));
         }
 
         [TestMethod]

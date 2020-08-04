@@ -49,7 +49,7 @@ namespace Jurassic.Library
         /// <param name="instance"> The CLR object instance to wrap. </param>
         public static ObjectInstance Create(ScriptEngine engine, object instance)
         {
-            if (instance is IEnumerable enumerable)
+            if (!engine.DisableClrCollectionsExposingByValue && instance is IEnumerable enumerable)
             {
                 var wrappedList = instance is ICollection ? new List<object>(((ICollection)instance).Count) : new List<object>();
                 var enumerator = enumerable.GetEnumerator();
