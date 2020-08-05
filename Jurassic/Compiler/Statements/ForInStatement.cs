@@ -72,9 +72,6 @@ namespace Jurassic.Compiler
             // }
             // break-target:
 
-            // Generate the scope variable if necessary.
-            this.Scope.GenerateScopeCreation(generator, optimizationInfo);
-
             // Call IEnumerable<string> EnumeratePropertyNames(ScriptEngine engine, object obj)
             optimizationInfo.MarkSequencePoint(generator, this.TargetObjectSourceSpan);
             EmitHelpers.LoadScriptEngine(generator);
@@ -91,6 +88,9 @@ namespace Jurassic.Compiler
 
             var breakTarget = generator.CreateLabel();
             var continueTarget = generator.DefineLabelPosition();
+
+            // Generate the scope variable if necessary.
+            this.Scope.GenerateScopeCreation(generator, optimizationInfo);
 
             // Emit debugging information.
             if (optimizationInfo.DebugDocument != null)

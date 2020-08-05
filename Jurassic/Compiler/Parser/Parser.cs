@@ -539,8 +539,6 @@ namespace Jurassic.Compiler
                     // Read the setter expression.
                     declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
                 }
-                else if (keyword == KeywordToken.Const)
-                    throw new SyntaxErrorException("Missing initializer in const declaration.", this.LineNumber, this.SourcePath);
 
                 // Record the portion of the source document that will be highlighted when debugging.
                 declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
@@ -553,6 +551,11 @@ namespace Jurassic.Compiler
                 if (insideForLoop && (this.nextToken == KeywordToken.In || this.nextToken == IdentifierToken.Of ||
                     (this.AtValidEndOfStatement() == true && this.nextToken != PunctuatorToken.Comma)))
                     return result;
+
+                // const declarations must have an initializer, unless they are part of a
+                // for-of/for-in statement.
+                if (keyword == KeywordToken.Const && declaration.InitExpression == null)
+                    throw new SyntaxErrorException("Missing initializer in const declaration.", this.LineNumber, this.SourcePath);
 
                 // Check if we are at the end of the statement.
                 if (this.AtValidEndOfStatement() == true && this.nextToken != PunctuatorToken.Comma)
@@ -667,8 +670,10 @@ namespace Jurassic.Compiler
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
 
-            // Consume the end of the statement.
-            this.ExpectEndOfStatement();
+            // Consume the end of the statement. Note this doesn't use ExpectEndOfStatement()
+            // because a semi-colon is not required here.
+            if (this.nextToken == PunctuatorToken.Semicolon)
+                Consume();
 
             return result;
         }
