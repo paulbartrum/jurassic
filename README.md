@@ -52,7 +52,7 @@ Feature|Status
 &nbsp;&nbsp;Unicode code point escapes|:white_check_mark: 4/4
 &nbsp;&nbsp;new.target|:white_check_mark: 2/2
 **Bindings**|
-&nbsp;&nbsp;const|14/18
+&nbsp;&nbsp;const|:white_check_mark: 18/18
 &nbsp;&nbsp;let|14/16
 &nbsp;&nbsp;block-level function declaration[18]|:x:
 **Functions**|
@@ -99,7 +99,7 @@ Feature|Status
 &nbsp;&nbsp;Object static methods accept primitives|:white_check_mark: 10/10
 &nbsp;&nbsp;own property order|2/7
 &nbsp;&nbsp;Updated identifier syntax|1/3
-&nbsp;&nbsp;miscellaneous|6/9
+&nbsp;&nbsp;miscellaneous|7/9
 **Annex b**|
 &nbsp;&nbsp;non-strict function semantics[35]|2/3
 &nbsp;&nbsp;\_\_proto\_\_ in object literals  [36]|:x:
