@@ -67,18 +67,14 @@ namespace Jurassic.TestSuiteRunner
                             !testCase.name.StartsWith("Reflect") &&
                             !testCase.name.StartsWith("generators") &&
                             !testCase.name.StartsWith("arrow functions") &&
-                            !testCase.name.StartsWith("let") &&
-                            !testCase.name.StartsWith("const") &&
                             !testCase.name.StartsWith("destructuring") &&
-                            !testCase.name.StartsWith("spread syntax for iterable objects") &&
-                            !testCase.name.StartsWith("miscellaneous subclassables") &&
-                            !testCase.name.Contains("is subclassable"))
+                            !testCase.name.StartsWith("spread syntax for iterable objects"))
                         {
                             Console.WriteLine($"{testCase.name} -- {testCase.detail}, result: {testCase.Response.JsonResult ?? $"{testCase.Response.ErrorType}: {testCase.Response.ErrorMessage}"}");
                         }
 
                         if (testCase.Success == false &&
-                            testCase.name.StartsWith("super"))
+                            (testCase.name.StartsWith("const") || testCase.name.StartsWith("let")))
                         {
                             Console.WriteLine(testCase.script);
                         }
