@@ -106,19 +106,6 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void displayName()
-        {
-            Assert.AreEqual(Undefined.Value, Evaluate("function f() { } f.displayName"));
-            Assert.AreEqual(Undefined.Value, Evaluate("f = function g() { }; f.displayName"));
-            Assert.AreEqual("f", Evaluate("f = function() { }; f.displayName"));
-            Assert.AreEqual(Undefined.Value, Evaluate("x = { y: function f() { } }; x.y.displayName"));
-            Assert.AreEqual("y", Evaluate("x = { y: function() { } }; x.y.displayName"));
-            Assert.AreEqual("get f", Evaluate("x = { get f() { } }; Object.getOwnPropertyDescriptor(x, 'f').get.displayName"));
-            Assert.AreEqual("set f", Evaluate("x = { set f(value) { } }; Object.getOwnPropertyDescriptor(x, 'f').set.displayName"));
-            Assert.AreEqual(Undefined.Value, Evaluate("new Function('').displayName"));
-        }
-
-        [TestMethod]
         public void toString()
         {
             Assert.AreEqual("function anonymous(a, b) {\nreturn a + b\n}", Evaluate("new Function('a, b', 'return a + b').toString()"));

@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
+using System.Text;
 
 namespace Jurassic.TestSuiteRunner
 {
@@ -57,12 +58,12 @@ namespace Jurassic.TestSuiteRunner
             try
             {
                 // Send the message.
-                var writer = new BinaryWriter(this.outPipe);    // Note: disposing closes the stream.
+                var writer = new BinaryWriter(this.outPipe, Encoding.UTF8);    // Note: disposing closes the stream.
                 writer.Write(message);
                 writer.Flush();
 
                 // Read the incoming response.
-                var reader = new BinaryReader(this.inPipe);     // Note: disposing closes the stream.
+                var reader = new BinaryReader(this.inPipe, Encoding.UTF8);     // Note: disposing closes the stream.
                 return reader.ReadString();
             }
             catch (IOException)

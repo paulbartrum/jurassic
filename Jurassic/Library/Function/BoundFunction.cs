@@ -122,9 +122,10 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
+        /// <param name="newTarget"> The value of 'new.target'. </param>
         /// <param name="argumentValues"> An array of argument values to pass to the function. </param>
         /// <returns> The object that was created. </returns>
-        public override ObjectInstance ConstructLateBound(params object[] argumentValues)
+        public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
             // Append the provided argument values to the end of the existing bound argument values.
             var resultingArgumentValues = argumentValues;
@@ -141,7 +142,7 @@ namespace Jurassic.Library
             }
 
             // Call the target function.
-            return this.TargetFunction.ConstructLateBound(resultingArgumentValues);
+            return this.TargetFunction.ConstructLateBound(newTarget, resultingArgumentValues);
         }
 
         /// <summary>

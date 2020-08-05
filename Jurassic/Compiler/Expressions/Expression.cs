@@ -24,6 +24,18 @@ namespace Jurassic.Compiler
         {
             get { throw new NotImplementedException(); }
         }
+
+        /// <summary>
+        /// Checks the expression is valid and throws a SyntaxErrorException if not.
+        /// Called after the expression tree is fully built out.
+        /// </summary>
+        /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
+        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
+        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
+        public virtual void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
+        {
+            // Override this to check validity.
+        }
     }
 
 }

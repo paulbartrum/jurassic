@@ -1,5 +1,5 @@
 ﻿using System;
-using ErrorType = Jurassic.Library.ErrorType;
+using Jurassic.Library;
 
 namespace Jurassic.Compiler
 {
@@ -725,19 +725,20 @@ namespace Jurassic.Compiler
             generator.Duplicate();
             generator.IsInstance(typeof(Library.FunctionInstance));
             var endOfTypeCheck = generator.CreateLabel();
-            generator.BranchIfNotNull(endOfTypeCheck);
+            generator.BranchIfTrue(endOfTypeCheck);
 
             // Throw an nicely formatted exception.
             var rightValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(rightValue);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadInt32((int)ErrorType.TypeError);
+            generator.LoadEnumValue(ErrorType.TypeError);
             generator.LoadString("The instanceof operator expected a function, but found '{0}' instead");
             generator.LoadInt32(1);
             generator.NewArray(typeof(object));
             generator.Duplicate();
             generator.LoadInt32(0);
             generator.LoadVariable(rightValue);
+            generator.ReleaseTemporaryVariable(rightValue);
             generator.Call(ReflectionHelpers.TypeUtilities_TypeOf);
             generator.StoreArrayElement(typeof(object));
             generator.Call(ReflectionHelpers.String_Format);
@@ -747,7 +748,7 @@ namespace Jurassic.Compiler
             generator.NewObject(ReflectionHelpers.JavaScriptException_Constructor_Error);
             generator.Throw();
             generator.DefineLabelPosition(endOfTypeCheck);
-            generator.ReleaseTemporaryVariable(rightValue);
+            generator.ReinterpretCast(typeof(FunctionInstance));
 
             // Load the left-hand side expression from the temporary variable.
             generator.LoadVariable(temp);
@@ -780,15 +781,15 @@ namespace Jurassic.Compiler
 
             // Check the right-hand side is a javascript object - if not, throw an exception.
             generator.Duplicate();
-            generator.IsInstance(typeof(Library.ObjectInstance));
+            generator.IsInstance(typeof(ObjectInstance));
             var endOfTypeCheck = generator.CreateLabel();
-            generator.BranchIfNotNull(endOfTypeCheck);
+            generator.BranchIfTrue(endOfTypeCheck);
 
             // Throw an nicely formatted exception.
             var rightValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(rightValue);
             EmitHelpers.LoadScriptEngine(generator);
-            generator.LoadInt32((int)ErrorType.TypeError);
+            generator.LoadEnumValue(ErrorType.TypeError);
             generator.LoadString("The in operator expected an object, but found '{0}' instead");
             generator.LoadInt32(1);
             generator.NewArray(typeof(object));
@@ -805,6 +806,7 @@ namespace Jurassic.Compiler
             generator.Throw();
             generator.DefineLabelPosition(endOfTypeCheck);
             generator.ReleaseTemporaryVariable(rightValue);
+            generator.ReinterpretCast(typeof(ObjectInstance));
 
             // Load the left-hand side expression from the temporary variable.
             generator.LoadVariable(temp);

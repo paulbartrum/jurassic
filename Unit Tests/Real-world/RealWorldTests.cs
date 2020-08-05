@@ -113,7 +113,6 @@ namespace UnitTests
         }
 
         [TestMethod]
-        [Ignore]
         public void RSAEncrypt()
         {
             // From http://xenon.stanford.edu/~tjw/jsbn/
@@ -137,7 +136,7 @@ namespace UnitTests
                     '1a24bca8e273df2f0e47c199bbf678604e7df7215480c77c8db39f49b000ce2c\nf7500038acfff5433b7d582a01f1826e6f4d42e1c57f5e1fef7b12aabc59fd25',
                     '3d06982efbbe47339e1f6d36b1216b8a741d410b0c662f54f7118b27b9a4ec9d\n914337eb39841d8666f3034408cf94f5b62f11c402fc994fe15a05493150d9fd',
                     '3a3e731acd8960b7ff9eb81a7ff93bd1cfa74cbd56987db58b4594fb09c09084\ndb1734c8143f98b602b981aaa9243ca28deb69b5b280ee8dcee0fd2625e53250');");
-            Assert.AreEqual("", engine.Evaluate("rsa.decrypt(encrypted)"));
+            Assert.AreEqual("text to encrypt", engine.Evaluate("rsa.decrypt(encrypted)"));
         }
 
         [TestMethod]

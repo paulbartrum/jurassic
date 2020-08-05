@@ -44,21 +44,21 @@ Feature|Status
 &nbsp;&nbsp;object literal extensions|:white_check_mark: 6/6
 &nbsp;&nbsp;for..of loops|6/9
 &nbsp;&nbsp;octal and binary literals|:white_check_mark: 4/4
-&nbsp;&nbsp;template literals|4/7
+&nbsp;&nbsp;template literals|6/7
 &nbsp;&nbsp;RegExp "y" and "u" flags|:x:
 &nbsp;&nbsp;destructuring, declarations|:x:
 &nbsp;&nbsp;destructuring, assignment|:x:
 &nbsp;&nbsp;destructuring, parameters|:x:
 &nbsp;&nbsp;Unicode code point escapes|:white_check_mark: 4/4
-&nbsp;&nbsp;new.target|:x:
+&nbsp;&nbsp;new.target|:white_check_mark: 2/2
 **Bindings**|
-&nbsp;&nbsp;const|4/18
-&nbsp;&nbsp;let|2/16
+&nbsp;&nbsp;const|:white_check_mark: 18/18
+&nbsp;&nbsp;let|14/16
 &nbsp;&nbsp;block-level function declaration[18]|:x:
 **Functions**|
 &nbsp;&nbsp;arrow functions|:x:
-&nbsp;&nbsp;class|:x:
-&nbsp;&nbsp;super|:x:
+&nbsp;&nbsp;class|:white_check_mark: 24/24
+&nbsp;&nbsp;super|:white_check_mark: 8/8
 &nbsp;&nbsp;generators|:x:
 **Built-ins**|
 &nbsp;&nbsp;typed arrays|45/46
@@ -69,37 +69,37 @@ Feature|Status
 &nbsp;&nbsp;Proxy  [25]|:x:
 &nbsp;&nbsp;Reflect  [26]|:x:
 &nbsp;&nbsp;Promise|4/8
-&nbsp;&nbsp;Symbol|6/12
-&nbsp;&nbsp;well-known symbols[27]|5/26
+&nbsp;&nbsp;Symbol|8/12
+&nbsp;&nbsp;well-known symbols[27]|7/26
 **Built-in extensions**|
 &nbsp;&nbsp;Object static methods|:white_check_mark: 4/4
-&nbsp;&nbsp;function "name" property|6/17
+&nbsp;&nbsp;function "name" property|10/17
 &nbsp;&nbsp;String static methods|:white_check_mark: 2/2
 &nbsp;&nbsp;String.prototype methods|:white_check_mark: 10/10
 &nbsp;&nbsp;RegExp.prototype properties|2/6
 &nbsp;&nbsp;Array static methods|8/11
 &nbsp;&nbsp;Array.prototype methods|9/10
-&nbsp;&nbsp;Number properties|7/9
+&nbsp;&nbsp;Number properties|:white_check_mark: 9/9
 &nbsp;&nbsp;Math methods|:white_check_mark: 17/17
 &nbsp;&nbsp;Date.prototype[Symbol.toPrimitive]|:white_check_mark: 1/1
 **Subclassing**|
-&nbsp;&nbsp;Array is subclassable|:x:
-&nbsp;&nbsp;RegExp is subclassable|:x:
-&nbsp;&nbsp;Function is subclassable|:x:
+&nbsp;&nbsp;Array is subclassable|3/11
+&nbsp;&nbsp;RegExp is subclassable|3/4
+&nbsp;&nbsp;Function is subclassable|4/6
 &nbsp;&nbsp;Promise is subclassable|:x:
 &nbsp;&nbsp;miscellaneous subclassables|:x:
 **Misc**|
-&nbsp;&nbsp;prototype of bound functions|:x:
+&nbsp;&nbsp;prototype of bound functions|1/5
 &nbsp;&nbsp;Proxy, internal 'get' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'set' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'defineProperty' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'deleteProperty' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'getOwnPropertyDescriptor' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'ownKeys' calls|:x:
-&nbsp;&nbsp;Object static methods accept primitives|7/10
+&nbsp;&nbsp;Object static methods accept primitives|:white_check_mark: 10/10
 &nbsp;&nbsp;own property order|2/7
 &nbsp;&nbsp;Updated identifier syntax|1/3
-&nbsp;&nbsp;miscellaneous|6/9
+&nbsp;&nbsp;miscellaneous|7/9
 **Annex b**|
 &nbsp;&nbsp;non-strict function semantics[35]|2/3
 &nbsp;&nbsp;\_\_proto\_\_ in object literals  [36]|:x:

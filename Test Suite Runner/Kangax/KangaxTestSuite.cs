@@ -60,21 +60,23 @@ namespace Jurassic.TestSuiteRunner
                         });
                         if (testCase.Response.JsonResult == "true" || testCase.Response.Variables?["__asyncTestPassed"] == "true")
                             testCase.Success = true;
+                        if (int.TryParse(testCase.Response.JsonResult, out int resultAsInteger) && resultAsInteger != 0)
+                            testCase.Success = true;
                         if (testCase.Success == false &&
                             !testCase.name.StartsWith("Proxy") &&
                             !testCase.name.StartsWith("Reflect") &&
                             !testCase.name.StartsWith("generators") &&
-                            !testCase.name.StartsWith("class") &&
-                            !testCase.name.StartsWith("super") &&
                             !testCase.name.StartsWith("arrow functions") &&
-                            !testCase.name.StartsWith("let") &&
-                            !testCase.name.StartsWith("const") &&
                             !testCase.name.StartsWith("destructuring") &&
-                            !testCase.name.StartsWith("spread syntax for iterable objects") &&
-                            !testCase.name.StartsWith("miscellaneous subclassables") &&
-                            !testCase.name.Contains("is subclassable"))
+                            !testCase.name.StartsWith("spread syntax for iterable objects"))
                         {
                             Console.WriteLine($"{testCase.name} -- {testCase.detail}, result: {testCase.Response.JsonResult ?? $"{testCase.Response.ErrorType}: {testCase.Response.ErrorMessage}"}");
+                        }
+
+                        if (testCase.Success == false &&
+                            (testCase.name.StartsWith("const") || testCase.name.StartsWith("let")))
+                        {
+                            Console.WriteLine(testCase.script);
                         }
                     }
                     catch (IOException)

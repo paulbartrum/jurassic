@@ -19,20 +19,23 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// The scope that encompasses the entire loop statement. Only needed if there is a
+        /// declaration statement in the loop header, which means it only applies to for
+        /// statements.
+        /// </summary>
+        public Scope Scope { get; set; }
+
+        /// <summary>
         /// Gets or sets the statement that initializes the loop variable.
         /// </summary>
-        public Statement InitStatement
-        {
-            get;
-            set;
-        }
+        public Statement InitStatement { get; set; }
 
         /// <summary>
         /// Gets the var statement that initializes the loop variable.
         /// </summary>
-        public VarStatement InitVarStatement
+        public VarLetOrConstStatement InitVarStatement
         {
-            get { return this.InitStatement as VarStatement; }
+            get { return this.InitStatement as VarLetOrConstStatement; }
         }
 
         /// <summary>
@@ -46,11 +49,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the statement that checks whether the loop should terminate.
         /// </summary>
-        public ExpressionStatement ConditionStatement
-        {
-            get;
-            set;
-        }
+        public ExpressionStatement ConditionStatement { get; set; }
 
         /// <summary>
         /// Gets the expression that checks whether the loop should terminate.
@@ -63,11 +62,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the statement that increments (or decrements) the loop variable.
         /// </summary>
-        public ExpressionStatement IncrementStatement
-        {
-            get;
-            set;
-        }
+        public ExpressionStatement IncrementStatement { get; set; }
 
         /// <summary>
         /// Gets the expression that increments (or decrements) the loop variable.
@@ -80,11 +75,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets or sets the loop body.
         /// </summary>
-        public Statement Body
-        {
-            get;
-            set;
-        }
+        public Statement Body { get; set; }
 
         /// <summary>
         /// Gets a value that indicates whether the condition should be checked at the end of the
@@ -95,11 +86,11 @@ namespace Jurassic.Compiler
             get { return false; }
         }
 
-        private struct RevertInfo
-        {
-            public PrimitiveType Type;
-            public ILLocalVariable Variable;
-        }
+        //private struct RevertInfo
+        //{
+        //    public PrimitiveType Type;
+        //    public ILLocalVariable Variable;
+        //}
 
         /// <summary>
         /// Generates CIL for the statement.
@@ -111,6 +102,71 @@ namespace Jurassic.Compiler
             // Generate code for the start of the statement.
             var statementLocals = new StatementLocals() { NonDefaultBreakStatementBehavior = true, NonDefaultSourceSpanBehavior = true };
             GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
+
+            // <initializer>
+            // start-of-loop:
+            // while (true) {
+            //   if (<condition> == false)
+            //     break;
+            //
+            //   <body statements>
+            //
+            //   continue-target:
+            //     <increment>
+            //
+            //   if (<condition> == false)  // do {} while (condition) only.
+            //     break;
+            // }
+            // break-target:
+
+            // Generate the scope variable if necessary.
+            if (this.Scope != null)
+                this.Scope.GenerateScopeCreation(generator, optimizationInfo);
+
+            // Emit the initialization statement.
+            if (this.InitStatement != null)
+                this.InitStatement.GenerateCode(generator, optimizationInfo);
+
+            // Set up some labels.
+            var continueTarget = generator.CreateLabel();
+            var breakTarget = generator.CreateLabel();
+            var startOfLoop = generator.DefineLabelPosition();
+
+            // Check the condition and jump to the end if it is false.
+            if (this.CheckConditionAtEnd == false && this.ConditionStatement != null)
+            {
+                optimizationInfo.MarkSequencePoint(generator, this.ConditionStatement.SourceSpan);
+                this.Condition.GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToBool(generator, this.Condition.ResultType);
+                generator.BranchIfFalse(breakTarget);
+            }
+
+            // Emit the loop body.
+            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget, continueTarget, labelledOnly: false);
+            this.Body.GenerateCode(generator, optimizationInfo);
+            optimizationInfo.PopBreakOrContinueInfo();
+
+            // The continue statement jumps here.
+            generator.DefineLabelPosition(continueTarget);
+
+            // Increment the loop variable.
+            if (this.IncrementStatement != null)
+                this.IncrementStatement.GenerateCode(generator, optimizationInfo);
+
+            // Check the condition and jump to the end if it is false.
+            if (this.CheckConditionAtEnd && this.ConditionStatement != null)
+            {
+                optimizationInfo.MarkSequencePoint(generator, this.ConditionStatement.SourceSpan);
+                this.Condition.GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToBool(generator, this.Condition.ResultType);
+                generator.BranchIfFalse(breakTarget);
+            }
+
+            // Unconditionally branch back to the start of the loop.
+            generator.Branch(startOfLoop);
+            
+            // Define where the break statement jumps to.
+            generator.DefineLabelPosition(breakTarget);
 
             // <initializer>
             // if (<condition>)
@@ -130,142 +186,146 @@ namespace Jurassic.Compiler
             // break-target:
 
             // Set up some labels.
-            var continueTarget1 = generator.CreateLabel();
-            var continueTarget2 = generator.CreateLabel();
-            var breakTarget1 = generator.CreateLabel();
-            var breakTarget2 = generator.CreateLabel();
-
-            // Emit the initialization statement.
-            if (this.InitStatement != null)
-                this.InitStatement.GenerateCode(generator, optimizationInfo);
-
-            // Check the condition and jump to the end if it is false.
-            if (this.CheckConditionAtEnd == false && this.ConditionStatement != null)
-            {
-                optimizationInfo.MarkSequencePoint(generator, this.ConditionStatement.SourceSpan);
-                this.Condition.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToBool(generator, this.Condition.ResultType);
-                generator.BranchIfFalse(breakTarget1);
-            }
-
-            // Emit the loop body.
-            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget1, continueTarget1, false);
-            this.Body.GenerateCode(generator, optimizationInfo);
-            optimizationInfo.PopBreakOrContinueInfo();
-
-            // The continue statement jumps here.
-            generator.DefineLabelPosition(continueTarget1);
-
-            // Increment the loop variable.
-            if (this.IncrementStatement != null)
-                this.IncrementStatement.GenerateCode(generator, optimizationInfo);
-
-            // Strengthen the variable types.
-            List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>> previousVariableTypes = null;
-            var previousInsideTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
-            if (optimizationInfo.OptimizeInferredTypes == true)
-            {
-                // Keep a record of the variable types before strengthening.
-                previousVariableTypes = new List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>>();
-
-                var typedVariables = FindTypedVariables();
-                foreach (var variableAndType in typedVariables)
-                {
-                    var variable = variableAndType.Key;
-                    var variableInfo = variableAndType.Value;
-                    if (variableInfo.Conditional == false && variableInfo.Type != variable.Type)
-                    {
-                        // Save the previous type so we can restore it later.
-                        var previousType = variable.Type;
-                        previousVariableTypes.Add(new KeyValuePair<Scope.DeclaredVariable, RevertInfo>(variable, new RevertInfo() { Type = previousType, Variable = variable.Store }));
-
-                        // Load the existing value.
-                        var nameExpression = new NameExpression(variable.Scope, variable.Name);
-                        nameExpression.GenerateGet(generator, optimizationInfo, false);
-
-                        // Store the typed value.
-                        variable.Store = generator.DeclareVariable(variableInfo.Type);
-                        variable.Type = variableInfo.Type;
-                        nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
-                    }
-                }
-
-                // The variables must be reverted even in the presence of exceptions.
-                if (previousVariableTypes.Count > 0)
-                {
-                    generator.BeginExceptionBlock();
-
-                    // Setting the InsideTryCatchOrFinally flag converts BR instructions into LEAVE
-                    // instructions so that the finally block is executed correctly.
-                    optimizationInfo.InsideTryCatchOrFinally = true;
-                }
-            }
-
-            // The inner loop starts here.
-            var startOfLoop = generator.DefineLabelPosition();
-
-            // Check the condition and jump to the end if it is false.
-            if (this.ConditionStatement != null)
-            {
-                optimizationInfo.MarkSequencePoint(generator, this.ConditionStatement.SourceSpan);
-                this.Condition.GenerateCode(generator, optimizationInfo);
-                EmitConversion.ToBool(generator, this.Condition.ResultType);
-                generator.BranchIfFalse(breakTarget2);
-            }
-
-            // Emit the loop body.
-            optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget2, continueTarget2, labelledOnly: false);
-            this.Body.GenerateCode(generator, optimizationInfo);
-            optimizationInfo.PopBreakOrContinueInfo();
-
-            // The continue statement jumps here.
-            generator.DefineLabelPosition(continueTarget2);
-
-            // Increment the loop variable.
-            if (this.IncrementStatement != null)
-                this.IncrementStatement.GenerateCode(generator, optimizationInfo);
-
-            // Unconditionally branch back to the start of the loop.
-            generator.Branch(startOfLoop);
-
-            // Define the end of the loop (actually just after).
-            generator.DefineLabelPosition(breakTarget2);
-
-            // Revert the variable types.
-            if (previousVariableTypes != null && previousVariableTypes.Count > 0)
-            {
-                // Revert the InsideTryCatchOrFinally flag.
-                optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
-
-                // Revert the variable types within a finally block.
-                generator.BeginFinallyBlock();
-
-                foreach (var previousVariableAndType in previousVariableTypes)
-                {
-                    var variable = previousVariableAndType.Key;
-                    var variableRevertInfo = previousVariableAndType.Value;
-
-                    // Load the existing value.
-                    var nameExpression = new NameExpression(variable.Scope, variable.Name);
-                    nameExpression.GenerateGet(generator, optimizationInfo, false);
-
-                    // Store the typed value.
-                    var previousType = variable.Type;
-                    variable.Store = variableRevertInfo.Variable;
-                    variable.Type = variableRevertInfo.Type;
-                    nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
-                }
-
-                // End the exception block.
-                generator.EndExceptionBlock();
-            }
-
-            // Define the end of the loop (actually just after).
-            generator.DefineLabelPosition(breakTarget1);
+            //var continueTarget1 = generator.CreateLabel();
+            //var continueTarget2 = generator.CreateLabel();
+            //var breakTarget1 = generator.CreateLabel();
+            //var breakTarget2 = generator.CreateLabel();
+            //
+            //// Emit the initialization statement.
+            //if (this.InitStatement != null)
+            //    this.InitStatement.GenerateCode(generator, optimizationInfo);
+            //
+            //// Check the condition and jump to the end if it is false.
+            //if (this.CheckConditionAtEnd == false && this.ConditionStatement != null)
+            //{
+            //    optimizationInfo.MarkSequencePoint(generator, this.ConditionStatement.SourceSpan);
+            //    this.Condition.GenerateCode(generator, optimizationInfo);
+            //    EmitConversion.ToBool(generator, this.Condition.ResultType);
+            //    generator.BranchIfFalse(breakTarget1);
+            //}
+            //
+            //// Emit the loop body.
+            //optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget1, continueTarget1, false);
+            //this.Body.GenerateCode(generator, optimizationInfo);
+            //optimizationInfo.PopBreakOrContinueInfo();
+            //
+            //// The continue statement jumps here.
+            //generator.DefineLabelPosition(continueTarget1);
+            //
+            //// Increment the loop variable.
+            //if (this.IncrementStatement != null)
+            //    this.IncrementStatement.GenerateCode(generator, optimizationInfo);
+            //
+            //// Strengthen the variable types.
+            //List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>> previousVariableTypes = null;
+            //var previousInsideTryCatchOrFinally = optimizationInfo.InsideTryCatchOrFinally;
+            //if (optimizationInfo.OptimizeInferredTypes == true)
+            //{
+            //    // Keep a record of the variable types before strengthening.
+            //    previousVariableTypes = new List<KeyValuePair<Scope.DeclaredVariable, RevertInfo>>();
+            //
+            //    /*var typedVariables = FindTypedVariables();
+            //    foreach (var variableAndType in typedVariables)
+            //    {
+            //        var variable = variableAndType.Key;
+            //        var variableInfo = variableAndType.Value;
+            //        if (variableInfo.Conditional == false && variableInfo.Type != variable.Type)
+            //        {
+            //            // Save the previous type so we can restore it later.
+            //            var previousType = variable.Type;
+            //            previousVariableTypes.Add(new KeyValuePair<Scope.DeclaredVariable, RevertInfo>(variable, new RevertInfo() { Type = previousType, Variable = variable.Store }));
+            //
+            //            // Load the existing value.
+            //            var nameExpression = new NameExpression(variable.Scope, variable.Name);
+            //            nameExpression.GenerateGet(generator, optimizationInfo, false);
+            //
+            //            // Store the typed value.
+            //            variable.Store = generator.DeclareVariable(variableInfo.Type);
+            //            variable.Type = variableInfo.Type;
+            //            nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
+            //        }
+            //    }*/
+            //
+            //    // The variables must be reverted even in the presence of exceptions.
+            //    if (previousVariableTypes.Count > 0)
+            //    {
+            //        generator.BeginExceptionBlock();
+            //
+            //        // Setting the InsideTryCatchOrFinally flag converts BR instructions into LEAVE
+            //        // instructions so that the finally block is executed correctly.
+            //        optimizationInfo.InsideTryCatchOrFinally = true;
+            //    }
+            //}
+            //
+            //// The inner loop starts here.
+            //var startOfLoop = generator.DefineLabelPosition();
+            //
+            //// Check the condition and jump to the end if it is false.
+            //if (this.ConditionStatement != null)
+            //{
+            //    optimizationInfo.MarkSequencePoint(generator, this.ConditionStatement.SourceSpan);
+            //    this.Condition.GenerateCode(generator, optimizationInfo);
+            //    EmitConversion.ToBool(generator, this.Condition.ResultType);
+            //    generator.BranchIfFalse(breakTarget2);
+            //}
+            //
+            //// Emit the loop body.
+            //optimizationInfo.PushBreakOrContinueInfo(this.Labels, breakTarget2, continueTarget2, labelledOnly: false);
+            //if (this.Body is BlockStatement blockStatement2)
+            //    blockStatement2.GenerateScopeCreation = false;
+            //this.Body.GenerateCode(generator, optimizationInfo);
+            //optimizationInfo.PopBreakOrContinueInfo();
+            //
+            //// The continue statement jumps here.
+            //generator.DefineLabelPosition(continueTarget2);
+            //
+            //// Increment the loop variable.
+            //if (this.IncrementStatement != null)
+            //    this.IncrementStatement.GenerateCode(generator, optimizationInfo);
+            //
+            //// Unconditionally branch back to the start of the loop.
+            //generator.Branch(startOfLoop);
+            //
+            //// Define the end of the loop (actually just after).
+            //generator.DefineLabelPosition(breakTarget2);
+            //
+            //// Revert the variable types.
+            //if (previousVariableTypes != null && previousVariableTypes.Count > 0)
+            //{
+            //    // Revert the InsideTryCatchOrFinally flag.
+            //    optimizationInfo.InsideTryCatchOrFinally = previousInsideTryCatchOrFinally;
+            //
+            //    // Revert the variable types within a finally block.
+            //    generator.BeginFinallyBlock();
+            //
+            //    foreach (var previousVariableAndType in previousVariableTypes)
+            //    {
+            //        var variable = previousVariableAndType.Key;
+            //        var variableRevertInfo = previousVariableAndType.Value;
+            //
+            //        // Load the existing value.
+            //        var nameExpression = new NameExpression(variable.Scope, variable.Name);
+            //        nameExpression.GenerateGet(generator, optimizationInfo, false);
+            //
+            //        // Store the typed value.
+            //        var previousType = variable.Type;
+            //        variable.Store = variableRevertInfo.Variable;
+            //        variable.Type = variableRevertInfo.Type;
+            //        nameExpression.GenerateSet(generator, optimizationInfo, previousType, false);
+            //    }
+            //
+            //    // End the exception block.
+            //    generator.EndExceptionBlock();
+            //}
+            //
+            //// Define the end of the loop (actually just after).
+            //generator.DefineLabelPosition(breakTarget1);
 
             // Generate code for the end of the statement.
             GenerateEndOfStatement(generator, optimizationInfo, statementLocals);
         }
+
+#if false
 
         private struct InferredTypeInfo
         {
@@ -307,9 +367,9 @@ namespace Jurassic.Compiler
                 // for (var i = <int>; ?; ?)
                 loopVariableScope = this.InitVarStatement.Scope;
                 loopVariableName = this.InitVarStatement.Declarations[0].VariableName;
-                initIsOkay = loopVariableScope is DeclarativeScope && loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
+                initIsOkay = loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
             }
-            else if (this.InitExpression != null &&
+            /*else if (this.InitExpression != null &&
                 this.InitExpression is AssignmentExpression &&
                 ((AssignmentExpression)this.InitExpression).ResultType == PrimitiveType.Int32 &&
                 ((AssignmentExpression)this.InitExpression).Target is NameExpression)
@@ -317,8 +377,8 @@ namespace Jurassic.Compiler
                 // for (i = <int>; ?; ?)
                 loopVariableScope = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Scope;
                 loopVariableName = ((NameExpression)((AssignmentExpression)this.InitExpression).Target).Name;
-                initIsOkay = loopVariableScope is DeclarativeScope && loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
-            }
+                initIsOkay = loopVariableScope.HasDeclaredVariable(loopVariableName) == true;
+            }*/
 
             // Next, check the condition expression.
             bool conditionAndInitIsOkay = false;
@@ -452,6 +512,8 @@ namespace Jurassic.Compiler
             foreach (var node in root.ChildNodes)
                 FindTypedVariables(node, variableTypes, conditional: conditional, continueEncountered: ref continueEncountered);
         }
+
+#endif
 
         /// <summary>
         /// Gets an enumerable list of child nodes in the abstract syntax tree.

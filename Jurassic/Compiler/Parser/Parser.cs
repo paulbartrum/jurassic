@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using ErrorType = Jurassic.Library.ErrorType;
 
 namespace Jurassic.Compiler
 {
@@ -17,8 +15,7 @@ namespace Jurassic.Compiler
         private bool consumedLineTerminator;
         private ParserExpressionState expressionState;
         private Scope initialScope;
-        private Scope currentVarScope;
-        private Scope currentLetScope;
+        private Scope currentScope;
         private MethodOptimizationHints methodOptimizationHints;
         private List<string> labelsForCurrentStatement = new List<string>();
         private Token endToken;
@@ -35,20 +32,15 @@ namespace Jurassic.Compiler
         /// Creates a Parser instance with the given lexer supplying the tokens.
         /// </summary>
         /// <param name="lexer"> The lexical analyser that provides the tokens. </param>
-        /// <param name="initialScope"> The initial variable scope. </param>
         /// <param name="options"> Options that influence the compiler. </param>
         /// <param name="context"> The context of the code (global, function or eval). </param>
         /// <param name="methodOptimizationHints"> Hints about whether optimization is possible. </param>
-        public Parser(Lexer lexer, Scope initialScope, CompilerOptions options, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
+        public Parser(Lexer lexer, CompilerOptions options, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
         {
-            if (lexer == null)
-                throw new ArgumentNullException(nameof(lexer));
-            if (initialScope == null)
-                throw new ArgumentNullException(nameof(initialScope));
-            this.lexer = lexer;
+            this.lexer = lexer ?? throw new ArgumentNullException(nameof(lexer)); ;
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
             this.lexer.CompatibilityMode = options.CompatibilityMode;
-            SetInitialScope(initialScope);
+            SetInitialScope(Scope.CreateGlobalOrEvalScope(context));
             this.methodOptimizationHints = methodOptimizationHints ?? new MethodOptimizationHints();
             this.options = options;
             this.context = context;
@@ -62,13 +54,14 @@ namespace Jurassic.Compiler
         /// <param name="parser"> The parser for the parent context. </param>
         /// <param name="scope"> The function scope. </param>
         /// <param name="optimizationHints"> Hints about whether optimization is possible. </param>
+        /// <param name="codeContext"> Indicates the parsing context. </param>
         /// <returns> A new parser. </returns>
-        private static Parser CreateFunctionBodyParser(Parser parser, Scope scope, MethodOptimizationHints optimizationHints)
+        private static Parser CreateFunctionBodyParser(Parser parser, Scope scope, MethodOptimizationHints optimizationHints, CodeContext codeContext)
         {
             var result = (Parser)parser.MemberwiseClone();
             result.SetInitialScope(scope);
             result.methodOptimizationHints = optimizationHints;
-            result.context = CodeContext.Function;
+            result.context = codeContext;
             result.endToken = PunctuatorToken.RightBrace;
             return result;
         }
@@ -138,6 +131,18 @@ namespace Jurassic.Compiler
         public MethodOptimizationHints MethodOptimizationHints
         {
             get { return this.methodOptimizationHints; }
+        }
+
+        /// <summary>
+        /// Indicates whether we are parsing in a function context (including constructors and class functions).
+        /// </summary>
+        public bool IsInFunctionContext
+        {
+            get {  return this.context == CodeContext.Function ||
+                    this.context == CodeContext.ObjectLiteralFunction ||
+                    this.context == CodeContext.ClassFunction ||
+                    this.context == CodeContext.Constructor ||
+                    this.context == CodeContext.DerivedConstructor;  }
         }
 
 
@@ -278,7 +283,7 @@ namespace Jurassic.Compiler
         {
             if (initialScope == null)
                 throw new ArgumentNullException(nameof(initialScope));
-            this.currentLetScope = this.currentVarScope = this.initialScope = initialScope;
+            this.currentScope = this.initialScope = initialScope;
         }
 
         /// <summary>
@@ -287,20 +292,17 @@ namespace Jurassic.Compiler
         private class ScopeContext : IDisposable
         {
             private readonly Parser parser;
-            private readonly Scope previousLetScope;
-            private readonly Scope previousVarScope;
+            private readonly Scope previousScope;
 
             public ScopeContext(Parser parser)
             {
                 this.parser = parser;
-                previousLetScope = parser.currentLetScope;
-                previousVarScope = parser.currentVarScope;
+                previousScope = parser.currentScope;
             }
 
             public void Dispose()
             {
-                parser.currentLetScope = previousLetScope;
-                parser.currentVarScope = previousVarScope;
+                parser.currentScope = previousScope;
             }
         }
 
@@ -308,17 +310,12 @@ namespace Jurassic.Compiler
         /// Sets the current scope and returns an object which can be disposed to restore the
         /// previous scope.
         /// </summary>
-        /// <param name="letScope"> The new let scope. </param>
-        /// <param name="varScope"> The new var scope. </param>
+        /// <param name="scope"> The new scope. </param>
         /// <returns> An object which can be disposed to restore the previous scope. </returns>
-        private ScopeContext CreateScopeContext(Scope letScope, Scope varScope = null)
+        private ScopeContext CreateScopeContext(Scope scope)
         {
-            if (letScope == null)
-                throw new ArgumentNullException(nameof(letScope));
             var result = new ScopeContext(this);
-            this.currentLetScope = letScope;
-            if (varScope != null)
-                this.currentVarScope = varScope;
+            this.currentScope = scope ?? throw new ArgumentNullException(nameof(scope));
             return result;
         }
 
@@ -335,7 +332,7 @@ namespace Jurassic.Compiler
         public Statement Parse()
         {
             // Read the directive prologue.
-            var result = new BlockStatement(new string[0]);
+            var result = new BlockStatement(new string[0], this.initialScope);
             while (true)
             {
                 // Check if we should stop parsing.
@@ -376,8 +373,8 @@ namespace Jurassic.Compiler
             }
 
             // If this is an eval, and strict mode is on, redefine the scope.
-            if (this.StrictMode == true && this.context == CodeContext.Eval)
-                SetInitialScope(DeclarativeScope.CreateEvalScope(this.initialScope));
+            if (this.StrictMode == true)
+                this.initialScope.ConvertToStrictMode();
 
             // Read zero or more regular statements.
             while (true)
@@ -387,7 +384,7 @@ namespace Jurassic.Compiler
                     break;
 
                 // Parse a single statement.
-                result.Statements.Add(ParseStatement());
+                result.Statements.Add(ParseStatement(addingToExistingBlock: true));
             }
 
             return result;
@@ -396,14 +393,22 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Parses any statement other than a function declaration.
         /// </summary>
+        /// <param name="addingToExistingBlock"> <c>true</c> if the statement is being added to an
+        /// existing block statement, <c>false</c> if the statement represents a new block. </param>
         /// <returns> An expression that represents the statement. </returns>
-        private Statement ParseStatement()
+        private Statement ParseStatement(bool addingToExistingBlock)
         {
             // This is a new statement so clear any labels.
             this.labelsForCurrentStatement.Clear();
 
             // Parse the statement.
             Statement statement = ParseStatementNoNewContext();
+
+            // Let and const statements are disallowed in single-statement contexts.
+            if (!addingToExistingBlock &&
+                statement is VarLetOrConstStatement varLetOrConstStatement &&
+                varLetOrConstStatement.Keyword != KeywordToken.Var)
+                throw new SyntaxErrorException("Lexical declaration cannot appear in a single-statement context.", this.LineNumber, this.SourcePath);
 
             return statement;
         }
@@ -447,6 +452,8 @@ namespace Jurassic.Compiler
                 return ParseDebugger();
             if (this.nextToken == KeywordToken.Function)
                 return ParseFunctionDeclaration();
+            if (this.nextToken == KeywordToken.Class)
+                return ParseClassDeclaration();
             if (this.nextToken == null)
                 throw new SyntaxErrorException("Unexpected end of input", this.LineNumber, this.SourcePath);
 
@@ -462,24 +469,30 @@ namespace Jurassic.Compiler
         /// or undefined if there are no statements in the block. </remarks>
         private BlockStatement ParseBlock()
         {
-            // Consume the start brace ({).
-            this.Expect(PunctuatorToken.LeftBrace);
-
-            // Read zero or more statements.
-            var result = new BlockStatement(this.labelsForCurrentStatement);
-            while (true)
+            var scope = Scope.CreateBlockScope(this.currentScope);
+            using (CreateScopeContext(scope))
             {
-                // Check for the end brace (}).
-                if (this.nextToken == PunctuatorToken.RightBrace)
-                    break;
 
-                // Parse a single statement.
-                result.Statements.Add(ParseStatement());
+                // Consume the start brace ({).
+                this.Expect(PunctuatorToken.LeftBrace);
+
+                // Read zero or more statements.
+                var result = new BlockStatement(this.labelsForCurrentStatement, scope);
+                while (true)
+                {
+                    // Check for the end brace (}).
+                    if (this.nextToken == PunctuatorToken.RightBrace)
+                        break;
+
+                    // Parse a single statement.
+                    result.Statements.Add(ParseStatement(addingToExistingBlock: true));
+                }
+
+                // Consume the end brace.
+                this.Expect(PunctuatorToken.RightBrace);
+                return result;
+
             }
-
-            // Consume the end brace.
-            this.Expect(PunctuatorToken.RightBrace);
-            return result;
         }
 
         /// <summary>
@@ -487,13 +500,18 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="keyword"> Indicates which type of statement is being parsed.  Must be var,
         /// let or const. </param>
+        /// <param name="consumeKeyword"> Indicates whether the keyword token needs to be consumed. </param>
+        /// <param name="insideForLoop"> Indicates whether we are parsing the initial declaration
+        /// inside a for() statement. </param>
         /// <returns> A variable declaration statement. </returns>
-        private VarStatement ParseVarLetOrConst(KeywordToken keyword)
+        private VarLetOrConstStatement ParseVarLetOrConst(KeywordToken keyword, bool consumeKeyword = true, bool insideForLoop = false)
         {
-            var result = new VarStatement(this.labelsForCurrentStatement, keyword == KeywordToken.Var ? this.currentVarScope : this.currentLetScope);
+            var result = new VarLetOrConstStatement(this.labelsForCurrentStatement, this.currentScope);
+            result.Keyword = keyword;
 
             // Read past the first token (var, let or const).
-            this.Expect(keyword);
+            if (consumeKeyword)
+                this.Expect(keyword);
 
             // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;
@@ -501,15 +519,16 @@ namespace Jurassic.Compiler
             // There can be multiple declarations.
             while (true)
             {
-                var declaration = new VariableDeclaration();
-
                 // The next token must be a variable name.
-                declaration.VariableName = this.ExpectIdentifier();
+                var declaration = new VariableDeclaration(keyword, ExpectIdentifier());
                 ValidateVariableName(declaration.VariableName);
+                if (keyword == KeywordToken.Let && declaration.VariableName == "let")
+                    throw new SyntaxErrorException("'let' is not allowed here.", this.LineNumber, this.SourcePath);
 
                 // Add the variable to the current function's list of local variables.
-                this.currentVarScope.DeclareVariable(declaration.VariableName,
-                    writable: true, deletable: this.context == CodeContext.Eval);
+                if (keyword != KeywordToken.Var && this.currentScope.HasDeclaredVariable(declaration.VariableName))
+                    throw new SyntaxErrorException($"Identifier '{declaration.VariableName}' has already been declared.", this.LineNumber, this.SourcePath);
+                this.currentScope.DeclareVariable(keyword, declaration.VariableName);
 
                 // The next token is either an equals sign (=), a semi-colon or a comma.
                 if (this.nextToken == PunctuatorToken.Assignment)
@@ -519,13 +538,24 @@ namespace Jurassic.Compiler
 
                     // Read the setter expression.
                     declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
-
-                    // Record the portion of the source document that will be highlighted when debugging.
-                    declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
                 }
+
+                // Record the portion of the source document that will be highlighted when debugging.
+                declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
                 // Add the declaration to the result.
                 result.Declarations.Add(declaration);
+
+                // If we are inside a for loop, then 'in' and 'of' are valid terminators.
+                // Also, to match ParseExpression(), we don't consume the final semi-colon.
+                if (insideForLoop && (this.nextToken == KeywordToken.In || this.nextToken == IdentifierToken.Of ||
+                    (this.AtValidEndOfStatement() == true && this.nextToken != PunctuatorToken.Comma)))
+                    return result;
+
+                // const declarations must have an initializer, unless they are part of a
+                // for-of/for-in statement.
+                if (keyword == KeywordToken.Const && declaration.InitExpression == null)
+                    throw new SyntaxErrorException("Missing initializer in const declaration.", this.LineNumber, this.SourcePath);
 
                 // Check if we are at the end of the statement.
                 if (this.AtValidEndOfStatement() == true && this.nextToken != PunctuatorToken.Comma)
@@ -591,7 +621,7 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Read the statements that will be executed when the condition is true.
-            result.IfClause = ParseStatement();
+            result.IfClause = ParseStatement(addingToExistingBlock: false);
 
             // Optionally, read the else statement.
             if (this.nextToken == KeywordToken.Else)
@@ -600,7 +630,7 @@ namespace Jurassic.Compiler
                 this.Consume();
 
                 // Read the statements that will be executed when the condition is false.
-                result.ElseClause = ParseStatement();
+                result.ElseClause = ParseStatement(addingToExistingBlock: false);
             }
 
             return result;
@@ -618,7 +648,7 @@ namespace Jurassic.Compiler
             this.Expect(KeywordToken.Do);
 
             // Read the statements that will be executed in the loop body.
-            result.Body = ParseStatement();
+            result.Body = ParseStatement(addingToExistingBlock: false);
 
             // Read the while keyword.
             this.Expect(KeywordToken.While);
@@ -640,8 +670,10 @@ namespace Jurassic.Compiler
             // Read the right parenthesis.
             this.Expect(PunctuatorToken.RightParenthesis);
 
-            // Consume the end of the statement.
-            this.ExpectEndOfStatement();
+            // Consume the end of the statement. Note this doesn't use ExpectEndOfStatement()
+            // because a semi-colon is not required here.
+            if (this.nextToken == PunctuatorToken.Semicolon)
+                Consume();
 
             return result;
         }
@@ -669,7 +701,7 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Read the statements that will be executed in the loop body.
-            result.Body = ParseStatement();
+            result.Body = ParseStatement(addingToExistingBlock: false);
 
             return result;
         }
@@ -697,213 +729,156 @@ namespace Jurassic.Compiler
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
-            // The initialization statement.
-            Statement initializationStatement = null;
-
-            // The type of for statement.
-            ForStatementType type = ForStatementType.Unknown;
-
-            // The for-in and for-of expressions need a variable to assign to.  Is null for a regular for statement.
-            IReferenceExpression forInOfReference = null;
-
-            // Keep track of the start of the statement so that source debugging works correctly.
-            var start = this.PositionAfterWhitespace;
-
-            if (this.nextToken == KeywordToken.Var)
+            // 'let' variables should have their own scope.
+            using (CreateScopeContext(Scope.CreateBlockScope(this.currentScope)))
             {
-                // Read past the var token.
-                this.Expect(KeywordToken.Var);
+                // Keep track of the start of the statement so that source debugging works correctly.
+                var start = this.PositionAfterWhitespace;
 
-                // There can be multiple initializers (but not for for-in statements).
-                var varStatement = new VarStatement(this.labelsForCurrentStatement, this.currentVarScope);
-                initializationStatement = varStatement;
-
-                while (true)
+                // There are lots of possibilities for the initialization statement:
+                // i = 0;
+                // var i = 0, j = 1;
+                // var i in
+                // var i of
+                // let i in
+                // let i of
+                Statement initStatement = null;
+                if (this.nextToken == KeywordToken.Var || this.nextToken == KeywordToken.Let || this.nextToken == KeywordToken.Const)
                 {
-                    var declaration = new VariableDeclaration();
-
-                    // The next token must be a variable name.
-                    declaration.VariableName = this.ExpectIdentifier();
-                    ValidateVariableName(declaration.VariableName);
-
-                    // Add the variable to the current function's list of local variables.
-                    this.currentVarScope.DeclareVariable(declaration.VariableName,
-                        writable: true, deletable: this.context == CodeContext.Eval);
-
-                    // The next token is either an equals sign (=), a semi-colon, a comma, or the "in" keyword.
-                    if (this.nextToken == PunctuatorToken.Assignment)
+                    // If the next token is var or const then we know we are parsing a declaration.
+                    // This doesn't always work for 'let' unfortunately, because 'let' is only a
+                    // reserved word in strict mode.
+                    initStatement = ParseVarLetOrConst((KeywordToken)this.nextToken, consumeKeyword: true, insideForLoop: true);
+                }
+                else if (this.nextToken != PunctuatorToken.Semicolon)
+                {
+                    // Parse the init statement as an expression.
+                    var initExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In, IdentifierToken.Of);
+                    if (this.nextToken is IdentifierToken && initExpression is NameExpression nameExpression && nameExpression.Name == "let")
                     {
-                        // Read past the equals token (=).
-                        this.Expect(PunctuatorToken.Assignment);
-
-                        // Read the setter expression.
-                        declaration.InitExpression = ParseExpression(PunctuatorToken.Semicolon, PunctuatorToken.Comma);
-
-                        // Record the portion of the source document that will be highlighted when debugging.
-                        declaration.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-
-                        // This must be a regular for statement.
-                        type = ForStatementType.For;
+                        initStatement = ParseVarLetOrConst(KeywordToken.Let, consumeKeyword: false, insideForLoop: true);
                     }
-
-                    // Add the declaration to the initialization statement.
-                    varStatement.Declarations.Add(declaration);
-
-                    if (this.nextToken == PunctuatorToken.Semicolon)
+                    else
                     {
-                        // This is a regular for statement.
-                        break;
+                        initStatement = new ExpressionStatement(initExpression);
+                        initStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
                     }
-                    else if (this.nextToken == KeywordToken.In && type == ForStatementType.Unknown)
-                    {
-                        // This is a for-in statement.
-                        forInOfReference = new NameExpression(this.currentVarScope, declaration.VariableName);
-                        type = ForStatementType.ForIn;
-                        break;
-                    }
-                    else if (this.nextToken == IdentifierToken.Of && type == ForStatementType.Unknown)
-                    {
-                        // This is a for-of statement.
-                        forInOfReference = new NameExpression(this.currentVarScope, declaration.VariableName);
-                        type = ForStatementType.ForOf;
-                        break;
-                    }
-                    else if (this.nextToken != PunctuatorToken.Comma)
-                        throw new SyntaxErrorException(string.Format("Unexpected token {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                }
 
-                    // Read past the comma token.
-                    this.Expect(PunctuatorToken.Comma);
+                // The for-in and for-of expressions need a variable to assign to.  Is null for a regular for statement.
+                IReferenceExpression forInOfReference = null;
+                if (this.nextToken == KeywordToken.In || this.nextToken == IdentifierToken.Of)
+                {
+                    // This is a for-in statement or a for-of statement.
+                    if (initStatement is ExpressionStatement initExpressionStatement)
+                    {
+                        if ((initExpressionStatement.Expression is IReferenceExpression) == false)
+                            throw new SyntaxErrorException("Invalid left-hand side in for loop.", this.LineNumber, this.SourcePath);
+                        forInOfReference = (IReferenceExpression)initExpressionStatement.Expression;
+                    }
+                    else if (initStatement is VarLetOrConstStatement initVarLetOrConstStatement)
+                    {
+                        if (initVarLetOrConstStatement.Declarations.Count != 1)
+                            throw new SyntaxErrorException("Invalid left-hand side in for loop; must have a single binding.", this.LineNumber, this.SourcePath);
+                        forInOfReference = new NameExpression(this.currentScope, initVarLetOrConstStatement.Declarations[0].VariableName);
+                    }
+                }
 
-                    // Keep track of the start of the statement so that source debugging works correctly.
+
+                if (this.nextToken == KeywordToken.In)
+                {
+                    // for (x in y)
+                    // for (var x in y)
+                    // for (let x in y)
+                    var result = new ForInStatement(this.labelsForCurrentStatement);
+                    result.Scope = this.currentScope;
+                    result.Variable = forInOfReference;
+                    result.VariableSourceSpan = initStatement.SourceSpan;
+
+                    // Consume the "in".
+                    this.Expect(KeywordToken.In);
+
+                    // Parse the right-hand-side expression.
                     start = this.PositionAfterWhitespace;
+                    result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis);
+                    result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
 
-                    // Multiple initializers are not allowed in for-in statements.
-                    type = ForStatementType.For;
+                    // Read the right parenthesis.
+                    this.Expect(PunctuatorToken.RightParenthesis);
+
+                    // Read the statements that will be executed in the loop body.
+                    result.Body = ParseStatement(addingToExistingBlock: false);
+
+                    return result;
                 }
-
-                // Record the portion of the source document that will be highlighted when debugging.
-                varStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-            }
-            else
-            {
-                // Not a var initializer - can be a simple variable name then "in" or any expression ending with a semi-colon.
-                // The expression can be empty.
-                if (this.nextToken != PunctuatorToken.Semicolon)
+                else if (this.nextToken == IdentifierToken.Of)
                 {
-                    // Parse an expression.
-                    var initializationExpression = ParseExpression(PunctuatorToken.Semicolon, KeywordToken.In, IdentifierToken.Of);
+                    // for (x of y)
+                    // for (var x of y)
+                    // for (let x of y)
+                    var result = new ForOfStatement(this.labelsForCurrentStatement);
+                    result.Scope = this.currentScope;
+                    result.Variable = forInOfReference;
+                    result.VariableSourceSpan = initStatement.SourceSpan;
 
-                    // Record debug info for the expression.
-                    initializationStatement = new ExpressionStatement(initializationExpression);
-                    initializationStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    // Consume the "of".
+                    this.Expect(IdentifierToken.Of);
 
-                    if (this.nextToken == KeywordToken.In)
-                    {
-                        // This is a for-in statement.
-                        if ((initializationExpression is IReferenceExpression) == false)
-                            throw new SyntaxErrorException("Invalid left-hand side in for-in", this.LineNumber, this.SourcePath);
-                        forInOfReference = (IReferenceExpression)initializationExpression;
-                        type = ForStatementType.ForIn;
-                    }
-                    else if (this.nextToken == IdentifierToken.Of)
-                    {
-                        // This is a for-of statement.
-                        if ((initializationExpression is IReferenceExpression) == false)
-                            throw new SyntaxErrorException("Invalid left-hand side in for-of", this.LineNumber, this.SourcePath);
-                        forInOfReference = (IReferenceExpression)initializationExpression;
-                        type = ForStatementType.ForOf;
-                    }
-                }
-            }
-
-            if (type == ForStatementType.ForIn)
-            {
-                // for (x in y)
-                // for (var x in y)
-                var result = new ForInStatement(this.labelsForCurrentStatement);
-                result.Variable = forInOfReference;
-                result.VariableSourceSpan = initializationStatement.SourceSpan;
-                
-                // Consume the "in".
-                this.Expect(KeywordToken.In);
-
-                // Parse the right-hand-side expression.
-                start = this.PositionAfterWhitespace;
-                result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis);
-                result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-
-                // Read the right parenthesis.
-                this.Expect(PunctuatorToken.RightParenthesis);
-
-                // Read the statements that will be executed in the loop body.
-                result.Body = ParseStatement();
-
-                return result;
-            }
-            else if (type == ForStatementType.ForOf)
-            {
-                // for (x of y)
-                // for (var x of y)
-                var result = new ForOfStatement(this.labelsForCurrentStatement);
-                result.Variable = forInOfReference;
-                result.VariableSourceSpan = initializationStatement.SourceSpan;
-
-                // Consume the "of".
-                this.Expect(IdentifierToken.Of);
-
-                // Parse the right-hand-side expression.
-                start = this.PositionAfterWhitespace;
-                result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis, PunctuatorToken.Comma); // Comma is not allowed.
-                result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
-
-                // Read the right parenthesis.
-                this.Expect(PunctuatorToken.RightParenthesis);
-
-                // Read the statements that will be executed in the loop body.
-                result.Body = ParseStatement();
-
-                return result;
-            }
-            else
-            {
-                var result = new ForStatement(this.labelsForCurrentStatement);
-
-                // Set the initialization statement.
-                if (initializationStatement != null)
-                    result.InitStatement = initializationStatement;
-
-                // Read the semicolon.
-                this.Expect(PunctuatorToken.Semicolon);
-
-                // Parse the optional condition expression.
-                // Note: if the condition is omitted then it is considered to always be true.
-                if (this.nextToken != PunctuatorToken.Semicolon)
-                {
+                    // Parse the right-hand-side expression.
                     start = this.PositionAfterWhitespace;
-                    result.ConditionStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.Semicolon));
-                    result.ConditionStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    result.TargetObject = ParseExpression(PunctuatorToken.RightParenthesis, PunctuatorToken.Comma); // Comma is not allowed.
+                    result.TargetObjectSourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+
+                    // Read the right parenthesis.
+                    this.Expect(PunctuatorToken.RightParenthesis);
+
+                    // Read the statements that will be executed in the loop body.
+                    result.Body = ParseStatement(addingToExistingBlock: false);
+
+                    return result;
                 }
-
-                // Read the semicolon.
-                // Note: automatic semicolon insertion never inserts a semicolon in the header of a
-                // for statement.
-                this.Expect(PunctuatorToken.Semicolon);
-
-                // Parse the optional increment expression.
-                if (this.nextToken != PunctuatorToken.RightParenthesis)
+                else
                 {
-                    start = this.PositionAfterWhitespace;
-                    result.IncrementStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.RightParenthesis));
-                    result.IncrementStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    var result = new ForStatement(this.labelsForCurrentStatement);
+                    result.Scope = this.currentScope;
+
+                    // Set the initialization statement.
+                    if (initStatement != null)
+                        result.InitStatement = initStatement;
+
+                    // Read the semicolon.
+                    this.Expect(PunctuatorToken.Semicolon);
+
+                    // Parse the optional condition expression.
+                    // Note: if the condition is omitted then it is considered to always be true.
+                    if (this.nextToken != PunctuatorToken.Semicolon)
+                    {
+                        start = this.PositionAfterWhitespace;
+                        result.ConditionStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.Semicolon));
+                        result.ConditionStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    }
+
+                    // Read the semicolon.
+                    // Note: automatic semicolon insertion never inserts a semicolon in the header of a
+                    // for statement.
+                    this.Expect(PunctuatorToken.Semicolon);
+
+                    // Parse the optional increment expression.
+                    if (this.nextToken != PunctuatorToken.RightParenthesis)
+                    {
+                        start = this.PositionAfterWhitespace;
+                        result.IncrementStatement = new ExpressionStatement(ParseExpression(PunctuatorToken.RightParenthesis));
+                        result.IncrementStatement.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
+                    }
+
+                    // Read the right parenthesis.
+                    this.Expect(PunctuatorToken.RightParenthesis);
+
+                    // Read the statements that will be executed in the loop body.
+                    result.Body = ParseStatement(addingToExistingBlock: false);
+
+                    return result;
                 }
-
-                // Read the right parenthesis.
-                this.Expect(PunctuatorToken.RightParenthesis);
-
-                // Read the statements that will be executed in the loop body.
-                result.Body = ParseStatement();
-
-                return result;
             }
         }
 
@@ -977,7 +952,7 @@ namespace Jurassic.Compiler
         /// <returns> A return statement. </returns>
         private ReturnStatement ParseReturn()
         {
-            if (this.context != CodeContext.Function)
+            if (!IsInFunctionContext)
                 throw new SyntaxErrorException("Return statements are only allowed inside functions", this.LineNumber, this.SourcePath);
 
             var result = new ReturnStatement(this.labelsForCurrentStatement);
@@ -1025,7 +1000,7 @@ namespace Jurassic.Compiler
             var start = this.PositionAfterWhitespace;
 
             // Read an object reference.
-            var objectEnvironment = ParseExpression(PunctuatorToken.RightParenthesis);
+            result.WithObject = ParseExpression(PunctuatorToken.RightParenthesis);
 
             // Record the portion of the source document that will be highlighted when debugging.
             result.SourceSpan = new SourceCodeSpan(start, this.PositionBeforeWhitespace);
@@ -1034,11 +1009,11 @@ namespace Jurassic.Compiler
             this.Expect(PunctuatorToken.RightParenthesis);
 
             // Create a new scope and assign variables within the with statement to the scope.
-            result.Scope = ObjectScope.CreateWithScope(this.currentLetScope, objectEnvironment);
-            using (CreateScopeContext(letScope: result.Scope, varScope: result.Scope))
+            result.WithScope = Scope.CreateWithScope(this.currentScope);
+            using (CreateScopeContext(result.WithScope))
             {
                 // Read the body of the with statement.
-                result.Body = ParseStatement();
+                result.Body = ParseStatement(addingToExistingBlock: false);
             }
 
             return result;
@@ -1091,7 +1066,7 @@ namespace Jurassic.Compiler
 
                     // Zero or more statements can be added to the case statement.
                     while (this.nextToken != KeywordToken.Case && this.nextToken != KeywordToken.Default && this.nextToken != PunctuatorToken.RightBrace)
-                        caseClause.BodyStatements.Add(ParseStatement());
+                        caseClause.BodyStatements.Add(ParseStatement(addingToExistingBlock: true));
 
                     // Add the case clause to the switch statement.
                     result.CaseClauses.Add(caseClause);
@@ -1112,7 +1087,7 @@ namespace Jurassic.Compiler
 
                     // Zero or more statements can be added to the case statement.
                     while (this.nextToken != KeywordToken.Case && this.nextToken != KeywordToken.Default && this.nextToken != PunctuatorToken.RightBrace)
-                        defaultClause.BodyStatements.Add(ParseStatement());
+                        defaultClause.BodyStatements.Add(ParseStatement(addingToExistingBlock: true));
 
                     // Add the default clause to the switch statement.
                     result.CaseClauses.Add(defaultClause);
@@ -1205,13 +1180,11 @@ namespace Jurassic.Compiler
                     // Read the right parenthesis.
                     this.Expect(PunctuatorToken.RightParenthesis);
 
-                    // Create a new scope for the catch variable.
-                    result.CatchScope = DeclarativeScope.CreateCatchScope(this.currentLetScope, result.CatchVariableName);
-                    using (CreateScopeContext(letScope: result.CatchScope, varScope: result.CatchScope))
-                    {
-                        // Parse the statements inside the catch block.
-                        result.CatchBlock = ParseBlock();
-                    }
+                    // Parse the statements inside the catch block.
+                    result.CatchBlock = ParseBlock();
+
+                    // Add the catch variable to the scope.
+                    result.CatchBlock.Scope.DeclareVariable(KeywordToken.Let, result.CatchVariableName);
                 }
             }
 
@@ -1271,10 +1244,15 @@ namespace Jurassic.Compiler
             ValidateVariableName(functionName);
 
             // Parse the function declaration.
-            var expression = ParseFunction(FunctionDeclarationType.Declaration, this.initialScope, functionName, startPosition);
+            var expression = ParseFunction(
+                        functionType: FunctionDeclarationType.Declaration,
+                        parentScope: this.initialScope,
+                        name: new PropertyName(functionName),
+                        startPosition: startPosition,
+                        codeContext: CodeContext.Function);
 
             // Add the function to the top-level scope.
-            this.initialScope.DeclareVariable(expression.FunctionName, expression, writable: true, deletable: this.context == CodeContext.Eval);
+            this.currentScope.DeclareVariable(KeywordToken.Var, functionName, hoistedFunction: expression);
 
             // Function declarations do nothing at the point of declaration - everything happens
             // at the top of the function/global code.
@@ -1286,38 +1264,40 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="functionType"> The type of function to parse. </param>
         /// <param name="parentScope"> The parent scope for the function. </param>
-        /// <param name="functionName"> The name of the function (can be empty). </param>
+        /// <param name="name"> The name of the function (can be computed at runtime). </param>
         /// <param name="startPosition"> The position of the start of the function. </param>
+        /// <param name="codeContext"> Indicates the parsing context. </param>
         /// <returns> A function expression. </returns>
-        private FunctionExpression ParseFunction(FunctionDeclarationType functionType, Scope parentScope, string functionName, SourceCodePosition startPosition)
+        private FunctionExpression ParseFunction(FunctionDeclarationType functionType, Scope parentScope, PropertyName name, SourceCodePosition startPosition, CodeContext codeContext)
         {
             // Read the left parenthesis.
             this.Expect(PunctuatorToken.LeftParenthesis);
 
             // Create a new scope and assign variables within the function body to the scope.
-            bool includeNameInScope = functionType != FunctionDeclarationType.Getter && functionType != FunctionDeclarationType.Setter;
-            var scope = DeclarativeScope.CreateFunctionScope(parentScope, includeNameInScope ? functionName : string.Empty, null);
+            var functionName = !name.IsGetter && !name.IsSetter && name.HasStaticName &&
+                codeContext != CodeContext.Constructor && codeContext != CodeContext.DerivedConstructor ? name.StaticName : null;
+            var scope = Scope.CreateFunctionScope(functionName, null);
 
             // Replace scope and methodOptimizationHints.
-            var originalScope = this.currentVarScope;
+            var originalScope = this.currentScope;
             var originalMethodOptimizationHints = this.methodOptimizationHints;
             var newMethodOptimizationHints = new MethodOptimizationHints();
             this.methodOptimizationHints = newMethodOptimizationHints;
-            this.currentVarScope = scope;
+            this.currentScope = scope;
 
             // Read zero or more arguments.
             var arguments = ParseFunctionArguments(PunctuatorToken.RightParenthesis);
 
             // Restore scope and methodOptimizationHints.
             this.methodOptimizationHints = originalMethodOptimizationHints;
-            this.currentVarScope = originalScope;
+            this.currentScope = originalScope;
 
             // Getters must have zero arguments.
-            if (functionType == FunctionDeclarationType.Getter && arguments.Count != 0)
+            if (name.IsGetter && arguments.Count != 0)
                 throw new SyntaxErrorException("Getters cannot have arguments", this.LineNumber, this.SourcePath);
 
             // Setters must have one argument.
-            if (functionType == FunctionDeclarationType.Setter && arguments.Count != 1)
+            if (name.IsSetter && arguments.Count != 1)
                 throw new SyntaxErrorException("Setters must have a single argument", this.LineNumber, this.SourcePath);
 
             // Read the right parenthesis.
@@ -1335,7 +1315,7 @@ namespace Jurassic.Compiler
             this.methodOptimizationHints.HasNestedFunction = true;
 
             // Read the function body.
-            var functionParser = CreateFunctionBodyParser(this, scope, newMethodOptimizationHints);
+            var functionParser = CreateFunctionBodyParser(this, scope, newMethodOptimizationHints, codeContext);
             var body = functionParser.Parse();
 
             // Transfer state back from the function parser.
@@ -1367,12 +1347,11 @@ namespace Jurassic.Compiler
             // Create a new function expression.
             var options = this.options.Clone();
             options.ForceStrictMode = functionParser.StrictMode;
-            var context = new FunctionMethodGenerator(scope, functionName,
-                functionType, arguments,
-                bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body,
+            var context = new FunctionMethodGenerator(name, functionType, arguments,
+                bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1), body, scope,
                 this.SourcePath, new SourceCodeSpan(startPosition, endPosition), options);
             context.MethodOptimizationHints = functionParser.methodOptimizationHints;
-            return new FunctionExpression(context);
+            return new FunctionExpression(context, this.currentScope);
         }
 
         /// <summary>
@@ -1404,7 +1383,7 @@ namespace Jurassic.Compiler
 
                     // Add the variable to the scope so that it can be used in the default value of
                     // the next argument.  Do this *after* parsing the default value.
-                    this.currentVarScope.DeclareVariable(argument.Name);
+                    this.currentScope.DeclareVariable(KeywordToken.Var, argument.Name);
 
                     // Add the argument to the list.
                     arguments.Add(argument);
@@ -1449,6 +1428,10 @@ namespace Jurassic.Compiler
 
                 // Read the rest of the statement.
                 return ParseStatementNoNewContext();
+            }
+            else if (this.nextToken is IdentifierToken && expression is NameExpression nameExpression && nameExpression.Name == "let")
+            {
+                return ParseVarLetOrConst(KeywordToken.Let, consumeKeyword: false);
             }
             else
             {
@@ -1558,9 +1541,11 @@ namespace Jurassic.Compiler
                 if ((this.nextToken is LiteralToken && (!(this.nextToken is TemplateLiteralToken) || this.expressionState == ParserExpressionState.Literal)) ||
                     this.nextToken is IdentifierToken ||
                     this.nextToken == KeywordToken.Function ||
+                    this.nextToken == KeywordToken.Class ||
                     this.nextToken == KeywordToken.This ||
-                    this.nextToken == PunctuatorToken.LeftBrace ||
-                    (this.nextToken == PunctuatorToken.LeftBracket && this.expressionState == ParserExpressionState.Literal) ||
+                    this.nextToken == KeywordToken.Super ||
+                    (this.expressionState == ParserExpressionState.Literal &&
+                        (this.nextToken == PunctuatorToken.LeftBrace || this.nextToken == PunctuatorToken.LeftBracket)) ||
                     (this.nextToken is KeywordToken && unboundOperator != null && unboundOperator.OperatorType == OperatorType.MemberAccess && this.expressionState == ParserExpressionState.Literal))
                 {
                     // If a literal was found where an operator was expected, insert a semi-colon
@@ -1571,9 +1556,15 @@ namespace Jurassic.Compiler
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && this.consumedLineTerminator == true)
                             break;
-                        // Check for "of" contextual keyword.
+
+                        // Check for 'of' contextual keyword.
                         if (Array.IndexOf(endTokens, IdentifierToken.Of) >= 0)
                             break;
+
+                        // Check for 'let' contextual keyword.
+                        if (root is NameExpression nameExpression && nameExpression.Name == "let" && this.nextToken is IdentifierToken)
+                            break;
+
                         throw new SyntaxErrorException(string.Format("Expected operator but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
@@ -1605,7 +1596,7 @@ namespace Jurassic.Compiler
                     {
                         // If the token is an identifier, convert it to a NameExpression.
                         var identifierName = ((IdentifierToken)this.nextToken).Name;
-                        terminal = new NameExpression(this.currentVarScope, identifierName);
+                        terminal = new NameExpression(this.currentScope, identifierName);
 
                         // Record each occurance of a variable name.
                         if (unboundOperator == null || unboundOperator.OperatorType != OperatorType.MemberAccess)
@@ -1619,6 +1610,14 @@ namespace Jurassic.Compiler
                         // Add method optimization info.
                         this.methodOptimizationHints.HasThis = true;
                     }
+                    else if (this.nextToken == KeywordToken.Super)
+                    {
+                        // Convert "super" to an expression.
+                        terminal = new SuperExpression();
+
+                        // Add method optimization info.
+                        this.methodOptimizationHints.HasThis = true;
+                    }
                     else if (this.nextToken == PunctuatorToken.LeftBracket)
                         // Array literal.
                         terminal = ParseArrayLiteral();
@@ -1627,6 +1626,8 @@ namespace Jurassic.Compiler
                         terminal = ParseObjectLiteral();
                     else if (this.nextToken == KeywordToken.Function)
                         terminal = ParseFunctionExpression();
+                    else if (this.nextToken == KeywordToken.Class)
+                        terminal = ParseClassExpression();
                     else
                         throw new InvalidOperationException("Unsupported literal type.");
 
@@ -1653,12 +1654,54 @@ namespace Jurassic.Compiler
                     // Make sure the token is actually an operator and not just a random keyword.
                     if (newOperator == null)
                     {
+                        if (this.nextToken == PunctuatorToken.Dot &&
+                            unboundOperator != null &&
+                            unboundOperator.OperatorType == OperatorType.New &&
+                            unboundOperator.AcceptingOperands &&
+                            expressionState == ParserExpressionState.Literal)
+                        {
+                            // new.target is a pseudo-property, ugh.
+                            Consume();
+                            if (this.nextToken is IdentifierToken identifierToken && identifierToken.Name == "target")
+                            {
+                                if (!IsInFunctionContext)
+                                    throw new SyntaxErrorException("new.target expression is not allowed here.", this.LineNumber, this.SourcePath);
+                                Consume();
+                                if (root == unboundOperator)
+                                {
+                                    root = new NewTargetExpression();
+                                    unboundOperator = null;
+                                }
+                                else
+                                {
+                                    var node = root as OperatorExpression;
+                                    while (node != null)
+                                    {
+                                        if (node.RightBranch == unboundOperator)
+                                        {
+                                            node.Pop();
+                                            node.Push(new NewTargetExpression());
+                                            unboundOperator = node;
+                                            break;
+                                        }
+                                        node = node.RightBranch;
+                                    }
+                                }
+                                expressionState = ParserExpressionState.Operator;
+                                continue;
+                            }
+                            else
+                                throw new SyntaxErrorException("Expected 'target'", this.LineNumber, this.SourcePath);
+                        }
+
                         // Check if the token is an end token, for example a semi-colon.
                         if (Array.IndexOf(endTokens, this.nextToken) >= 0)
                             break;
+
                         // Check for automatic semi-colon insertion.
                         if (Array.IndexOf(endTokens, PunctuatorToken.Semicolon) >= 0 && (this.consumedLineTerminator == true || this.nextToken == PunctuatorToken.RightBrace))
                             break;
+
                         throw new SyntaxErrorException(string.Format("Unexpected token {0} in expression.", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
                     }
 
@@ -1729,7 +1772,7 @@ namespace Jurassic.Compiler
                         }
 
                         // All the other situations involve the creation of a new operator.
-                        var newExpression = OperatorExpression.FromOperator(newOperator);
+                        var newExpression = OperatorExpression.FromOperator(newOperator, this.currentScope);
 
                         // 2. The new operator is a prefix operator.  The new operator becomes an operand
                         //    of the previous operator.
@@ -1851,7 +1894,7 @@ namespace Jurassic.Compiler
                 throw new SyntaxErrorException(string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Check the AST is valid.
-            CheckASTValidity(root);
+            root.CheckValidity(this.context, this.LineNumber, this.SourcePath);
 
             // A literal is the next valid expression token.
             this.expressionState = ParserExpressionState.Literal;
@@ -1862,43 +1905,10 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Checks the given AST is valid.
-        /// </summary>
-        /// <param name="root"> The root of the AST. </param>
-        private void CheckASTValidity(Expression root)
-        {
-            // Push the root expression onto a stack.
-            Stack<Expression> stack = new Stack<Expression>();
-            stack.Push(root);
-
-            while (stack.Count > 0)
-            {
-                // Pop the next expression from the stack.
-                var expression = stack.Pop() as OperatorExpression;
-                
-                // Only operator expressions are checked for validity.
-                if (expression == null)
-                    continue;
-
-                // Check the operator expression has the right number of operands.
-                if (expression.Operator.IsValidNumberOfOperands(expression.OperandCount) == false)
-                    throw new SyntaxErrorException("Wrong number of operands", this.LineNumber, this.SourcePath);
-
-                // Check the operator expression is closed.
-                if (expression.Operator.SecondaryToken != null && expression.SecondTokenEncountered == false)
-                    throw new SyntaxErrorException(string.Format("Missing closing token '{0}'", expression.Operator.SecondaryToken.Text), this.LineNumber, this.SourcePath);
-
-                // Check the child nodes.
-                for (int i = 0; i < expression.OperandCount; i++)
-                    stack.Push(expression.GetRawOperand(i));
-            }
-        }
-
-        /// <summary>
         /// Parses an array literal (e.g. "[1, 2]").
         /// </summary>
         /// <returns> A literal expression that represents the array literal. </returns>
-        private LiteralExpression ParseArrayLiteral()
+        private ArrayLiteralExpression ParseArrayLiteral()
         {
             // Read past the initial '[' token.
             Debug.Assert(this.nextToken == PunctuatorToken.LeftBracket);
@@ -1927,20 +1937,20 @@ namespace Jurassic.Compiler
             // The end token ']' will be consumed by the parent function.
             Debug.Assert(this.nextToken == PunctuatorToken.RightBracket);
 
-            return new LiteralExpression(items);
+            return new ArrayLiteralExpression(items);
         }
 
         /// <summary>
         /// Parses an object literal (e.g. "{a: 5}").
         /// </summary>
         /// <returns> A literal expression that represents the object literal. </returns>
-        private LiteralExpression ParseObjectLiteral()
+        private ObjectLiteralExpression ParseObjectLiteral()
         {
             // Read past the initial '{' token.
             Debug.Assert(this.nextToken == PunctuatorToken.LeftBrace);
             this.Consume();
 
-            var properties = new List<KeyValuePair<Expression, Expression>>();
+            var properties = new List<PropertyDeclaration>();
             while (true)
             {
                 // If the next token is '}', then the object literal is complete.
@@ -1950,52 +1960,49 @@ namespace Jurassic.Compiler
                 // Record the position in case it's a function.
                 var startPosition = this.PositionAfterWhitespace;
 
-                // Read the next property name.
-                PropertyNameType nameType;
-                Expression propertyName = ReadPropertyNameExpression(out nameType);
+                // Read the property name.
+                var propertyName = ReadPropertyName(PropertyNameContext.ObjectLiteral);
 
                 // Check if this is a getter or setter.
                 Expression propertyValue;
-                if (this.nextToken != PunctuatorToken.Colon && (nameType == PropertyNameType.Get || nameType == PropertyNameType.Set))
+                if (propertyName.IsGetter || propertyName.IsSetter)
                 {
-                    // Getters and setters can have any name that is allowed of a property.
-                    PropertyNameType nameType2;
-                    propertyName = ReadPropertyNameExpression(out nameType2);
-
-                    // Parse the function name and body.
-                    string nameAsString = propertyName is LiteralExpression ? (string)((LiteralExpression)propertyName).Value : string.Empty;
-                    var function = ParseFunction(nameType == PropertyNameType.Get ? FunctionDeclarationType.Getter : FunctionDeclarationType.Setter, this.currentVarScope, nameAsString, startPosition);
+                    // Parse the function body.
+                    var function = ParseFunction(
+                        functionType: FunctionDeclarationType.Declaration,
+                        parentScope: this.currentScope,
+                        name: propertyName,
+                        startPosition: startPosition,
+                        codeContext: CodeContext.ObjectLiteralFunction);
 
                     // Add the getter or setter to the list of properties to set.
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, function));
+                    properties.Add(new PropertyDeclaration(propertyName, function));
                 }
-                else if (nameType != PropertyNameType.Expression && (this.nextToken == PunctuatorToken.Comma || this.nextToken == PunctuatorToken.RightBrace))
+                else if (propertyName.HasStaticName && (this.nextToken == PunctuatorToken.Comma || this.nextToken == PunctuatorToken.RightBrace))
                 {
                     // This is a shorthand property e.g. "var a = 1, b = 2, c = { a, b }" is the
                     // same as "var a = 1, b = 2, c = { a: a, b: b }".
-                    string nameAsString = (string)((LiteralExpression)propertyName).Value;
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, new NameExpression(this.currentVarScope, nameAsString)));
+                    properties.Add(new PropertyDeclaration(propertyName, new NameExpression(this.currentScope, propertyName.StaticName)));
                 }
                 else if (this.nextToken == PunctuatorToken.LeftParenthesis)
                 {
                     // This is a shorthand function e.g. "var a = { b() { return 2; } }" is the
                     // same as "var a = { b: function() { return 2; } }".
 
-                    // Determine the function name. TODO: the function name can be dynamic, i.e.
-                    // only available at runtime, figure out how to accommodate this.
-                    string nameAsString = string.Empty;
-                    if (propertyName is LiteralExpression literalExpression && literalExpression.ResultType != PrimitiveType.Object)
-                        nameAsString = TypeConverter.ToString(literalExpression.Value);
-
                     // Parse the function.
-                    var function = ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, nameAsString, startPosition);
+                    var function = ParseFunction(
+                        functionType: FunctionDeclarationType.Expression,
+                        parentScope: this.currentScope,
+                        name: propertyName,
+                        startPosition: startPosition,
+                        codeContext: CodeContext.ObjectLiteralFunction);
 
                     // Strangely enough, if declarationType is Expression then the last right
                     // brace ('}') is not consumed.
                     this.Expect(PunctuatorToken.RightBrace);
 
                     // Add the function to the list of properties to set.
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, function));
+                    properties.Add(new PropertyDeclaration(propertyName, function));
                 }
                 else
                 {
@@ -2008,7 +2015,7 @@ namespace Jurassic.Compiler
                     propertyValue = ParseExpression(PunctuatorToken.Comma, PunctuatorToken.RightBrace);
 
                     // Add the property to the list.
-                    properties.Add(new KeyValuePair<Expression, Expression>(propertyName, propertyValue));
+                    properties.Add(new PropertyDeclaration(propertyName, propertyValue));
                 }
 
                 // Read past the comma.
@@ -2020,81 +2027,68 @@ namespace Jurassic.Compiler
             // The end token '}' will be consumed by the parent function.
             Debug.Assert(this.nextToken == PunctuatorToken.RightBrace);
 
-            return new LiteralExpression(properties);
+            return new ObjectLiteralExpression(properties);
+        }
+
+        private enum PropertyNameContext
+        {
+            ObjectLiteral,
+            ClassBody,
+            AfterStatic,
+            AfterGetOrSet,
         }
 
         /// <summary>
-        /// Distinguishes between the different ways of specifying a property name.
+        /// Reads a property name, as used in object literals and class bodies.
         /// </summary>
-        private enum PropertyNameType
+        /// <param name="context">  </param>
+        /// <returns> Details on the property name. </returns>
+        private PropertyName ReadPropertyName(PropertyNameContext context)
         {
-            Name,
-            Get,
-            Set,
-            Expression,
-        }
+            // Read and consume the next token.
+            var token = this.nextToken;
+            Consume();
 
-        /// <summary>
-        /// Reads a property name, used in object literals.
-        /// </summary>
-        /// <param name="nameType"> Identifies the particular way the property was specified. </param>
-        /// <returns> An expression that evaluates to the property name. </returns>
-        private Expression ReadPropertyNameExpression(out PropertyNameType nameType)
-        {
-            Expression result;
-            if (this.nextToken is LiteralToken)
+            if (token is LiteralToken literalToken)
             {
-                // The property name can be a string or a number or (in ES5) a keyword.
-                if (((LiteralToken)this.nextToken).IsKeyword == true)
-                {
-                    // false, true or null.
-                    result = new LiteralExpression(this.nextToken.Text);
-                }
-                else
-                {
-                    object literalValue = ((LiteralToken)this.nextToken).Value;
-                    if (literalValue is string || literalValue is int)
-                        result = new LiteralExpression(((LiteralToken)this.nextToken).Value.ToString());
-                    else if (literalValue is double)
-                        result = new LiteralExpression(((double)((LiteralToken)this.nextToken).Value).ToString(CultureInfo.InvariantCulture));
-                    else
-                        throw new SyntaxErrorException(string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
-                }
-                nameType = PropertyNameType.Name;
+                // The property name can be a string or a number or (in ES5) a keyword like false, true or null.
+                return new PropertyName(literalToken.ToPropertyName());
             }
-            else if (this.nextToken is IdentifierToken)
+            else if (token is IdentifierToken identifierToken)
             {
                 // An identifier is also okay.
-                var name = ((IdentifierToken)this.nextToken).Name;
-                if (name == "get")
-                    nameType = PropertyNameType.Get;
-                else if (name == "set")
-                    nameType = PropertyNameType.Set;
-                else
-                    nameType = PropertyNameType.Name;
-                result = new LiteralExpression(name);
+                // Note: that { get() { return 1; } } is valid (creates a function called 'get'),
+                // and { get get() { return 1; } } is valid (creates a getter called 'get'),
+                // but { get get get() { return 1; } } is not.
+                if (context != PropertyNameContext.AfterGetOrSet)
+                {
+                    var flags = PropertyNameFlags.None;
+                    if (identifierToken.Name == "get")
+                        flags = PropertyNameFlags.Get;
+                    else if (identifierToken.Name == "set")
+                        flags = PropertyNameFlags.Set;
+                    if (flags != PropertyNameFlags.None && (!(this.nextToken is PunctuatorToken) || this.nextToken == PunctuatorToken.LeftBracket))
+                        return ReadPropertyName(PropertyNameContext.AfterGetOrSet).WithFlags(flags);
+                }
+                return new PropertyName(identifierToken.Name);
             }
-            else if (this.nextToken is KeywordToken)
+            else if (token is KeywordToken keywordToken)
             {
-                // In ES5 a keyword is also okay.
-                result = new LiteralExpression(((KeywordToken)this.nextToken).Name);
-                nameType = PropertyNameType.Name;
+                // In ES5 a keyword like 'if' is also okay.
+                if (keywordToken == KeywordToken.Static && context == PropertyNameContext.ClassBody &&
+                    (!(this.nextToken is PunctuatorToken) || this.nextToken == PunctuatorToken.LeftBracket))
+                    return ReadPropertyName(PropertyNameContext.AfterStatic).WithFlags(PropertyNameFlags.Static);
+                return new PropertyName(keywordToken.Name);
             }
-            else if (this.nextToken == PunctuatorToken.LeftBracket)
+            else if (token == PunctuatorToken.LeftBracket)
             {
                 // ES6 computed property.
+                var expression = ParseExpression(PunctuatorToken.RightBracket);
                 this.Consume();
-                result = ParseExpression(PunctuatorToken.RightBracket);
-                nameType = PropertyNameType.Expression;
+                return new PropertyName(expression);
             }
             else
                 throw new SyntaxErrorException(string.Format("Expected property name but found {0}", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
-
-            // Consume the token.
-            this.Consume();
-
-            // Return the property name.
-            return result;
         }
 
         /// <summary>
@@ -2118,7 +2112,12 @@ namespace Jurassic.Compiler
             }
 
             // Parse the rest of the function.
-            return ParseFunction(FunctionDeclarationType.Expression, this.currentVarScope, functionName, startPosition);
+            return ParseFunction(
+                    functionType: FunctionDeclarationType.Expression,
+                    parentScope: this.currentScope,
+                    name: new PropertyName(functionName),
+                    startPosition: startPosition,
+                    codeContext: CodeContext.Function);
         }
 
         /// <summary>
@@ -2155,6 +2154,167 @@ namespace Jurassic.Compiler
 
             // If this is an untagged template literal, return a UntaggedTemplateExpression.
             return new TemplateLiteralExpression(strings, values, rawStrings);
+        }
+
+
+
+        /// <summary>
+        /// Parses a class declaration.
+        /// </summary>
+        /// <returns> A statement representing the class. </returns>
+        private Statement ParseClassDeclaration()
+        {
+            // Record the start of the function.
+            var startPosition = this.PositionAfterWhitespace;
+
+            // Consume the function keyword.
+            this.Expect(KeywordToken.Class);
+
+            // Read the class name.
+            var className = this.ExpectIdentifier();
+            ValidateVariableName(className);
+
+            // Parse the extends bit.
+            Expression extends = null;
+            if (this.nextToken == KeywordToken.Extends)
+            {
+                this.Consume();
+                extends = ParseExpression(PunctuatorToken.LeftBrace);
+            }
+
+            // Parse the class body.
+            var classExpression = ParseClassBody(className, extends, startPosition);
+
+            // Consume the end token.
+            this.Consume();
+
+            // For 'class A' construct an expression like 'A = class A'.
+            this.currentScope.DeclareVariable(KeywordToken.Let, className);
+            var result = new ExpressionStatement(this.labelsForCurrentStatement,
+                new AssignmentExpression(this.currentScope, className, classExpression));
+            result.SourceSpan = new SourceCodeSpan(startPosition, this.PositionBeforeWhitespace);
+            return result;
+        }
+
+        /// <summary>
+        /// Parses a class expression.
+        /// </summary>
+        /// <returns> A class expression. </returns>
+        private ClassExpression ParseClassExpression()
+        {
+            // Record the start of the function.
+            var startPosition = this.PositionAfterWhitespace;
+
+            // Consume the function keyword.
+            this.Expect(KeywordToken.Class);
+
+            // The class name is optional for class expressions.
+            string className = null;
+            if (this.nextToken is IdentifierToken)
+            {
+                className = this.ExpectIdentifier();
+                ValidateVariableName(className);
+            }
+
+            // Parse the extends bit.
+            Expression extends = null;
+            if (this.nextToken == KeywordToken.Extends)
+            {
+                this.Consume();
+                extends = ParseExpression(PunctuatorToken.LeftBrace);
+            }
+
+            // Parse the rest of the class.
+            return ParseClassBody(className, extends, startPosition);
+        }
+
+        /// <summary>
+        /// Parses the body of a class declaration or a class expression.
+        /// </summary>
+        /// <param name="className"> The name of the class (can be empty). </param>
+        /// <param name="extends"> The base class, or <c>null</c> if this class doesn't inherit
+        /// from another class. </param>
+        /// <param name="startPosition"> The position of the start of the function. </param>
+        /// <returns> A class expression. </returns>
+        private ClassExpression ParseClassBody(string className, Expression extends, SourceCodePosition startPosition)
+        {
+            // The contents of the class should all be considered to be strict mode.
+            var originalStrictMode = StrictMode;
+            this.StrictMode = true;
+
+            // Read the left brace.
+            this.Expect(PunctuatorToken.LeftBrace);
+
+            // Create a new scope to store the class name, if one was supplied.
+            var scope = this.currentScope;
+            if (className != null)
+            {
+                scope = Scope.CreateBlockScope(this.currentScope);
+                scope.DeclareVariable(KeywordToken.Let, className);
+            }
+            using (CreateScopeContext(scope))
+            {
+
+                var members = new List<FunctionExpression>();
+                FunctionExpression constructor = null;
+                while (true)
+                {
+                    // If the next token is '}', then the class is complete.
+                    if (this.nextToken == PunctuatorToken.RightBrace)
+                        break;
+
+                    // A bare semi-colon is an allowed class element.
+                    if (this.nextToken == PunctuatorToken.Semicolon)
+                    {
+                        Consume();
+                        continue;
+                    }
+
+                    // Record the start of the member.
+                    var memberStartPosition = this.PositionAfterWhitespace;
+
+                    // Read the name of the next class member.
+                    // This will start with 'get', 'set', 'constructor' or a function name.
+                    var memberName = ReadPropertyName(PropertyNameContext.ClassBody);
+
+                    // Determine the parser context.
+                    bool isConstructor = memberName.HasStaticName && memberName.StaticName == "constructor";
+                    var parserContext = isConstructor ? (extends != null ? CodeContext.DerivedConstructor : CodeContext.Constructor) : CodeContext.ClassFunction;
+
+                    // Parse the function declaration.
+                    var expression = ParseFunction(
+                        functionType: FunctionDeclarationType.Declaration,
+                        parentScope: this.currentScope,
+                        name: memberName,
+                        startPosition: memberStartPosition,
+                        codeContext: parserContext);
+
+                    if (memberName.HasStaticName && memberName.StaticName == "constructor")
+                    {
+                        // Only one constructor is allowed.
+                        if (constructor == null)
+                            constructor = expression;
+                        else
+                            throw new SyntaxErrorException("A class may only have one constructor.", this.LineNumber, this.SourcePath);
+                    }
+                    else if (memberName.IsStatic && memberName.HasStaticName && memberName.StaticName == "prototype")
+                    {
+                        // A static function called 'prototype' is not allowed.
+                        throw new SyntaxErrorException("Classes may not have a static property named 'prototype'.", this.LineNumber, this.SourcePath);
+                    }
+                    else
+                        members.Add(expression);
+                }
+
+                // The end token '}' will be consumed by the parent function.
+                Debug.Assert(this.nextToken == PunctuatorToken.RightBrace);
+
+                // Restore strict mode.
+                this.StrictMode = originalStrictMode;
+
+                return new ClassExpression(this.currentScope, className, extends, constructor, members);
+
+            }
         }
     }
 

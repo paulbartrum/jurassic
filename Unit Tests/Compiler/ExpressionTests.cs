@@ -21,7 +21,7 @@ namespace UnitTests
             Assert.AreEqual(3.1415, Evaluate("+3.1415"));
             Assert.AreEqual(5, Evaluate("+new Date(5)"));
             Assert.AreEqual(double.NaN, Evaluate("+new Object()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("+Symbol()"));
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a number.", EvaluateExceptionMessage("+Symbol()"));
         }
 
         [TestMethod]
@@ -36,7 +36,7 @@ namespace UnitTests
             Assert.AreEqual(-3.1415, Evaluate("-3.1415"));
             Assert.AreEqual(-5, Evaluate("-new Date(5)"));
             Assert.AreEqual(double.NaN, Evaluate("-new Object()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("-Symbol()"));
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a number.", EvaluateExceptionMessage("-Symbol()"));
         }
 
         [TestMethod]
@@ -47,6 +47,8 @@ namespace UnitTests
             Assert.AreEqual(19, Evaluate("~-20"));
             Assert.AreEqual(-9, Evaluate("~4294967304"));
             Assert.AreEqual(-21, Evaluate("~ '20'"));
+            Assert.AreEqual(-1, Evaluate("~false"));
+            Assert.AreEqual(-2, Evaluate("~true"));
 
             // Double bitwise not converts the input to a Int32.
             Assert.AreEqual(1, Evaluate("~~'1.2'"));
@@ -116,9 +118,9 @@ namespace UnitTests
             Assert.AreEqual("test1", Evaluate("'test' + {valueOf: function() {return 1}, toString: function() {return 0}}"));
             Assert.AreEqual(3, Evaluate("1 + {valueOf: function() {return 2}, toString: function() {return 3}}"));
             Assert.AreEqual("12", Evaluate("1 + {valueOf: function() {return '2'}, toString: function() {return '3'}}"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("1 + Symbol()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Symbol() + 1"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Symbol() + new Number(6)"));
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a number.", EvaluateExceptionMessage("1 + Symbol()"));
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a number.", EvaluateExceptionMessage("Symbol() + 1"));
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a number.", EvaluateExceptionMessage("Symbol() + new Number(6)"));
 
             // Variables
             Assert.AreEqual(35, Evaluate("x = 15; x + 20"));
@@ -172,7 +174,7 @@ namespace UnitTests
                 DeclCE = ""--("" + CommentCE + "")?|\\[CDATA\\[("" + CDATA_CE + "")?|DOCTYPE("" + DocTypeCE + "")?"";
                 PI_CE = Name + ""("" + PI_Tail + "")?"";
                 PI_CE"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("Symbol() + 'test'"));
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a string.", EvaluateExceptionMessage("Symbol() + 'test'"));
         }
 
         [TestMethod]
@@ -191,7 +193,7 @@ namespace UnitTests
             Assert.AreEqual(-1, Evaluate("new Number(5) - new Number(6)"));
             Assert.AreEqual(double.NaN, Evaluate("'test' - new Number(6)"));
             Assert.AreEqual(double.NaN, Evaluate("new Number(5) - 'test'"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new Number(5) - Symbol()"));
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a number.", EvaluateExceptionMessage("new Number(5) - Symbol()"));
 
             // Variables
             Assert.AreEqual(-5, Evaluate("x = 15; x - 20"));
@@ -707,6 +709,8 @@ namespace UnitTests
             Assert.AreEqual(16, Evaluate("42949673042 & -401929233123"));
             Assert.AreEqual(1, Evaluate("11.9 & 1.5"));
             Assert.AreEqual(0, Evaluate("NaN & NaN"));
+            Assert.AreEqual(0, Evaluate("true & false"));
+            Assert.AreEqual(0, Evaluate("false & false"));
 
             // Variables
             Assert.AreEqual(3, Evaluate("x = 11; x & 7"));
@@ -726,6 +730,8 @@ namespace UnitTests
             Assert.AreEqual(10, Evaluate("11.5 ^ 1.5"));
             Assert.AreEqual(3, Evaluate("'5' ^ '6'"));
             Assert.AreEqual(1, Evaluate("'a' ^ 1"));
+            Assert.AreEqual(1, Evaluate("true ^ false"));
+            Assert.AreEqual(0, Evaluate("false ^ false"));
 
             // Variables
             Assert.AreEqual(12, Evaluate("x = 11; x ^ 7"));
@@ -744,6 +750,8 @@ namespace UnitTests
             Assert.AreEqual(11, Evaluate("11.5 | 1.5"));
             Assert.AreEqual(7, Evaluate("'5' | '6'"));
             Assert.AreEqual(1, Evaluate("'a' | 1"));
+            Assert.AreEqual(1, Evaluate("true | false"));
+            Assert.AreEqual(0, Evaluate("false | false"));
 
             // Variables
             Assert.AreEqual(15, Evaluate("x = 11; x | 7"));
@@ -841,7 +849,7 @@ namespace UnitTests
 
             // Test the precedence in the middle of the conditional.
             Assert.AreEqual(1, Evaluate("x = 5; true ? x = 1 : 2"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("x = 5; true ? 1, x : 2"));
+            Assert.AreEqual("SyntaxError: Wrong number of operands", EvaluateExceptionMessage("x = 5; true ? 1, x : 2"));
 
             // Test the precedence at the end of the conditional.
             Assert.AreEqual(1, Evaluate("x = 4; true ? 1 : x = 2"));
@@ -922,34 +930,42 @@ namespace UnitTests
             Assert.AreEqual("1/3", Evaluate("x = [[2],[5]]; (x = x[0])[0] = 3; x.length + '/' + x.toString()"));
             Assert.AreEqual("1/9", Evaluate("x = [[2],[5]]; (x = x[0])[0] += 7; x.length + '/' + x.toString()"));
 
+            // Writing to a read-only property is ignored.
+            Assert.AreEqual(8, Evaluate("Object.defineProperty(this, '_g1', {value: 8, enumerable: true, writable: false, configurable: true}); _g1 = 9; _g1"));
+            Assert.AreEqual(7, Evaluate("var x = {}; Object.defineProperty(x, 'b', {value: 7, enumerable: true, writable: false, configurable: true}); x.b = 5; x.b"));
+
             // Strict mode: attempts to set a variable that has not been declared is disallowed.
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("'use strict'; asddfsgwqewert = 'test'"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
+            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("'use strict'; asddfsgwqewert = 'test'"));
+            Assert.AreEqual("ReferenceError: asddfsgwqewert is not defined.", EvaluateExceptionMessage("function foo() { 'use strict'; asddfsgwqewert = 'test'; } foo()"));
 
             // Strict mode: cannot write to a non-writable property.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: true}); x.a = 5;"));
+            Assert.AreEqual("TypeError: The property '_g2' is read-only.", EvaluateExceptionMessage("'use strict'; Object.defineProperty(this, '_g2', {value: 8, enumerable: true, writable: false, configurable: true}); _g2 = 9; _g2"));
+            Assert.AreEqual("TypeError: The property 'a' is read-only.", EvaluateExceptionMessage("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: true}); x.a = 5;"));
 
             // Strict mode: cannot write to a non-existant property when the object is non-extensible.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("'use strict'; var x = {}; Object.preventExtensions(x); x.a = 5;"));
+            Assert.AreEqual("TypeError: The property 'a' cannot be created as the object is not extensible.", EvaluateExceptionMessage("'use strict'; var x = {}; Object.preventExtensions(x); x.a = 5;"));
 
             // Strict mode: cannot write to a property that has a getter but no setter.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {get: function() { return 1 }}); x.a = 5;"));
+            Assert.AreEqual("TypeError: The property 'a' is read-only.", EvaluateExceptionMessage("'use strict'; var x = {}; Object.defineProperty(x, 'a', {get: function() { return 1 }}); x.a = 5;"));
 
             // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; eval = 5;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; arguments = 5;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { eval = 5; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { arguments = 5; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; eval = 5; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; arguments = 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; eval = 5;"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; arguments = 5;"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { eval = 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { arguments = 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; eval = 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; arguments = 5; } f()"));
 
             // Strict mode: left-hand side cannot be 'eval' or 'arguments' (compound assignment).
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; eval += 5;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; arguments += 5;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { eval += 5; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { arguments += 5; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; eval += 5; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; arguments += 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; eval += 5;"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; arguments += 5;"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { eval += 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { arguments += 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; eval += 5; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; arguments += 5; } f()"));
+
+            // Invalid left-hand side in assignment.
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in assignment.", EvaluateExceptionMessage("5 = 6"));
         }
 
         [TestMethod]
@@ -957,19 +973,19 @@ namespace UnitTests
         {
             Assert.AreEqual(1, Evaluate("x = 0; ++ x"));
             Assert.AreEqual(1, Evaluate("x = 0; ++ x; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("++ 2"));
+            Assert.AreEqual("SyntaxError: Invalid target of prefix operation.", EvaluateExceptionMessage("++ 2"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(3, Evaluate("x = [[2]]; ++(x = x[0])[0]"));
             Assert.AreEqual("1/3", Evaluate("x = [[2]]; ++(x = x[0])[0]; x.length + '/' + x.toString()"));
 
             // Strict mode: reference cannot be 'eval' or 'arguments'.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; ++ eval;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; ++ arguments;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { ++ eval; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { ++ arguments; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; ++ eval; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; ++ arguments; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; ++ eval;"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; ++ arguments;"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { ++ eval; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { ++ arguments; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; ++ eval; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; ++ arguments; } f()"));
         }
 
         [TestMethod]
@@ -977,19 +993,19 @@ namespace UnitTests
         {
             Assert.AreEqual(-1, Evaluate("x = 0; -- x"));
             Assert.AreEqual(-1, Evaluate("x = 0; -- x; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("-- 2"));
+            Assert.AreEqual("SyntaxError: Invalid target of prefix operation.", EvaluateExceptionMessage("-- 2"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(1, Evaluate("x = [[2]]; --(x = x[0])[0]"));
             Assert.AreEqual("1/1", Evaluate("x = [[2]]; --(x = x[0])[0]; x.length + '/' + x.toString()"));
 
             // Strict mode: reference cannot be 'eval' or 'arguments'.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; -- eval;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; -- arguments;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { -- eval; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { -- arguments; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; -- eval; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; -- arguments; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; -- eval;"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; -- arguments;"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { -- eval; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { -- arguments; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; -- eval; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; -- arguments; } f()"));
         }
 
         [TestMethod]
@@ -997,19 +1013,19 @@ namespace UnitTests
         {
             Assert.AreEqual(0, Evaluate("x = 0; x ++"));
             Assert.AreEqual(1, Evaluate("x = 0; x ++; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("2 ++"));
+            Assert.AreEqual("SyntaxError: Invalid target of postfix operation.", EvaluateExceptionMessage("2 ++"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(2, Evaluate("x = [[2]]; (x = x[0])[0]++"));
             Assert.AreEqual("1/3", Evaluate("x = [[2]]; (x = x[0])[0]++; x.length + '/' + x.toString()"));
 
             // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; eval ++;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; arguments ++;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { eval ++; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { arguments ++; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; eval ++; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; arguments ++; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; eval ++;"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; arguments ++;"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { eval ++; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { arguments ++; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; eval ++; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; arguments ++; } f()"));
         }
 
         [TestMethod]
@@ -1017,19 +1033,19 @@ namespace UnitTests
         {
             Assert.AreEqual(0, Evaluate("x = 0; x --"));
             Assert.AreEqual(-1, Evaluate("x = 0; x --; x"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("2 --"));
+            Assert.AreEqual("SyntaxError: Invalid target of postfix operation.", EvaluateExceptionMessage("2 --"));
 
             // The operand should only be evaluated once.
             Assert.AreEqual(2, Evaluate("x = [[2]]; (x = x[0])[0]--"));
             Assert.AreEqual("1/1", Evaluate("x = [[2]]; (x = x[0])[0]--; x.length + '/' + x.toString()"));
 
             // Strict mode: left-hand side cannot be 'eval' or 'arguments'.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; eval --;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; arguments --;"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { eval --; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function f() { arguments --; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; eval --; } f()"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("function f() { 'use strict'; arguments --; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; eval --;"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; arguments --;"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { eval --; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("'use strict'; function f() { arguments --; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'eval' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; eval --; } f()"));
+            Assert.AreEqual("SyntaxError: The variable 'arguments' cannot be modified in strict mode.", EvaluateExceptionMessage("function f() { 'use strict'; arguments --; } f()"));
         }
 
         [TestMethod]
@@ -1040,8 +1056,14 @@ namespace UnitTests
             Assert.AreEqual(33, Evaluate("5 + (5 * 6) - 2"));
             Assert.AreEqual(32, Evaluate("(5 + (5 + 6)) * 2"));
 
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("(5"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("({[0]("));
+            Assert.AreEqual("SyntaxError: Missing closing token ')'", EvaluateExceptionMessage("(5"));
+            Assert.AreEqual("SyntaxError: Expected identifier but found end of input", EvaluateExceptionMessage("({[0]("));
+        }
+
+        [TestMethod]
+        public void temp()
+        {
+            Assert.AreEqual(5, Evaluate("function test(test) { return test; } test(5, 4, 3);"));
         }
 
         [TestMethod]
@@ -1056,7 +1078,7 @@ namespace UnitTests
             // Call functions in the global scope.
             Assert.AreEqual("a%20b", Evaluate("encodeURI('a b')"));
             Assert.AreEqual(true, Evaluate("b = 5; this.hasOwnProperty('b')"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("b = 5; hasOwnProperty('b')"));
+            Assert.AreEqual("TypeError: The function 'hasOwnProperty' does not allow the value of 'this' to be undefined", EvaluateExceptionMessage("b = 5; hasOwnProperty('b')"));
 
             // Argument conversion.
             Assert.AreEqual(123, Evaluate("Math.abs('-123')"));
@@ -1072,7 +1094,7 @@ namespace UnitTests
             Assert.AreEqual(3, Evaluate("function test(test) { test = 3; return test; } test();"));
 
             // Object must be a function.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("x = { a: 1 }; x()"));
+            Assert.AreEqual("TypeError: 'x' is not a function", EvaluateExceptionMessage("x = { a: 1 }; x()"));
 
             // Passing a function in an argument.
             Assert.AreEqual(3, Evaluate("function a(b) { return b + 2; } function c(func) { return func(1); } c(a)"));
@@ -1106,12 +1128,11 @@ namespace UnitTests
             Assert.AreEqual("five", Evaluate("(new String('five')).toString()"));
             Assert.AreEqual("five", Evaluate("new String('five').toString()"));
             Assert.AreEqual("5", Evaluate("new Number(5).toString()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new (String('five'))"));
             Assert.AreEqual("TypeError: The new operator requires a function, found a 'string' instead", EvaluateExceptionMessage("new (String('five'))"));
 
             // Precedence tests.
             Assert.AreEqual("[object Object]", Evaluate("x = {}; x.f = function() { }; (new x.f()).toString()"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("(new Function.valueOf)()"));  // new (Function.valueOf) is not a function.
+            Assert.AreEqual("TypeError: Objects cannot be constructed from built-in functions.", EvaluateExceptionMessage("(new Function.valueOf)()"));  // new (Function.valueOf) is not a function.
             Assert.AreEqual("function anonymous() {\n\n}", Evaluate("(new (Function.valueOf())).toString()"));
             Assert.AreEqual("function anonymous() {\n\n}", Evaluate("((new Function).valueOf()).toString()"));
             Assert.AreEqual("[object Object]", Evaluate("x = {}; x.f = function() { }; (new (x.f)()).toString()"));
@@ -1124,7 +1145,7 @@ namespace UnitTests
             Assert.AreEqual(6, Evaluate("function f() { this.a = 5; return { a: 6 }; }; x = new f(); x.a"));
 
             // Built-in functions cannot be constructed.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("new Function.valueOf()"));
+            Assert.AreEqual("TypeError: Objects cannot be constructed from built-in functions.", EvaluateExceptionMessage("new Function.valueOf()"));
         }
 
         [TestMethod]
@@ -1160,7 +1181,6 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("x = Array; x instanceof x"));
 
             // Right-hand-side must be a function.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("5 instanceof Math"));
             Assert.AreEqual("TypeError: The instanceof operator expected a function, but found 'object' instead", EvaluateExceptionMessage("5 instanceof Math"));
 
             // Test newly constructed objects.
@@ -1188,7 +1208,7 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("'abcdefgh' in new Number(5)"));
             Assert.AreEqual(true, Evaluate("'toString' in new String()"));
             Assert.AreEqual(true, Evaluate("var x = 'atan2', y = Math; x in y"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("'toString' in 5"));
+            Assert.AreEqual("TypeError: The in operator expected an object, but found 'number' instead", EvaluateExceptionMessage("'toString' in 5"));
             Assert.AreEqual("TypeError: The in operator expected an object, but found 'number' instead", EvaluateExceptionMessage("'toString' in 5"));
 
             // Check order of evaluation - should be left to right.
@@ -1252,12 +1272,12 @@ namespace UnitTests
                     x['prop' + i] = i;
                 x.prop16383"));
 
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("abcdefghij"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("5.toString"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("qwerty345.prop"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("null.prop"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("undefined.prop"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("[].()"));
+            Assert.AreEqual("ReferenceError: abcdefghij is not defined.", EvaluateExceptionMessage("abcdefghij"));
+            Assert.AreEqual("SyntaxError: Expected operator but found 'toString'", EvaluateExceptionMessage("5.toString"));
+            Assert.AreEqual("ReferenceError: qwerty345 is not defined.", EvaluateExceptionMessage("qwerty345.prop"));
+            Assert.AreEqual("TypeError: Null cannot be converted to an object", EvaluateExceptionMessage("null.prop"));
+            Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("undefined.prop"));
+            Assert.AreEqual("SyntaxError: Wrong number of operands", EvaluateExceptionMessage("[].()"));
         }
 
         [TestMethod]
@@ -1296,6 +1316,8 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("x = {false: 1}; x.false"));
             Assert.AreEqual(1, Evaluate("x = {true: 1}; x.true"));
             Assert.AreEqual(1, Evaluate("x = {null: 1}; x.null"));
+            Assert.AreEqual(2, Evaluate("x = {get: 2}; x.get"));
+            Assert.AreEqual(3, Evaluate("x = {set: 3}; x.set"));
 
             // Object literals can have getters and setters.
             Assert.AreEqual(1, Evaluate("x = {get f() { return 1; }}; x.f"));
@@ -1303,11 +1325,10 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("x = {get f() { return this.a; }, set f(value) { this.a = value; }}; x.f = 5; x.f"));
             Assert.AreEqual(1, Evaluate("x = {get f() { return 1; }}; x.f = 5; x.f"));
             Assert.AreEqual(Undefined.Value, Evaluate("x = {set f(value) { this.a = value; }}; x.f"));
-            Assert.AreEqual(2, Evaluate("x = {get: 2}; x.get"));
-            Assert.AreEqual(3, Evaluate("x = {set: 3}; x.set"));
             Assert.AreEqual(1, Evaluate("x = {get 'f'() { return 1; }}; x.f = 5; x.f"));
             Assert.AreEqual(1, Evaluate("x = {get 0() { return 1; }}; x[0] = 5; x[0]"));
             Assert.AreEqual(4, Evaluate("var f = 4; x = {get f() { return f; }}; x.f"));
+            Assert.AreEqual(3, Evaluate("var x = { get get() { return 3; } }; x.get"));
 
             // Check accessibility of getters and setters.
             Assert.AreEqual(true, Evaluate("Object.getOwnPropertyDescriptor({ get a() {} }, 'a').configurable"));
@@ -1335,12 +1356,12 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("x = {set a(value) { }, a: 1}; x.a"));
 
             // Errors
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("{a: 1, b: 2}"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("x = {a: 1,, }.a"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("x = {'get' f() { return 1; }}"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("x = {get f(a) { return 1; }}"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("x = {set f() { return 1; }}"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("x = {set f(a, b) { return 1; }}"));
+            Assert.AreEqual("SyntaxError: Expected ';' but found ':'", EvaluateExceptionMessage("{a: 1, b: 2}"));
+            Assert.AreEqual("SyntaxError: Expected property name but found '}'", EvaluateExceptionMessage("x = {a: 1,, }.a"));
+            Assert.AreEqual("SyntaxError: Expected ':' but found 'f'", EvaluateExceptionMessage("x = {'get' f() { return 1; }}"));
+            Assert.AreEqual("SyntaxError: Getters cannot have arguments", EvaluateExceptionMessage("x = {get f(a) { return 1; }}"));
+            Assert.AreEqual("SyntaxError: Setters must have a single argument", EvaluateExceptionMessage("x = {set f() { return 1; }}"));
+            Assert.AreEqual("SyntaxError: Setters must have a single argument", EvaluateExceptionMessage("x = {set f(a, b) { return 1; }}"));
 
             // Strict mode: eval is allowed in a object literal property.
             Assert.AreEqual(1, Evaluate("'use strict'; x = {eval: 1}; x.eval"));
@@ -1360,7 +1381,7 @@ namespace UnitTests
             // Shorthand properties.
             Assert.AreEqual(1, Evaluate("var a = 1, b = 2; x = {a, b}; x.a"));
             Assert.AreEqual(2, Evaluate("var a = 1, b = 2; x = {a, b}; x.b"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("var a = 1, b = { a: 3 }; x = {a, b.a}; x.a"));
+            Assert.AreEqual("SyntaxError: Expected ':' but found '.'", EvaluateExceptionMessage("var a = 1, b = { a: 3 }; x = {a, b.a}; x.a"));
 
             // Shorthand functions.
             Assert.AreEqual(3, Evaluate("var x = { a() { return 3; } }; x.a()"));
@@ -1371,10 +1392,9 @@ namespace UnitTests
             Assert.AreEqual(19, Evaluate("var x = { [1+2]() { return 19; } }; x[3]()"));
             Assert.AreEqual("1", Evaluate("var x = { [1]() { return 19; } }; x[1].name"));
             Assert.AreEqual("test", Evaluate("var x = { ['test']() { return 19; } }; x.test.name"));
-
-            // TODO: we currently cannot compute function names at runtime.
-            Assert.AreEqual("", Evaluate("var x = { [1+2]() { return 19; } }; x[3].name"));
-            Assert.AreEqual("", Evaluate("var y = { a: 1, b: 2 }; var x = {[y]() { return 10; }}; x[y].name"));
+            Assert.AreEqual(3, Evaluate("var x = { get() { return 3; } }; x.get()"));
+            Assert.AreEqual("3", Evaluate("var x = { [1+2]() { return 19; } }; x[3].name"));
+            Assert.AreEqual("[object Object]", Evaluate("var y = { a: 1, b: 2 }; var x = {[y]() { return 10; }}; x[y].name"));
         }
 
         [TestMethod]
@@ -1440,7 +1460,7 @@ namespace UnitTests
             // Deleting variables defined within an eval statement inside a global scope succeeds.
             Assert.AreEqual(true, Evaluate("abcdefg = 1; delete abcdefg"));
             Assert.AreEqual(false, Evaluate("abcdefg = 1; delete abcdefg; this.hasOwnProperty('abcdefg')"));
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("x = 5; delete x; x"));
+            Assert.AreEqual("ReferenceError: x is not defined.", EvaluateExceptionMessage("x = 5; delete x; x"));
 
             // Deleting variables defined within an eval statement inside a function scope succeeds.
             Assert.AreEqual(true, Evaluate("(function() { var a = 5; return eval('var b = a; delete b'); })()"));
@@ -1452,12 +1472,12 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("called = false; function f() { called = true; } delete f(); called"));
 
             // Strict mode: cannot delete a non-configurable property.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: false}); delete x.a;"));
+            Assert.AreEqual("TypeError: The property 'a' cannot be deleted.", EvaluateExceptionMessage("'use strict'; var x = {}; Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: false, configurable: false}); delete x.a;"));
 
             // Strict mode: deleting a variable fails.
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; var foo = 'test'; delete foo"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; function test(){} delete test"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("'use strict'; (function(arg) { delete arg; })()"));
+            Assert.AreEqual("SyntaxError: Cannot delete foo because deleting a variable or argument is not allowed in strict mode", EvaluateExceptionMessage("'use strict'; var foo = 'test'; delete foo"));
+            Assert.AreEqual("SyntaxError: Cannot delete test because deleting a variable or argument is not allowed in strict mode", EvaluateExceptionMessage("'use strict'; function test(){} delete test"));
+            Assert.AreEqual("SyntaxError: Cannot delete arg because deleting a variable or argument is not allowed in strict mode", EvaluateExceptionMessage("'use strict'; (function(arg) { delete arg; })()"));
 
             // Delete a symbol.
             Assert.AreEqual(true, Evaluate("delete ''[Symbol.iterator]"));
@@ -1466,7 +1486,19 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("x[Symbol.iterator]"));
 
             // Errors
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("delete[].(0)"));
+            Assert.AreEqual("SyntaxError: Invalid member access", EvaluateExceptionMessage("delete[].(0)"));
+
+            // Deleting a super reference is not allowed.
+            Assert.AreEqual("ReferenceError: Unsupported reference to 'super'.", EvaluateExceptionMessage(@"
+                class Base {
+                  foo() {}
+                }
+                class Derived extends Base {
+                  delFoo() {
+                    delete super.foo;
+                  }
+                }
+                new Derived().delFoo();"));
         }
 
         [TestMethod]
@@ -1509,7 +1541,7 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("function x() { this.a = 5; this.f = function() { return this } }; new x().f().a"));
 
             // The "this" value cannot be modified.
-            Assert.AreEqual("ReferenceError", EvaluateExceptionType("this = 5;"));
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in assignment.", EvaluateExceptionMessage("this = 5;"));
 
             // Strict mode: the "this" object is not coerced to an object.
             Assert.AreEqual(Null.Value, Evaluate("'use strict'; (function(){ return this; }).call(null)"));
@@ -1632,6 +1664,221 @@ namespace UnitTests
             Assert.AreEqual(double.PositiveInfinity, Evaluate("(-0) ** -2"));
             Assert.AreEqual(double.NaN, Evaluate("(-1) ** 1.5"));
             Assert.AreEqual(double.NaN, Evaluate("(-1) ** -1.5"));
+        }
+
+        [TestMethod]
+        public void NewTarget()
+        {
+            // new.target should be undefined in the context of a function call.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                (function f() {
+                  passed = new.target === undefined;
+                })();
+                passed"));
+
+            // new.target should be set if 'new' is used.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                new function f() {
+                  passed = new.target === f;
+                }();
+                passed"));
+
+            // new.target should be set in a constructor.
+            Assert.AreEqual(true, Evaluate(@"
+                var passed = false;
+                class Animal {
+                    constructor() { passed = new.target === Dog; }
+                }
+                class Dog extends Animal {
+                }
+                new Dog();
+                passed"));
+
+            // new.target can only be used in the context of a function.
+            Assert.AreEqual("SyntaxError: new.target expression is not allowed here.", EvaluateExceptionMessage(@"new.target"));
+            Assert.AreEqual("SyntaxError: Invalid left-hand side in assignment.", EvaluateExceptionMessage(@"function f() { new.target = 5; }"));
+        }
+
+        [TestMethod]
+        public void SuperCall()
+        {
+            // Class with super.
+            Assert.AreEqual("bark", Evaluate(@"
+                class Animal {
+                    constructor(sound) { this.sound = sound; }
+                    speak() { return this.sound; }
+                }
+                class Dog extends Animal {
+                    constructor() { super('bark'); }
+                }
+                new Dog().speak()"));
+
+            // Empty constructors act like constructor(...args) { super(...args); }
+            Assert.AreEqual("woof", Evaluate(@"
+                class Animal {
+                    constructor(sound) { this.sound = sound; }
+                    speak() { return this.sound; }
+                }
+                class Dog extends Animal {
+                }
+                class Hound extends Dog {
+                    constructor() { super('woof'); }
+                }
+                new Hound().speak()"));
+
+            // If a constructor returns an object, then that is used as the instance.
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {
+                    constructor(a) { return ['foo' + a]; }
+                }
+                class C extends B {
+                    constructor(a) { return super('bar' + a); }
+                }
+                new C('baz')[0]"));
+
+            // 'super' must be called before accessing 'this'.
+            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before accessing 'this'.", EvaluateExceptionMessage(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        this.a = 'test';
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // 'super' must be called before returning.
+            Assert.AreEqual("ReferenceError: Must call super constructor in derived class before returning.", EvaluateExceptionMessage(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        return;
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // Super constructor may only be called once.
+            Assert.AreEqual("ReferenceError: Super constructor may only be called once.", EvaluateExceptionMessage(@"
+                class Animal {
+                    constructor() { }
+                }
+                class Dog extends Animal {
+                    constructor() {
+                        super();
+                        super();
+                    }
+                }
+                new Dog()"));
+
+            // 'super' keyword can only be used in a derived constructor.
+            Assert.AreEqual("SyntaxError: 'super' calls can only be made from a derived constructor.", EvaluateExceptionMessage(@"super();"));
+            Assert.AreEqual("SyntaxError: 'super' calls can only be made from a derived constructor.", EvaluateExceptionMessage(@"
+                class Dog {
+                    constructor() {
+                        super();
+                    }
+                }
+                new Dog()"));
+        }
+
+        [TestMethod]
+        public void SuperAccessor()
+        {
+            // Super should access the super class prototype.
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {}
+                B.prototype.qux = 'foo';
+                B.prototype.corge = 'baz';
+
+                class C extends B {
+                    quux(a) { return super.qux + a + super['corge']; }
+                }
+                C.prototype.qux = 'garply';
+
+                new C().quux('bar');"));
+
+            // Super method calls should use the correct "this" binding.
+            Assert.AreEqual("foobarbaz", Evaluate(@"
+                class B {
+                    qux(a) { return this.foo + a; }
+                }
+
+                class C extends B {
+                    qux(a) { return super.qux('bar' + a); }
+                }
+
+                var obj = new C();
+                obj.foo = 'foo';
+                obj.qux('baz');"));
+
+            // Super is statically bound.
+            Assert.AreEqual("barley", Evaluate(@"
+                class B {
+                    qux() { return 'bar'; }
+                }
+
+                class C extends B {
+                    qux() { return super.qux() + this.corge; }
+                }
+
+                var obj = {
+                    qux: C.prototype.qux,
+                    corge: 'ley'
+                };
+
+                obj.qux();"));
+
+            // Super works inside an object literal.
+            Assert.AreEqual("method1", Evaluate(@"
+                var obj1 = {
+                    method1() {
+                        return 'method1';
+                    }
+                }
+
+                var obj2 = {
+                    method2() {
+                        return super.method1();
+                    }
+                }
+
+                Object.setPrototypeOf(obj2, obj1);
+                obj2.method2()"));
+
+            // If the prototype is not set it defaults to the object prototype.
+            Assert.AreEqual("[object Object]", Evaluate(@"
+                var obj = {
+                    method() {
+                        return super.valueOf();
+                    }
+                }
+                obj.method().toString()"));
+
+            // Super cannot be used in plain function calls.
+            Assert.AreEqual("SyntaxError: 'super' keyword unexpected here.", EvaluateExceptionMessage(@"
+                (function() {
+                    return super.valueOf();
+                })()"));
+
+            // Super cannot be used on it's own.
+            Assert.AreEqual("SyntaxError: 'super' keyword cannot be used on it's own.", EvaluateExceptionMessage(@"
+                class Animal {
+                }
+
+                class Dog extends Animal {
+                    constructor() {
+                        super;
+                    }
+                }
+
+                new Dog()"));
         }
     }
 }

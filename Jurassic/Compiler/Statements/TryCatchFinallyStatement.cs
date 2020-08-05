@@ -36,16 +36,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets or sets the scope of the variable to receive the exception.  Can be <c>null</c> if
-        /// CatchStatement is also <c>null</c> or if the catch variable binding was omitted.
-        /// </summary>
-        public Scope CatchScope
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets the name of the variable to receive the exception.  Can be <c>null</c> if
         /// CatchStatement is also <c>null</c> or if the catch variable binding was omitted.
         /// </summary>
@@ -137,30 +127,26 @@ namespace Jurassic.Compiler
                 generator.DefineLabelPosition(endOfIfLabel);
 
             if (this.CatchBlock != null) {
-                if (this.CatchScope != null)
+
+                // Create a RuntimeScope instance.
+                CatchBlock.Scope.GenerateScopeCreation(generator, optimizationInfo);
+
+                if (this.CatchVariableName != null)
                 {
-                    // Create a new DeclarativeScope.
-                    this.CatchScope.GenerateScopeCreation(generator, optimizationInfo);
-
                     // Store the error object in the variable provided.
+                    generator.ReinterpretCast(typeof(JavaScriptException));
                     generator.Call(ReflectionHelpers.JavaScriptException_ErrorObject);
-                    var catchVariable = new NameExpression(this.CatchScope, this.CatchVariableName);
-                    catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any, false);
-
-                    // Make sure the scope is reverted even if an exception is thrown.
-                    generator.BeginExceptionBlock();
+                    var catchVariable = new NameExpression(CatchBlock.Scope, this.CatchVariableName);
+                    catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
+                }
+                else
+                {
+                    // Remove the exception object from the stack.
+                    generator.Pop();
                 }
 
                 // Emit code for the statements within the catch block.
                 this.CatchBlock.GenerateCode(generator, optimizationInfo);
-
-                if (this.CatchScope != null)
-                {
-                    // Revert the scope.
-                    generator.BeginFinallyBlock();
-                    this.CatchScope.GenerateScopeDestruction(generator, optimizationInfo);
-                    generator.EndExceptionBlock();
-                }
             }
 
             // Generate code for the finally block.
@@ -223,6 +209,10 @@ namespace Jurassic.Compiler
                         generator.DefineLabelPosition(switchLabels[i]);
                         generator.Leave(branches[i]);
                     }
+                }
+                else
+                {
+                    generator.Pop();
                 }
 
                 // Reset the state we clobbered.

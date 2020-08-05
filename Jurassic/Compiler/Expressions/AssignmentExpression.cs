@@ -184,21 +184,26 @@ namespace Jurassic.Compiler
             var rhs = this.GetOperand(1);
             rhs.GenerateCode(generator, optimizationInfo);
 
-            // Support the inferred function displayName property.
-            if (rhs is FunctionExpression)
-                ((FunctionExpression)rhs).GenerateDisplayName(generator, optimizationInfo, target.ToString(), false);
-
-            // Store the RHS value so we can return it as the result of the expression.
-            var result = generator.CreateTemporaryVariable(rhs.ResultType);
-            generator.Duplicate();
-            generator.StoreVariable(result);
+            ILLocalVariable result = null;
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Store the RHS value so we can return it as the result of the expression.
+                result = generator.CreateTemporaryVariable(rhs.ResultType);
+                generator.Duplicate();
+                generator.StoreVariable(result);
+            }
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, rhs.ResultType, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, rhs.ResultType);
 
-            // Restore the RHS value.
-            generator.LoadVariable(result);
-            generator.ReleaseTemporaryVariable(result);
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Restore the RHS value.
+                generator.LoadVariable(result);
+                generator.ReleaseTemporaryVariable(result);
+            }
+            else
+                optimizationInfo.ReturnValueWasNotGenerated = true;
         }
 
         /// <summary>
@@ -229,10 +234,11 @@ namespace Jurassic.Compiler
             if (target.Type != PrimitiveType.Int32)
                 EmitConversion.ToNumber(generator, target.Type);
 
-            // If this is PostIncrement or PostDecrement, store the value so it can be returned later.
-            var result = generator.CreateTemporaryVariable(target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
-            if (postfix == true)
+            ILLocalVariable result = null;
+            if (optimizationInfo.IgnoreReturnValue != this && postfix == true)
             {
+                // If this is PostIncrement or PostDecrement, store the value so it can be returned later.
+                result = generator.CreateTemporaryVariable(target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
                 generator.Duplicate();
                 generator.StoreVariable(result);
             }
@@ -249,19 +255,25 @@ namespace Jurassic.Compiler
             else
                 generator.Subtract();
 
-            // If this is PreIncrement or PreDecrement, store the value so it can be returned later.
-            if (postfix == false)
+            if (optimizationInfo.IgnoreReturnValue != this && postfix == false)
             {
+                // If this is PreIncrement or PreDecrement, store the value so it can be returned later.
+                result = generator.CreateTemporaryVariable(target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
                 generator.Duplicate();
                 generator.StoreVariable(result);
             }
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, target.Type == PrimitiveType.Int32 ? PrimitiveType.Int32 : PrimitiveType.Number);
 
-            // Restore the expression result.
-            generator.LoadVariable(result);
-            generator.ReleaseTemporaryVariable(result);
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Restore the expression result.
+                generator.LoadVariable(result);
+                generator.ReleaseTemporaryVariable(result);
+            }
+            else
+                optimizationInfo.ReturnValueWasNotGenerated = true;
         }
 
         /// <summary>
@@ -389,17 +401,47 @@ namespace Jurassic.Compiler
             var compoundOperator = new BinaryExpression(GetCompoundBaseOperator(this.OperatorType), new ReferenceGetExpression(target), this.GetOperand(1));
             compoundOperator.GenerateCode(generator, optimizationInfo);
 
-            // Store the resulting value so we can return it as the result of the expression.
-            var result = generator.CreateTemporaryVariable(compoundOperator.ResultType);
-            generator.Duplicate();
-            generator.StoreVariable(result);
+            ILLocalVariable result = null;
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Store the resulting value so we can return it as the result of the expression.
+                result = generator.CreateTemporaryVariable(compoundOperator.ResultType);
+                generator.Duplicate();
+                generator.StoreVariable(result);
+            }
 
             // Store the value.
-            target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType, optimizationInfo.StrictMode);
+            target.GenerateSet(generator, optimizationInfo, compoundOperator.ResultType);
 
-            // Restore the expression result.
-            generator.LoadVariable(result);
-            generator.ReleaseTemporaryVariable(result);
+            if (optimizationInfo.IgnoreReturnValue != this)
+            {
+                // Restore the expression result.
+                generator.LoadVariable(result);
+                generator.ReleaseTemporaryVariable(result);
+            }
+            else
+                optimizationInfo.ReturnValueWasNotGenerated = true;
+        }
+
+        /// <summary>
+        /// Checks the expression is valid and throws a SyntaxErrorException if not.
+        /// Called after the expression tree is fully built out.
+        /// </summary>
+        /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
+        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
+        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
+        public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
+        {
+            if (OperandCount > 0 && !(GetOperand(0) is IReferenceExpression))
+            {
+                if (Operator.HasLHSOperand && Operator.HasRHSOperand)
+                    throw new SyntaxErrorException("Invalid left-hand side in assignment.", lineNumber, sourcePath);
+                if (Operator.HasLHSOperand)
+                    throw new SyntaxErrorException("Invalid target of postfix operation.", lineNumber, sourcePath);
+                if (Operator.HasRHSOperand)
+                    throw new SyntaxErrorException("Invalid target of prefix operation.", lineNumber, sourcePath);
+            }
+            base.CheckValidity(context, lineNumber, sourcePath);
         }
     }
 

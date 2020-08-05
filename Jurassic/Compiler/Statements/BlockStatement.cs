@@ -15,9 +15,11 @@ namespace Jurassic.Compiler
         /// Creates a new BlockStatement instance.
         /// </summary>
         /// <param name="labels"> The labels that are associated with this statement. </param>
-        public BlockStatement(IList<string> labels)
+        /// <param name="scope"> The lexical scope associated with this block statement. </param>
+        public BlockStatement(IList<string> labels, Scope scope)
             : base(labels)
         {
+            Scope = scope ?? throw new ArgumentNullException(nameof(scope));
         }
 
         /// <summary>
@@ -29,6 +31,11 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// The lexical scope associated with this block statement.
+        /// </summary>
+        public Scope Scope { get; private set; }
+
+        /// <summary>
         /// Generates CIL for the statement.
         /// </summary>
         /// <param name="generator"> The generator to output the CIL to. </param>
@@ -38,6 +45,10 @@ namespace Jurassic.Compiler
             // Generate code for the start of the statement.
             var statementLocals = new StatementLocals() { NonDefaultSourceSpanBehavior = true };
             GenerateStartOfStatement(generator, optimizationInfo, statementLocals);
+
+            // Generate scope creation.
+            Scope.GenerateScopeCreation(generator, optimizationInfo);
+            Scope.GenerateHoistedDeclarations(generator, optimizationInfo);
 
             foreach (var statement in this.Statements)
             {

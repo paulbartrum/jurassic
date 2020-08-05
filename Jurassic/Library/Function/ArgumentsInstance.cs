@@ -12,10 +12,10 @@ namespace Jurassic.Library
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
     [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
-    public class ArgumentsInstance : ObjectInstance
+    public partial class ArgumentsInstance : ObjectInstance
     {
         private UserDefinedFunction callee;
-        private DeclarativeScope scope;
+        private RuntimeScope bindings;
         private bool[] mappedArguments;
 
 
@@ -28,19 +28,20 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="callee"> The function that was called. </param>
-        /// <param name="scope"> The function scope. </param>
+        /// <param name="bindings"> The bindings to allow modification. </param>
         /// <param name="argumentValues"> The argument values that were passed to the function. </param>
-        public ArgumentsInstance(ObjectInstance prototype, UserDefinedFunction callee, DeclarativeScope scope, object[] argumentValues)
+        internal ArgumentsInstance(ObjectInstance prototype, UserDefinedFunction callee, RuntimeScope bindings, object[] argumentValues)
             : base(prototype)
         {
             if (callee == null)
                 throw new ArgumentNullException(nameof(callee));
-            if (scope == null)
-                throw new ArgumentNullException(nameof(scope));
+            if (bindings == null)
+                throw new ArgumentNullException(nameof(bindings));
             if (argumentValues == null)
                 throw new ArgumentNullException(nameof(argumentValues));
             this.callee = callee;
-            this.scope = scope;
+            this.bindings = bindings;
+            InitializeProperties(GetDeclarativeProperties(Engine));
             this.FastSetProperty("length", argumentValues.Length, PropertyAttributes.NonEnumerable);
 
             if (this.callee.StrictMode == false)
@@ -74,9 +75,9 @@ namespace Jurassic.Library
                         this.mappedArguments[i] = true;
 
                         // Define a getter and setter so that the property value reflects that of the argument.
-                        var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.scope, "return " + callee.ArgumentNames[i], ArgumentGetter, true);
+                        var getter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentGetter", new string[0], this.bindings, "return " + callee.ArgumentNames[i], ArgumentGetter, true);
                         getter.SetPropertyValue("argumentIndex", i, false);
-                        var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[] { "value" }, this.scope, callee.ArgumentNames[i] + " = value", ArgumentSetter, true);
+                        var setter = new UserDefinedFunction(this.Engine.Function.InstancePrototype, "ArgumentSetter", new string[] { "value" }, this.bindings, callee.ArgumentNames[i] + " = value", ArgumentSetter, true);
                         setter.SetPropertyValue("argumentIndex", i, false);
                         this.DefineProperty(i.ToString(), new PropertyDescriptor(getter, setter, PropertyAttributes.FullAccess), false);
                     }
@@ -108,36 +109,28 @@ namespace Jurassic.Library
         /// <summary>
         /// Used to retrieve the value of an argument.
         /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        /// <param name="scope"> The scope (global or eval context) or the parent scope (function
-        /// context). </param>
-        /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
-        /// <param name="functionObject"> The function object. </param>
+        /// <param name="context"> The script engine, this value, etc. </param>
         /// <param name="argumentValues"> The arguments that were passed to the function. </param>
         /// <returns> The result of calling the method. </returns>
-        private object ArgumentGetter(ScriptEngine engine, Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] argumentValues)
+        private object ArgumentGetter(ExecutionContext context, object[] argumentValues)
         {
-            int argumentIndex = TypeConverter.ToInteger(functionObject.GetPropertyValue("argumentIndex"));
-            return this.scope.GetValue(this.callee.ArgumentNames[argumentIndex]);
+            int argumentIndex = TypeConverter.ToInteger(context.ExecutingFunction.GetPropertyValue("argumentIndex"));
+            return this.bindings.GetValue(this.callee.ArgumentNames[argumentIndex]);
         }
 
         /// <summary>
         /// Used to set the value of an argument.
         /// </summary>
-        /// <param name="engine"> The associated script engine. </param>
-        /// <param name="scope"> The scope (global or eval context) or the parent scope (function
-        /// context). </param>
-        /// <param name="thisObject"> The value of the <c>this</c> keyword. </param>
-        /// <param name="functionObject"> The function object. </param>
+        /// <param name="context"> The script engine, this value, etc. </param>
         /// <param name="argumentValues"> The arguments that were passed to the function. </param>
         /// <returns> The result of calling the method. </returns>
-        private object ArgumentSetter(ScriptEngine engine, Compiler.Scope scope, object thisObject, Library.FunctionInstance functionObject, object[] argumentValues)
+        private object ArgumentSetter(ExecutionContext context, object[] argumentValues)
         {
-            int argumentIndex = TypeConverter.ToInteger(functionObject.GetPropertyValue("argumentIndex"));
+            int argumentIndex = TypeConverter.ToInteger(context.ExecutingFunction.GetPropertyValue("argumentIndex"));
             if (argumentValues != null && argumentValues.Length >= 1)
             {
                 object value = argumentValues[0];
-                this.scope.SetValue(this.callee.ArgumentNames[argumentIndex], value);
+                this.bindings.SetValue(this.callee.ArgumentNames[argumentIndex], value);
             }
             return Undefined.Value;
         }
@@ -158,7 +151,7 @@ namespace Jurassic.Library
             if (index < this.mappedArguments.Length && this.mappedArguments[index] == true)
             {
                 this.mappedArguments[index] = false;
-                var currentValue = this.scope.GetValue(this.callee.ArgumentNames[(int)index]);
+                var currentValue = this.bindings.GetValue(this.callee.ArgumentNames[(int)index]);
                 DefineProperty(index.ToString(), new PropertyDescriptor(currentValue, PropertyAttributes.FullAccess), false);
             }
 
@@ -221,6 +214,21 @@ namespace Jurassic.Library
         public override string DebuggerDisplayType
         {
             get { return string.Format("Arguments({0})", this["length"]); }
+        }
+
+
+
+        //     JS FUNCTIONS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Returns an iterator that iterates over the argument values.
+        /// </summary>
+        /// <returns> An iterator for the arguments instance. </returns>
+        [JSInternalFunction(Name = "@@iterator")]
+        public ObjectInstance GetIterator()
+        {
+            return new ArrayIterator(Engine.ArrayIteratorPrototype, this, ArrayIterator.Kind.Value);
         }
     }
 }

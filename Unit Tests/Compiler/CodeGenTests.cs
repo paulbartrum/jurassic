@@ -15,289 +15,127 @@ namespace Performance
     public class CodeGenTests
     {
         [TestMethod]
-        public void EmptyFunction()
+        public void GlobalVariableSet()
         {
             Assert.AreEqual(NormalizeText(@"
-                      ldnull
-                      ret
-                "),
-                GetFunctionIL(@"function f() {
-                }", "f"));
-        }
-
-        [TestMethod]
-        public void SimpleReturn()
-        {
-            Assert.AreEqual(NormalizeText(@"
-                .local [0] System.Object returnValue
-                      ldc.i4     5
-                      box        System.Int32
-                      stloc      V0 (returnValue)
-                      ldloc      V0 (returnValue)
-                      ret
-                "),
-                GetFunctionIL(@"function f() {
-                    return 5;
-                }", "f"));
-        }
-
-        [TestMethod]
-        [Ignore("Needs investigation")]
-        public void FunctionCall0()
-        {
-            Assert.AreEqual(NormalizeText(@"
-                .local [0] System.Object a
-                      ldarg      4
-                      ldlen
-                      ldc.i4     0
-                      ble        L000
-                      ldarg      4
-                      ldc.i4     0
-                      ldelem     System.Object
-                      stloc      V0 (a)
-                L000: ldloc      V0 (a)
-                L001: ininst     Jurassic.Library.FunctionInstance
-                      dup
-                      brtrue     L002
-                      pop
+                .local [0] System.Int32
+                      ldc.i4     6
+                      stloc      V0
                       ldarg      0
-                      ldstr      ""TypeError""
-                      ldstr      ""'a' is not a function""
-                      ldc.i4     0
-                      ldnull
-                      ldnull
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
-                      throw
-                L002: ldnull
-                      ldstr      ""f""
-                      ldc.i4     2
-                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
-                      ldc.i4     0
-                      newarr     System.Object
-                      callvirt   System.Object CallWithStackTrace(System.String, System.String, Int32, System.Object, System.Object[])/Jurassic.Library.FunctionInstance
-                      pop
-                      ldnull
-                      ret"),
-                GetFunctionIL(@"function f(a) {
-                    a();
-                }", "f"));
-        }
-
-        [TestMethod]
-        [Ignore("Needs investigation")]
-        public void FunctionCall1()
-        {
-            Assert.AreEqual(NormalizeText(@"
-                .local [0] System.Object a
-                      ldarg      4
-                      ldlen
-                      ldc.i4     0
-                      ble        L000
-                      ldarg      4
-                      ldc.i4     0
-                      ldelem     System.Object
-                      stloc      V0 (a)
-                L000: ldloc      V0 (a)
-                L001: ininst     Jurassic.Library.FunctionInstance
-                      dup
-                      brtrue     L002
-                      pop
-                      ldarg      0
-                      ldstr      ""TypeError""
-                      ldstr      ""'a' is not a function""
-                      ldc.i4     0
-                      ldnull
-                      ldnull
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
-                      throw
-                L002: ldnull
-                      ldstr      ""f""
-                      ldc.i4     2
-                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
-                      ldc.i4     1
-                      newarr     System.Object
-                      dup
-                      ldc.i4     0
-                      ldc.i4     5
-                      box        System.Int32
-                      stelem     System.Object
-                      callvirt   System.Object CallWithStackTrace(System.String, System.String, Int32, System.Object, System.Object[])/Jurassic.Library.FunctionInstance
-                      pop
-                      ldnull
-                      ret"),
-                GetFunctionIL(@"function f(a) {
-                    a(5);
-                }", "f"));
-        }
-
-        [TestMethod]
-        [Ignore("Needs investigation")]
-        public void ForLoop()
-        {
-            Assert.AreEqual(NormalizeText(@"
-                .local [0] System.Object i
-                .local [1] System.Int32
-                      ldc.i4     0
-                      dup
-                      box        System.Int32
-                      stloc      V0 (i)
-                L000: pop
-                      ldloc      V0 (i)
-                L001: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
-                      ldc.i4     10
-                      conv.u4
-                      clt
-                      brfalse    L013
-                L002: ldloc      V0 (i)
-                L003: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
-                      dup
-                      ldc.r8     1
-                      add
-                      box        System.Double
-                      stloc      V0 (i)
-                L004: pop
-                      ldloc      V0 (i)
-                L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
-                      stloc      V1
-                .try
-                {
-                    L006: ldloc      V1
-                    L007: ldc.i4     10
-                          clt
-                          brfalse    L011
-                    L008: ldloc      V1
-                    L009: dup
-                          ldc.i4     1
-                          add
-                          stloc      V1
-                    L010: pop
-                          br             
-                }
-                .finally
-                {
-                    L011: ldloc      V1
-                    L012: box        System.Int32
-                          stloc      V0 (i)
-                }
-                L013: ldnull
-                      ret
-                "),
-                GetFunctionIL(@"function f() {
-                    for (var i = 0; i < 10; i ++)
-                        ;
-                }", "f"));
-        }
-
-        [TestMethod]
-        [Ignore("Needs investigation")]
-        public void GetGlobalVariable()
-        {
-            Assert.AreEqual(NormalizeText(@"
-                .local [0] System.Object
-                .local [1] System.Int32
-                .local [2] Jurassic.Library.ObjectInstance
-                .local [3] System.Object returnValue
-                      ldarg      1
-                      castclass  Jurassic.Compiler.ObjectScope
-                      callvirt   Jurassic.Library.ObjectInstance get_ScopeObject()/Jurassic.Compiler.ObjectScope
-                      stloc      V2
-                      ldloc      V0
-                      ldloc      V2
-                      callvirt   System.Object get_InlineCacheKey()/Jurassic.Library.ObjectInstance
-                      beq        L000
-                      ldloc      V2
+                      callvirt   Jurassic.Compiler.RuntimeScope get_ParentScope()/Jurassic.Compiler.ExecutionContext
                       ldstr      ""x""
-                      ldloca     V1
-                      ldloca     V0
-                      callvirt   System.Object InlineGetPropertyValue(System.String, Int32 ByRef, System.Object ByRef)/Jurassic.Library.ObjectInstance
-                      br         L001
-                L000: ldloc      V2
-                      callvirt   System.Object[] get_InlinePropertyValues()/Jurassic.Library.ObjectInstance
-                      ldloc      V1
-                      ldelem     System.Object
-                L001: dup
-                      brtrue     L002
-                      ldarg      0
-                      ldstr      ""ReferenceError""
-                      ldstr      ""x is not defined""
-                      ldc.i4     2
+                      ldloc      V0
+                      box        System.Int32
+                      callvirt   Void SetValue(System.String, System.Object)/Jurassic.Compiler.RuntimeScope
                       ldnull
-                      ldstr      ""f""
-                      newobj     Void .ctor(Jurassic.ScriptEngine, System.String, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
-                      throw
-                L002: stloc      V3 (returnValue)
-                      ldloc      V3 (returnValue)
-                      ret"),
-                GetFunctionIL(@"function f() {
-                    return x;
-                }", "f"));
+                      ret"), GetGlobalIL(@"x = 6"));
         }
-
+        
         [TestMethod]
-        [Ignore("Needs investigation")]
-        public void ReturnInsideFor()
+        public void Let()
         {
             Assert.AreEqual(NormalizeText(@"
-                .local [0] System.Object i
-                .local [1] System.Object returnValue
-                .local [2] System.Int32
+                .local [0] System.Object f
+                .local [1] System.Object arguments
+                .local [2] System.Object a
+                .local [3] System.Object b
+                .local [4] System.Object a
+                .local [5] System.Object returnValue
+                      ldnull
+                      stloc      V0 (f)
+                      ldnull
+                      stloc      V1 (arguments)
+                      ldnull
+                      stloc      V2 (a)
+                      ldnull
+                      stloc      V3 (b)
+                      ldc.i4     11
+                      box        System.Int32
+                      stloc      V2 (a)
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
+                      stloc      V3 (b)
+                      ldnull
+                      stloc      V4 (a)
+                      ldc.i4     13
+                      box        System.Int32
+                      stloc      V4 (a)
+                      ldloc      V4 (a)
+                      dup
+                      brtrue     L000
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'a' before initialization.""
                       ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L000: stloc      V3 (b)
+                      ldloc      V3 (b)
                       dup
-                      box        System.Int32
-                      stloc      V0 (i)
-                L000: pop
-                      ldloc      V0 (i)
-                L001: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
-                      ldc.i4     10
-                      conv.u4
-                      clt
-                      brfalse    L013
-                      ldc.i4     1
-                      box        System.Int32
-                      stloc      V1 (returnValue)
-                      br         L013
-                L002: ldloc      V0 (i)
-                L003: call       Double ToNumber(System.Object)/Jurassic.TypeConverter
+                      brtrue     L001
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'b' before initialization.""
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L001: ldloc      V2 (a)
                       dup
-                      ldc.r8     1
-                      add
-                      box        System.Double
-                      stloc      V0 (i)
-                L004: pop
-                      ldloc      V0 (i)
-                L005: call       Int32 ToInt32(System.Object)/Jurassic.TypeConverter
-                      stloc      V2
-                .try
+                      brtrue     L002
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'a' before initialization.""
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L002: call       System.Object Add(System.Object, System.Object)/Jurassic.TypeUtilities
+                      stloc      V3 (b)
+                      ldloc      V3 (b)
+                      dup
+                      brtrue     L003
+                      ldarg      0
+                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
+                      ldc.i4     6
+                      ldstr      ""Cannot access 'b' before initialization.""
+                      ldc.i4     0
+                      ldnull
+                      ldnull
+                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      throw
+                L003: stloc      V5 (returnValue)
+                      ldloc      V5 (returnValue)
+                      ret"),
+            GetFunctionIL(@"function f() {
+                let a = 11, b;
                 {
-                    L006: ldloc      V2
-                    L007: ldc.i4     10
-                          clt
-                          brfalse    L011
-                          ldc.i4     1
-                          box        System.Int32
-                          stloc      V1 (returnValue)
-                          leave      L013
-                    L008: ldloc      V2
-                    L009: dup
-                          ldc.i4     1
-                          add
-                          stloc      V2
-                    L010: pop
-                          br             
+                    let a = 13;
+                    b = a;
                 }
-                .finally
-                {
-                    L011: ldloc      V2
-                    L012: box        System.Int32
-                          stloc      V0 (i)
-                }
-                L013: ldloc      V1 (returnValue)
-                      ret
-                "),
-                GetFunctionIL(@"function f() {
-                    for (var i = 0; i < 10; i ++)
-                        return 1;
-                }", "f"));
+                b += a;
+                return b;
+            }", "f"));
+        }
+
+        private static string GetGlobalIL(string code)
+        {
+            var script = CompiledScript.Compile(new StringScriptSource(code),
+                new Jurassic.Compiler.CompilerOptions { EnableILAnalysis = true });
+            return NormalizeText(script.DisassembledIL);
+        }
+
+        private static string GetEvalIL(string code)
+        {
+            var script = CompiledEval.Compile(new StringScriptSource(code),
+                new Jurassic.Compiler.CompilerOptions { EnableILAnalysis = true });
+            return NormalizeText(script.DisassembledIL);
         }
 
         private static string GetFunctionIL(string code, string functionName)

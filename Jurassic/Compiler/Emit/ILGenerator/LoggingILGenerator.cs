@@ -38,9 +38,17 @@ namespace Jurassic.Compiler
             this.fixUps = new List<LabelFixUp>();
         }
 
+        /// <summary>
+        /// Gets a reference to the method that we are generating IL for.
+        /// </summary>
+        public override System.Reflection.MethodInfo MethodInfo
+        {
+            get { return this.generator.MethodInfo; }
+        }
 
 
-        //     BUFFER MANAGEMENT
+
+        //     LIFECYCLE MANAGEMENT
         //_________________________________________________________________________________________
 
         /// <summary>
@@ -725,7 +733,7 @@ namespace Jurassic.Compiler
         /// callsite.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public override void CallStatic(System.Reflection.MethodBase method)
+        public override void CallStatic(System.Reflection.MethodInfo method)
         {
             Log("call", method);
             this.generator.CallStatic(method);
@@ -738,7 +746,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public override void CallVirtual(System.Reflection.MethodBase method)
+        public override void CallVirtual(System.Reflection.MethodInfo method)
         {
             Log("callvirt", method);
             this.generator.CallVirtual(method);

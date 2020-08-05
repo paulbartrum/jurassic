@@ -101,12 +101,14 @@ namespace Jurassic.Compiler
             Break,
             Case,
             Catch,
+            Class,
             Continue,
             Debugger,
             Default,
             Delete,
             Do,
             Else,
+            Extends,
             Finally,
             For,
             Function,
@@ -115,6 +117,7 @@ namespace Jurassic.Compiler
             InstanceOf,
             New,
             Return,
+            Super,
             Switch,
             This,
             Throw,
@@ -131,13 +134,10 @@ namespace Jurassic.Compiler
             LiteralToken.Null,
 
             // Reserved keywords.
-            Class,
             Const,
             Enum,
             Export,
-            Extends,
             Import,
-            Super,
         };
 
         // Reserved words (in strict mode).

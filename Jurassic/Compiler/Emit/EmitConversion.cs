@@ -1,5 +1,5 @@
 ﻿using System;
-using ErrorType = Jurassic.Library.ErrorType;
+using Jurassic.Library;
 
 namespace Jurassic.Compiler
 {
@@ -259,8 +259,15 @@ namespace Jurassic.Compiler
         public static void ToInt32(ILGenerator generator, PrimitiveType fromType)
         {
             // Check that a conversion is actually necessary.
-            if (fromType == PrimitiveType.Int32 || fromType == PrimitiveType.UInt32 || fromType == PrimitiveType.Bool)
+            if (fromType == PrimitiveType.Int32 || fromType == PrimitiveType.UInt32)
                 return;
+            if (fromType == PrimitiveType.Bool)
+            {
+                // ToInt32(false) = 0, ToInt32(true) = 1, this corresponds exactly with the .NET
+                // representation of booleans.
+                generator.ReinterpretCast(typeof(int));
+                return;
+            }
 
             switch (fromType)
             {
@@ -298,6 +305,7 @@ namespace Jurassic.Compiler
         public static void ToUInt32(ILGenerator generator, PrimitiveType fromType)
         {
             ToInt32(generator, fromType);
+            generator.ConvertToUnsignedInteger();
         }
 
         /// <summary>
@@ -485,11 +493,13 @@ namespace Jurassic.Compiler
                 case PrimitiveType.Undefined:
                     // Converting from undefined always throws an exception.
                     EmitHelpers.EmitThrow(generator, ErrorType.TypeError, "Undefined cannot be converted to an object", path, function, line);
+                    generator.ReinterpretCast(typeof(ObjectInstance));
                     break;
 
                 case PrimitiveType.Null:
                     // Converting from null always throws an exception.
                     EmitHelpers.EmitThrow(generator, ErrorType.TypeError, "Null cannot be converted to an object", path, function, line);
+                    generator.ReinterpretCast(typeof(ObjectInstance));
                     break;
 
                 case PrimitiveType.Bool:
@@ -543,7 +553,7 @@ namespace Jurassic.Compiler
                 case PrimitiveType.Any:
                 case PrimitiveType.Object:
                     // Otherwise, fall back to calling TypeConverter.ToPrimitive()
-                    generator.LoadInt32((int)preferredType);
+                    generator.LoadEnumValue(preferredType);
                     generator.Call(ReflectionHelpers.TypeConverter_ToPrimitive);
                     break;
 
@@ -562,6 +572,8 @@ namespace Jurassic.Compiler
         {
             if (PrimitiveTypeUtilities.IsValueType(fromType))
                 generator.Box(fromType);
+            else
+                generator.ReinterpretCast(typeof(object));
         }
 
         /// <summary>

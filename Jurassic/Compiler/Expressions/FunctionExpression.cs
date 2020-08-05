@@ -14,11 +14,11 @@ namespace Jurassic.Compiler
         /// Creates a new instance of FunctionExpression.
         /// </summary>
         /// <param name="functionContext"> The function context to base this expression on. </param>
-        public FunctionExpression(FunctionMethodGenerator functionContext)
+        /// <param name="scope"> The scope that was in effect where the function was declared. </param>
+        public FunctionExpression(FunctionMethodGenerator functionContext, Scope scope)
         {
-            if (functionContext == null)
-                throw new ArgumentNullException(nameof(functionContext));
-            this.context = functionContext;
+            this.context = functionContext ?? throw new ArgumentNullException(nameof(functionContext));
+            this.Scope = scope;
         }
 
         /// <summary>
@@ -30,10 +30,9 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Gets the name of the function.  For getters and setters, this does not include the
-        /// "get" or "set".
+        /// Gets the name of the function. Can be <c>null</c>.
         /// </summary>
-        public string FunctionName
+        public PropertyName Name
         {
             get { return this.context.Name; }
         }
@@ -61,6 +60,20 @@ namespace Jurassic.Compiler
         {
             get { return PrimitiveType.Object; }
         }
+
+        /// <summary>
+        /// The scope that was in effect where the function was declared.
+        /// </summary>
+        public Scope Scope { get; set; }
+
+        /// <summary>
+        /// A variable that contains the declaring object.
+        /// 1. In an object literal, the object literal instance.
+        /// 2. In a class instance method, the class prototype.
+        /// 3. In a class static method, the class itself.
+        /// Used when generating code.
+        /// </summary>
+        public ILLocalVariable ContainerVariable { get; set; }
 
         /// <summary>
         /// Generates CIL for the expression.
@@ -95,12 +108,23 @@ namespace Jurassic.Compiler
             generator.Call(ReflectionHelpers.FunctionInstance_InstancePrototype);
 
             // name
-            if (this.context.DeclarationType == FunctionDeclarationType.Getter)
-                generator.LoadString("get " + this.FunctionName);
-            else if (this.context.DeclarationType == FunctionDeclarationType.Setter)
-                generator.LoadString("set " + this.FunctionName);
+            string prefix = null;
+            if (Name.IsGetter)
+                prefix = "get ";
+            else if (Name.IsSetter)
+                prefix = "set ";
+            if (Name.HasStaticName)
+                generator.LoadString(prefix + Name.StaticName);
             else
-                generator.LoadString(this.FunctionName);
+            {
+                // Compute the name at runtime.
+                if (prefix != null)
+                    generator.LoadString(prefix);
+                Name.ComputedName.GenerateCode(generator, optimizationInfo);
+                EmitConversion.ToString(generator, Name.ComputedName.ResultType);
+                if (prefix != null)
+                    generator.CallStatic(ReflectionHelpers.String_Concat_String_String);
+            }
 
             // argumentNames
             generator.LoadInt32(this.Arguments.Count);
@@ -114,7 +138,7 @@ namespace Jurassic.Compiler
             }
 
             // scope
-            EmitHelpers.LoadScope(generator);
+            Scope.GenerateReference(generator, optimizationInfo);
 
             // bodyText
             generator.LoadString(this.BodyText);
@@ -126,36 +150,16 @@ namespace Jurassic.Compiler
             // strictMode
             generator.LoadBoolean(this.context.StrictMode);
 
-            // new UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, DeclarativeScope scope, Func<Scope, object, object[], object> body, bool strictMode)
-            generator.NewObject(ReflectionHelpers.UserDefinedFunction_Constructor);
-        }
+            // container
+            if (ContainerVariable != null)
+                generator.LoadVariable(ContainerVariable);
+            else
+                generator.LoadNull();
 
-        
-        /// <summary>
-        /// Generates CIL to set the display name of the function.  The function should be on top of the stack.
-        /// </summary>
-        /// <param name="generator"> The generator to output the CIL to. </param>
-        /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
-        /// <param name="displayName"> The display name of the function. </param>
-        /// <param name="force"> <c>true</c> to set the displayName property, even if the function has a name already. </param>
-        public void GenerateDisplayName(ILGenerator generator, OptimizationInfo optimizationInfo, string displayName, bool force)
-        {
-            if (displayName == null)
-                throw new ArgumentNullException(nameof(displayName));
-
-            // We only infer names for functions if the function doesn't have a name.
-            if (force == true || string.IsNullOrEmpty(this.FunctionName))
-            {
-                // Statically set the display name.
-                this.context.DisplayName = displayName;
-
-                // Generate code to set the display name at runtime.
-                generator.Duplicate();
-                generator.LoadString("displayName");
-                generator.LoadString(displayName);
-                generator.LoadBoolean(false);
-                generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
-            }
+            // CreateFunction(ObjectInstance prototype, string name, IList<string> argumentNames,
+            //   RuntimeScope scope, Func<Scope, object, object[], object> body,
+            //   bool strictMode, FunctionInstance container)
+            generator.CallStatic(ReflectionHelpers.ReflectionHelpers_CreateFunction);
         }
 
         /// <summary>
@@ -164,7 +168,14 @@ namespace Jurassic.Compiler
         /// <returns> A string representing this expression. </returns>
         public override string ToString()
         {
-            return string.Format("function {0}({1}) {{\n{2}\n}}", this.FunctionName, StringHelpers.Join(", ", this.Arguments), this.BodyText);
+            var prefix = "function ";
+            if (Name.IsGetter)
+                prefix = "get ";
+            else if (Name.IsSetter)
+                prefix = "set ";
+
+            return string.Format("{0} {1}({2}) {{\n{3}\n}}", prefix, this.Name,
+                StringHelpers.Join(", ", this.Arguments), this.BodyText);
         }
     }
 

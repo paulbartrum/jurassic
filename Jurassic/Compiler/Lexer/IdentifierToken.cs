@@ -39,6 +39,7 @@ namespace Jurassic.Compiler
 
         // Contextual keywords.
         public readonly static IdentifierToken Of = new IdentifierToken("of");
+        public readonly static IdentifierToken Let = new IdentifierToken("let");
 
         /// <summary>
         /// Creates a new identifier token.
@@ -49,6 +50,8 @@ namespace Jurassic.Compiler
         {
             if (name == "of")
                 return Of;
+            if (name == "let")
+                return Let;
             return new IdentifierToken(name);
         }
     }

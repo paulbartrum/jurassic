@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Jurassic.Compiler
 {
@@ -8,20 +9,14 @@ namespace Jurassic.Compiler
     /// </summary>
     internal abstract class ILGenerator
     {
-        ///// <summary>
-        ///// Gets or sets a value which indicates whether diagnostics are enabled.  Better error
-        ///// messages are provided in some cases if this property is set to <c>true</c>, however
-        ///// performance and memory usage are negatively impacted.
-        ///// </summary>
-        //public bool EnableDiagnostics
-        //{
-        //    get;
-        //    set;
-        //}
+        /// <summary>
+        /// Gets a reference to the method that we are generating IL for.
+        /// </summary>
+        public abstract MethodInfo MethodInfo { get; }
 
 
 
-        //     BUFFER MANAGEMENT
+        //     LIFECYCLE MANAGEMENT
         //_________________________________________________________________________________________
 
         /// <summary>
@@ -98,7 +93,7 @@ namespace Jurassic.Compiler
         /// null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfFalse(ILLabel label)
+        public virtual void BranchIfFalse(ILLabel label)
         {
             BranchIfZero(label);
         }
@@ -108,7 +103,7 @@ namespace Jurassic.Compiler
         /// non-null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfTrue(ILLabel label)
+        public virtual void BranchIfTrue(ILLabel label)
         {
             BranchIfNotZero(label);
         }
@@ -118,7 +113,7 @@ namespace Jurassic.Compiler
         /// null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfNull(ILLabel label)
+        public virtual void BranchIfNull(ILLabel label)
         {
             BranchIfZero(label);
         }
@@ -128,7 +123,7 @@ namespace Jurassic.Compiler
         /// non-null.
         /// </summary>
         /// <param name="label"> The label to branch to. </param>
-        public void BranchIfNotNull(ILLabel label)
+        public virtual void BranchIfNotNull(ILLabel label)
         {
             BranchIfNotZero(label);
         }
@@ -349,7 +344,7 @@ namespace Jurassic.Compiler
         /// Pushes a constant value onto the stack.
         /// </summary>
         /// <param name="value"> The boolean to push onto the stack. </param>
-        public void LoadBoolean(bool value)
+        public virtual void LoadBoolean(bool value)
         {
             LoadInt32(value ? 1 : 0);
         }
@@ -406,6 +401,15 @@ namespace Jurassic.Compiler
                 LoadNull();
             else
                 LoadString(value);
+        }
+
+        /// <summary>
+        /// Pushes a constant value onto the stack.
+        /// </summary>
+        /// <param name="value"> The enum value to push onto the stack. </param>
+        public virtual void LoadEnumValue<T>(T value) where T : Enum
+        {
+            LoadInt32((int)(object)value);
         }
 
 
@@ -630,7 +634,7 @@ namespace Jurassic.Compiler
         /// Pops the constructor arguments off the stack and creates a new instance of the object.
         /// </summary>
         /// <param name="constructor"> The constructor that is used to initialize the object. </param>
-        public abstract void NewObject(System.Reflection.ConstructorInfo constructor);
+        public abstract void NewObject(ConstructorInfo constructor);
 
         /// <summary>
         /// Pops the method arguments off the stack, calls the given method, then pushes the result
@@ -638,7 +642,7 @@ namespace Jurassic.Compiler
         /// method (or is declared on a value type) or CallVirtual() otherwise.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public void Call(System.Reflection.MethodBase method)
+        public void Call(MethodInfo method)
         {
             if (method.IsStatic == true || method.DeclaringType.IsValueType == true)
                 CallStatic(method);
@@ -653,7 +657,7 @@ namespace Jurassic.Compiler
         /// callsite.
         /// </summary>
         /// <param name="method"> The method to call. </param>
-        public abstract void CallStatic(System.Reflection.MethodBase method);
+        public abstract void CallStatic(MethodInfo method);
 
         /// <summary>
         /// Pops the method arguments off the stack, calls the given method, then pushes the result
@@ -662,19 +666,19 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to call. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public abstract void CallVirtual(System.Reflection.MethodBase method);
+        public abstract void CallVirtual(MethodInfo method);
 
         /// <summary>
         /// Pushes the value of the given field onto the stack.
         /// </summary>
         /// <param name="field"> The field whose value will be pushed. </param>
-        public abstract void LoadField(System.Reflection.FieldInfo field);
+        public abstract void LoadField(FieldInfo field);
 
         /// <summary>
         /// Pops a value off the stack and stores it in the given field.
         /// </summary>
         /// <param name="field"> The field to modify. </param>
-        public abstract void StoreField(System.Reflection.FieldInfo field);
+        public abstract void StoreField(FieldInfo field);
 
         /// <summary>
         /// Pops an object off the stack, checks that the object inherits from or implements the
@@ -684,6 +688,16 @@ namespace Jurassic.Compiler
         /// <param name="type"> The type of the class the object inherits from or the interface the
         /// object implements. </param>
         public abstract void CastClass(Type type);
+
+        /// <summary>
+        /// Changes the type of the value on the top of the stack, for the purpose of passing
+        /// verification. Doesn't generate any IL instructions.
+        /// </summary>
+        /// <param name="type"> The type to convert to. </param>
+        public virtual void ReinterpretCast(Type type)
+        {
+            // Does nothing.
+        }
 
         /// <summary>
         /// Pops an object off the stack, checks that the object inherits from or implements the
@@ -705,20 +719,20 @@ namespace Jurassic.Compiler
         /// stack.
         /// </summary>
         /// <param name="method"> The method to convert to a RuntimeMethodHandle. </param>
-        public abstract void LoadToken(System.Reflection.MethodBase method);
+        public abstract void LoadToken(MethodBase method);
 
         /// <summary>
         /// Pushes a RuntimeFieldHandle corresponding to the given field onto the evaluation stack.
         /// </summary>
         /// <param name="field"> The type to convert to a RuntimeFieldHandle. </param>
-        public abstract void LoadToken(System.Reflection.FieldInfo field);
+        public abstract void LoadToken(FieldInfo field);
 
         /// <summary>
         /// Pushes a pointer to the native code implementing the given method onto the evaluation
         /// stack.  The virtual qualifier will be ignored, if present.
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
-        public abstract void LoadStaticMethodPointer(System.Reflection.MethodBase method);
+        public abstract void LoadStaticMethodPointer(MethodBase method);
 
         /// <summary>
         /// Pushes a pointer to the native code implementing the given method onto the
@@ -726,7 +740,7 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
         /// <exception cref="ArgumentException"> The method is static. </exception>
-        public abstract void LoadVirtualMethodPointer(System.Reflection.MethodBase method);
+        public abstract void LoadVirtualMethodPointer(MethodBase method);
 
         /// <summary>
         /// Pushes a pointer to the native code implementing the given method onto the evaluation
@@ -734,7 +748,7 @@ namespace Jurassic.Compiler
         /// method (or is declared on a value type) or LoadVirtualMethodPointer() otherwise.
         /// </summary>
         /// <param name="method"> The method to retrieve a pointer for. </param>
-        public void LoadMethodPointer(System.Reflection.MethodBase method)
+        public void LoadMethodPointer(MethodBase method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));

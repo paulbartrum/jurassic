@@ -27,8 +27,10 @@ namespace Jurassic.Compiler
         /// Creates a derived instance of OperatorExpression from the given operator.
         /// </summary>
         /// <param name="operator"> The operator to base this expression on. </param>
+        /// <param name="scope"> The scope that was in effect at the time of the function call
+        /// (used by eval() calls). </param>
         /// <returns> A derived OperatorExpression instance. </returns>
-        public static OperatorExpression FromOperator(Operator @operator)
+        public static OperatorExpression FromOperator(Operator @operator, Scope scope)
         {
             if (@operator == null)
                 throw new ArgumentNullException(nameof(@operator));
@@ -38,7 +40,7 @@ namespace Jurassic.Compiler
                     return new GroupingExpression(@operator);
 
                 case OperatorType.FunctionCall:
-                    return new FunctionCallExpression(@operator);
+                    return new FunctionCallExpression(@operator, scope);
 
                 case OperatorType.MemberAccess:
                 case OperatorType.Index:
@@ -210,6 +212,28 @@ namespace Jurassic.Compiler
                 for (int i = 0; i < this.OperandCount; i++)
                     yield return this.operands[i];
             }
+        }
+
+        /// <summary>
+        /// Checks the expression is valid and throws a SyntaxErrorException if not.
+        /// Called after the expression tree is fully built out.
+        /// </summary>
+        /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
+        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
+        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
+        public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
+        {
+            // Check the operator expression has the right number of operands.
+            if (Operator.IsValidNumberOfOperands(OperandCount) == false)
+                throw new SyntaxErrorException("Wrong number of operands", lineNumber, sourcePath);
+
+            // Check the operator expression is closed.
+            if (Operator.SecondaryToken != null && SecondTokenEncountered == false)
+                throw new SyntaxErrorException(string.Format("Missing closing token '{0}'", Operator.SecondaryToken.Text), lineNumber, sourcePath);
+
+            // Check the child nodes.
+            for (int i = 0; i < OperandCount; i++)
+                GetRawOperand(i).CheckValidity(context, lineNumber, sourcePath);
         }
 
         /// <summary>

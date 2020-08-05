@@ -57,6 +57,17 @@ namespace Jurassic.Compiler
                 return this.Value.ToString();
             }
         }
+
+        /// <summary>
+        /// Converts this token into a property name.
+        /// </summary>
+        /// <returns></returns>
+        public string ToPropertyName()
+        {
+            if (this.Value is string)
+                return (string)this.Value;
+            return Text;
+        }
     }
 
 }
