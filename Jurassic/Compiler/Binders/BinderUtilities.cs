@@ -96,6 +96,7 @@ namespace Jurassic.Compiler
                                 demeritPoints[i] += disqualification;
                             break;
 
+                        case TypeCode.DBNull:
                         case TypeCode.DateTime:
                         case TypeCode.Object:
                             if (input == null || input == Undefined.Value)
@@ -115,7 +116,6 @@ namespace Jurassic.Compiler
 
 
                         case TypeCode.Empty:
-                        case TypeCode.DBNull:
                             throw new NotSupportedException(string.Format("{0} is not a supported parameter type.", outputType));
                     }
                 }

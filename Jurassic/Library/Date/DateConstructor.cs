@@ -68,6 +68,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Creates a new Date object from a DateTime.
+        /// </summary>
+        /// <param name="date"> A regular DateTime </param>
+        public DateInstance Construct(DateTime date)
+        {
+            return new DateInstance(this.InstancePrototype, date);
+        }
+
+        /// <summary>
         /// Creates a new Date object from various date components, expressed in local time.
         /// </summary>
         /// <param name="year"> The full year. </param>

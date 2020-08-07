@@ -80,17 +80,37 @@ namespace Jurassic
                 return false;
             if (value is bool)
                 return (bool)value;
+            if (value is sbyte)
+                return ((sbyte)value) != 0;
+            if (value is byte)
+                return ((byte)value) != 0;
+            if (value is char)
+                return ((char)value) != 0;
+            if (value is short)
+                return ((short)value) != 0;
+            if (value is ushort)
+                return ((ushort)value) != 0;
             if (value is int)
                 return ((int)value) != 0;
             if (value is uint)
                 return ((uint)value) != 0;
+            if (value is long)
+                return ((long)value) != 0;
+            if (value is ulong)
+                return ((ulong)value) != 0;
+            if (value is Enum )
+                return ((int)value) != 0;
+            if (value is float)
+                return ((float)value) != 0 && float.IsNaN((float)value) == false;
             if (value is double)
                 return ((double)value) != 0 && double.IsNaN((double)value) == false;
+            if (value is decimal)
+                return ((decimal)value) != 0;
             if (value is string)
                 return ((string)value).Length > 0;
             if (value is ConcatenatedString)
                 return ((ConcatenatedString)value).Length > 0;
-            if (value is ObjectInstance)
+            if (value is Object && !(value is DBNull)) // All non null objects, except DBNull are converted to true
                 return true;
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a boolean.", value.GetType()), nameof(value));
         }
@@ -102,12 +122,32 @@ namespace Jurassic
         /// <returns> A primitive number value. </returns>
         public static double ToNumber(object value)
         {
+            if (value is float)
+                return (double)(float)value;
             if (value is double)
                 return (double)value;
+            if (value is decimal)
+                return decimal.ToDouble((decimal)value);
+            if (value is sbyte)
+                return (double)(sbyte)value;
+            if (value is byte)
+                return (double)(byte)value;
+            if (value is char)
+                return (double)(char)value;
+            if (value is short)
+                return (double)(short)value;
+            if (value is ushort)
+                return (double)(ushort)value;
             if (value is int)
                 return (double)(int)value;
             if (value is uint)
                 return (double)(uint)value;
+            if (value is long)
+                return (double)(long)value;
+            if (value is ulong)
+                return (double)(ulong)value;
+            if (value is Enum)
+                return (int)value;
             if (value == null || value == Undefined.Value)
                 return double.NaN;
             if (value == Null.Value)
@@ -146,11 +186,27 @@ namespace Jurassic
                 return "null";
             if (value is bool)
                 return (bool)value ? "true" : "false";
+            if (value is sbyte)
+                return ((sbyte)value).ToString();
+            if (value is byte)
+                return ((byte)value).ToString();
+            if (value is char)
+                return ((char)value).ToString();
+            if (value is short)
+                return ((short)value).ToString();
+            if (value is ushort)
+                return ((ushort)value).ToString();
             if (value is int)
                 return ((int)value).ToString();
             if (value is uint)
                 return ((uint)value).ToString();
-            if (value is double)
+            if (value is long)
+                return ((long)value).ToString();
+            if (value is ulong)
+                return ((ulong)value).ToString();
+            if (value is Enum)
+                return value.ToString();
+            if (value is double || value is float)
             {
                 // Check if the value is in the cache.
                 double doubleValue = (double)value;
@@ -167,6 +223,8 @@ namespace Jurassic
 
                 return result;
             }
+            if (value is decimal)
+                return ((decimal)value).ToString();
             if (value is string)
                 return (string)value;
             if (value is ConcatenatedString)
@@ -224,16 +282,40 @@ namespace Jurassic
             ObjectInstance result;
             if (value is bool)
                 result = engine.Boolean.Construct((bool)value);
+            else if (value is sbyte)
+                result = engine.Number.Construct((sbyte)value);
+            else if (value is byte)
+                result = engine.Number.Construct((byte)value);
+            else if (value is char)
+                result = engine.Number.Construct((char)value);
+            else if (value is short)
+                result = engine.Number.Construct((short)value);
+            else if (value is ushort)
+                result = engine.Number.Construct((ushort)value);
             else if (value is int)
                 result = engine.Number.Construct((int)value);
             else if (value is uint)
                 result = engine.Number.Construct((uint)value);
+            else if (value is long)
+                result = engine.Number.Construct((long)value);
+            else if (value is ulong)
+                result = engine.Number.Construct((ulong)value);
+            else if (value is Enum)
+                result = engine.Number.Construct((int)value);
+            else if (value is float)
+                result = engine.Number.Construct((float)value);
             else if (value is double)
                 result = engine.Number.Construct((double)value);
+            else if (value is decimal)
+                result = engine.Number.Construct(decimal.ToDouble((decimal)value));
             else if (value is string)
                 result = engine.String.Construct((string)value);
             else if (value is ConcatenatedString)
                 result = engine.String.Construct(value.ToString());
+            else if (value is DateTime)
+                result = engine.Date.Construct((DateTime)value);
+            else if (value is object && engine.EnableExposedClrTypes)
+                result = new ClrInstanceWrapper(engine, value);
             else
                 throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), nameof(value));
 
