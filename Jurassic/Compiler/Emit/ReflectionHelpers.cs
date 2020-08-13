@@ -292,10 +292,10 @@ namespace Jurassic.Compiler
             ExecutionContext_CreateRuntimeScope = GetInstanceMethod(typeof(ExecutionContext), nameof(ExecutionContext.CreateRuntimeScope), typeof(RuntimeScope), typeof(ScopeType), typeof(string[]), typeof(string[]), typeof(string[]));
 
             // RuntimeScope
-            RuntimeScope_GetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValue), typeof(string));
-            RuntimeScope_GetValueNoThrow = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValueNoThrow), typeof(string));
-            RuntimeScope_SetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValue), typeof(string), typeof(object));
-            RuntimeScope_SetValueStrict = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValueStrict), typeof(string), typeof(object));
+            RuntimeScope_GetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValue), typeof(string), typeof(int), typeof(string));
+            RuntimeScope_GetValueNoThrow = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.GetValueNoThrow), typeof(string), typeof(int), typeof(string));
+            RuntimeScope_SetValue = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValue), typeof(string), typeof(object), typeof(int), typeof(string));
+            RuntimeScope_SetValueStrict = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.SetValueStrict), typeof(string), typeof(object), typeof(int), typeof(string));
             RuntimeScope_Delete = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.Delete), typeof(string));
             RuntimeScope_With = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.With), typeof(object));
             RuntimeScope_ImplicitThis = GetInstanceMethod(typeof(RuntimeScope), "get_" + nameof(RuntimeScope.ImplicitThis));

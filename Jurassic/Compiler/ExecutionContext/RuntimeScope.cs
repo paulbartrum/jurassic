@@ -212,27 +212,45 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Returns the value of the given variable.
+        /// Returns the value of the given variable. An error is thrown if the variable doesn't
+        /// exist.
         /// </summary>
         /// <param name="variableName"> The name of the variable. </param>
-        /// <returns> The value of the given variable, or <c>null</c> if the variable doesn't exist
-        /// in the scope. </returns>
-        public object GetValue(string variableName)
+        /// <param name="lineNumber"> The line number in the source file the variable was accessed. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <returns> The value of the given variable. </returns>
+        public object GetValue(string variableName, int lineNumber, string sourcePath)
         {
-            return GetValueCore(variableName) ?? throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
+            object result = GetValueCore(variableName, lineNumber, sourcePath);
+            if (result == null)
+                throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.", lineNumber, sourcePath);
+            return result;
         }
 
         /// <summary>
-        /// 
+        /// Returns the value of the given variable. Returns <see cref="Undefined.Value"/> if the
+        /// variable doesn't exist.
         /// </summary>
         /// <param name="variableName"></param>
-        /// <returns></returns>
-        public object GetValueNoThrow(string variableName)
+        /// <param name="lineNumber"> The line number in the source file the variable was accessed. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <returns> The value of the given variable, or <see cref="Undefined.Value"/> if the
+        /// variable doesn't exist. </returns>
+        public object GetValueNoThrow(string variableName, int lineNumber, string sourcePath)
         {
-            return GetValueCore(variableName) ?? Undefined.Value;
+            return GetValueCore(variableName, lineNumber, sourcePath) ?? Undefined.Value;
         }
 
-        private object GetValueCore(string variableName)
+        /// <summary>
+        /// Returns the value of the given variable. Returns <c>null</c> if the variable doesn't
+        /// exist.
+        /// </summary>
+        /// <param name="variableName"> The name of the variable. </param>
+        /// <param name="lineNumber"> The line number in the source file the variable was accessed. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <returns> The value of the given variable, or <c>null</c> if the variable doesn't exist
+        /// in the scope. </returns>
+        private object GetValueCore(string variableName, int lineNumber, string sourcePath)
         {
             if (variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
@@ -242,7 +260,7 @@ namespace Jurassic.Compiler
                 if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
                     if (localValue.Value == null)
-                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.");
+                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.", lineNumber, sourcePath);
                     return localValue.Value;
                 }
                 if (scope.ScopeObject != null)
@@ -261,9 +279,11 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="variableName"> The name of the variable. </param>
         /// <param name="value"> The new value of the variable. </param>
-        public void SetValue(string variableName, object value)
+        /// <param name="lineNumber"> The line number in the source file the variable was set. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        public void SetValue(string variableName, object value, int lineNumber, string sourcePath)
         {
-            SetValueCore(variableName, value, strictMode: false);
+            SetValueCore(variableName, value, strictMode: false, lineNumber, sourcePath);
         }
 
         /// <summary>
@@ -271,12 +291,23 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="variableName"> The name of the variable. </param>
         /// <param name="value"> The new value of the variable. </param>
-        public void SetValueStrict(string variableName, object value)
+        /// <param name="lineNumber"> The line number in the source file the variable was set. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        public void SetValueStrict(string variableName, object value, int lineNumber, string sourcePath)
         {
-            SetValueCore(variableName, value, strictMode: true);
+            SetValueCore(variableName, value, strictMode: true, lineNumber, sourcePath);
         }
 
-        private void SetValueCore(string variableName, object value, bool strictMode)
+        /// <summary>
+        /// Sets the value of the given variable.
+        /// </summary>
+        /// <param name="variableName"> The name of the variable. </param>
+        /// <param name="value"> The new value of the variable. </param>
+        /// <param name="strictMode"> Indicates whether to use strict mode behaviour when setting
+        /// the variable. </param>
+        /// <param name="lineNumber"> The line number in the source file the variable was set. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        private void SetValueCore(string variableName, object value, bool strictMode, int lineNumber, string sourcePath)
         {
             if (variableName == null)
                 throw new ArgumentNullException(nameof(variableName));
@@ -288,7 +319,7 @@ namespace Jurassic.Compiler
                 if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
                     if (localValue.Value != null && localValue.Flags.HasFlag(LocalFlags.ReadOnly))
-                        throw new JavaScriptException(Engine, ErrorType.TypeError, $"Illegal assignment to constant variable '{variableName}'.");
+                        throw new JavaScriptException(Engine, ErrorType.TypeError, $"Illegal assignment to constant variable '{variableName}'.", lineNumber, sourcePath);
                     scope.values[variableName] = new LocalValue { Value = value, Flags = localValue.Flags };
                     return;
                 }
@@ -308,7 +339,7 @@ namespace Jurassic.Compiler
                     
                     // Strict mode: throw an exception if the variable is undefined.
                     if (scope.Parent == null)
-                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.");
+                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.", lineNumber, sourcePath);
                 }
                 scope = scope.Parent;
             } while (scope != null);

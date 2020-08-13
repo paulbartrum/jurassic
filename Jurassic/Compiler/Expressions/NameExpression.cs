@@ -124,6 +124,8 @@ namespace Jurassic.Compiler
             // Fallback: call RuntimeScope.GetValue() or RuntimeScope.GetValueNoThrow().
             Scope.GenerateReference(generator, optimizationInfo);
             generator.LoadString(Name);
+            generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
+            generator.LoadStringOrNull(optimizationInfo.Source.Path);
             generator.Call(throwIfUnresolvable ? ReflectionHelpers.RuntimeScope_GetValue : ReflectionHelpers.RuntimeScope_GetValueNoThrow);
         }
 
@@ -185,6 +187,8 @@ namespace Jurassic.Compiler
             generator.LoadString(Name);
             generator.LoadVariable(temp);
             EmitConversion.ToAny(generator, valueType);
+            generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
+            generator.LoadStringOrNull(optimizationInfo.Source.Path);
             generator.Call(optimizationInfo.StrictMode ? ReflectionHelpers.RuntimeScope_SetValueStrict : ReflectionHelpers.RuntimeScope_SetValue);
             generator.ReleaseTemporaryVariable(temp);
         }

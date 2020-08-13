@@ -115,7 +115,7 @@ namespace Jurassic.Library
         private object ArgumentGetter(ExecutionContext context, object[] argumentValues)
         {
             int argumentIndex = TypeConverter.ToInteger(context.ExecutingFunction.GetPropertyValue("argumentIndex"));
-            return this.bindings.GetValue(this.callee.ArgumentNames[argumentIndex]);
+            return this.bindings.GetValue(this.callee.ArgumentNames[argumentIndex], 0, null);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Jurassic.Library
             if (argumentValues != null && argumentValues.Length >= 1)
             {
                 object value = argumentValues[0];
-                this.bindings.SetValue(this.callee.ArgumentNames[argumentIndex], value);
+                this.bindings.SetValue(this.callee.ArgumentNames[argumentIndex], value, 0, null);
             }
             return Undefined.Value;
         }
@@ -151,7 +151,7 @@ namespace Jurassic.Library
             if (index < this.mappedArguments.Length && this.mappedArguments[index] == true)
             {
                 this.mappedArguments[index] = false;
-                var currentValue = this.bindings.GetValue(this.callee.ArgumentNames[(int)index]);
+                var currentValue = this.bindings.GetValue(this.callee.ArgumentNames[(int)index], 0, null);
                 DefineProperty(index.ToString(), new PropertyDescriptor(currentValue, PropertyAttributes.FullAccess), false);
             }
 
