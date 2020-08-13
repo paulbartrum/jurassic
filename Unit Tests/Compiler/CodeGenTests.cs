@@ -19,18 +19,18 @@ namespace Performance
         {
             Assert.AreEqual(NormalizeText(@"
                 .local [0] System.Int32
-                    ldc.i4     6
-                    stloc      V0
-                    ldarg      0
-                    callvirt   Jurassic.Compiler.RuntimeScope get_ParentScope()/Jurassic.Compiler.ExecutionContext
-                    ldstr      ""x""
-                    ldloc      V0
-                    box        System.Int32
-                    ldc.i4     1
-                    ldnull
-                    callvirt   Void SetValue(System.String, System.Object, Int32, System.String) / Jurassic.Compiler.RuntimeScope
-                    ldnull
-                    ret"), GetGlobalIL(@"x = 6"));
+                      ldc.i4     6
+                      stloc      V0
+                      ldarg      0
+                      callvirt   Jurassic.Compiler.RuntimeScope get_ParentScope()/Jurassic.Compiler.ExecutionContext
+                      ldstr      ""x""
+                      ldloc      V0
+                      box        System.Int32
+                      ldc.i4     1
+                      ldnull
+                      callvirt   Void SetValue(System.String, System.Object, Int32, System.String)/Jurassic.Compiler.RuntimeScope
+                      ldnull
+                      ret"), GetGlobalIL(@"x = 6"));
         }
         
         [TestMethod]
