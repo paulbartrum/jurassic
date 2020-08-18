@@ -12,6 +12,7 @@ namespace Jurassic.Library
     [DebuggerTypeProxy(typeof(ClrInstanceTypeWrapperDebugView))]
     internal class ClrInstanceTypeWrapper : ObjectInstance
     {
+        private static Object lockObject = new Object();
 
         //     INITIALIZATION
         //_________________________________________________________________________________________
@@ -28,11 +29,14 @@ namespace Jurassic.Library
                 throw new JavaScriptException(engine, ErrorType.TypeError, "Unsupported type: CLR types are not supported.  Enable CLR types by setting the ScriptEngine's EnableExposedClrTypes property to true.");
 
             ClrInstanceTypeWrapper cachedInstance;
-            if (engine.InstanceTypeWrapperCache.TryGetValue(type, out cachedInstance) == true)
-                return cachedInstance;
-            var newInstance = new ClrInstanceTypeWrapper(engine, type);
-            engine.InstanceTypeWrapperCache.Add(type, newInstance);
-            return newInstance;
+            lock (lockObject)
+            {
+                if (engine.InstanceTypeWrapperCache.TryGetValue(type, out cachedInstance) == true)
+                    return cachedInstance;
+                var newInstance = new ClrInstanceTypeWrapper(engine, type);
+                engine.InstanceTypeWrapperCache.Add(type, newInstance);
+                return newInstance;
+            }
         }
 
         /// <summary>
