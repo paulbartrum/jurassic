@@ -220,7 +220,7 @@ namespace Jurassic.Library
             key = TypeConverter.ToPropertyKey(key);
             var defaults = obj.GetOwnPropertyDescriptor(key);
             if (!(attributes is ObjectInstance))
-                throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Invalid descriptor for property '{propertyName}'.");
+                throw new JavaScriptException(obj.Engine, ErrorType.TypeError, $"Invalid descriptor for property '{key}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
             obj.DefineProperty(key, descriptor, true);
             return obj;
@@ -312,12 +312,16 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if properties can be added or at least one property can be
         /// deleted; <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "isSealed")]
-        public static bool IsSealed(ObjectInstance obj)
+        public static bool IsSealed(object obj)
         {
-            foreach (var property in obj.Properties)
-                if (property.IsConfigurable == true)
-                    return false;
-            return obj.IsExtensible == false;
+            if (obj is ObjectInstance objectInstance)
+            {
+                foreach (var property in objectInstance.Properties)
+                    if (property.IsConfigurable == true)
+                        return false;
+                return objectInstance.IsExtensible == false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -328,12 +332,16 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if properties can be added or at least one property can be
         /// deleted or modified; <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "isFrozen")]
-        public static bool IsFrozen(ObjectInstance obj)
+        public static bool IsFrozen(object obj)
         {
-            foreach (var property in obj.Properties)
-                if (property.IsConfigurable == true || property.IsWritable == true)
-                    return false;
-            return obj.IsExtensible == false;
+            if (obj is ObjectInstance objectInstance)
+            {
+                foreach (var property in objectInstance.Properties)
+                    if (property.IsConfigurable == true || property.IsWritable == true)
+                        return false;
+                return objectInstance.IsExtensible == false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -342,9 +350,13 @@ namespace Jurassic.Library
         /// <param name="obj"> The object to check. </param>
         /// <returns> <c>true</c> if properties can be added to the object; <c>false</c> otherwise. </returns>
         [JSInternalFunction(Name = "isExtensible")]
-        public static new bool IsExtensible(ObjectInstance obj)
+        public static new bool IsExtensible(object obj)
         {
-            return obj.IsExtensible;
+            if (obj is ObjectInstance objectInstance)
+            {
+                return objectInstance.IsExtensible;
+            }
+            return false;
         }
 
         /// <summary>
