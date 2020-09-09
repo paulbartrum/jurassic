@@ -64,7 +64,6 @@ namespace Jurassic.TestSuiteRunner
                             testCase.Success = true;
                         if (testCase.Success == false &&
                             !testCase.name.StartsWith("Proxy") &&
-                            !testCase.name.StartsWith("Reflect") &&
                             !testCase.name.StartsWith("generators") &&
                             !testCase.name.StartsWith("arrow functions") &&
                             !testCase.name.StartsWith("destructuring") &&
@@ -74,7 +73,7 @@ namespace Jurassic.TestSuiteRunner
                         }
 
                         if (testCase.Success == false &&
-                            (testCase.name.StartsWith("const") || testCase.name.StartsWith("let")))
+                            (testCase.name.StartsWith("Reflect")))
                         {
                             Console.WriteLine(testCase.script);
                         }
