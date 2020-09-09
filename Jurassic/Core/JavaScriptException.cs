@@ -1,7 +1,7 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿#nullable enable
+
+using System;
 using Jurassic.Library;
-using System.Security;
 
 namespace Jurassic
 {
@@ -67,7 +67,7 @@ namespace Jurassic
         /// <param name="message"> A description of the error. </param>
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
-        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string sourcePath)
+        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string? sourcePath)
             : base(string.Format("{0}: {1}", type, message))
         {
             this.ErrorObject = CreateError(engine, type, message);
@@ -86,7 +86,7 @@ namespace Jurassic
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
         /// <param name="innerException"> The exception that is the cause of the current exception,
         /// or <c>null</c> if no inner exception is specified. </param>
-        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string sourcePath, Exception innerException)
+        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string? sourcePath, Exception innerException)
             : base(string.Format("{0}: {1}", type, message), innerException)
         {
             this.ErrorObject = CreateError(engine, type, message);
@@ -104,7 +104,7 @@ namespace Jurassic
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
         /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
-        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string sourcePath, string functionName)
+        public JavaScriptException(ScriptEngine engine, ErrorType type, string message, int lineNumber, string? sourcePath, string? functionName)
             : base(string.Format("{0}: {1}", type, message))
         {
             this.ErrorObject = CreateError(engine, type, message);
@@ -127,7 +127,7 @@ namespace Jurassic
         /// <summary>
         /// Gets the type of error, e.g. ErrorType.TypeError or ErrorType.SyntaxError.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get
             {
@@ -147,19 +147,19 @@ namespace Jurassic
         /// Gets the path or URL of the source file.  Can be <c>null</c> if no source information
         /// is available.
         /// </summary>
-        public string SourcePath { get; internal set; }
+        public string? SourcePath { get; internal set; }
 
         /// <summary>
         /// Gets the name of the function where the exception occurred.  Can be <c>null</c> if no
         /// source information is available.
         /// </summary>
-        public string FunctionName { get; internal set; }
+        public string? FunctionName { get; internal set; }
 
         /// <summary>
         /// Gets a reference to the script engine associated with this object.  Will be <c>null</c>
         /// for statements like "throw 2".
         /// </summary>
-        public ScriptEngine Engine
+        public ScriptEngine? Engine
         {
             get
             {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Jurassic.Library;
@@ -130,8 +132,14 @@ namespace Jurassic
         {
             public double Value;
             public string Result;
+
+            public NumberToStringCache(double value, string result)
+            {
+                Value = value;
+                Result = result;
+            }
         }
-        private static NumberToStringCache numberToStringCache = new NumberToStringCache() { Value = 0.0, Result = "0" };
+        private static volatile NumberToStringCache numberToStringCache = new NumberToStringCache(0.0, "0");
 
         /// <summary>
         /// Converts any JavaScript value to a primitive string value.
@@ -163,7 +171,7 @@ namespace Jurassic
 
                 // Cache the result.
                 // This is thread-safe on Intel but not architectures with weak write ordering.
-                numberToStringCache = new NumberToStringCache() { Value = doubleValue, Result = result };
+                numberToStringCache = new NumberToStringCache(doubleValue, result);
 
                 return result;
             }
@@ -210,7 +218,7 @@ namespace Jurassic
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
         /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
         /// <returns> An object. </returns>
-        public static ObjectInstance ToObject(ScriptEngine engine, object value, int lineNumber, string sourcePath, string functionName)
+        public static ObjectInstance ToObject(ScriptEngine engine, object value, int lineNumber, string? sourcePath, string? functionName)
         {
             if (engine == null)
                 throw new ArgumentNullException(nameof(engine));

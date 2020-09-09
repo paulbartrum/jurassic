@@ -542,7 +542,7 @@ namespace Jurassic.Compiler
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
             ConstructorInfo result = type.GetConstructor(flags, null, parameterTypes, null);
             if (result == null)
-                throw new InvalidOperationException(string.Format("The constructor {0}({1}) does not exist.", type.FullName, StringHelpers.Join<Type>(", ", parameterTypes)));
+                throw new InvalidOperationException(string.Format("The constructor {0}({1}) does not exist.", type.FullName, string.Join<Type>(", ", parameterTypes)));
             return result;
         }
 
@@ -558,7 +558,7 @@ namespace Jurassic.Compiler
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.ExactBinding;
             MethodInfo result = type.GetMethod(name, flags, null, parameterTypes, null);
             if (result == null)
-                throw new InvalidOperationException(string.Format("The instance method {0}.{1}({2}) does not exist.", type.FullName, name, StringHelpers.Join<Type>(", ", parameterTypes)));
+                throw new InvalidOperationException(string.Format("The instance method {0}.{1}({2}) does not exist.", type.FullName, name, string.Join<Type>(", ", parameterTypes)));
             return result;
         }
 
@@ -574,7 +574,7 @@ namespace Jurassic.Compiler
             var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.ExactBinding;
             MethodInfo result = type.GetMethod(name, flags, null, parameterTypes, null);
             if (result == null)
-                throw new InvalidOperationException(string.Format("The static method {0}.{1}({2}) does not exist.", type.FullName, name, StringHelpers.Join<Type>(", ", parameterTypes)));
+                throw new InvalidOperationException(string.Format("The static method {0}.{1}({2}) does not exist.", type.FullName, name, string.Join<Type>(", ", parameterTypes)));
             return result;
         }
 

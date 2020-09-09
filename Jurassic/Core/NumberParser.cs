@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
+using System;
 using System.IO;
 
 namespace Jurassic
@@ -17,7 +18,7 @@ namespace Jurassic
         /// <returns> The result of parsing the string as a number. </returns>
         internal static double ParseFloat(string input)
         {
-            var reader = new System.IO.StringReader(input);
+            var reader = new StringReader(input);
 
             // Skip whitespace and line terminators.
             while (IsWhiteSpaceOrLineTerminator(reader.Peek()))
@@ -62,7 +63,7 @@ namespace Jurassic
         /// <returns> The result of parsing the string as a number. </returns>
         internal static double CoerceToNumber(string input)
         {
-            var reader = new System.IO.StringReader(input);
+            var reader = new StringReader(input);
 
             // Skip whitespace and line terminators.
             while (IsWhiteSpaceOrLineTerminator(reader.Peek()))

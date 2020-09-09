@@ -433,8 +433,8 @@ namespace Jurassic.Compiler
         {
             var name = Name.HasStaticName ? Name.StaticName : null;
             if (this.BodyRoot != null)
-                return string.Format("function {0}({1}) {2}", name, StringHelpers.Join(", ", this.Arguments), this.BodyRoot);
-            return string.Format("function {0}({1}) {{\n{2}\n}}", name, StringHelpers.Join(", ", this.Arguments), this.BodyText);
+                return string.Format("function {0}({1}) {2}", name, string.Join(", ", this.Arguments), this.BodyRoot);
+            return string.Format("function {0}({1}) {{\n{2}\n}}", name, string.Join(", ", this.Arguments), this.BodyText);
         }
     }
 

@@ -34,7 +34,7 @@ Plus misc fixes to regular expressions, number formatting and date parsing.</Pac
     <RepositoryBranch>master</RepositoryBranch>
     <RepositoryCommit>3ce05b3455dce546d36f08902546a61ac50c6c81</RepositoryCommit>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

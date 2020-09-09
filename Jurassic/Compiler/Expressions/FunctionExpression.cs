@@ -175,7 +175,7 @@ namespace Jurassic.Compiler
                 prefix = "set ";
 
             return string.Format("{0} {1}({2}) {{\n{3}\n}}", prefix, this.Name,
-                StringHelpers.Join(", ", this.Arguments), this.BodyText);
+                string.Join(", ", this.Arguments), this.BodyText);
         }
     }
 

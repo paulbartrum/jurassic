@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Jurassic.Library;
@@ -278,7 +280,7 @@ namespace Jurassic
         /// <param name="iterable"> The object to get a iterator from. </param>
         /// <returns> An iterator object, with a next function, or <c>null</c> if the iterator
         /// symbol value is undefined or null. </returns>
-        public static ObjectInstance GetIterator(ScriptEngine engine, ObjectInstance iterable)
+        public static ObjectInstance? GetIterator(ScriptEngine engine, ObjectInstance iterable)
         {
             if (iterable == null)
                 throw new ArgumentNullException(nameof(iterable));

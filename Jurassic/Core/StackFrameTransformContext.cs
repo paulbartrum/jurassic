@@ -1,4 +1,6 @@
-﻿namespace Jurassic
+﻿#nullable enable
+
+namespace Jurassic
 {
     /// <summary>
     /// Contains stack frame properties which can be transformed when formatting the
@@ -32,7 +34,7 @@
         /// Gets or sets the path of the javascript script file. A value of
         /// <c>null</c> means that the path is unknown.
         /// </summary>
-        public string Path
+        public string? Path
         {
             get;
             set;
@@ -42,7 +44,7 @@
         /// Gets or sets the name of the function. A value of <c>null</c> or
         /// the empty string (<c>""</c>) means that the path is unknown.
         /// </summary>
-        public string Function
+        public string? Function
         {
             get;
             set;

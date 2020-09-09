@@ -142,7 +142,7 @@ namespace Jurassic.Compiler
                 var ambiguousMethods = new List<BinderMethod>(lowestIndices.Count);
                 foreach (var index in lowestIndices)
                     ambiguousMethods.Add(methods[index]);
-                throw new JavaScriptException(engine, ErrorType.TypeError, "The method call is ambiguous between the following methods: " + StringHelpers.Join(", ", ambiguousMethods));
+                throw new JavaScriptException(engine, ErrorType.TypeError, "The method call is ambiguous between the following methods: " + string.Join(", ", ambiguousMethods));
             }
 
             // Throw an error is there is an invalid argument.
