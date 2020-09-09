@@ -9,7 +9,6 @@ namespace UnitTests
     public class ParserTests : TestBase
     {
         [TestMethod]
-        [Ignore]
         public void AutomaticSemicolonInsertion()
         {
             Assert.AreEqual(6, Evaluate("x = 1 + \r\n 5"));
