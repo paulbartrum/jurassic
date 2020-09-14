@@ -31,6 +31,26 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void construct()
+        {
+            Assert.AreEqual(5, Evaluate("Reflect.construct(Number, [5]).valueOf()"));
+            Assert.AreEqual(5, Evaluate("Reflect.construct(Number, [5], Number).valueOf()"));
+            Assert.AreEqual(true, Evaluate("Reflect.construct(function () { return new.target; }, [], Number) === Number"));
+
+            // The first parameter must be a constructor.
+            Assert.AreEqual("TypeError: Math is not a constructor.", EvaluateExceptionMessage("Reflect.construct(Math)"));
+
+            // The second parameter must be an object.
+            Assert.AreEqual("TypeError: CreateListFromArrayLike called on non-object", EvaluateExceptionMessage("Reflect.construct(Number)"));
+
+            // The third parameter must be undefined or a constructor.
+            Assert.AreEqual("TypeError: Math is not a constructor.", EvaluateExceptionMessage("Reflect.construct(Number, [5], Math)"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Reflect.construct.length"));
+        }
+
+        [TestMethod]
         public void isExtensible()
         {
             Assert.AreEqual(true, Evaluate("Reflect.isExtensible({})"));

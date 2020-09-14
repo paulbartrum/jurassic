@@ -53,9 +53,11 @@ namespace Jurassic.Library
         /// <param name="newTarget"> The constructor whose prototype should be used. See also the new.target operator. If newTarget is not present, its value defaults to target. </param>
         /// <returns> A new instance of target (or newTarget, if present), initialized by target as a constructor with the given argumentsList. </returns>
         [JSInternalFunction(Name = "construct")]
-        public static object Construct(ObjectInstance target, object argumentsList, object newTarget)
+        public static object Construct(FunctionInstance target, ObjectInstance argumentsList, FunctionInstance newTarget)
         {
-            return false;
+            if (newTarget == null)
+                newTarget = target;
+            return target.ConstructLateBound(newTarget, TypeUtilities.CreateListFromArrayLike(argumentsList));
         }
 
         /// <summary>

@@ -52,11 +52,11 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Construct(TypeConverter.ToObject(engine, args[0]), Undefined.Value, Undefined.Value);
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 2:
-					return Construct(TypeConverter.ToObject(engine, args[0]), args[1], Undefined.Value);
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
-					return Construct(TypeConverter.ToObject(engine, args[0]), args[1], args[2]);
+					return Construct(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeConverter.ToObject(engine, args[1]), TypeConverter.ToObject<FunctionInstance>(engine, args[2]));
 			}
 		}
 
