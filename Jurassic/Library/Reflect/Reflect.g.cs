@@ -15,7 +15,7 @@ namespace Jurassic.Library
 			return new List<PropertyNameAndValue>(17)
 			{
 				new PropertyNameAndValue("apply", new ClrStubFunction(engine, "apply", 3, __STUB__Apply), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("construct", new ClrStubFunction(engine, "construct", 3, __STUB__Construct), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("construct", new ClrStubFunction(engine, "construct", 2, __STUB__Construct), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("defineProperty", new ClrStubFunction(engine, "defineProperty", 3, __STUB__DefineProperty), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("deleteProperty", new ClrStubFunction(engine, "deleteProperty", 2, __STUB__DeleteProperty), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("get", new ClrStubFunction(engine, "get", 3, __STUB__Get), PropertyAttributes.NonEnumerable),
@@ -54,9 +54,9 @@ namespace Jurassic.Library
 				case 1:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 2:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return Construct(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeConverter.ToObject(engine, args[1]), null);
 				default:
-					return Construct(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeConverter.ToObject(engine, args[1]), TypeConverter.ToObject<FunctionInstance>(engine, args[2]));
+					return Construct(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), TypeConverter.ToObject(engine, args[1]), TypeUtilities.IsUndefined(args[2]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[2]));
 			}
 		}
 

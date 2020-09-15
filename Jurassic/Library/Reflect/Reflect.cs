@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -52,8 +53,8 @@ namespace Jurassic.Library
         /// <param name="argumentsList"> An array-like object specifying the arguments with which target should be called. </param>
         /// <param name="newTarget"> The constructor whose prototype should be used. See also the new.target operator. If newTarget is not present, its value defaults to target. </param>
         /// <returns> A new instance of target (or newTarget, if present), initialized by target as a constructor with the given argumentsList. </returns>
-        [JSInternalFunction(Name = "construct")]
-        public static object Construct(FunctionInstance target, ObjectInstance argumentsList, FunctionInstance newTarget)
+        [JSInternalFunction(Name = "construct", Length = 2)]
+        public static object Construct(FunctionInstance target, ObjectInstance argumentsList, FunctionInstance newTarget = null)
         {
             if (newTarget == null)
                 newTarget = target;
@@ -70,7 +71,12 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "defineProperty")]
         public static bool DefineProperty(ObjectInstance target, object propertyKey, object attributes)
         {
-            return false;
+            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+            var defaults = target.GetOwnPropertyDescriptor(propertyKey);
+            if (!(attributes is ObjectInstance))
+                throw new JavaScriptException(target.Engine, ErrorType.TypeError, $"Invalid property descriptor '{attributes}'.");
+            var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
+            return target.DefineProperty(propertyKey, descriptor, throwOnError: false);
         }
 
         /// <summary>
@@ -82,7 +88,8 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "deleteProperty")]
         public static bool DeleteProperty(ObjectInstance target, object propertyKey)
         {
-            return false;
+            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+            return target.Delete(propertyKey, throwOnError: false);
         }
 
         /// <summary>
@@ -95,7 +102,8 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "get")]
         public static object Get(ObjectInstance target, object propertyKey, object receiver)
         {
-            return false;
+            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+            return target[propertyKey];
         }
 
         /// <summary>
@@ -118,7 +126,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "getPrototypeOf")]
         public static object GetPrototypeOf(ObjectInstance target)
         {
-            return null;
+            return ObjectConstructor.GetPrototypeOf(target);
         }
 
         /// <summary>
@@ -152,7 +160,35 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "ownKeys")]
         public static ArrayInstance OwnKeys(ObjectInstance target)
         {
-            return null;
+            // Indexes should be in numeric order.
+            var indexes = new List<uint>();
+            foreach (var property in target.Properties)
+                if (property.Key is string key)
+                {
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    if (arrayIndex != uint.MaxValue)
+                        indexes.Add(arrayIndex);
+                }
+            indexes.Sort();
+            var result = target.Engine.Array.New();
+            foreach (uint index in indexes)
+                result.Push(index.ToString());
+
+            // Strings, in insertion order.
+            foreach (var property in target.Properties)
+                if (property.Key is string key)
+                {
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    if (arrayIndex == uint.MaxValue)
+                        result.Push(property.Key);
+                }
+
+            // Symbols, in insertion order.
+            foreach (var property in target.Properties)
+                if (property.Key is SymbolInstance)
+                    result.Push(property.Key);
+
+            return result;
         }
 
         /// <summary>
@@ -190,7 +226,11 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "setPrototypeOf")]
         public static bool SetPrototypeOf(ObjectInstance target, object prototype)
         {
-            return false;
+            // The prototype must be null or an object. Note that null in .NET is actually undefined in JS!
+            var prototypeObj = prototype as ObjectInstance;
+            if (prototypeObj == null && prototype != Null.Value)
+                throw new JavaScriptException(target.Engine, ErrorType.TypeError, "Object prototype may only be an Object or null.");
+            return target.SetPrototype(prototypeObj);
         }
     }
 }

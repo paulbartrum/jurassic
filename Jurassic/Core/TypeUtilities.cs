@@ -384,6 +384,9 @@ namespace Jurassic
         /// <returns> An array. </returns>
         internal static object[] CreateListFromArrayLike(ObjectInstance arrayLike)
         {
+            if (arrayLike is ArrayInstance arrayInstance)
+                return arrayInstance.ToArray();
+
             uint length = ArrayInstance.GetLength(arrayLike);
             var result = new object[length];
             for (uint i = 0; i < length; i++)

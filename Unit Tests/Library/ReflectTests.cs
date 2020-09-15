@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
 using Jurassic.Library;
 
@@ -28,6 +24,9 @@ namespace UnitTests
         public void apply()
         {
             Assert.AreEqual("", Evaluate("Reflect.apply()"));
+
+            // length
+            Assert.AreEqual(3, Evaluate("Reflect.apply.length"));
         }
 
         [TestMethod]
@@ -36,18 +35,70 @@ namespace UnitTests
             Assert.AreEqual(5, Evaluate("Reflect.construct(Number, [5]).valueOf()"));
             Assert.AreEqual(5, Evaluate("Reflect.construct(Number, [5], Number).valueOf()"));
             Assert.AreEqual(true, Evaluate("Reflect.construct(function () { return new.target; }, [], Number) === Number"));
-
+            
             // The first parameter must be a constructor.
-            Assert.AreEqual("TypeError: Math is not a constructor.", EvaluateExceptionMessage("Reflect.construct(Math)"));
-
+            Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("Reflect.construct(Math)"));
+            
             // The second parameter must be an object.
-            Assert.AreEqual("TypeError: CreateListFromArrayLike called on non-object", EvaluateExceptionMessage("Reflect.construct(Number)"));
-
+            Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("Reflect.construct(Number)"));
+            
             // The third parameter must be undefined or a constructor.
-            Assert.AreEqual("TypeError: Math is not a constructor.", EvaluateExceptionMessage("Reflect.construct(Number, [5], Math)"));
-
+            Assert.AreEqual("TypeError: Incorrect argument type.", EvaluateExceptionMessage("Reflect.construct(Number, [5], Math)"));
+            
             // length
             Assert.AreEqual(2, Evaluate("Reflect.construct.length"));
+        }
+
+        [TestMethod]
+        public void defineProperty()
+        {
+            Assert.AreEqual(5, Evaluate("var x = {}; Reflect.defineProperty(x, 'test', { value: 5 }); x.test"));
+
+            // The descriptor must be an object.
+            Assert.AreEqual("TypeError: Invalid property descriptor '5'.", EvaluateExceptionMessage("Reflect.defineProperty({}, 'test', 5)"));
+
+            // length
+            Assert.AreEqual(3, Evaluate("Reflect.defineProperty.length"));
+        }
+
+        [TestMethod]
+        public void deleteProperty()
+        {
+            Assert.AreEqual(true, Evaluate("var x = { a: 1 }; Reflect.deleteProperty(x, 'a')"));
+            Assert.AreEqual(false, Evaluate("var x = { a: 1 }; Reflect.deleteProperty(x, 'a'); 'a' in x"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Reflect.deleteProperty.length"));
+        }
+
+        [TestMethod]
+        public void get()
+        {
+            Assert.AreEqual(10, Evaluate("Reflect.get({ a: 10 }, 'a')"));
+
+            // length
+            Assert.AreEqual(2, Evaluate("Reflect.get.length"));
+        }
+
+        [TestMethod]
+        public void getOwnPropertyDescriptor()
+        {
+            // length
+            Assert.AreEqual(2, Evaluate("Reflect.getOwnPropertyDescriptor.length"));
+        }
+
+        [TestMethod]
+        public void getPrototypeOf()
+        {
+            // length
+            Assert.AreEqual(1, Evaluate("Reflect.getPrototypeOf.length"));
+        }
+
+        [TestMethod]
+        public void has()
+        {
+            // length
+            Assert.AreEqual(2, Evaluate("Reflect.has.length"));
         }
 
         [TestMethod]
@@ -70,6 +121,31 @@ namespace UnitTests
             Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("Reflect.isExtensible()"));
             Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("Reflect.isExtensible(undefined)"));
             Assert.AreEqual("TypeError: null cannot be converted to an object", EvaluateExceptionMessage("Reflect.isExtensible(null)"));
+        }
+
+        [TestMethod]
+        public void ownKeys()
+        {
+            Assert.AreEqual("z,y,x", Evaluate("Reflect.ownKeys({z: 3, y: 2, x: 1}).toString()"));
+            Assert.AreEqual("length", Evaluate("Reflect.ownKeys([]).toString()"));
+        
+            Execute(@"
+                var sym = Symbol('comet')
+                var sym2 = Symbol('meteor')
+                var obj = {[sym]: 0, 'str': 0, '773': 0, '0': 0,
+                           [sym2]: 0, '-1': 0, '8': 0, 'second str': 0}");
+            Assert.AreEqual(8, Evaluate("Reflect.ownKeys(obj).length"));
+            Assert.AreEqual("0", Evaluate("Reflect.ownKeys(obj)[0]"));
+            Assert.AreEqual("8", Evaluate("Reflect.ownKeys(obj)[1]"));
+            Assert.AreEqual("773", Evaluate("Reflect.ownKeys(obj)[2]"));
+            Assert.AreEqual("str", Evaluate("Reflect.ownKeys(obj)[3]"));
+            Assert.AreEqual("-1", Evaluate("Reflect.ownKeys(obj)[4]"));
+            Assert.AreEqual("second str", Evaluate("Reflect.ownKeys(obj)[5]"));
+            Assert.AreEqual(true, Evaluate("Reflect.ownKeys(obj)[6] === sym"));
+            Assert.AreEqual(true, Evaluate("Reflect.ownKeys(obj)[7] === sym2"));
+
+            // length
+            Assert.AreEqual(1, Evaluate("Reflect.ownKeys.length"));
         }
 
         [TestMethod]
@@ -100,6 +176,9 @@ namespace UnitTests
         public void set()
         {
             Assert.AreEqual(2, Evaluate("var x = { a: 1 }; Reflect.set(x, 'a', 2); x.a"));
+
+            // length
+            Assert.AreEqual(3, Evaluate("Reflect.set.length"));
         }
 
         [TestMethod]
@@ -118,7 +197,7 @@ namespace UnitTests
             Assert.AreEqual(2, Evaluate("Reflect.setPrototypeOf.length"));
 
             // Argument must be an object or null.
-            Assert.AreEqual("TypeError: Object prototype may only be an Object or null", EvaluateExceptionMessage("Reflect.setPrototypeOf({}, undefined)"));
+            Assert.AreEqual("TypeError: Object prototype may only be an Object or null.", EvaluateExceptionMessage("Reflect.setPrototypeOf({}, undefined)"));
 
             // Object must be extensible.
             Assert.AreEqual(false, Evaluate("Reflect.setPrototypeOf(Object.preventExtensions({}), {})"));

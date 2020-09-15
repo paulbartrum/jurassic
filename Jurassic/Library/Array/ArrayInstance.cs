@@ -294,6 +294,31 @@ namespace Jurassic.Library
             return result;
         }
 
+        /// <summary>
+        /// Converts the JS array to a .NET object array.
+        /// </summary>
+        /// <returns> A .NET object array. </returns>
+        internal object[] ToArray()
+        {
+            var result = new object[this.length];
+            if (this.dense != null)
+            {
+                Array.Copy(this.dense, result, this.length);
+                if (this.denseMayContainHoles)
+                {
+                    for (uint i = 0; i < this.length; i++)
+                        if (result[i] == null)
+                            result[i] = Undefined.Value;
+                }
+            }
+            else
+            {
+                for (uint i = 0; i < this.length; i++)
+                    result[i] = this[i];
+            }
+            return result;
+        }
+
 
 
         //     OVERRIDES
