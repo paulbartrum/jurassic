@@ -12,14 +12,10 @@ namespace Jurassic.Library
     public partial class DateInstance : ObjectInstance
     {
         /// <summary>
-        /// The underlying DateTime value.
+        /// The underlying DateTime value. Its Kind is always DateTimeKind.Utc.
+        /// The value <c>null</c> represents an invalid date.
         /// </summary>
-        private DateTime value;
-
-        /// <summary>
-        /// A DateTime that represents an invalid date.
-        /// </summary>
-        private static readonly DateTime InvalidDate = DateTime.MinValue;
+        private DateTime? value;
 
 
 
@@ -31,7 +27,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         public DateInstance(ObjectInstance prototype)
-            : this(prototype, GetNow())
+            : this(prototype, GetUtcNow())
         {
         }
 
@@ -41,7 +37,7 @@ namespace Jurassic.Library
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="value"> The number of milliseconds since January 1, 1970, 00:00:00 UTC. </param>
         public DateInstance(ObjectInstance prototype, double value)
-            : this(prototype, ToDateTime(value))
+            : this(prototype, ToUtcDateTime(value))
         {
         }
 
@@ -71,7 +67,7 @@ namespace Jurassic.Library
         /// </remarks>
         public DateInstance(ObjectInstance prototype, int year, int month, int day = 1, int hour = 0,
             int minute = 0, int second = 0, int millisecond = 0)
-            : this(prototype, ToDateTime(year >= 0 && year < 100 ? year + 1900 : year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
+            : this(prototype, ToUtcDateTime(prototype.Engine, year >= 0 && year < 100 ? year + 1900 : year, month, day, hour, minute, second, millisecond, DateTimeKind.Local))
         {
         }
 
@@ -80,10 +76,10 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="dateTime"> The date to set the instance value to. </param>
-        private DateInstance(ObjectInstance prototype, DateTime dateTime)
+        private DateInstance(ObjectInstance prototype, DateTime? dateTime)
             : base(prototype)
         {
-            this.value = dateTime;
+            this.value = ConvertTimeToUtc(prototype.Engine, dateTime);
         }
 
         /// <summary>
@@ -108,9 +104,15 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the date represented by this object in standard .NET DateTime format.
         /// </summary>
+        /// <exception cref="InvalidOperationException">If <see cref="IsValid"/> returns <c>false</c>.</exception>
         public DateTime Value
         {
-            get { return this.value; }
+            get {
+                if (!this.IsValid)
+                    throw new InvalidOperationException("Invalid date.");
+
+                return this.value.Value;
+            }
         }
 
         /// <summary>
@@ -128,7 +130,7 @@ namespace Jurassic.Library
         /// </summary>
         public bool IsValid
         {
-            get { return this.value != InvalidDate; }
+            get { return this.value.HasValue; }
         }
 
         /// <summary>
@@ -274,9 +276,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "getTimezoneOffset")]
         public double GetTimezoneOffset()
         {
-            if (this.value == InvalidDate)
+            if (!IsValid)
                 return double.NaN;
-            return -(int)TimeZoneInfo.Local.GetUtcOffset(this.Value).TotalMinutes;
+            return -(int)Engine.LocalTimeZone.GetUtcOffset(this.Value).TotalMinutes;
         }
 
         /// <summary>
@@ -792,7 +794,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "setTime", Flags = JSFunctionFlags.MutatesThisObject)]
         public double SetTime(double millisecond)
         {
-            this.value = ToDateTime(millisecond);
+            this.value = ToUtcDateTime(millisecond);
             return this.ValueInMilliseconds;
         }
 
@@ -803,9 +805,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toDateString")]
         public string ToDateString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return "Invalid Date";
-            return this.value.ToLocalTime().ToString("ddd MMM dd yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo);
+            return ConvertTimeFromUtc(Engine, this.Value).Value.ToString("ddd MMM dd yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo);
         }
 
         /// <summary>
@@ -815,9 +817,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Deprecated = true, Name = "toGMTString")]
         public string ToGMTString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return "Invalid Date";
-            return this.value.ToUniversalTime().ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
+            return ConvertTimeToUtc(Engine, this.Value).Value.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
         }
 
         /// <summary>
@@ -827,9 +829,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toISOString")]
         public string ToISOString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 throw new JavaScriptException(this.Engine, ErrorType.RangeError, "The date is invalid");
-            return this.value.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
+            return ConvertTimeToUtc(Engine, this.Value).Value.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
         }
 
         /// <summary>
@@ -854,9 +856,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toLocaleDateString")]
         public string ToLocaleDateString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return "Invalid Date";
-            return this.value.ToLocalTime().ToString("D", System.Globalization.DateTimeFormatInfo.CurrentInfo);
+            return ConvertTimeFromUtc(Engine, this.Value).Value.ToString("D", System.Globalization.DateTimeFormatInfo.CurrentInfo);
         }
 
         /// <summary>
@@ -866,9 +868,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toLocaleString")]
         public new string ToLocaleString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return "Invalid Date";
-            return this.value.ToLocalTime().ToString("F", System.Globalization.DateTimeFormatInfo.CurrentInfo);
+            return ConvertTimeFromUtc(Engine, this.Value).Value.ToString("F", System.Globalization.DateTimeFormatInfo.CurrentInfo);
         }
 
         /// <summary>
@@ -878,9 +880,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toLocaleTimeString")]
         public string ToLocaleTimeString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return "Invalid Date";
-            return this.value.ToLocalTime().ToString("T", System.Globalization.DateTimeFormatInfo.CurrentInfo);
+            return ConvertTimeFromUtc(Engine, this.Value).Value.ToString("T", System.Globalization.DateTimeFormatInfo.CurrentInfo);
         }
 
         /// <summary>
@@ -896,12 +898,12 @@ namespace Jurassic.Library
                 return "Invalid Date";
 
             var instance = (DateInstance)thisRef;
-            if (instance.value == InvalidDate)
+            if (!instance.IsValid)
                 return "Invalid Date";
 
-            var dateTime = instance.value.ToLocalTime();
-            return dateTime.ToString("ddd MMM dd yyyy HH:mm:ss ", System.Globalization.DateTimeFormatInfo.InvariantInfo) +
-                ToTimeZoneString(dateTime);
+            var dateTime = ConvertTimeFromUtc(instance.Engine, instance.Value);
+            return dateTime.Value.ToString("ddd MMM dd yyyy HH:mm:ss ", System.Globalization.DateTimeFormatInfo.InvariantInfo) +
+                ToTimeZoneString(instance.Engine, dateTime.Value);
         }
 
         /// <summary>
@@ -911,12 +913,12 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toTimeString")]
         public string ToTimeString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return "Invalid Date";
 
-            var dateTime = this.value.ToLocalTime();
-            return dateTime.ToString("HH:mm:ss ", System.Globalization.DateTimeFormatInfo.InvariantInfo) +
-                ToTimeZoneString(dateTime);
+            var dateTime = ConvertTimeFromUtc(Engine, this.Value);
+            return dateTime.Value.ToString("HH:mm:ss ", System.Globalization.DateTimeFormatInfo.InvariantInfo) +
+                ToTimeZoneString(Engine, dateTime.Value);
         }
 
         /// <summary>
@@ -926,9 +928,9 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "toUTCString")]
         public string ToUTCString()
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return "Invalid Date";
-            return this.value.ToUniversalTime().ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
+            return ConvertTimeToUtc(Engine, this.Value).Value.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
         }
 
         /// <summary>
@@ -974,13 +976,14 @@ namespace Jurassic.Library
         /// 1970, 00:00:00 UTC. </returns>
         public static double Now()
         {
-            return ToJSDate(GetNow());
+            return ToJSDate(GetUtcNow());
         }
 
         /// <summary>
         /// Given the components of a UTC date, returns the number of milliseconds since January 1,
         /// 1970, 00:00:00 UTC to that date.
         /// </summary>
+        /// <param name="engine"></param>
         /// <param name="year"> The full year. </param>
         /// <param name="month"> The month as an integer between 0 and 11 (january to december). </param>
         /// <param name="day"> The day of the month, from 1 to 31.  Defaults to 1. </param>
@@ -997,20 +1000,21 @@ namespace Jurassic.Library
         /// 
         /// If any of the parameters are out of range, then the other values are modified accordingly.
         /// </remarks>
-        public static double UTC(int year, int month, int day = 1, int hour = 0,
+        public static double UTC(ScriptEngine engine, int year, int month, int day = 1, int hour = 0,
             int minute = 0, int second = 0, int millisecond = 0)
         {
-            return ToJSDate(ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc));
+            return ToJSDate(ToUtcDateTime(engine, year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc));
         }
 
         /// <summary>
         /// Parses a string representation of a date, and returns the number of milliseconds since
         /// January 1, 1970, 00:00:00 UTC.
         /// </summary>
+        /// <param name="engine"></param>
         /// <param name="dateStr"> A string representing a date, expressed in RFC 1123 format. </param>
-        public static double Parse(string dateStr)
+        public static double Parse(ScriptEngine engine, string dateStr)
         {
-            return ToJSDate(DateParser.Parse(dateStr));
+            return ToJSDate(ConvertTimeToUtc(engine, DateParser.Parse(dateStr)));
         }
 
 
@@ -1040,17 +1044,19 @@ namespace Jurassic.Library
         /// <returns> The date component value, or <c>NaN</c> if the date is invalid. </returns>
         private double GetDateComponent(DateComponent component, DateTimeKind localOrUniversal)
         {
-            if (this.value == InvalidDate)
+            if (!this.IsValid)
                 return double.NaN;
 
+            DateTime value = this.Value;
+            
             // Convert the date to local or universal time.
             switch (localOrUniversal)
             {
                 case DateTimeKind.Local:
-                    this.value = this.Value.ToLocalTime();
-                    break;
+                    value = ConvertTimeFromUtc(Engine, value).Value;
+                    break;                    
                 case DateTimeKind.Utc:
-                    this.value = this.Value.ToUniversalTime();
+                    value = ConvertTimeToUtc(Engine, value).Value;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("localOrUniversal");
@@ -1060,21 +1066,21 @@ namespace Jurassic.Library
             switch (component)
             {
                 case DateComponent.Year:
-                    return this.value.Year;
+                    return value.Year;
                 case DateComponent.Month:
-                    return this.value.Month - 1;    // Javascript month is 0-11.
+                    return value.Month - 1;    // Javascript month is 0-11.
                 case DateComponent.Day:
-                    return this.value.Day;
+                    return value.Day;
                 case DateComponent.DayOfWeek:
-                    return (double)this.value.DayOfWeek;
+                    return (double)value.DayOfWeek;
                 case DateComponent.Hour:
-                    return this.value.Hour;
+                    return value.Hour;
                 case DateComponent.Minute:
-                    return this.value.Minute;
+                    return value.Minute;
                 case DateComponent.Second:
-                    return this.value.Second;
+                    return value.Second;
                 case DateComponent.Millisecond:
-                    return this.value.Millisecond;
+                    return value.Millisecond;
                 default:
                     throw new ArgumentOutOfRangeException("component");
             }
@@ -1091,14 +1097,24 @@ namespace Jurassic.Library
         /// the new date. </returns>
         private double SetDateComponents(DateComponent firstComponent, DateTimeKind localOrUniversal, params double[] componentValues)
         {
+            // When operating on an invalid date, we only set the date if
+            // the year is actually specified. This matches the behavior of
+            // other JS engines.
+            if (!this.IsValid && firstComponent != DateComponent.Year)
+            {
+                return this.ValueInMilliseconds;
+            }
+
+            DateTime value = this.value ?? new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);            
+            
             // Convert the date to local or universal time.
             switch (localOrUniversal)
             {
                 case DateTimeKind.Local:
-                    this.value = this.Value.ToLocalTime();
+                    value = ConvertTimeFromUtc(Engine, value).Value;
                     break;
                 case DateTimeKind.Utc:
-                    this.value = this.Value.ToUniversalTime();
+                    value = ConvertTimeToUtc(Engine, value).Value;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("localOrUniversal");
@@ -1106,13 +1122,13 @@ namespace Jurassic.Library
 
             // Get the current component values of the date.
             int[] allComponentValues = new int[7];
-            allComponentValues[0] = this.value.Year;
-            allComponentValues[1] = this.value.Month - 1;   // Javascript month is 0-11.
-            allComponentValues[2] = this.value.Day;
-            allComponentValues[3] = this.value.Hour;
-            allComponentValues[4] = this.value.Minute;
-            allComponentValues[5] = this.value.Second;
-            allComponentValues[6] = this.value.Millisecond;
+            allComponentValues[0] = value.Year;
+            allComponentValues[1] = value.Month - 1;   // Javascript month is 0-11.
+            allComponentValues[2] = value.Day;
+            allComponentValues[3] = value.Hour;
+            allComponentValues[4] = value.Minute;
+            allComponentValues[5] = value.Second;
+            allComponentValues[6] = value.Millisecond;
 
             // Overwrite the component values with the new ones that were passed in.
             for (int i = 0; i < componentValues.Length; i++)
@@ -1120,14 +1136,14 @@ namespace Jurassic.Library
                 double componentValue = componentValues[i];
                 if (double.IsNaN(componentValue) || double.IsInfinity(componentValue))
                 {
-                    this.value = InvalidDate;
+                    this.value = null;
                     return this.ValueInMilliseconds;
                 }
                 allComponentValues[(int)firstComponent + i] = (int)componentValue;
             }
 
             // Construct a new date.
-            this.value = ToDateTime(allComponentValues[0], allComponentValues[1], allComponentValues[2],
+            this.value = ToUtcDateTime(Engine, allComponentValues[0], allComponentValues[1], allComponentValues[2],
                 allComponentValues[3], allComponentValues[4], allComponentValues[5], allComponentValues[6],
                 localOrUniversal);
 
@@ -1138,15 +1154,17 @@ namespace Jurassic.Library
         /// <summary>
         /// Converts a .NET date into a javascript date.
         /// </summary>
-        /// <param name="dateTime"> The .NET date. </param>
+        /// <param name="utcDateTime"> The .NET date. </param>
         /// <returns> The number of milliseconds since January 1, 1970, 00:00:00 UTC </returns>
-        private static double ToJSDate(DateTime dateTime)
+        private static double ToJSDate(DateTime? utcDateTime)
         {
-            if (dateTime == InvalidDate)
+            if (utcDateTime == null)
                 return double.NaN;
+            if (utcDateTime.Value.Kind != DateTimeKind.Utc)
+                throw new ArgumentException("DateTime.Kind needs to be Utc");
             // The spec requires that the time value is an integer.
             // We could round to nearest, but then date.toUTCString() would be different from Date(date.getTime()).toUTCString().
-            return Math.Floor(dateTime.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            return Math.Floor(utcDateTime.Value.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
         }
 
         /// <summary>
@@ -1154,11 +1172,11 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="milliseconds"> The number of milliseconds since January 1, 1970, 00:00:00 UTC. </param>
         /// <returns> The equivalent .NET date. </returns>
-        private static DateTime ToDateTime(double milliseconds)
+        private static DateTime? ToUtcDateTime(double milliseconds)
         {
             // Check if the milliseconds value is out of range.
             if (double.IsNaN(milliseconds))
-                return InvalidDate;
+                return null;
 
             try
             {
@@ -1167,13 +1185,14 @@ namespace Jurassic.Library
             }
             catch (ArgumentOutOfRangeException)
             {
-                return InvalidDate;
+                return null;
             }
         }
 
         /// <summary>
         /// Given the components of a date, returns the equivalent .NET date.
         /// </summary>
+        /// <param name="engine">The engine.</param>
         /// <param name="year"> The full year. </param>
         /// <param name="month"> The month as an integer between 0 and 11 (january to december). </param>
         /// <param name="day"> The day of the month, from 1 to 31.  Defaults to 1. </param>
@@ -1183,12 +1202,13 @@ namespace Jurassic.Library
         /// <param name="millisecond"> The number of milliseconds, from 0 to 999.  Defaults to 0. </param>
         /// <param name="kind"> Indicates whether the components are in UTC or local time. </param>
         /// <returns> The equivalent .NET date. </returns>
-        private static DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, DateTimeKind kind)
+        private static DateTime? ToUtcDateTime(ScriptEngine engine, int year, int month, int day, int hour, int minute, int second, int millisecond, DateTimeKind kind)
         {
             // DateTime doesn't support years below year 1.
             if (year < 0)
-                return InvalidDate;
+                return null;
 
+            DateTime value;
             if (month >= 0 && month < 12 &&
                 day >= 1 && day <= DateTime.DaysInMonth(year, month + 1) &&
                 hour >= 0 && hour < 24 &&
@@ -1197,14 +1217,14 @@ namespace Jurassic.Library
                 millisecond >= 0 && millisecond < 1000)
             {
                 // All parameters are in range.
-                return new DateTime(year, month + 1, day, hour, minute, second, millisecond, kind);
+                value = new DateTime(year, month + 1, day, hour, minute, second, millisecond, kind);
             }
             else
             {
                 // One or more parameters are out of range.
                 try
                 {
-                    DateTime value = new DateTime(year, 1, 1, 0, 0, 0, kind);
+                    value = new DateTime(year, 1, 1, 0, 0, 0, kind);
                     value = value.AddMonths(month);
                     if (day != 1)
                         value = value.AddDays(day - 1);
@@ -1216,34 +1236,37 @@ namespace Jurassic.Library
                         value = value.AddSeconds(second);
                     if (millisecond != 0)
                         value = value.AddMilliseconds(millisecond);
-                    return value;
                 }
                 catch (ArgumentOutOfRangeException)
                 {
                     // One or more of the parameters was NaN or way too big or way too small.
                     // Return a sentinel invalid date.
-                    return InvalidDate;
+                    return null;
                 }
             }
+
+            // Ensure to convert to UTC.
+            return ConvertTimeToUtc(engine, value);
         }
 
         /// <summary>
         /// Gets the current time and date.
         /// </summary>
         /// <returns> The current time and date. </returns>
-        private static DateTime GetNow()
+        private static DateTime GetUtcNow()
         {
-            return DateTime.Now;
+            return DateTime.UtcNow;
         }
 
         /// <summary>
         /// Returns a string of the form "GMT+1200 (New Zealand Standard Time)".
         /// </summary>
+        /// <param name="engine"></param>
         /// <param name="dateTime"> The date to get the time zone information from. </param>
         /// <returns> A string of the form "GMT+1200 (New Zealand Standard Time)". </returns>
-        private static string ToTimeZoneString(DateTime dateTime)
+        private static string ToTimeZoneString(ScriptEngine engine, DateTime dateTime)
         {
-            var timeZone = TimeZoneInfo.Local;
+            var timeZone = engine.LocalTimeZone;
 
             // Compute the time zone offset in hours-minutes.
             int offsetInMinutes = (int)timeZone.GetUtcOffset(dateTime).TotalMinutes;
@@ -1260,6 +1283,36 @@ namespace Jurassic.Library
                 return string.Format("GMT{0:d4} ({1})", hhmm, zoneName);
             else
                 return string.Format("GMT+{0:d4} ({1})", hhmm, zoneName);
+        }
+
+        private static DateTime? ConvertTimeFromUtc(ScriptEngine engine, DateTime? value)
+        {
+            if (value == null)
+                return null;
+
+            value = TimeZoneInfo.ConvertTimeFromUtc(value.Value, engine.LocalTimeZone);
+
+            // Ensure that the kind is local for consistency.
+            if (value.Value.Kind == DateTimeKind.Unspecified)
+                DateTime.SpecifyKind(value.Value, DateTimeKind.Local);
+            return value;
+        }
+
+        private static DateTime? ConvertTimeToUtc(ScriptEngine engine, DateTime? value)
+        {
+            if (value == null)
+                return null;
+            if (value.Value.Kind == DateTimeKind.Utc)
+                return value;
+
+            // TimeZoneInfo.ConvertToUtc() expects the DateTime's Kind to be Local when the timezone
+            // is reference-equal to TimeZoneInfo.Local, and expects Kind to be Unspecified when the
+            // timezone is not reference-equal to TimeZoneInfo.Local.
+            if (object.ReferenceEquals(TimeZoneInfo.Local, engine.LocalTimeZone))
+                value = DateTime.SpecifyKind(value.Value, DateTimeKind.Local);
+            else
+                value = DateTime.SpecifyKind(value.Value, DateTimeKind.Unspecified);
+            return TimeZoneInfo.ConvertTimeToUtc(value.Value, engine.LocalTimeZone);
         }
 
     }

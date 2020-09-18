@@ -15,7 +15,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The string to parse as a date. </param>
         /// <returns> A date. </returns>
-        internal static DateTime Parse(string input)
+        internal static DateTime? Parse(string input)
         {
             /* Regex tested using http://derekslager.com/blog/posts/2007/09/a-better-dotnet-regular-expression-tester.ashx
              * These should succeed:
@@ -82,15 +82,15 @@ namespace Jurassic.Library
 
                 // Validate the components.
                 if (month < 1 || month > 12)
-                    return DateTime.MinValue;
+                    return null;
                 if (day < 1 || day > 31)
-                    return DateTime.MinValue;
+                    return null;
                 if (hour > 24 || (hour == 24 && (minute > 0 || second > 0 || millisecond > 0)))
-                    return DateTime.MinValue;
+                    return null;
                 if (minute >= 60)
-                    return DateTime.MinValue;
+                    return null;
                 if (second >= 60)
-                    return DateTime.MinValue;
+                    return null;
 
                 // 24:00 is valid according to the spec.
                 if (hour == 24)
@@ -105,15 +105,15 @@ namespace Jurassic.Library
                     // Parse the numeric values.
                     int zoneHours, zoneMinutes;
                     if (int.TryParse(match.Groups["zoneHours"].Value, out zoneHours) == false)
-                        return DateTime.MinValue;
+                        return null;
                     if (int.TryParse(match.Groups["zoneMinutes"].Value, out zoneMinutes) == false)
-                        return DateTime.MinValue;
+                        return null;
 
                     // Validate the components.
                     if (zoneHours >= 24)
-                        return DateTime.MinValue;
+                        return null;
                     if (zoneMinutes >= 60)
-                        return DateTime.MinValue;
+                        return null;
 
                     // Calculate the zone offset, in minutes.
                     offsetInMinutes -= zoneHours < 0 ? zoneHours * 60 - zoneMinutes : zoneHours * 60 + zoneMinutes;
@@ -131,7 +131,7 @@ namespace Jurassic.Library
                 {
                     // Passing in 29 Feb 2011 ("2011-02-29") results in the following error:
                     // "ArgumentOutOfRangeException: Year, Month, and Day parameters describe an un-representable DateTime."
-                    return DateTime.MinValue;
+                    return null;
                 }
             }
 
@@ -155,7 +155,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The string to parse as a date. </param>
         /// <returns> A date. </returns>
-        private static DateTime ParseUnstructured(string input)
+        private static DateTime? ParseUnstructured(string input)
         {
             // Initialize the lookup tables, if necessary.
             if (dayOfWeekNames == null)
@@ -200,7 +200,7 @@ namespace Jurassic.Library
                     {
                         // Convert time zone offset to minutes.
                         if (!ParseTimeZone(word, out int timeZoneOffset))
-                            return DateTime.MinValue;
+                            return null;
                         offsetInMinutes -= timeZoneOffset;
                     }
                 }
@@ -239,13 +239,13 @@ namespace Jurassic.Library
                     // If the word contains a slash or a dash, guess the word is a date, in US (MM-DD-YY) format.
                     string[] components = word.Split('/', '-');
                     if (components.Length != 3)
-                        return DateTime.MinValue;
+                        return null;
                     if (int.TryParse(components[0], out var component1) == false)
-                        return DateTime.MinValue;
+                        return null;
                     if (int.TryParse(components[1], out var component2) == false)
-                        return DateTime.MinValue;
+                        return null;
                     if (int.TryParse(components[2], out var component3) == false)
-                        return DateTime.MinValue;
+                        return null;
 
                     // This is weird: if the first number is >= 32, then interpret it as a year, otherwise interpret it as a month.
                     if (component1 >= 32)
@@ -279,20 +279,20 @@ namespace Jurassic.Library
                         var tzPart = word.Substring(plusOrMinusIndex + 1);
                         kind = DateTimeKind.Utc;
                         if (!ParseTimeZone(tzPart, out int timeZoneOffset))
-                            return DateTime.MinValue;
+                            return null;
                         offsetInMinutes -= timeZoneOffset;
                         word = timePart;
                     }
 
                     string[] components = word.Split(':');
                     if (components.Length < 2 || components.Length > 3)
-                        return DateTime.MinValue;
+                        return null;
                     if (int.TryParse(components[0], out hour) == false)
-                        return DateTime.MinValue;
+                        return null;
                     if (int.TryParse(components[1], out minute) == false)
-                        return DateTime.MinValue;
+                        return null;
                     if (components.Length >= 3 && int.TryParse(components[2], out second) == false)
-                        return DateTime.MinValue;
+                        return null;
                 }
                 else if (dayOfWeekNames.Contains(word) == true)
                 {
@@ -306,7 +306,7 @@ namespace Jurassic.Library
                 else
                 {
                     // Error.
-                    return DateTime.MinValue;
+                    return null;
                 }
             }
 
@@ -314,42 +314,42 @@ namespace Jurassic.Library
             if (month == -1)
             {
                 if (unclassifiedNumbers.Count == 0)
-                    return DateTime.MinValue;
+                    return null;
                 month = unclassifiedNumbers[0];
                 unclassifiedNumbers.RemoveAt(0);
             }
             if (day == -1)
             {
                 if (unclassifiedNumbers.Count == 0)
-                    return DateTime.MinValue;
+                    return null;
                 day = unclassifiedNumbers[0];
                 unclassifiedNumbers.RemoveAt(0);
             }
             if (year == -1)
             {
                 if (unclassifiedNumbers.Count == 0)
-                    return DateTime.MinValue;
+                    return null;
                 year = unclassifiedNumbers[0];
                 if (year >= 70 && year < 100)
                     year += 1900;   // two digit dates are okay from 1970 - 1999.
                 unclassifiedNumbers.RemoveAt(0);
             }
             if (unclassifiedNumbers.Count != 0)
-                return DateTime.MinValue;
+                return null;
 
             // Validate the components.
             if (year < 70)
-                return DateTime.MinValue;
+                return null;
             if (month < 1 || month > 12)
-                return DateTime.MinValue;
+                return null;
             if (day < 1 || day > 31)
-                return DateTime.MinValue;
+                return null;
             if (hour >= 24 || (twelveHourTime && hour >= 13))
-                return DateTime.MinValue;
+                return null;
             if (minute >= 60)
-                return DateTime.MinValue;
+                return null;
             if (second >= 60)
-                return DateTime.MinValue;
+                return null;
 
             // If there exists an AM/PM designator, 12:00 is the same as 0:00.
             if (twelveHourTime && hour == 12)
