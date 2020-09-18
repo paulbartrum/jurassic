@@ -294,6 +294,7 @@ namespace Jurassic.Compiler
                 EmitConversion.ToAny(generator, valueType);
                 generator.LoadBoolean(optimizationInfo.StrictMode);
                 generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Int);
+                generator.Pop();
             }
             else if (memberAccessType == TypeOfMemberAccess.Static)
             {
@@ -324,6 +325,7 @@ namespace Jurassic.Compiler
                     generator.LoadVariable(value);
                     generator.LoadBoolean(optimizationInfo.StrictMode);
                     generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_PropertyReference);
+                    generator.Pop();
                 }
                 else
                 {
@@ -331,6 +333,7 @@ namespace Jurassic.Compiler
                     generator.LoadVariable(value);
                     generator.LoadBoolean(optimizationInfo.StrictMode);
                     generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+                    generator.Pop();
                 }
 
                 generator.ReleaseTemporaryVariable(value);
@@ -344,6 +347,7 @@ namespace Jurassic.Compiler
                 EmitConversion.ToAny(generator, valueType);
                 generator.LoadBoolean(optimizationInfo.StrictMode);
                 generator.Call(ReflectionHelpers.ObjectInstance_SetPropertyValue_Object);
+                generator.Pop();
             }
         }
 

@@ -23,7 +23,16 @@ namespace UnitTests
         [TestMethod]
         public void apply()
         {
-            Assert.AreEqual("", Evaluate("Reflect.apply()"));
+            Assert.AreEqual(1, Evaluate("Reflect.apply(Math.floor, undefined, [1.75])"));
+            Assert.AreEqual("hello", Evaluate("Reflect.apply(String.fromCharCode, undefined, [104, 101, 108, 108, 111])"));
+            Assert.AreEqual(4, Evaluate("Reflect.apply(RegExp.prototype.exec, /ab/, ['confabulation']).index"));
+            Assert.AreEqual("i", Evaluate("Reflect.apply(''.charAt, 'ponies', [3])"));
+
+            // The first argument must be a function.
+            Assert.AreEqual("TypeError: Incorrect argument type.", EvaluateExceptionMessage("Reflect.apply(6, undefined, [])"));
+
+            // The third argument must be an array-like.
+            //Assert.AreEqual("TypeError: Incorrect argument type.", EvaluateExceptionMessage("Reflect.apply(Math.floor, undefined, 1.75)"));
 
             // length
             Assert.AreEqual(3, Evaluate("Reflect.apply.length"));
@@ -74,7 +83,12 @@ namespace UnitTests
         [TestMethod]
         public void get()
         {
-            Assert.AreEqual(10, Evaluate("Reflect.get({ a: 10 }, 'a')"));
+            Assert.AreEqual(1, Evaluate("Reflect.get({ x: 1, y: 2 }, 'x')"));
+            Assert.AreEqual("one", Evaluate("Reflect.get(['zero', 'one'], 1)"));
+
+            // receiver
+            Assert.AreEqual(true, Evaluate("var x = { get a() { return this; } }; Reflect.get(x, 'a') === x"));
+            Assert.AreEqual(5, Evaluate("Reflect.get({ get a() { return this; } }, 'a', 5).valueOf()"));
 
             // length
             Assert.AreEqual(2, Evaluate("Reflect.get.length"));
@@ -83,6 +97,9 @@ namespace UnitTests
         [TestMethod]
         public void getOwnPropertyDescriptor()
         {
+            Assert.AreEqual(@"{""value"":1,""writable"":true,""enumerable"":true,""configurable"":true}",
+                Evaluate("JSON.stringify(Reflect.getOwnPropertyDescriptor({ a: 1 }, 'a'))"));
+
             // length
             Assert.AreEqual(2, Evaluate("Reflect.getOwnPropertyDescriptor.length"));
         }
@@ -90,6 +107,9 @@ namespace UnitTests
         [TestMethod]
         public void getPrototypeOf()
         {
+            Assert.AreEqual(true, Evaluate("Reflect.getPrototypeOf({}) === Object.prototype"));
+            Assert.AreEqual(true, Evaluate("Reflect.getPrototypeOf([]) === Array.prototype"));
+
             // length
             Assert.AreEqual(1, Evaluate("Reflect.getPrototypeOf.length"));
         }
@@ -97,8 +117,29 @@ namespace UnitTests
         [TestMethod]
         public void has()
         {
+            // Regular objects.
+            Assert.AreEqual(true, Evaluate("Reflect.has({ a: 1 }, 'a')"));
+            Assert.AreEqual(false, Evaluate("Reflect.has({ a: 1 }, 'b')"));
+
+            // Symbols.
+            Assert.AreEqual(true, Evaluate("var sym = Symbol('test'); Reflect.has({ [sym]: 1 }, sym)"));
+            Assert.AreEqual(false, Evaluate("var sym1 = Symbol('test'); var sym2 = Symbol('test'); Reflect.has({ [sym1]: 1 }, sym2)"));
+
+            // Arrays.
+            Assert.AreEqual(true, Evaluate("Reflect.has([5], 'length')"));
+            Assert.AreEqual(true, Evaluate("Reflect.has([5], '0')"));
+            Assert.AreEqual(false, Evaluate("Reflect.has([5], '1')"));
+            Assert.AreEqual(false, Evaluate("Reflect.has([5,,6], '1')"));
+            Assert.AreEqual(true, Evaluate("Reflect.has([5,,6], '2')"));
+
+            // Prototypes.
+            Assert.AreEqual(true, Evaluate("Reflect.has(new Number(5), 'toString')"));
+
             // length
             Assert.AreEqual(2, Evaluate("Reflect.has.length"));
+
+            // The first argument must be an object.
+            Assert.AreEqual("TypeError: Reflect.has called with non-object.", EvaluateExceptionMessage("Reflect.has(5, 'toString')"));
         }
 
         [TestMethod]
@@ -158,24 +199,32 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("x.b = 6; x.b"));
             Assert.AreEqual(false, Evaluate("Reflect.isExtensible(x)"));
             Assert.AreEqual(PropertyAttributes.FullAccess, EvaluateAccessibility("x", "c"));
-            Assert.AreEqual(true, Evaluate("Reflect.preventExtensions(true)"));
-            Assert.AreEqual(true, Evaluate("Reflect.preventExtensions(5)"));
-            Assert.AreEqual(true, Evaluate("Reflect.preventExtensions('test')"));
 
             // length
             Assert.AreEqual(1, Evaluate("Reflect.preventExtensions.length"));
 
             // If the argument is not an object, this method throws a TypeError.
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object", EvaluateExceptionMessage("Reflect.preventExtensions()"));
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object", EvaluateExceptionMessage("Reflect.preventExtensions(undefined)"));
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object", EvaluateExceptionMessage("Reflect.preventExtensions(null)"));
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object", EvaluateExceptionMessage("Reflect.preventExtensions(5)"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions()"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(undefined)"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(null)"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(5)"));
         }
 
         [TestMethod]
         public void set()
         {
-            Assert.AreEqual(2, Evaluate("var x = { a: 1 }; Reflect.set(x, 'a', 2); x.a"));
+            Assert.AreEqual(true, Evaluate("var x = { a: 1 }; Reflect.set(x, 'a', 2)"));
+            Assert.AreEqual(2, Evaluate("x.a"));
+            Assert.AreEqual("goose", Evaluate("var arr = ['duck', 'duck', 'duck']; Reflect.set(x, 2, 'goose'); x[2]"));
+            Assert.AreEqual("duck", Evaluate("var arr = ['duck', 'duck', 'duck']; Reflect.set(arr, 'length', 1); arr.toString()"));
+
+            // The property is read-only.
+            Assert.AreEqual(false, Evaluate("var x = {}; Reflect.defineProperty(x, 'test', { value: 5, writable: false }); Reflect.set(x, 'test', 2)"));
+            Assert.AreEqual(5, Evaluate("x.test"));
+
+            // The property doesn't exist and the object is non-extensible.
+            Assert.AreEqual(false, Evaluate("var x = {}; Reflect.preventExtensions(x); Reflect.set(x, 'test', 2)"));
+            Assert.AreEqual(Undefined.Value, Evaluate("x.test"));
 
             // length
             Assert.AreEqual(3, Evaluate("Reflect.set.length"));

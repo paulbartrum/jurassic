@@ -41,9 +41,9 @@ namespace Jurassic.Library
         /// <param name="argumentsList"> An array-like object specifying the arguments with which target should be called. </param>
         /// <returns> The result of calling the given target function with the specified this value and arguments. </returns>
         [JSInternalFunction(Name = "apply")]
-        public static object Apply(ObjectInstance target, object thisArgument, object argumentsList)
+        public static object Apply(FunctionInstance target, object thisArgument, ObjectInstance argumentsList)
         {
-            return false;
+            return target.CallLateBound(thisArgument, TypeUtilities.CreateListFromArrayLike(argumentsList));
         }
 
         /// <summary>
@@ -97,13 +97,17 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="target"> The target object on which to get the property. </param>
         /// <param name="propertyKey"> The name of the property to get. </param>
-        /// <param name="receiver"> The value of this provided for the call to target if a getter is encountered. When used with Proxy, it can be an object that inherits from target. </param>
+        /// <param name="receiver"> The value of this provided for the call to target if a getter
+        /// is encountered. When used with Proxy, it can be an object that inherits from target. </param>
         /// <returns> The value of the property. </returns>
-        [JSInternalFunction(Name = "get")]
-        public static object Get(ObjectInstance target, object propertyKey, object receiver)
+        [JSInternalFunction(Name = "get", Length = 2)]
+        public static object Get(ObjectInstance target, object propertyKey, object receiver = null)
         {
             propertyKey = TypeConverter.ToPropertyKey(propertyKey);
-            return target[propertyKey];
+            if (receiver == null)
+                receiver = target;
+            object result = target.GetPropertyValue(propertyKey, TypeConverter.ToObject(target.Engine, receiver));
+            return result == null ? Undefined.Value : result;
         }
 
         /// <summary>
@@ -115,7 +119,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "getOwnPropertyDescriptor")]
         public static ObjectInstance GetOwnPropertyDescriptor(ObjectInstance target, object propertyKey)
         {
-            return null;
+            return ObjectConstructor.GetOwnPropertyDescriptor(target, propertyKey);
         }
 
         /// <summary>
@@ -130,15 +134,22 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Returns a Boolean indicating whether the target has the property. Either as own or inherited. Works like the in operator as a function.
+        /// Returns a Boolean indicating whether the target has the property. Either as own or
+        /// inherited. Works like the in operator as a function.
         /// </summary>
+        /// <param name="engine"> The script engine to use. </param>
         /// <param name="target"> The target object in which to look for the property. </param>
         /// <param name="propertyKey"> The name of the property to check. </param>
         /// <returns> A Boolean indicating whether or not the target has the property. </returns>
-        [JSInternalFunction(Name = "has")]
-        public static bool Has(ObjectInstance target, object propertyKey)
+        [JSInternalFunction(Name = "has", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static bool Has(ScriptEngine engine, object target, object propertyKey)
         {
-            return false;
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+                return targetObjectInstance.HasProperty(propertyKey);
+            }
+            throw new JavaScriptException(engine, ErrorType.TypeError, "Reflect.has called with non-object.");
         }
 
         /// <summary>
@@ -194,13 +205,18 @@ namespace Jurassic.Library
         /// <summary>
         /// Similar to Object.preventExtensions().
         /// </summary>
+        /// <param name="engine"> The script engine to use. </param>
         /// <param name="target"> The target object on which to prevent extensions. </param>
         /// <returns> A Boolean indicating whether or not the target was successfully set to prevent extensions. </returns>
-        [JSInternalFunction(Name = "preventExtensions")]
-        public static bool PreventExtensions(ObjectInstance target)
+        [JSInternalFunction(Name = "preventExtensions", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static bool PreventExtensions(ScriptEngine engine, object target)
         {
-            target.IsExtensible = false;
-            return true;
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                targetObjectInstance.IsExtensible = false;
+                return true;
+            }
+            throw new JavaScriptException(engine, ErrorType.TypeError, "Reflect.preventExtensions called with non-object.");
         }
 
         /// <summary>
@@ -211,10 +227,11 @@ namespace Jurassic.Library
         /// <param name="value"> The value to set. </param>
         /// <param name="receiver"> The value of this provided for the call to target if a setter is encountered. </param>
         /// <returns> A Boolean indicating whether or not setting the property was successful. </returns>
-        [JSInternalFunction(Name = "set")]
+        [JSInternalFunction(Name = "set", Length = 3)]
         public static bool Set(ObjectInstance target, object propertyKey, object value, object receiver)
         {
-            return false;
+            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+            return target.SetPropertyValue(propertyKey, value, throwOnError: false);
         }
 
         /// <summary>

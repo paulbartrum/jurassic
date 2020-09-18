@@ -18,14 +18,14 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("construct", new ClrStubFunction(engine, "construct", 2, __STUB__Construct), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("defineProperty", new ClrStubFunction(engine, "defineProperty", 3, __STUB__DefineProperty), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("deleteProperty", new ClrStubFunction(engine, "deleteProperty", 2, __STUB__DeleteProperty), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("get", new ClrStubFunction(engine, "get", 3, __STUB__Get), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("get", new ClrStubFunction(engine, "get", 2, __STUB__Get), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("getOwnPropertyDescriptor", new ClrStubFunction(engine, "getOwnPropertyDescriptor", 2, __STUB__GetOwnPropertyDescriptor), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("getPrototypeOf", new ClrStubFunction(engine, "getPrototypeOf", 1, __STUB__GetPrototypeOf), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("has", new ClrStubFunction(engine, "has", 2, __STUB__Has), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("isExtensible", new ClrStubFunction(engine, "isExtensible", 1, __STUB__IsExtensible), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("ownKeys", new ClrStubFunction(engine, "ownKeys", 1, __STUB__OwnKeys), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("preventExtensions", new ClrStubFunction(engine, "preventExtensions", 1, __STUB__PreventExtensions), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("set", new ClrStubFunction(engine, "set", 4, __STUB__Set), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("set", new ClrStubFunction(engine, "set", 3, __STUB__Set), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("setPrototypeOf", new ClrStubFunction(engine, "setPrototypeOf", 2, __STUB__SetPrototypeOf), PropertyAttributes.NonEnumerable),
 			};
 		}
@@ -37,11 +37,11 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Apply(TypeConverter.ToObject(engine, args[0]), Undefined.Value, Undefined.Value);
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 2:
-					return Apply(TypeConverter.ToObject(engine, args[0]), args[1], Undefined.Value);
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
-					return Apply(TypeConverter.ToObject(engine, args[0]), args[1], args[2]);
+					return Apply(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), args[1], TypeConverter.ToObject(engine, args[2]));
 			}
 		}
 
@@ -95,11 +95,11 @@ namespace Jurassic.Library
 				case 0:
 					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
-					return Get(TypeConverter.ToObject(engine, args[0]), Undefined.Value, Undefined.Value);
+					return Get(TypeConverter.ToObject(engine, args[0]), Undefined.Value, null);
 				case 2:
-					return Get(TypeConverter.ToObject(engine, args[0]), args[1], Undefined.Value);
+					return Get(TypeConverter.ToObject(engine, args[0]), args[1], null);
 				default:
-					return Get(TypeConverter.ToObject(engine, args[0]), args[1], args[2]);
+					return Get(TypeConverter.ToObject(engine, args[0]), args[1], TypeUtilities.IsUndefined(args[2]) ? null : args[2]);
 			}
 		}
 
@@ -132,11 +132,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return Has(engine, Undefined.Value, Undefined.Value);
 				case 1:
-					return Has(TypeConverter.ToObject(engine, args[0]), Undefined.Value);
+					return Has(engine, args[0], Undefined.Value);
 				default:
-					return Has(TypeConverter.ToObject(engine, args[0]), args[1]);
+					return Has(engine, args[0], args[1]);
 			}
 		}
 
@@ -167,9 +167,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					return PreventExtensions(engine, Undefined.Value);
 				default:
-					return PreventExtensions(TypeConverter.ToObject(engine, args[0]));
+					return PreventExtensions(engine, args[0]);
 			}
 		}
 

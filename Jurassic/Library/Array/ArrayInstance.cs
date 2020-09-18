@@ -354,7 +354,9 @@ namespace Jurassic.Library
         /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
-        public override void SetPropertyValue(uint index, object value, bool throwOnError)
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public override bool SetPropertyValue(uint index, object value, bool throwOnError)
         {
             value = value ?? Undefined.Value;
             if (this.dense != null)
@@ -401,6 +403,7 @@ namespace Jurassic.Library
                 this.sparse[index] = value;
                 this.length = Math.Max(this.length, index + 1);
             }
+            return true;
         }
 
         /// <summary>
