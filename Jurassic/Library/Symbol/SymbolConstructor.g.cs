@@ -63,9 +63,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined is not a symbol.");
 				default:
-					return ((SymbolConstructor)thisObj).KeyFor(TypeConverter.ToObject<SymbolInstance>(engine, args[0]));
+					return ((SymbolConstructor)thisObj).KeyFor(args[0] as Symbol);
 			}
 		}
 	}

@@ -45,9 +45,11 @@ namespace Jurassic.Library
         /// Converts the given argument into a string value (not a String object).
         /// </summary>
         [JSCallFunction]
-        public string Call(string value)
+        public string Call(object value)
         {
-            return value;
+            if (value is Symbol symbol)
+                return symbol.ToString();
+            return TypeConverter.ToString(value);
         }
 
         /// <summary>

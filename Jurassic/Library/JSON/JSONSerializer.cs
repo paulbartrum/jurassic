@@ -57,7 +57,8 @@ namespace Jurassic.Library
         /// Serializes a value into a JSON string.
         /// </summary>
         /// <param name="value"> The value to serialize. </param>
-        /// <returns> The JSON repesentation of the value. </returns>
+        /// <returns> The JSON repesentation of the value, or <c>null</c> if passed an
+        /// unserializable value (like a function). </returns>
         public string Serialize(object value)
         {
             // Initialize private variables.
@@ -77,7 +78,7 @@ namespace Jurassic.Library
             // Serialize the value.
             var result = new StringBuilder(100);
             SerializePropertyValue(value, result);
-            return result.ToString();
+            return result.Length == 0 ? null : result.ToString();
         }
 
         /// <summary>
@@ -207,7 +208,6 @@ namespace Jurassic.Library
             }
 
             // The value is of a type we cannot serialize.
-            throw new NotSupportedException(string.Format("Unsupported value type: {0}", value.GetType()));
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The string to quote. </param>
         /// <param name="result"> The StringBuilder to write the quoted string to. </param>
-        private static void QuoteString(string input, System.Text.StringBuilder result)
+        private static void QuoteString(string input, StringBuilder result)
         {
             result.Append('\"');
 
@@ -317,7 +317,7 @@ namespace Jurassic.Library
                 object propertyValue = TransformPropertyValue(value, propertyName);
 
                 // Undefined values are not serialized.
-                if (propertyValue == null || propertyValue == Undefined.Value || propertyValue is FunctionInstance)
+                if (propertyValue == null || propertyValue == Undefined.Value || propertyValue is FunctionInstance || propertyValue is Symbol)
                     continue;
 
                 // Append the separator.
@@ -374,7 +374,7 @@ namespace Jurassic.Library
                 // Transform the value using the replacer function or toJSON().
                 object elementValue = TransformPropertyValue(value, i);
 
-                if (elementValue == null || elementValue == Undefined.Value || elementValue is FunctionInstance)
+                if (elementValue == null || elementValue == Undefined.Value || elementValue is FunctionInstance || elementValue is Symbol)
                 {
                     // Undefined is serialized as "null".
                     result.Append("null");

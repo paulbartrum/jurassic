@@ -30,7 +30,7 @@ namespace Jurassic
                 return "string";
             if (obj is FunctionInstance)
                 return "function";
-            if (obj is SymbolInstance)
+            if (obj is Symbol)
                 return "symbol";
             if (obj is ObjectInstance)
                 return "object";
@@ -181,7 +181,7 @@ namespace Jurassic
                 type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
                 type == typeof(string) || type == typeof(ConcatenatedString) ||
                 type == typeof(Null) || type == typeof(Undefined) ||
-                type == typeof(SymbolInstance);
+                type == typeof(Symbol);
         }
 
         /// <summary>

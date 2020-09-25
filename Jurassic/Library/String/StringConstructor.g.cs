@@ -30,7 +30,7 @@ namespace Jurassic.Library
 				case 0:
 					return ((StringConstructor)thisObj).Call();
 				default:
-					return ((StringConstructor)thisObj).Call(TypeConverter.ToString(args[0]));
+					return ((StringConstructor)thisObj).Call(args[0]);
 			}
 		}
 

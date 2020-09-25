@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Jurassic.Library;
 
 namespace Jurassic
@@ -118,8 +116,8 @@ namespace Jurassic
                 return NumberParser.CoerceToNumber((string)value);
             if (value is ConcatenatedString)
                 return NumberParser.CoerceToNumber(value.ToString());
-            if (value is SymbolInstance)
-                throw new JavaScriptException(((SymbolInstance)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a number.");
+            //if (value is Symbol)
+            //    throw new JavaScriptException(((Symbol)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a number.");
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), nameof(value));
@@ -171,8 +169,8 @@ namespace Jurassic
                 return (string)value;
             if (value is ConcatenatedString)
                 return value.ToString();
-            if (value is SymbolInstance)
-                throw new JavaScriptException(((SymbolInstance)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a string.");
+            //if (value is Symbol)
+            //    throw new JavaScriptException(((Symbol)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a string.");
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), nameof(value));
@@ -234,6 +232,8 @@ namespace Jurassic
                 result = engine.String.Construct((string)value);
             else if (value is ConcatenatedString)
                 result = engine.String.Construct(value.ToString());
+            else if (value is Symbol symbolValue)
+                result = new SymbolInstance(engine.Symbol.InstancePrototype, symbolValue);
             else
                 throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), nameof(value));
 
@@ -276,7 +276,7 @@ namespace Jurassic
         /// <returns> A property key value. </returns>
         public static object ToPropertyKey(object value)
         {
-            if (value is SymbolInstance)
+            if (value is Symbol)
                 return value;
             return ToString(value);
         }

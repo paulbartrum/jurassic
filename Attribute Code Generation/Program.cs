@@ -14,7 +14,6 @@ namespace Attribute_Code_Generation
         static void Main(string[] args)
         {
             IEnumerable<string> files = Directory.EnumerateFiles(@"..\..\..\..\Jurassic", "*.cs", SearchOption.AllDirectories);
-            files = files.Union(Directory.EnumerateFiles(@"..\..\..\..\Jurassic.Extensions", "*.cs", SearchOption.AllDirectories));
             foreach (var csFilePath in files)
             {
                 var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(csFilePath));
@@ -573,8 +572,9 @@ namespace Attribute_Code_Generation
                             case "ObjectInstance":
                             case "FunctionInstance":
                             case "ArrayBufferInstance":
-                            case "SymbolInstance":
                                 return "throw new JavaScriptException(engine, ErrorType.TypeError, \"undefined cannot be converted to an object\");";
+                            case "Symbol":
+                                return "throw new JavaScriptException(engine, ErrorType.TypeError, \"undefined is not a symbol.\");";
 
                             case "object[]":
                                 result.Append("new object[0]");
@@ -627,8 +627,9 @@ namespace Attribute_Code_Generation
                     return $"TypeConverter.ToObject(engine, {arg})";
                 case "FunctionInstance":
                 case "ArrayBufferInstance":
-                case "SymbolInstance":
                     return $"TypeConverter.ToObject<{type}>(engine, {arg})";
+                case "Symbol":
+                    return $"{arg} as Symbol";
                 case "object[]":
                     if (arrayIndex < 0)
                         throw new InvalidOperationException("Cannot convert to array.");

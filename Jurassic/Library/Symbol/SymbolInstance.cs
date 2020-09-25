@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Text;
+﻿using System.Diagnostics;
 
 namespace Jurassic.Library
 {
@@ -13,7 +9,7 @@ namespace Jurassic.Library
     [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class SymbolInstance : ObjectInstance
     {
-        private string description;
+        private Symbol symbol;
 
 
 
@@ -24,11 +20,11 @@ namespace Jurassic.Library
         /// Creates a new symbol instance.
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
-        /// <param name="description"> An optional description of the symbol. </param>
-        public SymbolInstance(ObjectInstance prototype, string description)
+        /// <param name="symbol"> The symbol primitive. </param>
+        public SymbolInstance(ObjectInstance prototype, Symbol symbol)
             : base(prototype)
         {
-            this.description = description;
+            this.symbol = symbol;
         }
 
         /// <summary>
@@ -55,9 +51,9 @@ namespace Jurassic.Library
         /// </summary>
         /// <returns> A string representing the object. </returns>
         [JSInternalFunction(Name = "toString")]
-        public string ToStringJS()
+        public override string ToString()
         {
-            return $"Symbol({this.description})";
+            return this.symbol.ToString();
         }
 
         /// <summary>
@@ -65,9 +61,9 @@ namespace Jurassic.Library
         /// </summary>
         /// <returns> The primitive value of a Symbol object. </returns>
         [JSInternalFunction(Name = "valueOf")]
-        public new SymbolInstance ValueOf()
+        public new Symbol ValueOf()
         {
-            return this;
+            return this.symbol;
         }
 
         /// <summary>
@@ -76,9 +72,9 @@ namespace Jurassic.Library
         /// <param name="hint"> Specifies the conversion behaviour.  Must be "default", "string" or "number". </param>
         /// <returns> The primitive value of a Symbol object. </returns>
         [JSInternalFunction(Name = "@@toPrimitive")]
-        public SymbolInstance ToPrimitive(string hint)
+        public Symbol ToPrimitive(string hint)
         {
-            return this;
+            return this.symbol;
         }
 
 
@@ -93,7 +89,7 @@ namespace Jurassic.Library
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override string DebuggerDisplayValue
         {
-            get { return this.ToStringJS(); }
+            get { return this.ToString(); }
         }
 
         /// <summary>

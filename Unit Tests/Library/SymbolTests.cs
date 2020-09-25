@@ -28,6 +28,12 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("Symbol.valueOf() === Symbol"));
             Assert.AreEqual("Symbol", Evaluate("Symbol.prototype[Symbol.toStringTag]"));
 
+            // Symbols can be explicitly converted to strings.
+            Assert.AreEqual("Symbol(foo)", Evaluate("String(Symbol('foo'))"));
+
+            // ...but not implicitly
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a string.", EvaluateExceptionMessage("Symbol('foo') + ''"));
+
             // typeof
             Assert.AreEqual("symbol", Evaluate("typeof Symbol()"));
 

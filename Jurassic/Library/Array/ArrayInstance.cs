@@ -260,7 +260,7 @@ namespace Jurassic.Library
         /// an array index. </returns>
         internal static uint ParseArrayIndex(object key)
         {
-            if (key is SymbolInstance)
+            if (key is Symbol)
                 return uint.MaxValue;
 
             var propertyName = (string)key;

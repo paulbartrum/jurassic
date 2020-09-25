@@ -20,10 +20,10 @@ namespace Jurassic.Library
         internal SymbolConstructor(ObjectInstance prototype, ObjectInstance instancePrototype)
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
-            Iterator = new SymbolInstance(instancePrototype, "Symbol.iterator");
-            Species = new SymbolInstance(instancePrototype, "Symbol.Species");
-            ToPrimitive = new SymbolInstance(instancePrototype, "Symbol.toPrimitive");
-            ToStringTag = new SymbolInstance(instancePrototype, "Symbol.toStringTag");
+            Iterator = new Symbol("Symbol.iterator");
+            Species = new Symbol("Symbol.Species");
+            ToPrimitive = new Symbol("Symbol.toPrimitive");
+            ToStringTag = new Symbol("Symbol.toStringTag");
 
             // Initialize the constructor properties.
             var properties = new List<PropertyNameAndValue>(3);
@@ -50,23 +50,23 @@ namespace Jurassic.Library
         /// <summary>
         /// Used to override the default iterator for an object. Used by the for-of statement.
         /// </summary>
-        public SymbolInstance Iterator { get; internal set; }
+        public Symbol Iterator { get; internal set; }
 
         /// <summary>
         /// A function valued property that is the constructor function that is used to create
         /// derived objects.
         /// </summary>
-        public SymbolInstance Species { get; internal set; }
+        public Symbol Species { get; internal set; }
 
         /// <summary>
         /// Used to override ToPrimitive behaviour.
         /// </summary>
-        public SymbolInstance ToPrimitive { get; internal set; }
+        public Symbol ToPrimitive { get; internal set; }
 
         /// <summary>
         /// Used to customize the behaviour of Object.prototype.toString().
         /// </summary>
-        public SymbolInstance ToStringTag { get; internal set; }
+        public Symbol ToStringTag { get; internal set; }
 
 
 
@@ -78,9 +78,9 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="description"> The name or description of the symbol (optional). </param>
         [JSCallFunction]
-        public SymbolInstance Call(string description = null)
+        public Symbol Call(string description = null)
         {
-            return new SymbolInstance(this.InstancePrototype, description);
+            return new Symbol(description);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Jurassic.Library
         /// <param name="key"> The key for the symbol (also used for the description of the symbol). </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "for")]
-        public SymbolInstance For(string key)
+        public Symbol For(string key)
         {
             throw new NotImplementedException();
         }
@@ -116,7 +116,7 @@ namespace Jurassic.Library
         /// <param name="symbol"> The symbol to find a key for. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "keyFor")]
-        public string KeyFor(SymbolInstance symbol)
+        public string KeyFor(Symbol symbol)
         {
             throw new NotImplementedException();
         }

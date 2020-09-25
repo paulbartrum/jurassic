@@ -153,7 +153,7 @@ namespace Jurassic.Library
         {
             var result = obj.Engine.Array.New();
             foreach (var property in obj.Properties)
-                if (property.Key is SymbolInstance)
+                if (property.Key is Symbol)
                     result.Push(property.Key);
             return result;
         }
@@ -402,7 +402,7 @@ namespace Jurassic.Library
                 if (entry is ObjectInstance entryObject)
                 {
                     var propertyKey = entryObject[0];
-                    if (!(propertyKey is string) && !(propertyKey is SymbolInstance))
+                    if (!(propertyKey is string) && !(propertyKey is Symbol))
                         propertyKey = TypeConverter.ToString(propertyKey);
                     var propertyValue = entryObject[1];
                     result[propertyKey] = propertyValue;

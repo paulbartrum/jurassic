@@ -236,6 +236,19 @@ namespace UnitTests
 
             // Cyclic reference
             Assert.AreEqual("TypeError", EvaluateExceptionType("a = []; a[0] = a; JSON.stringify(a)"));
+
+            // JSON.stringify() should ignore functions.
+            Assert.AreEqual("{}", Evaluate("JSON.stringify({ foo: Math.min })"));
+            Assert.AreEqual("[null]", Evaluate(@"JSON.stringify([Math.min])"));
+            Assert.AreEqual(Undefined.Value, Evaluate("JSON.stringify(Math.min)"));
+
+            // JSON.stringify() should ignore symbols.
+            Assert.AreEqual("{}", Evaluate(@"
+                var object = { foo: Symbol() };
+                object[Symbol()] = 1;
+                JSON.stringify(object)"));
+            Assert.AreEqual("[null]", Evaluate(@"JSON.stringify([Symbol()])"));
+            Assert.AreEqual(Undefined.Value, Evaluate("JSON.stringify(Symbol())"));
         }
 
         [TestMethod]

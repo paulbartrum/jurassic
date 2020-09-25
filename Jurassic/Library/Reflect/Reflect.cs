@@ -196,7 +196,7 @@ namespace Jurassic.Library
 
             // Symbols, in insertion order.
             foreach (var property in target.Properties)
-                if (property.Key is SymbolInstance)
+                if (property.Key is Symbol)
                     result.Push(property.Key);
 
             return result;

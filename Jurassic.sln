@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2003
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jurassic", "Jurassic\Jurassic.csproj", "{78658500-2AEE-44EF-9B9D-6BF1A0AA5C42}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unit Tests", "Unit Tests\Unit Tests.csproj", "{5DF48A73-6EFF-4FC1-A2B7-0AF30C1FB27C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debugger Test", "Debugger Test\Debugger Test.csproj", "{CDCFA870-6E21-4702-8ECD-56A57BAE3E63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REPL", "REPL\REPL.csproj", "{9D257E9D-5481-48A9-9C6C-F91FE01F5497}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{CDCFA870-6E21-4702-8ECD-56A57BAE3E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDCFA870-6E21-4702-8ECD-56A57BAE3E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDCFA870-6E21-4702-8ECD-56A57BAE3E63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D257E9D-5481-48A9-9C6C-F91FE01F5497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D257E9D-5481-48A9-9C6C-F91FE01F5497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D257E9D-5481-48A9-9C6C-F91FE01F5497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D257E9D-5481-48A9-9C6C-F91FE01F5497}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

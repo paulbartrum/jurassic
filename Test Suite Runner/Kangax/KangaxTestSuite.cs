@@ -73,7 +73,7 @@ namespace Jurassic.TestSuiteRunner
                         }
 
                         if (testCase.Success == false &&
-                            (testCase.name.StartsWith("Reflect")))
+                            (testCase.name.StartsWith("Symbol")))
                         {
                             Console.WriteLine(testCase.script);
                         }
@@ -142,7 +142,7 @@ namespace Jurassic.TestSuiteRunner
             {
                 // Execute the provided script.
                 object result = engine.Evaluate(request.Script);
-                response.JsonResult = JSONObject.Stringify(engine, result);
+                response.JsonResult = TypeConverter.ToString(JSONObject.Stringify(engine, result));
                 if (request.VariablesToReturn != null)
                 {
                     response.Variables = new Dictionary<string, string>();
