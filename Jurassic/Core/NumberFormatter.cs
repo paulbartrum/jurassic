@@ -397,17 +397,11 @@ namespace Jurassic
         //_________________________________________________________________________________________
 
 
-        private readonly static int[] powersOfFive = { 5, 25, 125 };
-
         // IEEE 754 double-precision constants.
         private const int MantissaExplicitBits = 52;
-        private const int MantissaImplicitBits = 53;
         private const long MantissaMask = 0xFFFFFFFFFFFFF;
         private const long MantissaImplicitBit = 1L << MantissaExplicitBits;
         private const int ExponentBias = 1023;
-        private const long ExponentMask = 0x7FF0000000000000;
-        private const int ExponentDenormal = -1023;
-        private const int ExponentSpecial = 1024;
 
         // Powers of ten.
         private readonly static double[] tens = new double[]
@@ -500,49 +494,6 @@ namespace Jurassic
         }
 
         /// <summary>
-        /// Counts the number of leading zero bits in the given 64-bit value.
-        /// </summary>
-        /// <param name="value"> The 64-bit value. </param>
-        /// <returns> The number of leading zero bits in the given 64-bit value. </returns>
-        private static int CountLeadingZeroBits(ulong value)
-        {
-            int k = 0;
-
-            if ((value & 0xFFFFFFFF00000000) == 0)
-            {
-                k = 32;
-                value <<= 32;
-            }
-            if ((value & 0xFFFF000000000000) == 0)
-            {
-                k += 16;
-                value <<= 16;
-            }
-            if ((value & 0xFF00000000000000) == 0)
-            {
-                k += 8;
-                value <<= 8;
-            }
-            if ((value & 0xF000000000000000) == 0)
-            {
-                k += 4;
-                value <<= 4;
-            }
-            if ((value & 0xC000000000000000) == 0)
-            {
-                k += 2;
-                value <<= 2;
-            }
-            if ((value & 0x8000000000000000) == 0)
-            {
-                k++;
-                if ((value & 0x4000000000000000) == 0)
-                    return 64;
-            }
-            return k;
-        }
-
-        /// <summary>
         /// Counts the number of trailing zero bits in the given 64-bit value.
         /// </summary>
         /// <param name="value"> The 64-bit value. </param>
@@ -601,11 +552,26 @@ namespace Jurassic
         /// <returns> The logarithm of the provided value, rounded down to the nearest integer. </returns>
         private static int IntegralLog(double value, int radix)
         {
-            // For radix 10, fails for 999999999999998, 999999999999999 and 0.00000000000999999999999999.
-            int result = radix == 10 ? (int)Math.Floor(Math.Log10(value)) : (int)Math.Floor(Math.Log(value, radix));
-            if ((result >= 15 || result <= -11) && value < Math.Pow(radix, result))
-                return result - 1;
-            return result;
+            // For radix 10, fails for: 999999999999998, 999999999999999, 0.00000000000999999999999999 and 99999.9999999999.
+            if (radix == 10)
+            {
+                int result = (int)Math.Floor(Math.Log10(value));
+                if (result >= 0 && result <= 22)
+                {
+                    if (value < tens[result])
+                        return result - 1;
+                }
+                else if (value < Math.Pow(10, result))
+                    return result - 1;
+                return result;
+            }
+            else
+            {
+                int result = (int)Math.Floor(Math.Log(value, radix));
+                if (value < Math.Pow(radix, result))
+                    return result - 1;
+                return result;
+            }
         }
     }
 

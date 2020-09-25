@@ -283,6 +283,9 @@ namespace UnitTests
             Assert.AreEqual("-99999999999999", Evaluate("(-99999999999999).toString()"));
             Assert.AreEqual("-999999999999999", Evaluate("(-999999999999999).toString()"));
             Assert.AreEqual("-10000000000000000", Evaluate("(-9999999999999999).toString()"));
+            Assert.AreEqual("99999.9999999999", Evaluate("(99999.9999999999).toString()"));
+            Assert.AreEqual("99999.99999999999", Evaluate("(99999.99999999999).toString()"));
+            Assert.AreEqual("100000", Evaluate("(99999.999999999999).toString()"));
             Assert.AreEqual("9007199254740992", Evaluate("9007199254740993 .toString()"));
             Assert.AreEqual("-77", Evaluate("(-77).toString()"));
             Assert.AreEqual("77.1274", Evaluate("77.1274.toString()"));
