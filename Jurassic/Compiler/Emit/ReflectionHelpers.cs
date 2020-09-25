@@ -103,7 +103,6 @@ namespace Jurassic.Compiler
         internal static MethodInfo ObjectInstance_SetPropertyValue_Object;
         internal static MethodInfo ObjectInstance_SetPropertyValue_Int;
         internal static MethodInfo ObjectInstance_SetPropertyValue_PropertyReference;
-        internal static MethodInfo ObjectInstance_SetPropertyValueIfExists;
         internal static MethodInfo ObjectInstance_InitializeMissingProperty;
 
         internal static ConstructorInfo JavaScriptException_Constructor_Error;
@@ -189,7 +188,6 @@ namespace Jurassic.Compiler
             ObjectInstance_SetPropertyValue_Object = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_Int = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(uint), typeof(object), typeof(bool));
             ObjectInstance_SetPropertyValue_PropertyReference = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValue", typeof(PropertyReference), typeof(object), typeof(bool));
-            ObjectInstance_SetPropertyValueIfExists = GetInstanceMethod(typeof(ObjectInstance), "SetPropertyValueIfExists", typeof(object), typeof(object), typeof(bool));
             ObjectInstance_InitializeMissingProperty = GetInstanceMethod(typeof(ObjectInstance), "InitializeMissingProperty", typeof(object), typeof(PropertyAttributes));
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));

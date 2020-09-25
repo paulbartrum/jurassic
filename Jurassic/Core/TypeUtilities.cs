@@ -376,6 +376,23 @@ namespace Jurassic
         {
             return Iterate(engine, RequireIterator(engine, iterable));
         }
+
+        /// <summary>
+        /// Create an array whose elements are provided by the indexed properties of an array-like object.
+        /// </summary>
+        /// <param name="arrayLike"> The array-like object to convert. </param>
+        /// <returns> An array. </returns>
+        internal static object[] CreateListFromArrayLike(ObjectInstance arrayLike)
+        {
+            if (arrayLike is ArrayInstance arrayInstance)
+                return arrayInstance.ToArray();
+
+            uint length = ArrayInstance.GetLength(arrayLike);
+            var result = new object[length];
+            for (uint i = 0; i < length; i++)
+                result[i] = arrayLike[i];
+            return result;
+        }
     }
 
 }

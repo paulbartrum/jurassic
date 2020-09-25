@@ -352,7 +352,7 @@ namespace Jurassic.Library
 
             // The property might exist in the prototype.
             if (this.prototype == null)
-                return thisValue.GetMissingPropertyValue(index.ToString());
+                return this.GetMissingPropertyValue(index.ToString());
             return this.prototype.GetPropertyValue(index, thisValue);
         }
 
@@ -360,18 +360,19 @@ namespace Jurassic.Library
         /// Gets the value of the property with the given name.
         /// </summary>
         /// <param name="key"> The property key (either a string or a Symbol). </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        public object GetPropertyValue(object key)
+        public object GetPropertyValue(object key, ObjectInstance thisValue = null)
         {
             // Check if the property is an indexed property.
             uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
             if (arrayIndex != uint.MaxValue)
-                return GetPropertyValue(arrayIndex);
+                return GetPropertyValue(arrayIndex, thisValue ?? this);
 
             // Otherwise, the property is a name.
-            return GetNamedPropertyValue(key, this);
+            return GetNamedPropertyValue(key, thisValue ?? this);
         }
 
         /// <summary>
@@ -541,15 +542,18 @@ namespace Jurassic.Library
         /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
-        public virtual void SetPropertyValue(uint index, object value, bool throwOnError)
+        /// <returns> <c>false</c> if an error occurred. </returns>
+        public virtual bool SetPropertyValue(uint index, object value, bool throwOnError)
         {
             string indexStr = index.ToString();
-            bool exists = SetPropertyValueIfExists(indexStr, value, throwOnError);
+            if (!SetPropertyValueIfExists(indexStr, value, throwOnError, out bool exists))
+                return false;
             if (exists == false)
             {
                 // The property doesn't exist - add it.
-                AddProperty(indexStr, value, PropertyAttributes.FullAccess, throwOnError);
+                return AddProperty(indexStr, value, PropertyAttributes.FullAccess, throwOnError);
             }
+            return true;
         }
 
         /// <summary>
@@ -563,22 +567,23 @@ namespace Jurassic.Library
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set (i.e. if the property is read-only or if the object is not extensible and a new
         /// property needs to be created). </param>
-        public void SetPropertyValue(object key, object value, bool throwOnError)
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public bool SetPropertyValue(object key, object value, bool throwOnError)
         {
             // Check if the property is an indexed property.
             uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
             if (arrayIndex != uint.MaxValue)
-            {
-                SetPropertyValue(arrayIndex, value, throwOnError);
-                return;
-            }
+                return SetPropertyValue(arrayIndex, value, throwOnError);
 
-            bool exists = SetPropertyValueIfExists(key, value, throwOnError);
+            if (!SetPropertyValueIfExists(key, value, throwOnError, out bool exists))
+                return false;
             if (exists == false)
             {
                 // The property doesn't exist - add it.
-                AddProperty(key, value, PropertyAttributes.FullAccess, throwOnError);
+                return AddProperty(key, value, PropertyAttributes.FullAccess, throwOnError);
             }
+            return true;
         }
 
         /// <summary>
@@ -592,14 +597,16 @@ namespace Jurassic.Library
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set (i.e. if the property is read-only or if the object is not extensible and a new
         /// property needs to be created). </param>
-        public void SetPropertyValue(PropertyReference propertyReference, object value, bool throwOnError)
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public bool SetPropertyValue(PropertyReference propertyReference, object value, bool throwOnError)
         {
             // Check if anything has changed.
             if (propertyReference.CachedSchema == this.schema)
             {
                 // Fast path: nothing has changed.
                 this.propertyValues[propertyReference.CachedIndex] = value ?? Undefined.Value;
-                return;
+                return true;
             }
 
             var propertyInfo = this.schema.GetPropertyIndexAndAttributes(propertyReference.Name);
@@ -609,20 +616,21 @@ namespace Jurassic.Library
                 if ((propertyInfo.Attributes & (PropertyAttributes.Writable | PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != PropertyAttributes.Writable)
                 {
                     propertyReference.ClearCache();
-                    this.SetPropertyValue(propertyReference.Name, value, throwOnError);
+                    return this.SetPropertyValue(propertyReference.Name, value, throwOnError);
                 }
                 else
                 {
                     // The property can be cached.
                     propertyReference.CachePropertyDetails(this.schema, propertyInfo.Index);
                     this.propertyValues[propertyReference.CachedIndex] = value ?? Undefined.Value;
+                    return true;
                 }
             }
             else
             {
                 // The property is in the prototype or is non-existent.
                 propertyReference.ClearCache();
-                this.SetPropertyValue(propertyReference.Name, value, throwOnError);
+                return this.SetPropertyValue(propertyReference.Name, value, throwOnError);
             }
         }
 
@@ -640,8 +648,10 @@ namespace Jurassic.Library
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set (i.e. if the property is read-only or if the object is not extensible and a new
         /// property needs to be created). </param>
-        /// <returns> <c>true</c> if the property value exists; <c>false</c> otherwise. </returns>
-        public bool SetPropertyValueIfExists(object key, object value, bool throwOnError)
+        /// <param name="exists"> Set to <c>true</c> if the property value exists; <c>false</c> otherwise. </param>
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public bool SetPropertyValueIfExists(object key, object value, bool throwOnError, out bool exists)
         {
             // Do not store nulls - null represents a non-existant value.
             value = value ?? Undefined.Value;
@@ -650,13 +660,15 @@ namespace Jurassic.Library
             var property = this.schema.GetPropertyIndexAndAttributes(key);
             if (property.Exists == true)
             {
+                exists = true;
+
                 // Check if the property is read-only.
                 if (property.IsWritable == false)
                 {
                     // The property is read-only.
                     if (throwOnError == true)
                         throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' is read-only.", key));
-                    return true;
+                    return false;
                 }
 
                 if ((property.Attributes & (PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) == 0)
@@ -694,6 +706,7 @@ namespace Jurassic.Library
                     {
                         // The property contains an accessor function.  Set the property value by calling the accessor.
                         ((PropertyAccessorValue)prototypeObject.propertyValues[property.Index]).SetValue(this, value);
+                        exists = true;
                         return true;
                     }
                     propertyExistsInPrototype = true;
@@ -706,11 +719,13 @@ namespace Jurassic.Library
             if (propertyExistsInPrototype == true)
             {
                 AddProperty(key, value, PropertyAttributes.FullAccess, throwOnError);
+                exists = true;
                 return true;
             }
 
             // The property does not exist.
-            return false;
+            exists = false;
+            return true;
         }
         
         /// <summary>

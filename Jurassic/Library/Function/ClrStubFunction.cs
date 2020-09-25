@@ -160,7 +160,9 @@ namespace Jurassic.Library
         {
             if (this.constructBinder == null)
                 throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Objects cannot be constructed from built-in functions.");
-            return (ObjectInstance)this.constructBinder(this.Engine, this, argumentValues);
+            var result = (ObjectInstance)this.constructBinder(this.Engine, this, argumentValues);
+            result.SetPrototype(newTarget.InstancePrototype);
+            return result;
         }
     }
 }
