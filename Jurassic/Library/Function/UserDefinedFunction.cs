@@ -273,7 +273,7 @@ namespace Jurassic.Library
         public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
             // Create a new object and set the prototype to the instance prototype of the function.
-            var newObject = ObjectInstance.CreateRawObject(this.InstancePrototype);
+            var newObject = ObjectInstance.CreateRawObject(newTarget.InstancePrototype);
 
             // Run the function, with the new object as the "this" keyword.
             var context = ExecutionContext.CreateConstructContext(

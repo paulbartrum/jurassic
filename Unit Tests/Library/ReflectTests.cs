@@ -18,8 +18,6 @@ namespace UnitTests
             Assert.AreEqual("TypeError: 'Reflect' is not a function", EvaluateExceptionMessage("Reflect()"));
         }
 
-        // TODO: Reflect.apply, Reflect.construct, etc.
-
         [TestMethod]
         public void apply()
         {
@@ -43,8 +41,21 @@ namespace UnitTests
         {
             Assert.AreEqual(5, Evaluate("Reflect.construct(Number, [5]).valueOf()"));
             Assert.AreEqual(5, Evaluate("Reflect.construct(Number, [5], Number).valueOf()"));
+            Assert.AreEqual(true, Evaluate(@"
+                function F() { }
+                var obj = Reflect.construct(function() { this.y = 1; }, [], F);
+                obj.y === 1 && obj instanceof F;"));
             Assert.AreEqual(true, Evaluate("Reflect.construct(function () { return new.target; }, [], Number) === Number"));
-            
+            Assert.AreEqual(true, Evaluate(@"
+                function F() { }
+                var obj = Reflect.construct(Array, [], F);
+                obj[2] = 'foo';
+                obj.length === 3 && obj instanceof F;"));
+            Assert.AreEqual(true, Evaluate(@"
+                function F(){}
+                var obj = Reflect.construct(RegExp, ['baz','g'], F);
+                RegExp.prototype.exec.call(obj, 'foobarbaz')[0] === 'baz' && obj.lastIndex === 9 && obj instanceof F;"));
+
             // The first parameter must be a constructor.
             Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("Reflect.construct(Math)"));
             
