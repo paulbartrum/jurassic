@@ -67,7 +67,7 @@ Feature|Status
 &nbsp;&nbsp;WeakMap|11/12
 &nbsp;&nbsp;WeakSet|10/11
 &nbsp;&nbsp;Proxy  [25]|:x:
-&nbsp;&nbsp;Reflect  [26]|:x:
+&nbsp;&nbsp;Reflect  [26]|:white_check_mark: 20/20
 &nbsp;&nbsp;Promise|4/8
 &nbsp;&nbsp;Symbol|8/12
 &nbsp;&nbsp;well-known symbols[27]|7/26
@@ -83,11 +83,11 @@ Feature|Status
 &nbsp;&nbsp;Math methods|:white_check_mark: 17/17
 &nbsp;&nbsp;Date.prototype[Symbol.toPrimitive]|:white_check_mark: 1/1
 **Subclassing**|
-&nbsp;&nbsp;Array is subclassable|3/11
-&nbsp;&nbsp;RegExp is subclassable|3/4
-&nbsp;&nbsp;Function is subclassable|4/6
-&nbsp;&nbsp;Promise is subclassable|:x:
-&nbsp;&nbsp;miscellaneous subclassables|:x:
+&nbsp;&nbsp;Array is subclassable|4/11
+&nbsp;&nbsp;RegExp is subclassable|:white_check_mark: 4/4
+&nbsp;&nbsp;Function is subclassable|:white_check_mark: 6/6
+&nbsp;&nbsp;Promise is subclassable|2/4
+&nbsp;&nbsp;miscellaneous subclassables|:white_check_mark: 6/6
 **Misc**|
 &nbsp;&nbsp;prototype of bound functions|1/5
 &nbsp;&nbsp;Proxy, internal 'get' calls|:x:
@@ -97,7 +97,7 @@ Feature|Status
 &nbsp;&nbsp;Proxy, internal 'getOwnPropertyDescriptor' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'ownKeys' calls|:x:
 &nbsp;&nbsp;Object static methods accept primitives|:white_check_mark: 10/10
-&nbsp;&nbsp;own property order|2/7
+&nbsp;&nbsp;own property order|4/7
 &nbsp;&nbsp;Updated identifier syntax|1/3
 &nbsp;&nbsp;miscellaneous|7/9
 **Annex b**|
