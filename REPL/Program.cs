@@ -39,14 +39,23 @@ namespace REPL
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                         Console.WriteLine("null");
                     }
-                    else if (result is bool)
-                        Console.WriteLine(result);
-                    else if (result is double)
-                        Console.WriteLine(result);
+                    else if (result is bool || result is int || result is uint || result is double)
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                        if (result is bool b)
+                            Console.WriteLine(b ? "true" : "false");
+                        else
+                            Console.WriteLine(result);
+                    }
                     else if (result is string)
-                        Console.WriteLine($"\"{result}\"");
-                    else if (result is int)
-                        Console.WriteLine(result);
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("\"");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write(result);
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("\"");
+                    }
                     else if (result is ObjectInstance obj)
                         Console.WriteLine(obj.ToString());
                     script.Clear();
@@ -56,7 +65,7 @@ namespace REPL
                     if (!ex.Message.StartsWith("SyntaxError: Unexpected end of input"))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        if (ex.ErrorObject is ErrorInstance error && error.Stack != null)
+                        if (ex.GetErrorObject(scriptEngine) is ErrorInstance error && error.Stack != null)
                             Console.WriteLine(error.Stack);
                         else
                             Console.WriteLine($"Uncaught {ex.Message}");
@@ -70,21 +79,6 @@ namespace REPL
                     script.Clear();
                 }
             }
-        }
-
-        private static string ReadInput()
-        {
-            var buffer = new StringBuilder();
-            while (true)
-            {
-                var keyInfo = Console.ReadKey();
-                if (keyInfo.Key == ConsoleKey.Enter)
-                    Console.WriteLine();
-                if (keyInfo.Key == ConsoleKey.Enter && (keyInfo.Modifiers & ConsoleModifiers.Shift) == 0)
-                    break;
-                buffer.Append(keyInfo.KeyChar);
-            }
-            return buffer.ToString();
         }
     }
 }
