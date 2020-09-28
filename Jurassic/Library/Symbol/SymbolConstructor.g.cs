@@ -43,29 +43,23 @@ namespace Jurassic.Library
 
 		private static object __STUB__For(ScriptEngine engine, object thisObj, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is SymbolConstructor))
-				throw new JavaScriptException(ErrorType.TypeError, "The method 'for' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					return ((SymbolConstructor)thisObj).For("undefined");
+					return For("undefined");
 				default:
-					return ((SymbolConstructor)thisObj).For(TypeConverter.ToString(args[0]));
+					return For(TypeConverter.ToString(args[0]));
 			}
 		}
 
 		private static object __STUB__KeyFor(ScriptEngine engine, object thisObj, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is SymbolConstructor))
-				throw new JavaScriptException(ErrorType.TypeError, "The method 'keyFor' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
 					throw new JavaScriptException(ErrorType.TypeError, "undefined is not a symbol.");
 				default:
-					return ((SymbolConstructor)thisObj).KeyFor(args[0] as Symbol);
+					return KeyFor(args[0] as Symbol);
 			}
 		}
 	}

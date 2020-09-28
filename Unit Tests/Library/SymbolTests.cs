@@ -48,6 +48,22 @@ namespace UnitTests
             Assert.AreEqual("1defaulttest", Evaluate("var x = { a: 1 }; x[Symbol.toPrimitive] = function (hint) { return this.a + hint; }; x + 'test'"));
         }
 
-        // TODO: Symbol.iterator, Symbol.for, Symbol.keyFor, etc.
+        [TestMethod]
+        public void @for()
+        {
+            Assert.AreEqual(true, Evaluate("Symbol.for('foo') === Symbol.for('foo')"));
+
+            // The key is also used as the description.
+            Assert.AreEqual("Symbol(mario)", Evaluate("Symbol.for('mario').toString()"));
+        }
+
+        [TestMethod]
+        public void keyFor()
+        {
+            Assert.AreEqual("foo", Evaluate("Symbol.keyFor(Symbol.for('foo'))"));
+            Assert.AreEqual(Undefined.Value, Evaluate("Symbol.keyFor(Symbol('foo'))"));
+        }
+
+        // TODO: Symbol.iterator, etc.
     }
 }

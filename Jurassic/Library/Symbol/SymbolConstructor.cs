@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Jurassic.Library
@@ -26,7 +27,7 @@ namespace Jurassic.Library
             ToStringTag = new Symbol("Symbol.toStringTag");
 
             // Initialize the constructor properties.
-            var properties = new List<PropertyNameAndValue>(3);
+            var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "Symbol", 0, instancePrototype);
             //properties.Add(new PropertyNameAndValue("hasInstance", null, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("isConcatSpreadable", null, PropertyAttributes.Sealed));
@@ -97,28 +98,37 @@ namespace Jurassic.Library
         //     JAVASCRIPT FUNCTIONS
         //_________________________________________________________________________________________
 
+        private static ConcurrentDictionary<string, Symbol> symbolRegistry = new ConcurrentDictionary<string, Symbol>();
+
         /// <summary>
         /// Searches for existing symbols in a runtime-wide symbol registry with the given key and
         /// returns it if found. Otherwise a new symbol gets created in the global symbol registry
         /// with this key.
         /// </summary>
         /// <param name="key"> The key for the symbol (also used for the description of the symbol). </param>
-        /// <returns></returns>
+        /// <returns> An existing symbol with the given key if found; otherwise, a new symbol is
+        /// created and returned. </returns>
         [JSInternalFunction(Name = "for")]
-        public Symbol For(string key)
+        public static Symbol For(string key)
         {
-            throw new NotImplementedException();
+            return symbolRegistry.GetOrAdd(key, key2 => new Symbol(key2));
         }
 
         /// <summary>
         /// Retrieves a shared symbol key from the global symbol registry for the given symbol.
         /// </summary>
         /// <param name="symbol"> The symbol to find a key for. </param>
-        /// <returns></returns>
+        /// <returns> A string representing the key for the given symbol if one is found on the
+        /// global registry; otherwise, undefined. </returns>
         [JSInternalFunction(Name = "keyFor")]
-        public string KeyFor(Symbol symbol)
+        public static string KeyFor(Symbol symbol)
         {
-            throw new NotImplementedException();
+            // We assume here that the symbol description is immutable.
+            string key = symbol.Description;
+            symbolRegistry.TryGetValue(key, out Symbol result);
+            if (result == symbol)
+                return key;
+            return null;
         }
     }
 }
