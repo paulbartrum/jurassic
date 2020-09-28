@@ -40,7 +40,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get buffer' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get buffer' is not generic.");
 			return ((DataViewInstance)thisObj).Buffer;
 		}
 
@@ -48,7 +48,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get byteOffset' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get byteOffset' is not generic.");
 			return ((DataViewInstance)thisObj).ByteOffset;
 		}
 
@@ -56,7 +56,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get byteLength' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get byteLength' is not generic.");
 			return ((DataViewInstance)thisObj).ByteLength;
 		}
 
@@ -64,11 +64,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getFloat32' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getFloat32' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
 					return ((DataViewInstance)thisObj).GetFloat32(TypeConverter.ToInteger(args[0]), false);
 				default:
@@ -80,11 +80,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getFloat64' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getFloat64' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
 					return ((DataViewInstance)thisObj).GetFloat64(TypeConverter.ToInteger(args[0]), false);
 				default:
@@ -96,11 +96,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getInt16' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getInt16' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
 					return ((DataViewInstance)thisObj).GetInt16(TypeConverter.ToInteger(args[0]), false);
 				default:
@@ -112,11 +112,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getInt32' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getInt32' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
 					return ((DataViewInstance)thisObj).GetInt32(TypeConverter.ToInteger(args[0]), false);
 				default:
@@ -128,11 +128,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getInt8' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getInt8' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				default:
 					return ((DataViewInstance)thisObj).GetInt8(TypeConverter.ToInteger(args[0]));
 			}
@@ -142,11 +142,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUint16' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUint16' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
 					return ((DataViewInstance)thisObj).GetUint16(TypeConverter.ToInteger(args[0]), false);
 				default:
@@ -158,11 +158,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUint32' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUint32' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
 					return ((DataViewInstance)thisObj).GetUint32(TypeConverter.ToInteger(args[0]), false);
 				default:
@@ -174,11 +174,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUint8' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUint8' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				default:
 					return ((DataViewInstance)thisObj).GetUint8(TypeConverter.ToInteger(args[0]));
 			}
@@ -188,13 +188,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setFloat32' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setFloat32' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				case 2:
 					((DataViewInstance)thisObj).SetFloat32(TypeConverter.ToInteger(args[0]), TypeConverter.ToNumber(args[1]), false); return Undefined.Value;
 				default:
@@ -206,13 +206,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setFloat64' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setFloat64' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				case 2:
 					((DataViewInstance)thisObj).SetFloat64(TypeConverter.ToInteger(args[0]), TypeConverter.ToNumber(args[1]), false); return Undefined.Value;
 				default:
@@ -224,13 +224,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setInt16' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setInt16' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				case 2:
 					((DataViewInstance)thisObj).SetInt16(TypeConverter.ToInteger(args[0]), args[1], false); return Undefined.Value;
 				default:
@@ -242,13 +242,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setInt32' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setInt32' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				case 2:
 					((DataViewInstance)thisObj).SetInt32(TypeConverter.ToInteger(args[0]), args[1], false); return Undefined.Value;
 				default:
@@ -260,13 +260,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setInt8' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setInt8' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				default:
 					((DataViewInstance)thisObj).SetInt8(TypeConverter.ToInteger(args[0]), args[1]); return Undefined.Value;
 			}
@@ -276,13 +276,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUint16' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUint16' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				case 2:
 					((DataViewInstance)thisObj).SetUint16(TypeConverter.ToInteger(args[0]), args[1], false); return Undefined.Value;
 				default:
@@ -294,13 +294,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUint32' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUint32' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				case 2:
 					((DataViewInstance)thisObj).SetUint32(TypeConverter.ToInteger(args[0]), args[1], false); return Undefined.Value;
 				default:
@@ -312,13 +312,13 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DataViewInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUint8' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUint8' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'byteOffset' was not specified.");
 				case 1:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'value' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'value' was not specified.");
 				default:
 					((DataViewInstance)thisObj).SetUint8(TypeConverter.ToInteger(args[0]), args[1]); return Undefined.Value;
 			}

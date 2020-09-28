@@ -38,7 +38,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public object Call()
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, "Constructor Promise requires 'new'");
+            throw new JavaScriptException(ErrorType.TypeError, "Constructor Promise requires 'new'");
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Jurassic.Library
                         {
                             var innerException = ex.InnerExceptions[0];
                             if (innerException is JavaScriptException innerJSException)
-                                promise.Reject(innerJSException.ErrorObject);
+                                promise.Reject(innerJSException.GetErrorObject(Engine));
                             else
                                 promise.Reject(innerException.Message);
                         }
@@ -97,7 +97,7 @@ namespace Jurassic.Library
                     }
                     catch (JavaScriptException ex)
                     {
-                        promise.Reject(ex.ErrorObject);
+                        promise.Reject(ex.GetErrorObject(Engine));
                     }
                     catch (Exception ex)
                     {
@@ -172,7 +172,7 @@ namespace Jurassic.Library
         public PromiseInstance Race(ObjectInstance iterable)
         {
             if (iterable == null)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "The parameter must be an iterable.");
+                throw new JavaScriptException(ErrorType.TypeError, "The parameter must be an iterable.");
 
             var promises = TypeUtilities.ForOf(Engine, iterable);
 
@@ -192,7 +192,7 @@ namespace Jurassic.Library
         public PromiseInstance All(ObjectInstance iterable)
         {
             if (iterable == null)
-                throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, "The parameter must be an iterable.");
+                throw new JavaScriptException(ErrorType.TypeError, "The parameter must be an iterable.");
 
             var promises = TypeUtilities.ForOf(iterable.Engine, iterable).ToList();
             var results = Engine.Array.Construct(new object[promises.Count]);
@@ -260,7 +260,7 @@ namespace Jurassic.Library
                     }
                     catch (JavaScriptException jex)
                     {
-                        promise.Reject(jex.ErrorObject);
+                        promise.Reject(jex.GetErrorObject(Engine));
                         break;
                     }
 
@@ -289,7 +289,7 @@ namespace Jurassic.Library
                         }
                         catch (JavaScriptException jex)
                         {
-                            promise.Reject(jex.ErrorObject);
+                            promise.Reject(jex.GetErrorObject(Engine));
                             break;
                         }
                     }

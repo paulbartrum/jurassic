@@ -23,7 +23,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Call' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'Call' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -37,7 +37,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Construct' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'Construct' is not generic.");
 			return ((SymbolConstructor)thisObj).Construct();
 		}
 
@@ -45,7 +45,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'for' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'for' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -59,11 +59,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'keyFor' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'keyFor' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined is not a symbol.");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined is not a symbol.");
 				default:
 					return ((SymbolConstructor)thisObj).KeyFor(args[0] as Symbol);
 			}

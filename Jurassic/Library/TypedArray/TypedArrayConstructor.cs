@@ -113,7 +113,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public object Call()
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, $"Constructor {this["name"]} requires 'new'");
+            throw new JavaScriptException(ErrorType.TypeError, $"Constructor {this["name"]} requires 'new'");
         }
 
         /// <summary>
@@ -167,20 +167,20 @@ namespace Jurassic.Library
                 if (length == null)
                 {
                     if (byteOffset < 0)
-                        throw new JavaScriptException(Engine, ErrorType.RangeError, "Invalid typed array offset");
+                        throw new JavaScriptException(ErrorType.RangeError, "Invalid typed array offset");
                     if ((byteOffset % BytesPerElement) != 0)
-                        throw new JavaScriptException(Engine, ErrorType.RangeError, $"Start offset of {this.type} should be a multiple of {BytesPerElement}");
+                        throw new JavaScriptException(ErrorType.RangeError, $"Start offset of {this.type} should be a multiple of {BytesPerElement}");
                     if ((buffer.ByteLength % BytesPerElement) != 0)
-                        throw new JavaScriptException(Engine, ErrorType.RangeError, $"Byte length of {this.type} should be a multiple of {BytesPerElement}");
+                        throw new JavaScriptException(ErrorType.RangeError, $"Byte length of {this.type} should be a multiple of {BytesPerElement}");
                     actualLength = (buffer.ByteLength - byteOffset) / bytesPerElement;
                     if (actualLength < 0)
-                        throw new JavaScriptException(Engine, ErrorType.RangeError, "Start offset is too large");
+                        throw new JavaScriptException(ErrorType.RangeError, "Start offset is too large");
                 }
                 else
                 {
                     actualLength = length.Value;
                     if (byteOffset + actualLength * bytesPerElement > buffer.ByteLength)
-                        throw new JavaScriptException(Engine, ErrorType.RangeError, "Invalid typed array length");
+                        throw new JavaScriptException(ErrorType.RangeError, "Invalid typed array length");
                 }
                 return new TypedArrayInstance(this.InstancePrototype, this.type, buffer, byteOffset, actualLength);
             }
@@ -193,7 +193,7 @@ namespace Jurassic.Library
             {
                 // new %TypedArray%(length);
                 if (TypeUtilities.IsUndefined(arg))
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Argument cannot be undefined");
+                    throw new JavaScriptException(ErrorType.TypeError, "Argument cannot be undefined");
                 int argLength = TypeConverter.ToInteger(arg);
                 return new TypedArrayInstance(this.InstancePrototype, this.type, Engine.ArrayBuffer.Construct(argLength * BytesPerElement), 0, argLength);
             }

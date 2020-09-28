@@ -31,7 +31,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get size' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get size' is not generic.");
 			return ((MapInstance)thisObj).Size;
 		}
 
@@ -39,7 +39,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'clear' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'clear' is not generic.");
 			((MapInstance)thisObj).Clear(); return Undefined.Value;
 		}
 
@@ -47,7 +47,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'delete' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'delete' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -61,7 +61,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'entries' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'entries' is not generic.");
 			return ((MapInstance)thisObj).Entries();
 		}
 
@@ -69,11 +69,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'forEach' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'forEach' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					((MapInstance)thisObj).ForEach(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), Undefined.Value); return Undefined.Value;
 				default:
@@ -85,7 +85,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -99,7 +99,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'has' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'has' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -113,7 +113,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'keys' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'keys' is not generic.");
 			return ((MapInstance)thisObj).Keys();
 		}
 
@@ -121,7 +121,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'set' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'set' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -137,7 +137,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is MapInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'values' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'values' is not generic.");
 			return ((MapInstance)thisObj).Values();
 		}
 	}

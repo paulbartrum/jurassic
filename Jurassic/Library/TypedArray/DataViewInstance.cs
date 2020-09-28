@@ -138,7 +138,7 @@ namespace Jurassic.Library
         public unsafe int GetInt16(int byteOffset, bool littleEndian)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - 2)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             fixed (byte* ptr = &buffer.Buffer[this.byteOffset + byteOffset])
             {
                 if (littleEndian)
@@ -166,7 +166,7 @@ namespace Jurassic.Library
         public unsafe int GetInt32(int byteOffset, bool littleEndian)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - 4)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             fixed (byte* ptr = &buffer.Buffer[this.byteOffset + byteOffset])
             {
                 if (littleEndian)
@@ -193,7 +193,7 @@ namespace Jurassic.Library
         public unsafe long GetInt64(int byteOffset, bool littleEndian)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - 8)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             fixed (byte* ptr = &buffer.Buffer[this.byteOffset + byteOffset])
             {
                 if (littleEndian)
@@ -223,7 +223,7 @@ namespace Jurassic.Library
         public int GetInt8(int byteOffset)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - 1)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             return (sbyte)buffer.Buffer[this.byteOffset + byteOffset];
         }
 
@@ -271,7 +271,7 @@ namespace Jurassic.Library
         public int GetUint8(int byteOffset)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - 1)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             return buffer.Buffer[this.byteOffset + byteOffset];
         }
 
@@ -346,7 +346,7 @@ namespace Jurassic.Library
         public void SetInt8(int byteOffset, object value)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - 1)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             buffer.Buffer[this.byteOffset + byteOffset] = (byte)TypeConverter.ToInt8(value);
         }
 
@@ -391,7 +391,7 @@ namespace Jurassic.Library
         public void SetUint8(int byteOffset, object value)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - 1)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             buffer.Buffer[this.byteOffset + byteOffset] = TypeConverter.ToUint8(value);
         }
 
@@ -412,7 +412,7 @@ namespace Jurassic.Library
         private void SetCore(int byteOffset, byte[] bytes, bool littleEndian)
         {
             if (byteOffset < 0 || byteOffset > this.byteLength - bytes.Length)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
+                throw new JavaScriptException(ErrorType.RangeError, "Offset is outside the bounds of the DataView.");
             if (littleEndian)
             {
                 for (int i = 0; i < bytes.Length; i++)

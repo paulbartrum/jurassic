@@ -88,6 +88,8 @@ namespace Jurassic
                 return ((string)value).Length > 0;
             if (value is ConcatenatedString)
                 return ((ConcatenatedString)value).Length > 0;
+            if (value is Symbol)
+                return true;
             if (value is ObjectInstance)
                 return true;
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a boolean.", value.GetType()), nameof(value));
@@ -116,8 +118,8 @@ namespace Jurassic
                 return NumberParser.CoerceToNumber((string)value);
             if (value is ConcatenatedString)
                 return NumberParser.CoerceToNumber(value.ToString());
-            //if (value is Symbol)
-            //    throw new JavaScriptException(((Symbol)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a number.");
+            if (value is Symbol)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot convert a Symbol value to a number.");
             if (value is ObjectInstance)
                 return ToNumber(ToPrimitive(value, PrimitiveTypeHint.Number));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a number.", value.GetType()), nameof(value));
@@ -169,8 +171,8 @@ namespace Jurassic
                 return (string)value;
             if (value is ConcatenatedString)
                 return value.ToString();
-            //if (value is Symbol)
-            //    throw new JavaScriptException(((Symbol)value).Engine, ErrorType.TypeError, "Cannot convert a Symbol value to a string.");
+            if (value is Symbol)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot convert a Symbol value to a string.");
             if (value is ObjectInstance)
                 return ToString(ToPrimitive(value, PrimitiveTypeHint.String));
             throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to a string.", value.GetType()), nameof(value));
@@ -215,9 +217,9 @@ namespace Jurassic
             if (value is ObjectInstance)
                 return (ObjectInstance)value;
             if (value == null || value == Undefined.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object", lineNumber, sourcePath, functionName);
+                throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object", lineNumber, sourcePath, functionName);
             if (value == Null.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "null cannot be converted to an object", lineNumber, sourcePath, functionName);
+                throw new JavaScriptException(ErrorType.TypeError, "null cannot be converted to an object", lineNumber, sourcePath, functionName);
 
             ObjectInstance result;
             if (value is bool)
@@ -251,7 +253,7 @@ namespace Jurassic
         {
             if (value is T)
                 return (T)value;
-            throw new JavaScriptException(engine, ErrorType.TypeError, "Incorrect argument type.");
+            throw new JavaScriptException(ErrorType.TypeError, "Incorrect argument type.");
         }
 
         /// <summary>

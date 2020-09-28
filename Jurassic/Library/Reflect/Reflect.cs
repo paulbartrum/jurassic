@@ -74,7 +74,7 @@ namespace Jurassic.Library
             propertyKey = TypeConverter.ToPropertyKey(propertyKey);
             var defaults = target.GetOwnPropertyDescriptor(propertyKey);
             if (!(attributes is ObjectInstance))
-                throw new JavaScriptException(target.Engine, ErrorType.TypeError, $"Invalid property descriptor '{attributes}'.");
+                throw new JavaScriptException(ErrorType.TypeError, $"Invalid property descriptor '{attributes}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
             return target.DefineProperty(propertyKey, descriptor, throwOnError: false);
         }
@@ -149,7 +149,7 @@ namespace Jurassic.Library
                 propertyKey = TypeConverter.ToPropertyKey(propertyKey);
                 return targetObjectInstance.HasProperty(propertyKey);
             }
-            throw new JavaScriptException(engine, ErrorType.TypeError, "Reflect.has called with non-object.");
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.has called with non-object.");
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace Jurassic.Library
                 targetObjectInstance.IsExtensible = false;
                 return true;
             }
-            throw new JavaScriptException(engine, ErrorType.TypeError, "Reflect.preventExtensions called with non-object.");
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.preventExtensions called with non-object.");
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace Jurassic.Library
             // The prototype must be null or an object. Note that null in .NET is actually undefined in JS!
             var prototypeObj = prototype as ObjectInstance;
             if (prototypeObj == null && prototype != Null.Value)
-                throw new JavaScriptException(target.Engine, ErrorType.TypeError, "Object prototype may only be an Object or null.");
+                throw new JavaScriptException(ErrorType.TypeError, "Object prototype may only be an Object or null.");
             return target.SetPrototype(prototypeObj);
         }
     }

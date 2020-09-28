@@ -223,7 +223,7 @@ namespace Jurassic.Compiler
         {
             object result = GetValueCore(variableName, lineNumber, sourcePath);
             if (result == null)
-                throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.", lineNumber, sourcePath);
+                throw new JavaScriptException(ErrorType.ReferenceError, $"{variableName} is not defined.", lineNumber, sourcePath);
             return result;
         }
 
@@ -260,7 +260,7 @@ namespace Jurassic.Compiler
                 if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
                     if (localValue.Value == null)
-                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.", lineNumber, sourcePath);
+                        throw new JavaScriptException(ErrorType.ReferenceError, $"Cannot access '{variableName}' before initialization.", lineNumber, sourcePath);
                     return localValue.Value;
                 }
                 if (scope.ScopeObject != null)
@@ -319,7 +319,7 @@ namespace Jurassic.Compiler
                 if (scope.values != null && scope.values.TryGetValue(variableName, out var localValue))
                 {
                     if (localValue.Value != null && localValue.Flags.HasFlag(LocalFlags.ReadOnly))
-                        throw new JavaScriptException(Engine, ErrorType.TypeError, $"Illegal assignment to constant variable '{variableName}'.", lineNumber, sourcePath);
+                        throw new JavaScriptException(ErrorType.TypeError, $"Illegal assignment to constant variable '{variableName}'.", lineNumber, sourcePath);
                     scope.values[variableName] = new LocalValue { Value = value, Flags = localValue.Flags };
                     return;
                 }
@@ -339,7 +339,7 @@ namespace Jurassic.Compiler
                     
                     // Strict mode: throw an exception if the variable is undefined.
                     if (scope.Parent == null)
-                        throw new JavaScriptException(Engine, ErrorType.ReferenceError, $"{variableName} is not defined.", lineNumber, sourcePath);
+                        throw new JavaScriptException(ErrorType.ReferenceError, $"{variableName} is not defined.", lineNumber, sourcePath);
                 }
                 scope = scope.Parent;
             } while (scope != null);

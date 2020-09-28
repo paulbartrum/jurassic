@@ -89,7 +89,7 @@ namespace Jurassic.Library
         [JSConstructorFunction]
         public StringInstance Construct()
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, "Function is not a constructor.");
+            throw new JavaScriptException(ErrorType.TypeError, "Function is not a constructor.");
         }
 
 

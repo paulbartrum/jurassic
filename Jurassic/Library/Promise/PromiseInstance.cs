@@ -64,7 +64,7 @@ namespace Jurassic.Library
             }
             catch (JavaScriptException ex)
             {
-                rejectFunction.Call(Undefined.Value, ex.ErrorObject);
+                rejectFunction.Call(Undefined.Value, ex.GetErrorObject(Engine));
             }
         }
 
@@ -122,7 +122,7 @@ namespace Jurassic.Library
                             }
                             catch (JavaScriptException ex)
                             {
-                                Reject(ex.ErrorObject);
+                                Reject(ex.GetErrorObject(Engine));
                             }
                         });
                         return;
@@ -132,7 +132,7 @@ namespace Jurassic.Library
                 catch (JavaScriptException ex)
                 {
                     // GetPropertyValue threw an exception.
-                    Reject(ex.ErrorObject);
+                    Reject(ex.GetErrorObject(Engine));
                     return;
                 }
             }
@@ -209,7 +209,7 @@ namespace Jurassic.Library
                 new ClrStubFunction(Engine.Function.InstancePrototype, (engine, thisObj, args) =>
                 {
                     onFinallyFunction.Call(Undefined.Value);
-                    throw new JavaScriptException(this.result, 0, null);
+                    throw new JavaScriptException(this.result);
                 }));
             }
             else
@@ -290,7 +290,7 @@ namespace Jurassic.Library
                     catch (JavaScriptException ex)
                     {
                         if (reaction.Promise != null)
-                            reaction.Promise.Reject(ex.ErrorObject);
+                            reaction.Promise.Reject(ex.GetErrorObject(Engine));
                     }
                 }
                 else if (reaction.Type == ReactionType.Fulfill)
@@ -320,7 +320,7 @@ namespace Jurassic.Library
             }
             else if (state == PromiseState.Rejected)
             {
-                throw new JavaScriptException(result, 0, null);
+                throw new JavaScriptException(result);
             }
 
             // These callbacks shouldn't deadlock on this.sync as they will not immediately fire
@@ -335,7 +335,7 @@ namespace Jurassic.Library
                 new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
                 {
                     var result = arg.Length == 0 ? Undefined.Value : arg[0];
-                    tcs.SetException(new JavaScriptException(result, 0, null));
+                    tcs.SetException(new JavaScriptException(result));
                     return Undefined.Value;
                 }));
             return tcs.Task;

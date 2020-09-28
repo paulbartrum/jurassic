@@ -730,7 +730,6 @@ namespace Jurassic.Compiler
             // Throw an nicely formatted exception.
             var rightValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(rightValue);
-            EmitHelpers.LoadScriptEngine(generator);
             generator.LoadEnumValue(ErrorType.TypeError);
             generator.LoadString("The instanceof operator expected a function, but found '{0}' instead");
             generator.LoadInt32(1);
@@ -788,7 +787,6 @@ namespace Jurassic.Compiler
             // Throw an nicely formatted exception.
             var rightValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(rightValue);
-            EmitHelpers.LoadScriptEngine(generator);
             generator.LoadEnumValue(ErrorType.TypeError);
             generator.LoadString("The in operator expected an object, but found '{0}' instead");
             generator.LoadInt32(1);

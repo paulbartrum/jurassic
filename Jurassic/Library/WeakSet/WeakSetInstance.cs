@@ -58,7 +58,7 @@ namespace Jurassic.Library
         {
             var valueObj = value as ObjectInstance;
             if (valueObj == null)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid value used in weak set");
+                throw new JavaScriptException(ErrorType.TypeError, "Invalid value used in weak set");
 
             this.store.GetValue(valueObj, obj => null);
             return this;

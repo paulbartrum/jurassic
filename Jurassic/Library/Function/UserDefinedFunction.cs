@@ -58,7 +58,7 @@ namespace Jurassic.Library
             }
             catch (SyntaxErrorException ex)
             {
-                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+                throw new JavaScriptException(ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
             }
 
             this.ArgumentsText = argumentsText;

@@ -157,7 +157,7 @@ namespace Jurassic.Library
                 return false;
             object functionPrototype = this["prototype"];
             if ((functionPrototype is ObjectInstance) == false)
-                throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Function has non-object prototype in instanceof check");
+                throw new JavaScriptException(ErrorType.TypeError, "Function has non-object prototype in instanceof check");
             var instancePrototype = ((ObjectInstance)instance).Prototype;
             while (instancePrototype != null)
             {
@@ -226,7 +226,7 @@ namespace Jurassic.Library
         /// <returns> The object that was created. </returns>
         public virtual ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, $"{Name} is not a constructor.");
+            throw new JavaScriptException(ErrorType.TypeError, $"{Name} is not a constructor.");
         }
 
         /// <summary>
@@ -272,14 +272,14 @@ namespace Jurassic.Library
             else
             {
                 if ((arguments is ObjectInstance) == false)
-                    throw new JavaScriptException(this.Engine, ErrorType.TypeError, "The second parameter of apply() must be an array or an array-like object.");
+                    throw new JavaScriptException(ErrorType.TypeError, "The second parameter of apply() must be an array or an array-like object.");
                 ObjectInstance argumentsObject = (ObjectInstance)arguments;
                 object arrayLengthObj = argumentsObject["length"];
                 if (arrayLengthObj == null || arrayLengthObj == Undefined.Value || arrayLengthObj == Null.Value)
-                    throw new JavaScriptException(this.Engine, ErrorType.TypeError, "The second parameter of apply() must be an array or an array-like object.");
+                    throw new JavaScriptException(ErrorType.TypeError, "The second parameter of apply() must be an array or an array-like object.");
                 uint arrayLength = TypeConverter.ToUint32(arrayLengthObj);
                 if (arrayLength != TypeConverter.ToNumber(arrayLengthObj))
-                    throw new JavaScriptException(this.Engine, ErrorType.TypeError, "The second parameter of apply() must be an array or an array-like object.");
+                    throw new JavaScriptException(ErrorType.TypeError, "The second parameter of apply() must be an array or an array-like object.");
                 argumentsArray = new object[arrayLength];
                 for (uint i = 0; i < arrayLength; i++)
                     argumentsArray[i] = argumentsObject[i];

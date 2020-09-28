@@ -37,7 +37,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public object Call()
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, "Constructor WeakSet requires 'new'");
+            throw new JavaScriptException(ErrorType.TypeError, "Constructor WeakSet requires 'new'");
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Jurassic.Library
                 // Get a reference to the add function.
                 var addFunc = result["add"] as FunctionInstance;
                 if (addFunc == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Missing 'add' function.");
+                    throw new JavaScriptException(ErrorType.TypeError, "Missing 'add' function.");
 
                 // Call the add function for each value.
                 foreach (var value in TypeUtilities.Iterate(Engine, iterator))

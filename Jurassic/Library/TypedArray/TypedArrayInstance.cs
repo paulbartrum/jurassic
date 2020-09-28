@@ -749,12 +749,12 @@ namespace Jurassic.Library
         public void Set(ObjectInstance array, int offset = 0)
         {
             if (offset < 0)
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "Start offset cannot be negative");
+                throw new JavaScriptException(ErrorType.RangeError, "Start offset cannot be negative");
             if (array is TypedArrayInstance)
             {
                 var typedArray = (TypedArrayInstance)array;
                 if (typedArray.Length + offset > this.Length)
-                    throw new JavaScriptException(Engine, ErrorType.RangeError, "Source array is too large");
+                    throw new JavaScriptException(ErrorType.RangeError, "Source array is too large");
                 if (this.Buffer == typedArray.Buffer && this.ByteOffset + offset * BytesPerElement > typedArray.ByteOffset)
                 {
                     // Copy in the opposite direction.
@@ -776,7 +776,7 @@ namespace Jurassic.Library
             {
                 int arrayLength = TypeConverter.ToInteger(array["length"]);
                 if (arrayLength + offset > this.Length)
-                    throw new JavaScriptException(Engine, ErrorType.RangeError, "Source array is too large");
+                    throw new JavaScriptException(ErrorType.RangeError, "Source array is too large");
                 for (int i = 0; i < arrayLength; i ++)
                 {
                     this[offset + i] = array[i];
@@ -887,7 +887,7 @@ namespace Jurassic.Library
         public static string ToString(ObjectInstance thisObj)
         {
             if (!(thisObj is TypedArrayInstance))
-                throw new JavaScriptException(thisObj.Engine, ErrorType.TypeError, "This function is not generic.");
+                throw new JavaScriptException(ErrorType.TypeError, "This function is not generic.");
             return new TypedArrayAdapter((TypedArrayInstance)thisObj).ToString();
         }
     }

@@ -124,7 +124,7 @@ namespace Jurassic.Library
         public static string ToString(ScriptEngine engine, object thisObj)
         {
             if (!(thisObj is ObjectInstance))
-                throw new JavaScriptException(engine, ErrorType.TypeError, "this is not an object.");
+                throw new JavaScriptException(ErrorType.TypeError, "this is not an object.");
 
             // Get the relevant properties.
             var obj = (ObjectInstance)thisObj;

@@ -84,7 +84,6 @@ namespace Jurassic.Compiler
         /// <param name="line"> The line number of the statement that is currently executing. </param>
         public static void EmitThrow(ILGenerator generator, ErrorType type, string message, string path, string function, int line)
         {
-            EmitHelpers.LoadScriptEngine(generator);
             generator.LoadEnumValue(type);
             generator.LoadString(message);
             generator.LoadInt32(line);

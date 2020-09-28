@@ -68,7 +68,7 @@ namespace UnitTests
             }
             catch (JavaScriptException ex)
             {
-                return ex.Name;
+                return ex.ErrorType.Value.ToString();
             }
             return string.Format("No error was thrown (result was '{0}')", result);
         }

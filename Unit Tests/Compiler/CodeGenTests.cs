@@ -64,53 +64,45 @@ namespace Performance
                       ldloc      V4 (a)
                       dup
                       brtrue     L000
-                      ldarg      0
-                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
                       ldc.i4     6
                       ldstr      ""Cannot access 'a' before initialization.""
                       ldc.i4     0
                       ldnull
                       ldnull
-                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      newobj     Void .ctor(Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
                 L000: stloc      V3 (b)
                       ldloc      V3 (b)
                       dup
                       brtrue     L001
-                      ldarg      0
-                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
                       ldc.i4     6
                       ldstr      ""Cannot access 'b' before initialization.""
                       ldc.i4     0
                       ldnull
                       ldnull
-                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      newobj     Void .ctor(Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
                 L001: ldloc      V2 (a)
                       dup
                       brtrue     L002
-                      ldarg      0
-                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
                       ldc.i4     6
                       ldstr      ""Cannot access 'a' before initialization.""
                       ldc.i4     0
                       ldnull
                       ldnull
-                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      newobj     Void .ctor(Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
                 L002: call       System.Object Add(System.Object, System.Object)/Jurassic.TypeUtilities
                       stloc      V3 (b)
                       ldloc      V3 (b)
                       dup
                       brtrue     L003
-                      ldarg      0
-                      callvirt   Jurassic.ScriptEngine get_Engine()/Jurassic.Compiler.ExecutionContext
                       ldc.i4     6
                       ldstr      ""Cannot access 'b' before initialization.""
                       ldc.i4     0
                       ldnull
                       ldnull
-                      newobj     Void .ctor(Jurassic.ScriptEngine, Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
+                      newobj     Void .ctor(Jurassic.Library.ErrorType, System.String, Int32, System.String, System.String)/Jurassic.JavaScriptException
                       throw
                 L003: stloc      V5 (returnValue)
                       ldloc      V5 (returnValue)

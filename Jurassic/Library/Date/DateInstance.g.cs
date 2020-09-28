@@ -68,7 +68,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getFullYear' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getFullYear' is not generic.");
 			return ((DateInstance)thisObj).GetFullYear();
 		}
 
@@ -76,7 +76,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getYear' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getYear' is not generic.");
 			return ((DateInstance)thisObj).GetYear();
 		}
 
@@ -84,7 +84,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getMonth' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getMonth' is not generic.");
 			return ((DateInstance)thisObj).GetMonth();
 		}
 
@@ -92,7 +92,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getDate' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getDate' is not generic.");
 			return ((DateInstance)thisObj).GetDate();
 		}
 
@@ -100,7 +100,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getDay' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getDay' is not generic.");
 			return ((DateInstance)thisObj).GetDay();
 		}
 
@@ -108,7 +108,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getHours' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getHours' is not generic.");
 			return ((DateInstance)thisObj).GetHours();
 		}
 
@@ -116,7 +116,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getMinutes' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getMinutes' is not generic.");
 			return ((DateInstance)thisObj).GetMinutes();
 		}
 
@@ -124,7 +124,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getSeconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getSeconds' is not generic.");
 			return ((DateInstance)thisObj).GetSeconds();
 		}
 
@@ -132,7 +132,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getMilliseconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getMilliseconds' is not generic.");
 			return ((DateInstance)thisObj).GetMilliseconds();
 		}
 
@@ -140,7 +140,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getTime' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getTime' is not generic.");
 			return ((DateInstance)thisObj).GetTime();
 		}
 
@@ -148,7 +148,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getTimezoneOffset' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getTimezoneOffset' is not generic.");
 			return ((DateInstance)thisObj).GetTimezoneOffset();
 		}
 
@@ -156,7 +156,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCFullYear' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCFullYear' is not generic.");
 			return ((DateInstance)thisObj).GetUTCFullYear();
 		}
 
@@ -164,7 +164,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCMonth' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCMonth' is not generic.");
 			return ((DateInstance)thisObj).GetUTCMonth();
 		}
 
@@ -172,7 +172,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCDate' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCDate' is not generic.");
 			return ((DateInstance)thisObj).GetUTCDate();
 		}
 
@@ -180,7 +180,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCDay' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCDay' is not generic.");
 			return ((DateInstance)thisObj).GetUTCDay();
 		}
 
@@ -188,7 +188,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCHours' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCHours' is not generic.");
 			return ((DateInstance)thisObj).GetUTCHours();
 		}
 
@@ -196,7 +196,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCMinutes' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCMinutes' is not generic.");
 			return ((DateInstance)thisObj).GetUTCMinutes();
 		}
 
@@ -204,7 +204,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCSeconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCSeconds' is not generic.");
 			return ((DateInstance)thisObj).GetUTCSeconds();
 		}
 
@@ -212,7 +212,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'getUTCMilliseconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'getUTCMilliseconds' is not generic.");
 			return ((DateInstance)thisObj).GetUTCMilliseconds();
 		}
 
@@ -220,7 +220,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setFullYear' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setFullYear' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -238,7 +238,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setYear' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setYear' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -252,7 +252,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setMonth' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setMonth' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -268,7 +268,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setDate' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setDate' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -282,7 +282,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setHours' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setHours' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -302,7 +302,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setMinutes' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setMinutes' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -320,7 +320,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setSeconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setSeconds' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -336,7 +336,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setMilliseconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setMilliseconds' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -350,7 +350,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUTCFullYear' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUTCFullYear' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -368,7 +368,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUTCMonth' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUTCMonth' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -384,7 +384,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUTCDate' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUTCDate' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -398,7 +398,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUTCHours' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUTCHours' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -418,7 +418,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUTCMinutes' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUTCMinutes' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -436,7 +436,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUTCSeconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUTCSeconds' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -452,7 +452,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setUTCMilliseconds' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setUTCMilliseconds' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -466,7 +466,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'setTime' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'setTime' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -480,7 +480,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toDateString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toDateString' is not generic.");
 			return ((DateInstance)thisObj).ToDateString();
 		}
 
@@ -488,7 +488,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toGMTString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toGMTString' is not generic.");
 			return ((DateInstance)thisObj).ToGMTString();
 		}
 
@@ -496,14 +496,14 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toISOString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toISOString' is not generic.");
 			return ((DateInstance)thisObj).ToISOString();
 		}
 
 		private static object __STUB__ToJSON(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -517,7 +517,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toLocaleDateString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toLocaleDateString' is not generic.");
 			return ((DateInstance)thisObj).ToLocaleDateString();
 		}
 
@@ -525,7 +525,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toLocaleString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toLocaleString' is not generic.");
 			return ((DateInstance)thisObj).ToLocaleString();
 		}
 
@@ -533,7 +533,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toLocaleTimeString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toLocaleTimeString' is not generic.");
 			return ((DateInstance)thisObj).ToLocaleTimeString();
 		}
 
@@ -546,7 +546,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toTimeString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toTimeString' is not generic.");
 			return ((DateInstance)thisObj).ToTimeString();
 		}
 
@@ -554,7 +554,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toUTCString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toUTCString' is not generic.");
 			return ((DateInstance)thisObj).ToUTCString();
 		}
 
@@ -562,18 +562,18 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is DateInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'valueOf' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((DateInstance)thisObj).ValueOf();
 		}
 
 		private static object __STUB__ToPrimitive(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'hint' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'hint' was not specified.");
 				default:
 					return ToPrimitive(engine, TypeConverter.ToObject(engine, thisObj), TypeConverter.ToString(args[0]));
 			}

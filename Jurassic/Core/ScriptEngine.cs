@@ -765,7 +765,7 @@ namespace Jurassic
                 }
                 catch (SyntaxErrorException ex)
                 {
-                    throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath, ex);
+                    throw new JavaScriptException(ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath, ex);
                 }
 
                 // Execute
@@ -868,7 +868,7 @@ namespace Jurassic
             }
             catch (SyntaxErrorException ex)
             {
-                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+                throw new JavaScriptException(ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
             }
         }
 
@@ -1244,7 +1244,7 @@ namespace Jurassic
             }
             catch (SyntaxErrorException ex)
             {
-                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+                throw new JavaScriptException(ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
             }
         }
 

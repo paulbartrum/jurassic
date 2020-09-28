@@ -24,7 +24,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toString' is not generic.");
 			return ((SymbolInstance)thisObj).ToString();
 		}
 
@@ -32,7 +32,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'valueOf' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((SymbolInstance)thisObj).ValueOf();
 		}
 
@@ -40,7 +40,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method '[Symbol.toPrimitive]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.toPrimitive]' is not generic.");
 			switch (args.Length)
 			{
 				case 0:

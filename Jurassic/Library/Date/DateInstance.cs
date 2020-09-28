@@ -828,7 +828,7 @@ namespace Jurassic.Library
         public string ToISOString()
         {
             if (this.value == InvalidDate)
-                throw new JavaScriptException(this.Engine, ErrorType.RangeError, "The date is invalid");
+                throw new JavaScriptException(ErrorType.RangeError, "The date is invalid");
             return this.value.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", System.Globalization.DateTimeFormatInfo.InvariantInfo);
         }
 
@@ -958,7 +958,7 @@ namespace Jurassic.Library
                 return thisObj.GetPrimitiveValuePreES6(PrimitiveTypeHint.String);
             if (hint == "number")
                 return thisObj.GetPrimitiveValuePreES6(PrimitiveTypeHint.Number);
-            throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid type hint.");
+            throw new JavaScriptException(ErrorType.TypeError, "Invalid type hint.");
         }
 
 

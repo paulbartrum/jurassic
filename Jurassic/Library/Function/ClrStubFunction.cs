@@ -144,7 +144,7 @@ namespace Jurassic.Library
                 {
                     ex.FunctionName = this.Name;
                     ex.SourcePath = "native";
-                    ex.PopulateStackTrace();
+                    ex.GetErrorObject(Engine);
                 }
                 throw;
             }
@@ -159,7 +159,7 @@ namespace Jurassic.Library
         public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
             if (this.constructBinder == null)
-                throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Objects cannot be constructed from built-in functions.");
+                throw new JavaScriptException(ErrorType.TypeError, "Objects cannot be constructed from built-in functions.");
             var result = (ObjectInstance)this.constructBinder(this.Engine, this, argumentValues);
             result.SetPrototype(newTarget.InstancePrototype);
             return result;

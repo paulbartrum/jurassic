@@ -212,9 +212,9 @@ namespace Jurassic
         public static void VerifyThisObject(ScriptEngine engine, object value, string functionName)
         {
             if (value == null || value == Undefined.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
+                throw new JavaScriptException(ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
             if (value == Null.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
+                throw new JavaScriptException(ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
         }
 
         /// <summary>
@@ -291,12 +291,12 @@ namespace Jurassic
             // If a value is present, it must be a function.
             var iteratorFunc = iteratorValue as FunctionInstance;
             if (iteratorFunc == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "The iterator symbol value must be a function");
+                throw new JavaScriptException(ErrorType.TypeError, "The iterator symbol value must be a function");
 
             // Call the function to get the iterator.
             var iterator = iteratorFunc.Call(iterable) as ObjectInstance;
             if (iterator == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator");
+                throw new JavaScriptException(ErrorType.TypeError, "Invalid iterator");
             return iterator;
         }
 
@@ -325,10 +325,10 @@ namespace Jurassic
         {
 
             if (iterable == Undefined.Value || iterable == Null.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
+                throw new JavaScriptException(ErrorType.TypeError, $"{iterable} is not iterable.");
             var iterator = GetIterator(engine, TypeConverter.ToObject(engine, iterable));
             if (iterator == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
+                throw new JavaScriptException(ErrorType.TypeError, $"{iterable} is not iterable.");
             return iterator;
         }
 
@@ -346,7 +346,7 @@ namespace Jurassic
             // Okay, we have the iterator.  Now get a reference to the next function.
             var nextFunc = iterator["next"] as FunctionInstance;
             if (nextFunc == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Missing iterator next function");
+                throw new JavaScriptException(ErrorType.TypeError, "Missing iterator next function");
 
             // Loop.
             var values = new List<object>();
@@ -355,7 +355,7 @@ namespace Jurassic
                 // Call the next function to get the next value.
                 var iteratorResult = nextFunc.Call(iterator) as ObjectInstance;
                 if (iteratorResult == null)
-                    throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator next return value");
+                    throw new JavaScriptException(ErrorType.TypeError, "Invalid iterator next return value");
 
                 // Check if iteration is done.
                 if (TypeConverter.ToBoolean(iteratorResult["done"]))

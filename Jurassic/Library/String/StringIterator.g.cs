@@ -23,7 +23,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringIterator))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get [Symbol.toStringTag]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get [Symbol.toStringTag]' is not generic.");
 			return ((StringIterator)thisObj).ToStringTag;
 		}
 
@@ -31,7 +31,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringIterator))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'next' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'next' is not generic.");
 			return ((StringIterator)thisObj).Next();
 		}
 	}

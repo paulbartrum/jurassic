@@ -116,7 +116,7 @@ namespace Jurassic.Library
         {
             var keyObj = key as ObjectInstance;
             if (keyObj == null)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid value used as weak map key");
+                throw new JavaScriptException(ErrorType.TypeError, "Invalid value used as weak map key");
 
             // Gah!  There's no update/set method on ConditionalWeakTable (Add throws an exception
             // if the key exists).

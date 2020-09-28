@@ -667,7 +667,7 @@ namespace Jurassic.Library
                 {
                     // The property is read-only.
                     if (throwOnError == true)
-                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' is read-only.", key));
+                        throw new JavaScriptException(ErrorType.TypeError, string.Format("The property '{0}' is read-only.", key));
                     return false;
                 }
 
@@ -687,7 +687,7 @@ namespace Jurassic.Library
                     double length = TypeConverter.ToNumber(value);
                     uint lengthUint32 = TypeConverter.ToUint32(length);
                     if (length != (double)lengthUint32)
-                        throw new JavaScriptException(this.Engine, ErrorType.RangeError, "Invalid array length");
+                        throw new JavaScriptException(ErrorType.RangeError, "Invalid array length");
                     ((ArrayInstance)this).Length = lengthUint32;
                 }
                 return true;
@@ -776,7 +776,7 @@ namespace Jurassic.Library
             if (propertyInfo.IsConfigurable == false)
             {
                 if (throwOnError == true)
-                    throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' cannot be deleted.", key));
+                    throw new JavaScriptException(ErrorType.TypeError, string.Format("The property '{0}' cannot be deleted.", key));
                 return false;
             }
 
@@ -826,7 +826,7 @@ namespace Jurassic.Library
                     (descriptor.IsAccessor == false && current.IsWritable == false && TypeComparer.SameValue(currentValue, descriptor.Value) == false))
                 {
                     if (throwOnError == true)
-                        throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' is non-configurable.", key));
+                        throw new JavaScriptException(ErrorType.TypeError, string.Format("The property '{0}' is non-configurable.", key));
                     return false;
                 }
             }
@@ -857,13 +857,13 @@ namespace Jurassic.Library
             if (this.IsExtensible == false)
             {
                 if (throwOnError == true)
-                    throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("The property '{0}' cannot be created as the object is not extensible.", key));
+                    throw new JavaScriptException(ErrorType.TypeError, string.Format("The property '{0}' cannot be created as the object is not extensible.", key));
                 return false;
             }
 
             // To avoid running out of memory, restrict the number of properties.
             if (this.schema.PropertyCount == 16384)
-                throw new JavaScriptException(this.engine, ErrorType.Error, "Maximum number of named properties reached.");
+                throw new JavaScriptException(ErrorType.Error, "Maximum number of named properties reached.");
 
             // Do not store nulls - null represents a non-existant value.
             value = value ?? Undefined.Value;
@@ -978,7 +978,7 @@ namespace Jurassic.Library
             {
                 // Return value must be primitive.
                 if (TypeUtilities.IsPrimitive(toPrimitiveResult) == false)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Cannot convert object to primitive value.");
+                    throw new JavaScriptException(ErrorType.TypeError, "Cannot convert object to primitive value.");
                 return toPrimitiveResult;
             }
 
@@ -1039,7 +1039,7 @@ namespace Jurassic.Library
 
             }
 
-            throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Attempted conversion of the object to a primitive value failed.  Check the toString() and valueOf() functions.");
+            throw new JavaScriptException(ErrorType.TypeError, "Attempted conversion of the object to a primitive value failed.  Check the toString() and valueOf() functions.");
         }
 
         /// <summary>
@@ -1053,9 +1053,9 @@ namespace Jurassic.Library
         {
             var function = GetPropertyValue(functionName);
             if (function == null)
-                throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("Object {0} has no method '{1}'", this.ToString(), functionName));
+                throw new JavaScriptException(ErrorType.TypeError, string.Format("Object {0} has no method '{1}'", this.ToString(), functionName));
             if ((function is FunctionInstance) == false)
-                throw new JavaScriptException(this.Engine, ErrorType.TypeError, string.Format("Property '{1}' of object {0} is not a function", this.ToString(), functionName));
+                throw new JavaScriptException(ErrorType.TypeError, string.Format("Property '{1}' of object {0} is not a function", this.ToString(), functionName));
             return ((FunctionInstance)function).CallLateBound(this, parameters);
         }
 

@@ -77,7 +77,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo IEnumerator_String_Current;
         internal static MethodInfo IEnumerator_Object_Current;
 
-        internal static MethodInfo JavaScriptException_ErrorObject;
+        internal static MethodInfo JavaScriptException_GetErrorObject;
         internal static MethodInfo Boolean_Construct;
         internal static MethodInfo Object_Construct;
 
@@ -223,14 +223,14 @@ namespace Jurassic.Compiler
             ConcatenatedString_Append_ConcatenatedString = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(ConcatenatedString));
             ConcatenatedString_ToString = GetInstanceMethod(typeof(ConcatenatedString), "ToString");
 
-            JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ScriptEngine), typeof(ErrorType), typeof(string), typeof(int), typeof(string), typeof(string));
+            JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ErrorType), typeof(string), typeof(int), typeof(string), typeof(string));
             JavaScriptException_Constructor_Object = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string), typeof(string));
             IEnumerable_String_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<string>), "GetEnumerator");
             IEnumerable_Object_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<object>), "GetEnumerator");
             IEnumerator_MoveNext = GetInstanceMethod(typeof(System.Collections.IEnumerator), "MoveNext");
             IEnumerator_String_Current = GetInstanceMethod(typeof(IEnumerator<string>), "get_Current");
             IEnumerator_Object_Current = GetInstanceMethod(typeof(IEnumerator<object>), "get_Current");
-            JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
+            JavaScriptException_GetErrorObject = GetInstanceMethod(typeof(JavaScriptException), "GetErrorObject", typeof(ScriptEngine));
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));
             
             RegExp_Construct = GetInstanceMethod(typeof(RegExpConstructor), "Construct", typeof(object), typeof(string));
@@ -441,7 +441,7 @@ namespace Jurassic.Compiler
             else
             {
                 if (extends != null)
-                    throw new JavaScriptException(engine, ErrorType.TypeError, $"Class {name} cannot extend '{extends}' as it is not a constructor.");
+                    throw new JavaScriptException(ErrorType.TypeError, $"Class {name} cannot extend '{extends}' as it is not a constructor.");
                 return new ClassFunction(engine.Function.InstancePrototype, name, engine.Object.Construct(), constructor);
             }
         }
