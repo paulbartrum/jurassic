@@ -52,6 +52,7 @@ namespace UnitTests
         public void @for()
         {
             Assert.AreEqual(true, Evaluate("Symbol.for('foo') === Symbol.for('foo')"));
+            Assert.AreEqual(true, Evaluate("Symbol.for('foo') !== Symbol('foo')"));
 
             // The key is also used as the description.
             Assert.AreEqual("Symbol(mario)", Evaluate("Symbol.for('mario').toString()"));
