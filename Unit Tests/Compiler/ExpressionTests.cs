@@ -1181,7 +1181,8 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("x = Array; x instanceof x"));
 
             // Right-hand-side must be a function.
-            Assert.AreEqual("TypeError: The instanceof operator expected a function, but found 'object' instead", EvaluateExceptionMessage("5 instanceof Math"));
+            Assert.AreEqual("TypeError: Right-hand side of 'instanceof' is not an object.", EvaluateExceptionMessage("5 instanceof 5"));
+            Assert.AreEqual("TypeError: Right-hand side of 'instanceof' is not an object.", EvaluateExceptionMessage("5 instanceof Math"));
 
             // Test newly constructed objects.
             Assert.AreEqual(true, Evaluate("new Number(5) instanceof Number"));
@@ -1193,6 +1194,13 @@ namespace UnitTests
                 var x = function () { throw 'x'; };
                 var y = function () { throw 'y'; };
                 try { x() instanceof y(); } catch (e) { e }"));
+
+            // If the rhs value has a Symbol.hasInstance property, 'instanceof' should call that function.
+            Execute("var thisObj = null, obj = { [Symbol.hasInstance]: function(v) { thisObj = this; return v > 2; } }");
+            Assert.AreEqual(false, Evaluate("2 instanceof obj"));
+            Assert.AreEqual(true, Evaluate("3 instanceof obj"));
+            Assert.AreEqual(true, Evaluate("thisObj === obj"));
+            Assert.AreEqual("TypeError: Symbol.hasInstance value is not a function.", EvaluateExceptionMessage("5 instanceof { [Symbol.hasInstance]: 3 }"));
         }
 
         [TestMethod]

@@ -21,6 +21,7 @@ namespace Jurassic.Library
         internal SymbolConstructor(ObjectInstance prototype, ObjectInstance instancePrototype)
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
+            HasInstance = new Symbol("Symbol.hasInstance");
             Iterator = new Symbol("Symbol.iterator");
             Species = new Symbol("Symbol.Species");
             ToPrimitive = new Symbol("Symbol.toPrimitive");
@@ -29,7 +30,7 @@ namespace Jurassic.Library
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties(Engine);
             InitializeConstructorProperties(properties, "Symbol", 0, instancePrototype);
-            //properties.Add(new PropertyNameAndValue("hasInstance", null, PropertyAttributes.Sealed));
+            properties.Add(new PropertyNameAndValue("hasInstance", HasInstance, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("isConcatSpreadable", null, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("iterator", Iterator, PropertyAttributes.Sealed));
             //properties.Add(new PropertyNameAndValue("match", null, PropertyAttributes.Sealed));
@@ -47,6 +48,12 @@ namespace Jurassic.Library
 
         //     .NET ACCESSOR PROPERTIES
         //_________________________________________________________________________________________
+
+        /// <summary>
+        /// A method that determines if a constructor object recognizes an object as one of the
+        /// constructor's instances. Used by the 'instanceof' operator.
+        /// </summary>
+        public new Symbol HasInstance { get; internal set; }
 
         /// <summary>
         /// Used to override the default iterator for an object. Used by the for-of statement.

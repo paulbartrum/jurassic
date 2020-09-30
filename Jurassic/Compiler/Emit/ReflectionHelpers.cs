@@ -128,6 +128,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo ReflectionHelpers_SetClassSetter;
         internal static MethodInfo ReflectionHelpers_GetCachedTemplateStringsArray;
         internal static MethodInfo ReflectionHelpers_CreateTemplateStringsArray;
+        internal static MethodInfo ReflectionHelpers_InstanceOf;
 
         internal static MethodInfo ExecutionContext_GetEngine;
         internal static MethodInfo ExecutionContext_GetThisValue;
@@ -276,6 +277,9 @@ namespace Jurassic.Compiler
             // Template literals
             ReflectionHelpers_GetCachedTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(GetCachedTemplateStringsArray), typeof(ScriptEngine), typeof(int));
             ReflectionHelpers_CreateTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(CreateTemplateStringsArray), typeof(ScriptEngine), typeof(int), typeof(string[]), typeof(string[]));
+
+            // instanceof
+            ReflectionHelpers_InstanceOf = GetStaticMethod(typeof(ReflectionHelpers), nameof(InstanceOf), typeof(object), typeof(object), typeof(int), typeof(string), typeof(string));
 
             // ExecutionContext
             ExecutionContext_GetEngine = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Engine));
@@ -487,6 +491,46 @@ namespace Jurassic.Compiler
                 obj.DefineProperty(key, new PropertyDescriptor(null, setter, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
             else
                 obj.DefineProperty(key, new PropertyDescriptor(descriptor.Getter, setter, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
+        }
+
+        /// <summary>
+        /// Implements the 'instanceof' operator.
+        /// </summary>
+        /// <param name="lhs"> The left-hand side value. </param>
+        /// <param name="rhs"> The right-hand side value. </param>
+        /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
+        /// <returns> The result of the 'instanceof' operator. </returns>
+        public static bool InstanceOf(object lhs, object rhs, int lineNumber, string sourcePath, string functionName)
+        {
+            if (rhs is ObjectInstance rhsObjectInstance)
+            {
+                // Look for rhs[Symbol.hasInstance] function.
+                var hasInstanceObj = rhsObjectInstance[rhsObjectInstance.Engine.Symbol.HasInstance];
+                if (hasInstanceObj != Undefined.Value)
+                {
+                    // rhs[Symbol.hasInstance] exists, check it's a function.
+                    if (hasInstanceObj is FunctionInstance hasInstanceFunction)
+                    {
+                        // rhs[Symbol.hasInstance] is a function, call it.
+                        return TypeConverter.ToBoolean(hasInstanceFunction.Call(rhs, lhs));
+                    }
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.hasInstance value is not a function.", lineNumber, sourcePath, functionName);
+                }
+
+                // Fallback: make sure rhs is a function.
+                if (rhs is FunctionInstance rhsFunctionInstance)
+                {
+                    // Apply the ECMAScript algorithm.
+                    return rhsFunctionInstance.HasInstance(lhs);
+                }
+                else
+                    throw new JavaScriptException(ErrorType.TypeError, "Right-hand side of 'instanceof' is not an object.", lineNumber, sourcePath, functionName);
+            }
+            else
+                throw new JavaScriptException(ErrorType.TypeError, "Right-hand side of 'instanceof' is not an object.", lineNumber, sourcePath, functionName);
         }
 
 

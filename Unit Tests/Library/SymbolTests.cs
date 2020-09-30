@@ -65,6 +65,13 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("Symbol.keyFor(Symbol('foo'))"));
         }
 
+        [TestMethod]
+        public void hasInstance()
+        {
+            Assert.AreEqual(@"{""writable"":false,""enumerable"":false,""configurable"":false}",
+                Evaluate("JSON.stringify(Object.getOwnPropertyDescriptor(Symbol, 'hasInstance'))"));
+        }
+
         // TODO: Symbol.iterator, etc.
     }
 }
