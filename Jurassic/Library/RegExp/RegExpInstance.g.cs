@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(9)
+			return new List<PropertyNameAndValue>(12)
 			{
 				new PropertyNameAndValue("source", new PropertyDescriptor(new ClrStubFunction(engine, "get source", 0, __GETTER__Source), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("flags", new PropertyDescriptor(new ClrStubFunction(engine, "get flags", 0, __GETTER__Flags), null, PropertyAttributes.Configurable)),
@@ -23,6 +23,9 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("test", new ClrStubFunction(engine, "test", 1, __STUB__Test), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("exec", new ClrStubFunction(engine, "exec", 1, __STUB__Exec), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue(engine.Symbol.Match, new ClrStubFunction(engine, "[Symbol.match]", 1, __STUB__Match), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.Replace, new ClrStubFunction(engine, "[Symbol.replace]", 2, __STUB__Replace), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.Search, new ClrStubFunction(engine, "[Symbol.search]", 1, __STUB__Search), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.Split, new ClrStubFunction(engine, "[Symbol.split]", 2, __STUB__Split), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 			};
 		}
@@ -122,6 +125,52 @@ namespace Jurassic.Library
 					return ((RegExpInstance)thisObj).Match("undefined");
 				default:
 					return ((RegExpInstance)thisObj).Match(TypeConverter.ToString(args[0]));
+			}
+		}
+
+		private static object __STUB__Replace(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.replace]' is not generic.");
+			switch (args.Length)
+			{
+				case 0:
+					return ((RegExpInstance)thisObj).Replace("undefined", Undefined.Value);
+				case 1:
+					return ((RegExpInstance)thisObj).Replace(TypeConverter.ToString(args[0]), Undefined.Value);
+				default:
+					return ((RegExpInstance)thisObj).Replace(TypeConverter.ToString(args[0]), args[1]);
+			}
+		}
+
+		private static object __STUB__Search(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.search]' is not generic.");
+			switch (args.Length)
+			{
+				case 0:
+					return ((RegExpInstance)thisObj).Search("undefined");
+				default:
+					return ((RegExpInstance)thisObj).Search(TypeConverter.ToString(args[0]));
+			}
+		}
+
+		private static object __STUB__Split(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.split]' is not generic.");
+			switch (args.Length)
+			{
+				case 0:
+					return ((RegExpInstance)thisObj).Split("undefined", uint.MaxValue);
+				case 1:
+					return ((RegExpInstance)thisObj).Split(TypeConverter.ToString(args[0]), uint.MaxValue);
+				default:
+					return ((RegExpInstance)thisObj).Split(TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? uint.MaxValue : TypeConverter.ToUint32(args[1]));
 			}
 		}
 

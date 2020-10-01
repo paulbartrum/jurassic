@@ -339,9 +339,22 @@ namespace Jurassic.Library
         /// Returns a copy of the given string with text replaced using a regular expression.
         /// </summary>
         /// <param name="input"> The string on which to perform the search. </param>
-        /// <param name="replaceText"> A string containing the text to replace for every successful match. </param>
+        /// <param name="replaceValue"> A string containing the text to replace for every successful match. </param>
         /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
         [JSInternalFunction(Name = "@@replace")]
+        public string Replace(string input, object replaceValue)
+        {
+            if (replaceValue is FunctionInstance replaceFunction)
+                return Replace(input, replaceFunction);
+            return Replace(input, TypeConverter.ToString(replaceValue));
+        }
+
+        /// <summary>
+        /// Returns a copy of the given string with text replaced using a regular expression.
+        /// </summary>
+        /// <param name="input"> The string on which to perform the search. </param>
+        /// <param name="replaceText"> A string containing the text to replace for every successful match. </param>
+        /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
         public string Replace(string input, string replaceText)
         {
             // Check if the replacement string contains any patterns.
@@ -434,7 +447,7 @@ namespace Jurassic.Library
         /// <param name="replaceFunction"> A function that is called to produce the text to replace
         /// for every successful match. </param>
         /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
-        [JSInternalFunction(Name = "@@replace")]
+        
         public string Replace(string input, FunctionInstance replaceFunction)
         {
             return this.value.Replace(input, match =>

@@ -204,29 +204,25 @@ namespace Jurassic.Library
 
 		private static object __STUB__Replace(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Replace(TypeConverter.ToString(thisObj), Undefined.Value, Undefined.Value);
+					return Replace(engine, thisObj, Undefined.Value, Undefined.Value);
 				case 1:
-					return Replace(TypeConverter.ToString(thisObj), args[0], Undefined.Value);
+					return Replace(engine, thisObj, args[0], Undefined.Value);
 				default:
-					return Replace(TypeConverter.ToString(thisObj), args[0], args[1]);
+					return Replace(engine, thisObj, args[0], args[1]);
 			}
 		}
 
 		private static object __STUB__Search(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Search(TypeConverter.ToString(thisObj), Undefined.Value);
+					return Search(engine, thisObj, Undefined.Value);
 				default:
-					return Search(TypeConverter.ToString(thisObj), args[0]);
+					return Search(engine, thisObj, args[0]);
 			}
 		}
 

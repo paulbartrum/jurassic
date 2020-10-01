@@ -381,31 +381,37 @@ namespace Jurassic.Library
         /// Substitutes the given string or regular expression with the given text or the result
         /// of a replacement function.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="thisObject"> The string that is being operated on. </param>
         /// <param name="substrOrRegExp"> The substring to replace -or- a regular expression that
         /// matches the text to replace. </param>
         /// <param name="replaceTextOrFunction"> The text to substitute -or- a function that
         /// returns the text to substitute. </param>
         /// <returns> A copy of this string with text replaced. </returns>
-        [JSInternalFunction(Name = "replace", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Replace(string thisObject, object substrOrRegExp, object replaceTextOrFunction)
+        [JSInternalFunction(Name = "replace", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        public static object Replace(ScriptEngine engine, object thisObject, object substrOrRegExp, object replaceTextOrFunction)
         {
-            // The built-in function binding system is not powerful enough to bind the replace
-            // function properly, so we bind to the correct function manually.
-            if (substrOrRegExp is RegExpInstance)
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.replace called on null or undefined.");
+
+            if (substrOrRegExp != Null.Value && substrOrRegExp != Undefined.Value)
             {
-                if (replaceTextOrFunction is FunctionInstance)
-                    return Replace(thisObject, (RegExpInstance)substrOrRegExp, (FunctionInstance)replaceTextOrFunction);
-                else
-                    return Replace(thisObject, (RegExpInstance)substrOrRegExp, TypeConverter.ToString(replaceTextOrFunction));
+                // Get the [Symbol.replace] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, substrOrRegExp)[engine.Symbol.Replace];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(substrOrRegExp, thisObject, replaceTextOrFunction);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.replace value is not a function.");
+                }
             }
+
+            if (replaceTextOrFunction is FunctionInstance)
+                return Replace(TypeConverter.ToString(thisObject), TypeConverter.ToString(substrOrRegExp), (FunctionInstance)replaceTextOrFunction);
             else
-            {
-                if (replaceTextOrFunction is FunctionInstance)
-                    return Replace(thisObject, TypeConverter.ToString(substrOrRegExp), (FunctionInstance)replaceTextOrFunction);
-                else
-                    return Replace(thisObject, TypeConverter.ToString(substrOrRegExp), TypeConverter.ToString(replaceTextOrFunction));
-            }
+                return Replace(TypeConverter.ToString(thisObject), TypeConverter.ToString(substrOrRegExp), TypeConverter.ToString(replaceTextOrFunction));
         }
 
         /// <summary>
@@ -460,50 +466,37 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Returns a copy of this string with text replaced using a regular expression.
-        /// </summary>
-        /// <param name="thisObject"> The string that is being operated on. </param>
-        /// <param name="regExp"> The regular expression to search for. </param>
-        /// <param name="replaceText"> A string containing the text to replace for every successful match. </param>
-        /// <returns> A copy of this string with text replaced using a regular expression. </returns>
-        public static string Replace(string thisObject, RegExpInstance regExp, string replaceText)
-        {
-            return regExp.Replace(thisObject, replaceText);
-        }
-
-        /// <summary>
-        /// Returns a copy of this string with text replaced using a regular expression and a
-        /// replacement function.
-        /// </summary>
-        /// <param name="thisObject"> The string that is being operated on. </param>
-        /// <param name="regExp"> The regular expression to search for. </param>
-        /// <param name="replaceFunction"> A function that is called to produce the text to replace
-        /// for every successful match. </param>
-        /// <returns> A copy of this string with text replaced using a regular expression. </returns>
-        public static string Replace(string thisObject, RegExpInstance regExp, FunctionInstance replaceFunction)
-        {
-            return regExp.Replace(thisObject, replaceFunction);
-        }
-
-        /// <summary>
         /// Returns the position of the first substring match.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="thisObject"> The string that is being operated on. </param>
         /// <param name="substrOrRegExp"> The string or regular expression to search for. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
-        [JSInternalFunction(Name = "search", Flags = JSFunctionFlags.HasThisObject)]
-        public static int Search(string thisObject, object substrOrRegExp)
+        [JSInternalFunction(Name = "search", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        public static object Search(ScriptEngine engine, object thisObject, object substrOrRegExp)
         {
-            if (substrOrRegExp is RegExpInstance)
-                // substrOrRegExp is a regular expression.
-                return ((RegExpInstance)substrOrRegExp).Search(thisObject);
-            
-            if (TypeUtilities.IsUndefined(substrOrRegExp))
-                // substrOrRegExp is undefined.
-                return 0;
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.search called on null or undefined.");
 
-            // substrOrRegExp is a string (or convertible to a string).
-            return thisObject.IndexOf(TypeConverter.ToString(substrOrRegExp), StringComparison.Ordinal);
+            if (substrOrRegExp != Null.Value && substrOrRegExp != Undefined.Value)
+            {
+                // Get the [Symbol.search] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, substrOrRegExp)[engine.Symbol.Search];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(substrOrRegExp, thisObject);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.search value is not a function.");
+                }
+            }
+
+            // Convert the argument to a regex.
+            var regex = engine.RegExp.Construct(substrOrRegExp);
+
+            // Call the [Symbol.search] function.
+            return regex.CallMemberFunction(engine.Symbol.Search, TypeConverter.ToString(thisObject));
         }
 
         /// <summary>

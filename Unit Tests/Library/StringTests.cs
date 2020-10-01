@@ -501,8 +501,8 @@ namespace UnitTests
             Assert.AreEqual("12", Evaluate("result[0]"));
 
             // Undefined and null are not allowed as the "this" object.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("''.match.call(undefined)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("''.match.call(null)"));
+            Assert.AreEqual("TypeError: String.prototype.match called on null or undefined.", EvaluateExceptionMessage("''.match.call(undefined)"));
+            Assert.AreEqual("TypeError: String.prototype.match called on null or undefined.", EvaluateExceptionMessage("''.match.call(null)"));
 
             // Test the deprecated RegExp properties.
             Evaluate("'honey bunny'.match(/n(.)y/)");
@@ -794,6 +794,12 @@ namespace UnitTests
                     success = this === undefined;
                 });
                 success"));
+
+            // replace() calls the Symbol.replace function.
+            Assert.AreEqual("abc", Evaluate("'abc'.replace({ [Symbol.replace]: function(v, r) { return v; } }, 'def')"));
+            Assert.AreEqual("def", Evaluate("'abc'.replace({ [Symbol.replace]: function(v, r) { return r; } }, 'def')"));
+            Assert.AreEqual("TypeError: Symbol.replace value is not a function.",
+                EvaluateExceptionMessage("'abc'.replace({ [Symbol.replace]: true })"));
         }
 
         [TestMethod]
@@ -829,8 +835,8 @@ namespace UnitTests
             Assert.AreEqual(2, Evaluate("x = new Number(6.1234); x.f = ''.search; x.f('12')"));
 
             // Undefined and null are not allowed as the "this" object.
-            Assert.AreEqual("TypeError", EvaluateExceptionType("''.search.call(undefined)"));
-            Assert.AreEqual("TypeError", EvaluateExceptionType("''.search.call(null)"));
+            Assert.AreEqual("TypeError: String.prototype.search called on null or undefined.", EvaluateExceptionMessage("''.search.call(undefined)"));
+            Assert.AreEqual("TypeError: String.prototype.search called on null or undefined.", EvaluateExceptionMessage("''.search.call(null)"));
 
             // Test the deprecated RegExp properties.
             Assert.AreEqual(7, Evaluate("'lots of honey'.search(/(...)ney/)"));
@@ -860,6 +866,11 @@ namespace UnitTests
             Assert.AreEqual("lots of", Evaluate("RegExp['$`']"));
             Assert.AreEqual("", Evaluate("RegExp.rightContext"));
             Assert.AreEqual("", Evaluate("RegExp[\"$'\"]"));
+
+            // search() calls the Symbol.search function.
+            Assert.AreEqual("abc", Evaluate("'abc'.search({ [Symbol.search]: function(v) { return v; } })"));
+            Assert.AreEqual("TypeError: Symbol.search value is not a function.",
+                EvaluateExceptionMessage("'abc'.search({ [Symbol.search]: true })"));
         }
 
         [TestMethod]

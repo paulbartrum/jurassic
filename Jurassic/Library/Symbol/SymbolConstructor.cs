@@ -25,7 +25,7 @@ namespace Jurassic.Library
             IsConcatSpreadable = new Symbol("Symbol.isConcatSpreadable");
             Iterator = new Symbol("Symbol.iterator");
             Match = new Symbol("Symbol.match");
-            MatchAll = new Symbol("Symbol.matchAll");
+            //MatchAll = new Symbol("Symbol.matchAll");
             Replace = new Symbol("Symbol.replace");
             Search = new Symbol("Symbol.search");
             Species = new Symbol("Symbol.species");
@@ -41,7 +41,7 @@ namespace Jurassic.Library
             properties.Add(new PropertyNameAndValue("isConcatSpreadable", IsConcatSpreadable, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("iterator", Iterator, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("match", Match, PropertyAttributes.Sealed));
-            properties.Add(new PropertyNameAndValue("matchAll", MatchAll, PropertyAttributes.Sealed));
+            //properties.Add(new PropertyNameAndValue("matchAll", MatchAll, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("replace", Replace, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("search", Search, PropertyAttributes.Sealed));
             properties.Add(new PropertyNameAndValue("species", Species, PropertyAttributes.Sealed));
@@ -84,7 +84,7 @@ namespace Jurassic.Library
         /// A regular expression method that returns an iterator, that yields matches of the
         /// regular expression against a string. Used by the String.prototype.matchAll method.
         /// </summary>
-        public Symbol MatchAll { get; private set; }
+        //public Symbol MatchAll { get; private set; }
 
         /// <summary>
         /// A regular expression method that replaces matched substrings of a string. Used by the

@@ -619,6 +619,8 @@ namespace Attribute_Code_Generation
                     return $"TypeConverter.ToBoolean({arg})";
                 case "int":
                     return $"TypeConverter.ToInteger({arg})";
+                case "uint":
+                    return $"TypeConverter.ToUint32({arg})";
                 case "string":
                     return $"TypeConverter.ToString({arg})";
                 case "double":
