@@ -983,8 +983,8 @@ namespace UnitTests
             Assert.AreEqual(@"[""o"",null,null,""n"",""et""]",
                 Evaluate("JSON.stringify('onetwothree'.split(/(et)?(wo)?/, 5))"));
 
-            // Spec violation but de-facto standard: undefined is converted to 'undefined'.
-            Assert.AreEqual(2, Evaluate("'teundefinedst'.split(undefined).length"));
+            // undefined doesn't match anything.
+            Assert.AreEqual(1, Evaluate("'teundefinedst'.split(undefined).length"));
 
             // Splitting by an empty string splits the string into individual characters.
             Assert.AreEqual("a,b,c", Evaluate("'abc'.split('').toString()"));
@@ -1031,6 +1031,13 @@ namespace UnitTests
             Assert.AreEqual("lots of money and ", Evaluate("RegExp['$`']"));
             Assert.AreEqual("", Evaluate("RegExp.rightContext"));
             Assert.AreEqual("", Evaluate("RegExp[\"$'\"]"));
+
+            // split() calls the Symbol.split function.
+            Assert.AreEqual("abc", Evaluate("'abc'.split({ [Symbol.split]: function(v, limit) { return v; } }, 5)"));
+            Assert.AreEqual(5, Evaluate("'abc'.split({ [Symbol.split]: function(v, limit) { return limit; } }, 5)"));
+            Assert.AreEqual("limit", Evaluate("'abc'.split({ [Symbol.split]: function(v, limit) { return limit; } }, 'limit')"));
+            Assert.AreEqual("TypeError: Symbol.split value is not a function.",
+                EvaluateExceptionMessage("'abc'.split({ [Symbol.split]: true })"));
         }
 
         [TestMethod]

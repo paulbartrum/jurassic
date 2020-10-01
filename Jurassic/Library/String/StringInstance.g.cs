@@ -243,16 +243,14 @@ namespace Jurassic.Library
 
 		private static object __STUB__Split(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Split(engine, TypeConverter.ToString(thisObj), Undefined.Value, uint.MaxValue);
+					return Split(engine, thisObj, Undefined.Value, Undefined.Value);
 				case 1:
-					return Split(engine, TypeConverter.ToString(thisObj), args[0], uint.MaxValue);
+					return Split(engine, thisObj, args[0], Undefined.Value);
 				default:
-					return Split(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? uint.MaxValue : TypeConverter.ToNumber(args[1]));
+					return Split(engine, thisObj, args[0], args[1]);
 			}
 		}
 

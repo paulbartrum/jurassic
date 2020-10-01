@@ -533,30 +533,32 @@ namespace Jurassic.Library
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
         [JSInternalFunction(Name = "split", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, double limit = uint.MaxValue)
+        public static object Split(ScriptEngine engine, object thisObject, object separator, object limit)
         {
-            // Limit defaults to unlimited.  Note the ToUint32() conversion.
-            uint limit2 = uint.MaxValue;
-            if (TypeUtilities.IsUndefined(limit) == false)
-                limit2 = TypeConverter.ToUint32(limit);
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.split called on null or undefined.");
 
-            // Call separate methods, depending on whether the separator is a regular expression.
-            if (separator is RegExpInstance)
-                return Split(thisObject, (RegExpInstance)separator, limit2);
-            else
-                return Split(engine, thisObject, TypeConverter.ToString(separator), limit2);
-        }
+            if (separator != Null.Value && separator != Undefined.Value)
+            {
+                // Get the [Symbol.split] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, separator)[engine.Symbol.Split];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(separator, thisObject, limit);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.split value is not a function.");
+                }
+            }
 
-        /// <summary>
-        /// Splits this string into an array of strings by separating the string into substrings.
-        /// </summary>
-        /// <param name="thisObject"> The string that is being operated on. </param>
-        /// <param name="regExp"> A regular expression that indicates where to split the string. </param>
-        /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
-        /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, uint limit = uint.MaxValue)
-        {
-            return regExp.Split(thisObject, limit);
+            // If separator is undefined, then don't match anything.
+            if (separator == Undefined.Value)
+                return engine.Array.New(new object[] { TypeConverter.ToString(thisObject) });
+
+            // Call the strongly-typed string split method.
+            var limitUint = limit == Undefined.Value ? uint.MaxValue : TypeConverter.ToUint32(limit);
+            return Split(engine, TypeConverter.ToString(thisObject), TypeConverter.ToString(separator), limitUint);
         }
 
         /// <summary>
