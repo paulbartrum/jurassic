@@ -313,6 +313,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The string on which to perform the search. </param>
         /// <returns> An array containing the matched strings. </returns>
+        [JSInternalFunction(Name = "@@match")]
         public object Match(string input)
         {
             // If the global flag is not set, returns a single match.
@@ -340,6 +341,7 @@ namespace Jurassic.Library
         /// <param name="input"> The string on which to perform the search. </param>
         /// <param name="replaceText"> A string containing the text to replace for every successful match. </param>
         /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
+        [JSInternalFunction(Name = "@@replace")]
         public string Replace(string input, string replaceText)
         {
             // Check if the replacement string contains any patterns.
@@ -432,6 +434,7 @@ namespace Jurassic.Library
         /// <param name="replaceFunction"> A function that is called to produce the text to replace
         /// for every successful match. </param>
         /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
+        [JSInternalFunction(Name = "@@replace")]
         public string Replace(string input, FunctionInstance replaceFunction)
         {
             return this.value.Replace(input, match =>
@@ -458,6 +461,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The string on which to perform the search. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
+        [JSInternalFunction(Name = "@@search")]
         public int Search(string input)
         {
             // Perform the regular expression matching.
@@ -480,6 +484,7 @@ namespace Jurassic.Library
         /// <param name="input"> The string to split. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
+        [JSInternalFunction(Name = "@@split")]
         public ArrayInstance Split(string input, uint limit = uint.MaxValue)
         {
             // Return an empty array if limit = 0.

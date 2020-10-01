@@ -281,6 +281,13 @@ namespace UnitTests
                 Evaluate("delete Array.prototype[1]");
             }
 
+            // Concat array-like objects.
+            Assert.AreEqual("1,2", Evaluate("[1, 2].concat({ [0]: 3, [1]: 4, [Symbol.isConcatSpreadable]: true }).toString()"));
+            Assert.AreEqual("1,2,3,4", Evaluate("[1, 2].concat({ [0]: 3, [1]: 4, length: 2, [Symbol.isConcatSpreadable]: true }).toString()"));
+            Assert.AreEqual("1,2,3,,4", Evaluate("[1, 2].concat({ [0]: 3, [2]: 4, length: 3, [Symbol.isConcatSpreadable]: true }).toString()"));
+            Assert.AreEqual("1,2,3", Evaluate("[1, 2].concat({ [0]: 3, [2]: 4, length: 1, [Symbol.isConcatSpreadable]: true }).toString()"));
+            Assert.AreEqual("1,2,[object Object]", Evaluate("[1, 2].concat({ [0]: 3, [1]: 4, length: 2, [Symbol.isConcatSpreadable]: false }).toString()"));
+
             // length
             Assert.AreEqual(1, Evaluate("Array.prototype.concat.length"));
         }

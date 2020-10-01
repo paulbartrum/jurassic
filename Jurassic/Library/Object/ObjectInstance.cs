@@ -1046,12 +1046,12 @@ namespace Jurassic.Library
         /// Calls the function with the given name.  The function must exist on this object or an
         /// exception will be thrown.
         /// </summary>
-        /// <param name="functionName"> The name of the function to call. </param>
+        /// <param name="functionName"> The name of the function to call (or a symbol). </param>
         /// <param name="parameters"> The parameters to pass to the function. </param>
         /// <returns> The result of calling the function. </returns>
-        public object CallMemberFunction(string functionName, params object[] parameters)
+        public object CallMemberFunction(object functionName, params object[] parameters)
         {
-            var function = GetPropertyValue(functionName);
+            var function = GetPropertyValue(TypeConverter.ToPropertyKey(functionName));
             if (function == null)
                 throw new JavaScriptException(ErrorType.TypeError, string.Format("Object {0} has no method '{1}'", this.ToString(), functionName));
             if ((function is FunctionInstance) == false)
@@ -1068,7 +1068,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if the function was called successfully; <c>false</c> otherwise. </returns>
         public bool TryCallMemberFunction(out object result, object key, params object[] parameters)
         {
-            var function = GetPropertyValue(key);
+            var function = GetPropertyValue(TypeConverter.ToPropertyKey(key));
             if ((function is FunctionInstance) == false)
             {
                 result = null;

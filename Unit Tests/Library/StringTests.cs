@@ -547,6 +547,11 @@ namespace UnitTests
             Assert.AreEqual("honey ", Evaluate("RegExp['$`']"));
             Assert.AreEqual("", Evaluate("RegExp.rightContext"));
             Assert.AreEqual("", Evaluate("RegExp[\"$'\"]"));
+
+            // match() calls the Symbol.match function.
+            Assert.AreEqual("abc", Evaluate("'abc'.match({ [Symbol.match]: function(v) { return v; } })"));
+            Assert.AreEqual("TypeError: Symbol.match value is not a function.",
+                EvaluateExceptionMessage("'abc'.match({ [Symbol.match]: true })"));
         }
 
         [TestMethod]

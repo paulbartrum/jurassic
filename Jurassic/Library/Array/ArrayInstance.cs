@@ -536,11 +536,19 @@ namespace Jurassic.Library
             bool dense = true;
             uint length = (uint)items.Length;
             foreach (object item in items)
-                if (item is ArrayInstance)
+                if (IsConcatSpreadable(thisObj.Engine, item))
                 {
-                    length += ((ArrayInstance)item).Length - 1;
-                    if (((ArrayInstance)item).dense == null)
+                    if (item is ArrayInstance)
+                    {
+                        length += ((ArrayInstance)item).Length - 1;
+                        if (((ArrayInstance)item).dense == null)
+                            dense = false;
+                    }
+                    else
+                    {
+                        length += GetLength((ObjectInstance)item) - 1;
                         dense = false;
+                    }
                 }
 
             // This method only supports arrays of length up to 2^31-1, rather than 2^32-1.
@@ -555,19 +563,25 @@ namespace Jurassic.Library
                 int index = 0;
                 foreach (object item in items)
                 {
-                    if (item is ArrayInstance)
+                    if (IsConcatSpreadable(thisObj.Engine, item))
                     {
                         // Add the items in the array to the end of the resulting array.
-                        var array = (ArrayInstance)item;
-                        Array.Copy(array.dense, 0, result, index, (int)array.Length);
-                        if (array.denseMayContainHoles == true && array.Prototype != null)
+                        if (item is ArrayInstance array)
                         {
-                            // Populate holes from the prototype.
-                            for (uint i = 0; i < array.length; i++)
-                                if (array.dense[i] == null)
-                                    result[index + i] = array.Prototype.GetPropertyValue(i);
+                            Array.Copy(array.dense, 0, result, index, (int)array.Length);
+                            if (array.denseMayContainHoles == true && array.Prototype != null)
+                            {
+                                // Populate holes from the prototype.
+                                for (uint i = 0; i < array.length; i++)
+                                    if (array.dense[i] == null)
+                                        result[index + i] = array.Prototype.GetPropertyValue(i);
+                            }
+                            index += (int)array.Length;
                         }
-                        index += (int)array.Length;
+                        else
+                        {
+                            throw new InvalidOperationException();
+                        }
                     }
                     else
                     {
@@ -587,33 +601,43 @@ namespace Jurassic.Library
                 int index = 0;
                 foreach (object item in items)
                 {
-                    if (item is ArrayInstance)
+                    if (IsConcatSpreadable(thisObj.Engine, item))
                     {
                         // Add the items in the array to the end of the resulting array.
-                        var array = (ArrayInstance)item;
-                        if (array.dense != null)
+                        if (item is ArrayInstance array)
                         {
-                            result.CopyTo(array.dense, (uint)index, (int)array.Length);
-                            if (array.Prototype != null)
+                            if (array.dense != null)
                             {
-                                // Populate holes from the prototype.
-                                for (uint i = 0; i < array.length; i++)
-                                    if (array.dense[i] == null)
-                                        result[(uint)index + i] = array.Prototype.GetPropertyValue(i);
+                                result.CopyTo(array.dense, (uint)index, (int)array.Length);
+                                if (array.Prototype != null)
+                                {
+                                    // Populate holes from the prototype.
+                                    for (uint i = 0; i < array.length; i++)
+                                        if (array.dense[i] == null)
+                                            result[(uint)index + i] = array.Prototype.GetPropertyValue(i);
+                                }
                             }
+                            else
+                            {
+                                result.CopyTo(array.sparse, (uint)index);
+                                if (array.Prototype != null)
+                                {
+                                    // Populate holes from the prototype.
+                                    for (uint i = 0; i < array.Length; i++)
+                                        if (array.sparse[i] == null)
+                                            result[(uint)index + i] = array.Prototype.GetPropertyValue(i);
+                                }
+                            }
+                            index += (int)array.Length;
                         }
                         else
                         {
-                            result.CopyTo(array.sparse, (uint)index);
-                            if (array.Prototype != null)
-                            {
-                                // Populate holes from the prototype.
-                                for (uint i = 0; i < array.Length; i++)
-                                    if (array.sparse[i] == null)
-                                        result[(uint)index + i] = array.Prototype.GetPropertyValue(i);
-                            }
+                            // Concat array-like elements.
+                            uint itemLength = GetLength((ObjectInstance)item);
+                            foreach (var indexAndValue in EnumerateArrayLikeValues(thisObj.Engine, (ObjectInstance)item, itemLength))
+                                result[(uint)index + indexAndValue.Key] = indexAndValue.Value;
+                            index += (int)itemLength;
                         }
-                        index += (int)array.Length;
                     }
                     else
                     {
@@ -1557,6 +1581,45 @@ namespace Jurassic.Library
                         result.Add(elementValue);
                 }
             }
+        }
+
+        /// <summary>
+        /// Indicates whether the given object should be concatenated as if it was an array.
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="o"> The value to check. </param>
+        /// <returns> <c>true</c> if the value should be concatenated as if it was an array,
+        /// <c>false</c> otherwise. </returns>
+        private static bool IsConcatSpreadable(ScriptEngine engine, object o)
+        {
+            if (o is ObjectInstance objectInstance)
+            {
+                var result = objectInstance[engine.Symbol.IsConcatSpreadable];
+                if (result != Undefined.Value)
+                    return TypeConverter.ToBoolean(result);
+                return objectInstance is ArrayInstance;
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Enumerates the list of array-like properties (with numeric names).
+        /// </summary>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="obj"> The object to enumerate properties of. </param>
+        /// <param name="length"> The value of the length property. No indices are returned that
+        /// are higher or equal to this value. </param>
+        /// <returns> Enumerates the list of array-like properties (with numeric names). </returns>
+        private static IEnumerable<KeyValuePair<uint, object>> EnumerateArrayLikeValues(ScriptEngine engine, ObjectInstance obj, uint length)
+        {
+            foreach (var property in TypeConverter.ToObject(engine, obj).Properties)
+                if (property.Key is string key)
+                {
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    if (arrayIndex != uint.MaxValue && arrayIndex < length)
+                        yield return new KeyValuePair<uint, object>(arrayIndex, property.Value);
+                }
         }
     }
 }

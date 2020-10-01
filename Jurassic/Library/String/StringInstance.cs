@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 
 namespace Jurassic.Library
@@ -13,7 +12,7 @@ namespace Jurassic.Library
     [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class StringInstance : ObjectInstance
     {
-        private string value;
+        private readonly string value;
 
 
 
@@ -305,18 +304,30 @@ namespace Jurassic.Library
         /// <param name="substrOrRegExp"> The substring or regular expression to search for. </param>
         /// <returns> An array containing the matched strings. </returns>
         [JSInternalFunction(Name = "match", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static object Match(ScriptEngine engine, string thisObject, object substrOrRegExp)
+        public static object Match(ScriptEngine engine, object thisObject, object substrOrRegExp)
         {
-            if (substrOrRegExp is RegExpInstance)
-                // substrOrRegExp is a regular expression.
-                return ((RegExpInstance)substrOrRegExp).Match(thisObject);
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.match called on null or undefined.");
 
-            if (TypeUtilities.IsUndefined(substrOrRegExp))
-                // substrOrRegExp is undefined.
-                return engine.RegExp.Construct("").Match(thisObject);
+            if (substrOrRegExp != Null.Value && substrOrRegExp != Undefined.Value)
+            {
+                // Get the [Symbol.match] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, substrOrRegExp)[engine.Symbol.Match];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(substrOrRegExp, thisObject);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.match value is not a function.");
+                }
+            }
 
-            // substrOrRegExp is a string (or convertible to a string).
-            return engine.RegExp.Construct(TypeConverter.ToString(substrOrRegExp)).Match(thisObject);
+            // Convert the argument to a regex.
+            var regex = engine.RegExp.Construct(substrOrRegExp);
+
+            // Call the [Symbol.match] function.
+            return regex.CallMemberFunction(engine.Symbol.Match, TypeConverter.ToString(thisObject));
         }
 
         /// <summary>
@@ -353,7 +364,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "quote", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Quote(string thisObject)
         {
-            var result = new System.Text.StringBuilder(thisObject.Length + 2);
+            var result = new StringBuilder(thisObject.Length + 2);
             result.Append('"');
             for (int i = 0; i < thisObject.Length; i++)
             {

@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(8)
+			return new List<PropertyNameAndValue>(9)
 			{
 				new PropertyNameAndValue("source", new PropertyDescriptor(new ClrStubFunction(engine, "get source", 0, __GETTER__Source), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("flags", new PropertyDescriptor(new ClrStubFunction(engine, "get flags", 0, __GETTER__Flags), null, PropertyAttributes.Configurable)),
@@ -22,6 +22,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("compile", new ClrStubFunction(engine, "compile", 2, __STUB__Compile), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("test", new ClrStubFunction(engine, "test", 1, __STUB__Test), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("exec", new ClrStubFunction(engine, "exec", 1, __STUB__Exec), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(engine.Symbol.Match, new ClrStubFunction(engine, "[Symbol.match]", 1, __STUB__Match), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 			};
 		}
@@ -107,6 +108,20 @@ namespace Jurassic.Library
 					return ((RegExpInstance)thisObj).Exec("undefined");
 				default:
 					return ((RegExpInstance)thisObj).Exec(TypeConverter.ToString(args[0]));
+			}
+		}
+
+		private static object __STUB__Match(ScriptEngine engine, object thisObj, object[] args)
+		{
+			thisObj = TypeConverter.ToObject(engine, thisObj);
+			if (!(thisObj is RegExpInstance))
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.match]' is not generic.");
+			switch (args.Length)
+			{
+				case 0:
+					return ((RegExpInstance)thisObj).Match("undefined");
+				default:
+					return ((RegExpInstance)thisObj).Match(TypeConverter.ToString(args[0]));
 			}
 		}
 

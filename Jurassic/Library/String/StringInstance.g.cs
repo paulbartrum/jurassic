@@ -173,14 +173,12 @@ namespace Jurassic.Library
 
 		private static object __STUB__Match(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Match(engine, TypeConverter.ToString(thisObj), Undefined.Value);
+					return Match(engine, thisObj, Undefined.Value);
 				default:
-					return Match(engine, TypeConverter.ToString(thisObj), args[0]);
+					return Match(engine, thisObj, args[0]);
 			}
 		}
 
