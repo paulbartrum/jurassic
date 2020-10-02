@@ -35,17 +35,14 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static ObjectInstance __STUB__Construct(ScriptEngine engine, object thisObj, object[] args)
+		private static ObjectInstance __STUB__Construct(ScriptEngine engine, FunctionInstance thisObj, FunctionInstance newTarget, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is ArrayConstructor))
-				throw new JavaScriptException(ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					return ((ArrayConstructor)thisObj).Construct(new object[0]);
+					return ((ArrayConstructor)thisObj).Construct(newTarget, new object[0]);
 				default:
-					return ((ArrayConstructor)thisObj).Construct(args);
+					return ((ArrayConstructor)thisObj).Construct(newTarget, args);
 			}
 		}
 

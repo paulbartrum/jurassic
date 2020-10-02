@@ -132,11 +132,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return Has(engine, Undefined.Value, Undefined.Value);
+					return Has(Undefined.Value, Undefined.Value);
 				case 1:
-					return Has(engine, args[0], Undefined.Value);
+					return Has(args[0], Undefined.Value);
 				default:
-					return Has(engine, args[0], args[1]);
+					return Has(args[0], args[1]);
 			}
 		}
 
@@ -145,9 +145,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
+					return IsExtensible(Undefined.Value);
 				default:
-					return IsExtensible(TypeConverter.ToObject(engine, args[0]));
+					return IsExtensible(args[0]);
 			}
 		}
 
@@ -167,9 +167,9 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return PreventExtensions(engine, Undefined.Value);
+					return PreventExtensions(Undefined.Value);
 				default:
-					return PreventExtensions(engine, args[0]);
+					return PreventExtensions(args[0]);
 			}
 		}
 

@@ -40,15 +40,25 @@ namespace Jurassic.Library
         /// <param name="elements"> The initial elements of the new array. </param>
         public ArrayInstance New(object[] elements)
         {
+            return New(this.InstancePrototype, elements);
+        }
+
+        /// <summary>
+        /// Creates a new Array instance.
+        /// </summary>
+        /// <param name="prototype"> The prototype of the newly created array. </param>
+        /// <param name="elements"> The initial elements of the new array. </param>
+        private ArrayInstance New(ObjectInstance prototype, object[] elements)
+        {
             // Copy the array if it is not an object array (for example, if it is a string[]).
             if (elements.GetType() != typeof(object[]))
             {
                 var temp = new object[elements.Length];
                 Array.Copy(elements, temp, elements.Length);
-                return new ArrayInstance(this.InstancePrototype, temp);
+                return new ArrayInstance(prototype, temp);
             }
 
-            return new ArrayInstance(this.InstancePrototype, elements);
+            return new ArrayInstance(prototype, elements);
         }
 
 
@@ -78,7 +88,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public ArrayInstance Call(params object[] elements)
         {
-            return Construct(elements);
+            return (ArrayInstance)ConstructLateBound(this, elements);
         }
 
         /// <summary>
@@ -86,9 +96,22 @@ namespace Jurassic.Library
         /// Called when the new expression is used on this object, e.g. var x = new Array(length).
         /// </summary>
         /// <param name="elements"> The initial elements of the new array. </param>
-        [JSConstructorFunction]
         public ArrayInstance Construct(params object[] elements)
         {
+            return Construct(this, elements);
+        }
+
+        /// <summary>
+        /// Creates a new Array instance and initializes the contents of the array.
+        /// Called when the new expression is used on this object, e.g. var x = new Array(length).
+        /// </summary>
+        /// <param name="newTarget"> The value of the new.target expression. </param>
+        /// <param name="elements"> The initial elements of the new array. </param>
+        [JSConstructorFunction]
+        private ArrayInstance Construct(FunctionInstance newTarget, params object[] elements)
+        {
+            var prototype = (newTarget["prototype"] as ObjectInstance) ?? this.InstancePrototype;
+
             if (elements.Length == 1)
             {
                 if (TypeUtilities.IsNumeric(elements[0]))
@@ -97,7 +120,7 @@ namespace Jurassic.Library
                     uint actualLength = TypeConverter.ToUint32(elements[0]);
                     if (specifiedLength != (double)actualLength)
                         throw new JavaScriptException(ErrorType.RangeError, "Invalid array length");
-                    return new ArrayInstance(this.InstancePrototype, actualLength, actualLength);
+                    return new ArrayInstance(prototype, actualLength, actualLength);
                 }
             }
 
@@ -106,7 +129,7 @@ namespace Jurassic.Library
                 if (elements[i] == null)
                     elements[i] = Undefined.Value;
 
-            return New(elements);
+            return New(prototype, elements);
         }
 
 

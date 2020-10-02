@@ -101,9 +101,9 @@ namespace Attribute_Code_Generation
                     }
 
                     if (memberCollector.JSCallFunctionMethods.Any())
-                        GenerateMethodStub(output, classSyntax, new JSMethodGroup(memberCollector.JSCallFunctionMethods.Select(mds => new JSMethod(mds))));
+                        GenerateMethodStub(output, classSyntax, new JSMethodGroup(memberCollector.JSCallFunctionMethods.Select(mds => new JSMethod(mds))), isConstructor: false);
                     if (memberCollector.JSConstructorFunctionMethods.Any())
-                        GenerateMethodStub(output, classSyntax, new JSMethodGroup(memberCollector.JSConstructorFunctionMethods.Select(mds => new JSMethod(mds))), "ObjectInstance");
+                        GenerateMethodStub(output, classSyntax, new JSMethodGroup(memberCollector.JSConstructorFunctionMethods.Select(mds => new JSMethod(mds))), isConstructor: true);
                     foreach (var property in memberCollector.JSProperties.Select(p => new JSProperty(p)))
                     {
                         output.AppendLine();
@@ -129,7 +129,7 @@ namespace Attribute_Code_Generation
                     }
                     foreach (var methodGroup in methodGroups)
                     {
-                        GenerateMethodStub(output, classSyntax, methodGroup);
+                        GenerateMethodStub(output, classSyntax, methodGroup, isConstructor: false);
                     }
 
                     output.AppendLine("\t}");
@@ -341,6 +341,16 @@ namespace Attribute_Code_Generation
                     RequiredArgumentCount = (int)((LiteralExpressionSyntax)requiredArgumentCountParameter.Expression).Token.Value;
                 if (RequiredArgumentCount > Parameters.Count())
                     throw new InvalidOperationException("RequiredArgumentCount must be less than or equal to the number of parameters.");
+
+                // For [JSConstructorFunction], if the first parameter is "FunctionInstance newTarget" then pass in the newTarget parameter.
+                if (jsAttribute.Name.ToString() == "JSConstructorFunction" &&
+                    Parameters.Any() &&
+                    Parameters.First().Name == "newTarget" &&
+                    Parameters.First().Type == "FunctionInstance")
+                {
+                    HasNewTarget = true;
+                    Parameters = Parameters.Skip(1);
+                }
             }
 
             private bool GetBooleanAttributeFlag(AttributeSyntax jsAttribute, string name, bool defaultValue)
@@ -354,6 +364,7 @@ namespace Attribute_Code_Generation
 
             public bool HasEngineParameter { get; private set; }
             public bool HasThisObject { get; private set; }
+            public bool HasNewTarget { get; private set; }
             public string ThisObjectParameterType { get; private set; }
             public bool IsStatic { get; private set; }
             public int RequiredArgumentCount { get; private set; }
@@ -455,13 +466,16 @@ namespace Attribute_Code_Generation
             public string SetterStubName { get; private set; }
         }
 
-        private static void GenerateMethodStub(StringBuilder output, ClassDeclarationSyntax classSyntax, JSMethodGroup methodGroup, string returnType = "object")
+        private static void GenerateMethodStub(StringBuilder output, ClassDeclarationSyntax classSyntax, JSMethodGroup methodGroup, bool isConstructor)
         {
             output.AppendLine();
-            output.AppendLine($"\t\tprivate static {returnType} {methodGroup.StubName}(ScriptEngine engine, object thisObj, object[] args)");
+            if (isConstructor)
+                output.AppendLine($"\t\tprivate static ObjectInstance {methodGroup.StubName}(ScriptEngine engine, FunctionInstance thisObj, FunctionInstance newTarget, object[] args)");
+            else
+                output.AppendLine($"\t\tprivate static object {methodGroup.StubName}(ScriptEngine engine, object thisObj, object[] args)");
             output.AppendLine("\t\t{");
 
-            if (!methodGroup.IsStatic)
+            if (!methodGroup.IsStatic && !isConstructor)
             {
                 output.AppendLine($"\t\t\tthisObj = TypeConverter.ToObject(engine, thisObj);");
                 output.AppendLine($"\t\t\tif (!(thisObj is {classSyntax.Identifier.ToString()}))");
@@ -477,7 +491,7 @@ namespace Attribute_Code_Generation
             if (maxParameterCount == 0)
             {
                 output.Append("\t\t\t");
-                output.AppendLine(GenerateMethodCall(classSyntax, methodGroup.Single(), 0));
+                output.AppendLine(GenerateMethodCall(classSyntax, methodGroup.Single(), 0, isConstructor));
             }
             else
             {
@@ -496,7 +510,7 @@ namespace Attribute_Code_Generation
                     if (i < methodGroup.RequiredArgumentCount)
                         output.AppendLine($"throw new JavaScriptException(ErrorType.TypeError, \"Required argument '{method.Parameters.Skip(i).First().Name}' was not specified.\");");
                     else
-                        output.AppendLine(GenerateMethodCall(classSyntax, method, i));
+                        output.AppendLine(GenerateMethodCall(classSyntax, method, i, isConstructor));
                 }
                 output.AppendLine("\t\t\t}");
             }
@@ -504,32 +518,35 @@ namespace Attribute_Code_Generation
             output.AppendLine("\t\t}");
         }
 
-        private static string GenerateMethodCall(ClassDeclarationSyntax classSyntax, JSMethod method, int argsLength)
+        private static string GenerateMethodCall(ClassDeclarationSyntax classSyntax, JSMethod method, int argsLength, bool isConstructor)
         {
             var result = new StringBuilder();
             if (method.ReturnType != "void")
                 result.Append("return ");
             if (!method.IsStatic)
-                result.Append($"(({classSyntax.Identifier.ToString()})thisObj).");
+                result.Append($"(({classSyntax.Identifier})thisObj).");
             result.Append(method.MethodName);
             result.Append('(');
 
-            int skipCount = 0;
             bool appendComma = false;
             if (method.HasEngineParameter)
             {
                 appendComma = true;
                 result.Append("engine");
-                skipCount++;
             }
             if (method.HasThisObject)
             {
                 if (appendComma)
                     result.Append(", ");
                 appendComma = true;
-
                 result.Append(ConvertTo($"thisObj", method.ThisObjectParameterType, null));
-                skipCount++;
+            }
+            if (method.HasNewTarget)
+            {
+                if (appendComma)
+                    result.Append(", ");
+                appendComma = true;
+                result.Append("newTarget");
             }
 
             int argIndex = 0;

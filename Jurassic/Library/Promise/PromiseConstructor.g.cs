@@ -30,11 +30,8 @@ namespace Jurassic.Library
 			return ((PromiseConstructor)thisObj).Call();
 		}
 
-		private static ObjectInstance __STUB__Construct(ScriptEngine engine, object thisObj, object[] args)
+		private static ObjectInstance __STUB__Construct(ScriptEngine engine, FunctionInstance thisObj, FunctionInstance newTarget, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:

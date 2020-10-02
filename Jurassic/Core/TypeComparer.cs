@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Jurassic.Library;
 
 namespace Jurassic
 {
@@ -54,13 +52,17 @@ namespace Jurassic
                 return Equals(x, TypeConverter.ToNumber(y));
 
             // false == new Boolean(false), 1.5 == new Number(1.5)
-            if (TypeUtilities.IsNumeric(x) && y is Jurassic.Library.ObjectInstance)
+            if (TypeUtilities.IsNumeric(x) && y is ObjectInstance)
                 return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.None));
-            if (TypeUtilities.IsString(x) && y is Jurassic.Library.ObjectInstance)
+            if (TypeUtilities.IsString(x) && y is ObjectInstance)
                 return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.None));
-            if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsNumeric(y))
+            if (x is Symbol && y is ObjectInstance)
+                return Equals(x, TypeConverter.ToPrimitive(y, PrimitiveTypeHint.None));
+            if (x is ObjectInstance && TypeUtilities.IsNumeric(y))
                 return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.None), y);
-            if (x is Jurassic.Library.ObjectInstance && TypeUtilities.IsString(y))
+            if (x is ObjectInstance && TypeUtilities.IsString(y))
+                return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.None), y);
+            if (x is ObjectInstance && y is Symbol)
                 return Equals(TypeConverter.ToPrimitive(x, PrimitiveTypeHint.None), y);
 
             return false;

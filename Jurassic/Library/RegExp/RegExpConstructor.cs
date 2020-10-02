@@ -478,15 +478,32 @@ namespace Jurassic.Library
         /// g (global search for all occurrences of pattern)
         /// i (ignore case)
         /// m (multiline search)</param>
-        [JSConstructorFunction]
         public RegExpInstance Construct(object patternOrRegExp, string flags = null)
         {
+            return Construct(this, patternOrRegExp, flags);
+        }
+
+        /// <summary>
+        /// Called when the new keyword is used on the RegExp object e.g. new RegExp(/abc/).
+        /// Creates a new regular expression instance.
+        /// </summary>
+        /// <param name="newTarget"> The value of the new.target expression. </param>
+        /// <param name="patternOrRegExp"> The regular expression pattern, or a regular expression
+        /// to clone. </param>
+        /// <param name="flags"> Available flags, which may be combined, are:
+        /// g (global search for all occurrences of pattern)
+        /// i (ignore case)
+        /// m (multiline search)</param>
+        [JSConstructorFunction]
+        private RegExpInstance Construct(FunctionInstance newTarget, object patternOrRegExp, string flags = null)
+        {
+            var prototype = (newTarget["prototype"] as ObjectInstance) ?? this.InstancePrototype;
             if (patternOrRegExp is RegExpInstance)
             {
                 // new RegExp(regExp, flags)
                 if (flags != null)
-                    return new RegExpInstance(this.InstancePrototype, ((RegExpInstance)patternOrRegExp).Source, flags);
-                return new RegExpInstance(this.InstancePrototype, (RegExpInstance)patternOrRegExp);
+                    return new RegExpInstance(prototype, ((RegExpInstance)patternOrRegExp).Source, flags);
+                return new RegExpInstance(prototype, (RegExpInstance)patternOrRegExp);
             }
             else
             {
@@ -494,7 +511,7 @@ namespace Jurassic.Library
                 var pattern = string.Empty;
                 if (TypeUtilities.IsUndefined(patternOrRegExp) == false)
                     pattern = TypeConverter.ToString(patternOrRegExp);
-                return new RegExpInstance(this.InstancePrototype, pattern, flags);
+                return new RegExpInstance(prototype, pattern, flags);
             }
         }
     }

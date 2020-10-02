@@ -239,7 +239,6 @@ namespace Jurassic
             else
                 throw new ArgumentException(string.Format("Cannot convert object of type '{0}' to an object.", value.GetType()), nameof(value));
 
-            result.IsExtensible = false;
             return result;
         }
 

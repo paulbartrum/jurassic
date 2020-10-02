@@ -162,17 +162,17 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("Reflect.isExtensible(Object.freeze({a: 1}))"));
             Assert.AreEqual(false, Evaluate("Reflect.isExtensible(Object.preventExtensions({}))"));
             Assert.AreEqual(true, Evaluate("Reflect.isExtensible(new Boolean(true))"));
-            Assert.AreEqual(false, Evaluate("Reflect.isExtensible(true)"));
-            Assert.AreEqual(false, Evaluate("Reflect.isExtensible(5)"));
-            Assert.AreEqual(false, Evaluate("Reflect.isExtensible('test')"));
 
             // length
             Assert.AreEqual(1, Evaluate("Reflect.isExtensible.length"));
 
             // Argument must be an object.
-            Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("Reflect.isExtensible()"));
-            Assert.AreEqual("TypeError: undefined cannot be converted to an object", EvaluateExceptionMessage("Reflect.isExtensible(undefined)"));
-            Assert.AreEqual("TypeError: null cannot be converted to an object", EvaluateExceptionMessage("Reflect.isExtensible(null)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(true)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(5)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible('test')"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible()"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(undefined)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(null)"));
         }
 
         [TestMethod]

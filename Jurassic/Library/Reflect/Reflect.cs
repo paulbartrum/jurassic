@@ -137,12 +137,11 @@ namespace Jurassic.Library
         /// Returns a Boolean indicating whether the target has the property. Either as own or
         /// inherited. Works like the in operator as a function.
         /// </summary>
-        /// <param name="engine"> The script engine to use. </param>
         /// <param name="target"> The target object in which to look for the property. </param>
         /// <param name="propertyKey"> The name of the property to check. </param>
         /// <returns> A Boolean indicating whether or not the target has the property. </returns>
-        [JSInternalFunction(Name = "has", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static bool Has(ScriptEngine engine, object target, object propertyKey)
+        [JSInternalFunction(Name = "has")]
+        public static bool Has(object target, object propertyKey)
         {
             if (target is ObjectInstance targetObjectInstance)
             {
@@ -158,9 +157,11 @@ namespace Jurassic.Library
         /// <param name="target"> The target object which to check if it is extensible. </param>
         /// <returns> A Boolean indicating whether or not the target is extensible. </returns>
         [JSInternalFunction(Name = "isExtensible")]
-        public static new bool IsExtensible(ObjectInstance target)
+        public static new bool IsExtensible(object target)
         {
-            return target.IsExtensible;
+            if (target is ObjectInstance targetObjectInstance)
+                return targetObjectInstance.IsExtensible;
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.isExtensible called with non-object.");
         }
 
         /// <summary>
@@ -205,11 +206,10 @@ namespace Jurassic.Library
         /// <summary>
         /// Similar to Object.preventExtensions().
         /// </summary>
-        /// <param name="engine"> The script engine to use. </param>
         /// <param name="target"> The target object on which to prevent extensions. </param>
         /// <returns> A Boolean indicating whether or not the target was successfully set to prevent extensions. </returns>
-        [JSInternalFunction(Name = "preventExtensions", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static bool PreventExtensions(ScriptEngine engine, object target)
+        [JSInternalFunction(Name = "preventExtensions")]
+        public static bool PreventExtensions(object target)
         {
             if (target is ObjectInstance targetObjectInstance)
             {
