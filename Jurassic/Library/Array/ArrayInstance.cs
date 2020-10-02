@@ -523,7 +523,7 @@ namespace Jurassic.Library
         /// <returns> A new array consisting of the values of this array plus any number of
         /// additional items. </returns>
         [JSInternalFunction(Name = "concat", Flags = JSFunctionFlags.HasThisObject)]
-        public static ArrayInstance Concat(ObjectInstance thisObj, params object[] items)
+        public static ObjectInstance Concat(ObjectInstance thisObj, params object[] items)
         {
             // Create a new items array with the thisObject at the beginning.
             var temp = new object[items.Length + 1];
@@ -591,7 +591,7 @@ namespace Jurassic.Library
                 }
 
                 // Return the new dense array.
-                return new ArrayInstance(thisObj.Engine.Array.InstancePrototype, result);
+                return new ArrayInstanceAdapter(thisObj).ConstructArray(result);
             }
             else
             {
@@ -865,7 +865,7 @@ namespace Jurassic.Library
         /// <param name="thisObj"> The array that is being operated on. </param>
         /// <returns> An array containing the deleted elements, if any. </returns>
         [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 2)]
-        public static ArrayInstance Splice(ObjectInstance thisObj)
+        public static ObjectInstance Splice(ObjectInstance thisObj)
         {
             // If the number of actual arguments is 0, then
             //     Let insertCount be 0.
@@ -880,7 +880,7 @@ namespace Jurassic.Library
         /// <param name="start"> The index to start deleting from. </param>
         /// <returns> An array containing the deleted elements, if any. </returns>
         [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 2)]
-        public static ArrayInstance Splice(ObjectInstance thisObj, int start)
+        public static ObjectInstance Splice(ObjectInstance thisObj, int start)
         {
             // Else if the number of actual arguments is 1, then
             //     Let insertCount be 0.
@@ -897,7 +897,7 @@ namespace Jurassic.Library
         /// <param name="items"> The items to insert. </param>
         /// <returns> An array containing the deleted elements, if any. </returns>
         [JSInternalFunction(Name = "splice", Flags = JSFunctionFlags.HasThisObject | JSFunctionFlags.MutatesThisObject, Length = 2)]
-        public static ArrayInstance Splice(ObjectInstance thisObj, int start, int deleteCount, params object[] items)
+        public static ObjectInstance Splice(ObjectInstance thisObj, int start, int deleteCount, params object[] items)
         {
             // Get the length of the array.
             uint arrayLength = GetLength(thisObj);
@@ -942,7 +942,7 @@ namespace Jurassic.Library
                 thisObj[(uint)(start + i)] = items[i];
 
             // Return the deleted items.
-            return thisObj.Engine.Array.New(deletedItems);
+            return new ArrayInstanceAdapter(thisObj).ConstructArray(deletedItems);
         }
 
         /// <summary>
@@ -1023,7 +1023,7 @@ namespace Jurassic.Library
         {
             var result = new List<object>((int)GetLength(thisObj));
             FlattenTo(result, thisObj, null, null, depth);
-            return thisObj.Engine.Array.New(result.ToArray());
+            return new ArrayInstanceAdapter(thisObj).ConstructArray(result.ToArray());
         }
 
         /// <summary>
@@ -1040,7 +1040,7 @@ namespace Jurassic.Library
         {
             var result = new List<object>((int)GetLength(thisObj));
             FlattenTo(result, thisObj, callback, thisArg, depth: 1);
-            return thisObj.Engine.Array.New(result.ToArray());
+            return new ArrayInstanceAdapter(thisObj).ConstructArray(result.ToArray());
         }
 
 
@@ -1089,6 +1089,29 @@ namespace Jurassic.Library
             /// <returns> A new array object. </returns>
             public override ObjectInstance ConstructArray(object[] values)
             {
+                if (WrappedInstance is ArrayInstance wrappedArrayInstance)
+                {
+                    var constructor = wrappedArrayInstance["constructor"];
+                    if (constructor is ObjectInstance constructorObjectInstance && !(constructor is FunctionInstance))
+                    {
+                        constructor = constructorObjectInstance[Symbol.Species];
+                        if (constructor == Null.Value)
+                            constructor = Undefined.Value;
+                    }
+                    if (constructor != Undefined.Value && constructor != Engine.Array)
+                    {
+                        if (constructor is FunctionInstance constructorFunction)
+                        {
+                            var result = constructorFunction.ConstructLateBound(constructorFunction, values.Length);
+                            for (int i = 0; i < values.Length; i++)
+                                if (values[i] != null)
+                                    result[i] = values[i];
+                            return result;
+                        }
+                        else
+                            throw new JavaScriptException(ErrorType.TypeError, "object.constructor[Symbol.species] is not a constructor.");
+                    }
+                }
                 return Engine.Array.New(values);
             }
 

@@ -370,11 +370,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return StartsWith(engine, TypeConverter.ToString(thisObj), Undefined.Value, 0);
+					return StartsWith(TypeConverter.ToString(thisObj), Undefined.Value, 0);
 				case 1:
-					return StartsWith(engine, TypeConverter.ToString(thisObj), args[0], 0);
+					return StartsWith(TypeConverter.ToString(thisObj), args[0], 0);
 				default:
-					return StartsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
+					return StartsWith(TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
@@ -385,11 +385,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return EndsWith(engine, TypeConverter.ToString(thisObj), Undefined.Value, int.MaxValue);
+					return EndsWith(TypeConverter.ToString(thisObj), Undefined.Value, int.MaxValue);
 				case 1:
-					return EndsWith(engine, TypeConverter.ToString(thisObj), args[0], int.MaxValue);
+					return EndsWith(TypeConverter.ToString(thisObj), args[0], int.MaxValue);
 				default:
-					return EndsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
+					return EndsWith(TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
