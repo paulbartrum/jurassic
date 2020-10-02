@@ -14,7 +14,7 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue(engine.Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
 			};
 		}
 

@@ -292,7 +292,7 @@ namespace Jurassic
                     var result = Object.Construct();
                     result.InitializeProperties(new List<PropertyNameAndValue>(1)
                     {
-                        new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(FunctionInstancePrototype, "[Symbol.iterator]", 0,
+                        new PropertyNameAndValue(Library.Symbol.Iterator, new ClrStubFunction(FunctionInstancePrototype, "[Symbol.iterator]", 0,
                             (engine, thisObj, args) => thisObj), PropertyAttributes.NonEnumerable),
                     });
                     this.baseIteratorPrototype = result;

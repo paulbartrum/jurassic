@@ -37,7 +37,7 @@ namespace Jurassic.Library
             var engine = obj.Engine;
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Symbol", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "Symbol", PropertyAttributes.Configurable));
             obj.InitializeProperties(properties);
         }
 

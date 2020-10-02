@@ -46,7 +46,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("endsWith", new ClrStubFunction(engine, "endsWith", 1, __STUB__EndsWith), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("contains", new ClrStubFunction(engine, "contains", 1, __STUB__Contains), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("repeat", new ClrStubFunction(engine, "repeat", 1, __STUB__Repeat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("anchor", new ClrStubFunction(engine, "anchor", 1, __STUB__Anchor), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("big", new ClrStubFunction(engine, "big", 0, __STUB__Big), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("blink", new ClrStubFunction(engine, "blink", 0, __STUB__Blink), PropertyAttributes.NonEnumerable),

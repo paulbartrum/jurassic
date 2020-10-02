@@ -109,7 +109,7 @@ namespace Jurassic.Library
             PropertyNameAndValue valuesProperty = properties.Find(p => "values".Equals(p.Key));
             if (valuesProperty == null)
                 throw new InvalidOperationException("Expected values property.");
-            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
 
             result.InitializeProperties(properties);
             return result;
@@ -1594,7 +1594,7 @@ namespace Jurassic.Library
         {
             if (o is ObjectInstance objectInstance)
             {
-                var result = objectInstance[engine.Symbol.IsConcatSpreadable];
+                var result = objectInstance[Symbol.IsConcatSpreadable];
                 if (result != Undefined.Value)
                     return TypeConverter.ToBoolean(result);
                 return objectInstance is ArrayInstance;

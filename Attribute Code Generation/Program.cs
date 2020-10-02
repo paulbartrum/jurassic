@@ -315,7 +315,7 @@ namespace Attribute_Code_Generation
                     // This is a symbol.
                     var symbolName = new StringBuilder(jsName.Substring(2));
                     symbolName[0] = char.ToUpper(symbolName[0]);
-                    PropertyKey = $"engine.Symbol.{symbolName}";
+                    PropertyKey = $"Symbol.{symbolName}";
                     FunctionName = $"[Symbol.{jsName.Substring(2)}]";
                 }
                 else
@@ -420,7 +420,7 @@ namespace Attribute_Code_Generation
                     // This is a symbol.
                     var symbolName = new StringBuilder(jsName.Substring(2));
                     symbolName[0] = char.ToUpper(symbolName[0]);
-                    PropertyKey = $"engine.Symbol.{symbolName}";
+                    PropertyKey = $"Symbol.{symbolName}";
                     FunctionName = $"[Symbol.{jsName.Substring(2)}]";
                 }
                 else

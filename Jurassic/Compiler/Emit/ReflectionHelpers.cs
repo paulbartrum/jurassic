@@ -507,7 +507,7 @@ namespace Jurassic.Compiler
             if (rhs is ObjectInstance rhsObjectInstance)
             {
                 // Look for rhs[Symbol.hasInstance] function.
-                var hasInstanceObj = rhsObjectInstance[rhsObjectInstance.Engine.Symbol.HasInstance];
+                var hasInstanceObj = rhsObjectInstance[Symbol.HasInstance];
                 if (hasInstanceObj != Undefined.Value)
                 {
                     // rhs[Symbol.hasInstance] exists, check it's a function.

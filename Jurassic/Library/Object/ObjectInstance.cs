@@ -974,7 +974,7 @@ namespace Jurassic.Library
                     throw new InvalidOperationException($"Unsupported PrimitiveTypeHint value '{typeHint}'.");
             }
             object toPrimitiveResult;
-            if (TryCallMemberFunction(out toPrimitiveResult, Engine.Symbol.ToPrimitive, hintStr) == true)
+            if (TryCallMemberFunction(out toPrimitiveResult, Symbol.ToPrimitive, hintStr) == true)
             {
                 // Return value must be primitive.
                 if (TypeUtilities.IsPrimitive(toPrimitiveResult) == false)
@@ -1215,7 +1215,7 @@ namespace Jurassic.Library
             var obj = TypeConverter.ToObject(engine, thisObject);
 
             // ES6 - if the value of @@toStringTag is a string, use it to form the result.
-            object tag = obj.GetPropertyValue(engine.Symbol.ToStringTag);
+            object tag = obj.GetPropertyValue(Symbol.ToStringTag);
             if (tag is string)
                 return $"[object {tag}]";
 

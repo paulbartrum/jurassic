@@ -23,7 +23,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue(Engine.Symbol.ToStringTag, "JSON", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "JSON", PropertyAttributes.Configurable));
             InitializeProperties(properties);
         }
 

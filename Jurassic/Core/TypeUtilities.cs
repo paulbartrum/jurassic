@@ -235,17 +235,6 @@ namespace Jurassic
             return result;
         }
 
-        /// <summary>
-        /// Determines if the given value is a regular expression.
-        /// </summary>
-        /// <param name="value"> The value to test. </param>
-        /// <returns> <c>true</c> if the given value is a regular expression; <c>false</c> otherwise. </returns>
-        public static bool IsRegularExpression(object value)
-        {
-            // TODO: ECMAScript 6 defines IsRegExp in terms of a predefined symbol @@match.
-            return value is RegExpInstance;
-        }
-
         private static readonly long negativeZeroBits = BitConverter.DoubleToInt64Bits(-0.0);
 
         /// <summary>
@@ -284,7 +273,7 @@ namespace Jurassic
                 throw new ArgumentNullException(nameof(iterable));
 
             // Get the iterator symbol value.
-            var iteratorValue = iterable[engine.Symbol.Iterator];
+            var iteratorValue = iterable[Symbol.Iterator];
             if (iteratorValue == Undefined.Value || iteratorValue == Null.Value)
                 return null;
 

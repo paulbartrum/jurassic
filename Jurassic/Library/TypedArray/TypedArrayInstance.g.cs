@@ -18,7 +18,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("byteOffset", new PropertyDescriptor(new ClrStubFunction(engine, "get byteOffset", 0, __GETTER__ByteOffset), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("byteLength", new PropertyDescriptor(new ClrStubFunction(engine, "get byteLength", 0, __GETTER__ByteLength), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("length", new PropertyDescriptor(new ClrStubFunction(engine, "get length", 0, __GETTER__Length), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue(engine.Symbol.ToStringTag, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.toStringTag]", 0, __GETTER__ToStringTag), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue(Symbol.ToStringTag, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.toStringTag]", 0, __GETTER__ToStringTag), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("entries", new ClrStubFunction(engine, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("keys", new ClrStubFunction(engine, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("subarray", new ClrStubFunction(engine, "subarray", 2, __STUB__Subarray), PropertyAttributes.NonEnumerable),

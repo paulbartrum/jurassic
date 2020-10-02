@@ -14,7 +14,7 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(4)
 			{
-				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue(Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
 			};
 		}
 

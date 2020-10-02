@@ -60,7 +60,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("toTimeString", new ClrStubFunction(engine, "toTimeString", 0, __STUB__ToTimeString), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toUTCString", new ClrStubFunction(engine, "toUTCString", 0, __STUB__ToUTCString), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.ToPrimitive, new ClrStubFunction(engine, "[Symbol.toPrimitive]", 1, __STUB__ToPrimitive), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.ToPrimitive, new ClrStubFunction(engine, "[Symbol.toPrimitive]", 1, __STUB__ToPrimitive), PropertyAttributes.NonEnumerable),
 			};
 		}
 

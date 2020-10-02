@@ -40,14 +40,14 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Set", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "Set", PropertyAttributes.Configurable));
 
             // From the spec: the initial value of the @@iterator property is the same function
             // object as the initial value of the Set.prototype.values property.
             PropertyNameAndValue valuesProperty = properties.Find(p => "values".Equals(p.Key));
             if (valuesProperty == null)
                 throw new InvalidOperationException("Expected values property.");
-            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
 
             result.InitializeProperties(properties);
             return result;

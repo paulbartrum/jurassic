@@ -22,10 +22,10 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("compile", new ClrStubFunction(engine, "compile", 2, __STUB__Compile), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("test", new ClrStubFunction(engine, "test", 1, __STUB__Test), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("exec", new ClrStubFunction(engine, "exec", 1, __STUB__Exec), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.Match, new ClrStubFunction(engine, "[Symbol.match]", 1, __STUB__Match), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.Replace, new ClrStubFunction(engine, "[Symbol.replace]", 2, __STUB__Replace), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.Search, new ClrStubFunction(engine, "[Symbol.search]", 1, __STUB__Search), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.Split, new ClrStubFunction(engine, "[Symbol.split]", 2, __STUB__Split), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Match, new ClrStubFunction(engine, "[Symbol.match]", 1, __STUB__Match), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Replace, new ClrStubFunction(engine, "[Symbol.replace]", 2, __STUB__Replace), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Search, new ClrStubFunction(engine, "[Symbol.search]", 1, __STUB__Search), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Split, new ClrStubFunction(engine, "[Symbol.split]", 2, __STUB__Split), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 			};
 		}
