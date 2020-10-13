@@ -176,10 +176,9 @@ namespace Jurassic.Library
 
 		private static object __STUB__ToString(ScriptEngine engine, object thisObj, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is RegExpInstance))
-				throw new JavaScriptException(ErrorType.TypeError, "The method 'toString' is not generic.");
-			return ((RegExpInstance)thisObj).ToString();
+			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
+			return ToString(TypeConverter.ToObject(engine, thisObj));
 		}
 	}
 

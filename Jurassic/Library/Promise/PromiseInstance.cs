@@ -241,8 +241,15 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "then")]
         public PromiseInstance Then(object onFulfilled, object onRejected)
         {
-            return PerformPromiseThen(onFulfilled as FunctionInstance, onRejected as FunctionInstance,
-                new PromiseInstance(Prototype));
+            // Get the @@species constructor, if one exists.
+            var constructor = TypeUtilities.GetSpeciesConstructor(this, Engine.Promise);
+
+            // Create a new promise instance.
+            var executor = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 2, (engine, thisObj, args) => Undefined.Value);
+            var result = constructor.ConstructLateBound(constructor, executor);
+            if (result is PromiseInstance resultPromise)
+                return PerformPromiseThen(onFulfilled as FunctionInstance, onRejected as FunctionInstance, resultPromise);
+            throw new JavaScriptException(ErrorType.TypeError, "Subclassed promises are not supported.");
         }
 
         private PromiseInstance PerformPromiseThen(FunctionInstance onFulfilled, FunctionInstance onRejected, PromiseInstance result = null)

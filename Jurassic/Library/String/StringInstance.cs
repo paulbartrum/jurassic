@@ -324,10 +324,10 @@ namespace Jurassic.Library
             }
 
             // Convert the argument to a regex.
-            var regex = engine.RegExp.Construct(substrOrRegExp);
+            var regex = new RegExpInstance(engine.RegExp.InstancePrototype, TypeConverter.ToString(substrOrRegExp, string.Empty));
 
             // Call the [Symbol.match] function.
-            return regex.CallMemberFunction(Symbol.Match, TypeConverter.ToString(thisObject));
+            return regex.Match(TypeConverter.ToString(thisObject));
         }
 
         /// <summary>
@@ -431,7 +431,7 @@ namespace Jurassic.Library
             int end = start + substr.Length;
 
             // Replace only the first match.
-            var result = new System.Text.StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
+            var result = new StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
             result.Append(thisObject, 0, start);
             result.Append(replaceText);
             result.Append(thisObject, end, thisObject.Length - end);
@@ -458,7 +458,7 @@ namespace Jurassic.Library
             var replaceText = TypeConverter.ToString(replaceFunction.CallFromNative("replace", null, substr, start, thisObject));
 
             // Replace only the first match.
-            var result = new System.Text.StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
+            var result = new StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
             result.Append(thisObject, 0, start);
             result.Append(replaceText);
             result.Append(thisObject, end, thisObject.Length - end);
@@ -493,10 +493,10 @@ namespace Jurassic.Library
             }
 
             // Convert the argument to a regex.
-            var regex = engine.RegExp.Construct(substrOrRegExp);
+            var regex = new RegExpInstance(engine.RegExp.InstancePrototype, TypeConverter.ToString(substrOrRegExp, string.Empty));
 
             // Call the [Symbol.search] function.
-            return regex.CallMemberFunction(Symbol.Search, TypeConverter.ToString(thisObject));
+            return regex.Search(TypeConverter.ToString(thisObject));
         }
 
         /// <summary>

@@ -382,6 +382,32 @@ namespace Jurassic
                 result[i] = arrayLike[i];
             return result;
         }
+
+        /// <summary>
+        /// Retrieves the constructor that should be used to create new objects that are derived
+        /// from the argument object <paramref name="objectInstance"/>.
+        /// </summary>
+        /// <param name="objectInstance"> The object to check. </param>
+        /// <param name="defaultConstructor"> The constructor to return if no @@species property
+        /// can be found. </param>
+        /// <returns> A constructor that can be used to create new objects. </returns>
+        internal static FunctionInstance GetSpeciesConstructor(ObjectInstance objectInstance, FunctionInstance defaultConstructor)
+        {
+            var constructor = objectInstance["constructor"];
+            if (constructor == Undefined.Value)
+                return defaultConstructor;
+            if (constructor is ObjectInstance constructorObjectInstance)
+            {
+                var species = constructorObjectInstance[Symbol.Species];
+                if (species == Undefined.Value || species == Null.Value)
+                    return defaultConstructor;
+                if (species is FunctionInstance speciesConstructor)
+                    return speciesConstructor;
+                throw new JavaScriptException(ErrorType.TypeError, "@@species value must be a constructor.");
+            }
+            else
+                throw new JavaScriptException(ErrorType.TypeError, "'constructor' value is not an object.");
+        }
     }
 
 }

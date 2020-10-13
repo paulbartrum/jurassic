@@ -111,6 +111,20 @@ namespace Jurassic.Library
                 throw new InvalidOperationException("Expected values property.");
             properties.Add(new PropertyNameAndValue(Symbol.Iterator, valuesProperty.Value, PropertyAttributes.NonEnumerable));
 
+            // Create the @@unscopables data property.
+            var unscopables = engine.Object.Construct();
+            unscopables["copyWithin"] = true;
+            unscopables["entries"] = true;
+            unscopables["fill"] = true;
+            unscopables["find"] = true;
+            unscopables["findIndex"] = true;
+            unscopables["flat"] = true;
+            unscopables["flatMap"] = true;
+            unscopables["includes"] = true;
+            unscopables["keys"] = true;
+            unscopables["values"] = true;
+            properties.Add(new PropertyNameAndValue(Symbol.Unscopables, unscopables, PropertyAttributes.Configurable));
+
             result.InitializeProperties(properties);
             return result;
         }

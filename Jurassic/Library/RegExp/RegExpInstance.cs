@@ -144,7 +144,7 @@ namespace Jurassic.Library
         {
             get
             {
-                var result = new System.Text.StringBuilder(3);
+                var result = new StringBuilder(3);
                 if (this.Global)
                     result.Append("g");
                 if (this.IgnoreCase)
@@ -555,11 +555,14 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string representing the current object.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <returns> A string representing the current object. </returns>
-        [JSInternalFunction(Name = "toString")]
-        public new string ToString()
+        [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
+        public static string ToString(ObjectInstance thisObject)
         {
-            return string.Format("/{0}/{1}", this.Source, this.Flags);
+            return string.Format("/{0}/{1}",
+                TypeConverter.ToString(thisObject["source"]),
+                TypeConverter.ToString(thisObject["flags"]));
         }
 
 

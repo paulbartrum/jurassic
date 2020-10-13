@@ -135,10 +135,30 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "getOwnPropertyNames")]
         public static ArrayInstance GetOwnPropertyNames(ObjectInstance obj)
         {
-            var result = obj.Engine.Array.New();
+            // Indexes should be in numeric order.
+            var indexes = new List<uint>();
             foreach (var property in obj.Properties)
-                if (property.Key is string)
-                    result.Push(property.Key);
+                if (property.Key is string key)
+                {
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    if (arrayIndex != uint.MaxValue)
+                        indexes.Add(arrayIndex);
+                }
+            indexes.Sort();
+
+            var result = obj.Engine.Array.New();
+            foreach (uint index in indexes)
+                result.Push(index.ToString());
+
+            // Strings, in insertion order.
+            foreach (var property in obj.Properties)
+                if (property.Key is string key)
+                {
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    if (arrayIndex == uint.MaxValue)
+                        result.Push(key);
+                }
+                    
             return result;
         }
 

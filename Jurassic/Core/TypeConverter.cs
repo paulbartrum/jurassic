@@ -140,8 +140,19 @@ namespace Jurassic
         /// <returns> A primitive string value. </returns>
         public static string ToString(object value)
         {
+            return ToString(value, "undefined");
+        }
+
+        /// <summary>
+        /// Converts any JavaScript value to a primitive string value.
+        /// </summary>
+        /// <param name="value"> The value to convert. </param>
+        /// <param name="defaultValue"> The value to return if the input is undefined. </param>
+        /// <returns> A primitive string value. </returns>
+        internal static string ToString(object value, string defaultValue)
+        {
             if (value == null || value == Undefined.Value)
-                return "undefined";
+                return defaultValue;
             if (value == Null.Value)
                 return "null";
             if (value is bool)

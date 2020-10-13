@@ -267,7 +267,19 @@ namespace Jurassic.Compiler
                 {
                     var result = scope.ScopeObject.GetPropertyValue(variableName);
                     if (result != null)
-                        return result;
+                    {
+                        // If the scope was created by a with() statement.
+                        if (scope.ScopeType == ScopeType.With)
+                        {
+                            // The [Symbol.unscopables] value contains a list of properties that
+                            // should be excluded from with() environment bindings.
+                            var unscopables = scope.ScopeObject.GetPropertyValue(Symbol.Unscopables) as ObjectInstance;
+                            if (unscopables == null || !TypeConverter.ToBoolean(unscopables[variableName]))
+                                return result;
+                        }
+                        else
+                            return result;
+                    }
                 }
                 scope = scope.Parent;
             } while (scope != null);
@@ -330,6 +342,19 @@ namespace Jurassic.Compiler
                     {
                         scope.ScopeObject[variableName] = value;
                         return;
+                    }
+
+                    // If the scope was created by a with() statement.
+                    if (scope.ScopeType == ScopeType.With)
+                    {
+                        // The [Symbol.unscopables] value contains a list of properties that
+                        // should be excluded from with() environment bindings.
+                        var unscopables = scope.ScopeObject.GetPropertyValue(Symbol.Unscopables) as ObjectInstance;
+                        if (unscopables != null && TypeConverter.ToBoolean(unscopables[variableName]))
+                        {
+                            scope = scope.Parent;
+                            continue;
+                        }
                     }
 
                     // Only set the value if it exists.
