@@ -46,7 +46,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("endsWith", new ClrStubFunction(engine, "endsWith", 1, __STUB__EndsWith), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("contains", new ClrStubFunction(engine, "contains", 1, __STUB__Contains), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("repeat", new ClrStubFunction(engine, "repeat", 1, __STUB__Repeat), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("anchor", new ClrStubFunction(engine, "anchor", 1, __STUB__Anchor), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("big", new ClrStubFunction(engine, "big", 0, __STUB__Big), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("blink", new ClrStubFunction(engine, "blink", 0, __STUB__Blink), PropertyAttributes.NonEnumerable),
@@ -66,7 +66,7 @@ namespace Jurassic.Library
 		private static object __STUB__CharAt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -79,7 +79,7 @@ namespace Jurassic.Library
 		private static object __STUB__CharCodeAt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -92,7 +92,7 @@ namespace Jurassic.Library
 		private static object __STUB__CodePointAt(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -116,7 +116,7 @@ namespace Jurassic.Library
 		private static object __STUB__Includes(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -131,7 +131,7 @@ namespace Jurassic.Library
 		private static object __STUB__IndexOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -146,7 +146,7 @@ namespace Jurassic.Library
 		private static object __STUB__LastIndexOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -161,7 +161,7 @@ namespace Jurassic.Library
 		private static object __STUB__LocaleCompare(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -173,21 +173,19 @@ namespace Jurassic.Library
 
 		private static object __STUB__Match(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Match(engine, TypeConverter.ToString(thisObj), Undefined.Value);
+					return Match(engine, thisObj, Undefined.Value);
 				default:
-					return Match(engine, TypeConverter.ToString(thisObj), args[0]);
+					return Match(engine, thisObj, args[0]);
 			}
 		}
 
 		private static object __STUB__Normalize(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -200,42 +198,38 @@ namespace Jurassic.Library
 		private static object __STUB__Quote(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Quote(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Replace(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Replace(TypeConverter.ToString(thisObj), Undefined.Value, Undefined.Value);
+					return Replace(engine, thisObj, Undefined.Value, Undefined.Value);
 				case 1:
-					return Replace(TypeConverter.ToString(thisObj), args[0], Undefined.Value);
+					return Replace(engine, thisObj, args[0], Undefined.Value);
 				default:
-					return Replace(TypeConverter.ToString(thisObj), args[0], args[1]);
+					return Replace(engine, thisObj, args[0], args[1]);
 			}
 		}
 
 		private static object __STUB__Search(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Search(TypeConverter.ToString(thisObj), Undefined.Value);
+					return Search(engine, thisObj, Undefined.Value);
 				default:
-					return Search(TypeConverter.ToString(thisObj), args[0]);
+					return Search(engine, thisObj, args[0]);
 			}
 		}
 
 		private static object __STUB__Slice(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -249,23 +243,21 @@ namespace Jurassic.Library
 
 		private static object __STUB__Split(ScriptEngine engine, object thisObj, object[] args)
 		{
-			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return Split(engine, TypeConverter.ToString(thisObj), Undefined.Value, uint.MaxValue);
+					return Split(engine, thisObj, Undefined.Value, Undefined.Value);
 				case 1:
-					return Split(engine, TypeConverter.ToString(thisObj), args[0], uint.MaxValue);
+					return Split(engine, thisObj, args[0], Undefined.Value);
 				default:
-					return Split(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? uint.MaxValue : TypeConverter.ToNumber(args[1]));
+					return Split(engine, thisObj, args[0], args[1]);
 			}
 		}
 
 		private static object __STUB__Substr(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -280,7 +272,7 @@ namespace Jurassic.Library
 		private static object __STUB__Substring(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -295,21 +287,21 @@ namespace Jurassic.Library
 		private static object __STUB__ToLocaleLowerCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToLocaleLowerCase(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__ToLocaleUpperCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToLocaleUpperCase(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__ToLowerCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToLowerCase(TypeConverter.ToString(thisObj));
 		}
 
@@ -317,49 +309,49 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toString' is not generic.");
 			return ((StringInstance)thisObj).ToString();
 		}
 
 		private static object __STUB__ToUpperCase(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToUpperCase(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Trim(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Trim(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__TrimStart(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return TrimStart(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__TrimEnd(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return TrimEnd(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__TrimLeft(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return TrimLeft(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__TrimRight(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return TrimRight(TypeConverter.ToString(thisObj));
 		}
 
@@ -367,44 +359,44 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'valueOf' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((StringInstance)thisObj).ValueOf();
 		}
 
 		private static object __STUB__StartsWith(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return StartsWith(engine, TypeConverter.ToString(thisObj), Undefined.Value, 0);
+					return StartsWith(TypeConverter.ToString(thisObj), Undefined.Value, 0);
 				case 1:
-					return StartsWith(engine, TypeConverter.ToString(thisObj), args[0], 0);
+					return StartsWith(TypeConverter.ToString(thisObj), args[0], 0);
 				default:
-					return StartsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
+					return StartsWith(TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? 0 : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
 		private static object __STUB__EndsWith(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
-					return EndsWith(engine, TypeConverter.ToString(thisObj), Undefined.Value, int.MaxValue);
+					return EndsWith(TypeConverter.ToString(thisObj), Undefined.Value, int.MaxValue);
 				case 1:
-					return EndsWith(engine, TypeConverter.ToString(thisObj), args[0], int.MaxValue);
+					return EndsWith(TypeConverter.ToString(thisObj), args[0], int.MaxValue);
 				default:
-					return EndsWith(engine, TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
+					return EndsWith(TypeConverter.ToString(thisObj), args[0], TypeUtilities.IsUndefined(args[1]) ? int.MaxValue : TypeConverter.ToInteger(args[1]));
 			}
 		}
 
 		private static object __STUB__Contains(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -419,7 +411,7 @@ namespace Jurassic.Library
 		private static object __STUB__Repeat(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -433,14 +425,14 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method '[Symbol.iterator]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.iterator]' is not generic.");
 			return ((StringInstance)thisObj).GetIterator();
 		}
 
 		private static object __STUB__Anchor(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -453,35 +445,35 @@ namespace Jurassic.Library
 		private static object __STUB__Big(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Big(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Blink(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Blink(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Bold(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Bold(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Fixed(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Fixed(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__FontColor(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -494,7 +486,7 @@ namespace Jurassic.Library
 		private static object __STUB__FontSize(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -507,14 +499,14 @@ namespace Jurassic.Library
 		private static object __STUB__Italics(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Italics(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Link(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			switch (args.Length)
 			{
 				case 0:
@@ -527,28 +519,28 @@ namespace Jurassic.Library
 		private static object __STUB__Small(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Small(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Strike(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Strike(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Sub(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Sub(TypeConverter.ToString(thisObj));
 		}
 
 		private static object __STUB__Sup(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return Sup(TypeConverter.ToString(thisObj));
 		}
 	}

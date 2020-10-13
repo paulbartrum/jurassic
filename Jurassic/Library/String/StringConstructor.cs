@@ -45,9 +45,11 @@ namespace Jurassic.Library
         /// Converts the given argument into a string value (not a String object).
         /// </summary>
         [JSCallFunction]
-        public string Call(string value)
+        public string Call(object value)
         {
-            return value;
+            if (value is Symbol symbol)
+                return symbol.ToString();
+            return TypeConverter.ToString(value);
         }
 
         /// <summary>
@@ -108,7 +110,7 @@ namespace Jurassic.Library
             {
                 int codePoint = (int) codePointDouble;
                 if (codePoint < 0 || codePoint > 0x10FFFF || (double)codePoint != codePointDouble)
-                    throw new JavaScriptException(scriptEngine, ErrorType.RangeError, string.Format("Invalid code point {0}", codePointDouble));
+                    throw new JavaScriptException(ErrorType.RangeError, string.Format("Invalid code point {0}", codePointDouble));
                 if (codePoint <= 65535)
                     result.Append((char)codePoint);
                 else

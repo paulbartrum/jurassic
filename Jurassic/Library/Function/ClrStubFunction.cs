@@ -10,7 +10,7 @@ namespace Jurassic.Library
     public class ClrStubFunction : FunctionInstance
     {
         private Func<ScriptEngine, object, object[], object> callBinder;
-        private Func<ScriptEngine, object, object[], ObjectInstance> constructBinder;
+        private Func<ScriptEngine, FunctionInstance, FunctionInstance, object[], ObjectInstance> constructBinder;
 
 
         //     INITIALIZATION
@@ -68,7 +68,7 @@ namespace Jurassic.Library
         /// <param name="construct"> The delegate to call when calling the JS method as a constructor. </param>
         /// <param name="call"> The delegate to call when function is called. </param>
         public ClrStubFunction(ObjectInstance prototype,
-            Func<ScriptEngine, object, object[], ObjectInstance> construct,
+            Func<ScriptEngine, FunctionInstance, FunctionInstance, object[], ObjectInstance> construct,
             Func<ScriptEngine, object, object[], object> call)
             : base(prototype)
         {
@@ -101,7 +101,7 @@ namespace Jurassic.Library
         /// <param name="call"> The delegate to call when function is called. </param>
         protected ClrStubFunction(ObjectInstance prototype,
             string name, int length, ObjectInstance instancePrototype,
-            Func<ScriptEngine, object, object[], ObjectInstance> construct,
+            Func<ScriptEngine, FunctionInstance, FunctionInstance, object[], ObjectInstance> construct,
             Func<ScriptEngine, object, object[], object> call)
             : base(prototype)
         {
@@ -144,7 +144,7 @@ namespace Jurassic.Library
                 {
                     ex.FunctionName = this.Name;
                     ex.SourcePath = "native";
-                    ex.PopulateStackTrace();
+                    ex.GetErrorObject(Engine);
                 }
                 throw;
             }
@@ -159,10 +159,8 @@ namespace Jurassic.Library
         public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
             if (this.constructBinder == null)
-                throw new JavaScriptException(this.Engine, ErrorType.TypeError, "Objects cannot be constructed from built-in functions.");
-            var result = (ObjectInstance)this.constructBinder(this.Engine, this, argumentValues);
-            result.SetPrototype(newTarget.InstancePrototype);
-            return result;
+                throw new JavaScriptException(ErrorType.TypeError, "Objects cannot be constructed from built-in functions.");
+            return this.constructBinder(this.Engine, this, newTarget, argumentValues);
         }
     }
 }

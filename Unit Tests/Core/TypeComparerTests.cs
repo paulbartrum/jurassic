@@ -127,6 +127,13 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.Equals(engine.String.Construct("5.5"), engine.String.Construct("5.5")));
             Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct("5.5"), 5.5));
             Assert.AreEqual(true,  TypeComparer.Equals(engine.String.Construct(""), ""));
+
+            // Symbol.
+            var symbol1 = engine.Symbol.Call("x");
+            var symbol2 = engine.Symbol.Call("x");
+            Assert.AreEqual(true, TypeComparer.Equals(symbol1, symbol1));
+            Assert.AreEqual(false, TypeComparer.Equals(symbol1, symbol2));
+            Assert.AreEqual(true, TypeComparer.Equals(symbol1, TypeConverter.ToObject(engine, symbol1)));
         }
 
         [TestMethod]
@@ -225,6 +232,13 @@ namespace UnitTests
             Assert.AreEqual(false, TypeComparer.StrictEquals(engine.Object.Construct(), engine.Object.Construct()));
             Assert.AreEqual(false, TypeComparer.StrictEquals(engine.Number.Construct(5.5), engine.Number.Construct(5.5)));
             Assert.AreEqual(false, TypeComparer.StrictEquals(engine.String.Construct("5.5"), engine.String.Construct("5.5")));
+
+            // Symbol.
+            var symbol1 = engine.Symbol.Call("x");
+            var symbol2 = engine.Symbol.Call("x");
+            Assert.AreEqual(true, TypeComparer.StrictEquals(symbol1, symbol1));
+            Assert.AreEqual(false, TypeComparer.StrictEquals(symbol1, symbol2));
+            Assert.AreEqual(false, TypeComparer.StrictEquals(symbol1, TypeConverter.ToObject(engine, symbol1)));
         }
 
         [TestMethod]

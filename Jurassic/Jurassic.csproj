@@ -12,7 +12,6 @@
     <PackageProjectUrl>https://github.com/paulbartrum/jurassic</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/nuget-logo.png</PackageIconUrl>
     <PackageTags>JavaScript ECMAScript</PackageTags>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <DefineConstants>TRACE</DefineConstants>
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);DEBUG</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net45'">$(DefineConstants);ENABLE_DEBUGGING</DefineConstants>
@@ -35,15 +34,13 @@ Plus misc fixes to regular expressions, number formatting and date parsing.</Pac
     <RepositoryCommit>3ce05b3455dce546d36f08902546a61ac50c6c81</RepositoryCommit>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <LangVersion>7.3</LangVersion>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,7 +14,7 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(5)
 			{
-				new PropertyNameAndValue(engine.Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(engine, "[Symbol.iterator]", 0, __STUB__GetIterator), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -22,7 +22,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ArgumentsInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method '[Symbol.iterator]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.iterator]' is not generic.");
 			return ((ArgumentsInstance)thisObj).GetIterator();
 		}
 	}

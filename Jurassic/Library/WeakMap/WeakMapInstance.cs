@@ -41,7 +41,7 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "WeakMap", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "WeakMap", PropertyAttributes.Configurable));
             result.InitializeProperties(properties);
             return result;
         }
@@ -116,7 +116,7 @@ namespace Jurassic.Library
         {
             var keyObj = key as ObjectInstance;
             if (keyObj == null)
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid value used as weak map key");
+                throw new JavaScriptException(ErrorType.TypeError, "Invalid value used as weak map key");
 
             // Gah!  There's no update/set method on ConditionalWeakTable (Add throws an exception
             // if the key exists).

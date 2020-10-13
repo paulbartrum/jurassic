@@ -14,25 +14,25 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(7)
 			{
-				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 0, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 0, __STUB__ToString), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue(engine.Symbol.ToPrimitive, new ClrStubFunction(engine, "[Symbol.toPrimitive]", 1, __STUB__ToPrimitive), PropertyAttributes.NonEnumerable),
+				new PropertyNameAndValue(Symbol.ToPrimitive, new ClrStubFunction(engine, "[Symbol.toPrimitive]", 1, __STUB__ToPrimitive), PropertyAttributes.NonEnumerable),
 			};
 		}
 
-		private static object __STUB__ToStringJS(ScriptEngine engine, object thisObj, object[] args)
+		private static object __STUB__ToString(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
-			return ((SymbolInstance)thisObj).ToStringJS();
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toString' is not generic.");
+			return ((SymbolInstance)thisObj).ToString();
 		}
 
 		private static object __STUB__ValueOf(ScriptEngine engine, object thisObj, object[] args)
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'valueOf' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((SymbolInstance)thisObj).ValueOf();
 		}
 
@@ -40,7 +40,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is SymbolInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method '[Symbol.toPrimitive]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method '[Symbol.toPrimitive]' is not generic.");
 			switch (args.Length)
 			{
 				case 0:

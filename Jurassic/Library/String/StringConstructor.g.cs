@@ -24,21 +24,18 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is StringConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Call' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'Call' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
 					return ((StringConstructor)thisObj).Call();
 				default:
-					return ((StringConstructor)thisObj).Call(TypeConverter.ToString(args[0]));
+					return ((StringConstructor)thisObj).Call(args[0]);
 			}
 		}
 
-		private static ObjectInstance __STUB__Construct(ScriptEngine engine, object thisObj, object[] args)
+		private static ObjectInstance __STUB__Construct(ScriptEngine engine, FunctionInstance thisObj, FunctionInstance newTarget, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is StringConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -75,7 +72,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return Raw(engine, TypeConverter.ToObject(engine, args[0]), new object[0]);
 				default:

@@ -534,6 +534,13 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage(@"eval(""'use strict'; var o = {}; with (o) {}"")"));
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage(@"'use strict'; eval(""var o = {}; with (o) {}"")"));
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage(@"eval(""function f() { 'use strict'; var o = {}; with (o) {} }"")"));
+
+            // Unscopables.
+            Assert.AreEqual(10, Evaluate("var keys = 10; with ([]) { keys }"));
+            Assert.AreEqual(2, Evaluate("var bar = 2; with ({ bar: 5, [Symbol.unscopables]: { bar: true } }) { bar }"));
+            Assert.AreEqual(5, Evaluate("var bar = 2; with ({ bar: 5, [Symbol.unscopables]: { bar: false } }) { bar }"));
+            Assert.AreEqual(2, Evaluate("var bar = 2; with ({ bar: 5, [Symbol.unscopables]: { bar: false } }) { bar = 3; } bar"));
+            Assert.AreEqual(3, Evaluate("var bar = 2; with ({ bar: 5, [Symbol.unscopables]: { bar: true } }) { bar = 3; } bar"));
         }
 
         [TestMethod]
@@ -653,7 +660,7 @@ namespace UnitTests
             // AND if the catch block is not run then the finally block shouldn't run either.
             scriptEngine.SetGlobalFunction("test", new Action(() =>
             {
-                throw new JavaScriptException(ScriptEngine, ErrorType.Error, "This is a test.");
+                throw new JavaScriptException(ScriptEngine.TypeError.Construct("This is a test."));
             }));
             try
             {
@@ -699,7 +706,7 @@ namespace UnitTests
             // The finally block shouldn't run for exceptions from other script engines.
             scriptEngine.SetGlobalFunction("test", new Action(() =>
             {
-                throw new JavaScriptException(ScriptEngine, ErrorType.Error, "This is a test.");
+                throw new JavaScriptException(ScriptEngine.TypeError.Construct("This is a test."));
             }));
             try
             {

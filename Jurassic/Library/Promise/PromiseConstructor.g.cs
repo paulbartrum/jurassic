@@ -14,7 +14,7 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue(Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("reject", new ClrStubFunction(engine, "reject", 1, __STUB__Reject), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("resolve", new ClrStubFunction(engine, "resolve", 1, __STUB__Resolve), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("race", new ClrStubFunction(engine, "race", 1, __STUB__Race), PropertyAttributes.NonEnumerable),
@@ -26,19 +26,16 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Call' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'Call' is not generic.");
 			return ((PromiseConstructor)thisObj).Call();
 		}
 
-		private static ObjectInstance __STUB__Construct(ScriptEngine engine, object thisObj, object[] args)
+		private static ObjectInstance __STUB__Construct(ScriptEngine engine, FunctionInstance thisObj, FunctionInstance newTarget, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return ((PromiseConstructor)thisObj).Construct(TypeConverter.ToObject<FunctionInstance>(engine, args[0]));
 			}
@@ -48,7 +45,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get [Symbol.species]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get [Symbol.species]' is not generic.");
 			return ((PromiseConstructor)thisObj).Species;
 		}
 
@@ -56,7 +53,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'reject' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'reject' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -70,7 +67,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'resolve' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'resolve' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -84,11 +81,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'race' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'race' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return ((PromiseConstructor)thisObj).Race(TypeConverter.ToObject(engine, args[0]));
 			}
@@ -98,11 +95,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is PromiseConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'all' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'all' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				default:
 					return ((PromiseConstructor)thisObj).All(TypeConverter.ToObject(engine, args[0]));
 			}

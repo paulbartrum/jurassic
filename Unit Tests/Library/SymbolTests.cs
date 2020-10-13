@@ -28,6 +28,12 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("Symbol.valueOf() === Symbol"));
             Assert.AreEqual("Symbol", Evaluate("Symbol.prototype[Symbol.toStringTag]"));
 
+            // Symbols can be explicitly converted to strings.
+            Assert.AreEqual("Symbol(foo)", Evaluate("String(Symbol('foo'))"));
+
+            // ...but not implicitly
+            Assert.AreEqual("TypeError: Cannot convert a Symbol value to a string.", EvaluateExceptionMessage("Symbol('foo') + ''"));
+
             // typeof
             Assert.AreEqual("symbol", Evaluate("typeof Symbol()"));
 
@@ -42,6 +48,30 @@ namespace UnitTests
             Assert.AreEqual("1defaulttest", Evaluate("var x = { a: 1 }; x[Symbol.toPrimitive] = function (hint) { return this.a + hint; }; x + 'test'"));
         }
 
-        // TODO: Symbol.iterator, Symbol.for, Symbol.keyFor, etc.
+        [TestMethod]
+        public void @for()
+        {
+            Assert.AreEqual(true, Evaluate("Symbol.for('foo') === Symbol.for('foo')"));
+            Assert.AreEqual(true, Evaluate("Symbol.for('foo') !== Symbol('foo')"));
+
+            // The key is also used as the description.
+            Assert.AreEqual("Symbol(mario)", Evaluate("Symbol.for('mario').toString()"));
+        }
+
+        [TestMethod]
+        public void keyFor()
+        {
+            Assert.AreEqual("foo", Evaluate("Symbol.keyFor(Symbol.for('foo'))"));
+            Assert.AreEqual(Undefined.Value, Evaluate("Symbol.keyFor(Symbol('foo'))"));
+        }
+
+        [TestMethod]
+        public void hasInstance()
+        {
+            Assert.AreEqual(@"{""writable"":false,""enumerable"":false,""configurable"":false}",
+                Evaluate("JSON.stringify(Object.getOwnPropertyDescriptor(Symbol, 'hasInstance'))"));
+        }
+
+        // TODO: Symbol.iterator, etc.
     }
 }

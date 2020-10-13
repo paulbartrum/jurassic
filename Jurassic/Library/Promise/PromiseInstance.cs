@@ -64,7 +64,7 @@ namespace Jurassic.Library
             }
             catch (JavaScriptException ex)
             {
-                rejectFunction.Call(Undefined.Value, ex.ErrorObject);
+                rejectFunction.Call(Undefined.Value, ex.GetErrorObject(Engine));
             }
         }
 
@@ -122,7 +122,7 @@ namespace Jurassic.Library
                             }
                             catch (JavaScriptException ex)
                             {
-                                Reject(ex.ErrorObject);
+                                Reject(ex.GetErrorObject(Engine));
                             }
                         });
                         return;
@@ -132,7 +132,7 @@ namespace Jurassic.Library
                 catch (JavaScriptException ex)
                 {
                     // GetPropertyValue threw an exception.
-                    Reject(ex.ErrorObject);
+                    Reject(ex.GetErrorObject(Engine));
                     return;
                 }
             }
@@ -180,7 +180,7 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Promise", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "Promise", PropertyAttributes.Configurable));
             result.InitializeProperties(properties);
             return result;
         }
@@ -209,7 +209,7 @@ namespace Jurassic.Library
                 new ClrStubFunction(Engine.Function.InstancePrototype, (engine, thisObj, args) =>
                 {
                     onFinallyFunction.Call(Undefined.Value);
-                    throw new JavaScriptException(this.result, 0, null);
+                    throw new JavaScriptException(this.result);
                 }));
             }
             else
@@ -241,8 +241,15 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "then")]
         public PromiseInstance Then(object onFulfilled, object onRejected)
         {
-            return PerformPromiseThen(onFulfilled as FunctionInstance, onRejected as FunctionInstance,
-                new PromiseInstance(Prototype));
+            // Get the @@species constructor, if one exists.
+            var constructor = TypeUtilities.GetSpeciesConstructor(this, Engine.Promise);
+
+            // Create a new promise instance.
+            var executor = new ClrStubFunction(Engine.FunctionInstancePrototype, "", 2, (engine, thisObj, args) => Undefined.Value);
+            var result = constructor.ConstructLateBound(constructor, executor);
+            if (result is PromiseInstance resultPromise)
+                return PerformPromiseThen(onFulfilled as FunctionInstance, onRejected as FunctionInstance, resultPromise);
+            throw new JavaScriptException(ErrorType.TypeError, "Subclassed promises are not supported.");
         }
 
         private PromiseInstance PerformPromiseThen(FunctionInstance onFulfilled, FunctionInstance onRejected, PromiseInstance result = null)
@@ -290,7 +297,7 @@ namespace Jurassic.Library
                     catch (JavaScriptException ex)
                     {
                         if (reaction.Promise != null)
-                            reaction.Promise.Reject(ex.ErrorObject);
+                            reaction.Promise.Reject(ex.GetErrorObject(Engine));
                     }
                 }
                 else if (reaction.Type == ReactionType.Fulfill)
@@ -320,7 +327,7 @@ namespace Jurassic.Library
             }
             else if (state == PromiseState.Rejected)
             {
-                throw new JavaScriptException(result, 0, null);
+                throw new JavaScriptException(result);
             }
 
             // These callbacks shouldn't deadlock on this.sync as they will not immediately fire
@@ -335,7 +342,7 @@ namespace Jurassic.Library
                 new ClrStubFunction(Engine.Function.InstancePrototype, (engine, ths, arg) =>
                 {
                     var result = arg.Length == 0 ? Undefined.Value : arg[0];
-                    tcs.SetException(new JavaScriptException(result, 0, null));
+                    tcs.SetException(new JavaScriptException(result));
                     return Undefined.Value;
                 }));
             return tcs.Task;

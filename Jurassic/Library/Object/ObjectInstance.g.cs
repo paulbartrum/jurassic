@@ -60,7 +60,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ObjectInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toLocaleString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toLocaleString' is not generic.");
 			return ((ObjectInstance)thisObj).ToLocaleString();
 		}
 
@@ -68,7 +68,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ObjectInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'valueOf' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((ObjectInstance)thisObj).ValueOf();
 		}
 

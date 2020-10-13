@@ -52,7 +52,7 @@ namespace Jurassic.Library
         [JSCallFunction]
         public object Call()
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, "Constructor Map requires 'new'");
+            throw new JavaScriptException(ErrorType.TypeError, "Constructor Map requires 'new'");
         }
 
         /// <summary>
@@ -76,14 +76,14 @@ namespace Jurassic.Library
                 // Get a reference to the set function.
                 var setFunc = result["set"] as FunctionInstance;
                 if (setFunc == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Missing 'set' function");
+                    throw new JavaScriptException(ErrorType.TypeError, "Missing 'set' function");
 
                 // Call the set function for each value.
                 foreach (var value in TypeUtilities.Iterate(Engine, iterator))
                 {
                     var obj = value as ObjectInstance;
                     if (obj == null)
-                        throw new JavaScriptException(Engine, ErrorType.TypeError, $"Expected iterator return value to be an object, but was {value}");
+                        throw new JavaScriptException(ErrorType.TypeError, $"Expected iterator return value to be an object, but was {value}");
                     setFunc.Call(result, obj[0], obj[1]);
                 }
             }

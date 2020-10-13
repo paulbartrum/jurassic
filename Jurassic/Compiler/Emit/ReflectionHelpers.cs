@@ -77,7 +77,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo IEnumerator_String_Current;
         internal static MethodInfo IEnumerator_Object_Current;
 
-        internal static MethodInfo JavaScriptException_ErrorObject;
+        internal static MethodInfo JavaScriptException_GetErrorObject;
         internal static MethodInfo Boolean_Construct;
         internal static MethodInfo Object_Construct;
 
@@ -128,6 +128,7 @@ namespace Jurassic.Compiler
         internal static MethodInfo ReflectionHelpers_SetClassSetter;
         internal static MethodInfo ReflectionHelpers_GetCachedTemplateStringsArray;
         internal static MethodInfo ReflectionHelpers_CreateTemplateStringsArray;
+        internal static MethodInfo ReflectionHelpers_InstanceOf;
 
         internal static MethodInfo ExecutionContext_GetEngine;
         internal static MethodInfo ExecutionContext_GetThisValue;
@@ -223,14 +224,14 @@ namespace Jurassic.Compiler
             ConcatenatedString_Append_ConcatenatedString = GetInstanceMethod(typeof(ConcatenatedString), "Append", typeof(ConcatenatedString));
             ConcatenatedString_ToString = GetInstanceMethod(typeof(ConcatenatedString), "ToString");
 
-            JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ScriptEngine), typeof(ErrorType), typeof(string), typeof(int), typeof(string), typeof(string));
+            JavaScriptException_Constructor_Error = GetConstructor(typeof(JavaScriptException), typeof(ErrorType), typeof(string), typeof(int), typeof(string), typeof(string));
             JavaScriptException_Constructor_Object = GetConstructor(typeof(JavaScriptException), typeof(object), typeof(int), typeof(string), typeof(string));
             IEnumerable_String_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<string>), "GetEnumerator");
             IEnumerable_Object_GetEnumerator = GetInstanceMethod(typeof(IEnumerable<object>), "GetEnumerator");
             IEnumerator_MoveNext = GetInstanceMethod(typeof(System.Collections.IEnumerator), "MoveNext");
             IEnumerator_String_Current = GetInstanceMethod(typeof(IEnumerator<string>), "get_Current");
             IEnumerator_Object_Current = GetInstanceMethod(typeof(IEnumerator<object>), "get_Current");
-            JavaScriptException_ErrorObject = GetInstanceMethod(typeof(JavaScriptException), "get_ErrorObject");
+            JavaScriptException_GetErrorObject = GetInstanceMethod(typeof(JavaScriptException), "GetErrorObject", typeof(ScriptEngine));
             Boolean_Construct = GetInstanceMethod(typeof(BooleanConstructor), "Construct", typeof(bool));
             
             RegExp_Construct = GetInstanceMethod(typeof(RegExpConstructor), "Construct", typeof(object), typeof(string));
@@ -276,6 +277,9 @@ namespace Jurassic.Compiler
             // Template literals
             ReflectionHelpers_GetCachedTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(GetCachedTemplateStringsArray), typeof(ScriptEngine), typeof(int));
             ReflectionHelpers_CreateTemplateStringsArray = GetStaticMethod(typeof(ReflectionHelpers), nameof(CreateTemplateStringsArray), typeof(ScriptEngine), typeof(int), typeof(string[]), typeof(string[]));
+
+            // instanceof
+            ReflectionHelpers_InstanceOf = GetStaticMethod(typeof(ReflectionHelpers), nameof(InstanceOf), typeof(object), typeof(object), typeof(int), typeof(string), typeof(string));
 
             // ExecutionContext
             ExecutionContext_GetEngine = GetInstanceMethod(typeof(ExecutionContext), "get_" + nameof(ExecutionContext.Engine));
@@ -441,7 +445,7 @@ namespace Jurassic.Compiler
             else
             {
                 if (extends != null)
-                    throw new JavaScriptException(engine, ErrorType.TypeError, $"Class {name} cannot extend '{extends}' as it is not a constructor.");
+                    throw new JavaScriptException(ErrorType.TypeError, $"Class {name} cannot extend '{extends}' as it is not a constructor.");
                 return new ClassFunction(engine.Function.InstancePrototype, name, engine.Object.Construct(), constructor);
             }
         }
@@ -487,6 +491,46 @@ namespace Jurassic.Compiler
                 obj.DefineProperty(key, new PropertyDescriptor(null, setter, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
             else
                 obj.DefineProperty(key, new PropertyDescriptor(descriptor.Getter, setter, Library.PropertyAttributes.NonEnumerable), throwOnError: false);
+        }
+
+        /// <summary>
+        /// Implements the 'instanceof' operator.
+        /// </summary>
+        /// <param name="lhs"> The left-hand side value. </param>
+        /// <param name="rhs"> The right-hand side value. </param>
+        /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
+        /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
+        /// <param name="functionName"> The name of the function.  Can be <c>null</c>. </param>
+        /// <returns> The result of the 'instanceof' operator. </returns>
+        public static bool InstanceOf(object lhs, object rhs, int lineNumber, string sourcePath, string functionName)
+        {
+            if (rhs is ObjectInstance rhsObjectInstance)
+            {
+                // Look for rhs[Symbol.hasInstance] function.
+                var hasInstanceObj = rhsObjectInstance[Symbol.HasInstance];
+                if (hasInstanceObj != Undefined.Value)
+                {
+                    // rhs[Symbol.hasInstance] exists, check it's a function.
+                    if (hasInstanceObj is FunctionInstance hasInstanceFunction)
+                    {
+                        // rhs[Symbol.hasInstance] is a function, call it.
+                        return TypeConverter.ToBoolean(hasInstanceFunction.Call(rhs, lhs));
+                    }
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.hasInstance value is not a function.", lineNumber, sourcePath, functionName);
+                }
+
+                // Fallback: make sure rhs is a function.
+                if (rhs is FunctionInstance rhsFunctionInstance)
+                {
+                    // Apply the ECMAScript algorithm.
+                    return rhsFunctionInstance.HasInstance(lhs);
+                }
+                else
+                    throw new JavaScriptException(ErrorType.TypeError, "Right-hand side of 'instanceof' is not an object.", lineNumber, sourcePath, functionName);
+            }
+            else
+                throw new JavaScriptException(ErrorType.TypeError, "Right-hand side of 'instanceof' is not an object.", lineNumber, sourcePath, functionName);
         }
 
 

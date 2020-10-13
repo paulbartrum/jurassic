@@ -14,7 +14,7 @@ namespace Jurassic.Library
 		{
 			return new List<PropertyNameAndValue>(8)
 			{
-				new PropertyNameAndValue(engine.Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue(Symbol.Species, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.species]", 0, __GETTER__Species), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("isArray", new ClrStubFunction(engine, "isArray", 1, __STUB__IsArray), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("of", new ClrStubFunction(engine, "of", 0, __STUB__Of), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("from", new ClrStubFunction(engine, "from", 1, __STUB__From), PropertyAttributes.NonEnumerable),
@@ -25,7 +25,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ArrayConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Call' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'Call' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -35,17 +35,14 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static ObjectInstance __STUB__Construct(ScriptEngine engine, object thisObj, object[] args)
+		private static ObjectInstance __STUB__Construct(ScriptEngine engine, FunctionInstance thisObj, FunctionInstance newTarget, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is ArrayConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					return ((ArrayConstructor)thisObj).Construct(new object[0]);
+					return ((ArrayConstructor)thisObj).Construct(newTarget, new object[0]);
 				default:
-					return ((ArrayConstructor)thisObj).Construct(args);
+					return ((ArrayConstructor)thisObj).Construct(newTarget, args);
 			}
 		}
 
@@ -53,7 +50,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ArrayConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get [Symbol.species]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get [Symbol.species]' is not generic.");
 			return ((ArrayConstructor)thisObj).Species;
 		}
 
@@ -84,7 +81,7 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "Required argument 'iterable' was not specified.");
+					throw new JavaScriptException(ErrorType.TypeError, "Required argument 'iterable' was not specified.");
 				case 1:
 					return From(engine, TypeConverter.ToObject(engine, args[0]));
 				case 2:

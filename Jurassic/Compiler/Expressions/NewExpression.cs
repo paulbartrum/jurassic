@@ -79,7 +79,6 @@ namespace Jurassic.Compiler
             // Throw an nicely formatted exception.
             var targetValue = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(targetValue);
-            EmitHelpers.LoadScriptEngine(generator);
             generator.LoadEnumValue(ErrorType.TypeError);
             generator.LoadString("The new operator requires a function, found a '{0}' instead");
             generator.LoadInt32(1);

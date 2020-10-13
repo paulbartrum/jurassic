@@ -133,7 +133,7 @@ namespace Jurassic.Compiler
             get
             {
                 if (ThisBindingStatus == BindingStatus.Uninitialized)
-                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, "Must call super constructor in derived class before accessing 'this'.");
+                    throw new JavaScriptException(ErrorType.ReferenceError, "Must call super constructor in derived class before accessing 'this'.");
                 return thisValue;
             }
         }
@@ -168,7 +168,7 @@ namespace Jurassic.Compiler
         public ObjectInstance CallSuperClass(object[] argumentValues)
         {
             if (ThisBindingStatus != BindingStatus.Uninitialized)
-                throw new JavaScriptException(Engine, ErrorType.ReferenceError, "Super constructor may only be called once.");
+                throw new JavaScriptException(ErrorType.ReferenceError, "Super constructor may only be called once.");
 
             if (FunctionContainer.Prototype is FunctionInstance super)
             {
@@ -179,7 +179,7 @@ namespace Jurassic.Compiler
                 return result;
             }
             else
-                throw new JavaScriptException(Engine, ErrorType.TypeError, $"Super constructor {FunctionContainer.Prototype} of {ExecutingFunction.Name} is not a constructor.");
+                throw new JavaScriptException(ErrorType.TypeError, $"Super constructor {FunctionContainer.Prototype} of {ExecutingFunction.Name} is not a constructor.");
         }
 
         /// <summary>

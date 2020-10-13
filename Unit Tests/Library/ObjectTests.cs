@@ -164,6 +164,20 @@ namespace UnitTests
             // Symbols are ignored.
             Assert.AreEqual("a", Evaluate("var x = {a: 5}; x[Symbol('test')] = 6; Object.getOwnPropertyNames(x).toString()"));
 
+            // Check the ordering.
+            Assert.AreEqual("012349 DB-1AEFGHIJKLMNOPQRSTUVWXYZC", Evaluate(@"
+                var obj = { 2: true, 0: true, 1: true, ' ': true, 9: true, D: true, B: true, '-1': true };
+                obj.A = true;
+                obj[3] = true;
+                'EFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(key) {
+	                obj[key] = true;
+                });
+                Object.defineProperty(obj, 'C', { value: true, enumerable: true });
+                Object.defineProperty(obj, '4', { value: true, enumerable: true });
+                delete obj[2];
+                obj[2] = true;
+                Object.getOwnPropertyNames(obj).join('')"));
+
             // length
             Assert.AreEqual(1, Evaluate("Object.getOwnPropertyNames.length"));
 

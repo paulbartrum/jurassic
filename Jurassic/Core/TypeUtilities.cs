@@ -30,7 +30,7 @@ namespace Jurassic
                 return "string";
             if (obj is FunctionInstance)
                 return "function";
-            if (obj is SymbolInstance)
+            if (obj is Symbol)
                 return "symbol";
             if (obj is ObjectInstance)
                 return "object";
@@ -181,7 +181,7 @@ namespace Jurassic
                 type == typeof(int) || type == typeof(uint) || type == typeof(double) ||
                 type == typeof(string) || type == typeof(ConcatenatedString) ||
                 type == typeof(Null) || type == typeof(Undefined) ||
-                type == typeof(SymbolInstance);
+                type == typeof(Symbol);
         }
 
         /// <summary>
@@ -212,9 +212,9 @@ namespace Jurassic
         public static void VerifyThisObject(ScriptEngine engine, object value, string functionName)
         {
             if (value == null || value == Undefined.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
+                throw new JavaScriptException(ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be undefined", functionName));
             if (value == Null.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
+                throw new JavaScriptException(ErrorType.TypeError, string.Format("The function '{0}' does not allow the value of 'this' to be null", functionName));
         }
 
         /// <summary>
@@ -233,17 +233,6 @@ namespace Jurassic
             var result = new object[args.Length - offset];
             Array.Copy(args, offset, result, 0, args.Length - offset);
             return result;
-        }
-
-        /// <summary>
-        /// Determines if the given value is a regular expression.
-        /// </summary>
-        /// <param name="value"> The value to test. </param>
-        /// <returns> <c>true</c> if the given value is a regular expression; <c>false</c> otherwise. </returns>
-        public static bool IsRegularExpression(object value)
-        {
-            // TODO: ECMAScript 6 defines IsRegExp in terms of a predefined symbol @@match.
-            return value is RegExpInstance;
         }
 
         private static readonly long negativeZeroBits = BitConverter.DoubleToInt64Bits(-0.0);
@@ -284,19 +273,19 @@ namespace Jurassic
                 throw new ArgumentNullException(nameof(iterable));
 
             // Get the iterator symbol value.
-            var iteratorValue = iterable[engine.Symbol.Iterator];
+            var iteratorValue = iterable[Symbol.Iterator];
             if (iteratorValue == Undefined.Value || iteratorValue == Null.Value)
                 return null;
 
             // If a value is present, it must be a function.
             var iteratorFunc = iteratorValue as FunctionInstance;
             if (iteratorFunc == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "The iterator symbol value must be a function");
+                throw new JavaScriptException(ErrorType.TypeError, "The iterator symbol value must be a function");
 
             // Call the function to get the iterator.
             var iterator = iteratorFunc.Call(iterable) as ObjectInstance;
             if (iterator == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator");
+                throw new JavaScriptException(ErrorType.TypeError, "Invalid iterator");
             return iterator;
         }
 
@@ -325,10 +314,10 @@ namespace Jurassic
         {
 
             if (iterable == Undefined.Value || iterable == Null.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
+                throw new JavaScriptException(ErrorType.TypeError, $"{iterable} is not iterable.");
             var iterator = GetIterator(engine, TypeConverter.ToObject(engine, iterable));
             if (iterator == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, $"{iterable} is not iterable.");
+                throw new JavaScriptException(ErrorType.TypeError, $"{iterable} is not iterable.");
             return iterator;
         }
 
@@ -346,7 +335,7 @@ namespace Jurassic
             // Okay, we have the iterator.  Now get a reference to the next function.
             var nextFunc = iterator["next"] as FunctionInstance;
             if (nextFunc == null)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Missing iterator next function");
+                throw new JavaScriptException(ErrorType.TypeError, "Missing iterator next function");
 
             // Loop.
             var values = new List<object>();
@@ -355,7 +344,7 @@ namespace Jurassic
                 // Call the next function to get the next value.
                 var iteratorResult = nextFunc.Call(iterator) as ObjectInstance;
                 if (iteratorResult == null)
-                    throw new JavaScriptException(engine, ErrorType.TypeError, "Invalid iterator next return value");
+                    throw new JavaScriptException(ErrorType.TypeError, "Invalid iterator next return value");
 
                 // Check if iteration is done.
                 if (TypeConverter.ToBoolean(iteratorResult["done"]))
@@ -392,6 +381,32 @@ namespace Jurassic
             for (uint i = 0; i < length; i++)
                 result[i] = arrayLike[i];
             return result;
+        }
+
+        /// <summary>
+        /// Retrieves the constructor that should be used to create new objects that are derived
+        /// from the argument object <paramref name="objectInstance"/>.
+        /// </summary>
+        /// <param name="objectInstance"> The object to check. </param>
+        /// <param name="defaultConstructor"> The constructor to return if no @@species property
+        /// can be found. </param>
+        /// <returns> A constructor that can be used to create new objects. </returns>
+        internal static FunctionInstance GetSpeciesConstructor(ObjectInstance objectInstance, FunctionInstance defaultConstructor)
+        {
+            var constructor = objectInstance["constructor"];
+            if (constructor == Undefined.Value)
+                return defaultConstructor;
+            if (constructor is ObjectInstance constructorObjectInstance)
+            {
+                var species = constructorObjectInstance[Symbol.Species];
+                if (species == Undefined.Value || species == Null.Value)
+                    return defaultConstructor;
+                if (species is FunctionInstance speciesConstructor)
+                    return speciesConstructor;
+                throw new JavaScriptException(ErrorType.TypeError, "@@species value must be a constructor.");
+            }
+            else
+                throw new JavaScriptException(ErrorType.TypeError, "'constructor' value is not an object.");
         }
     }
 

@@ -182,7 +182,7 @@ namespace Jurassic.Library
             }
             catch (IndexOutOfRangeException)
             {
-                throw new JavaScriptException(Engine, ErrorType.TypeError, "Invalid comparison function");
+                throw new JavaScriptException(ErrorType.TypeError, "Invalid comparison function");
             }
 
             return WrappedInstance;
@@ -219,7 +219,7 @@ namespace Jurassic.Library
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new JavaScriptException(Engine, ErrorType.RangeError, "The array is too long");
+                throw new JavaScriptException(ErrorType.RangeError, "The array is too long");
             }
 
             return result.ToString();
@@ -514,7 +514,7 @@ namespace Jurassic.Library
                     }
                 }
                 if (accumulatedValue == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Reduce of empty array with no initial value");
+                    throw new JavaScriptException(ErrorType.TypeError, "Reduce of empty array with no initial value");
             }
 
             // Scan from low to high.
@@ -563,7 +563,7 @@ namespace Jurassic.Library
                     }
                 }
                 if (accumulatedValue == null)
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, "Reduce of empty array with no initial value");
+                    throw new JavaScriptException(ErrorType.TypeError, "Reduce of empty array with no initial value");
             }
 
             // Scan from high to to low.

@@ -25,7 +25,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'apply' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'apply' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -41,7 +41,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'call' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'call' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -57,7 +57,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'bind' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'bind' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -73,7 +73,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is FunctionInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toString' is not generic.");
 			return ((FunctionInstance)thisObj).ToStringJS();
 		}
 	}

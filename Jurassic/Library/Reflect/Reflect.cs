@@ -23,7 +23,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue(Engine.Symbol.ToStringTag, "Reflect", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "Reflect", PropertyAttributes.Configurable));
             InitializeProperties(properties);
         }
 
@@ -74,7 +74,7 @@ namespace Jurassic.Library
             propertyKey = TypeConverter.ToPropertyKey(propertyKey);
             var defaults = target.GetOwnPropertyDescriptor(propertyKey);
             if (!(attributes is ObjectInstance))
-                throw new JavaScriptException(target.Engine, ErrorType.TypeError, $"Invalid property descriptor '{attributes}'.");
+                throw new JavaScriptException(ErrorType.TypeError, $"Invalid property descriptor '{attributes}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
             return target.DefineProperty(propertyKey, descriptor, throwOnError: false);
         }
@@ -137,19 +137,18 @@ namespace Jurassic.Library
         /// Returns a Boolean indicating whether the target has the property. Either as own or
         /// inherited. Works like the in operator as a function.
         /// </summary>
-        /// <param name="engine"> The script engine to use. </param>
         /// <param name="target"> The target object in which to look for the property. </param>
         /// <param name="propertyKey"> The name of the property to check. </param>
         /// <returns> A Boolean indicating whether or not the target has the property. </returns>
-        [JSInternalFunction(Name = "has", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static bool Has(ScriptEngine engine, object target, object propertyKey)
+        [JSInternalFunction(Name = "has")]
+        public static bool Has(object target, object propertyKey)
         {
             if (target is ObjectInstance targetObjectInstance)
             {
                 propertyKey = TypeConverter.ToPropertyKey(propertyKey);
                 return targetObjectInstance.HasProperty(propertyKey);
             }
-            throw new JavaScriptException(engine, ErrorType.TypeError, "Reflect.has called with non-object.");
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.has called with non-object.");
         }
 
         /// <summary>
@@ -158,9 +157,11 @@ namespace Jurassic.Library
         /// <param name="target"> The target object which to check if it is extensible. </param>
         /// <returns> A Boolean indicating whether or not the target is extensible. </returns>
         [JSInternalFunction(Name = "isExtensible")]
-        public static new bool IsExtensible(ObjectInstance target)
+        public static new bool IsExtensible(object target)
         {
-            return target.IsExtensible;
+            if (target is ObjectInstance targetObjectInstance)
+                return targetObjectInstance.IsExtensible;
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.isExtensible called with non-object.");
         }
 
         /// <summary>
@@ -196,7 +197,7 @@ namespace Jurassic.Library
 
             // Symbols, in insertion order.
             foreach (var property in target.Properties)
-                if (property.Key is SymbolInstance)
+                if (property.Key is Symbol)
                     result.Push(property.Key);
 
             return result;
@@ -205,18 +206,17 @@ namespace Jurassic.Library
         /// <summary>
         /// Similar to Object.preventExtensions().
         /// </summary>
-        /// <param name="engine"> The script engine to use. </param>
         /// <param name="target"> The target object on which to prevent extensions. </param>
         /// <returns> A Boolean indicating whether or not the target was successfully set to prevent extensions. </returns>
-        [JSInternalFunction(Name = "preventExtensions", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static bool PreventExtensions(ScriptEngine engine, object target)
+        [JSInternalFunction(Name = "preventExtensions")]
+        public static bool PreventExtensions(object target)
         {
             if (target is ObjectInstance targetObjectInstance)
             {
                 targetObjectInstance.IsExtensible = false;
                 return true;
             }
-            throw new JavaScriptException(engine, ErrorType.TypeError, "Reflect.preventExtensions called with non-object.");
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.preventExtensions called with non-object.");
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace Jurassic.Library
             // The prototype must be null or an object. Note that null in .NET is actually undefined in JS!
             var prototypeObj = prototype as ObjectInstance;
             if (prototypeObj == null && prototype != Null.Value)
-                throw new JavaScriptException(target.Engine, ErrorType.TypeError, "Object prototype may only be an Object or null.");
+                throw new JavaScriptException(ErrorType.TypeError, "Object prototype may only be an Object or null.");
             return target.SetPrototype(prototypeObj);
         }
     }

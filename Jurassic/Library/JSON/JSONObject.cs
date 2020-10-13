@@ -23,7 +23,7 @@ namespace Jurassic.Library
             : base(prototype)
         {
             var properties = GetDeclarativeProperties(Engine);
-            properties.Add(new PropertyNameAndValue(Engine.Symbol.ToStringTag, "JSON", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "JSON", PropertyAttributes.Configurable));
             InitializeProperties(properties);
         }
 
@@ -58,7 +58,7 @@ namespace Jurassic.Library
         /// that is used for indentation. </param>
         /// <returns> The JSON string representing the value. </returns>
         [JSInternalFunction(Name = "stringify", Flags = JSFunctionFlags.HasEngineParameter)]
-        public static string Stringify(ScriptEngine engine, object value, object replacer = null, object spacer = null)
+        public static object Stringify(ScriptEngine engine, object value, object replacer = null, object spacer = null)
         {
             var serializer = new JSONSerializer(engine);
 
@@ -89,7 +89,7 @@ namespace Jurassic.Library
                 serializer.Indentation = ((string)spacer).Substring(0, Math.Min(((string)spacer).Length, 10));
 
             // Serialize the value.
-            return serializer.Serialize(value);
+            return serializer.Serialize(value) ?? (object)Undefined.Value;
         }
 
 

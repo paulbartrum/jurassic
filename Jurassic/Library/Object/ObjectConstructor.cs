@@ -96,15 +96,15 @@ namespace Jurassic.Library
             // The prototype must be null or an object. Note that null in .NET is actually undefined in JS!
             var prototypeObj = prototype as ObjectInstance;
             if (prototypeObj == null && prototype != Null.Value)
-                throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Object prototype may only be an Object or null.");
+                throw new JavaScriptException(ErrorType.TypeError, "Object prototype may only be an Object or null.");
 
             // Attempt to set the prototype.
             if (!obj.SetPrototype(prototypeObj))
             {
                 // Attempt to throw a reasonable error message based on what we know about how SetPrototype works.
                 if (!obj.IsExtensible)
-                    throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Object is not extensible.");
-                throw new JavaScriptException(obj.Engine, ErrorType.TypeError, "Prototype chain contains a cyclic reference.");
+                    throw new JavaScriptException(ErrorType.TypeError, "Object is not extensible.");
+                throw new JavaScriptException(ErrorType.TypeError, "Prototype chain contains a cyclic reference.");
             }
 
             return obj;
@@ -135,10 +135,30 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "getOwnPropertyNames")]
         public static ArrayInstance GetOwnPropertyNames(ObjectInstance obj)
         {
-            var result = obj.Engine.Array.New();
+            // Indexes should be in numeric order.
+            var indexes = new List<uint>();
             foreach (var property in obj.Properties)
-                if (property.Key is string)
-                    result.Push(property.Key);
+                if (property.Key is string key)
+                {
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    if (arrayIndex != uint.MaxValue)
+                        indexes.Add(arrayIndex);
+                }
+            indexes.Sort();
+
+            var result = obj.Engine.Array.New();
+            foreach (uint index in indexes)
+                result.Push(index.ToString());
+
+            // Strings, in insertion order.
+            foreach (var property in obj.Properties)
+                if (property.Key is string key)
+                {
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    if (arrayIndex == uint.MaxValue)
+                        result.Push(key);
+                }
+                    
             return result;
         }
 
@@ -153,7 +173,7 @@ namespace Jurassic.Library
         {
             var result = obj.Engine.Array.New();
             foreach (var property in obj.Properties)
-                if (property.Key is SymbolInstance)
+                if (property.Key is Symbol)
                     result.Push(property.Key);
             return result;
         }
@@ -170,7 +190,7 @@ namespace Jurassic.Library
         public static ObjectInstance Create(ScriptEngine engine, object prototype, ObjectInstance properties = null)
         {
             if ((prototype is ObjectInstance) == false && prototype != Null.Value)
-                throw new JavaScriptException(engine, ErrorType.TypeError, "object prototype must be an object or null");
+                throw new JavaScriptException(ErrorType.TypeError, "object prototype must be an object or null");
             ObjectInstance result;
             if (prototype == Null.Value)
                 result = ObjectInstance.CreateRootObject(engine);
@@ -220,7 +240,7 @@ namespace Jurassic.Library
             key = TypeConverter.ToPropertyKey(key);
             var defaults = obj.GetOwnPropertyDescriptor(key);
             if (!(attributes is ObjectInstance))
-                throw new JavaScriptException(obj.Engine, ErrorType.TypeError, $"Invalid descriptor for property '{key}'.");
+                throw new JavaScriptException(ErrorType.TypeError, $"Invalid descriptor for property '{key}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
             obj.DefineProperty(key, descriptor, true);
             return obj;
@@ -236,7 +256,7 @@ namespace Jurassic.Library
         public static ObjectInstance DefineProperties(object obj, ObjectInstance properties)
         {
             if (!(obj is ObjectInstance))
-                throw new JavaScriptException(properties.Engine, ErrorType.TypeError, "Object.defineProperties called on non-object.");
+                throw new JavaScriptException(ErrorType.TypeError, "Object.defineProperties called on non-object.");
             var obj2 = (ObjectInstance)obj;
             foreach (var property in properties.Properties)
                 if (property.IsEnumerable == true)
@@ -402,13 +422,13 @@ namespace Jurassic.Library
                 if (entry is ObjectInstance entryObject)
                 {
                     var propertyKey = entryObject[0];
-                    if (!(propertyKey is string) && !(propertyKey is SymbolInstance))
+                    if (!(propertyKey is string) && !(propertyKey is Symbol))
                         propertyKey = TypeConverter.ToString(propertyKey);
                     var propertyValue = entryObject[1];
                     result[propertyKey] = propertyValue;
                 }
                 else
-                    throw new JavaScriptException(iterable.Engine, ErrorType.TypeError, $"Iterator value {TypeConverter.ToString(entry)} is not an entry object.");
+                    throw new JavaScriptException(ErrorType.TypeError, $"Iterator value {TypeConverter.ToString(entry)} is not an entry object.");
             }
             return result;
         }

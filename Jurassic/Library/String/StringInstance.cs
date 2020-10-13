@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 
 namespace Jurassic.Library
@@ -13,7 +12,7 @@ namespace Jurassic.Library
     [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class StringInstance : ObjectInstance
     {
-        private string value;
+        private readonly string value;
 
 
 
@@ -236,8 +235,8 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "includes", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject, Length = 1)]
         public static bool Includes(ScriptEngine engine, string thisObject, object substring, int startIndex = 0)
         {
-            if (TypeUtilities.IsRegularExpression(substring))
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Substring argument must not be a regular expression.");
+            if (IsRegExp(substring))
+                throw new JavaScriptException(ErrorType.TypeError, "Substring argument must not be a regular expression.");
             return IndexOf(thisObject, TypeConverter.ToString(substring), startIndex) >= 0;
         }
 
@@ -305,18 +304,30 @@ namespace Jurassic.Library
         /// <param name="substrOrRegExp"> The substring or regular expression to search for. </param>
         /// <returns> An array containing the matched strings. </returns>
         [JSInternalFunction(Name = "match", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static object Match(ScriptEngine engine, string thisObject, object substrOrRegExp)
+        public static object Match(ScriptEngine engine, object thisObject, object substrOrRegExp)
         {
-            if (substrOrRegExp is RegExpInstance)
-                // substrOrRegExp is a regular expression.
-                return ((RegExpInstance)substrOrRegExp).Match(thisObject);
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.match called on null or undefined.");
 
-            if (TypeUtilities.IsUndefined(substrOrRegExp))
-                // substrOrRegExp is undefined.
-                return engine.RegExp.Construct("").Match(thisObject);
+            if (substrOrRegExp != Null.Value && substrOrRegExp != Undefined.Value)
+            {
+                // Get the [Symbol.match] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, substrOrRegExp)[Symbol.Match];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(substrOrRegExp, thisObject);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.match value is not a function.");
+                }
+            }
 
-            // substrOrRegExp is a string (or convertible to a string).
-            return engine.RegExp.Construct(TypeConverter.ToString(substrOrRegExp)).Match(thisObject);
+            // Convert the argument to a regex.
+            var regex = new RegExpInstance(engine.RegExp.InstancePrototype, TypeConverter.ToString(substrOrRegExp, string.Empty));
+
+            // Call the [Symbol.match] function.
+            return regex.Match(TypeConverter.ToString(thisObject));
         }
 
         /// <summary>
@@ -340,7 +351,7 @@ namespace Jurassic.Library
                 case "NFKD":
                     return thisObject.Normalize(NormalizationForm.FormKD);
             }
-            throw new JavaScriptException(engine, ErrorType.RangeError, "The normalization form should be one of NFC, NFD, NFKC, NFKD.");
+            throw new JavaScriptException(ErrorType.RangeError, "The normalization form should be one of NFC, NFD, NFKC, NFKD.");
         }
 
         /// <summary>
@@ -353,7 +364,7 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "quote", Flags = JSFunctionFlags.HasThisObject, NonStandard = true)]
         public static string Quote(string thisObject)
         {
-            var result = new System.Text.StringBuilder(thisObject.Length + 2);
+            var result = new StringBuilder(thisObject.Length + 2);
             result.Append('"');
             for (int i = 0; i < thisObject.Length; i++)
             {
@@ -370,31 +381,37 @@ namespace Jurassic.Library
         /// Substitutes the given string or regular expression with the given text or the result
         /// of a replacement function.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="thisObject"> The string that is being operated on. </param>
         /// <param name="substrOrRegExp"> The substring to replace -or- a regular expression that
         /// matches the text to replace. </param>
         /// <param name="replaceTextOrFunction"> The text to substitute -or- a function that
         /// returns the text to substitute. </param>
         /// <returns> A copy of this string with text replaced. </returns>
-        [JSInternalFunction(Name = "replace", Flags = JSFunctionFlags.HasThisObject)]
-        public static string Replace(string thisObject, object substrOrRegExp, object replaceTextOrFunction)
+        [JSInternalFunction(Name = "replace", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        public static object Replace(ScriptEngine engine, object thisObject, object substrOrRegExp, object replaceTextOrFunction)
         {
-            // The built-in function binding system is not powerful enough to bind the replace
-            // function properly, so we bind to the correct function manually.
-            if (substrOrRegExp is RegExpInstance)
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.replace called on null or undefined.");
+
+            if (substrOrRegExp != Null.Value && substrOrRegExp != Undefined.Value)
             {
-                if (replaceTextOrFunction is FunctionInstance)
-                    return Replace(thisObject, (RegExpInstance)substrOrRegExp, (FunctionInstance)replaceTextOrFunction);
-                else
-                    return Replace(thisObject, (RegExpInstance)substrOrRegExp, TypeConverter.ToString(replaceTextOrFunction));
+                // Get the [Symbol.replace] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, substrOrRegExp)[Symbol.Replace];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(substrOrRegExp, thisObject, replaceTextOrFunction);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.replace value is not a function.");
+                }
             }
+
+            if (replaceTextOrFunction is FunctionInstance)
+                return Replace(TypeConverter.ToString(thisObject), TypeConverter.ToString(substrOrRegExp), (FunctionInstance)replaceTextOrFunction);
             else
-            {
-                if (replaceTextOrFunction is FunctionInstance)
-                    return Replace(thisObject, TypeConverter.ToString(substrOrRegExp), (FunctionInstance)replaceTextOrFunction);
-                else
-                    return Replace(thisObject, TypeConverter.ToString(substrOrRegExp), TypeConverter.ToString(replaceTextOrFunction));
-            }
+                return Replace(TypeConverter.ToString(thisObject), TypeConverter.ToString(substrOrRegExp), TypeConverter.ToString(replaceTextOrFunction));
         }
 
         /// <summary>
@@ -414,7 +431,7 @@ namespace Jurassic.Library
             int end = start + substr.Length;
 
             // Replace only the first match.
-            var result = new System.Text.StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
+            var result = new StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
             result.Append(thisObject, 0, start);
             result.Append(replaceText);
             result.Append(thisObject, end, thisObject.Length - end);
@@ -441,7 +458,7 @@ namespace Jurassic.Library
             var replaceText = TypeConverter.ToString(replaceFunction.CallFromNative("replace", null, substr, start, thisObject));
 
             // Replace only the first match.
-            var result = new System.Text.StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
+            var result = new StringBuilder(thisObject.Length + (replaceText.Length - substr.Length));
             result.Append(thisObject, 0, start);
             result.Append(replaceText);
             result.Append(thisObject, end, thisObject.Length - end);
@@ -449,50 +466,37 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Returns a copy of this string with text replaced using a regular expression.
-        /// </summary>
-        /// <param name="thisObject"> The string that is being operated on. </param>
-        /// <param name="regExp"> The regular expression to search for. </param>
-        /// <param name="replaceText"> A string containing the text to replace for every successful match. </param>
-        /// <returns> A copy of this string with text replaced using a regular expression. </returns>
-        public static string Replace(string thisObject, RegExpInstance regExp, string replaceText)
-        {
-            return regExp.Replace(thisObject, replaceText);
-        }
-
-        /// <summary>
-        /// Returns a copy of this string with text replaced using a regular expression and a
-        /// replacement function.
-        /// </summary>
-        /// <param name="thisObject"> The string that is being operated on. </param>
-        /// <param name="regExp"> The regular expression to search for. </param>
-        /// <param name="replaceFunction"> A function that is called to produce the text to replace
-        /// for every successful match. </param>
-        /// <returns> A copy of this string with text replaced using a regular expression. </returns>
-        public static string Replace(string thisObject, RegExpInstance regExp, FunctionInstance replaceFunction)
-        {
-            return regExp.Replace(thisObject, replaceFunction);
-        }
-
-        /// <summary>
         /// Returns the position of the first substring match.
         /// </summary>
+        /// <param name="engine"> The current script environment. </param>
         /// <param name="thisObject"> The string that is being operated on. </param>
         /// <param name="substrOrRegExp"> The string or regular expression to search for. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
-        [JSInternalFunction(Name = "search", Flags = JSFunctionFlags.HasThisObject)]
-        public static int Search(string thisObject, object substrOrRegExp)
+        [JSInternalFunction(Name = "search", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
+        public static object Search(ScriptEngine engine, object thisObject, object substrOrRegExp)
         {
-            if (substrOrRegExp is RegExpInstance)
-                // substrOrRegExp is a regular expression.
-                return ((RegExpInstance)substrOrRegExp).Search(thisObject);
-            
-            if (TypeUtilities.IsUndefined(substrOrRegExp))
-                // substrOrRegExp is undefined.
-                return 0;
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.search called on null or undefined.");
 
-            // substrOrRegExp is a string (or convertible to a string).
-            return thisObject.IndexOf(TypeConverter.ToString(substrOrRegExp), StringComparison.Ordinal);
+            if (substrOrRegExp != Null.Value && substrOrRegExp != Undefined.Value)
+            {
+                // Get the [Symbol.search] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, substrOrRegExp)[Symbol.Search];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(substrOrRegExp, thisObject);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.search value is not a function.");
+                }
+            }
+
+            // Convert the argument to a regex.
+            var regex = new RegExpInstance(engine.RegExp.InstancePrototype, TypeConverter.ToString(substrOrRegExp, string.Empty));
+
+            // Call the [Symbol.search] function.
+            return regex.Search(TypeConverter.ToString(thisObject));
         }
 
         /// <summary>
@@ -529,30 +533,32 @@ namespace Jurassic.Library
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
         [JSInternalFunction(Name = "split", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject)]
-        public static ArrayInstance Split(ScriptEngine engine, string thisObject, object separator, double limit = uint.MaxValue)
+        public static object Split(ScriptEngine engine, object thisObject, object separator, object limit)
         {
-            // Limit defaults to unlimited.  Note the ToUint32() conversion.
-            uint limit2 = uint.MaxValue;
-            if (TypeUtilities.IsUndefined(limit) == false)
-                limit2 = TypeConverter.ToUint32(limit);
+            if (thisObject == Null.Value || thisObject == Undefined.Value)
+                throw new JavaScriptException(ErrorType.TypeError, "String.prototype.split called on null or undefined.");
 
-            // Call separate methods, depending on whether the separator is a regular expression.
-            if (separator is RegExpInstance)
-                return Split(thisObject, (RegExpInstance)separator, limit2);
-            else
-                return Split(engine, thisObject, TypeConverter.ToString(separator), limit2);
-        }
+            if (separator != Null.Value && separator != Undefined.Value)
+            {
+                // Get the [Symbol.split] property value.
+                var matchFunctionObj = TypeConverter.ToObject(engine, separator)[Symbol.Split];
+                if (matchFunctionObj != Undefined.Value)
+                {
+                    // If it's a function, call it and return the result.
+                    if (matchFunctionObj is FunctionInstance matchFunction)
+                        return matchFunction.CallLateBound(separator, thisObject, limit);
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, "Symbol.split value is not a function.");
+                }
+            }
 
-        /// <summary>
-        /// Splits this string into an array of strings by separating the string into substrings.
-        /// </summary>
-        /// <param name="thisObject"> The string that is being operated on. </param>
-        /// <param name="regExp"> A regular expression that indicates where to split the string. </param>
-        /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
-        /// <returns> An array containing the split strings. </returns>
-        public static ArrayInstance Split(string thisObject, RegExpInstance regExp, uint limit = uint.MaxValue)
-        {
-            return regExp.Split(thisObject, limit);
+            // If separator is undefined, then don't match anything.
+            if (separator == Undefined.Value)
+                return engine.Array.New(new object[] { TypeConverter.ToString(thisObject) });
+
+            // Call the strongly-typed string split method.
+            var limitUint = limit == Undefined.Value ? uint.MaxValue : TypeConverter.ToUint32(limit);
+            return Split(engine, TypeConverter.ToString(thisObject), TypeConverter.ToString(separator), limitUint);
         }
 
         /// <summary>
@@ -753,16 +759,15 @@ namespace Jurassic.Library
         /// <summary>
         /// Determines whether a string begins with the characters of another string.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="thisObject"> The string that is being operated on. </param>
         /// <param name="searchStringObj"> The characters to be searched for at the start of this string. </param>
         /// <param name="position"> The position at which to begin searching.  Defaults to zero. </param>
         /// <returns> <c>true</c> if this string starts with the given string, <c>false</c> otherwise. </returns>
-        [JSInternalFunction(Name = "startsWith", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool StartsWith(ScriptEngine engine, string thisObject, object searchStringObj, int position = 0)
+        [JSInternalFunction(Name = "startsWith", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static bool StartsWith(string thisObject, object searchStringObj, int position = 0)
         {
-            if (TypeUtilities.IsRegularExpression(searchStringObj))
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Substring argument must not be a regular expression.");
+            if (IsRegExp(searchStringObj))
+                throw new JavaScriptException(ErrorType.TypeError, "Substring argument must not be a regular expression.");
             string searchString = TypeConverter.ToString(searchStringObj);
             if (position == 0)
                 return thisObject.StartsWith(searchString);
@@ -775,17 +780,16 @@ namespace Jurassic.Library
         /// <summary>
         /// Determines whether a string ends with the characters of another string.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="thisObject"> The string that is being operated on. </param>
         /// <param name="searchStringObj"> The characters to be searched for at the end of this string. </param>
         /// <param name="position"> Search within the string as if the string were only this long.
         /// Defaults to the string's actual length. </param>
         /// <returns> <c>true</c> if this string ends with the given string, <c>false</c> otherwise. </returns>
-        [JSInternalFunction(Name = "endsWith", Flags = JSFunctionFlags.HasEngineParameter | JSFunctionFlags.HasThisObject, Length = 1)]
-        public static bool EndsWith(ScriptEngine engine, string thisObject, object searchStringObj, int position = int.MaxValue)
+        [JSInternalFunction(Name = "endsWith", Flags = JSFunctionFlags.HasThisObject, Length = 1)]
+        public static bool EndsWith(string thisObject, object searchStringObj, int position = int.MaxValue)
         {
-            if (TypeUtilities.IsRegularExpression(searchStringObj))
-                throw new JavaScriptException(engine, ErrorType.TypeError, "Substring argument must not be a regular expression.");
+            if (IsRegExp(searchStringObj))
+                throw new JavaScriptException(ErrorType.TypeError, "Substring argument must not be a regular expression.");
             string searchString = TypeConverter.ToString(searchStringObj);
             if (position == int.MaxValue)
                 return thisObject.EndsWith(searchString);
@@ -820,7 +824,7 @@ namespace Jurassic.Library
         public static string Repeat(ScriptEngine engine, string thisObject, int count)
         {
             if (count < 0 || count == int.MaxValue)
-                throw new JavaScriptException(engine, ErrorType.RangeError, "The count parameter is out of range.");
+                throw new JavaScriptException(ErrorType.RangeError, "The count parameter is out of range.");
             var result = new StringBuilder();
             for (int i = 0; i < count; i ++)
                 result.Append(thisObject);
@@ -986,6 +990,31 @@ namespace Jurassic.Library
         public static string Sup(string thisObject)
         {
             return string.Format("<sup>{0}</sup>", thisObject);
+        }
+
+
+
+        //     HELPER METHODS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Determines if the given object can be considered a RegExp-like object.
+        /// </summary>
+        /// <param name="o"> The object instance to check. </param>
+        /// <returns> <c>true</c> if the object instance has [Symbol.match] value that is truthy;
+        /// <c>false</c> otherwise. </returns>
+        private static bool IsRegExp(object o)
+        {
+            if (o is ObjectInstance objectInstance)
+            {
+                // Get the [Symbol.match] property value.
+                var match = objectInstance[Symbol.Match];
+                if (match != Undefined.Value)
+                    return TypeConverter.ToBoolean(match);
+                return o is RegExpInstance;
+            }
+            else
+                return false;
         }
     }
 }

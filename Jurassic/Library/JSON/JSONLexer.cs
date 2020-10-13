@@ -84,7 +84,7 @@ namespace Jurassic.Library
                         // End of input.
                         return null;
                     default:
-                        throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Unexpected character '{0}'.", (char)c));
+                        throw new JavaScriptException(ErrorType.SyntaxError, string.Format("Unexpected character '{0}'.", (char)c));
                 }
             }
         }
@@ -123,7 +123,7 @@ namespace Jurassic.Library
             else if (keyword == "true")
                 return LiteralToken.True;
             else
-                throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Unexpected keyword '{0}'", keyword));
+                throw new JavaScriptException(ErrorType.SyntaxError, string.Format("Unexpected keyword '{0}'", keyword));
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Jurassic.Library
 
                 // If the first character is '-' then a digit must be the next character.
                 if (firstChar < '0' || firstChar > '9')
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid number.");
+                    throw new JavaScriptException(ErrorType.SyntaxError, "Invalid number.");
             }
 
             NumberParser.ParseCoreStatus status;
@@ -155,17 +155,17 @@ namespace Jurassic.Library
                 case NumberParser.ParseCoreStatus.NoExponent:
                 case NumberParser.ParseCoreStatus.NoFraction:
                 case NumberParser.ParseCoreStatus.ExponentHasLeadingZero:
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Invalid number.");
+                    throw new JavaScriptException(ErrorType.SyntaxError, "Invalid number.");
                 case NumberParser.ParseCoreStatus.HexLiteral:
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Hexidecimal literals are not supported in JSON.");
+                    throw new JavaScriptException(ErrorType.SyntaxError, "Hexidecimal literals are not supported in JSON.");
                 case NumberParser.ParseCoreStatus.ES3OctalLiteral:
                 case NumberParser.ParseCoreStatus.ES6OctalLiteral:
                 case NumberParser.ParseCoreStatus.InvalidOctalLiteral:
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Octal literals are not supported in JSON.");
+                    throw new JavaScriptException(ErrorType.SyntaxError, "Octal literals are not supported in JSON.");
                 case NumberParser.ParseCoreStatus.BinaryLiteral:
                 case NumberParser.ParseCoreStatus.InvalidBinaryLiteral:
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Binary literals are not supported in JSON.");
+                    throw new JavaScriptException(ErrorType.SyntaxError, "Binary literals are not supported in JSON.");
             }
 
             return new LiteralToken(negative ? -result : result);
@@ -210,9 +210,9 @@ namespace Jurassic.Library
                 if (c == '"')
                     break;
                 if (c == -1)
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected end of input in string literal");
+                    throw new JavaScriptException(ErrorType.SyntaxError, "Unexpected end of input in string literal");
                 if (c < 0x20)
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected character in string literal");
+                    throw new JavaScriptException(ErrorType.SyntaxError, "Unexpected character in string literal");
 
                 if (c == '\\')
                 {
@@ -257,7 +257,7 @@ namespace Jurassic.Library
                             contents.Append(ReadHexNumber(4));
                             break;
                         default:
-                            throw new JavaScriptException(this.engine, ErrorType.SyntaxError, "Unexpected character in escape sequence.");
+                            throw new JavaScriptException(ErrorType.SyntaxError, "Unexpected character in escape sequence.");
                     }
                 }
                 else
@@ -281,7 +281,7 @@ namespace Jurassic.Library
                 int c = this.reader.Read();
                 contents.Append((char)c);
                 if (IsHexDigit(c) == false)
-                    throw new JavaScriptException(this.engine, ErrorType.SyntaxError, string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c));
+                    throw new JavaScriptException(ErrorType.SyntaxError, string.Format("Invalid hex digit '{0}' in escape sequence.", (char)c));
             }
             return (char)int.Parse(contents.ToString(), System.Globalization.NumberStyles.HexNumber);
         }

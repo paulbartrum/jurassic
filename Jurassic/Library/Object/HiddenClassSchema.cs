@@ -14,7 +14,7 @@ namespace Jurassic.Library
         private Dictionary<object, SchemaProperty> properties;
 
         // Transitions
-            private struct TransitionInfo
+        private struct TransitionInfo
         {
             public object Key;
             public PropertyAttributes Attributes;

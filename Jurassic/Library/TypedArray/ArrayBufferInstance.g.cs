@@ -23,7 +23,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ArrayBufferInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get byteLength' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get byteLength' is not generic.");
 			return ((ArrayBufferInstance)thisObj).ByteLength;
 		}
 
@@ -31,7 +31,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is ArrayBufferInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'slice' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'slice' is not generic.");
 			switch (args.Length)
 			{
 				case 0:

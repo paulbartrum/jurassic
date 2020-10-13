@@ -41,14 +41,14 @@ namespace Jurassic.Library
             var result = engine.Object.Construct();
             var properties = GetDeclarativeProperties(engine);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
-            properties.Add(new PropertyNameAndValue(engine.Symbol.ToStringTag, "Map", PropertyAttributes.Configurable));
+            properties.Add(new PropertyNameAndValue(Symbol.ToStringTag, "Map", PropertyAttributes.Configurable));
 
             // From the spec: the initial value of the @@iterator property is the same function
             // object as the initial value of the Map.prototype.entries property.
             PropertyNameAndValue entriesProperty = properties.Find(p => "entries".Equals(p.Key));
             if (entriesProperty == null)
                 throw new InvalidOperationException("Expected entries property.");
-            properties.Add(new PropertyNameAndValue(engine.Symbol.Iterator, entriesProperty.Value, PropertyAttributes.NonEnumerable));
+            properties.Add(new PropertyNameAndValue(Symbol.Iterator, entriesProperty.Value, PropertyAttributes.NonEnumerable));
 
             result.InitializeProperties(properties);
             return result;

@@ -135,7 +135,8 @@ namespace Jurassic.Compiler
                 {
                     // Store the error object in the variable provided.
                     generator.ReinterpretCast(typeof(JavaScriptException));
-                    generator.Call(ReflectionHelpers.JavaScriptException_ErrorObject);
+                    EmitHelpers.LoadScriptEngine(generator);
+                    generator.Call(ReflectionHelpers.JavaScriptException_GetErrorObject);
                     var catchVariable = new NameExpression(CatchBlock.Scope, this.CatchVariableName);
                     catchVariable.GenerateSet(generator, optimizationInfo, PrimitiveType.Any);
                 }

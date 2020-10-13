@@ -15,7 +15,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is BooleanConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Call' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'Call' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -25,11 +25,8 @@ namespace Jurassic.Library
 			}
 		}
 
-		private static ObjectInstance __STUB__Construct(ScriptEngine engine, object thisObj, object[] args)
+		private static ObjectInstance __STUB__Construct(ScriptEngine engine, FunctionInstance thisObj, FunctionInstance newTarget, object[] args)
 		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is BooleanConstructor))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'Construct' is not generic.");
 			switch (args.Length)
 			{
 				case 0:

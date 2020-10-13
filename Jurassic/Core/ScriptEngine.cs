@@ -292,7 +292,7 @@ namespace Jurassic
                     var result = Object.Construct();
                     result.InitializeProperties(new List<PropertyNameAndValue>(1)
                     {
-                        new PropertyNameAndValue(Symbol.Iterator, new ClrStubFunction(FunctionInstancePrototype, "[Symbol.iterator]", 0,
+                        new PropertyNameAndValue(Library.Symbol.Iterator, new ClrStubFunction(FunctionInstancePrototype, "[Symbol.iterator]", 0,
                             (engine, thisObj, args) => thisObj), PropertyAttributes.NonEnumerable),
                     });
                     this.baseIteratorPrototype = result;
@@ -765,7 +765,7 @@ namespace Jurassic
                 }
                 catch (SyntaxErrorException ex)
                 {
-                    throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath, ex);
+                    throw new JavaScriptException(ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath, ex);
                 }
 
                 // Execute
@@ -868,7 +868,7 @@ namespace Jurassic
             }
             catch (SyntaxErrorException ex)
             {
-                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+                throw new JavaScriptException(ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
             }
         }
 
@@ -1244,7 +1244,7 @@ namespace Jurassic
             }
             catch (SyntaxErrorException ex)
             {
-                throw new JavaScriptException(this, ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
+                throw new JavaScriptException(ErrorType.SyntaxError, ex.Message, ex.LineNumber, ex.SourcePath);
             }
         }
 

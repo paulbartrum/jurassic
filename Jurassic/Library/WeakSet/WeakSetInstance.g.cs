@@ -24,7 +24,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is WeakSetInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'add' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'add' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -38,7 +38,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is WeakSetInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'delete' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'delete' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -52,7 +52,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is WeakSetInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'has' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'has' is not generic.");
 			switch (args.Length)
 			{
 				case 0:

@@ -18,7 +18,7 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("byteOffset", new PropertyDescriptor(new ClrStubFunction(engine, "get byteOffset", 0, __GETTER__ByteOffset), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("byteLength", new PropertyDescriptor(new ClrStubFunction(engine, "get byteLength", 0, __GETTER__ByteLength), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("length", new PropertyDescriptor(new ClrStubFunction(engine, "get length", 0, __GETTER__Length), null, PropertyAttributes.Configurable)),
-				new PropertyNameAndValue(engine.Symbol.ToStringTag, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.toStringTag]", 0, __GETTER__ToStringTag), null, PropertyAttributes.Configurable)),
+				new PropertyNameAndValue(Symbol.ToStringTag, new PropertyDescriptor(new ClrStubFunction(engine, "get [Symbol.toStringTag]", 0, __GETTER__ToStringTag), null, PropertyAttributes.Configurable)),
 				new PropertyNameAndValue("entries", new ClrStubFunction(engine, "entries", 0, __STUB__Entries), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("keys", new ClrStubFunction(engine, "keys", 0, __STUB__Keys), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("subarray", new ClrStubFunction(engine, "subarray", 2, __STUB__Subarray), PropertyAttributes.NonEnumerable),
@@ -50,7 +50,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get buffer' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get buffer' is not generic.");
 			return ((TypedArrayInstance)thisObj).Buffer;
 		}
 
@@ -58,7 +58,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get byteOffset' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get byteOffset' is not generic.");
 			return ((TypedArrayInstance)thisObj).ByteOffset;
 		}
 
@@ -66,7 +66,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get byteLength' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get byteLength' is not generic.");
 			return ((TypedArrayInstance)thisObj).ByteLength;
 		}
 
@@ -74,7 +74,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get length' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get length' is not generic.");
 			return ((TypedArrayInstance)thisObj).Length;
 		}
 
@@ -82,7 +82,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'get [Symbol.toStringTag]' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'get [Symbol.toStringTag]' is not generic.");
 			return ((TypedArrayInstance)thisObj).ToStringTag;
 		}
 
@@ -90,7 +90,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'entries' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'entries' is not generic.");
 			return ((TypedArrayInstance)thisObj).Entries();
 		}
 
@@ -98,7 +98,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'keys' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'keys' is not generic.");
 			return ((TypedArrayInstance)thisObj).Keys();
 		}
 
@@ -106,7 +106,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'subarray' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'subarray' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -122,7 +122,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'values' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'values' is not generic.");
 			return ((TypedArrayInstance)thisObj).Values();
 		}
 
@@ -130,7 +130,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'copyWithin' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'copyWithin' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -148,11 +148,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'every' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'every' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).Every(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -164,7 +164,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'fill' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'fill' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -182,11 +182,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'filter' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'filter' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).Filter(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -198,11 +198,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'find' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'find' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).Find(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -214,11 +214,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'findIndex' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'findIndex' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).FindIndex(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -230,11 +230,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'forEach' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'forEach' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					((TypedArrayInstance)thisObj).ForEach(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null); return Undefined.Value;
 				default:
@@ -246,7 +246,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'indexOf' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'indexOf' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -262,7 +262,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'join' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'join' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -276,7 +276,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'lastIndexOf' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'lastIndexOf' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -292,11 +292,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'map' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'map' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).Map(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -308,11 +308,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'reduce' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'reduce' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).Reduce(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -324,11 +324,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'reduceRight' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'reduceRight' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).ReduceRight(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -340,7 +340,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'reverse' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'reverse' is not generic.");
 			return ((TypedArrayInstance)thisObj).Reverse();
 		}
 
@@ -348,11 +348,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'set' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'set' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					((TypedArrayInstance)thisObj).Set(TypeConverter.ToObject(engine, args[0]), 0); return Undefined.Value;
 				default:
@@ -364,7 +364,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'slice' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'slice' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -380,11 +380,11 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'some' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'some' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
-					throw new JavaScriptException(engine, ErrorType.TypeError, "undefined cannot be converted to an object");
+					throw new JavaScriptException(ErrorType.TypeError, "undefined cannot be converted to an object");
 				case 1:
 					return ((TypedArrayInstance)thisObj).Some(TypeConverter.ToObject<FunctionInstance>(engine, args[0]), null);
 				default:
@@ -396,7 +396,7 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'sort' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'sort' is not generic.");
 			switch (args.Length)
 			{
 				case 0:
@@ -410,14 +410,14 @@ namespace Jurassic.Library
 		{
 			thisObj = TypeConverter.ToObject(engine, thisObj);
 			if (!(thisObj is TypedArrayInstance))
-				throw new JavaScriptException(engine, ErrorType.TypeError, "The method 'toLocaleString' is not generic.");
+				throw new JavaScriptException(ErrorType.TypeError, "The method 'toLocaleString' is not generic.");
 			return ((TypedArrayInstance)thisObj).ToLocaleString();
 		}
 
 		private static object __STUB__ToString(ScriptEngine engine, object thisObj, object[] args)
 		{
 			if (thisObj == null || thisObj == Undefined.Value || thisObj == Null.Value)
-				throw new JavaScriptException(engine, ErrorType.TypeError, "Cannot convert undefined or null to object.");
+				throw new JavaScriptException(ErrorType.TypeError, "Cannot convert undefined or null to object.");
 			return ToString(TypeConverter.ToObject(engine, thisObj));
 		}
 	}

@@ -69,7 +69,7 @@ namespace Jurassic.Library
         /// <returns> The value that was returned from the function. </returns>
         public override object CallLateBound(object thisObject, params object[] argumentValues)
         {
-            throw new JavaScriptException(Engine, ErrorType.TypeError, $"Class constructor {Name} cannot be invoked without 'new'");
+            throw new JavaScriptException(ErrorType.TypeError, $"Class constructor {Name} cannot be invoked without 'new'");
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Jurassic.Library
 
                 // Make sure super() was called in derived classes.
                 if (context.ThisBindingStatus == ExecutionContext.BindingStatus.Uninitialized)
-                    throw new JavaScriptException(Engine, ErrorType.ReferenceError, "Must call super constructor in derived class before returning.");
+                    throw new JavaScriptException(ErrorType.ReferenceError, "Must call super constructor in derived class before returning.");
                 return (ObjectInstance)context.ThisValue;   // Must be ObjectInstance since it is only set in ExecutionContext.CallSuperClass().
             }
             else if (Prototype != Engine.Function.InstancePrototype)
@@ -128,7 +128,7 @@ namespace Jurassic.Library
                     return super.ConstructLateBound(newTarget, argumentValues);
                 }
                 else
-                    throw new JavaScriptException(Engine, ErrorType.TypeError, $"Super constructor {Prototype} of {Name} is not a constructor.");
+                    throw new JavaScriptException(ErrorType.TypeError, $"Super constructor {Prototype} of {Name} is not a constructor.");
             }
             else
             {

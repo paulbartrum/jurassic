@@ -449,23 +449,14 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSCallFunction]
-        public RegExpInstance Call(object patternOrRegExp, string flags = null)
+        public ObjectInstance Call(object patternOrRegExp, string flags = null)
         {
-            if (patternOrRegExp is RegExpInstance)
-            {
-                // RegExp(/abc/) or RegExp(/abc/, "g")
-                if (flags != null)
-                    return new RegExpInstance(this.InstancePrototype, ((RegExpInstance)patternOrRegExp).Source, flags);
-                return (RegExpInstance)patternOrRegExp;
-            }
-            else
-            {
-                // RegExp('abc', 'g')
-                var pattern = string.Empty;
-                if (TypeUtilities.IsUndefined(patternOrRegExp) == false)
-                    pattern = TypeConverter.ToString(patternOrRegExp);
-                return new RegExpInstance(this.InstancePrototype, pattern, flags);
-            }
+            if (flags == null &&
+                patternOrRegExp is ObjectInstance regExp &&
+                TypeConverter.ToBoolean(regExp[Symbol.Match]) &&
+                regExp["constructor"] == this)
+                return regExp;
+            return Construct(patternOrRegExp, flags);
         }
 
         /// <summary>
@@ -478,23 +469,46 @@ namespace Jurassic.Library
         /// g (global search for all occurrences of pattern)
         /// i (ignore case)
         /// m (multiline search)</param>
-        [JSConstructorFunction]
         public RegExpInstance Construct(object patternOrRegExp, string flags = null)
         {
-            if (patternOrRegExp is RegExpInstance)
+            return Construct(this, patternOrRegExp, flags);
+        }
+
+        /// <summary>
+        /// Called when the new keyword is used on the RegExp object e.g. new RegExp(/abc/).
+        /// Creates a new regular expression instance.
+        /// </summary>
+        /// <param name="newTarget"> The value of the new.target expression. </param>
+        /// <param name="patternOrRegExp"> The regular expression pattern, or a regular expression
+        /// to clone. </param>
+        /// <param name="flags"> Available flags, which may be combined, are:
+        /// g (global search for all occurrences of pattern)
+        /// i (ignore case)
+        /// m (multiline search)</param>
+        [JSConstructorFunction]
+        private RegExpInstance Construct(FunctionInstance newTarget, object patternOrRegExp, string flags = null)
+        {
+            var prototype = (newTarget["prototype"] as ObjectInstance) ?? this.InstancePrototype;
+            if (patternOrRegExp is RegExpInstance regExp)
             {
                 // new RegExp(regExp, flags)
                 if (flags != null)
-                    return new RegExpInstance(this.InstancePrototype, ((RegExpInstance)patternOrRegExp).Source, flags);
-                return new RegExpInstance(this.InstancePrototype, (RegExpInstance)patternOrRegExp);
+                    return new RegExpInstance(prototype, regExp.Source, flags);
+                return new RegExpInstance(prototype, regExp);
+            }
+            else if (patternOrRegExp is ObjectInstance regExpLike && TypeConverter.ToBoolean(regExpLike[Symbol.Match]))
+            {
+                // new RegExp(regExp-like, flags)
+                var pattern = TypeConverter.ToString(regExpLike["source"], string.Empty);
+                if (flags == null)
+                    flags = TypeConverter.ToString(regExpLike["flags"], null);
+                return new RegExpInstance(prototype, pattern, flags);
             }
             else
             {
                 // new RegExp(pattern, flags)
-                var pattern = string.Empty;
-                if (TypeUtilities.IsUndefined(patternOrRegExp) == false)
-                    pattern = TypeConverter.ToString(patternOrRegExp);
-                return new RegExpInstance(this.InstancePrototype, pattern, flags);
+                var pattern = TypeConverter.ToString(patternOrRegExp, string.Empty);
+                return new RegExpInstance(prototype, pattern, flags);
             }
         }
     }

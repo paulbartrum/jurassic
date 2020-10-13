@@ -43,7 +43,7 @@ namespace Jurassic.Library
             catch (ArgumentException ex)
             {
                 // Wrap the exception so that it can be caught within javascript code.
-                throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "Invalid regular expression - " + ex.Message);
+                throw new JavaScriptException(ErrorType.SyntaxError, "Invalid regular expression - " + ex.Message);
             }
 
             // Initialize the javascript properties.
@@ -144,7 +144,7 @@ namespace Jurassic.Library
         {
             get
             {
-                var result = new System.Text.StringBuilder(3);
+                var result = new StringBuilder(3);
                 if (this.Global)
                     result.Append("g");
                 if (this.IgnoreCase)
@@ -313,6 +313,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The string on which to perform the search. </param>
         /// <returns> An array containing the matched strings. </returns>
+        [JSInternalFunction(Name = "@@match")]
         public object Match(string input)
         {
             // If the global flag is not set, returns a single match.
@@ -332,6 +333,20 @@ namespace Jurassic.Library
             for (int i = 0; i < matches.Count; i++)
                 matchValues[i] = matches[i].Value;
             return this.Engine.Array.New(matchValues);
+        }
+
+        /// <summary>
+        /// Returns a copy of the given string with text replaced using a regular expression.
+        /// </summary>
+        /// <param name="input"> The string on which to perform the search. </param>
+        /// <param name="replaceValue"> A string containing the text to replace for every successful match. </param>
+        /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
+        [JSInternalFunction(Name = "@@replace")]
+        public string Replace(string input, object replaceValue)
+        {
+            if (replaceValue is FunctionInstance replaceFunction)
+                return Replace(input, replaceFunction);
+            return Replace(input, TypeConverter.ToString(replaceValue));
         }
 
         /// <summary>
@@ -432,6 +447,7 @@ namespace Jurassic.Library
         /// <param name="replaceFunction"> A function that is called to produce the text to replace
         /// for every successful match. </param>
         /// <returns> A copy of the given string with text replaced using a regular expression. </returns>
+        
         public string Replace(string input, FunctionInstance replaceFunction)
         {
             return this.value.Replace(input, match =>
@@ -458,6 +474,7 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="input"> The string on which to perform the search. </param>
         /// <returns> The character position of the first match, or -1 if no match was found. </returns>
+        [JSInternalFunction(Name = "@@search")]
         public int Search(string input)
         {
             // Perform the regular expression matching.
@@ -480,6 +497,7 @@ namespace Jurassic.Library
         /// <param name="input"> The string to split. </param>
         /// <param name="limit"> The maximum number of array items to return.  Defaults to unlimited. </param>
         /// <returns> An array containing the split strings. </returns>
+        [JSInternalFunction(Name = "@@split")]
         public ArrayInstance Split(string input, uint limit = uint.MaxValue)
         {
             // Return an empty array if limit = 0.
@@ -537,11 +555,14 @@ namespace Jurassic.Library
         /// <summary>
         /// Returns a string representing the current object.
         /// </summary>
+        /// <param name="thisObject"> The object that is being operated on. </param>
         /// <returns> A string representing the current object. </returns>
-        [JSInternalFunction(Name = "toString")]
-        public new string ToString()
+        [JSInternalFunction(Name = "toString", Flags = JSFunctionFlags.HasThisObject)]
+        public static string ToString(ObjectInstance thisObject)
         {
-            return string.Format("/{0}/{1}", this.Source, this.Flags);
+            return string.Format("/{0}/{1}",
+                TypeConverter.ToString(thisObject["source"]),
+                TypeConverter.ToString(thisObject["flags"]));
         }
 
 
@@ -570,24 +591,24 @@ namespace Jurassic.Library
                     if (flag == 'g')
                     {
                         if (this.globalSearch == true)
-                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "The 'g' flag cannot be specified twice");
+                            throw new JavaScriptException(ErrorType.SyntaxError, "The 'g' flag cannot be specified twice");
                         this.globalSearch = true;
                     }
                     else if (flag == 'i')
                     {
                         if ((options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase)
-                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "The 'i' flag cannot be specified twice");
+                            throw new JavaScriptException(ErrorType.SyntaxError, "The 'i' flag cannot be specified twice");
                         options |= RegexOptions.IgnoreCase;
                     }
                     else if (flag == 'm')
                     {
                         if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
-                            throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, "The 'm' flag cannot be specified twice");
+                            throw new JavaScriptException(ErrorType.SyntaxError, "The 'm' flag cannot be specified twice");
                         options |= RegexOptions.Multiline;
                     }
                     else
                     {
-                        throw new JavaScriptException(this.Engine, ErrorType.SyntaxError, string.Format("Unknown flag '{0}'", flag));
+                        throw new JavaScriptException(ErrorType.SyntaxError, string.Format("Unknown flag '{0}'", flag));
                     }
                 }
             }
