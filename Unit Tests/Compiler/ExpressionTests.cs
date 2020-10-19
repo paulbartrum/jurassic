@@ -1061,12 +1061,6 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void temp()
-        {
-            Assert.AreEqual(5, Evaluate("function test(test) { return test; } test(5, 4, 3);"));
-        }
-
-        [TestMethod]
         public void FunctionCall()
         {
             Assert.AreEqual("[object Math]", Evaluate("(Math.toString)()"));
@@ -1120,6 +1114,37 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("'use strict'; function test(){ function inner(){ return inner.caller; } return inner(); } test()"));
             Assert.AreEqual(Undefined.Value, Evaluate("'use strict'; function test(){ function inner(){ test.arguments = 5; } return inner(); } test()"));
             Assert.AreEqual(Undefined.Value, Evaluate("'use strict'; function test(){ function inner(){ inner.caller = 5; } return inner(); } test()"));
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void SpreadSyntax()
+        {
+            // In an array literal.
+            Assert.AreEqual("head,shoulders,knees,and,toes",
+                Evaluate("var a1 = ['shoulders', 'knees']; var a2 = ['head', ...a1, 'and', 'toes']; a2.toString()"));
+            Assert.AreEqual("1,2,3|1,2,3,4",
+                Evaluate("var arr = [1, 2, 3]; var arr2 = [...arr]; arr2.push(4); arr.toString() + '|' + arr2.toString()"));
+
+            // In a function call.
+            Assert.AreEqual(3, Evaluate("Math.max(...[1, 3, 2])"));
+            Assert.AreEqual(3, Evaluate("Math.max(... [1, 3, 2])"));
+            Assert.AreEqual(3, Evaluate("var a = [1, 3, 2]; Math.max(...a)"));
+            Assert.AreEqual(7, Evaluate("Math.max(4, ...[4, 7, 2], 6)"));
+            Assert.AreEqual(5, Evaluate("Math.max(...new Set([2, 1, 1, 3, 5, 3, 2]))"));
+
+            // In a new operator.
+            Assert.AreEqual("Thu Jan 01 1970", Evaluate("new Date(...[1970, 0, 1]).toDateString()"));
+
+            // In an array literal.
+            Assert.AreEqual("head,shoulders,knees,and,toes",
+                Evaluate("var a1 = ['shoulders', 'knees']; var a2 = ['head', ...a1, 'and', 'toes']; a2.toString()"));
+            Assert.AreEqual("1,2,3|1,2,3,4",
+                Evaluate("var arr = [1, 2, 3]; var arr2 = [...arr]; arr2.push(4); arr.toString() + '|' + arr2.toString()"));
+
+            // The argument must be iterable.
+            Assert.AreEqual("TypeError: number 1 is not iterable.", EvaluateExceptionMessage("[...1]"));
+            Assert.AreEqual("TypeError: object is not iterable.", EvaluateExceptionMessage("[...{}]"));
         }
 
         [TestMethod]
