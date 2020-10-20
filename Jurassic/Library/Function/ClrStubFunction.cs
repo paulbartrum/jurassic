@@ -85,9 +85,12 @@ namespace Jurassic.Library
         /// <param name="instancePrototype"> The value of the "prototype" property. </param>
         protected void InitializeConstructorProperties(List<PropertyNameAndValue> properties, string name, int length, ObjectInstance instancePrototype)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
             properties.Add(new PropertyNameAndValue("name", name, PropertyAttributes.Configurable));
             properties.Add(new PropertyNameAndValue("length", length, PropertyAttributes.Configurable));
-            properties.Add(new PropertyNameAndValue("prototype", instancePrototype, PropertyAttributes.Sealed));
+            if (instancePrototype != null)
+                properties.Add(new PropertyNameAndValue("prototype", instancePrototype, PropertyAttributes.Sealed));
         }
 
         /// <summary>

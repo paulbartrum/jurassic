@@ -31,6 +31,7 @@ namespace Jurassic
         private NumberConstructor numberConstructor;
         private ObjectConstructor objectConstructor;
         private PromiseConstructor promiseConstructor;
+        private ProxyConstructor proxyConstructor;
         private ReflectObject reflectObject;
         private RegExpConstructor regExpConstructor;
         private SetConstructor setConstructor;
@@ -101,6 +102,7 @@ namespace Jurassic
             this.mapConstructor = new MapConstructor(baseFunction);
             this.numberConstructor = new NumberConstructor(baseFunction);
             this.promiseConstructor = new PromiseConstructor(baseFunction);
+            this.proxyConstructor = new ProxyConstructor(baseFunction);
             this.reflectObject = new ReflectObject(baseFunction);
             this.regExpConstructor = new RegExpConstructor(baseFunction);
             this.setConstructor = new SetConstructor(baseFunction);
@@ -147,6 +149,7 @@ namespace Jurassic
             globalProperties.Add(new PropertyNameAndValue("Number", this.numberConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Object", this.objectConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Promise", this.promiseConstructor, PropertyAttributes.NonEnumerable));
+            globalProperties.Add(new PropertyNameAndValue("Proxy", this.proxyConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Reflect", this.reflectObject, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("RegExp", this.regExpConstructor, PropertyAttributes.NonEnumerable));
             globalProperties.Add(new PropertyNameAndValue("Set", this.setConstructor, PropertyAttributes.NonEnumerable));
@@ -437,6 +440,14 @@ namespace Jurassic
         public PromiseConstructor Promise
         {
             get { return this.promiseConstructor; }
+        }
+
+        /// <summary>
+        /// Gets the built-in Proxy object.
+        /// </summary>
+        public ProxyConstructor Proxy
+        {
+            get { return this.proxyConstructor; }
         }
 
         /// <summary>
