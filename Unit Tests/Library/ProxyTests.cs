@@ -29,6 +29,28 @@ namespace UnitTests
             Assert.AreEqual(2, Evaluate("Proxy.length"));
             Assert.AreEqual(Undefined.Value, Evaluate("Proxy.prototype"));
         }
-        
+
+        [TestMethod]
+        public void get()
+        {
+            Assert.AreEqual("original value, replaced value", Evaluate(@"
+                const target = {
+                  notProxied: 'original value',
+                  proxied: 'original value'
+                };
+
+                const handler = {
+                  get: function(target, prop, receiver) {
+                    if (prop === 'proxied') {
+                      return 'replaced value';
+                    }
+                    return Reflect.get(...arguments);
+                  }
+                };
+
+                const proxy = new Proxy(target, handler);
+
+                proxy.notProxied + ', ' + proxy.proxied);"));
+        }
     }
 }
