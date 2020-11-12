@@ -1117,7 +1117,6 @@ namespace UnitTests
         }
 
         [TestMethod]
-        [Ignore]
         public void SpreadSyntax()
         {
             // In an array literal.
@@ -1125,6 +1124,8 @@ namespace UnitTests
                 Evaluate("var a1 = ['shoulders', 'knees']; var a2 = ['head', ...a1, 'and', 'toes']; a2.toString()"));
             Assert.AreEqual("1,2,3|1,2,3,4",
                 Evaluate("var arr = [1, 2, 3]; var arr2 = [...arr]; arr2.push(4); arr.toString() + '|' + arr2.toString()"));
+            Assert.AreEqual("head,s,h,o,u,l,d,e,r,s,,,k,n,e,e,s,1,and,toes",
+                Evaluate("var a1 = ['shoulders', 'knees']; var a2 = ['head', ...a1 + 1, 'and', 'toes']; a2.toString()"));
 
             // In a function call.
             Assert.AreEqual(3, Evaluate("Math.max(...[1, 3, 2])"));
@@ -1143,8 +1144,11 @@ namespace UnitTests
                 Evaluate("var arr = [1, 2, 3]; var arr2 = [...arr]; arr2.push(4); arr.toString() + '|' + arr2.toString()"));
 
             // The argument must be iterable.
-            Assert.AreEqual("TypeError: number 1 is not iterable.", EvaluateExceptionMessage("[...1]"));
-            Assert.AreEqual("TypeError: object is not iterable.", EvaluateExceptionMessage("[...{}]"));
+            Assert.AreEqual("TypeError: 1 is not iterable.", EvaluateExceptionMessage("[...1]"));
+            Assert.AreEqual("TypeError: [object Object] is not iterable.", EvaluateExceptionMessage("[...{}]"));
+            Assert.AreEqual("SyntaxError: Unexpected token '..' in expression.", EvaluateExceptionMessage("[..1]"));
+            Assert.AreEqual("SyntaxError: Unexpected token '...' in expression.", EvaluateExceptionMessage("1 ... 1"));
+            Assert.AreEqual("SyntaxError: Unexpected token '...' in expression.", EvaluateExceptionMessage("[1 ... 1]"));
         }
 
         [TestMethod]

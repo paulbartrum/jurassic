@@ -94,6 +94,11 @@ namespace Jurassic.Compiler
         internal static MethodInfo Convert_ToInt32_Double;
         internal static MethodInfo Math_Pow;
 
+        internal static ConstructorInfo ArrayBuilder_Constructor_Int;
+        internal static MethodInfo ArrayBuilder_Add_Object;
+        internal static MethodInfo ArrayBuilder_AddIterable_Object;
+        internal static MethodInfo ArrayBuilder_ToArray;
+
         internal static MethodInfo ObjectInstance_Delete;
         internal static MethodInfo ObjectInstance_DefineProperty;
         internal static MethodInfo ObjectInstance_HasProperty;
@@ -252,6 +257,11 @@ namespace Jurassic.Compiler
             BinderUtilities_ResolveOverloads = GetStaticMethod(typeof(BinderUtilities), "ResolveOverloads", typeof(RuntimeMethodHandle[]), typeof(ScriptEngine), typeof(object), typeof(object[]));
             Convert_ToInt32_Double = GetStaticMethod(typeof(Convert), "ToInt32", typeof(double));
             Math_Pow = GetStaticMethod(typeof(MathObject), "Pow", typeof(double), typeof(double));
+
+            ArrayBuilder_Constructor_Int = GetConstructor(typeof(ArrayBuilder), typeof(int));
+            ArrayBuilder_Add_Object = GetInstanceMethod(typeof(ArrayBuilder), nameof(ArrayBuilder.Add), typeof(object));
+            ArrayBuilder_AddIterable_Object = GetInstanceMethod(typeof(ArrayBuilder), nameof(ArrayBuilder.AddIterable), typeof(ScriptEngine), typeof(object));
+            ArrayBuilder_ToArray = GetInstanceMethod(typeof(ArrayBuilder), nameof(ArrayBuilder.ToArray));
 
             Undefined_Value = GetField(typeof(Undefined), "Value");
             Null_Value = GetField(typeof(Null), "Value");

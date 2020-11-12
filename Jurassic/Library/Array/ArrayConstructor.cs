@@ -189,7 +189,7 @@ namespace Jurassic.Library
         public static ArrayInstance From(ScriptEngine engine, ObjectInstance iterable, FunctionInstance mapFunction, object thisArg)
         {
             var result = new List<object>();
-            var iterator = TypeUtilities.GetIterator(engine, iterable);
+            var iterator = TypeUtilities.GetIterator(iterable);
             if (iterator != null)
             {
                 // Initialize the array from an iterator.

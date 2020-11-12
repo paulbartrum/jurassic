@@ -80,6 +80,7 @@ namespace Jurassic.Compiler
         Minus,
         LogicalNot,
         BitwiseNot,
+        SpreadSyntax,
 
         // Binary operators.
         Multiply,
@@ -411,6 +412,9 @@ namespace Jurassic.Compiler
         public static readonly Operator CompoundSubtract            = new Operator(PunctuatorToken.CompoundSubtract, 2, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.CompoundSubtract);
         public static readonly Operator CompoundUnsignedRightShift  = new Operator(PunctuatorToken.CompoundUnsignedRightShift, 2, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.CompoundUnsignedRightShift);
         public static readonly Operator CompoundExponentiation      = new Operator(PunctuatorToken.CompoundExponentiation, 2, OperatorPlacement.Binary, OperatorAssociativity.RightToLeft, OperatorType.CompoundExponentiation);
+
+        // Spread syntax operator.
+        public static readonly Operator SpreadSyntax                = new Operator(PunctuatorToken.SpreadSyntax, 1, OperatorPlacement.Prefix, OperatorAssociativity.RightToLeft, OperatorType.SpreadSyntax);
 
         // Comma operator.
         public static readonly Operator Comma                       = new Operator(PunctuatorToken.Comma, 1, OperatorPlacement.Binary, OperatorAssociativity.LeftToRight, OperatorType.Comma);

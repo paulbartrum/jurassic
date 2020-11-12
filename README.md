@@ -40,7 +40,7 @@ Feature|Status
 **Syntax**|
 &nbsp;&nbsp;default function parameters|4/7
 &nbsp;&nbsp;rest parameters|:x:
-&nbsp;&nbsp;spread syntax for iterable objects|:x:
+&nbsp;&nbsp;spread syntax for iterable objects|13/15
 &nbsp;&nbsp;object literal extensions|:white_check_mark: 6/6
 &nbsp;&nbsp;for..of loops|6/9
 &nbsp;&nbsp;octal and binary literals|:white_check_mark: 4/4

@@ -209,17 +209,8 @@ namespace Jurassic.Compiler
                     arguments = new List<Expression>(1) { argumentsOperand };
                 }
 
-                // Generate an array containing the value of each argument.
-                generator.LoadInt32(arguments.Count);
-                generator.NewArray(typeof(object));
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    generator.Duplicate();
-                    generator.LoadInt32(i);
-                    arguments[i].GenerateCode(generator, optimizationInfo);
-                    EmitConversion.ToAny(generator, arguments[i].ResultType);
-                    generator.StoreArrayElement(typeof(object));
-                }
+                // Construct a object[] from the list of expressions.
+                ArrayLiteralExpression.GenerateObjectArrayCode(generator, optimizationInfo, arguments);
             }
         }
 

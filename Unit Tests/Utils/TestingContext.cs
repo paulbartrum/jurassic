@@ -20,7 +20,7 @@ namespace UnitTests
 
         public IReadOnlyList<object> Results()
         {
-            return TypeUtilities.Iterate(Engine, TypeUtilities.GetIterator(Engine, this)).ToList();
+            return TypeUtilities.Iterate(Engine, TypeUtilities.GetIterator(this)).ToList();
         }
     }
 }

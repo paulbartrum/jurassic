@@ -216,7 +216,7 @@ namespace Jurassic.Library
         {
             var items = TypeConverter.ToObject(Engine, source);
 
-            var iterator = TypeUtilities.GetIterator(Engine, items);
+            var iterator = TypeUtilities.GetIterator(items);
             if (iterator != null)
             {
                 // Loop.

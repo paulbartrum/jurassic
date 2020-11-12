@@ -337,8 +337,14 @@ namespace Jurassic.Compiler
             switch (status)
             {
                 case NumberParser.ParseCoreStatus.NoDigits:
-                    // If the number consists solely of a period, return that as a token.
-                    return PunctuatorToken.Dot;
+                    // If the number consists solely of a period (or periods), return that as a token.
+                    if (reader.Peek() != '.')
+                        return PunctuatorToken.Dot;
+                    reader.Read();
+                    if (reader.Peek() != '.')
+                        return PunctuatorToken.DotDot;
+                    reader.Read();
+                    return PunctuatorToken.SpreadSyntax;
                 case NumberParser.ParseCoreStatus.NoExponent:
                     throw new SyntaxErrorException("Invalid number.", this.lineNumber, this.Source.Path);
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:

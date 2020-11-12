@@ -75,6 +75,8 @@ namespace Jurassic.Compiler
         public readonly static PunctuatorToken Dot = new PunctuatorToken(".");
         public readonly static PunctuatorToken Divide = new PunctuatorToken("/");
         public readonly static PunctuatorToken CompoundDivide = new PunctuatorToken("/=");
+        public readonly static PunctuatorToken DotDot = new PunctuatorToken("..");
+        public readonly static PunctuatorToken SpreadSyntax = new PunctuatorToken("...");
 
         // Mapping from text -> punctuator.
         private readonly static Dictionary<string, PunctuatorToken> punctuatorLookupTable = new Dictionary<string, PunctuatorToken>()
@@ -131,6 +133,8 @@ namespace Jurassic.Compiler
             {".", Dot},
             {"/", Divide},
             {"/=", CompoundDivide},
+            {"..", DotDot},
+            {"...", SpreadSyntax},
         };
 
         /// <summary>

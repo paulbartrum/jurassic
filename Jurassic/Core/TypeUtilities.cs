@@ -263,11 +263,10 @@ namespace Jurassic
         /// Converts an iteratable object into a iterator by looking up the @@iterator property,
         /// then calling that value as a function.
         /// </summary>
-        /// <param name="engine"> The script engine. </param>
         /// <param name="iterable"> The object to get a iterator from. </param>
         /// <returns> An iterator object, with a next function, or <c>null</c> if the iterator
         /// symbol value is undefined or null. </returns>
-        public static ObjectInstance GetIterator(ScriptEngine engine, ObjectInstance iterable)
+        public static ObjectInstance GetIterator(ObjectInstance iterable)
         {
             if (iterable == null)
                 throw new ArgumentNullException(nameof(iterable));
@@ -315,7 +314,7 @@ namespace Jurassic
 
             if (iterable == Undefined.Value || iterable == Null.Value)
                 throw new JavaScriptException(ErrorType.TypeError, $"{iterable} is not iterable.");
-            var iterator = GetIterator(engine, TypeConverter.ToObject(engine, iterable));
+            var iterator = GetIterator(TypeConverter.ToObject(engine, iterable));
             if (iterator == null)
                 throw new JavaScriptException(ErrorType.TypeError, $"{iterable} is not iterable.");
             return iterator;
