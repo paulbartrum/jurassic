@@ -331,25 +331,5 @@ namespace Jurassic.Compiler
             // Call Global.Eval(engine, code, scope, thisValue, strictMode)
             generator.Call(ReflectionHelpers.Global_Eval);
         }
-
-        /// <summary>
-        /// Checks the expression is valid and throws a SyntaxErrorException if not.
-        /// Called after the expression tree is fully built out.
-        /// </summary>
-        /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
-        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
-        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
-        public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
-        {
-            // Super calls are valid only in derived constructors.
-            if (this.Target is SuperExpression superExpression)
-            {
-                if (context == CodeContext.DerivedConstructor)
-                    superExpression.IsInValidContext = true;
-                else
-                    throw new SyntaxErrorException("'super' calls can only be made from a derived constructor.", lineNumber, sourcePath);
-            }
-            base.CheckValidity(context, lineNumber, sourcePath);
-        }
     }
 }

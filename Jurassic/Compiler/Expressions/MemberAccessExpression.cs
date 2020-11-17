@@ -398,28 +398,6 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Checks the expression is valid and throws a SyntaxErrorException if not.
-        /// Called after the expression tree is fully built out.
-        /// </summary>
-        /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
-        /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
-        /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
-        public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
-        {
-            if (GetRawOperand(0) is SuperExpression superExpression)
-            {
-                if (context == CodeContext.ObjectLiteralFunction ||
-                    context == CodeContext.Constructor ||
-                    context == CodeContext.DerivedConstructor ||
-                    context == CodeContext.ClassFunction)
-                    superExpression.IsInValidContext = true;
-                else
-                    throw new SyntaxErrorException("'super' keyword unexpected here.", lineNumber, sourcePath);
-            }
-            base.CheckValidity(context, lineNumber, sourcePath);
-        }
-
-        /// <summary>
         /// Converts the expression to a string.
         /// </summary>
         /// <returns> A string representing this expression. </returns>

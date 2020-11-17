@@ -1894,7 +1894,7 @@ namespace Jurassic.Compiler
                 throw new SyntaxErrorException(string.Format("Expected an expression but found {0} instead", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
 
             // Check the AST is valid.
-            root.CheckValidity(this.context, this.LineNumber, this.SourcePath);
+            root.CheckValidity(this.context, parent: null, this.LineNumber, this.SourcePath);
 
             // A literal is the next valid expression token.
             this.expressionState = ParserExpressionState.Literal;

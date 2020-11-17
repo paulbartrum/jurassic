@@ -27,21 +27,32 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
-        /// Indicates whether this 'super' keyword is in a valid context.
-        /// </summary>
-        public bool IsInValidContext { get; set; }
-
-        /// <summary>
         /// Checks the expression is valid and throws a SyntaxErrorException if not.
         /// Called after the expression tree is fully built out.
         /// </summary>
         /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
+        /// <param name="parent"> The parent expression in the tree. </param>
         /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
         /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
-        public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
+        public override void CheckValidity(CodeContext context, Expression parent, int lineNumber, string sourcePath)
         {
-            if (!IsInValidContext)
+            if (parent is FunctionCallExpression)
+            {
+                if (context != CodeContext.DerivedConstructor)
+                    throw new SyntaxErrorException("'super' calls can only be made from a derived constructor.", lineNumber, sourcePath);
+            }
+            else if (parent is MemberAccessExpression)
+            {
+                if (context != CodeContext.ObjectLiteralFunction &&
+                    context != CodeContext.Constructor &&
+                    context != CodeContext.DerivedConstructor &&
+                    context != CodeContext.ClassFunction)
+                    throw new SyntaxErrorException("'super' keyword unexpected here.", lineNumber, sourcePath);
+            }
+            else
+            {
                 throw new SyntaxErrorException("'super' keyword cannot be used on it's own.", lineNumber, sourcePath);
+            }
         }
 
         /// <summary>

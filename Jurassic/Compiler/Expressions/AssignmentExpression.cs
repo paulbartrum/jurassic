@@ -428,9 +428,10 @@ namespace Jurassic.Compiler
         /// Called after the expression tree is fully built out.
         /// </summary>
         /// <param name="context"> Indicates where the code is located e.g. inside a function, or a constructor, etc. </param>
+        /// <param name="parent"> The parent expression in the tree. </param>
         /// <param name="lineNumber"> The line number to use when throwing an exception. </param>
         /// <param name="sourcePath"> The source path to use when throwing an exception. </param>
-        public override void CheckValidity(CodeContext context, int lineNumber, string sourcePath)
+        public override void CheckValidity(CodeContext context, Expression parent, int lineNumber, string sourcePath)
         {
             if (OperandCount > 0 && !(GetOperand(0) is IReferenceExpression))
             {
@@ -441,7 +442,7 @@ namespace Jurassic.Compiler
                 if (Operator.HasRHSOperand)
                     throw new SyntaxErrorException("Invalid target of prefix operation.", lineNumber, sourcePath);
             }
-            base.CheckValidity(context, lineNumber, sourcePath);
+            base.CheckValidity(context, parent, lineNumber, sourcePath);
         }
     }
 

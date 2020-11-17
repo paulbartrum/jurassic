@@ -1149,6 +1149,7 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError: Unexpected token '..' in expression.", EvaluateExceptionMessage("[..1]"));
             Assert.AreEqual("SyntaxError: Unexpected token '...' in expression.", EvaluateExceptionMessage("1 ... 1"));
             Assert.AreEqual("SyntaxError: Unexpected token '...' in expression.", EvaluateExceptionMessage("[1 ... 1]"));
+            Assert.AreEqual("SyntaxError: Unexpected token '...' in expression.", EvaluateExceptionMessage("... 1"));
         }
 
         [TestMethod]
