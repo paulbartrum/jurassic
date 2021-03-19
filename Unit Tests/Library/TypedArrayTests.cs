@@ -82,6 +82,10 @@ namespace UnitTests
             Assert.AreEqual(3, Evaluate("Uint32Array.length"));
             Assert.AreEqual(3, Evaluate("Float32Array.length"));
             Assert.AreEqual(3, Evaluate("Float64Array.length"));
+
+            // All the typed array constructors are different but share the same prototype functions.
+            Assert.AreEqual(false, Evaluate("Int8Array.prototype === Float64Array.prototype"));
+            Assert.AreEqual(true, Evaluate("Int8Array.prototype.map === Float64Array.prototype.map"));
         }
 
         [TestMethod]

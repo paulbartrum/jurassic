@@ -122,15 +122,16 @@ namespace Jurassic
             // Create the typed array functions.
             this.arrayBufferConstructor = new ArrayBufferConstructor(baseFunction);
             this.dataViewConstructor = new DataViewConstructor(baseFunction);
-            this.int8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Int8Array);
-            this.uint8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint8Array);
-            this.uint8ClampedArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint8ClampedArray);
-            this.int16ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Int16Array);
-            this.uint16ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint16Array);
-            this.int32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Int32Array);
-            this.uint32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint32Array);
-            this.float32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Float32Array);
-            this.float64ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Float64Array);
+            var typedArrayInstanceDeclarativeProperties = TypedArrayInstance.ScriptEngine_GetDeclarativeProperties(this);
+            this.int8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Int8Array, typedArrayInstanceDeclarativeProperties);
+            this.uint8ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint8Array, typedArrayInstanceDeclarativeProperties);
+            this.uint8ClampedArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint8ClampedArray, typedArrayInstanceDeclarativeProperties);
+            this.int16ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Int16Array, typedArrayInstanceDeclarativeProperties);
+            this.uint16ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint16Array, typedArrayInstanceDeclarativeProperties);
+            this.int32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Int32Array, typedArrayInstanceDeclarativeProperties);
+            this.uint32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Uint32Array, typedArrayInstanceDeclarativeProperties);
+            this.float32ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Float32Array, typedArrayInstanceDeclarativeProperties);
+            this.float64ArrayConstructor = new TypedArrayConstructor(baseFunction, TypedArrayType.Float64Array, typedArrayInstanceDeclarativeProperties);
 
             // Initialize the prototypes for the base of the prototype chain.
             ObjectInstance.InitializePrototypeProperties(baseObject, this.objectConstructor);

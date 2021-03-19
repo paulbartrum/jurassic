@@ -19,14 +19,15 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="prototype"> The next object in the prototype chain. </param>
         /// <param name="type"> Defines the element type and behaviour of the typed array. </param>
-        internal TypedArrayConstructor(ObjectInstance prototype, TypedArrayType type)
+        /// <param name="declarativeProperties"> The result of calling <see cref="TypedArrayInstance.GetDeclarativeProperties(ScriptEngine)"/>. </param>
+        internal TypedArrayConstructor(ObjectInstance prototype, TypedArrayType type, List<PropertyNameAndValue> declarativeProperties)
             : base(prototype, __STUB__Construct, __STUB__Call)
         {
             this.type = type;
 
             // Initialize the constructor properties.
             var properties = GetDeclarativeProperties(Engine);
-            InitializeConstructorProperties(properties, type.ToString(), 3, TypedArrayInstance.CreatePrototype(Engine, this));
+            InitializeConstructorProperties(properties, type.ToString(), 3, TypedArrayInstance.CreatePrototype(Engine, this, declarativeProperties));
             properties.Add(new PropertyNameAndValue("BYTES_PER_ELEMENT", BytesPerElement, PropertyAttributes.Sealed));
             InitializeProperties(properties);
         }
