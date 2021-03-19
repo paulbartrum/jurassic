@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -44,10 +45,13 @@ namespace Jurassic.Library
         /// </summary>
         /// <param name="engine"> The script environment. </param>
         /// <param name="constructor"> A reference to the constructor that owns the prototype. </param>
-        internal static ObjectInstance CreatePrototype(ScriptEngine engine, TypedArrayConstructor constructor)
+        /// <param name="declarativeProperties"> The result of calling <see cref="GetDeclarativeProperties(ScriptEngine)"/>. </param>
+        internal static ObjectInstance CreatePrototype(ScriptEngine engine, TypedArrayConstructor constructor, List<PropertyNameAndValue> declarativeProperties)
         {
             var result = engine.Object.Construct();
-            var properties = GetDeclarativeProperties(engine);
+
+            var properties = new List<PropertyNameAndValue>(declarativeProperties.Count + 2);
+            properties.AddRange(declarativeProperties);
             properties.Add(new PropertyNameAndValue("constructor", constructor, PropertyAttributes.NonEnumerable));
 
             // From the spec: the initial value of the @@iterator property is the same function
@@ -59,6 +63,16 @@ namespace Jurassic.Library
 
             result.InitializeProperties(properties);
             return result;
+        }
+
+        /// <summary>
+        /// Speeds up initialization by only calling GetDeclarativeProperties once.
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <returns></returns>
+        internal static List<PropertyNameAndValue> ScriptEngine_GetDeclarativeProperties(ScriptEngine engine)
+        {
+            return GetDeclarativeProperties(engine);
         }
 
 
