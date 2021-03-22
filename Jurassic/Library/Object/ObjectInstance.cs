@@ -156,8 +156,8 @@ namespace Jurassic.Library
         /// exist. </returns>
         public object this[object key]
         {
-            get { return GetPropertyValue(key) ?? Undefined.Value; }
-            set { SetPropertyValue(key, value, throwOnError: false); }
+            get { return GetPropertyValue(key, this) ?? Undefined.Value; }
+            set { SetPropertyValue(key, value, this, throwOnError: false); }
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Jurassic.Library
         public object this[uint index]
         {
             get { return GetPropertyValue(index) ?? Undefined.Value; }
-            set { SetPropertyValue(index, value, throwOnError: false); }
+            set { SetPropertyValue(index, value, this, throwOnError: false); }
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace Jurassic.Library
             {
                 if (index < 0)
                     throw new ArgumentOutOfRangeException("index");
-                SetPropertyValue((uint)index, value, throwOnError: false);
+                SetPropertyValue((uint)index, value, this, throwOnError: false);
             }
         }
 
@@ -306,32 +306,29 @@ namespace Jurassic.Library
         /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <returns> <c>true</c> if the property exists on this object or in the prototype chain;
         /// <c>false</c> otherwise. </returns>
-        public bool HasProperty(object key)
+        public virtual bool HasProperty(object key)
         {
             // Check if the name of the property qualifies it as an indexed property.
             uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
 
-            ObjectInstance prototypeObject = this;
-            do
+            if (arrayIndex == uint.MaxValue)
             {
-                if (arrayIndex == uint.MaxValue)
-                {
-                    // Named property.
-                    var property = prototypeObject.schema.GetPropertyIndexAndAttributes(key);
-                    if (property.Exists == true)
-                        return true;
-                }
-                else
-                {
-                    // Indexed property.
-                    var property = this.GetOwnPropertyDescriptor(arrayIndex);
-                    if (property.Exists == true)
-                        return true;
-                }
+                // Named property.
+                var property = this.schema.GetPropertyIndexAndAttributes(key);
+                if (property.Exists == true)
+                    return true;
+            }
+            else
+            {
+                // Indexed property.
+                var property = this.GetOwnPropertyDescriptor(arrayIndex);
+                if (property.Exists == true)
+                    return true;
+            }
 
-                // Traverse the prototype chain.
-                prototypeObject = prototypeObject.prototype;
-            } while (prototypeObject != null);
+            // Check the prototype chain.
+            if (this.Prototype != null)
+                return this.Prototype.HasProperty(key);
 
             return false;
         }
@@ -356,7 +353,7 @@ namespace Jurassic.Library
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        private object GetPropertyValue(uint index, ObjectInstance thisValue)
+        private object GetPropertyValue(uint index, object thisValue)
         {
             // Get the descriptor for the property.
             var property = this.GetOwnPropertyDescriptor(index);
@@ -380,19 +377,31 @@ namespace Jurassic.Library
         /// Gets the value of the property with the given name.
         /// </summary>
         /// <param name="key"> The property key (either a string or a Symbol). </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        public object GetPropertyValue(object key)
+        {
+            return GetPropertyValue(key, this);
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name.
+        /// </summary>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        public object GetPropertyValue(object key, ObjectInstance thisValue = null)
+        public virtual object GetPropertyValue(object key, object thisValue)
         {
             // Check if the property is an indexed property.
             uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
             if (arrayIndex != uint.MaxValue)
-                return GetPropertyValue(arrayIndex, thisValue ?? this);
+                return GetPropertyValue(arrayIndex, thisValue);
 
             // Otherwise, the property is a name.
-            return GetNamedPropertyValue(key, thisValue ?? this);
+            return GetNamedPropertyValue(key, thisValue);
         }
 
         /// <summary>
@@ -464,7 +473,7 @@ namespace Jurassic.Library
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        private object GetNamedPropertyValue(object key, ObjectInstance thisValue)
+        private object GetNamedPropertyValue(object key, object thisValue)
         {
             ObjectInstance prototypeObject = this;
             do
@@ -491,7 +500,7 @@ namespace Jurassic.Library
             } while (prototypeObject != null);
 
             // The property doesn't exist.
-            return thisValue.GetMissingPropertyValue(key);
+            return GetMissingPropertyValue(key);
         }
 
         /// <summary>
@@ -581,8 +590,25 @@ namespace Jurassic.Library
         /// <returns> <c>false</c> if an error occurred. </returns>
         public virtual bool SetPropertyValue(uint index, object value, bool throwOnError)
         {
+            return SetPropertyValue(index, value, this, throwOnError);
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given array index.  If a property with the
+        /// given index does not exist, or exists in the prototype chain (and is not a setter) then
+        /// a new property is created.
+        /// </summary>
+        /// <param name="index"> The array index of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
+        /// <returns> <c>false</c> if an error occurred. </returns>
+        public virtual bool SetPropertyValue(uint index, object value, object thisValue, bool throwOnError)
+        {
             string indexStr = index.ToString();
-            if (!SetPropertyValueIfExists(indexStr, value, throwOnError, out bool exists))
+            if (!SetPropertyValueIfExists(indexStr, value, thisValue, throwOnError, out bool exists))
                 return false;
             if (exists == false)
             {
@@ -607,12 +633,31 @@ namespace Jurassic.Library
         /// occurred; <c>true</c> otherwise. </returns>
         public bool SetPropertyValue(object key, object value, bool throwOnError)
         {
+            return SetPropertyValue(key, value, this, throwOnError);
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given name.  If a property with the given name
+        /// does not exist, or exists in the prototype chain (and is not a setter) then a new
+        /// property is created.
+        /// </summary>
+        /// <param name="key"> The property key of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set (i.e. if the property is read-only or if the object is not extensible and a new
+        /// property needs to be created). </param>
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public virtual bool SetPropertyValue(object key, object value, object thisValue, bool throwOnError)
+        {
             // Check if the property is an indexed property.
             uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
             if (arrayIndex != uint.MaxValue)
-                return SetPropertyValue(arrayIndex, value, throwOnError);
+                return SetPropertyValue(arrayIndex, value, thisValue, throwOnError);
 
-            if (!SetPropertyValueIfExists(key, value, throwOnError, out bool exists))
+            if (!SetPropertyValueIfExists(key, value, thisValue, throwOnError, out bool exists))
                 return false;
             if (exists == false)
             {
@@ -637,6 +682,25 @@ namespace Jurassic.Library
         /// occurred; <c>true</c> otherwise. </returns>
         public bool SetPropertyValue(PropertyReference propertyReference, object value, bool throwOnError)
         {
+            return SetPropertyValue(propertyReference, value, this, throwOnError);
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given name.  If a property with the given name
+        /// does not exist, or exists in the prototype chain (and is not a setter) then a new
+        /// property is created.
+        /// </summary>
+        /// <param name="propertyReference"> The name of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set (i.e. if the property is read-only or if the object is not extensible and a new
+        /// property needs to be created). </param>
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public bool SetPropertyValue(PropertyReference propertyReference, object value, object thisValue, bool throwOnError)
+        {
             // Check if anything has changed.
             if (propertyReference.CachedSchema == this.schema)
             {
@@ -652,7 +716,7 @@ namespace Jurassic.Library
                 if ((propertyInfo.Attributes & (PropertyAttributes.Writable | PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) != PropertyAttributes.Writable)
                 {
                     propertyReference.ClearCache();
-                    return this.SetPropertyValue(propertyReference.Name, value, throwOnError);
+                    return this.SetPropertyValue(propertyReference.Name, value, thisValue, throwOnError);
                 }
                 else
                 {
@@ -666,7 +730,7 @@ namespace Jurassic.Library
             {
                 // The property is in the prototype or is non-existent.
                 propertyReference.ClearCache();
-                return this.SetPropertyValue(propertyReference.Name, value, throwOnError);
+                return this.SetPropertyValue(propertyReference.Name, value, thisValue, throwOnError);
             }
         }
 
@@ -681,13 +745,14 @@ namespace Jurassic.Library
         /// <param name="key"> The property key (either a string or a Symbol). Cannot be an array index. </param>
         /// <param name="value"> The desired value of the property. This must be a javascript
         /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set (i.e. if the property is read-only or if the object is not extensible and a new
         /// property needs to be created). </param>
         /// <param name="exists"> Set to <c>true</c> if the property value exists; <c>false</c> otherwise. </param>
         /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
         /// occurred; <c>true</c> otherwise. </returns>
-        public bool SetPropertyValueIfExists(object key, object value, bool throwOnError, out bool exists)
+        public bool SetPropertyValueIfExists(object key, object value, object thisValue, bool throwOnError, out bool exists)
         {
             // Do not store nulls - null represents a non-existant value.
             value = value ?? Undefined.Value;
@@ -715,7 +780,7 @@ namespace Jurassic.Library
                 else if (property.IsAccessor == true)
                 {
                     // The property contains an accessor function.  Set the property value by calling the accessor.
-                    ((PropertyAccessorValue)this.propertyValues[property.Index]).SetValue(this, value);
+                    ((PropertyAccessorValue)this.propertyValues[property.Index]).SetValue(thisValue, value);
                 }
                 else
                 {
@@ -796,7 +861,7 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if the property was successfully deleted, or if the property did
         /// not exist; <c>false</c> if the property was marked as non-configurable and
         /// <paramref name="throwOnError"/> was <c>false</c>. </returns>
-        public bool Delete(object key, bool throwOnError)
+        public virtual bool Delete(object key, bool throwOnError)
         {
             // Check if the property is an indexed property.
             uint arrayIndex = ArrayInstance.ParseArrayIndex(key);

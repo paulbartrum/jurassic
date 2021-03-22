@@ -215,7 +215,7 @@ namespace Jurassic.Library
                 // Copy the enumerable properties from the source object.
                 foreach (var property in source.Properties)
                     if (property.IsEnumerable == true)
-                        target.SetPropertyValue(property.Key, property.Value, throwOnError: true);
+                        target.SetPropertyValue(property.Key, property.Value, target, throwOnError: true);
             }
             return target;
         }

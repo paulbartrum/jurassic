@@ -31,30 +31,6 @@ namespace UnitTests
         }
 
         [TestMethod]
-        [Ignore]
-        public void get()
-        {
-            Assert.AreEqual("original value, replaced value", Evaluate(@"
-                const target = {
-                  notProxied: 'original value',
-                  proxied: 'original value'
-                };
-
-                const handler = {
-                  get: function(target, prop, receiver) {
-                    if (prop === 'proxied') {
-                      return 'replaced value';
-                    }
-                    return Reflect.get.apply(null, arguments);
-                  }
-                };
-
-                const proxy = new Proxy(target, handler);
-
-                proxy.notProxied + ', ' + proxy.proxied;"));
-        }
-
-        [TestMethod]
         public void getPrototypeOf()
         {
             // The trap can return a new prototype.
@@ -354,6 +330,167 @@ namespace UnitTests
                   }
                 });
                 Reflect.defineProperty(proxy, 'x', { value: 11, writable: false })"));
+        }
+
+        [TestMethod]
+        public void has()
+        {
+            // Check the various methods for checking if a property exists.
+            Assert.AreEqual("false/true/false/true/false/true", Evaluate(@"
+                var proxy = new Proxy({ a: 1, b: 2 }, {
+                  has(target, key) {
+                    return key !== 'a';
+                  }
+                });
+                ('a' in proxy) + '/' + ('b' in proxy) + '/' +
+                ('a' in Object.create(proxy)) + '/' + ('b' in Object.create(proxy)) + '/' +
+                Reflect.has(proxy, 'a') + '/' + Reflect.has(proxy, 'b')"));
+
+            // A property cannot be reported as non-existent, if it exists as a non-configurable own property of the target object.
+            Assert.AreEqual("TypeError: 'has' on proxy: trap returned falsish for property 'a' which exists in the proxy target as non-configurable.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ }, 'a', { value: 10, configurable: false }), {
+                  has(target, key) {
+                    return false;
+                  }
+                });
+                'a' in proxy"));
+
+            // A property cannot be reported as non-existent, if it exists as an own property of the target object and the target object is not extensible.
+            Assert.AreEqual("TypeError: 'has' on proxy: trap returned falsish for property 'a' but the proxy target is not extensible.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.preventExtensions({ a: 1 }), {
+                  has(target, key) {
+                    return false;
+                  }
+                });
+                'a' in proxy"));
+        }
+
+        [TestMethod]
+        public void has_with()
+        {
+            // Check the various methods for checking if a property exists.
+            Execute(@"
+                var proxy = new Proxy({ a: 1, b: 2 }, {
+                  has(target, key) {
+                    return key !== 'a';
+                  }
+                });");
+            Assert.AreEqual("ReferenceError: a is not defined.", EvaluateExceptionMessage(@"with (proxy) { (a); }"));
+            Assert.AreEqual(2, Evaluate(@"with (proxy) { (b); }"));
+        }
+
+        [TestMethod]
+        public void get()
+        {
+            // Check normal case.
+            Assert.AreEqual("original value, replaced value", Evaluate(@"
+                const target = {
+                  notProxied: 'original value',
+                  proxied: 'original value'
+                };
+
+                const handler = {
+                  get: function(target, prop, receiver) {
+                    if (prop === 'proxied') {
+                      return 'replaced value';
+                    }
+                    return Reflect.get(target, prop, receiver);
+                  }
+                };
+
+                const proxy = new Proxy(target, handler);
+                proxy.notProxied + ', ' + proxy.proxied;"));
+
+            // The value reported for a property must be the same as the value of the corresponding
+            // target object property if the target object property is a non-writable,
+            // non-configurable own data property.
+            Assert.AreEqual("TypeError: 'get' on proxy: property 'a' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value (expected '10' but got '99').", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ }, 'a', { value: 10, writable: false, configurable: false }), {
+                  get(target) {
+                    return 99;
+                  }
+                });
+                proxy.a;"));
+
+            // The value reported for a property must be undefined if the corresponding target
+            // object property is a non-configurable own accessor property that has undefined as
+            // its [[Get]] attribute.
+            Assert.AreEqual("TypeError: 'get' on proxy: property 'a' is a non-configurable accessor property on the proxy target and does not have a getter function, but the trap did not return 'undefined' (got '99').", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ }, 'a', { configurable: false, set: function(val) { } }), {
+                  get(target) {
+                    return 99;
+                  }
+                });
+                proxy.a;"));
+        }
+
+        [TestMethod]
+        public void set()
+        {
+            // Check normal case.
+            Assert.AreEqual(20, Evaluate(@"
+                const proxy = new Proxy({ a: 50 }, {
+                  set(obj, prop, value) {
+                    obj[prop] = value * 2;
+                  }
+                });
+                proxy.a = 10;
+                proxy.a"));
+
+            // Cannot change the value of a property to be different from the value of the
+            // corresponding target object property if the corresponding target object property is
+            // a non-writable, non-configurable own data property.
+            Assert.AreEqual("TypeError: 'set' on proxy: trap returned truish for property 'a' which exists in the proxy target as a non-configurable and non-writable data property with a different value.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ }, 'a', { value: 10, writable: false, configurable: false }), {
+                  set(obj, prop, value) {
+                    return true;
+                  }
+                });
+                proxy.a = 100;"));
+
+            // Cannot set the value of a property if the corresponding target object property is a
+            // non-configurable own accessor property that has undefined as its [[Set]] attribute.
+            Assert.AreEqual("TypeError: 'set' on proxy: trap returned truish for property 'a' which exists in the proxy target as a non-configurable and non-writable accessor property without a setter.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ }, 'a', { configurable: false, get: function(val) { } }), {
+                  set(obj, prop, value) {
+                    return true;
+                  }
+                });
+                proxy.a = 100;"));
+        }
+
+        [TestMethod]
+        public void deleteProperty()
+        {
+            // Check normal case.
+            Assert.AreEqual("true, 1", Evaluate(@"
+                var proxy = new Proxy({ }, {
+                  deleteProperty(obj, prop) {
+                    obj[prop] = 1;
+                    return true;
+                  }
+                });
+                (delete proxy.test) + ', ' + proxy.test;"));
+
+            // A property cannot be reported as deleted, if it exists as a non-configurable own
+            // property of the target object.
+            Assert.AreEqual("TypeError: 'deleteProperty' on proxy: trap returned truish for property 'a' which is non-configurable in the proxy target.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ }, 'a', { value: 10, configurable: false }), {
+                  deleteProperty(obj, prop) {
+                    return true;
+                  }
+                });
+                delete proxy.a;"));
+
+            // A property cannot be reported as deleted, if it exists as an own property of the
+            // target object and the target object is non-extensible.
+            Assert.AreEqual("TypeError: 'deleteProperty' on proxy: trap returned truish for property 'a' but the proxy target is non-extensible.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.preventExtensions({ a: 1 }), {
+                  deleteProperty(obj, prop) {
+                    return true;
+                  }
+                });
+                delete proxy.a;"));
         }
     }
 }

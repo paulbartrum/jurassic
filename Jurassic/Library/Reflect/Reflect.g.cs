@@ -178,15 +178,15 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return Set(Undefined.Value, Undefined.Value, Undefined.Value, Undefined.Value);
+					return Set(Undefined.Value, Undefined.Value, Undefined.Value, null);
 				case 1:
-					return Set(args[0], Undefined.Value, Undefined.Value, Undefined.Value);
+					return Set(args[0], Undefined.Value, Undefined.Value, null);
 				case 2:
-					return Set(args[0], args[1], Undefined.Value, Undefined.Value);
+					return Set(args[0], args[1], Undefined.Value, null);
 				case 3:
-					return Set(args[0], args[1], args[2], Undefined.Value);
+					return Set(args[0], args[1], args[2], null);
 				default:
-					return Set(args[0], args[1], args[2], args[3]);
+					return Set(args[0], args[1], args[2], TypeUtilities.IsUndefined(args[3]) ? null : args[3]);
 			}
 		}
 

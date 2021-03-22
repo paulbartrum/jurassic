@@ -1059,7 +1059,7 @@ namespace Jurassic
                         throw new ArgumentException(string.Format("Cannot store value of type {0}.", value.GetType()), nameof(value));
                 }
             }
-            this.Global.SetPropertyValue(variableName, value, true);
+            this.Global.SetPropertyValue(variableName, value, this.Global, throwOnError: true);
         }
 
         /// <summary>

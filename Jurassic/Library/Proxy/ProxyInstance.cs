@@ -246,5 +246,129 @@
             }
             return true;
         }
+
+        /// <summary>
+        /// Determines if a property with the given name exists.
+        /// </summary>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
+        /// <returns> <c>true</c> if the property exists on this object or in the prototype chain;
+        /// <c>false</c> otherwise. </returns>
+        public override bool HasProperty(object key)
+        {
+            // Call the handler, if one exists.
+            var trap = handler.GetMethod("has");
+            if (trap == null)
+                return target.HasProperty(key);
+            var result = TypeConverter.ToBoolean(trap.CallLateBound(handler, target, key));
+
+            // Validate.
+            if (!result)
+            {
+                var targetDescriptor = target.GetOwnPropertyDescriptor(key);
+                if (targetDescriptor.Exists)
+                {
+                    if (!targetDescriptor.IsConfigurable)
+                        throw new JavaScriptException(ErrorType.TypeError, $"'has' on proxy: trap returned falsish for property '{TypeConverter.ToString(key)}' which exists in the proxy target as non-configurable.");
+                    if (!target.IsExtensible)
+                        throw new JavaScriptException(ErrorType.TypeError, $"'has' on proxy: trap returned falsish for property '{TypeConverter.ToString(key)}' but the proxy target is not extensible.");
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name.
+        /// </summary>
+        /// <param name="key"> The property key (either a string or a Symbol). </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        public override object GetPropertyValue(object key, object thisValue = null)
+        {
+            // Call the handler, if one exists.
+            var trap = handler.GetMethod("get");
+            if (trap == null)
+                return target.GetPropertyValue(key, thisValue);
+            var result = trap.CallLateBound(handler, target, key, thisValue);
+
+            // Validate.
+            var targetDescriptor = target.GetOwnPropertyDescriptor(key);
+            if (targetDescriptor.Exists && !targetDescriptor.IsConfigurable)
+            {
+                if (!targetDescriptor.IsAccessor && !targetDescriptor.IsWritable && !TypeComparer.SameValue(result, targetDescriptor.Value))
+                    throw new JavaScriptException(ErrorType.TypeError, $"'get' on proxy: property '{TypeConverter.ToString(key)}' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value (expected '{TypeConverter.ToString(targetDescriptor.Value)}' but got '{TypeConverter.ToString(result)}').");
+                if (targetDescriptor.IsAccessor && targetDescriptor.Getter == null && result != null && result != Undefined.Value)
+                    throw new JavaScriptException(ErrorType.TypeError, $"'get' on proxy: property '{TypeConverter.ToString(key)}' is a non-configurable accessor property on the proxy target and does not have a getter function, but the trap did not return 'undefined' (got '{TypeConverter.ToString(result)}').");
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given name.  If a property with the given name
+        /// does not exist, or exists in the prototype chain (and is not a setter) then a new
+        /// property is created.
+        /// </summary>
+        /// <param name="key"> The property key of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set (i.e. if the property is read-only or if the object is not extensible and a new
+        /// property needs to be created). </param>
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public override bool SetPropertyValue(object key, object value, object thisValue, bool throwOnError)
+        {
+            // Call the handler, if one exists.
+            var trap = handler.GetMethod("set");
+            if (trap == null)
+                return target.SetPropertyValue(key, value, thisValue, throwOnError);
+            var result = TypeConverter.ToBoolean(trap.CallLateBound(handler, target, key, value, thisValue));
+            if (!result)
+                return false;
+
+            // Validate.
+            var targetDescriptor = target.GetOwnPropertyDescriptor(key);
+            if (targetDescriptor.Exists && !targetDescriptor.IsConfigurable)
+            {
+                if (!targetDescriptor.IsAccessor && !targetDescriptor.IsWritable && !TypeComparer.SameValue(value, targetDescriptor.Value))
+                    throw new JavaScriptException(ErrorType.TypeError, $"'set' on proxy: trap returned truish for property '{TypeConverter.ToString(key)}' which exists in the proxy target as a non-configurable and non-writable data property with a different value.");
+                if (targetDescriptor.IsAccessor && targetDescriptor.Setter == null)
+                    throw new JavaScriptException(ErrorType.TypeError, $"'set' on proxy: trap returned truish for property '{TypeConverter.ToString(key)}' which exists in the proxy target as a non-configurable and non-writable accessor property without a setter.");
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Deletes the property with the given name.
+        /// </summary>
+        /// <param name="key"> The property key of the property to delete. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set because the property was marked as non-configurable.  </param>
+        /// <returns> <c>true</c> if the property was successfully deleted, or if the property did
+        /// not exist; <c>false</c> if the property was marked as non-configurable and
+        /// <paramref name="throwOnError"/> was <c>false</c>. </returns>
+        public override bool Delete(object key, bool throwOnError)
+        {
+            // Call the handler, if one exists.
+            var trap = handler.GetMethod("deleteProperty");
+            if (trap == null)
+                return target.Delete(key, throwOnError);
+            var result = TypeConverter.ToBoolean(trap.CallLateBound(handler, target, key));
+            if (!result)
+                return false;
+
+            // Validate.
+            var targetDescriptor = target.GetOwnPropertyDescriptor(key);
+            if (targetDescriptor.Exists)
+            {
+                if (!targetDescriptor.IsConfigurable)
+                    throw new JavaScriptException(ErrorType.TypeError, $"'deleteProperty' on proxy: trap returned truish for property '{TypeConverter.ToString(key)}' which is non-configurable in the proxy target.");
+                if (!target.IsExtensible)
+                    throw new JavaScriptException(ErrorType.TypeError, $"'deleteProperty' on proxy: trap returned truish for property '{TypeConverter.ToString(key)}' but the proxy target is non-extensible.");
+            }
+            return true;
+        }
     }
 }

@@ -358,11 +358,12 @@ namespace Jurassic.Library
         /// <param name="index"> The array index of the property to set. </param>
         /// <param name="value"> The value to set the property to.  This must be a javascript
         /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
         /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
         /// occurred; <c>true</c> otherwise. </returns>
-        public override bool SetPropertyValue(uint index, object value, bool throwOnError)
+        public override bool SetPropertyValue(uint index, object value, object thisValue, bool throwOnError)
         {
             this[(int)index] = value;
             return true;

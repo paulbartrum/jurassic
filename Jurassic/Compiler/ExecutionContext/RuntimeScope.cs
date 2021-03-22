@@ -358,7 +358,7 @@ namespace Jurassic.Compiler
                     }
 
                     // Only set the value if it exists.
-                    scope.ScopeObject.SetPropertyValueIfExists(variableName, value, throwOnError: strictMode, out bool exists);
+                    scope.ScopeObject.SetPropertyValueIfExists(variableName, value, scope.ScopeObject, throwOnError: strictMode, out bool exists);
                     if (exists)
                         return;
                     

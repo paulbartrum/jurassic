@@ -366,11 +366,12 @@ namespace Jurassic.Library
         /// <param name="index"> The array index of the property to set. </param>
         /// <param name="value"> The value to set the property to.  This must be a javascript
         /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
         /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
         /// occurred; <c>true</c> otherwise. </returns>
-        public override bool SetPropertyValue(uint index, object value, bool throwOnError)
+        public override bool SetPropertyValue(uint index, object value, object thisValue, bool throwOnError)
         {
             value = value ?? Undefined.Value;
             if (this.dense != null)
@@ -777,7 +778,7 @@ namespace Jurassic.Library
                 for (int i = 0; i < items.Length; i++)
                 {
                     // Append the new item to the array.
-                    thisObj.SetPropertyValue((arrayLength2++).ToString(), items[i], true);
+                    thisObj.SetPropertyValue((arrayLength2++).ToString(), items[i], thisObj, throwOnError: true);
                 }
                 SetLength(thisObj, uint.MaxValue);
                 throw new JavaScriptException(ErrorType.RangeError, "Invalid array length");
@@ -787,7 +788,7 @@ namespace Jurassic.Library
             for (int i = 0; i < items.Length; i++)
             {
                 // Append the new item to the array.
-                thisObj.SetPropertyValue(arrayLength ++, items[i], true);
+                thisObj.SetPropertyValue(arrayLength ++, items[i], thisObj, throwOnError: true);
             }
 
             // Update the length property.
@@ -808,7 +809,7 @@ namespace Jurassic.Library
                 // Even though attempting to push more items than can fit in the array raises an
                 // error, the items are still pushed correctly (but the length is stuck at the
                 // maximum).
-                SetPropertyValue(this.length.ToString(), item, false);
+                SetPropertyValue(this.length.ToString(), item, this, throwOnError: false);
                 throw new JavaScriptException(ErrorType.RangeError, "Invalid array length");
             }
 
@@ -1018,7 +1019,7 @@ namespace Jurassic.Library
 
             // Prepend the new items.
             for (uint i = 0; i < items.Length; i++)
-                thisObj.SetPropertyValue(i, items[i], true);
+                thisObj.SetPropertyValue(i, items[i], thisObj, throwOnError: true);
 
             // Return the new length of the array.
             return arrayLength + (uint)items.Length;
@@ -1084,7 +1085,7 @@ namespace Jurassic.Library
             public override object this[int index]
             {
                 get { return WrappedInstance.GetPropertyValue((uint)index); }
-                set { WrappedInstance.SetPropertyValue((uint)index, value, throwOnError: false); }
+                set { WrappedInstance.SetPropertyValue((uint)index, value, WrappedInstance, throwOnError: false); }
             }
 
             /// <summary>
@@ -1571,7 +1572,7 @@ namespace Jurassic.Library
             if (thisObj is ArrayInstance)
                 ((ArrayInstance)thisObj).Length = value;
             else
-                thisObj.SetPropertyValue("length", (double)value, true);
+                thisObj.SetPropertyValue("length", (double)value, thisObj, throwOnError: true);
         }
 
         /// <summary>

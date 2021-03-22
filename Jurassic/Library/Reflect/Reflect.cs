@@ -116,7 +116,7 @@ namespace Jurassic.Library
                 propertyKey = TypeConverter.ToPropertyKey(propertyKey);
                 if (receiver == null)
                     receiver = targetObjectInstance;
-                object result = targetObjectInstance.GetPropertyValue(propertyKey, TypeConverter.ToObject(targetObjectInstance.Engine, receiver));
+                object result = targetObjectInstance.GetPropertyValue(propertyKey, receiver);
                 return result == null ? Undefined.Value : result;
             }
             throw new JavaScriptException(ErrorType.TypeError, "Reflect.get called on non-object.");
@@ -245,12 +245,14 @@ namespace Jurassic.Library
         /// <param name="receiver"> The value of this provided for the call to target if a setter is encountered. </param>
         /// <returns> A Boolean indicating whether or not setting the property was successful. </returns>
         [JSInternalFunction(Name = "set", Length = 3)]
-        public static bool Set(object target, object propertyKey, object value, object receiver)
+        public static bool Set(object target, object propertyKey, object value, object receiver = null)
         {
             if (target is ObjectInstance targetObjectInstance)
             {
                 propertyKey = TypeConverter.ToPropertyKey(propertyKey);
-                return targetObjectInstance.SetPropertyValue(propertyKey, value, throwOnError: false);
+                if (receiver == null)
+                    receiver = targetObjectInstance;
+                return targetObjectInstance.SetPropertyValue(propertyKey, value, receiver, throwOnError: false);
             }
             throw new JavaScriptException(ErrorType.TypeError, "Reflect.set called on non-object.");
         }
