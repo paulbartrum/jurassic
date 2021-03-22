@@ -131,26 +131,21 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the next object in the prototype chain.  There is no corresponding property in
         /// javascript (it is is *not* the same as the prototype property), instead use
-        /// Object.getPrototypeOf().
+        /// Object.getPrototypeOf(). Returns <c>null</c> for the root object in the prototype
+        /// chain. Use <see cref="SetPrototype(ObjectInstance, bool)"/> to set this value.
         /// </summary>
-        public ObjectInstance Prototype
+        public virtual ObjectInstance Prototype
         {
             get { return this.prototype; }
         }
 
         /// <summary>
-        /// Gets or sets a value that indicates whether the object can have new properties added
-        /// to it.
+        /// Gets a value that indicates whether the object can have new properties added to it.
+        /// Called by Object.isExtensible(). Use <see cref="PreventExtensions"/> to set this value.
         /// </summary>
-        internal bool IsExtensible
+        internal virtual bool IsExtensible
         {
             get { return (this.flags & ObjectFlags.Extensible) != 0; }
-            set
-            {
-                if (value == true)
-                    throw new InvalidOperationException("Once an object has been made non-extensible it cannot be made extensible again.");
-                this.flags &= ~ObjectFlags.Extensible;
-            }
         }
 
         /// <summary>
@@ -252,11 +247,15 @@ namespace Jurassic.Library
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Implements Object.setPrototypeOf().
+        /// Sets the next object in the prototype chain. Can be <c>null</c>, which indicates there
+        /// are no further objects in the chain.
         /// </summary>
         /// <param name="prototype"> The new prototype. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the prototype could not
+        /// be set.  This can happen if the object is non-extensible or if setting the prototype
+        /// would introduce a cyclic dependency. </param>
         /// <returns> <c>true</c> if the prototype was successfully applied; <c>false</c> otherwise. </returns>
-        internal bool SetPrototype(ObjectInstance prototype)
+        internal virtual bool SetPrototype(ObjectInstance prototype, bool throwOnError)
         {
             // If the new prototype is the same as the existing one, return success.
             if (this.prototype == prototype)
@@ -264,19 +263,40 @@ namespace Jurassic.Library
 
             // Can only set the prototype on extensible objects.
             if (!IsExtensible)
+            {
+                if (throwOnError)
+                    throw new JavaScriptException(ErrorType.TypeError, "Object is not extensible.");
                 return false;
+            }
 
             // Check there are no circular references in the prototype chain.
             var ancestor = prototype;
             while (ancestor != null)
             {
                 if (ancestor == this)
+                {
+                    if (throwOnError)
+                        throw new JavaScriptException(ErrorType.TypeError, "Prototype chain contains a cyclic reference.");
                     return false;
+                }
                 ancestor = ancestor.Prototype;
             }
 
             // Set the new prototype.
             this.prototype = prototype;
+            return true;
+        }
+
+        /// <summary>
+        /// Makes this object non-extensible, which means no new properties can be added to it.
+        /// </summary>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the object could not
+        /// be made non-extensible. </param>
+        /// <returns> <c>true</c> if the operation was successful, <c>false</c> otherwise. The
+        /// default implementation always returns <c>true</c>. </returns>
+        internal virtual bool PreventExtensions(bool throwOnError)
+        {
+            this.flags &= ~ObjectFlags.Extensible;
             return true;
         }
 
@@ -501,7 +521,7 @@ namespace Jurassic.Library
             var property = this.schema.GetPropertyIndexAndAttributes(index.ToString());
             if (property.Exists == true)
                 return new PropertyDescriptor(this.propertyValues[property.Index], property.Attributes);
-            return PropertyDescriptor.Undefined;
+            return PropertyDescriptor.Missing;
         }
 
         /// <summary>
@@ -510,7 +530,7 @@ namespace Jurassic.Library
         /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <returns> A property descriptor containing the property value and attributes. </returns>
         /// <remarks> The prototype chain is not searched. </remarks>
-        public PropertyDescriptor GetOwnPropertyDescriptor(object key)
+        public virtual PropertyDescriptor GetOwnPropertyDescriptor(object key)
         {
             // Check if the property is an indexed property.
             uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
@@ -529,7 +549,23 @@ namespace Jurassic.Library
             }
 
             // The property doesn't exist.
-            return PropertyDescriptor.Undefined;
+            return PropertyDescriptor.Missing;
+        }
+
+        /// <summary>
+        /// Returns the function with the given name, if it exists.
+        /// </summary>
+        /// <param name="key"> The property key (either a string or a Symbol). Cannot be a number. </param>
+        /// <returns> The method with the given name, if it exists; otherwise <c>null</c>. </returns>
+        /// <exception cref="JavaScriptException"> A property exists with the given name, but it's not callable. </exception>
+        public FunctionInstance GetMethod(object key)
+        {
+            var value = GetNamedPropertyValue(key, this);
+            if (value == null || value == Undefined.Value || value == Null.Value)
+                return null;
+            if (value is FunctionInstance f)
+                return f;
+            throw new JavaScriptException(ErrorType.TypeError, $"'{TypeConverter.ToString(value)}' returned for property '{TypeConverter.ToString(key)}' of object '{TypeConverter.ToString(this)}' is not a function.");
         }
 
         /// <summary>
@@ -807,28 +843,13 @@ namespace Jurassic.Library
             }
 
             // If the current property is not configurable, then the only change that is allowed is
-            // a change from one simple value to another (i.e. accessors are not allowed) and only
-            // if the writable attribute is set.
-            if (current.IsConfigurable == false)
+            // a change from one simple value to another (i.e. accessor changes are not allowed) and
+            // only if the writable attribute is currently set.
+            if (!PropertyDescriptor.IsCompatible(descriptor, new PropertyDescriptor(this.propertyValues[current.Index], current.Attributes)))
             {
-                // Get the current value of the property.
-                object currentValue = this.propertyValues[current.Index];
-                object getter = null, setter = null;
-                if (currentValue is PropertyAccessorValue)
-                {
-                    getter = ((PropertyAccessorValue)currentValue).Getter;
-                    setter = ((PropertyAccessorValue)currentValue).Setter;
-                }
-
-                // Check if the modification is allowed.
-                if (descriptor.Attributes != current.Attributes ||
-                    (descriptor.IsAccessor == true && (getter != descriptor.Getter || setter != descriptor.Setter)) ||
-                    (descriptor.IsAccessor == false && current.IsWritable == false && TypeComparer.SameValue(currentValue, descriptor.Value) == false))
-                {
-                    if (throwOnError == true)
-                        throw new JavaScriptException(ErrorType.TypeError, string.Format("The property '{0}' is non-configurable.", key));
-                    return false;
-                }
+                if (throwOnError == true)
+                    throw new JavaScriptException(ErrorType.TypeError, string.Format("The property '{0}' is non-configurable.", key));
+                return false;
             }
 
             // Set the property attributes.
@@ -839,6 +860,26 @@ namespace Jurassic.Library
             this.propertyValues[current.Index] = descriptor.Value;
 
             return true;
+        }
+
+        /// <summary>
+        /// Checks whether the given descriptor is compatible with the current descriptor.
+        /// </summary>
+        /// <param name="isExtensible"> Indicates whether the target object is extensible. </param>
+        /// <param name="descriptor"> The new descriptor. </param>
+        /// <param name="current"> The descriptor corresponding to the currently existing property. </param>
+        /// <returns> <c>true</c> if the new descriptor is compatible with the old one; <c>false</c> otherwise. </returns>
+        internal static bool IsCompatiblePropertyDescriptor(bool isExtensible, PropertyDescriptor descriptor, PropertyDescriptor current)
+        {
+            // If the current property doesn't exist, then the new descriptor is always compatible,
+            // unless isExtensible is false.
+            if (!current.Exists)
+                return isExtensible;
+
+            // If the current property is not configurable, then the only change that is allowed is
+            // a change from one simple value to another (i.e. accessor changes are not allowed) and
+            // only if the writable attribute is currently set.
+            return PropertyDescriptor.IsCompatible(descriptor, current);
         }
 
         /// <summary>

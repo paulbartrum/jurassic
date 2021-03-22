@@ -351,7 +351,7 @@ namespace Jurassic.Library
                 // The array is dense and therefore has at least "length" elements.
                 if (index < this.length)
                     return new PropertyDescriptor(this.dense[index], PropertyAttributes.FullAccess);
-                return PropertyDescriptor.Undefined;
+                return PropertyDescriptor.Missing;
             }
 
             // The array is sparse and therefore has "holes".

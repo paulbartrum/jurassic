@@ -47,9 +47,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Used in several APIs to indicate that a property doesn't exist.
+        /// Indicates that a property doesn't exist.
         /// </summary>
-        internal static readonly PropertyDescriptor Undefined = new PropertyDescriptor(null, PropertyAttributes.Sealed);
+        internal static readonly PropertyDescriptor Missing = new PropertyDescriptor(null, PropertyAttributes.Sealed);
+
+        /// <summary>
+        /// Used to indicate that a property whose value is undefined, and is not writable,
+        /// enumerable or configurable.
+        /// </summary>
+        internal static readonly PropertyDescriptor Undefined = new PropertyDescriptor(Undefined.Value, PropertyAttributes.Sealed);
 
         /// <summary>
         /// Gets a value that indicates whether the property exists.
@@ -100,28 +106,6 @@ namespace Jurassic.Library
         {
             get { return this.value; }
         }
-
-        ///// <summary>
-        ///// Gets the property value, calling the get accessor, if present.
-        ///// </summary>
-        ///// <param name="thisObject"> The context of the get accessor, if present. </param>
-        ///// <returns> The property value. </returns>
-        //public object GetValue(ObjectInstance thisObject)
-        //{
-        //    // Get the property value.
-        //    object result = this.Value;
-
-        //    // Deal with accessor properties.
-        //    if (result is PropertyAccessorValue)
-        //    {
-        //        if (((PropertyAccessorValue)result).GetAccessor == null)
-        //            return Undefined.Value;
-        //        return ((PropertyAccessorValue)result).GetAccessor.CallLateBound(thisObject);
-        //    }
-
-        //    // Return the value.
-        //    return result;
-        //}
 
         /// <summary>
         /// Returns a string representing the current object.
@@ -196,7 +180,7 @@ namespace Jurassic.Library
         public static PropertyDescriptor FromObject(ObjectInstance obj, PropertyDescriptor defaults)
         {
             if (obj == null)
-                return PropertyDescriptor.Undefined;
+                return Missing;
 
             // Read configurable attribute.
             bool configurable = defaults.IsConfigurable;
@@ -298,6 +282,47 @@ namespace Jurassic.Library
             result["enumerable"] = this.IsEnumerable;
             result["configurable"] = this.IsConfigurable;
             return result;
+        }
+
+
+
+        //     HELPER FUNCTIONS
+        //_________________________________________________________________________________________
+
+        /// <summary>
+        /// Checks whether the given descriptor is compatible with the current descriptor.
+        /// </summary>
+        /// <param name="descriptor"> The new descriptor. </param>
+        /// <param name="current"> The descriptor corresponding to the currently existing property. </param>
+        /// <returns> <c>true</c> if the new descriptor is compatible with the old one; <c>false</c> otherwise. </returns>
+        internal static bool IsCompatible(PropertyDescriptor descriptor, PropertyDescriptor current)
+        {
+            // If the current property is configurable, then allow the modification.
+            if (current.IsConfigurable)
+                return true;
+
+            // If both properties are accessors, then they must match exactly.
+            if (descriptor.value is PropertyAccessorValue descriptorAccessor)
+            {
+                if (current.value is PropertyAccessorValue currentAccessor)
+                {
+                    return TypeComparer.SameValue(descriptorAccessor.Getter, currentAccessor.Getter) &&
+                        TypeComparer.SameValue(descriptorAccessor.Setter, currentAccessor.Setter) &&
+                        descriptor.Attributes == current.Attributes;
+                }
+                return false;
+            }
+
+            // If this is a data property, and writable is false, then the properties must match exactly.
+            if (current.IsWritable == false)
+            {
+                return TypeComparer.SameValue(descriptor.Value, current.Value) &&
+                        descriptor.Attributes == current.Attributes;
+            }
+
+            // Otherwise, if the data property is writable, then IsEnumerable and IsConfigurable must match.
+            // Value changes are allowed, and making the property non-writable is also allowed.
+            return !descriptor.IsConfigurable && descriptor.IsEnumerable == current.IsEnumerable;
         }
     }
 

@@ -131,6 +131,9 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("descriptor.hasOwnProperty('get')"));
             Assert.AreEqual(false, Evaluate("descriptor.hasOwnProperty('set')"));
 
+            // The first parameter doesn't have to be an object.
+            Assert.AreEqual(@"{""value"":""f"",""writable"":false,""enumerable"":true,""configurable"":false}",
+                Evaluate("JSON.stringify(Object.getOwnPropertyDescriptor('foo', 0))"));
             Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor(true, 'toString')"));
             Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor(5, 'toString')"));
             Assert.AreEqual(Undefined.Value, Evaluate("Object.getOwnPropertyDescriptor('test', 'toString')"));
@@ -341,6 +344,11 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("Object.defineProperty(x, 'a', {get: undefined, set: undefined}) === x"));
             Assert.AreEqual(Undefined.Value, Evaluate("x.a"));
 
+            // Writable properties can be made non-writable.
+            Assert.AreEqual(10, Evaluate(@"
+                var x = Object.defineProperty({}, 'a', { configurable: false, writable: true, value: 5 });
+                Object.defineProperty(x, 'a', { configurable: false, writable: false, value: 10 }).a;"));
+
             // Non-extensible objects cannot have properties added.
             Assert.AreEqual(true, Evaluate("var x = {}; Object.preventExtensions(x) === x"));
             Assert.AreEqual("TypeError: The property 'a' cannot be created as the object is not extensible.", EvaluateExceptionMessage("Object.defineProperty(x, 'a', {value: 7, enumerable: true, writable: true, configurable: true})"));
@@ -350,7 +358,6 @@ namespace UnitTests
             Assert.AreEqual(10, Evaluate("Object.defineProperty(x, 'a', {value: 10, enumerable: true, writable: true, configurable: false}); x.a"));
             Assert.AreEqual("TypeError: Property descriptors with 'get' or 'set' defined must not have 'writable' set", EvaluateExceptionMessage("Object.defineProperty(x, 'a', {get: function() { return 7; }, enumerable: true, writable: true, configurable: false}); x.a"));
             Assert.AreEqual("TypeError: The property 'a' is non-configurable.", EvaluateExceptionMessage("Object.defineProperty(x, 'a', {value: 10, enumerable: false, writable: true, configurable: false})"));
-            Assert.AreEqual("TypeError: The property 'a' is non-configurable.", EvaluateExceptionMessage("Object.defineProperty(x, 'a', {value: 10, enumerable: true, writable: false, configurable: false})"));
             Assert.AreEqual("TypeError: The property 'a' is non-configurable.", EvaluateExceptionMessage("Object.defineProperty(x, 'a', {value: 10, enumerable: true, writable: true, configurable: true})"));
             Assert.AreEqual(true, Evaluate("var x = {}; var f = function() { return 1; }; Object.defineProperty(x, 'a', {get: f}); Object.defineProperty(x, 'a', {get: f}) === x"));
             Assert.AreEqual(true, Evaluate("var x = {}; Object.defineProperty(x, 'a', {get: function() { return 1; }}); Object.defineProperty(x, 'a', {set: undefined}) === x"));

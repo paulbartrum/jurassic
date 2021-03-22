@@ -99,13 +99,7 @@ namespace Jurassic.Library
                 throw new JavaScriptException(ErrorType.TypeError, "Object prototype may only be an Object or null.");
 
             // Attempt to set the prototype.
-            if (!obj.SetPrototype(prototypeObj))
-            {
-                // Attempt to throw a reasonable error message based on what we know about how SetPrototype works.
-                if (!obj.IsExtensible)
-                    throw new JavaScriptException(ErrorType.TypeError, "Object is not extensible.");
-                throw new JavaScriptException(ErrorType.TypeError, "Prototype chain contains a cyclic reference.");
-            }
+            obj.SetPrototype(prototypeObj, throwOnError: true);
 
             return obj;
         }
@@ -239,6 +233,8 @@ namespace Jurassic.Library
         {
             key = TypeConverter.ToPropertyKey(key);
             var defaults = obj.GetOwnPropertyDescriptor(key);
+            if (!defaults.Exists)
+                defaults = PropertyDescriptor.Undefined;
             if (!(attributes is ObjectInstance))
                 throw new JavaScriptException(ErrorType.TypeError, $"Invalid descriptor for property '{key}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
@@ -282,7 +278,7 @@ namespace Jurassic.Library
                     objectInstance.FastSetProperty(property.Key, property.Value,
                         property.Attributes & ~PropertyAttributes.Configurable, overwriteAttributes: true);
                 }
-                objectInstance.IsExtensible = false;
+                objectInstance.PreventExtensions(throwOnError: true);
             }
             return obj;
         }
@@ -305,7 +301,7 @@ namespace Jurassic.Library
                     objectInstance.FastSetProperty(property.Key, property.Value,
                         property.Attributes & ~(PropertyAttributes.NonEnumerable), overwriteAttributes: true);
                 }
-                objectInstance.IsExtensible = false;
+                objectInstance.PreventExtensions(throwOnError: true);
             }
             return obj;
         }
@@ -320,7 +316,7 @@ namespace Jurassic.Library
         {
             if (obj is ObjectInstance objectInstance)
             {
-                objectInstance.IsExtensible = false;
+                objectInstance.PreventExtensions(throwOnError: true);
             }
             return obj;
         }
