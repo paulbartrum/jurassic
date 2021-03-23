@@ -145,7 +145,8 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "isArray")]
         public static bool IsArray(object value)
         {
-            return value is ArrayInstance;
+            return value is ArrayInstance ||
+                (value is IProxyInstance proxy && IsArray(proxy.Target));
         }
 
         /// <summary>

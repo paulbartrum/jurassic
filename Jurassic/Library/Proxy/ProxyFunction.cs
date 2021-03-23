@@ -3,13 +3,10 @@
     /// <summary>
     /// Represents a callable, constructable instance of the Proxy class.
     /// </summary>
-    internal partial class ProxyFunction : FunctionInstance
+    internal partial class ProxyFunction : FunctionInstance, IProxyInstance
     {
         private readonly FunctionInstance target;
         private readonly ObjectInstance handler;
-
-        //     INITIALIZATION
-        //_________________________________________________________________________________________
 
         /// <summary>
         /// Creates a new proxy instance.
@@ -24,6 +21,14 @@
         {
             this.target = target;
             this.handler = handler;
+        }
+
+        /// <summary>
+        /// The proxy target.
+        /// </summary>
+        ObjectInstance IProxyInstance.Target
+        {
+            get { return target; }
         }
 
         /// <summary>
@@ -66,61 +71,61 @@
         /// <inheritdoc/>
         public override ObjectInstance Prototype
         {
-            get { return new ProxyInstance(Engine, target, handler).Prototype; }
+            get { return new ProxyObject(Engine, target, handler).Prototype; }
         }
 
         /// <inheritdoc/>
         internal override bool SetPrototype(ObjectInstance prototype, bool throwOnError)
         {
-            return new ProxyInstance(Engine, target, handler).SetPrototype(prototype, throwOnError);
+            return new ProxyObject(Engine, target, handler).SetPrototype(prototype, throwOnError);
         }
 
         /// <inheritdoc/>
         internal override bool IsExtensible
         {
-            get { return new ProxyInstance(Engine, target, handler).IsExtensible; }
+            get { return new ProxyObject(Engine, target, handler).IsExtensible; }
         }
 
         /// <inheritdoc/>
         internal override bool PreventExtensions(bool throwOnError)
         {
-            return new ProxyInstance(Engine, target, handler).PreventExtensions(throwOnError);
+            return new ProxyObject(Engine, target, handler).PreventExtensions(throwOnError);
         }
 
         /// <inheritdoc/>
         public override PropertyDescriptor GetOwnPropertyDescriptor(object key)
         {
-            return new ProxyInstance(Engine, target, handler).GetOwnPropertyDescriptor(key);
+            return new ProxyObject(Engine, target, handler).GetOwnPropertyDescriptor(key);
         }
 
         /// <inheritdoc/>
         public override bool DefineProperty(object key, PropertyDescriptor descriptor, bool throwOnError)
         {
-            return new ProxyInstance(Engine, target, handler).DefineProperty(key, descriptor, throwOnError);
+            return new ProxyObject(Engine, target, handler).DefineProperty(key, descriptor, throwOnError);
         }
 
         /// <inheritdoc/>
         public override bool HasProperty(object key)
         {
-            return new ProxyInstance(Engine, target, handler).HasProperty(key);
+            return new ProxyObject(Engine, target, handler).HasProperty(key);
         }
 
         /// <inheritdoc/>
         public override object GetPropertyValue(object key, object thisValue = null)
         {
-            return new ProxyInstance(Engine, target, handler).GetPropertyValue(key, thisValue);
+            return new ProxyObject(Engine, target, handler).GetPropertyValue(key, thisValue);
         }
 
         /// <inheritdoc/>
         public override bool SetPropertyValue(object key, object value, object thisValue, bool throwOnError)
         {
-            return new ProxyInstance(Engine, target, handler).SetPropertyValue(key, value, thisValue, throwOnError);
+            return new ProxyObject(Engine, target, handler).SetPropertyValue(key, value, thisValue, throwOnError);
         }
 
         /// <inheritdoc/>
         public override bool Delete(object key, bool throwOnError)
         {
-            return new ProxyInstance(Engine, target, handler).Delete(key, throwOnError);
+            return new ProxyObject(Engine, target, handler).Delete(key, throwOnError);
         }
     }
 }

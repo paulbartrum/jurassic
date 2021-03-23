@@ -51,7 +51,7 @@ namespace Jurassic.Library
             {
                 if (target is FunctionInstance targetFunction)
                     return new ProxyFunction(Engine, targetFunction, handlerObject);
-                return new ProxyInstance(Engine, targetObject, handlerObject);
+                return new ProxyObject(Engine, targetObject, handlerObject);
             }
             throw new JavaScriptException(ErrorType.TypeError, "Cannot create proxy with a non-object as target or handler.");
         }
@@ -68,7 +68,7 @@ namespace Jurassic.Library
         /// <param name="handler"> An object whose properties are functions that define the behavior of the proxy when an operation is performed on it. </param>
         /// <returns> A new proxy object. </returns>
         [JSInternalFunction(Name = "revocable")]
-        public static ProxyInstance Revocable(object target, object handler)
+        public static ProxyObject Revocable(object target, object handler)
         {
             throw new NotSupportedException();
         }

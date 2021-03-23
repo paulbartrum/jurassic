@@ -64,11 +64,10 @@ namespace Jurassic.Library
 
             // The replacer object can be either a function or an array.
             serializer.ReplacerFunction = replacer as FunctionInstance;
-            if (replacer is ArrayInstance)
+            if (replacer is ObjectInstance replaceObjectInstance && ArrayConstructor.IsArray(replacer))
             {
-                var replacerArray = (ArrayInstance)replacer;
                 var serializableProperties = new HashSet<string>(StringComparer.Ordinal);
-                foreach (object elementValue in replacerArray.ElementValues)
+                foreach (object elementValue in TypeUtilities.CreateListFromArrayLike(replaceObjectInstance))
                 {
                     if (elementValue is string || elementValue is int || elementValue is double || elementValue is StringInstance || elementValue is NumberInstance)
                         serializableProperties.Add(TypeConverter.ToString(elementValue));

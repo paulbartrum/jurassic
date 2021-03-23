@@ -353,7 +353,7 @@ namespace Jurassic.Library
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        private object GetPropertyValue(uint index, object thisValue)
+        protected virtual object GetPropertyValue(uint index, object thisValue)
         {
             // Get the descriptor for the property.
             var property = this.GetOwnPropertyDescriptor(index);

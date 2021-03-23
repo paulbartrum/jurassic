@@ -11,7 +11,7 @@ namespace Jurassic.Library
     {
         private ScriptEngine engine;
         private Stack<ObjectInstance> objectStack;
-        private Stack<ArrayInstance> arrayStack;
+        private Stack<ObjectInstance> arrayStack;
         private string separator;
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Jurassic.Library
         {
             // Initialize private variables.
             this.objectStack = new Stack<ObjectInstance>();
-            this.arrayStack = new Stack<ArrayInstance>();
+            this.arrayStack = new Stack<ObjectInstance>();
             this.separator = string.IsNullOrEmpty(this.Indentation) ? string.Empty : "\n";
 
             // Create a temp object to hold the value.
@@ -112,7 +112,7 @@ namespace Jurassic.Library
         /// <param name="holder"> The object containing the value. </param>
         /// <param name="arrayIndex"> The array index of the property holding the value to transform. </param>
         /// <returns> The transformed value. </returns>
-        private object TransformPropertyValue(ArrayInstance holder, uint arrayIndex)
+        private object TransformPropertyValue(ObjectInstance holder, uint arrayIndex)
         {
             string propertyName = null;
             object value = holder[arrayIndex];
@@ -194,9 +194,9 @@ namespace Jurassic.Library
             }
 
             // Serialize an array.
-            if (value is ArrayInstance)
+            if (value is ObjectInstance valueObjectInstance && ArrayConstructor.IsArray(value))
             {
-                SerializeArray((ArrayInstance)value, result);
+                SerializeArray(valueObjectInstance, result);
                 return;
             }
 
@@ -352,7 +352,7 @@ namespace Jurassic.Library
         /// <param name="value"> The array to serialize. </param>
         /// <param name="result"> The StringBuilder to write the JSON representation of the
         /// array to. </param>
-        private void SerializeArray(ArrayInstance value, StringBuilder result)
+        private void SerializeArray(ObjectInstance value, StringBuilder result)
         {
             // Add the spacer string to the current separator string.
             string previousSeparator = this.separator;
@@ -364,7 +364,8 @@ namespace Jurassic.Library
             this.arrayStack.Push(value);
 
             result.Append('[');
-            for (uint i = 0; i < value.Length; i++)
+            uint length = ArrayInstance.GetLength(value);
+            for (uint i = 0; i < length; i++)
             {
                 // Append the separator.
                 if (i > 0)
@@ -385,7 +386,7 @@ namespace Jurassic.Library
                     SerializePropertyValue(elementValue, result);
                 }
             }
-            if (value.Length > 0)
+            if (length > 0)
                 result.Append(previousSeparator);
             result.Append(']');
 

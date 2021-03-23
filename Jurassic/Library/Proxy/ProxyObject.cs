@@ -5,13 +5,10 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the Proxy class, one that is non-callable and non-constructable.
     /// </summary>
-    public partial class ProxyInstance : ObjectInstance
+    public partial class ProxyObject : ObjectInstance, IProxyInstance
     {
         private readonly ObjectInstance target;
         private readonly ObjectInstance handler;
-
-        //     INITIALIZATION
-        //_________________________________________________________________________________________
 
         /// <summary>
         /// Creates a new proxy instance.
@@ -21,12 +18,20 @@ namespace Jurassic.Library
         /// including a native array, a function, or even another proxy. </param>
         /// <param name="handler"> An object whose properties are functions that define the
         /// behavior of the proxy when an operation is performed on it. </param>
-        internal ProxyInstance(ScriptEngine engine, ObjectInstance target, ObjectInstance handler)
+        internal ProxyObject(ScriptEngine engine, ObjectInstance target, ObjectInstance handler)
             : base(engine)
         {
             // target and handler are both non-null.
             this.target = target;
             this.handler = handler;
+        }
+
+        /// <summary>
+        /// The proxy target.
+        /// </summary>
+        ObjectInstance IProxyInstance.Target
+        {
+            get { return target; }
         }
 
         /// <summary>
@@ -281,6 +286,19 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Gets the value of the property with the given array index.
+        /// </summary>
+        /// <param name="index"> The array index of the property. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        protected override object GetPropertyValue(uint index, object thisValue)
+        {
+            return GetPropertyValue(index.ToString(), thisValue);
+        }
+
+        /// <summary>
         /// Gets the value of the property with the given name.
         /// </summary>
         /// <param name="key"> The property key (either a string or a Symbol). </param>
@@ -288,7 +306,7 @@ namespace Jurassic.Library
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        public override object GetPropertyValue(object key, object thisValue = null)
+        public override object GetPropertyValue(object key, object thisValue)
         {
             // Call the handler, if one exists.
             var trap = handler.GetMethod("get");
@@ -375,7 +393,11 @@ namespace Jurassic.Library
             return true;
         }
 
-        /*public override IEnumerable<PropertyNameAndValue> Properties
+        /// <summary>
+        /// Gets an enumerable list of every property name and value associated with this object.
+        /// Does not include properties in the prototype chain.
+        /// </summary>
+        public override IEnumerable<PropertyNameAndValue> Properties
         {
             get
             {
@@ -387,11 +409,11 @@ namespace Jurassic.Library
 
                 // Validate.
                 if (!(result is ObjectInstance))
-                    throw new JavaScriptException(ErrorType.TypeError, $"");
+                    throw new JavaScriptException(ErrorType.TypeError, $"sdf");
                 var trapResult = TypeUtilities.CreateListFromArrayLike((ObjectInstance)result);
 
-                return Engine.Array.New(trapResult);
+                throw new JavaScriptException(ErrorType.TypeError, $"sdf");
             }
-        }*/
+        }
     }
 }
