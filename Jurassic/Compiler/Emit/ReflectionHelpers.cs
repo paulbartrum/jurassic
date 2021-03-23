@@ -11,7 +11,7 @@ namespace Jurassic.Compiler
     /// Not intended for user code (the class needs to be public because when using Reflection
     /// Emit, all calls into Jurassic.dll are cross-assembly and thus must be public).
     /// </summary>
-    public static class ReflectionHelpers
+    internal static class ReflectionHelpers
     {
         internal static MethodInfo TypeConverter_ToString;
         internal static MethodInfo TypeConverter_ToConcatenatedString;
@@ -301,29 +301,6 @@ namespace Jurassic.Compiler
             RuntimeScope_Delete = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.Delete), typeof(string));
             RuntimeScope_With = GetInstanceMethod(typeof(RuntimeScope), nameof(RuntimeScope.With), typeof(object));
             RuntimeScope_ImplicitThis = GetInstanceMethod(typeof(RuntimeScope), "get_" + nameof(RuntimeScope.ImplicitThis));
-
-#if DEBUG && ENABLE_DEBUGGING
-            // When using Reflection Emit, all calls into Jurassic.dll are cross-assembly and thus
-            // must be public.
-            var text = new System.Text.StringBuilder();
-            foreach (var reflectionField in GetMembers())
-            {
-                var methodBase = reflectionField.MemberInfo as MethodBase;
-                if (methodBase != null && (methodBase.Attributes & MethodAttributes.Public) != MethodAttributes.Public)
-                {
-                    text.Append(methodBase.DeclaringType.ToString());
-                    text.Append("/");
-                    text.AppendLine(methodBase.ToString());
-                }
-                var field = reflectionField.MemberInfo as FieldInfo;
-                if (field != null && (field.Attributes & FieldAttributes.Public) != FieldAttributes.Public)
-                    text.AppendLine(field.ToString());
-                if ((reflectionField.MemberInfo.DeclaringType.Attributes & TypeAttributes.Public) != TypeAttributes.Public)
-                    text.AppendLine(reflectionField.MemberInfo.DeclaringType.ToString());
-            }
-            if (text.Length > 0)
-                throw new InvalidOperationException("The following members need to be public: " + Environment.NewLine + text.ToString());
-#endif
         }
 
 

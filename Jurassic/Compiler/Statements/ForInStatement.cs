@@ -92,10 +92,6 @@ namespace Jurassic.Compiler
             // Generate the scope variable if necessary.
             this.Scope.GenerateScopeCreation(generator, optimizationInfo);
 
-            // Emit debugging information.
-            if (optimizationInfo.DebugDocument != null)
-                generator.MarkSequencePoint(optimizationInfo.DebugDocument, this.VariableSourceSpan);
-
             //   if (enumerator.MoveNext() == false)
             //     goto break-target;
             generator.LoadVariable(enumerator);

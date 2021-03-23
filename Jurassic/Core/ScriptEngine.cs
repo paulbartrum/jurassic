@@ -645,20 +645,6 @@ namespace Jurassic
         //     DEBUGGING SUPPORT
         //_________________________________________________________________________________________
 
-#if ENABLE_DEBUGGING
-
-        /// <summary>
-        /// Gets or sets a value which indicates whether debug information should be generated.  If
-        /// this is set to <c>true</c> performance and memory usage are negatively impacted.
-        /// </summary>
-        public bool EnableDebugging
-        {
-            get;
-            set;
-        }
-
-#endif
-
         /// <summary>
         /// Gets or sets whether CLR types can be exposed directly to the script engine.  If this is set to 
         /// <c>false</c>, attempting to instantiate CLR types from script may result in exceptions being
@@ -925,9 +911,6 @@ namespace Jurassic
             return new CompilerOptions()
             {
                 ForceStrictMode = this.ForceStrictMode,
-#if ENABLE_DEBUGGING
-                EnableDebugging = this.EnableDebugging,
-#endif
                 CompatibilityMode = this.CompatibilityMode,
                 EnableILAnalysis = this.EnableILAnalysis,
             };

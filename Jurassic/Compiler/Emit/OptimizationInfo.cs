@@ -34,11 +34,6 @@ namespace Jurassic.Compiler
         //_________________________________________________________________________________________
 
         /// <summary>
-        /// Gets or sets the symbol store to write debugging information to.
-        /// </summary>
-        public System.Diagnostics.SymbolStore.ISymbolDocumentWriter DebugDocument { get; set; }
-
-        /// <summary>
         /// Gets or sets the source of javascript code.
         /// </summary>
         public ScriptSource Source { get; set; }
@@ -63,8 +58,6 @@ namespace Jurassic.Compiler
         {
             if (span == null)
                 throw new ArgumentNullException(nameof(span));
-            if (this.DebugDocument != null)
-                generator.MarkSequencePoint(this.DebugDocument, span);
             this.SourceSpan = span;
         }
 

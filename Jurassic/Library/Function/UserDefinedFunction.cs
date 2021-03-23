@@ -44,10 +44,8 @@ namespace Jurassic.Library
             this.ParentScope = RuntimeScope.CreateGlobalScope(Engine);
 
             // Compile the code.
-            var context = new FunctionMethodGenerator(name, argumentsText, bodyText, new CompilerOptions() {
-#if ENABLE_DEBUGGING
-               EnableDebugging = this.Engine.EnableDebugging,
-#endif
+            var context = new FunctionMethodGenerator(name, argumentsText, bodyText, new CompilerOptions()
+            {
                ForceStrictMode = this.Engine.ForceStrictMode,
                EnableILAnalysis = this.Engine.EnableILAnalysis,
                CompatibilityMode = this.Engine.CompatibilityMode
