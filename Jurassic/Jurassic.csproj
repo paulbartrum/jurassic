@@ -1,21 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Paul Bartrum</Authors>
     <Company />
     <Description>A .NET library to parse and execute JavaScript code.</Description>
     <Version>3.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/paulbartrum/jurassic</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/nuget-logo.png</PackageIconUrl>
     <PackageTags>JavaScript ECMAScript</PackageTags>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;NETSTANDARD</DefineConstants>
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);DEBUG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'net45'">$(DefineConstants);ENABLE_DEBUGGING</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);NETSTANDARD</DefineConstants>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Jurassic.xml</DocumentationFile>
     <PackageReleaseNotes>Language changes:
 * Support exponentiation operator (e.g. 2**3).
@@ -38,13 +36,9 @@ Plus misc fixes to regular expressions, number formatting and date parsing.</Pac
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+  <ItemGroup>
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
   </ItemGroup>
 
 </Project>
