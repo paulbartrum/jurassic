@@ -63,7 +63,6 @@ namespace Jurassic.TestSuiteRunner
                         if (int.TryParse(testCase.Response.JsonResult, out int resultAsInteger) && resultAsInteger != 0)
                             testCase.Success = true;
                         if (testCase.Success == false &&
-                            !testCase.name.StartsWith("Proxy") &&
                             !testCase.name.StartsWith("generators") &&
                             !testCase.name.StartsWith("arrow functions") &&
                             !testCase.name.StartsWith("destructuring") &&

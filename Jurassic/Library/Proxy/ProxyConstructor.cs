@@ -45,11 +45,15 @@ namespace Jurassic.Library
         /// <param name="handler"> An object whose properties are functions that define the behavior of the proxy when an operation is performed on it. </param>
         /// <returns> A new proxy object. </returns>
         [JSConstructorFunction]
-        public ProxyInstance Construct(object target, object handler)
+        public ObjectInstance Construct(object target, object handler)
         {
-            if (!(target is ObjectInstance) || !(handler is ObjectInstance))
-                throw new JavaScriptException(ErrorType.TypeError, "Cannot create proxy with a non-object as target or handler.");
-            return new ProxyInstance(Engine, (ObjectInstance)target, (ObjectInstance)handler);
+            if (target is ObjectInstance targetObject && handler is ObjectInstance handlerObject)
+            {
+                if (target is FunctionInstance targetFunction)
+                    return new ProxyFunction(Engine, targetFunction, handlerObject);
+                return new ProxyInstance(Engine, targetObject, handlerObject);
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Cannot create proxy with a non-object as target or handler.");
         }
 
 

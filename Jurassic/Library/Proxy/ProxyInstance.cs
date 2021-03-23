@@ -1,7 +1,9 @@
-﻿namespace Jurassic.Library
+﻿using System.Collections.Generic;
+
+namespace Jurassic.Library
 {
     /// <summary>
-    /// 
+    /// Represents an instance of the Proxy class, one that is non-callable and non-constructable.
     /// </summary>
     public partial class ProxyInstance : ObjectInstance
     {
@@ -14,11 +16,13 @@
         /// <summary>
         /// Creates a new proxy instance.
         /// </summary>
-        /// <param name="engine"> The next object in the prototype chain. </param>
-        /// <param name="target"></param>
-        /// <param name="handler"></param>
+        /// <param name="engine"> The script engine. </param>
+        /// <param name="target"> A target object to wrap with Proxy. It can be any sort of object,
+        /// including a native array, a function, or even another proxy. </param>
+        /// <param name="handler"> An object whose properties are functions that define the
+        /// behavior of the proxy when an operation is performed on it. </param>
         internal ProxyInstance(ScriptEngine engine, ObjectInstance target, ObjectInstance handler)
-            : base(engine.Object.InstancePrototype)
+            : base(engine)
         {
             // target and handler are both non-null.
             this.target = target;
@@ -370,5 +374,24 @@
             }
             return true;
         }
+
+        /*public override IEnumerable<PropertyNameAndValue> Properties
+        {
+            get
+            {
+                // Call the handler, if one exists.
+                var trap = handler.GetMethod("ownKeys");
+                if (trap == null)
+                    return target.Properties;
+                var result = trap.CallLateBound(handler, target);
+
+                // Validate.
+                if (!(result is ObjectInstance))
+                    throw new JavaScriptException(ErrorType.TypeError, $"");
+                var trapResult = TypeUtilities.CreateListFromArrayLike((ObjectInstance)result);
+
+                return Engine.Array.New(trapResult);
+            }
+        }*/
     }
 }

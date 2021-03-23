@@ -492,5 +492,67 @@ namespace UnitTests
                 });
                 delete proxy.a;"));
         }
+
+        [TestMethod]
+        public void apply()
+        {
+            // Check normal case.
+            Assert.AreEqual(64, Evaluate(@"
+                var proxy = new Proxy(Math.pow, {
+                  apply(target, thisArg, argumentsList) {
+                    return target(argumentsList[0], argumentsList[1]);
+                  }
+                });
+                proxy(2, 6);"));
+
+            // Check arguments.
+            Assert.AreEqual(99, Evaluate(@"
+                var proxy = new Proxy(Math.pow, {
+                  bubbles: 99,
+                  apply(target, thisArg, argumentsList) {
+                    return this.bubbles;
+                  }
+                });
+                var container = { proxy: proxy };
+                container.proxy(2, 6);"));
+            Assert.AreEqual(true, Evaluate(@"
+                var proxy = new Proxy(Math.pow, {
+                  apply(target, thisArg, argumentsList) {
+                    return thisArg === container;
+                  }
+                });
+                var container = { proxy: proxy };
+                container.proxy(2, 6);"));
+
+            // The proxy is only callable if the target is callable.
+            Assert.AreEqual("TypeError: 'proxy' is not a function", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Math, {
+                  apply(target, thisArg, argumentsList) {
+                    return target.pow(argumentsList[0], argumentsList[1]);
+                  }
+                });
+                proxy(2, 6);"));
+        }
+
+        [TestMethod]
+        public void construct()
+        {
+            // Check normal case.
+            Assert.AreEqual("haha", Evaluate(@"
+                var proxy = new Proxy(Error, {
+                  construct(target, args) {
+                    return new String(args[0]);
+                  }
+                });
+                new proxy('haha').toString();"));
+
+            Assert.AreEqual("TypeError: proxy is not a constructor", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Math.pow, {
+                  construct(target, args) {
+                    return new String('test');
+                  }
+                });
+                new proxy(2, 6);"));
+        }
     }
 }
