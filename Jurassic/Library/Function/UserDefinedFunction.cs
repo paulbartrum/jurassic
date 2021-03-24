@@ -11,11 +11,8 @@ namespace Jurassic.Library
     /// </summary>
     public class UserDefinedFunction : FunctionInstance
     {
-        [NonSerialized]
-        private GeneratedMethod generatedMethod;
-
-        [NonSerialized]
-        private FunctionDelegate body;
+        private readonly GeneratedMethod generatedMethod;
+        private readonly FunctionMethodGenerator.FunctionDelegate body;
 
 
 
@@ -63,7 +60,7 @@ namespace Jurassic.Library
             this.ArgumentNames = context.Arguments.Select(a => a.Name).ToList();
             this.BodyText = bodyText;
             this.generatedMethod = context.GeneratedMethod;
-            this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
+            this.body = (FunctionMethodGenerator.FunctionDelegate)this.generatedMethod.GeneratedDelegate;
             this.StrictMode = context.StrictMode;
             InitProperties(name, context.Arguments.Count);
         }
@@ -79,7 +76,7 @@ namespace Jurassic.Library
         /// <param name="body"> A delegate which represents the body of the function. </param>
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
         /// <remarks> This is used by <c>arguments</c>. </remarks>
-        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, RuntimeScope parentScope, string bodyText, FunctionDelegate body, bool strictMode)
+        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, RuntimeScope parentScope, string bodyText, FunctionMethodGenerator.FunctionDelegate body, bool strictMode)
             : base(prototype)
         {
             this.ArgumentsText = string.Join(", ", argumentNames);
@@ -111,7 +108,7 @@ namespace Jurassic.Library
             this.ArgumentNames = argumentNames;
             this.BodyText = bodyText;
             this.generatedMethod = generatedMethod;
-            this.body = (FunctionDelegate)this.generatedMethod.GeneratedDelegate;
+            this.body = (FunctionMethodGenerator.FunctionDelegate)this.generatedMethod.GeneratedDelegate;
             this.ParentScope = parentScope;
             this.StrictMode = strictMode;
             this.Container = container;
@@ -230,7 +227,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a reference to the generated method. For internal use only.
         /// </summary>
-        internal FunctionDelegate Body
+        internal FunctionMethodGenerator.FunctionDelegate Body
         {
             get { return body; }
         }

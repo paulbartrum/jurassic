@@ -52,7 +52,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Locals needed by GenerateStartOfStatement() and GenerateEndOfStatement().
         /// </summary>
-        public class StatementLocals
+        internal class StatementLocals
         {
             /// <summary>
             /// Gets or sets a value that indicates whether the break statement will be handled

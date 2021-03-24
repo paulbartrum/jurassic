@@ -41,6 +41,22 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Represents a delegate that is used for global code.  For internal use only.
+        /// </summary>
+        /// <param name="context"> The script engine, scope and 'this' value. </param>
+        /// <returns> The result of calling the method. </returns>
+        protected delegate object GlobalCodeDelegate(ExecutionContext context);
+
+        /// <summary>
+        /// Retrieves a delegate for the generated method.
+        /// </summary>
+        /// <returns> The delegate type that matches the method parameters. </returns>
+        protected override Type GetDelegate()
+        {
+            return typeof(GlobalCodeDelegate);
+        }
+
+        /// <summary>
         /// Parses the source text into an abstract syntax tree.
         /// </summary>
         public override void Parse()

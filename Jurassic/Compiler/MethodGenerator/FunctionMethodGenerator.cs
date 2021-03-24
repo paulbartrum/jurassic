@@ -287,12 +287,21 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Represents a delegate that is used for user-defined functions.  For internal use only.
+        /// </summary>
+        /// <param name="context"> The script engine, this value and other state needed to run the
+        /// function. </param>
+        /// <param name="arguments"> The arguments that were passed to the function. </param>
+        /// <returns> The result of calling the method. </returns>
+        internal delegate object FunctionDelegate(ExecutionContext context, object[] arguments);
+
+        /// <summary>
         /// Retrieves a delegate for the generated method.
         /// </summary>
         /// <returns> The delegate type that matches the method parameters. </returns>
         protected override Type GetDelegate()
         {
-            return typeof(Library.FunctionDelegate);
+            return typeof(FunctionDelegate);
         }
 
         /// <summary>

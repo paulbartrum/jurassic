@@ -6,7 +6,7 @@ namespace Jurassic.Compiler
     /// <summary>
     /// Represents the runtime state needed to run JS code.
     /// </summary>
-    public class ExecutionContext
+    internal class ExecutionContext
     {
         object thisValue;
 

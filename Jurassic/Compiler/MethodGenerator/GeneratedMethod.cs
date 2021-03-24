@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace Jurassic.Compiler
 {
     /// <summary>
-    /// Represents a generated method and it's dependencies.  For internal use only.
+    /// Represents a generated method and it's dependencies.
     /// </summary>
-    public class GeneratedMethod
+    internal class GeneratedMethod
     {
         /// <summary>
         /// Creates a new GeneratedMethod instance.

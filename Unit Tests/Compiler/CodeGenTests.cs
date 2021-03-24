@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
 
-namespace Performance
+namespace UnitTests
 {
 
     /// <summary>
