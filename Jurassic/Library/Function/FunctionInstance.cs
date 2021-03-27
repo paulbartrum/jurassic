@@ -219,6 +219,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Indicates whether the 'new' operator can be used on this function.
+        /// Will be <c>false</c> for built-in functions like Math.max.
+        /// </summary>
+        public virtual bool IsConstructor
+        {
+            get { return true; }
+        }
+
+        /// <summary>
         /// Creates an object, using this function as the constructor.
         /// </summary>
         /// <param name="newTarget"> The value of 'new.target'. </param>

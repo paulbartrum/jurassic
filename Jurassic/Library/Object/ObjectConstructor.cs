@@ -99,13 +99,7 @@ namespace Jurassic.Library
                 throw new JavaScriptException(ErrorType.TypeError, "Object prototype may only be an Object or null.");
 
             // Attempt to set the prototype.
-            if (!obj.SetPrototype(prototypeObj))
-            {
-                // Attempt to throw a reasonable error message based on what we know about how SetPrototype works.
-                if (!obj.IsExtensible)
-                    throw new JavaScriptException(ErrorType.TypeError, "Object is not extensible.");
-                throw new JavaScriptException(ErrorType.TypeError, "Prototype chain contains a cyclic reference.");
-            }
+            obj.SetPrototype(prototypeObj, throwOnError: true);
 
             return obj;
         }
@@ -137,10 +131,10 @@ namespace Jurassic.Library
         {
             // Indexes should be in numeric order.
             var indexes = new List<uint>();
-            foreach (var property in obj.Properties)
-                if (property.Key is string key)
+            foreach (var key in obj.OwnKeys)
+                if (key is string keyStr)
                 {
-                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
                     if (arrayIndex != uint.MaxValue)
                         indexes.Add(arrayIndex);
                 }
@@ -151,12 +145,12 @@ namespace Jurassic.Library
                 result.Push(index.ToString());
 
             // Strings, in insertion order.
-            foreach (var property in obj.Properties)
-                if (property.Key is string key)
+            foreach (var key in obj.OwnKeys)
+                if (key is string keyStr)
                 {
-                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
                     if (arrayIndex == uint.MaxValue)
-                        result.Push(key);
+                        result.Push(keyStr);
                 }
                     
             return result;
@@ -172,9 +166,9 @@ namespace Jurassic.Library
         public static ArrayInstance GetOwnPropertySymbols(ObjectInstance obj)
         {
             var result = obj.Engine.Array.New();
-            foreach (var property in obj.Properties)
-                if (property.Key is Symbol)
-                    result.Push(property.Key);
+            foreach (var key in obj.OwnKeys)
+                if (key is Symbol)
+                    result.Push(key);
             return result;
         }
 
@@ -221,7 +215,7 @@ namespace Jurassic.Library
                 // Copy the enumerable properties from the source object.
                 foreach (var property in source.Properties)
                     if (property.IsEnumerable == true)
-                        target.SetPropertyValue(property.Key, property.Value, throwOnError: true);
+                        target.SetPropertyValue(property.Key, property.Value, target, throwOnError: true);
             }
             return target;
         }
@@ -239,6 +233,8 @@ namespace Jurassic.Library
         {
             key = TypeConverter.ToPropertyKey(key);
             var defaults = obj.GetOwnPropertyDescriptor(key);
+            if (!defaults.Exists)
+                defaults = PropertyDescriptor.Undefined;
             if (!(attributes is ObjectInstance))
                 throw new JavaScriptException(ErrorType.TypeError, $"Invalid descriptor for property '{key}'.");
             var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
@@ -282,7 +278,7 @@ namespace Jurassic.Library
                     objectInstance.FastSetProperty(property.Key, property.Value,
                         property.Attributes & ~PropertyAttributes.Configurable, overwriteAttributes: true);
                 }
-                objectInstance.IsExtensible = false;
+                objectInstance.PreventExtensions(throwOnError: true);
             }
             return obj;
         }
@@ -305,7 +301,7 @@ namespace Jurassic.Library
                     objectInstance.FastSetProperty(property.Key, property.Value,
                         property.Attributes & ~(PropertyAttributes.NonEnumerable), overwriteAttributes: true);
                 }
-                objectInstance.IsExtensible = false;
+                objectInstance.PreventExtensions(throwOnError: true);
             }
             return obj;
         }
@@ -320,7 +316,7 @@ namespace Jurassic.Library
         {
             if (obj is ObjectInstance objectInstance)
             {
-                objectInstance.IsExtensible = false;
+                objectInstance.PreventExtensions(throwOnError: true);
             }
             return obj;
         }
@@ -388,9 +384,15 @@ namespace Jurassic.Library
         public static ArrayInstance Keys(ObjectInstance obj)
         {
             var result = obj.Engine.Array.New();
-            foreach (var property in obj.Properties)
-                if (property.IsEnumerable == true && property.Key is string)
-                    result.Push(property.Key);
+            foreach (var key in obj.OwnKeys)
+            {
+                if (key is string)
+                {
+                    var propertyDescriptor = obj.GetOwnPropertyDescriptor(key);
+                    if (propertyDescriptor.Exists && propertyDescriptor.IsEnumerable)
+                        result.Push(key);
+                }
+            }
             return result;
         }
 

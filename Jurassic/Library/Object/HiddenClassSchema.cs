@@ -83,6 +83,19 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Enumerates the property names for this schema.
+        /// </summary>
+        /// <returns> An enumerable collection of property names. </returns>
+        public IEnumerable<object> EnumeratePropertyNames()
+        {
+            if (this.properties == null)
+                this.properties = CreatePropertiesDictionary();
+            this.parent = null;     // Prevents the properties dictionary from being stolen while an enumeration is in progress.
+            foreach (var pair in this.properties)
+                yield return pair.Key;
+        }
+
+        /// <summary>
         /// Enumerates the property names and values for this schema.
         /// </summary>
         /// <param name="values"> The array containing the property values. </param>

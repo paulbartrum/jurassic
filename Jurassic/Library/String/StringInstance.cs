@@ -119,19 +119,41 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets an enumerable list of every property name and value associated with this object.
+        /// Defines or redefines the value and attributes of a property.  The prototype chain is
+        /// not searched so if the property exists but only in the prototype chain a new property
+        /// will be created.
         /// </summary>
-        public override IEnumerable<PropertyNameAndValue> Properties
+        /// <param name="key"> The property key of the property to modify. </param>
+        /// <param name="descriptor"> The property value and attributes. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set.  This can happen if the property is not configurable or the object is sealed. </param>
+        /// <returns> <c>true</c> if the property was successfully modified; <c>false</c> otherwise. </returns>
+        public override bool DefineProperty(object key, PropertyDescriptor descriptor, bool throwOnError)
+        {
+            // Check if the property is an indexed property.
+            uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+            if (arrayIndex < this.Length)
+                return IsCompatiblePropertyDescriptor(IsExtensible, descriptor, GetOwnPropertyDescriptor(arrayIndex));
+
+            // Delegate to the base class.
+            return base.DefineProperty(key, descriptor, throwOnError);
+        }
+
+        /// <summary>
+        /// Gets an enumerable list of every property name associated with this object.
+        /// Does not include properties in the prototype chain.
+        /// </summary>
+        public override IEnumerable<object> OwnKeys
         {
             get
             {
                 // Enumerate array indices.
                 for (int i = 0; i < this.value.Length; i++)
-                    yield return new PropertyNameAndValue(i.ToString(), this.value[i].ToString(), PropertyAttributes.Enumerable);
+                    yield return i.ToString();
 
                 // Delegate to the base implementation.
-                foreach (var nameAndValue in base.Properties)
-                    yield return nameAndValue;
+                foreach (var key in base.OwnKeys)
+                    yield return key;
             }
         }
 

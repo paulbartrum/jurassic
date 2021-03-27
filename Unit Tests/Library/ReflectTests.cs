@@ -74,8 +74,16 @@ namespace UnitTests
         {
             Assert.AreEqual(5, Evaluate("var x = {}; Reflect.defineProperty(x, 'test', { value: 5 }); x.test"));
 
+            // The first parameter must be an object.
+            Assert.AreEqual("TypeError: Reflect.defineProperty called on non-object.",
+                EvaluateExceptionMessage("Reflect.defineProperty(5, 'test', { value: 5 })"));
+
             // The descriptor must be an object.
             Assert.AreEqual("TypeError: Invalid property descriptor '5'.", EvaluateExceptionMessage("Reflect.defineProperty({}, 'test', 5)"));
+
+            // Can be called on a string index.
+            Assert.AreEqual(true, Evaluate("Reflect.defineProperty(new String('test'), '1', { value: 'e', writable: false, enumerable: true, configurable: false })"));
+            Assert.AreEqual(false, Evaluate("Reflect.defineProperty(new String('test'), '1', { value: 'f', writable: false, enumerable: true, configurable: false })"));
 
             // length
             Assert.AreEqual(3, Evaluate("Reflect.defineProperty.length"));
@@ -86,6 +94,10 @@ namespace UnitTests
         {
             Assert.AreEqual(true, Evaluate("var x = { a: 1 }; Reflect.deleteProperty(x, 'a')"));
             Assert.AreEqual(false, Evaluate("var x = { a: 1 }; Reflect.deleteProperty(x, 'a'); 'a' in x"));
+
+            // The first parameter must be an object.
+            Assert.AreEqual("TypeError: Reflect.deleteProperty called on non-object.",
+                EvaluateExceptionMessage("Reflect.deleteProperty(5, 'test')"));
 
             // length
             Assert.AreEqual(2, Evaluate("Reflect.deleteProperty.length"));
@@ -101,6 +113,10 @@ namespace UnitTests
             Assert.AreEqual(true, Evaluate("var x = { get a() { return this; } }; Reflect.get(x, 'a') === x"));
             Assert.AreEqual(5, Evaluate("Reflect.get({ get a() { return this; } }, 'a', 5).valueOf()"));
 
+            // The first parameter must be an object.
+            Assert.AreEqual("TypeError: Reflect.get called on non-object.",
+                EvaluateExceptionMessage("Reflect.get(5, 'test')"));
+
             // length
             Assert.AreEqual(2, Evaluate("Reflect.get.length"));
         }
@@ -111,6 +127,10 @@ namespace UnitTests
             Assert.AreEqual(@"{""value"":1,""writable"":true,""enumerable"":true,""configurable"":true}",
                 Evaluate("JSON.stringify(Reflect.getOwnPropertyDescriptor({ a: 1 }, 'a'))"));
 
+            // The first parameter must be an object.
+            Assert.AreEqual("TypeError: Reflect.getOwnPropertyDescriptor called on non-object.",
+                EvaluateExceptionMessage("Reflect.getOwnPropertyDescriptor('foo', 0)"));
+
             // length
             Assert.AreEqual(2, Evaluate("Reflect.getOwnPropertyDescriptor.length"));
         }
@@ -120,6 +140,10 @@ namespace UnitTests
         {
             Assert.AreEqual(true, Evaluate("Reflect.getPrototypeOf({}) === Object.prototype"));
             Assert.AreEqual(true, Evaluate("Reflect.getPrototypeOf([]) === Array.prototype"));
+
+            // The first parameter must be an object.
+            Assert.AreEqual("TypeError: Reflect.getPrototypeOf called on non-object.",
+                EvaluateExceptionMessage("Reflect.getPrototypeOf(5)"));
 
             // length
             Assert.AreEqual(1, Evaluate("Reflect.getPrototypeOf.length"));
@@ -150,7 +174,8 @@ namespace UnitTests
             Assert.AreEqual(2, Evaluate("Reflect.has.length"));
 
             // The first argument must be an object.
-            Assert.AreEqual("TypeError: Reflect.has called with non-object.", EvaluateExceptionMessage("Reflect.has(5, 'toString')"));
+            Assert.AreEqual("TypeError: Reflect.has called on non-object.",
+                EvaluateExceptionMessage("Reflect.has(5, 'toString')"));
         }
 
         [TestMethod]
@@ -167,12 +192,12 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("Reflect.isExtensible.length"));
 
             // Argument must be an object.
-            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(true)"));
-            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(5)"));
-            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible('test')"));
-            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible()"));
-            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(undefined)"));
-            Assert.AreEqual("TypeError: Reflect.isExtensible called with non-object.", EvaluateExceptionMessage("Reflect.isExtensible(null)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called on non-object.", EvaluateExceptionMessage("Reflect.isExtensible(true)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called on non-object.", EvaluateExceptionMessage("Reflect.isExtensible(5)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called on non-object.", EvaluateExceptionMessage("Reflect.isExtensible('test')"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called on non-object.", EvaluateExceptionMessage("Reflect.isExtensible()"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called on non-object.", EvaluateExceptionMessage("Reflect.isExtensible(undefined)"));
+            Assert.AreEqual("TypeError: Reflect.isExtensible called on non-object.", EvaluateExceptionMessage("Reflect.isExtensible(null)"));
         }
 
         [TestMethod]
@@ -195,6 +220,11 @@ namespace UnitTests
             Assert.AreEqual("second str", Evaluate("Reflect.ownKeys(obj)[5]"));
             Assert.AreEqual(true, Evaluate("Reflect.ownKeys(obj)[6] === sym"));
             Assert.AreEqual(true, Evaluate("Reflect.ownKeys(obj)[7] === sym2"));
+            Assert.AreEqual(@"[""0"",""1"",""2"",""3"",""length""]", Evaluate("JSON.stringify(Reflect.ownKeys(new String('test')))"));
+
+            // The first argument must be an object.
+            Assert.AreEqual("TypeError: Reflect.ownKeys called on non-object.",
+                EvaluateExceptionMessage("Reflect.ownKeys(5)"));
 
             // length
             Assert.AreEqual(1, Evaluate("Reflect.ownKeys.length"));
@@ -215,10 +245,10 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("Reflect.preventExtensions.length"));
 
             // If the argument is not an object, this method throws a TypeError.
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions()"));
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(undefined)"));
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(null)"));
-            Assert.AreEqual("TypeError: Reflect.preventExtensions called with non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(5)"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object.", EvaluateExceptionMessage("Reflect.preventExtensions()"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(undefined)"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(null)"));
+            Assert.AreEqual("TypeError: Reflect.preventExtensions called on non-object.", EvaluateExceptionMessage("Reflect.preventExtensions(5)"));
         }
 
         [TestMethod]
@@ -236,6 +266,10 @@ namespace UnitTests
             // The property doesn't exist and the object is non-extensible.
             Assert.AreEqual(false, Evaluate("var x = {}; Reflect.preventExtensions(x); Reflect.set(x, 'test', 2)"));
             Assert.AreEqual(Undefined.Value, Evaluate("x.test"));
+
+            // The first argument must be an object.
+            Assert.AreEqual("TypeError: Reflect.set called on non-object.",
+                EvaluateExceptionMessage("Reflect.set(5, 'a', 2)"));
 
             // length
             Assert.AreEqual(3, Evaluate("Reflect.set.length"));
@@ -255,6 +289,10 @@ namespace UnitTests
 
             // length
             Assert.AreEqual(2, Evaluate("Reflect.setPrototypeOf.length"));
+
+            // The first argument must be an object.
+            Assert.AreEqual("TypeError: Reflect.setPrototypeOf called on non-object.",
+                EvaluateExceptionMessage("Reflect.setPrototypeOf(5, null)"));
 
             // Argument must be an object or null.
             Assert.AreEqual("TypeError: Object prototype may only be an Object or null.", EvaluateExceptionMessage("Reflect.setPrototypeOf({}, undefined)"));

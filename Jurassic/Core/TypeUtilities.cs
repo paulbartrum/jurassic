@@ -111,36 +111,32 @@ namespace Jurassic
         {
             if (IsUndefined(obj) == true || obj == Null.Value)
                 yield break;
-            var obj2 = TypeConverter.ToObject(engine, obj);
+            var objectInstance = TypeConverter.ToObject(engine, obj);
             var names = new HashSet<string>();
             do
             {
-                foreach (var property in obj2.Properties)
+                foreach (var key in objectInstance.OwnKeys)
                 {
                     // Only enumerate string-based property keys, not symbols.
-                    if (!(property.Key is string))
-                        continue;
-                    string propertyName = (string)property.Key;
-
-                    // Check whether the property is shadowed.
-                    if (names.Contains(propertyName) == false)
+                    if (key is string name)
                     {
-                        // Only return enumerable properties.
-                        if (property.IsEnumerable == true)
+                        // Check whether the property is shadowed.
+                        if (names.Contains(name) == false)
                         {
-                            // Make sure the property still exists.
-                            if (obj2.HasProperty(propertyName) == true)
+                            // Only return enumerable properties.
+                            var propertyDescriptor = objectInstance.GetOwnPropertyDescriptor(name);
+                            if (propertyDescriptor.Exists && propertyDescriptor.IsEnumerable == true)
                             {
-                                yield return propertyName;
+                                yield return name;
                             }
+
+                            // Record the name so we can check if it was shadowed.
+                            names.Add(name);
                         }
-                        
-                        // Record the name so we can check if it was shadowed.
-                        names.Add(propertyName);
                     }
                 }
-                obj2 = obj2.Prototype;
-            } while (obj2 != null);
+                objectInstance = objectInstance.Prototype;
+            } while (objectInstance != null);
         }
 
         /// <summary>

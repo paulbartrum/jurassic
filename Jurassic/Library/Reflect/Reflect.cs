@@ -69,14 +69,18 @@ namespace Jurassic.Library
         /// <param name="attributes"> The attributes for the property being defined or modified. </param>
         /// <returns> A Boolean indicating whether or not the property was successfully defined. </returns>
         [JSInternalFunction(Name = "defineProperty")]
-        public static bool DefineProperty(ObjectInstance target, object propertyKey, object attributes)
+        public static bool DefineProperty(object target, object propertyKey, object attributes)
         {
-            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
-            var defaults = target.GetOwnPropertyDescriptor(propertyKey);
-            if (!(attributes is ObjectInstance))
-                throw new JavaScriptException(ErrorType.TypeError, $"Invalid property descriptor '{attributes}'.");
-            var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
-            return target.DefineProperty(propertyKey, descriptor, throwOnError: false);
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+                var defaults = targetObjectInstance.GetOwnPropertyDescriptor(propertyKey);
+                if (!(attributes is ObjectInstance))
+                    throw new JavaScriptException(ErrorType.TypeError, $"Invalid property descriptor '{attributes}'.");
+                var descriptor = PropertyDescriptor.FromObject((ObjectInstance)attributes, defaults);
+                return targetObjectInstance.DefineProperty(propertyKey, descriptor, throwOnError: false);
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.defineProperty called on non-object.");
         }
 
         /// <summary>
@@ -86,10 +90,14 @@ namespace Jurassic.Library
         /// <param name="propertyKey"> The name of the property to be deleted. </param>
         /// <returns> A Boolean indicating whether or not the property was successfully deleted. </returns>
         [JSInternalFunction(Name = "deleteProperty")]
-        public static bool DeleteProperty(ObjectInstance target, object propertyKey)
+        public static bool DeleteProperty(object target, object propertyKey)
         {
-            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
-            return target.Delete(propertyKey, throwOnError: false);
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+                return targetObjectInstance.Delete(propertyKey, throwOnError: false);
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.deleteProperty called on non-object.");
         }
 
         /// <summary>
@@ -101,13 +109,17 @@ namespace Jurassic.Library
         /// is encountered. When used with Proxy, it can be an object that inherits from target. </param>
         /// <returns> The value of the property. </returns>
         [JSInternalFunction(Name = "get", Length = 2)]
-        public static object Get(ObjectInstance target, object propertyKey, object receiver = null)
+        public static object Get(object target, object propertyKey, object receiver = null)
         {
-            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
-            if (receiver == null)
-                receiver = target;
-            object result = target.GetPropertyValue(propertyKey, TypeConverter.ToObject(target.Engine, receiver));
-            return result == null ? Undefined.Value : result;
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+                if (receiver == null)
+                    receiver = targetObjectInstance;
+                object result = targetObjectInstance.GetPropertyValue(propertyKey, receiver);
+                return result == null ? Undefined.Value : result;
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.get called on non-object.");
         }
 
         /// <summary>
@@ -117,9 +129,11 @@ namespace Jurassic.Library
         /// <param name="propertyKey"> The name of the property to get an own property descriptor for. </param>
         /// <returns></returns>
         [JSInternalFunction(Name = "getOwnPropertyDescriptor")]
-        public static ObjectInstance GetOwnPropertyDescriptor(ObjectInstance target, object propertyKey)
+        public static ObjectInstance GetOwnPropertyDescriptor(object target, object propertyKey)
         {
-            return ObjectConstructor.GetOwnPropertyDescriptor(target, propertyKey);
+            if (target is ObjectInstance targetObjectInstance)
+                return ObjectConstructor.GetOwnPropertyDescriptor(targetObjectInstance, propertyKey);
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.getOwnPropertyDescriptor called on non-object.");
         }
 
         /// <summary>
@@ -128,9 +142,11 @@ namespace Jurassic.Library
         /// <param name="target"> The target object of which to get the prototype. </param>
         /// <returns> The prototype of the given object. If there are no inherited properties, null is returned. </returns>
         [JSInternalFunction(Name = "getPrototypeOf")]
-        public static object GetPrototypeOf(ObjectInstance target)
+        public static object GetPrototypeOf(object target)
         {
-            return ObjectConstructor.GetPrototypeOf(target);
+            if (target is ObjectInstance targetObjectInstance)
+                return ObjectConstructor.GetPrototypeOf(targetObjectInstance);
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.getPrototypeOf called on non-object.");
         }
 
         /// <summary>
@@ -148,7 +164,7 @@ namespace Jurassic.Library
                 propertyKey = TypeConverter.ToPropertyKey(propertyKey);
                 return targetObjectInstance.HasProperty(propertyKey);
             }
-            throw new JavaScriptException(ErrorType.TypeError, "Reflect.has called with non-object.");
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.has called on non-object.");
         }
 
         /// <summary>
@@ -161,7 +177,7 @@ namespace Jurassic.Library
         {
             if (target is ObjectInstance targetObjectInstance)
                 return targetObjectInstance.IsExtensible;
-            throw new JavaScriptException(ErrorType.TypeError, "Reflect.isExtensible called with non-object.");
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.isExtensible called on non-object.");
         }
 
         /// <summary>
@@ -170,37 +186,41 @@ namespace Jurassic.Library
         /// <param name="target"> The target object from which to get the own keys. </param>
         /// <returns> An Array of the target object's own property keys. </returns>
         [JSInternalFunction(Name = "ownKeys")]
-        public static ArrayInstance OwnKeys(ObjectInstance target)
+        public static new ArrayInstance OwnKeys(object target)
         {
-            // Indexes should be in numeric order.
-            var indexes = new List<uint>();
-            foreach (var property in target.Properties)
-                if (property.Key is string key)
-                {
-                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
-                    if (arrayIndex != uint.MaxValue)
-                        indexes.Add(arrayIndex);
-                }
-            indexes.Sort();
-            var result = target.Engine.Array.New();
-            foreach (uint index in indexes)
-                result.Push(index.ToString());
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                // Indexes should be in numeric order.
+                var indexes = new List<uint>();
+                foreach (var key in targetObjectInstance.OwnKeys)
+                    if (key is string keyStr)
+                    {
+                        uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
+                        if (arrayIndex != uint.MaxValue)
+                            indexes.Add(arrayIndex);
+                    }
+                indexes.Sort();
+                var result = targetObjectInstance.Engine.Array.New();
+                foreach (uint index in indexes)
+                    result.Push(index.ToString());
 
-            // Strings, in insertion order.
-            foreach (var property in target.Properties)
-                if (property.Key is string key)
-                {
-                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
-                    if (arrayIndex == uint.MaxValue)
-                        result.Push(property.Key);
-                }
+                // Strings, in insertion order.
+                foreach (var key in targetObjectInstance.OwnKeys)
+                    if (key is string keyStr)
+                    {
+                        uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
+                        if (arrayIndex == uint.MaxValue)
+                            result.Push(keyStr);
+                    }
 
-            // Symbols, in insertion order.
-            foreach (var property in target.Properties)
-                if (property.Key is Symbol)
-                    result.Push(property.Key);
+                // Symbols, in insertion order.
+                foreach (var key in targetObjectInstance.OwnKeys)
+                    if (key is Symbol)
+                        result.Push(key);
 
-            return result;
+                return result;
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.ownKeys called on non-object.");
         }
 
         /// <summary>
@@ -212,11 +232,8 @@ namespace Jurassic.Library
         public static bool PreventExtensions(object target)
         {
             if (target is ObjectInstance targetObjectInstance)
-            {
-                targetObjectInstance.IsExtensible = false;
-                return true;
-            }
-            throw new JavaScriptException(ErrorType.TypeError, "Reflect.preventExtensions called with non-object.");
+                return targetObjectInstance.PreventExtensions(throwOnError: false);
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.preventExtensions called on non-object.");
         }
 
         /// <summary>
@@ -228,10 +245,16 @@ namespace Jurassic.Library
         /// <param name="receiver"> The value of this provided for the call to target if a setter is encountered. </param>
         /// <returns> A Boolean indicating whether or not setting the property was successful. </returns>
         [JSInternalFunction(Name = "set", Length = 3)]
-        public static bool Set(ObjectInstance target, object propertyKey, object value, object receiver)
+        public static bool Set(object target, object propertyKey, object value, object receiver = null)
         {
-            propertyKey = TypeConverter.ToPropertyKey(propertyKey);
-            return target.SetPropertyValue(propertyKey, value, throwOnError: false);
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                propertyKey = TypeConverter.ToPropertyKey(propertyKey);
+                if (receiver == null)
+                    receiver = targetObjectInstance;
+                return targetObjectInstance.SetPropertyValue(propertyKey, value, receiver, throwOnError: false);
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.set called on non-object.");
         }
 
         /// <summary>
@@ -241,13 +264,17 @@ namespace Jurassic.Library
         /// <param name="prototype"> The object's new prototype (an object or null). </param>
         /// <returns> A Boolean indicating whether or not the prototype was successfully set. </returns>
         [JSInternalFunction(Name = "setPrototypeOf")]
-        public static bool SetPrototypeOf(ObjectInstance target, object prototype)
+        public static bool SetPrototypeOf(object target, object prototype)
         {
-            // The prototype must be null or an object. Note that null in .NET is actually undefined in JS!
-            var prototypeObj = prototype as ObjectInstance;
-            if (prototypeObj == null && prototype != Null.Value)
-                throw new JavaScriptException(ErrorType.TypeError, "Object prototype may only be an Object or null.");
-            return target.SetPrototype(prototypeObj);
+            if (target is ObjectInstance targetObjectInstance)
+            {
+                // The prototype must be null or an object. Note that null in .NET is actually undefined in JS!
+                var prototypeObj = prototype as ObjectInstance;
+                if (prototypeObj == null && prototype != Null.Value)
+                    throw new JavaScriptException(ErrorType.TypeError, "Object prototype may only be an Object or null.");
+                return targetObjectInstance.SetPrototype(prototypeObj, throwOnError: false);
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Reflect.setPrototypeOf called on non-object.");
         }
     }
 }

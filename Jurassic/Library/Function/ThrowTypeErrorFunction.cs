@@ -35,7 +35,7 @@ namespace Jurassic.Library
         {
             this.FastSetProperty("name", "ThrowTypeError", PropertyAttributes.Configurable);
             this.FastSetProperty("length", 0, PropertyAttributes.Configurable);
-            this.IsExtensible = false;
+            this.PreventExtensions(throwOnError: false);    // Should never throw.
             this.message = message;
         }
 
