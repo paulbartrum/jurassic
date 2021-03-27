@@ -18,7 +18,6 @@ namespace Jurassic.Compiler
     /// </summary>
     internal abstract class Binder
     {
-        [NonSerialized]
         private BinderDelegate[] delegateCache;
         private const int MaximumCachedParameterCount = 8;
 

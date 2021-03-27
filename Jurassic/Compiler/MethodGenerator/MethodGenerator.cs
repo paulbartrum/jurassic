@@ -120,6 +120,12 @@ namespace Jurassic.Compiler
         }
 
         /// <summary>
+        /// Retrieves a delegate for the generated method.
+        /// </summary>
+        /// <returns> The delegate type that matches the method parameters. </returns>
+        protected abstract Type GetDelegate();
+
+        /// <summary>
         /// Parses the source text into an abstract syntax tree.
         /// </summary>
         public abstract void Parse();
@@ -202,22 +208,6 @@ namespace Jurassic.Compiler
         /// <param name="generator"> The generator to output the CIL to. </param>
         /// <param name="optimizationInfo"> Information about any optimizations that should be performed. </param>
         protected abstract void GenerateCode(ILGenerator generator, OptimizationInfo optimizationInfo);
-
-        /// <summary>
-        /// Represents a delegate that is used for global code.  For internal use only.
-        /// </summary>
-        /// <param name="context"> The script engine, scope and 'this' value. </param>
-        /// <returns> The result of calling the method. </returns>
-        protected delegate object GlobalCodeDelegate(ExecutionContext context);
-
-        /// <summary>
-        /// Retrieves a delegate for the generated method.
-        /// </summary>
-        /// <returns> The delegate type that matches the method parameters. </returns>
-        protected virtual Type GetDelegate()
-        {
-            return typeof(GlobalCodeDelegate);
-        }
     }
 
 }

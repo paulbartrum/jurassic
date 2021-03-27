@@ -15,7 +15,6 @@ namespace Jurassic.Library
     public partial class ObjectInstance : IDebuggerDisplay
     {
         // The script engine associated with this object.
-        [NonSerialized]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private ScriptEngine engine;
 
