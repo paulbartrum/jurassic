@@ -131,10 +131,10 @@ namespace Jurassic.Library
         {
             // Indexes should be in numeric order.
             var indexes = new List<uint>();
-            foreach (var property in obj.Properties)
-                if (property.Key is string key)
+            foreach (var key in obj.OwnKeys)
+                if (key is string keyStr)
                 {
-                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
                     if (arrayIndex != uint.MaxValue)
                         indexes.Add(arrayIndex);
                 }
@@ -145,12 +145,12 @@ namespace Jurassic.Library
                 result.Push(index.ToString());
 
             // Strings, in insertion order.
-            foreach (var property in obj.Properties)
-                if (property.Key is string key)
+            foreach (var key in obj.OwnKeys)
+                if (key is string keyStr)
                 {
-                    uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                    uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
                     if (arrayIndex == uint.MaxValue)
-                        result.Push(key);
+                        result.Push(keyStr);
                 }
                     
             return result;
@@ -166,9 +166,9 @@ namespace Jurassic.Library
         public static ArrayInstance GetOwnPropertySymbols(ObjectInstance obj)
         {
             var result = obj.Engine.Array.New();
-            foreach (var property in obj.Properties)
-                if (property.Key is Symbol)
-                    result.Push(property.Key);
+            foreach (var key in obj.OwnKeys)
+                if (key is Symbol)
+                    result.Push(key);
             return result;
         }
 
@@ -384,9 +384,15 @@ namespace Jurassic.Library
         public static ArrayInstance Keys(ObjectInstance obj)
         {
             var result = obj.Engine.Array.New();
-            foreach (var property in obj.Properties)
-                if (property.IsEnumerable == true && property.Key is string)
-                    result.Push(property.Key);
+            foreach (var key in obj.OwnKeys)
+            {
+                if (key is string)
+                {
+                    var propertyDescriptor = obj.GetOwnPropertyDescriptor(key);
+                    if (propertyDescriptor.Exists && propertyDescriptor.IsEnumerable)
+                        result.Push(key);
+                }
+            }
             return result;
         }
 

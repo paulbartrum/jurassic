@@ -197,12 +197,25 @@ namespace Jurassic.Library
         /// Gets an enumerable list of every property name and value associated with this object.
         /// Does not include properties in the prototype chain.
         /// </summary>
-        public virtual IEnumerable<PropertyNameAndValue> Properties
+        internal IEnumerable<PropertyNameAndValue> Properties
+        {
+            get
+            {
+                foreach (var key in OwnKeys)
+                    yield return new PropertyNameAndValue(key, GetOwnPropertyDescriptor(key));
+            }
+        }
+
+        /// <summary>
+        /// Gets an enumerable list of every property name associated with this object.
+        /// Does not include properties in the prototype chain.
+        /// </summary>
+        public virtual IEnumerable<object> OwnKeys
         {
             get
             {
                 // Enumerate named properties.
-                return this.schema.EnumeratePropertyNamesAndValues(this.propertyValues);
+                return this.schema.EnumeratePropertyNames();
             }
         }
         
@@ -368,7 +381,7 @@ namespace Jurassic.Library
 
             // The property might exist in the prototype.
             if (this.prototype == null)
-                return this.GetMissingPropertyValue(index.ToString());
+                return null;
             return this.prototype.GetPropertyValue(index, thisValue);
         }
 
@@ -424,7 +437,7 @@ namespace Jurassic.Library
         /// doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        public object GetPropertyValue(PropertyReference propertyReference)
+        public virtual object GetPropertyValue(PropertyReference propertyReference)
         {
             // Check if anything has changed.
             if (propertyReference.CachedSchema == this.schema)
@@ -459,7 +472,7 @@ namespace Jurassic.Library
                 // The property is in the prototype or is non-existent.
                 propertyReference.ClearCache();
                 if (this.Prototype == null)
-                    return this.GetMissingPropertyValue(propertyReference.Name) ?? Undefined.Value;
+                    return Undefined.Value;
                 return this.Prototype.GetNamedPropertyValue(propertyReference.Name, this) ?? Undefined.Value;
             }
         }
@@ -472,50 +485,31 @@ namespace Jurassic.Library
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
         /// <remarks> The prototype chain is searched if the property does not exist directly on
         /// this object. </remarks>
-        private object GetNamedPropertyValue(object key, object thisValue)
+        internal virtual object GetNamedPropertyValue(object key, object thisValue)
         {
-            ObjectInstance prototypeObject = this;
-            do
+            // Retrieve information about the property.
+            var property = this.schema.GetPropertyIndexAndAttributes(key);
+            if (property.Exists == true)
             {
-                // Retrieve information about the property.
-                var property = prototypeObject.schema.GetPropertyIndexAndAttributes(key);
-                if (property.Exists == true)
-                {
-                    // The property was found!
-                    object value = prototypeObject.propertyValues[property.Index];
-                    if ((property.Attributes & (PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) == 0)
-                        return value;
+                // The property was found!
+                object value = this.propertyValues[property.Index];
+                if ((property.Attributes & (PropertyAttributes.IsAccessorProperty | PropertyAttributes.IsLengthProperty)) == 0)
+                    return value;
 
-                    // Call the getter if there is one.
-                    if (property.IsAccessor == true)
-                        return ((PropertyAccessorValue)value).GetValue(thisValue);
+                // Call the getter if there is one.
+                if (property.IsAccessor == true)
+                    return ((PropertyAccessorValue)value).GetValue(thisValue);
 
-                    // Otherwise, the property is the "magic" length property.
-                    return ((ArrayInstance)prototypeObject).Length;
-                }
+                // Otherwise, the property is the "magic" length property.
+                return ((ArrayInstance)this).Length;
+            }
 
-                // Traverse the prototype chain.
-                prototypeObject = prototypeObject.prototype;
-            } while (prototypeObject != null);
+            // Traverse the prototype chain.
+            if (Prototype != null)
+                return Prototype.GetNamedPropertyValue(key, thisValue);
 
             // The property doesn't exist.
-            return GetMissingPropertyValue(key);
-        }
-
-        /// <summary>
-        /// Retrieves the value of a property which doesn't exist on the object.  This method can
-        /// be overridden to effectively construct properties on the fly.  The default behavior is
-        /// to return <c>undefined</c>.
-        /// </summary>
-        /// <param name="key"> The property key of the missing property. </param>
-        /// <returns> The value of the missing property. </returns>
-        /// <remarks> When overriding, call the base class implementation only if you want to
-        /// revert to the default behavior. </remarks>
-        protected virtual object GetMissingPropertyValue(object key)
-        {
-            if (this.prototype == null)
-                return null;
-            return this.prototype.GetMissingPropertyValue(key);
+            return null;
         }
 
         /// <summary>
@@ -587,7 +581,7 @@ namespace Jurassic.Library
         /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
         /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
         /// <returns> <c>false</c> if an error occurred. </returns>
-        public virtual bool SetPropertyValue(uint index, object value, bool throwOnError)
+        public bool SetPropertyValue(uint index, object value, bool throwOnError)
         {
             return SetPropertyValue(index, value, this, throwOnError);
         }
@@ -698,7 +692,7 @@ namespace Jurassic.Library
         /// property needs to be created). </param>
         /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
         /// occurred; <c>true</c> otherwise. </returns>
-        public bool SetPropertyValue(PropertyReference propertyReference, object value, object thisValue, bool throwOnError)
+        public virtual bool SetPropertyValue(PropertyReference propertyReference, object value, object thisValue, bool throwOnError)
         {
             // Check if anything has changed.
             if (propertyReference.CachedSchema == this.schema)
@@ -751,7 +745,7 @@ namespace Jurassic.Library
         /// <param name="exists"> Set to <c>true</c> if the property value exists; <c>false</c> otherwise. </param>
         /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
         /// occurred; <c>true</c> otherwise. </returns>
-        public bool SetPropertyValueIfExists(object key, object value, object thisValue, bool throwOnError, out bool exists)
+        internal bool SetPropertyValueIfExists(object key, object value, object thisValue, bool throwOnError, out bool exists)
         {
             // Do not store nulls - null represents a non-existant value.
             value = value ?? Undefined.Value;
@@ -799,13 +793,13 @@ namespace Jurassic.Library
             ObjectInstance prototypeObject = this.prototype;
             while (prototypeObject != null)
             {
-                property = prototypeObject.schema.GetPropertyIndexAndAttributes(key);
-                if (property.Exists == true)
+                var descriptor = prototypeObject.GetOwnPropertyDescriptor(key);
+                if (descriptor.Exists == true)
                 {
-                    if (property.IsAccessor == true)
+                    if (descriptor.IsAccessor == true)
                     {
                         // The property contains an accessor function.  Set the property value by calling the accessor.
-                        ((PropertyAccessorValue)prototypeObject.propertyValues[property.Index]).SetValue(this, value);
+                        ((PropertyAccessorValue)descriptor.Value).SetValue(thisValue, value);
                         exists = true;
                         return true;
                     }

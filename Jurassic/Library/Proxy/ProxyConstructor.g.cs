@@ -44,11 +44,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return Revocable(Undefined.Value, Undefined.Value);
+					return Revocable(engine, Undefined.Value, Undefined.Value);
 				case 1:
-					return Revocable(args[0], Undefined.Value);
+					return Revocable(engine, args[0], Undefined.Value);
 				default:
-					return Revocable(args[0], args[1]);
+					return Revocable(engine, args[0], args[1]);
 			}
 		}
 	}

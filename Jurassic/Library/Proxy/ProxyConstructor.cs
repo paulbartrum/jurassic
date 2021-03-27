@@ -64,13 +64,23 @@ namespace Jurassic.Library
         /// <summary>
         /// Creates a revocable proxy object.
         /// </summary>
+        /// <param name="engine"> The script engine. </param>
         /// <param name="target"> A target object to wrap with Proxy. It can be any sort of object, including a native array, a function, or even another proxy. </param>
         /// <param name="handler"> An object whose properties are functions that define the behavior of the proxy when an operation is performed on it. </param>
         /// <returns> A new proxy object. </returns>
-        [JSInternalFunction(Name = "revocable")]
-        public static ProxyObject Revocable(object target, object handler)
+        [JSInternalFunction(Name = "revocable", Flags = JSFunctionFlags.HasEngineParameter)]
+        public static ObjectInstance Revocable(ScriptEngine engine, object target, object handler)
         {
-            throw new NotSupportedException();
+            var proxy = (IProxyInstance)engine.Proxy.Construct(target, handler);
+            var result = engine.Object.Construct();
+            result.SetPropertyValue("proxy", proxy, throwOnError: true);
+            result.SetPropertyValue("revoke", new ClrStubFunction(engine, "revoke", 0,
+                (ScriptEngine engine2, object thisObj, object[] args) =>
+                {
+                    proxy.Revoke();
+                    return Undefined.Value;
+                }), throwOnError: true);
+            return result;
         }
     }
 }

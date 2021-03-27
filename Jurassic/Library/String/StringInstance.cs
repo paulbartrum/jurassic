@@ -140,19 +140,20 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets an enumerable list of every property name and value associated with this object.
+        /// Gets an enumerable list of every property name associated with this object.
+        /// Does not include properties in the prototype chain.
         /// </summary>
-        public override IEnumerable<PropertyNameAndValue> Properties
+        public override IEnumerable<object> OwnKeys
         {
             get
             {
                 // Enumerate array indices.
                 for (int i = 0; i < this.value.Length; i++)
-                    yield return new PropertyNameAndValue(i.ToString(), this.value[i].ToString(), PropertyAttributes.Enumerable);
+                    yield return i.ToString();
 
                 // Delegate to the base implementation.
-                foreach (var nameAndValue in base.Properties)
-                    yield return nameAndValue;
+                foreach (var key in base.OwnKeys)
+                    yield return key;
             }
         }
 

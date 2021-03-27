@@ -10,12 +10,20 @@ namespace UnitTests
     [TestClass]
     public class ProxyTests : TestBase
     {
+        // Proxy for debugging algorithms:
+        // 
+        // var proxy = new Proxy({ a: 1, b: 2 }, {
+        //   ownKeys(target) { console.log('ownKeys', target); return Reflect.ownKeys(target); },
+        //   has(target, key) { console.log('has', target, key); return Reflect.has(target, key); },
+        //   getOwnPropertyDescriptor(target, prop) { console.log('getOwnPropertyDescriptor', target, prop); return Reflect.getOwnPropertyDescriptor(target, prop); },
+        //   get(target, prop, receiver) { console.log('get', target, prop, receiver); return Reflect.get(target, prop, receiver); },
+        //   isExtensible(target) { console.log('isExtensible', target); return Reflect.isExtensible(target); }
+        // });
+
         [TestMethod]
         public void Constructor()
         {
             // new Proxy(target, handler)
-
-
             // Both parameters must be objects.
             Assert.AreEqual("TypeError: Cannot create proxy with a non-object as target or handler.", EvaluateExceptionMessage("new Proxy()"));
             Assert.AreEqual("TypeError: Cannot create proxy with a non-object as target or handler.", EvaluateExceptionMessage("new Proxy({})"));
@@ -28,6 +36,43 @@ namespace UnitTests
             Assert.AreEqual("Proxy", Evaluate("Proxy.name"));
             Assert.AreEqual(2, Evaluate("Proxy.length"));
             Assert.AreEqual(Undefined.Value, Evaluate("Proxy.prototype"));
+        }
+
+        [TestMethod]
+        public void revocable()
+        {
+            // Proxy.revocable(target, handler)
+            // Both parameters must be objects.
+            Assert.AreEqual("TypeError: Cannot create proxy with a non-object as target or handler.", EvaluateExceptionMessage("Proxy.revocable()"));
+            Assert.AreEqual("TypeError: Cannot create proxy with a non-object as target or handler.", EvaluateExceptionMessage("Proxy.revocable({})"));
+            Assert.AreEqual("TypeError: Cannot create proxy with a non-object as target or handler.", EvaluateExceptionMessage("Proxy.revocable({}, 5)"));
+
+            // The properties on the revocable object are regular enumerable properties (including the revoke() function!)
+            Assert.AreEqual(@"{""value"":{},""writable"":true,""enumerable"":true,""configurable"":true}",
+                Evaluate("JSON.stringify(Object.getOwnPropertyDescriptor(Proxy.revocable({}, {}), 'proxy'))"));
+            Assert.AreEqual(@"{""writable"":true,""enumerable"":true,""configurable"":true}",
+                Evaluate("JSON.stringify(Object.getOwnPropertyDescriptor(Proxy.revocable({}, {}), 'revoke'))"));
+
+            // Check that the revocable proxy works.
+            Assert.AreEqual(2, Evaluate(@"
+                var revocable = Proxy.revocable({ a: 1 }, {
+                  getPrototypeOf(target) {
+                    return { a: 2 };
+                  }
+                });
+                var proxy = revocable.proxy;
+                Object.getPrototypeOf(proxy).a"));
+
+            // Check the revocable proxy doesn't work after being revoked.
+            Assert.AreEqual("TypeError: Cannot call 'getPrototypeOf' on a proxy that has been revoked.", EvaluateExceptionMessage(@"
+                var revocable = Proxy.revocable({ a: 1 }, {
+                  getPrototypeOf(target) {
+                    return { a: 2 };
+                  }
+                });
+                var proxy = revocable.proxy;
+                revocable.revoke();
+                Object.getPrototypeOf(proxy)"));
         }
 
         [TestMethod]
@@ -222,6 +267,46 @@ namespace UnitTests
                   }
                 });
                 JSON.stringify(Reflect.getOwnPropertyDescriptor(proxy, 'test'))"));
+
+            Assert.AreEqual("TypeError: 'getOwnPropertyDescriptor' on proxy: trap returned descriptor for property 'a' that is incompatible with the existing property in the proxy target.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ a: 1 }, 'a', { configurable: false }), {
+                  getOwnPropertyDescriptor(target, prop) {
+                    return { configurable: false, value: 5 };
+                  }
+                });
+                JSON.stringify(Reflect.getOwnPropertyDescriptor(proxy, 'a'))"));
+            Assert.AreEqual("TypeError: 'getOwnPropertyDescriptor' on proxy: trap reported non-configurability for property 'a' which is either non-existent or configurable in the proxy target.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ a: 1 }, 'a', { configurable: true }), {
+                  getOwnPropertyDescriptor(target, prop) {
+                    return { configurable: false, value: 5 };
+                  }
+                });
+                JSON.stringify(Reflect.getOwnPropertyDescriptor(proxy, 'a'))"));
+            Assert.AreEqual("TypeError: 'getOwnPropertyDescriptor' on proxy: trap reported non-configurable and writable for property 'a' which is non-configurable, non-writable in the proxy target.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ a: 1 }, 'a', { configurable: false, writable: true, enumerable: true }), {
+                  getOwnPropertyDescriptor(target, prop) {
+                    return { configurable: false, writable: false, value: 5, enumerable: true };
+                  }
+                });
+                JSON.stringify(Reflect.getOwnPropertyDescriptor(proxy, 'a'))"));
+
+            Assert.AreEqual("TypeError: 'getOwnPropertyDescriptor' on proxy: trap returned undefined for property 'a' which is non-configurable in the proxy target.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ a: 1 }, 'a', { configurable: false }), {
+                  getOwnPropertyDescriptor(target, prop) {}
+                });
+                JSON.stringify(Reflect.getOwnPropertyDescriptor(proxy, 'a'))"));
+
+            Assert.AreEqual("TypeError: 'getOwnPropertyDescriptor' on proxy: trap returned undefined for property 'a' which exists in the non-extensible proxy target.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.preventExtensions({ a: 1 }), {
+                  getOwnPropertyDescriptor(target, prop) {}
+                });
+                JSON.stringify(Reflect.getOwnPropertyDescriptor(proxy, 'a'))"));
+
+            Assert.AreEqual("TypeError: 'getOwnPropertyDescriptor' on proxy: trap returned neither object nor undefined for property 'a'.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.preventExtensions({ a: 1 }), {
+                  getOwnPropertyDescriptor(target, prop) { return 5; }
+                });
+                JSON.stringify(Reflect.getOwnPropertyDescriptor(proxy, 'a'))"));
         }
 
         [TestMethod]
@@ -345,6 +430,8 @@ namespace UnitTests
                 ('a' in proxy) + '/' + ('b' in proxy) + '/' +
                 ('a' in Object.create(proxy)) + '/' + ('b' in Object.create(proxy)) + '/' +
                 Reflect.has(proxy, 'a') + '/' + Reflect.has(proxy, 'b')"));
+            Assert.AreEqual("ReferenceError: a is not defined.", EvaluateExceptionMessage(@"with (proxy) { (a); }"));
+            Assert.AreEqual(2, Evaluate(@"with (proxy) { (b); }"));
 
             // A property cannot be reported as non-existent, if it exists as a non-configurable own property of the target object.
             Assert.AreEqual("TypeError: 'has' on proxy: trap returned falsish for property 'a' which exists in the proxy target as non-configurable.", EvaluateExceptionMessage(@"
@@ -363,20 +450,6 @@ namespace UnitTests
                   }
                 });
                 'a' in proxy"));
-        }
-
-        [TestMethod]
-        public void has_with()
-        {
-            // Check the various methods for checking if a property exists.
-            Execute(@"
-                var proxy = new Proxy({ a: 1, b: 2 }, {
-                  has(target, key) {
-                    return key !== 'a';
-                  }
-                });");
-            Assert.AreEqual("ReferenceError: a is not defined.", EvaluateExceptionMessage(@"with (proxy) { (a); }"));
-            Assert.AreEqual(2, Evaluate(@"with (proxy) { (b); }"));
         }
 
         [TestMethod]
@@ -422,6 +495,16 @@ namespace UnitTests
                   }
                 });
                 proxy.a;"));
+
+            // Check 'get' is called on the prototype.
+            Assert.AreEqual(5, Evaluate(@"
+                var proxied = { };
+                var proxy = Object.create(new Proxy(proxied, {
+                 get: function (t, k, r) {
+                   return t === proxied && k === 'foo' && r === proxy && 5;
+                 }
+                }));
+                proxy.foo;"));
         }
 
         [TestMethod]
@@ -494,6 +577,74 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void ownKeys()
+        {
+            // Check normal case.
+            Assert.AreEqual("a,c,d", Evaluate(@"
+                var proxy = new Proxy({ a: 1, b: 2 }, {
+                  ownKeys(target) {
+                    return [ 'a', 'c', 'd' ];
+                  }
+                });
+                Reflect.ownKeys(proxy).join(',');"));
+            Assert.AreEqual("a,c,d", Evaluate(@"Object.getOwnPropertyNames(proxy).join(',');"));
+            Assert.AreEqual("a", Evaluate(@"Object.keys(proxy).join(',');"));
+            Assert.AreEqual("a,", Evaluate(@"var result = ''; for (var key in proxy) result += key + ','; result"));
+
+            // Callback must return an object.
+            Assert.AreEqual("TypeError: 'ownKeys' on proxy: trap returned non-object ('5').", EvaluateExceptionMessage(@"
+                var proxy = new Proxy({ a: 1, b: 2 }, {
+                  ownKeys(target) { return 5; }
+                });
+                Reflect.ownKeys(proxy).join(',');"));
+
+            // Callback must return an object with strings or Symbols.
+            Assert.AreEqual("TypeError: 3 is not a valid property name.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy({ a: 1, b: 2 }, {
+                  ownKeys(target) {
+                    return [ 'c', 3, 'd' ];
+                  }
+                });
+                Object.getOwnPropertyNames(proxy).join(',');"));
+
+            // Callback must return an object with no duplicates.
+            Assert.AreEqual("TypeError: 'ownKeys' on proxy: trap returned duplicate entries.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy({ a: 1, b: 2 }, {
+                  ownKeys(target) {
+                    return [ 'c', 'c' ];
+                  }
+                });
+                Object.getOwnPropertyNames(proxy).join(',');"));
+
+            // Proxy must return any non-configurable keys on the target.
+            Assert.AreEqual("TypeError: 'ownKeys' on proxy: trap result did not include 'a'.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.defineProperty({ a: 1, b: 2 }, 'a', { configurable: false }), {
+                  ownKeys(target) {
+                    return [ 'c', 'd' ];
+                  }
+                });
+                Object.getOwnPropertyNames(proxy).join(',');"));
+
+            // Proxy must include all target keys if target is non-extensible.
+            Assert.AreEqual("TypeError: 'ownKeys' on proxy: trap result did not include 'a'.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.preventExtensions({ a: 1, b: 2 }), {
+                  ownKeys(target) {
+                    return [ ];
+                  }
+                });
+                Object.getOwnPropertyNames(proxy).join(',');"));
+
+            // Proxy cannot return extra keys if target is non-extensible.
+            Assert.AreEqual("TypeError: 'ownKeys' on proxy: trap returned extra keys but proxy target is non-extensible.", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(Object.preventExtensions({ a: 1, b: 2 }), {
+                  ownKeys(target) {
+                    return [ 'a', 'b', 'c' ];
+                  }
+                });
+                Object.getOwnPropertyNames(proxy).join(',');"));
+        }
+
+        [TestMethod]
         public void apply()
         {
             // Check normal case.
@@ -546,13 +697,28 @@ namespace UnitTests
                 });
                 new proxy('haha').toString();"));
 
-            Assert.AreEqual("TypeError: proxy is not a constructor", EvaluateExceptionMessage(@"
+            // No callback.
+            Assert.AreEqual("test", Evaluate(@"
+                var proxy = new Proxy(String, {});
+                new proxy('test').toString();"));
+
+            // Can't use 'new' on built-in functions.
+            Assert.AreEqual("TypeError: proxy is not a constructor.", EvaluateExceptionMessage(@"
                 var proxy = new Proxy(Math.pow, {
                   construct(target, args) {
                     return new String('test');
                   }
                 });
                 new proxy(2, 6);"));
+
+            // construct() function must return an object.
+            Assert.AreEqual("TypeError: 'construct' on proxy: trap returned non-object ('1').", EvaluateExceptionMessage(@"
+                var proxy = new Proxy(String, {
+                  construct(target, args) {
+                    return 1;
+                  }
+                });
+                new proxy();"));
         }
     }
 }

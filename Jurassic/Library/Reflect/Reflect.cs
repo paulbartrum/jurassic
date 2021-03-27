@@ -186,16 +186,16 @@ namespace Jurassic.Library
         /// <param name="target"> The target object from which to get the own keys. </param>
         /// <returns> An Array of the target object's own property keys. </returns>
         [JSInternalFunction(Name = "ownKeys")]
-        public static ArrayInstance OwnKeys(object target)
+        public static new ArrayInstance OwnKeys(object target)
         {
             if (target is ObjectInstance targetObjectInstance)
             {
                 // Indexes should be in numeric order.
                 var indexes = new List<uint>();
-                foreach (var property in targetObjectInstance.Properties)
-                    if (property.Key is string key)
+                foreach (var key in targetObjectInstance.OwnKeys)
+                    if (key is string keyStr)
                     {
-                        uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                        uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
                         if (arrayIndex != uint.MaxValue)
                             indexes.Add(arrayIndex);
                     }
@@ -205,18 +205,18 @@ namespace Jurassic.Library
                     result.Push(index.ToString());
 
                 // Strings, in insertion order.
-                foreach (var property in targetObjectInstance.Properties)
-                    if (property.Key is string key)
+                foreach (var key in targetObjectInstance.OwnKeys)
+                    if (key is string keyStr)
                     {
-                        uint arrayIndex = ArrayInstance.ParseArrayIndex(key);
+                        uint arrayIndex = ArrayInstance.ParseArrayIndex(keyStr);
                         if (arrayIndex == uint.MaxValue)
-                            result.Push(property.Key);
+                            result.Push(keyStr);
                     }
 
                 // Symbols, in insertion order.
-                foreach (var property in targetObjectInstance.Properties)
-                    if (property.Key is Symbol)
-                        result.Push(property.Key);
+                foreach (var key in targetObjectInstance.OwnKeys)
+                    if (key is Symbol)
+                        result.Push(key);
 
                 return result;
             }

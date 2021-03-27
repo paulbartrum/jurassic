@@ -9,5 +9,10 @@
         /// The proxy target.
         /// </summary>
         ObjectInstance Target { get; }
+
+        /// <summary>
+        /// Invalidates (switches off) the proxy.
+        /// </summary>
+        void Revoke();
     }
 }

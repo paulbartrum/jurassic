@@ -490,9 +490,10 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets an enumerable list of every property name and value associated with this object.
+        /// Gets an enumerable list of every property name associated with this object.
+        /// Does not include properties in the prototype chain.
         /// </summary>
-        public override IEnumerable<PropertyNameAndValue> Properties
+        public override IEnumerable<object> OwnKeys
         {
             get
             {
@@ -503,7 +504,7 @@ namespace Jurassic.Library
                     {
                         object arrayElementValue = this.dense[i];
                         if (arrayElementValue != null)
-                            yield return new PropertyNameAndValue(i.ToString(), arrayElementValue, PropertyAttributes.FullAccess);
+                            yield return i.ToString();
                     }
                 }
                 else
@@ -514,13 +515,13 @@ namespace Jurassic.Library
                         {
                             object arrayElementValue = this.sparse[i];
                             if (arrayElementValue != null)
-                                yield return new PropertyNameAndValue(i.ToString(), arrayElementValue, PropertyAttributes.FullAccess);
+                                yield return i.ToString();
                         }
                 }
 
                 // Delegate to the base implementation.
-                foreach (var nameAndValue in base.Properties)
-                    yield return nameAndValue;
+                foreach (var key in base.OwnKeys)
+                    yield return key;
             }
         }
 

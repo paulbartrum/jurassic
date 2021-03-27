@@ -66,7 +66,7 @@ Feature|Status
 &nbsp;&nbsp;Set|18/19
 &nbsp;&nbsp;WeakMap|11/12
 &nbsp;&nbsp;WeakSet|10/11
-&nbsp;&nbsp;Proxy  [25]|:x:
+&nbsp;&nbsp;Proxy  [25]|33/34
 &nbsp;&nbsp;Reflect  [26]|18/20
 &nbsp;&nbsp;Promise|4/8
 &nbsp;&nbsp;Symbol|:white_check_mark: 12/12
@@ -90,12 +90,12 @@ Feature|Status
 &nbsp;&nbsp;miscellaneous subclassables|:x:
 **Misc**|
 &nbsp;&nbsp;prototype of bound functions|1/5
-&nbsp;&nbsp;Proxy, internal 'get' calls|:x:
-&nbsp;&nbsp;Proxy, internal 'set' calls|:x:
+&nbsp;&nbsp;Proxy, internal 'get' calls|19/36
+&nbsp;&nbsp;Proxy, internal 'set' calls|7/11
 &nbsp;&nbsp;Proxy, internal 'defineProperty' calls|:x:
 &nbsp;&nbsp;Proxy, internal 'deleteProperty' calls|:x:
-&nbsp;&nbsp;Proxy, internal 'getOwnPropertyDescriptor' calls|:x:
-&nbsp;&nbsp;Proxy, internal 'ownKeys' calls|:x:
+&nbsp;&nbsp;Proxy, internal 'getOwnPropertyDescriptor' calls|2/4
+&nbsp;&nbsp;Proxy, internal 'ownKeys' calls|:white_check_mark: 3/3
 &nbsp;&nbsp;Object static methods accept primitives|:white_check_mark: 10/10
 &nbsp;&nbsp;own property order|5/7
 &nbsp;&nbsp;Updated identifier syntax|1/3

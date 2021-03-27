@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Jurassic.Library
@@ -46,7 +47,7 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets or sets a list of property names to be serialized.
         /// </summary>
-        public ICollection<string> SerializableProperties
+        public IEnumerable<string> SerializableProperties
         {
             get;
             set;
@@ -302,12 +303,7 @@ namespace Jurassic.Library
             // Only properties that are enumerable and have property names are serialized.
             var propertiesToSerialize = this.SerializableProperties;
             if (propertiesToSerialize == null)
-            {
-                propertiesToSerialize = new List<string>();
-                foreach (var property in value.Properties)
-                    if (property.IsEnumerable == true && property.Key is string)
-                        propertiesToSerialize.Add((string)property.Key);
-            }
+                propertiesToSerialize = ObjectConstructor.Keys(value).ElementValues.Cast<string>();
 
             result.Append('{');
             int serializedPropertyCount = 0;

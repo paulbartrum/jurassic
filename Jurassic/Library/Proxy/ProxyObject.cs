@@ -7,8 +7,8 @@ namespace Jurassic.Library
     /// </summary>
     public partial class ProxyObject : ObjectInstance, IProxyInstance
     {
-        private readonly ObjectInstance target;
-        private readonly ObjectInstance handler;
+        private ObjectInstance target;
+        private ObjectInstance handler;
 
         /// <summary>
         /// Creates a new proxy instance.
@@ -35,6 +35,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Invalidates (switches off) the proxy.
+        /// </summary>
+        void IProxyInstance.Revoke()
+        {
+            this.target = null;
+            this.handler = null;
+        }
+
+        /// <summary>
         /// Gets the next object in the prototype chain.  There is no corresponding property in
         /// javascript (it is is *not* the same as the prototype property), instead use
         /// Object.getPrototypeOf(). Returns <c>null</c> for the root object in the prototype
@@ -50,6 +59,10 @@ namespace Jurassic.Library
         {
             get
             {
+                // Check for revocation.
+                if (target == null || handler == null)
+                    throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'getPrototypeOf' on a proxy that has been revoked.");
+
                 // Call the handler, if one exists.
                 var trap = handler.GetMethod("getPrototypeOf");
                 if (trap == null)
@@ -83,6 +96,10 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if the prototype was successfully applied; <c>false</c> otherwise. </returns>
         internal override bool SetPrototype(ObjectInstance prototype, bool throwOnError)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'setPrototypeOf' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("setPrototypeOf");
             if (trap == null)
@@ -112,6 +129,10 @@ namespace Jurassic.Library
         {
             get
             {
+                // Check for revocation.
+                if (target == null || handler == null)
+                    throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'isExtensible' on a proxy that has been revoked.");
+
                 // Call the handler, if one exists.
                 var trap = handler.GetMethod("isExtensible");
                 if (trap == null)
@@ -134,6 +155,10 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if the operation was successful, <c>false</c> otherwise. </returns>
         internal override bool PreventExtensions(bool throwOnError)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'preventExtensions' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("preventExtensions");
             if (trap == null)
@@ -151,6 +176,17 @@ namespace Jurassic.Library
             if (targetIsExtensible)
                 throw new JavaScriptException(ErrorType.TypeError, "'preventExtensions' on proxy: trap returned truish but the proxy target is extensible.");
             return true;
+        }
+
+        /// <summary>
+        /// Gets a descriptor for the property with the given array index.
+        /// </summary>
+        /// <param name="index"> The array index of the property. </param>
+        /// <returns> A property descriptor containing the property value and attributes. </returns>
+        /// <remarks> The prototype chain is not searched. </remarks>
+        public override PropertyDescriptor GetOwnPropertyDescriptor(uint index)
+        {
+            return GetOwnPropertyDescriptor(index.ToString());
         }
 
         /// <summary>
@@ -174,6 +210,10 @@ namespace Jurassic.Library
         /// </remarks>
         public override PropertyDescriptor GetOwnPropertyDescriptor(object key)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'getOwnPropertyDescriptor' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("getOwnPropertyDescriptor");
             if (trap == null)
@@ -186,13 +226,13 @@ namespace Jurassic.Library
             {
                 var propertyDescriptor = PropertyDescriptor.FromObject(propertyDescriptorObject, PropertyDescriptor.Undefined);
                 if (!IsCompatiblePropertyDescriptor(target.IsExtensible, propertyDescriptor, targetDescriptor))
-                    throw new JavaScriptException(ErrorType.TypeError, "sdff");
+                    throw new JavaScriptException(ErrorType.TypeError, $"'getOwnPropertyDescriptor' on proxy: trap returned descriptor for property '{TypeConverter.ToString(key)}' that is incompatible with the existing property in the proxy target.");
                 if (!propertyDescriptor.IsConfigurable)
                 {
                     if (!targetDescriptor.Exists || targetDescriptor.IsConfigurable)
-                        throw new JavaScriptException(ErrorType.TypeError, "sdff");
+                        throw new JavaScriptException(ErrorType.TypeError, $"'getOwnPropertyDescriptor' on proxy: trap reported non-configurability for property '{TypeConverter.ToString(key)}' which is either non-existent or configurable in the proxy target.");
                     if (!propertyDescriptor.IsWritable && targetDescriptor.IsWritable)
-                        throw new JavaScriptException(ErrorType.TypeError, "sdff");
+                        throw new JavaScriptException(ErrorType.TypeError, $"'getOwnPropertyDescriptor' on proxy: trap reported non-configurable and writable for property '{TypeConverter.ToString(key)}' which is non-configurable, non-writable in the proxy target.");
                 }
                 return propertyDescriptor;
             }
@@ -201,13 +241,13 @@ namespace Jurassic.Library
                 if (!targetDescriptor.Exists)
                     return PropertyDescriptor.Missing;
                 if (!targetDescriptor.IsConfigurable)
-                    throw new JavaScriptException(ErrorType.TypeError, "sdff");
+                    throw new JavaScriptException(ErrorType.TypeError, $"'getOwnPropertyDescriptor' on proxy: trap returned undefined for property '{TypeConverter.ToString(key)}' which is non-configurable in the proxy target.");
                 if (!target.IsExtensible)
-                    throw new JavaScriptException(ErrorType.TypeError, "sdff");
+                    throw new JavaScriptException(ErrorType.TypeError, $"'getOwnPropertyDescriptor' on proxy: trap returned undefined for property '{TypeConverter.ToString(key)}' which exists in the non-extensible proxy target.");
                 return PropertyDescriptor.Missing;
             }
             else
-                throw new JavaScriptException(ErrorType.TypeError, "sdff");
+                throw new JavaScriptException(ErrorType.TypeError, $"'getOwnPropertyDescriptor' on proxy: trap returned neither object nor undefined for property '{TypeConverter.ToString(key)}'.");
         }
 
         /// <summary>
@@ -222,6 +262,10 @@ namespace Jurassic.Library
         /// <returns> <c>true</c> if the property was successfully modified; <c>false</c> otherwise. </returns>
         public override bool DefineProperty(object key, PropertyDescriptor descriptor, bool throwOnError)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'defineProperty' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("defineProperty");
             if (trap == null)
@@ -264,6 +308,10 @@ namespace Jurassic.Library
         /// <c>false</c> otherwise. </returns>
         public override bool HasProperty(object key)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'has' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("has");
             if (trap == null)
@@ -301,6 +349,32 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the value of the property with the given name.
         /// </summary>
+        /// <param name="propertyReference"> The name of the property. </param>
+        /// <returns> The value of the property, or <see cref="Undefined.Value"/> if the property
+        /// doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        public override object GetPropertyValue(PropertyReference propertyReference)
+        {
+            return GetPropertyValue(propertyReference.Name, this);
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name.  The name cannot be an array index.
+        /// </summary>
+        /// <param name="key"> The property key (either a string or a Symbol).  Cannot be an array index. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
+        /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
+        /// <remarks> The prototype chain is searched if the property does not exist directly on
+        /// this object. </remarks>
+        internal override object GetNamedPropertyValue(object key, object thisValue)
+        {
+            return GetPropertyValue(key, thisValue);
+        }
+
+        /// <summary>
+        /// Gets the value of the property with the given name.
+        /// </summary>
         /// <param name="key"> The property key (either a string or a Symbol). </param>
         /// <param name="thisValue"> The value of the "this" keyword inside a getter. </param>
         /// <returns> The value of the property, or <c>null</c> if the property doesn't exist. </returns>
@@ -308,6 +382,10 @@ namespace Jurassic.Library
         /// this object. </remarks>
         public override object GetPropertyValue(object key, object thisValue)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'get' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("get");
             if (trap == null)
@@ -327,6 +405,42 @@ namespace Jurassic.Library
         }
 
         /// <summary>
+        /// Sets the value of the property with the given array index.  If a property with the
+        /// given index does not exist, or exists in the prototype chain (and is not a setter) then
+        /// a new property is created.
+        /// </summary>
+        /// <param name="index"> The array index of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set.  This can happen if the property is read-only or if the object is sealed. </param>
+        /// <returns> <c>false</c> if an error occurred. </returns>
+        public override bool SetPropertyValue(uint index, object value, object thisValue, bool throwOnError)
+        {
+            return SetPropertyValue(index.ToString(), value, thisValue, throwOnError);
+        }
+
+        /// <summary>
+        /// Sets the value of the property with the given name.  If a property with the given name
+        /// does not exist, or exists in the prototype chain (and is not a setter) then a new
+        /// property is created.
+        /// </summary>
+        /// <param name="propertyReference"> The name of the property to set. </param>
+        /// <param name="value"> The value to set the property to.  This must be a javascript
+        /// primitive (double, string, etc) or a class derived from <see cref="ObjectInstance"/>. </param>
+        /// <param name="thisValue"> The value of the "this" keyword inside a setter. </param>
+        /// <param name="throwOnError"> <c>true</c> to throw an exception if the property could not
+        /// be set (i.e. if the property is read-only or if the object is not extensible and a new
+        /// property needs to be created). </param>
+        /// <returns> <c>false</c> if <paramref name="throwOnError"/> is false and an error
+        /// occurred; <c>true</c> otherwise. </returns>
+        public override bool SetPropertyValue(PropertyReference propertyReference, object value, object thisValue, bool throwOnError)
+        {
+            return SetPropertyValue(propertyReference.Name, value, thisValue, throwOnError);
+        }
+
+        /// <summary>
         /// Sets the value of the property with the given name.  If a property with the given name
         /// does not exist, or exists in the prototype chain (and is not a setter) then a new
         /// property is created.
@@ -342,6 +456,10 @@ namespace Jurassic.Library
         /// occurred; <c>true</c> otherwise. </returns>
         public override bool SetPropertyValue(object key, object value, object thisValue, bool throwOnError)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'set' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("set");
             if (trap == null)
@@ -373,6 +491,10 @@ namespace Jurassic.Library
         /// <paramref name="throwOnError"/> was <c>false</c>. </returns>
         public override bool Delete(object key, bool throwOnError)
         {
+            // Check for revocation.
+            if (target == null || handler == null)
+                throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'deleteProperty' on a proxy that has been revoked.");
+
             // Call the handler, if one exists.
             var trap = handler.GetMethod("deleteProperty");
             if (trap == null)
@@ -394,25 +516,75 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets an enumerable list of every property name and value associated with this object.
+        /// Gets an enumerable list of every property name associated with this object.
         /// Does not include properties in the prototype chain.
         /// </summary>
-        public override IEnumerable<PropertyNameAndValue> Properties
+        public override IEnumerable<object> OwnKeys
         {
             get
             {
+                // Check for revocation.
+                if (target == null || handler == null)
+                    throw new JavaScriptException(ErrorType.TypeError, "Cannot call 'ownKeys' on a proxy that has been revoked.");
+
+
                 // Call the handler, if one exists.
                 var trap = handler.GetMethod("ownKeys");
                 if (trap == null)
-                    return target.Properties;
+                    return target.OwnKeys;
                 var result = trap.CallLateBound(handler, target);
 
                 // Validate.
                 if (!(result is ObjectInstance))
-                    throw new JavaScriptException(ErrorType.TypeError, $"sdf");
+                    throw new JavaScriptException(ErrorType.TypeError, $"'ownKeys' on proxy: trap returned non-object ('{TypeConverter.ToString(result)}').");
                 var trapResult = TypeUtilities.CreateListFromArrayLike((ObjectInstance)result);
 
-                throw new JavaScriptException(ErrorType.TypeError, $"sdf");
+                // Check for duplicates.
+                for (int i = 0; i < trapResult.Length; i++)
+                {
+                    object key = trapResult[i];
+                    if (key is string keyStr)
+                    {
+                        for (int j = 0; j < i; j++)
+                            if (trapResult[j] is string keyStr2 && keyStr == keyStr2)
+                                throw new JavaScriptException(ErrorType.TypeError, $"'ownKeys' on proxy: trap returned duplicate entries.");
+                    }
+                    else if (key is Symbol)
+                    {
+                        for (int j = 0; j < i; j++)
+                            if (key == trapResult[j])
+                                throw new JavaScriptException(ErrorType.TypeError, $"'ownKeys' on proxy: trap returned duplicate entries.");
+                    }
+                    else
+                        throw new JavaScriptException(ErrorType.TypeError, $"{TypeConverter.ToString(key)} is not a valid property name.");
+                }
+
+                // Check that required keys are present.
+                var targetNonconfigurableKeys = new List<object>();
+                var targetConfigurableKeys = new List<object>();
+                foreach (var key in target.OwnKeys)
+                {
+                    var targetDescriptor = target.GetOwnPropertyDescriptor(key);
+                    if (targetDescriptor.Exists && !targetDescriptor.IsConfigurable)
+                        targetNonconfigurableKeys.Add(key);
+                    else
+                        targetConfigurableKeys.Add(key);
+                }
+                if (target.IsExtensible && targetNonconfigurableKeys.Count == 0)
+                    return trapResult;
+                var uncheckedResultKeys = new List<object>(trapResult);
+                foreach (var key in targetNonconfigurableKeys)
+                    if (!uncheckedResultKeys.Remove(key))
+                        throw new JavaScriptException(ErrorType.TypeError, $"'ownKeys' on proxy: trap result did not include '{TypeConverter.ToString(key)}'.");
+                if (target.IsExtensible)
+                    return trapResult;
+                foreach (var key in targetConfigurableKeys)
+                    if (!uncheckedResultKeys.Remove(key))
+                        throw new JavaScriptException(ErrorType.TypeError, $"'ownKeys' on proxy: trap result did not include '{TypeConverter.ToString(key)}'.");
+                if (uncheckedResultKeys.Count > 0)
+                    throw new JavaScriptException(ErrorType.TypeError, $"'ownKeys' on proxy: trap returned extra keys but proxy target is non-extensible.");
+
+                return trapResult;
             }
         }
     }

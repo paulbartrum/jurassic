@@ -265,19 +265,27 @@ namespace Jurassic.Compiler
                 }
                 if (scope.ScopeObject != null)
                 {
-                    var result = scope.ScopeObject.GetPropertyValue(variableName);
-                    if (result != null)
+                    // Special case with() scopes.
+                    if (scope.ScopeType == ScopeType.With)
                     {
-                        // If the scope was created by a with() statement.
-                        if (scope.ScopeType == ScopeType.With)
+                        // First, check the property exists.
+                        if (scope.ScopeObject.HasProperty(variableName))
                         {
                             // The [Symbol.unscopables] value contains a list of properties that
                             // should be excluded from with() environment bindings.
                             var unscopables = scope.ScopeObject.GetPropertyValue(Symbol.Unscopables) as ObjectInstance;
                             if (unscopables == null || !TypeConverter.ToBoolean(unscopables[variableName]))
-                                return result;
+                            {
+                                // Return the property value, or undefined if the property doesn't exist.
+                                return scope.ScopeObject.GetPropertyValue(variableName) ?? Undefined.Value;
+                            }
                         }
-                        else
+                    }
+                    else
+                    {
+                        // Global scope.
+                        var result = scope.ScopeObject.GetPropertyValue(variableName);
+                        if (result != null)
                             return result;
                     }
                 }

@@ -236,7 +236,7 @@ namespace UnitTests
 
             // Proxies.
             Assert.AreEqual("[1,2,3]", Evaluate("JSON.stringify(new Proxy([1, 2, 3], {}))"));
-            Assert.AreEqual(@"{""a"":1,""b"":2}", Evaluate("JSON.stringify(new Proxy({ a: 1, b: 2}, {}))"));
+            Assert.AreEqual(@"{""a"":1,""b"":2}", Evaluate("JSON.stringify(new Proxy({ a: 1, b: 2 }, {}))"));
 
             // Cyclic reference
             Assert.AreEqual("TypeError", EvaluateExceptionType("a = []; a[0] = a; JSON.stringify(a)"));
