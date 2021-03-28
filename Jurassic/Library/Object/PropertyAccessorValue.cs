@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-
-namespace Jurassic.Library
+﻿namespace Jurassic.Library
 {
 
     /// <summary>
     /// Represents a the value of an accessor property.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    internal sealed class PropertyAccessorValue : IDebuggerDisplay
+    internal sealed class PropertyAccessorValue
     {
-        private FunctionInstance getter;
-        private FunctionInstance setter;
+        private readonly FunctionInstance getter;
+        private readonly FunctionInstance setter;
 
         /// <summary>
         /// Creates a new PropertyAccessorValue instance.
@@ -66,46 +61,15 @@ namespace Jurassic.Library
         }
 
         /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
+        /// Returns a string that represents the current object.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string DebuggerDisplayValue
+        public override string ToString()
         {
-            get
-            {
-                string result = string.Empty;
-                if (this.getter != null && this.setter != null)
-                {
-                    result = "getter;setter";
-                }
-                else if (this.getter != null)
-                {
-                    result = "getter";
-                }
-                else if (this.setter != null)
-                {
-                    result = "getter";
-                }
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string DebuggerDisplayType
-        {
-            get { return "Property Accessor"; }
+            if (getter == null)
+                return "setter";
+            else if (setter == null)
+                return "getter";
+            return "getter, setter";
         }
     }
 

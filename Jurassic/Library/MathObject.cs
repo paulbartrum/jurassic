@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents the built-in Math class that has mathematical constants and functions.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class MathObject : ObjectInstance
     {
 

@@ -1,12 +1,8 @@
-﻿using System.Diagnostics;
-
-namespace Jurassic.Library
+﻿namespace Jurassic.Library
 {
     /// <summary>
     /// Represents an instance of the Symbol object.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class SymbolInstance : ObjectInstance
     {
         private Symbol symbol;
@@ -75,39 +71,6 @@ namespace Jurassic.Library
         public Symbol ToPrimitive(string hint)
         {
             return this.symbol;
-        }
-
-
-
-        //     .NET ACCESSOR PROPERTIES
-        //_________________________________________________________________________________________
-
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get { return this.ToString(); }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return "Symbol"; }
         }
     }
 }

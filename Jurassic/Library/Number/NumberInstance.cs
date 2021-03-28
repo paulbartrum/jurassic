@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Jurassic.Library
 {
@@ -11,14 +9,12 @@ namespace Jurassic.Library
     /// None of the methods of the Number prototype are generic; they should throw <c>TypeError</c>
     /// if the <c>this</c> value is not a Number object or a number primitive.
     /// </remarks>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class NumberInstance : ObjectInstance
     {
         /// <summary>
         /// The primitive value.
         /// </summary>
-        private double value;
+        private readonly double value;
 
 
         //     INITIALIZATION
@@ -60,36 +56,6 @@ namespace Jurassic.Library
         public double Value
         {
             get { return this.value; }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get
-            {
-                return this.Value.ToString(CultureInfo.InvariantCulture);
-            }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return "Number"; }
         }
 
 

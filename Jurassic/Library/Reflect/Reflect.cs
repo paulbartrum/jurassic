@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Jurassic.Library
 {
@@ -7,8 +6,6 @@ namespace Jurassic.Library
     /// Represents the built-in Reflect class that provides methods for interceptable JavaScript
     /// operations.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class ReflectObject : ObjectInstance
     {
 

@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// Represents an instance of the JavaScript Array object.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ArrayInstanceDebugView))]
     public partial class ArrayInstance : ObjectInstance
     {
         // The array, if it is dense.
@@ -223,44 +219,6 @@ namespace Jurassic.Library
             return this.Properties.Where(pnv => (pnv.Key is string) && (pnv.Key as string) != "length").Count();
         }
 
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get
-            {
-                IEnumerable<string> strValues = 
-                    this.Properties.Where(pnv => !((pnv.Key is string) && (pnv.Key as string) == "length")).
-                        Select(pnv=> DebuggerDisplayHelper.ShortStringRepresentation(pnv.Value));
-
-                return string.Format("[{0}]", string.Join(", ", strValues));
-            }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get
-            {
-                string result = string.Format("Array({0})", this.GetLength());
-                return result;
-            }
-        }
-
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return "Array"; }
-        }
 
 
         //     INTERNAL HELPER METHODS

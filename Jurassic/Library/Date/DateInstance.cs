@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Jurassic.Library
 {
     /// <summary>
     /// The prototype for the Date object.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class DateInstance : ObjectInstance
     {
         /// <summary>
@@ -129,36 +125,6 @@ namespace Jurassic.Library
         public bool IsValid
         {
             get { return this.value != InvalidDate; }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get
-            {
-                return DateInstance.ToString(this);
-            }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return "Date"; }
         }
 
 

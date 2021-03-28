@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 
 namespace Jurassic.Library
 {
@@ -9,8 +7,6 @@ namespace Jurassic.Library
     /// The Map object is a simple key/value map. Any value (both objects and primitive values) may
     /// be used as either a key or a value.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(MapInstanceDebugView))]
     public partial class MapInstance : ObjectInstance
     {
         private readonly Dictionary<object, LinkedListNode<KeyValuePair<object, object>>> store;
@@ -63,36 +59,6 @@ namespace Jurassic.Library
         /// Called before a linked list node is deleted.
         /// </summary>
         internal event Action<LinkedListNode<KeyValuePair<object, object>>> BeforeDelete;
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get
-            {
-                return string.Format("{{{0}}}]", DebuggerDisplayHelper.MapRepresentation(this.store));
-            }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return string.Format("Map({0})", this.store.Count); }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return this.DebuggerDisplayShortValue; }
-        }
 
         /// <summary>
         /// Gets the internal storage. Used by debugger decoration only.

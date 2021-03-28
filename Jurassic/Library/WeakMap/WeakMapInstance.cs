@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Jurassic.Library
 {
@@ -11,8 +7,6 @@ namespace Jurassic.Library
     /// The WeakMap object is a collection of key/value pairs in which the keys are weakly
     /// referenced.  The keys must be objects and the values can be arbitrary values.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(WeakMapInstanceDebugView))]
     public partial class WeakMapInstance : ObjectInstance
     {
         private readonly ConditionalWeakTable<ObjectInstance, object> store;
@@ -147,40 +141,6 @@ namespace Jurassic.Library
         internal ConditionalWeakTable<ObjectInstance, object> Store
         {
             get { return this.store; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append("{");
-                DebuggerDisplayHelper.WeakMapRepresentation(sb, this.store);
-                sb.Append("}");
-                return sb.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayType; }
-        }
-
-        /// <summary>
-        /// Gets the key-value pairs
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return string.Format("WeakMap({0})", this.store.GetKeys().Count()); }
         }
     }
 }

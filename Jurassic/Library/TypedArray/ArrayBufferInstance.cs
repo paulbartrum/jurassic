@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace Jurassic.Library
 {
@@ -9,8 +8,6 @@ namespace Jurassic.Library
     /// the typed array objects or a DataView object which represents the buffer in a specific
     /// format, and use that to read and write the contents of the buffer.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ArrayBufferInstanceDebugView))]
     public partial class ArrayBufferInstance : ObjectInstance
     {
         private byte[] buffer;
@@ -68,33 +65,6 @@ namespace Jurassic.Library
         internal byte[] Buffer
         {
             get { return this.buffer; }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get { return "{}"; }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayType; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return string.Format("ArrayBuffer({0})", this.buffer.Length); }
         }
 
 

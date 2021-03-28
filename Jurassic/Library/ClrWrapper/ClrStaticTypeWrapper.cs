@@ -10,8 +10,6 @@ namespace Jurassic.Library
     /// Represents the static portion of a CLR type that cannot be exposed directly but instead
     /// must be wrapped.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ClrStaticTypeWrapperDebugView))]
     internal class ClrStaticTypeWrapper : FunctionInstance
     {
         private ClrBinder constructBinder;
@@ -107,37 +105,6 @@ namespace Jurassic.Library
             get;
             private set;
         }
-
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get { return this.WrappedType?.ToString(); }
-        }
-
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return "Type"; }
-        }
-
 
 
 

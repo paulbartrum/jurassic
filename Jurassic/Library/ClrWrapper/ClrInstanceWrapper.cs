@@ -8,8 +8,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a non-native CLR object instance.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ClrInstanceWrapperDebugView))]
     public class ClrInstanceWrapper : ObjectInstance
     {
 
@@ -72,34 +70,6 @@ namespace Jurassic.Library
             get;
             private set;
         }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get { return this.WrappedInstance?.ToString(); }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return this.WrappedInstance?.GetType().ToString(); }
-        }
-
 
 
 

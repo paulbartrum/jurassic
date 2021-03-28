@@ -1,22 +1,12 @@
-﻿using System;
-using System.Diagnostics;
-using System.Globalization;
-
-
-namespace Jurassic.Library
+﻿namespace Jurassic.Library
 {
     /// <summary>
     /// Represents a property name and value.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Name = "{Key,nq}", Type = "{DebuggerDisplayType,nq}")]
     public sealed class PropertyNameAndValue
     {
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private object key;
-
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private PropertyDescriptor descriptor;
+        private readonly object key;
+        private readonly PropertyDescriptor descriptor;
 
         /// <summary>
         /// Initializes a property with any descriptor.
@@ -57,7 +47,6 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the property key.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public object Key
         {
             get { return this.key; }
@@ -66,72 +55,15 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets the value of the property.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public object Value
         {
             get { return this.descriptor.Value; }
         }
 
         /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string DebuggerDisplayValue
-        {
-            get
-            {
-                string result;
-                if (this.descriptor.Value is IDebuggerDisplay debuggerDisplay)
-                {
-                    result = debuggerDisplay.DebuggerDisplayValue;
-                }
-                else if (this.descriptor.Value is string)
-                {
-                    result = string.Format("\"{0}\"", this.descriptor.Value);
-                }
-                else
-                {
-                    IFormattable formattable = this.descriptor.Value as IFormattable;
-                    if (formattable == null)
-                    {
-                        result = this.descriptor.Value.ToString();
-                    }
-                    else
-                    {
-                        result = formattable.ToString(null, CultureInfo.InvariantCulture);
-                    }
-                }
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string DebuggerDisplayType
-        {
-            get
-            {
-                string result;
-                if (this.descriptor.Value is IDebuggerDisplay debuggerDisplay)
-                {
-                    result = debuggerDisplay.DebuggerDisplayType;
-                }
-                else
-                {
-                    result = this.descriptor.Value?.GetType().Name;
-                }
-                return result;
-            }
-        }
-
-
-        /// <summary>
         /// Gets the property attributes.  These attributes describe how the property can
         /// be modified.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public PropertyAttributes Attributes
         {
             get { return this.descriptor.Attributes; }
@@ -140,7 +72,6 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a boolean value indicating whether the property value can be set.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsWritable
         {
             get { return this.descriptor.IsWritable; }
@@ -150,7 +81,6 @@ namespace Jurassic.Library
         /// Gets a boolean value indicating whether the property value will be included during an
         /// enumeration.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsEnumerable
         {
             get { return this.descriptor.IsEnumerable; }
@@ -159,10 +89,17 @@ namespace Jurassic.Library
         /// <summary>
         /// Gets a boolean value indicating whether the property can be deleted.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsConfigurable
         {
             get { return this.descriptor.IsConfigurable; }
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        public override string ToString()
+        {
+            return $"{Key}: {Value} (configurable={IsConfigurable}, writable={IsWritable}, enumerable={IsEnumerable})";
         }
     }
 }

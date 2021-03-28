@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-
-namespace Jurassic.Library
+﻿namespace Jurassic.Library
 {
     /// <summary>
     /// Represents the base class of all the javascript errors.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(ObjectInstanceDebugView))]
     public partial class ErrorInstance : ObjectInstance
     {
 
@@ -141,34 +134,6 @@ namespace Jurassic.Library
             if (string.IsNullOrEmpty(message))
                 return name;
             return string.Format("{0}: {1}", name, message);
-        }
-
-        /// <summary>
-        /// Gets an enumerable list of every property name and value associated with this object.
-        /// Does not include properties in the prototype chain.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get { return this.Message; }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return "Error"; }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Jurassic.Compiler;
 
@@ -198,22 +197,6 @@ namespace Jurassic.Library
         public string DisassembledIL
         {
             get { return this.generatedMethod.DisassembledIL; }
-        }
-
-        /// <summary>
-        /// Gets the value that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get
-            {
-                string name = this.Name;
-                if (string.IsNullOrEmpty(name))
-                    name = "function";
-                string result = string.Format("{0}({1})", name, this.ArgumentsText);
-                return result;
-            }
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Jurassic.Library
@@ -7,8 +6,6 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents an instance of the Promise object.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Type = "{DebuggerDisplayType,nq}")]
-    [DebuggerTypeProxy(typeof(PromiseInstanceDebugView))]
     public partial class PromiseInstance : ObjectInstance
     {
         internal enum PromiseState
@@ -382,39 +379,6 @@ namespace Jurassic.Library
         internal FunctionInstance RejectFunction
         {
             get { return this.rejectFunction; }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayValue
-        {
-            get
-            {
-                if (state == PromiseState.Pending)
-                    return state.ToString();
-                else
-                    return $"{state}: {result}";
-            }
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window when this object is part of array, map, etc.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayShortValue
-        {
-            get { return this.DebuggerDisplayValue; }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public override string DebuggerDisplayType
-        {
-            get { return "Promise"; }
         }
     }
 }

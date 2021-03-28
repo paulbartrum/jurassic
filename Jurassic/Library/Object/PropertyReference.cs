@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace Jurassic.Library
 {
@@ -7,11 +6,9 @@ namespace Jurassic.Library
     /// <summary>
     /// Represents a property name. Used to speed up access to object properties and global variables.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplayValue,nq}", Name = "{Name,nq}", Type = "{DebuggerDisplayType,nq}")]
     public sealed class PropertyReference
     {
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string propertyName;
+        private readonly string propertyName;
 
         /// <summary>
         /// Creates a new PropertyName instance.
@@ -27,7 +24,6 @@ namespace Jurassic.Library
         /// <summary>
         /// The property name.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Name
         {
             get { return propertyName; }
@@ -36,13 +32,11 @@ namespace Jurassic.Library
         /// <summary>
         /// A reference to a schema that defines how properties are stored.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal HiddenClassSchema CachedSchema { get; private set; }
 
         /// <summary>
         /// The index into the property array.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal int CachedIndex { get; private set; }
 
         /// <summary>
@@ -62,30 +56,6 @@ namespace Jurassic.Library
         internal void ClearCache()
         {
             this.CachedSchema = null;
-        }
-
-        /// <summary>
-        /// Gets value, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string DebuggerDisplayValue
-        {
-            get
-            {
-                return Name;
-            }
-        }
-
-        /// <summary>
-        /// Gets type, that will be displayed in debugger watch window.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string DebuggerDisplayType
-        {
-            get
-            {
-                return Name;
-            }
         }
 
         /// <summary>
