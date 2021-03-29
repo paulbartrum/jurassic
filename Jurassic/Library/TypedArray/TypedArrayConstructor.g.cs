@@ -59,13 +59,13 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					return ((TypedArrayConstructor)thisObj).From(Undefined.Value, null, null);
+					return ((TypedArrayConstructor)thisObj).From(Undefined.Value, null, Undefined.Value);
 				case 1:
-					return ((TypedArrayConstructor)thisObj).From(args[0], null, null);
+					return ((TypedArrayConstructor)thisObj).From(args[0], null, Undefined.Value);
 				case 2:
-					return ((TypedArrayConstructor)thisObj).From(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[1]), null);
+					return ((TypedArrayConstructor)thisObj).From(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[1]), Undefined.Value);
 				default:
-					return ((TypedArrayConstructor)thisObj).From(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[1]), TypeUtilities.IsUndefined(args[2]) ? null : args[2]);
+					return ((TypedArrayConstructor)thisObj).From(args[0], TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToObject<FunctionInstance>(engine, args[1]), args[2]);
 			}
 		}
 

@@ -323,7 +323,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    if (TypeConverter.ToBoolean(callbackFunction.CallFromNative("every", context, elementValue, i, WrappedInstance)) == false)
+                    if (TypeConverter.ToBoolean(callbackFunction.CallLateBound(context ?? (object)Undefined.Value, elementValue, i, WrappedInstance)) == false)
                         return false;
                 }
             }
@@ -352,7 +352,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    if (TypeConverter.ToBoolean(callbackFunction.CallFromNative("some", context, elementValue, i, WrappedInstance)) == true)
+                    if (TypeConverter.ToBoolean(callbackFunction.CallLateBound(context ?? (object)Undefined.Value, elementValue, i, WrappedInstance)) == true)
                         return true;
                 }
             }
@@ -377,7 +377,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    callbackFunction.CallFromNative("forEach", context, elementValue, i, WrappedInstance);
+                    callbackFunction.CallLateBound(context ?? (object)Undefined.Value, elementValue, i, WrappedInstance);
                 }
             }
         }
@@ -408,7 +408,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    object result = callbackFunction.CallFromNative("map", context, elementValue, i, WrappedInstance);
+                    object result = callbackFunction.CallLateBound(context ?? (object)Undefined.Value, elementValue, i, WrappedInstance);
 
                     // Store the result.
                     resultArray[i] = ConvertValue(result);
@@ -439,7 +439,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    bool result = TypeConverter.ToBoolean(callbackFunction.CallFromNative("find", context, elementValue, i, WrappedInstance));
+                    bool result = TypeConverter.ToBoolean(callbackFunction.CallLateBound(context ?? (object)Undefined.Value, elementValue, i, WrappedInstance));
 
                     // Return if the result was true.
                     if (result == true)
@@ -476,7 +476,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    bool includeInArray = TypeConverter.ToBoolean(callbackFunction.CallFromNative("filter", context, elementValue, i, WrappedInstance));
+                    bool includeInArray = TypeConverter.ToBoolean(callbackFunction.CallLateBound(context ?? (object)Undefined.Value, elementValue, i, WrappedInstance));
 
                     // Store the result if the callback function returned true.
                     if (includeInArray == true)
@@ -527,7 +527,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    accumulatedValue = callbackFunction.CallFromNative("reduce", Undefined.Value, accumulatedValue, elementValue, i, WrappedInstance);
+                    accumulatedValue = callbackFunction.Call(Undefined.Value, accumulatedValue, elementValue, i, WrappedInstance);
                 }
             }
 
@@ -576,7 +576,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    accumulatedValue = callbackFunction.CallFromNative("reduceRight", Undefined.Value, accumulatedValue, elementValue, i, WrappedInstance);
+                    accumulatedValue = callbackFunction.CallLateBound(Undefined.Value, accumulatedValue, elementValue, i, WrappedInstance);
                 }
             }
 
@@ -680,7 +680,7 @@ namespace Jurassic.Library
                 if (elementValue != null)
                 {
                     // Call the callback function.
-                    bool result = TypeConverter.ToBoolean(callbackFunction.CallFromNative("findIndex", context, elementValue, i, WrappedInstance));
+                    bool result = TypeConverter.ToBoolean(callbackFunction.CallLateBound(context ?? (object)Undefined.Value, elementValue, i, WrappedInstance));
 
                     // Return if the result was true.
                     if (result == true)

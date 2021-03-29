@@ -182,15 +182,29 @@ namespace UnitTests
                     catch (e) {
                         e.stack
                     }"));
-            Assert.AreEqual(@"TypeError: 'null' is not a function
-    at unknown:3",
+
+            // The stack property is populated either when the error is constructed, or when it is
+            // thrown. Chrome chooses to do it when the error is constructed, so we do too.
+            Assert.AreEqual(@"TypeError: haha
+    at new_error_func (<anonymous>:2:10)
+    at <anonymous>:4:22",
                 Evaluate(@"
-                    try {
-                        null();
+                    function new_error_func() {
+                        return new TypeError('haha');
                     }
-                    catch (e) {
+                    var error_instance = new_error_func();
+                    try {
+                        throw error_instance;
+                    } catch (e) {
                         e.stack
                     }"));
+
+            // Check what happens when we traverse through a built-in function.
+            Assert.AreEqual(@"Uncaught Error: sucker!
+    at mapper (<anonymous>:1:41)
+    at Array.map (<anonymous>)
+    at <anonymous>:1:11",
+                Evaluate(@"[1, 2, 3].map(function mapper() { throw new Error('sucker!') });"));
         }
     }
 }

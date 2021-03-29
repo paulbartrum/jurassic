@@ -134,48 +134,6 @@
         public abstract object CallLateBound(object thisObject, params object[] argumentValues);
 
         /// <summary>
-        /// Calls this function, passing in the given "this" value and zero or more arguments.
-        /// </summary>
-        /// <param name="function"> The name of the caller function. </param>
-        /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
-        /// <param name="argumentValues"> An array of argument values. </param>
-        /// <returns> The value that was returned from the function. </returns>
-        internal object CallFromNative(string function, object thisObject, params object[] argumentValues)
-        {
-            this.Engine.PushStackFrame("native", function, 0, ScriptEngine.CallType.MethodCall);
-            try
-            {
-                return CallLateBound(thisObject ?? Undefined.Value, argumentValues);
-            }
-            finally
-            {
-                this.Engine.PopStackFrame();
-            }
-        }
-
-        /// <summary>
-        /// Calls this function, passing in the given "this" value and zero or more arguments.
-        /// </summary>
-        /// <param name="path"> The path of the javascript source file that contains the caller. </param>
-        /// <param name="function"> The name of the caller function. </param>
-        /// <param name="line"> The line number of the statement that is calling this function. </param>
-        /// <param name="thisObject"> The value of the "this" keyword within the function. </param>
-        /// <param name="argumentValues"> An array of argument values. </param>
-        /// <returns> The value that was returned from the function. </returns>
-        public object CallWithStackTrace(string path, string function, int line, object thisObject, object[] argumentValues)
-        {
-            this.Engine.PushStackFrame(path, function, line, ScriptEngine.CallType.MethodCall);
-            try
-            {
-                return CallLateBound(thisObject, argumentValues);
-            }
-            finally
-            {
-                this.Engine.PopStackFrame();
-            }
-        }
-
-        /// <summary>
         /// Indicates whether the 'new' operator can be used on this function.
         /// Will be <c>false</c> for built-in functions like Math.max.
         /// </summary>
@@ -193,28 +151,6 @@
         public virtual ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
             throw new JavaScriptException(ErrorType.TypeError, $"{Name} is not a constructor.");
-        }
-
-        /// <summary>
-        /// Creates an object, using this function as the constructor.
-        /// </summary>
-        /// <param name="path"> The path of the javascript source file that contains the caller. </param>
-        /// <param name="function"> The name of the caller function. </param>
-        /// <param name="line"> The line number of the statement that is calling this function. </param>
-        /// <param name="newTarget"> The value of 'new.target'. </param>
-        /// <param name="argumentValues"> An array of argument values. </param>
-        /// <returns> The object that was created. </returns>
-        public ObjectInstance ConstructWithStackTrace(string path, string function, int line, FunctionInstance newTarget, object[] argumentValues)
-        {
-            this.Engine.PushStackFrame(path, function, line, ScriptEngine.CallType.NewOperator);
-            try
-            {
-                return ConstructLateBound(newTarget, argumentValues);
-            }
-            finally
-            {
-                this.Engine.PopStackFrame();
-            }
         }
 
 

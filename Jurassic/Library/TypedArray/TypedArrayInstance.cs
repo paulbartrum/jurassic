@@ -825,7 +825,7 @@ namespace Jurassic.Library
                 // Custom comparer.
                 comparer = (a, b) =>
                 {
-                    var v = TypeConverter.ToNumber(comparisonFunction.CallFromNative("sort", null, a, b));
+                    var v = TypeConverter.ToNumber(comparisonFunction.CallLateBound(Undefined.Value, a, b));
                     if (double.IsNaN(v))
                         return 0;
                     return Math.Sign(v);

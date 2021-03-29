@@ -103,11 +103,6 @@ namespace Jurassic.Compiler
             generator.Duplicate();
             generator.StoreVariable(functionReference);
 
-            // Pass in the path, function name and line.
-            generator.LoadStringOrNull(optimizationInfo.Source.Path);
-            generator.LoadStringOrNull(optimizationInfo.FunctionName);
-            generator.LoadInt32(optimizationInfo.SourceSpan.StartLine);
-
             // Pass in the value of 'new.target'.
             generator.LoadVariable(functionReference);
             generator.ReleaseTemporaryVariable(functionReference);
@@ -124,8 +119,8 @@ namespace Jurassic.Compiler
                 generator.NewArray(typeof(object));
             }
 
-            // FunctionInstance.ConstructLateBound(string path, string function, int line, FunctionInstance newTarget, object[] argumentValues)
-            generator.Call(ReflectionHelpers.FunctionInstance_ConstructWithStackTrace);
+            // FunctionInstance.ConstructLateBound(FunctionInstance newTarget, object[] argumentValues)
+            generator.Call(ReflectionHelpers.FunctionInstance_ConstructLateBound);
         }
     }
 

@@ -39,8 +39,8 @@ namespace Jurassic.Compiler
         internal static MethodInfo TypeUtilities_ForOf;
 
         internal static MethodInfo FunctionInstance_HasInstance;
-        internal static MethodInfo FunctionInstance_ConstructWithStackTrace;
-        internal static MethodInfo FunctionInstance_CallWithStackTrace;
+        internal static MethodInfo FunctionInstance_ConstructLateBound;
+        internal static MethodInfo FunctionInstance_CallLateBound;
         internal static MethodInfo FunctionInstance_InstancePrototype;
 
         internal static MethodInfo ScriptEngine_Global;
@@ -192,8 +192,8 @@ namespace Jurassic.Compiler
             ObjectInstance_InitializeMissingProperty = GetInstanceMethod(typeof(ObjectInstance), "InitializeMissingProperty", typeof(object), typeof(PropertyAttributes));
 
             FunctionInstance_HasInstance = GetInstanceMethod(typeof(FunctionInstance), "HasInstance", typeof(object));
-            FunctionInstance_ConstructWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "ConstructWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(FunctionInstance), typeof(object[]));
-            FunctionInstance_CallWithStackTrace = GetInstanceMethod(typeof(FunctionInstance), "CallWithStackTrace", typeof(string), typeof(string), typeof(int), typeof(object), typeof(object[]));
+            FunctionInstance_ConstructLateBound = GetInstanceMethod(typeof(FunctionInstance), "ConstructLateBound", typeof(FunctionInstance), typeof(object[]));
+            FunctionInstance_CallLateBound = GetInstanceMethod(typeof(FunctionInstance), "CallLateBound", typeof(object), typeof(object[]));
             FunctionInstance_InstancePrototype = GetInstanceMethod(typeof(FunctionInstance), "get_InstancePrototype");
 
             ScriptEngine_Global = GetInstanceMethod(typeof(ScriptEngine), "get_Global");

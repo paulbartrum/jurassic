@@ -85,6 +85,9 @@
         /// Gets the stack trace.  Note that this is populated when the object is thrown, NOT when
         /// it is initialized.
         /// </summary>
+        /// <remarks>
+        /// Based loosely on the v8 stack trace API: https://v8.dev/docs/stack-trace-api
+        /// </remarks>
         public string Stack
         {
             get { return TypeConverter.ToString(this["stack"]); }
@@ -98,7 +101,7 @@
         /// <param name="line"> The line number of the statement that is currently executing. </param>
         internal void SetStackTrace(string path, string function, int line)
         {
-            var stackTrace = this.Engine.FormatStackTrace(this.Name, this.Message, path, function, line);
+            var stackTrace = ""; //this.Engine.FormatStackTrace(this.Name, this.Message, path, function, line);
             this.FastSetProperty("stack", stackTrace, PropertyAttributes.FullAccess);
         }
 

@@ -1191,7 +1191,7 @@ namespace Jurassic.Library
                         return 1;
                     if (b == Undefined.Value)
                         return -1;
-                    var v = TypeConverter.ToNumber(comparisonFunction.CallFromNative("sort", null, a, b));
+                    var v = TypeConverter.ToNumber(comparisonFunction.CallLateBound(Undefined.Value, a, b));
                     if (double.IsNaN(v))
                         return 0;
                     return Math.Sign(v);
