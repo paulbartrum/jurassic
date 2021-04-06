@@ -213,9 +213,15 @@ namespace Jurassic.Library
                 var source = TypeConverter.ToObject(engine, rawSource);
 
                 // Copy the enumerable properties from the source object.
-                foreach (var property in source.Properties)
-                    if (property.IsEnumerable == true)
-                        target.SetPropertyValue(property.Key, property.Value, target, throwOnError: true);
+                foreach (var key in source.OwnKeys)
+                {
+                    var descriptor = source.GetOwnPropertyDescriptor(key);
+                    if (descriptor.IsEnumerable)
+                    {
+                        // Spec says call [[Get]] instead of using the value from the descriptor.
+                        target.SetPropertyValue(key, source[key], target, throwOnError: true);
+                    }
+                }
             }
             return target;
         }
@@ -251,13 +257,20 @@ namespace Jurassic.Library
         [JSInternalFunction(Name = "defineProperties")]
         public static ObjectInstance DefineProperties(object obj, ObjectInstance properties)
         {
-            if (!(obj is ObjectInstance))
-                throw new JavaScriptException(ErrorType.TypeError, "Object.defineProperties called on non-object.");
-            var obj2 = (ObjectInstance)obj;
-            foreach (var property in properties.Properties)
-                if (property.IsEnumerable == true)
-                    DefineProperty(obj2, property.Key, property.Value);
-            return obj2;
+            if (obj is ObjectInstance objectInstance)
+            {
+                foreach (var key in properties.OwnKeys)
+                {
+                    var descriptor = properties.GetOwnPropertyDescriptor(key);
+                    if (descriptor.IsEnumerable)
+                    {
+                        // Spec says call [[Get]] instead of just using the value from the descriptor.
+                        DefineProperty(objectInstance, key, properties[key]);
+                    }
+                }
+                return objectInstance;
+            }
+            throw new JavaScriptException(ErrorType.TypeError, "Object.defineProperties called on non-object.");
         }
 
         /// <summary>
@@ -270,15 +283,12 @@ namespace Jurassic.Library
         {
             if (obj is ObjectInstance objectInstance)
             {
-                var properties = new List<PropertyNameAndValue>();
-                foreach (var property in objectInstance.Properties)
-                    properties.Add(property);
-                foreach (var property in properties)
-                {
-                    objectInstance.FastSetProperty(property.Key, property.Value,
-                        property.Attributes & ~PropertyAttributes.Configurable, overwriteAttributes: true);
-                }
                 objectInstance.PreventExtensions(throwOnError: true);
+                foreach (var key in objectInstance.OwnKeys)
+                {
+                    var descriptor = objectInstance.GetOwnPropertyDescriptor(key);
+                    objectInstance.DefineProperty(key, new PropertyDescriptor(descriptor.Value, descriptor.Attributes & ~PropertyAttributes.Configurable), throwOnError: true);
+                }
             }
             return obj;
         }
@@ -293,15 +303,12 @@ namespace Jurassic.Library
         {
             if (obj is ObjectInstance objectInstance)
             {
-                var properties = new List<PropertyNameAndValue>();
-                foreach (var property in objectInstance.Properties)
-                    properties.Add(property);
-                foreach (var property in properties)
-                {
-                    objectInstance.FastSetProperty(property.Key, property.Value,
-                        property.Attributes & ~(PropertyAttributes.NonEnumerable), overwriteAttributes: true);
-                }
                 objectInstance.PreventExtensions(throwOnError: true);
+                foreach (var key in objectInstance.OwnKeys)
+                {
+                    var descriptor = objectInstance.GetOwnPropertyDescriptor(key);
+                    objectInstance.DefineProperty(key, new PropertyDescriptor(descriptor.Value, descriptor.Attributes & ~PropertyAttributes.NonEnumerable), throwOnError: true);
+                }
             }
             return obj;
         }

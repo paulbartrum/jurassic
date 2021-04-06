@@ -25,6 +25,11 @@ namespace UnitTests
 
             // species
             Assert.AreEqual(true, Evaluate("RegExp[Symbol.species] === RegExp"));
+
+            // lastIndex is the only property defined on the instance itself.
+            Assert.AreEqual("lastIndex", Evaluate("Reflect.ownKeys(/[a-z]+/).toString()"));
+            Assert.AreEqual(@"{""value"":0,""writable"":true,""enumerable"":false,""configurable"":false}",
+                Evaluate("JSON.stringify(Reflect.getOwnPropertyDescriptor(/[a-z]+/, 'lastIndex'))"));
         }
 
         [TestMethod]
@@ -216,7 +221,7 @@ namespace UnitTests
             // compile(pattern)
             Evaluate("var x = new RegExp('abc', 'g')");
             Evaluate("x.lastIndex = 1;");
-            Evaluate("x.compile('cde')");
+            Assert.AreEqual(true, Evaluate("x.compile('cde') === x"));
             Assert.AreEqual("cde", Evaluate("x.source"));
             Assert.AreEqual(false, Evaluate("x.global"));
             Assert.AreEqual(false, Evaluate("x.ignoreCase"));
@@ -226,12 +231,15 @@ namespace UnitTests
             // compile(pattern, flags)
             Evaluate("var x = new RegExp('abc', 'g')");
             Evaluate("x.lastIndex = 1;");
-            Evaluate("x.compile('cde', 'i')");
+            Assert.AreEqual(true, Evaluate("x.compile('cde', 'i') === x"));
             Assert.AreEqual("cde", Evaluate("x.source"));
             Assert.AreEqual(false, Evaluate("x.global"));
             Assert.AreEqual(true, Evaluate("x.ignoreCase"));
             Assert.AreEqual(false, Evaluate("x.multiline"));
             Assert.AreEqual(0, Evaluate("x.lastIndex"));
+
+            // compile() should not add any properties to the object.
+            Assert.AreEqual("lastIndex", Evaluate("Reflect.ownKeys(x).toString()"));
         }
 
         [TestMethod]

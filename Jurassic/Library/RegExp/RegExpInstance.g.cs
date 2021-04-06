@@ -78,11 +78,11 @@ namespace Jurassic.Library
 			switch (args.Length)
 			{
 				case 0:
-					((RegExpInstance)thisObj).Compile("undefined", null); return Undefined.Value;
+					return ((RegExpInstance)thisObj).Compile("undefined", null);
 				case 1:
-					((RegExpInstance)thisObj).Compile(TypeConverter.ToString(args[0]), null); return Undefined.Value;
+					return ((RegExpInstance)thisObj).Compile(TypeConverter.ToString(args[0]), null);
 				default:
-					((RegExpInstance)thisObj).Compile(TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToString(args[1])); return Undefined.Value;
+					return ((RegExpInstance)thisObj).Compile(TypeConverter.ToString(args[0]), TypeUtilities.IsUndefined(args[1]) ? null : TypeConverter.ToString(args[1]));
 			}
 		}
 

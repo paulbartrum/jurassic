@@ -1057,6 +1057,16 @@ namespace Jurassic.Library
             }
 
             /// <summary>
+            /// Indicates whether the array index exists (has a value).
+            /// </summary>
+            /// <param name="index"> The index to check. </param>
+            /// <returns> <c>true</c> if the index exists, <c>false</c> otherwise. </returns>
+            public override bool HasProperty(int index)
+            {
+                return WrappedInstance.HasProperty(index.ToString());
+            }
+
+            /// <summary>
             /// Creates a new array of the same type as this one.
             /// </summary>
             /// <param name="values"> The values in the new array. </param>

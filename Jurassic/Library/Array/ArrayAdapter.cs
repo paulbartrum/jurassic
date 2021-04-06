@@ -68,6 +68,13 @@ namespace Jurassic.Library
         public abstract void Delete(int index);
 
         /// <summary>
+        /// Indicates whether the array index exists (has a value).
+        /// </summary>
+        /// <param name="index"> The index to check. </param>
+        /// <returns> <c>true</c> if the index exists, <c>false</c> otherwise. </returns>
+        public abstract bool HasProperty(int index);
+
+        /// <summary>
         /// Creates a new array of the same type as this one.
         /// </summary>
         /// <param name="values"> The values in the new array. </param>
@@ -119,13 +126,20 @@ namespace Jurassic.Library
                 int highIndex = Length - lowIndex - 1;
 
                 // Swap the two values.
-                T low = this[lowIndex];
-                T high = this[highIndex];
-                if (high != null)
+                bool lowExists = HasProperty(lowIndex);
+                T low = default;
+                if (lowExists)
+                    low = this[lowIndex];
+                bool highExists = HasProperty(highIndex);
+                T high = default;
+                if (highExists)
+                    high = this[highIndex];
+
+                if (highExists)
                     this[lowIndex] = high;
                 else
                     Delete(lowIndex);
-                if (low != null)
+                if (lowExists)
                     this[highIndex] = low;
                 else
                     Delete(highIndex);

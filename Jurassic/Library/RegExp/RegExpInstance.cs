@@ -44,7 +44,10 @@ namespace Jurassic.Library
             }
 
             // Initialize the javascript properties.
-            FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+            InitializeProperties(new PropertyNameAndValue[]
+                {
+                    new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable),
+                });
         }
 
         /// <summary>
@@ -62,7 +65,10 @@ namespace Jurassic.Library
             this.globalSearch = existingInstance.globalSearch;
 
             // Initialize the javascript properties.
-            FastSetProperty("lastIndex", 0.0, PropertyAttributes.Writable);
+            InitializeProperties(new PropertyNameAndValue[]
+                {
+                    new PropertyNameAndValue("lastIndex", 0.0, PropertyAttributes.Writable),
+                });
         }
 
         /// <summary>
@@ -181,17 +187,11 @@ namespace Jurassic.Library
         /// i (ignore case)
         /// m (multiline search)</param>
         [JSInternalFunction(Deprecated = true, Name = "compile")]
-        public void Compile(string pattern, string flags = null)
+        public ObjectInstance Compile(string pattern, string flags = null)
         {
             this.value = CreateRegex(pattern, ParseFlags(flags) | RegexOptions.Compiled);
-
-            // Update the javascript properties.
-            this.FastSetProperty("source", pattern);
-            this.FastSetProperty("flags", this.Flags);
-            this.FastSetProperty("global", this.Global);
-            this.FastSetProperty("multiline", this.Multiline);
-            this.FastSetProperty("ignoreCase", this.IgnoreCase);
             this.LastIndex = 0;
+            return this;
         }
 
         /// <summary>
