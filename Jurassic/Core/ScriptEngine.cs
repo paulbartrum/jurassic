@@ -685,6 +685,7 @@ namespace Jurassic
         /// <param name="source"> The javascript source code to execute. </param>
         /// <returns> A CompiledScript instance, which can be executed as many times as needed. </returns>
         /// <exception cref="ArgumentNullException"> <paramref name="source"/> is a <c>null</c> reference. </exception>
+        [Obsolete("Use CompiledEval.Compile() or CompiledScript.Compile() instead.")]
         public CompiledScript Compile(ScriptSource source)
         {
             var methodGen = new GlobalOrEvalMethodGenerator(
