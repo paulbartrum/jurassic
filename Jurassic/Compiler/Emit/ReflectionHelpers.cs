@@ -394,8 +394,10 @@ namespace Jurassic.Compiler
         {
             // The result is an array with a 'raw' property which is also an array.
             var result = engine.Array.New(strings);
-            result["raw"] = ObjectConstructor.Freeze(engine.Array.New(rawStrings));
-            ObjectConstructor.Freeze(result);
+            result["raw"] = engine.Array.New(rawStrings);
+            // TODO: properly support frozen arrays.
+            //result["raw"] = ObjectConstructor.Freeze(engine.Array.New(rawStrings));
+            //ObjectConstructor.Freeze(result);
             engine.SetCachedTemplateStringsArray(callSiteId, result);
             return result;
         }
