@@ -5,7 +5,7 @@
     <Authors>Paul Bartrum</Authors>
     <Company />
     <Description>A .NET library to parse and execute JavaScript code.</Description>
-    <Version>3.1.0</Version>
+    <Version>3.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -16,20 +16,18 @@
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);DEBUG</DefineConstants>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Jurassic.xml</DocumentationFile>
     <PackageReleaseNotes>Language changes:
-* Support exponentiation operator (e.g. 2**3).
-* Catch variable is now optional.
+* Add support for ES6 classes.
+* Add support for ES6 let and const.
 
 Library changes:
-* Added Array.of, Array.from, Array.prototype.flat, Array.prototype.flatMap and Array.prototype.includes.
-* Added Object.fromEntries and Object.setPrototypeOf.
-* Added String.prototype.trimStart.
-* Added support for promises.
+* Add Reflect class &amp; functions.
+* Add Proxy class &amp; functions.
 
-Plus misc fixes to regular expressions, number formatting and date parsing.</PackageReleaseNotes>
+.NET 4 specific functionality has been removed, if you need this you'll have to stick with the previous version, sorry!</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/paulbartrum/jurassic.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryBranch>master</RepositoryBranch>
-    <RepositoryCommit>3ce05b3455dce546d36f08902546a61ac50c6c81</RepositoryCommit>
+    <RepositoryCommit>42b367afc6f9e786a6e3ff280bbacb3ef816a1f0</RepositoryCommit>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <LangVersion>7.3</LangVersion>
     <IncludeSymbols>true</IncludeSymbols>
