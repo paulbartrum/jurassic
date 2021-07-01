@@ -62,6 +62,20 @@ namespace Jurassic
         /// </summary>
         /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
         /// <param name="message"> A description of the error. </param>
+        /// <param name="innerException"> The exception that is the cause of the current exception,
+        /// or <c>null</c> if no inner exception is specified. </param>
+        public JavaScriptException(ErrorType type, string message, Exception innerException)
+            : base(string.Format("{0}: {1}", type, message), innerException)
+        {
+            this.ErrorType = type;
+            this.ErrorMessage = message;
+        }
+
+        /// <summary>
+        /// Creates a new JavaScriptException instance.
+        /// </summary>
+        /// <param name="type"> The type of error, e.g. Error, RangeError, etc. </param>
+        /// <param name="message"> A description of the error. </param>
         /// <param name="lineNumber"> The line number in the source file the error occurred on. </param>
         /// <param name="sourcePath"> The path or URL of the source file.  Can be <c>null</c>. </param>
         public JavaScriptException(ErrorType type, string message, int lineNumber, string sourcePath)

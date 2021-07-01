@@ -192,7 +192,7 @@ namespace Jurassic.Library
         /// Gets an enumerable list of every property name and value associated with this object.
         /// Does not include properties in the prototype chain.
         /// </summary>
-        internal IEnumerable<PropertyNameAndValue> Properties
+        public IEnumerable<PropertyNameAndValue> Properties
         {
             get
             {
