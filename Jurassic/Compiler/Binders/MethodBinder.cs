@@ -39,14 +39,14 @@ namespace Jurassic.Compiler
         /// Creates a new Binder instance.
         /// </summary>
         /// <param name="targetMethods"> An enumerable list of methods to bind to.  At least one
-        /// method must be provided.  Every method must have the same name and declaring type. </param>
+        /// method must be provided.  Every method must have the same name. </param>
         protected MethodBinder(IEnumerable<BinderMethod> targetMethods)
         {
             if (targetMethods == null)
                 throw new ArgumentNullException(nameof(targetMethods));
 
             // At least one method must be provided.
-            // Every method must have the same name and declaring type.
+            // Every method must have the same name
             foreach (var method in targetMethods)
             {
                 if (this.Name == null)
@@ -58,8 +58,13 @@ namespace Jurassic.Compiler
                 {
                     if (this.Name != method.Name)
                         throw new ArgumentException(nameof(targetMethods));
-                    if (this.declaringType != method.DeclaringType)
-                        throw new ArgumentException(nameof(targetMethods));
+
+                    // This code is removed, because now methods with same name from 
+                    // the whole inheritance hierarchy are grouped together. 
+                    // Otherwise method from the base class is not accessible when there 
+                    // is a method with the same name in inherited class.
+                    //if (this.declaringType != method.DeclaringType)
+                    //    throw new ArgumentException(nameof(targetMethods));
                 }
                 this.functionLength = Math.Max(this.FunctionLength, method.RequiredParameterCount +
                     method.OptionalParameterCount + (method.HasParamArray ? 1 : 0));
