@@ -43,9 +43,9 @@ namespace UnitTests
                 .local [3] System.Object b
                 .local [4] System.Object a
                 .local [5] System.Object returnValue
-                      ldnull
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       stloc      V0 (f)
-                      ldnull
+                      ldsfld     Jurassic.Undefined Value/Jurassic.Undefined
                       stloc      V1 (arguments)
                       ldnull
                       stloc      V2 (a)

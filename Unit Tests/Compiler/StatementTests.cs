@@ -290,6 +290,7 @@ namespace UnitTests
             Assert.AreEqual(Undefined.Value, Evaluate("var x, y"));
             Assert.AreEqual(Undefined.Value, Evaluate("_varDeclaration; var _varDeclaration"));
             Assert.AreEqual(Undefined.Value, Evaluate("(function() { var x; return x; })();"));
+            Assert.AreEqual(Undefined.Value, Evaluate(@"function func(a) { return a; } (function() { var x; return func(x); })();"));
             Assert.AreEqual(Undefined.Value, Evaluate("(function() { var a = x; var x; return a; })();"));
             Assert.AreEqual(2, Evaluate("(function() { for (var i = 0; i < 2; i ++) { } return i; })();"));
             Assert.AreEqual(5, Evaluate("var x = 5; x"));

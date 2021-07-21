@@ -256,7 +256,19 @@ namespace Jurassic.Compiler
                     variable.Store = generator.DeclareVariable(variable.Type, variable.Name);
                     if (variable.Type == PrimitiveType.Any)
                     {
-                        generator.LoadNull();
+                        if (variable.Keyword == KeywordToken.Var)
+                        {
+                            // Accessing an uninitialized variable results in "undefined". This initialization must be
+                            // done here rather than where the variable is declared, as it is possible to access the
+                            // variable before it is declared.
+                            EmitHelpers.EmitUndefined(generator);
+                        }
+                        else
+                        {
+                            // We initialize let & const variables to null, which indicates that the variable has not
+                            // been initialized. Attempting to access the variable results in an exception.
+                            generator.LoadNull();
+                        }
                         generator.StoreVariable(variable.Store);
                     }
                 }
