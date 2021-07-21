@@ -31,6 +31,9 @@ BundleArtifacts/
 # Visual Studio Code cache/options directory
 .vscode/
 
+# Rider
+.idea/
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
