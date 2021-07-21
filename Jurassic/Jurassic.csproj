@@ -5,7 +5,7 @@
     <Authors>Paul Bartrum</Authors>
     <Company />
     <Description>A .NET library to parse and execute JavaScript code.</Description>
-    <Version>3.2.2</Version>
+    <Version>3.2.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -27,7 +27,7 @@ Library changes:
     <RepositoryUrl>https://github.com/paulbartrum/jurassic.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryBranch>master</RepositoryBranch>
-    <RepositoryCommit>0ac822a5a7ce93c3b48133f87d29e0f665c6d801</RepositoryCommit>
+    <RepositoryCommit>d33c7c99908bdfe8be06031e602039517da24295</RepositoryCommit>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <LangVersion>7.3</LangVersion>
     <IncludeSymbols>true</IncludeSymbols>
