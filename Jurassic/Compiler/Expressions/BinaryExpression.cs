@@ -783,10 +783,10 @@ namespace Jurassic.Compiler
         {
             // Emit the left-hand side expression and convert it to a string.
             this.Left.GenerateCode(generator, optimizationInfo);
-            EmitConversion.ToString(generator, this.Left.ResultType);
+            EmitConversion.ToPropertyKey(generator, this.Left.ResultType);
 
             // Store the left-hand side expression in a temporary variable.
-            var temp = generator.CreateTemporaryVariable(typeof(string));
+            var temp = generator.CreateTemporaryVariable(typeof(object));
             generator.StoreVariable(temp);
 
             // Emit the right-hand side expression.
