@@ -840,6 +840,8 @@ namespace UnitTests
             Assert.AreEqual(3, Evaluate("1 ? 2 ? 3 : 4 : 5"));
             Assert.AreEqual(4, Evaluate("1 ? 0 ? 3 : 4 : 5"));
             Assert.AreEqual(5, Evaluate("0 ? 1 ? 3 : 4 : 5"));
+            Assert.AreEqual("[object Object]1", Evaluate("(true ? {} : []) + 1"));
+            Assert.AreEqual("1", Evaluate("(true ? [] : {}) + 1"));
 
             // Test the precedence at the start of the conditional.
             Assert.AreEqual(1, Evaluate("x = 5; x + 0 ? 1 : 2"));

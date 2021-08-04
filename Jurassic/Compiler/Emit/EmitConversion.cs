@@ -45,10 +45,6 @@ namespace Jurassic.Compiler
         /// <param name="line"> The line number of the statement that is currently executing. </param>
         public static void Convert(ILGenerator generator, PrimitiveType fromType, PrimitiveType toType, string path, string function, int line)
         {
-            // Check that a conversion is actually necessary.
-            if (fromType == toType)
-                return;
-
             switch (toType)
             {
                 case PrimitiveType.Any:
@@ -486,7 +482,10 @@ namespace Jurassic.Compiler
         {
             // Check that a conversion is actually necessary.
             if (fromType == PrimitiveType.Object)
+            {
+                generator.ReinterpretCast(typeof(ObjectInstance));
                 return;
+            }
 
             switch (fromType)
             {
