@@ -1218,12 +1218,14 @@ namespace UnitTests
             Assert.AreEqual(false, Evaluate("'abcdefgh' in new Number(5)"));
             Assert.AreEqual(true, Evaluate("'toString' in new String()"));
             Assert.AreEqual(true, Evaluate("var x = 'atan2', y = Math; x in y"));
-            Assert.AreEqual("TypeError: The in operator expected an object, but found 'number' instead", EvaluateExceptionMessage("'toString' in 5"));
-            Assert.AreEqual("TypeError: The in operator expected an object, but found 'number' instead", EvaluateExceptionMessage("'toString' in 5"));
 
             // The LHS can be a symbol.
             Assert.AreEqual(true, Evaluate("Symbol.toStringTag in Math"));
             Assert.AreEqual(false, Evaluate("Symbol.toStringTag in eval"));
+            
+            // The RHS must be an object.
+            Assert.AreEqual("TypeError: The in operator expected an object, but found 'number' instead", EvaluateExceptionMessage("'toString' in 5"));
+            Assert.AreEqual("TypeError: The in operator expected an object, but found 'undefined' instead", EvaluateExceptionMessage("'toString' in undefined"));
             
             // Check order of evaluation - should be left to right.
             Assert.AreEqual("x", Evaluate(@"
