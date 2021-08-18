@@ -76,26 +76,6 @@ namespace Jurassic.Library
                 throw new JavaScriptException(ErrorType.SyntaxError, string.Format("Expected '{0}'", token.Text));
         }
 
-        /// <summary>
-        /// Indicates that the next token should be an identifier.  Throws an exception if this is
-        /// not the case.  Consumes the token.
-        /// </summary>
-        /// <returns> The identifier name. </returns>
-        private string ExpectIdentifier()
-        {
-            var token = this.nextToken;
-            if (token is IdentifierToken)
-            {
-                Consume();
-                return ((IdentifierToken)token).Name;
-            }
-            else
-            {
-                throw new JavaScriptException(ErrorType.SyntaxError, "Expected identifier");
-            }
-        }
-
-
 
 
         //     PARSE METHODS

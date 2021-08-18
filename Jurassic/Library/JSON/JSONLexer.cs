@@ -154,7 +154,6 @@ namespace Jurassic.Library
                 case NumberParser.ParseCoreStatus.NoDigits:
                 case NumberParser.ParseCoreStatus.NoExponent:
                 case NumberParser.ParseCoreStatus.NoFraction:
-                case NumberParser.ParseCoreStatus.ExponentHasLeadingZero:
                     throw new JavaScriptException(ErrorType.SyntaxError, "Invalid number.");
                 case NumberParser.ParseCoreStatus.HexLiteral:
                 case NumberParser.ParseCoreStatus.InvalidHexLiteral:

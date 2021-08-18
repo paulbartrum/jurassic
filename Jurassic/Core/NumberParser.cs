@@ -135,7 +135,6 @@ namespace Jurassic
             NoDigits,   // Number consists of a period without any digits.
             NoFraction, // Number has a period, but no digits after it.
             NoExponent, // Number has 'e' but no number after it.
-            ExponentHasLeadingZero,
             HexLiteral,
             ES3OctalLiteral,
             ES6OctalLiteral,
@@ -335,10 +334,6 @@ namespace Jurassic
                         exponent = Math.Min(exponent * 10 + (c - '0'), 9999);
                         exponentDigits++;
                     }
-
-                    // JSON does not allow a leading zero in front of the exponent.
-                    if (firstExponentChar == '0' && exponentDigits > 1 && status == ParseCoreStatus.Success)
-                        status = ParseCoreStatus.ExponentHasLeadingZero;
                 }
 
                 // Keep track of the overall base-10 exponent.

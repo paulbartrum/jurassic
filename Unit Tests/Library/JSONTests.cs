@@ -64,6 +64,8 @@ namespace UnitTests
             Assert.AreEqual(500, Evaluate("JSON.parse('5E2')"));
             Assert.AreEqual(5, Evaluate("JSON.parse('5E0')"));
             Assert.AreEqual(-500, Evaluate("JSON.parse('-5E+2')"));
+            Assert.AreEqual(500, Evaluate("JSON.parse('5E+02')"));
+            Assert.AreEqual(100, Evaluate("JSON.parse('1e02')"));
 
             // With reviver.
             Assert.AreEqual(6, Evaluate(@"JSON.parse('5', function(name, value) { return value + 1 })"));
@@ -79,7 +81,6 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("JSON.parse('5e+')"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("JSON.parse('5e-')"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("JSON.parse('+5')"));
-            Assert.AreEqual("SyntaxError", EvaluateExceptionType("JSON.parse('5e05')"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("JSON.parse('12\\t\\r\\n 34')"));
         }
 
