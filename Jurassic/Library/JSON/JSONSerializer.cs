@@ -193,6 +193,11 @@ namespace Jurassic.Library
                 result.Append(((int)value).ToString());
                 return;
             }
+            if (value is uint)
+            {
+                result.Append(((uint)value).ToString());
+                return;
+            }
 
             // Serialize an array.
             if (value is ObjectInstance valueObjectInstance && ArrayConstructor.IsArray(value))

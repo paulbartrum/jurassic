@@ -66,7 +66,7 @@ namespace Jurassic.Library
                 var serializableProperties = new HashSet<string>(StringComparer.Ordinal);
                 foreach (object elementValue in TypeUtilities.CreateListFromArrayLike(replaceObjectInstance))
                 {
-                    if (elementValue is string || elementValue is int || elementValue is double || elementValue is StringInstance || elementValue is NumberInstance)
+                    if (elementValue is string || elementValue is int || elementValue is uint || elementValue is double || elementValue is StringInstance || elementValue is NumberInstance)
                         serializableProperties.Add(TypeConverter.ToString(elementValue));
                 }
                 serializer.SerializableProperties = serializableProperties;
@@ -79,8 +79,8 @@ namespace Jurassic.Library
                 spacer = ((StringInstance)spacer).Value;
             if (spacer is double)
                 serializer.Indentation = new string(' ', Math.Max(Math.Min(TypeConverter.ToInteger((double)spacer), 10), 0));
-            else if (spacer is int)
-                serializer.Indentation = new string(' ', Math.Max(Math.Min(TypeConverter.ToInteger((int)spacer), 10), 0));
+            else if (spacer is int || spacer is uint)
+                serializer.Indentation = new string(' ', Math.Max(Math.Min(TypeConverter.ToInteger(spacer), 10), 0));
             else if (spacer is string)
                 serializer.Indentation = ((string)spacer).Substring(0, Math.Min(((string)spacer).Length, 10));
 
