@@ -19,9 +19,9 @@ namespace Jurassic.Library
             public object Key;
             public PropertyAttributes Attributes;
         }
-        private Dictionary<TransitionInfo, HiddenClassSchema> addTransitions;
-        private Dictionary<object, HiddenClassSchema> deleteTransitions;
-        private Dictionary<TransitionInfo, HiddenClassSchema> modifyTransitions;
+        private Dictionary<TransitionInfo, WeakReference<HiddenClassSchema>> addTransitions;
+        private Dictionary<object, WeakReference<HiddenClassSchema>> deleteTransitions;
+        private Dictionary<TransitionInfo, WeakReference<HiddenClassSchema>> modifyTransitions;
 
         // The index of the next value.
         private int nextValueIndex;
@@ -150,8 +150,8 @@ namespace Jurassic.Library
 
             // Check if there is a transition to the schema already.
             HiddenClassSchema newSchema = null;
-            if (this.addTransitions != null)
-                this.addTransitions.TryGetValue(transitionInfo, out newSchema);
+            if (this.addTransitions != null && this.addTransitions.TryGetValue(transitionInfo, out var newSchemaRef))
+                newSchemaRef.TryGetTarget(out newSchema);
 
             if (newSchema == null)
             {
@@ -176,8 +176,8 @@ namespace Jurassic.Library
 
                 // Add a transition to the new schema.
                 if (this.addTransitions == null)
-                    this.addTransitions = new Dictionary<TransitionInfo, HiddenClassSchema>(1);
-                this.addTransitions.Add(transitionInfo, newSchema);
+                    this.addTransitions = new Dictionary<TransitionInfo, WeakReference<HiddenClassSchema>>(1);
+                this.addTransitions[transitionInfo] = new WeakReference<HiddenClassSchema>(newSchema);
             }
 
             return newSchema;
@@ -217,8 +217,8 @@ namespace Jurassic.Library
         {
             // Check if there is a transition to the schema already.
             HiddenClassSchema newSchema = null;
-            if (this.deleteTransitions != null)
-                this.deleteTransitions.TryGetValue(key, out newSchema);
+            if (this.deleteTransitions != null && this.deleteTransitions.TryGetValue(key, out var newSchemaRef))
+                newSchemaRef.TryGetTarget(out newSchema);
 
             if (newSchema == null)
             {
@@ -230,8 +230,8 @@ namespace Jurassic.Library
 
                 // Add a transition to the new schema.
                 if (this.deleteTransitions == null)
-                    this.deleteTransitions = new Dictionary<object, HiddenClassSchema>(1);
-                this.deleteTransitions.Add(key, newSchema);
+                    this.deleteTransitions = new Dictionary<object, WeakReference<HiddenClassSchema>>(1);
+                this.deleteTransitions[key] = new WeakReference<HiddenClassSchema>(newSchema);
             }
 
             return newSchema;
@@ -250,8 +250,8 @@ namespace Jurassic.Library
 
             // Check if there is a transition to the schema already.
             HiddenClassSchema newSchema = null;
-            if (this.modifyTransitions != null)
-                this.modifyTransitions.TryGetValue(transitionInfo, out newSchema);
+            if (this.modifyTransitions != null && this.modifyTransitions.TryGetValue(transitionInfo, out var newSchemaRef))
+                newSchemaRef.TryGetTarget(out newSchema);
 
             if (newSchema == null)
             {
@@ -273,8 +273,8 @@ namespace Jurassic.Library
 
                 // Add a transition to the new schema.
                 if (this.modifyTransitions == null)
-                    this.modifyTransitions = new Dictionary<TransitionInfo, HiddenClassSchema>(1);
-                this.modifyTransitions.Add(transitionInfo, newSchema);
+                    this.modifyTransitions = new Dictionary<TransitionInfo, WeakReference<HiddenClassSchema>>(1);
+                this.modifyTransitions[transitionInfo] = new WeakReference<HiddenClassSchema>(newSchema);
             }
 
             return newSchema;
