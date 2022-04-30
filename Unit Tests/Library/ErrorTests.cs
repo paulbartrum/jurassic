@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jurassic;
+using System;
 
 namespace UnitTests
 {
@@ -75,10 +76,10 @@ namespace UnitTests
         public void stack()
         {
             Assert.AreEqual(Undefined.Value, Evaluate(@"new Error('hah').stack"));
-            Assert.AreEqual("Error: myError\r\n" +
-                "    at trace (unknown:4)\r\n" +
-                "    at b (unknown:11)\r\n" +
-                "    at a (unknown:14)\r\n" +
+            Assert.AreEqual("Error: myError" + Environment.NewLine +
+                "    at trace (unknown:4)" + Environment.NewLine +
+                "    at b (unknown:11)" + Environment.NewLine +
+                "    at a (unknown:14)" + Environment.NewLine +
                 "    at unknown:16",
                 Evaluate(@"
                     function trace() {
@@ -96,10 +97,10 @@ namespace UnitTests
                         return b(3, 4, '\n\n', undefined, {});
                     }
                     a('first call, firstarg');"));
-            Assert.AreEqual("Error: myError\r\n" +
-                "    at new trace (unknown:4)\r\n" +
-                "    at new b (unknown:11)\r\n" +
-                "    at new a (unknown:14)\r\n" +
+            Assert.AreEqual("Error: myError" + Environment.NewLine +
+                "    at new trace (unknown:4)" + Environment.NewLine +
+                "    at new b (unknown:11)" + Environment.NewLine +
+                "    at new a (unknown:14)" + Environment.NewLine +
                 "    at unknown:16",
                 Evaluate(@"
                     function trace() {
@@ -117,8 +118,8 @@ namespace UnitTests
                         return new b(3, 4, '\n\n', undefined, {});
                     }
                     new a('first call, firstarg').valueOf();"));
-            Assert.AreEqual("Error: this error is initialized at line 3, but thrown at line 5\r\n" +
-                "    at trace (unknown:5)\r\n" +
+            Assert.AreEqual("Error: this error is initialized at line 3, but thrown at line 5" + Environment.NewLine +
+                "    at trace (unknown:5)" + Environment.NewLine +
                 "    at unknown:11",
                 Evaluate(@"
                     function trace() {
@@ -131,12 +132,12 @@ namespace UnitTests
                         }
                     }
                     trace()"));
-            Assert.AreEqual("URIError: URI malformed\r\n" +
-                "    at decodeURI (native)\r\n" +
+            Assert.AreEqual("URIError: URI malformed" + Environment.NewLine +
+                "    at decodeURI (native)" + Environment.NewLine +
                 "    at unknown:1",
                 Evaluate(@"try { decodeURI('%z') } catch (e) { e.stack }"));
-            Assert.AreEqual("Error: two\r\n" +
-                "    at a (unknown:13)\r\n" +
+            Assert.AreEqual("Error: two" + Environment.NewLine +
+                "    at a (unknown:13)" + Environment.NewLine +
                 "    at unknown:17",
                 Evaluate(@"
                     function trace() {
@@ -159,9 +160,9 @@ namespace UnitTests
                     catch (e) {
                         e.stack
                     }"));
-            Assert.AreEqual("Error: inside callback\r\n" +
-                "    at anonymous (unknown:4)\r\n" +
-                "    at sort (native)\r\n" +
+            Assert.AreEqual("Error: inside callback" + Environment.NewLine +
+                "    at anonymous (unknown:4)" + Environment.NewLine +
+                "    at sort (native)" + Environment.NewLine +
                 "    at unknown:3",
                 Evaluate(@"
                     try {
@@ -172,7 +173,7 @@ namespace UnitTests
                     catch (e) {
                         e.stack
                     }"));
-            Assert.AreEqual("TypeError: undefined cannot be converted to an object\r\n" +
+            Assert.AreEqual("TypeError: undefined cannot be converted to an object" + Environment.NewLine +
                 "    at unknown:4",
                 Evaluate(@"
                     try {

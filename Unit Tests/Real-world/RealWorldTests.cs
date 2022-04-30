@@ -14,7 +14,7 @@ namespace UnitTests
         {
             // See http://attacklab.net/showdown/
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\showdown.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/showdown.js");
             engine.Execute("var converter = new Showdown.converter()");
             engine.SetGlobalValue("text", NormalizeText(@"
                 Showdown Demo
@@ -45,7 +45,7 @@ namespace UnitTests
         {
             // http://www.webtoolkit.info/javascript-color-conversion.html
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\color-conversion.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/color-conversion.js");
             engine.Execute("var result = ColorConverter.toRGB(new HSV(10, 20, 30))");
             Assert.AreEqual(77, engine.Evaluate("result.r"));
             Assert.AreEqual(64, engine.Evaluate("result.g"));
@@ -57,7 +57,7 @@ namespace UnitTests
         {
             // From http://phpjs.org/functions/sprintf
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\sprintf.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/sprintf.js");
             Assert.AreEqual("123.10", engine.Evaluate("sprintf('%01.2f', 123.1)"));
             Assert.AreEqual("[    monkey]", engine.Evaluate("sprintf('[%10s]', 'monkey')"));
             Assert.AreEqual("[####monkey]", engine.Evaluate("sprintf(\"[%'#10s]\", 'monkey')"));
@@ -68,7 +68,7 @@ namespace UnitTests
         {
             // From http://www.webtoolkit.info/javascript-md5.html
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\md5.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/md5.js");
             Assert.AreEqual("ae2b1fca515949e5d54fb22b8ed95575", engine.Evaluate(@"MD5('testing')"));
             Assert.AreEqual("023c0c18f0c6e89076d668146fcb81c2", engine.Evaluate(@"MD5('Mary had a little lamb, it\'s fleece was white as snow!')"));
             Assert.AreEqual("cbbcd86416057ca304141fc9b3b418d5", engine.Evaluate(@"MD5('\u2020')"));
@@ -79,7 +79,7 @@ namespace UnitTests
         {
             // From http://www.webtoolkit.info/javascript-sha1.html
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\sha1.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/sha1.js");
             Assert.AreEqual("dc724af18fbdd4e59189f5fe768a5f8311527050", engine.Evaluate(@"SHA1('testing')"));
             Assert.AreEqual("5fb03a9e2c9d14894b51a2bd0e521177e083af3f", engine.Evaluate(@"SHA1('Mary had a little lamb, it\'s fleece was white as snow!')"));
             Assert.AreEqual("5b7c3f4be781869083966e4b5eac6bd2900d9340", engine.Evaluate(@"SHA1('\u2020')"));
@@ -90,7 +90,7 @@ namespace UnitTests
         {
             // From http://www.webtoolkit.info/javascript-sha256.html
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\sha256.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/sha256.js");
             Assert.AreEqual("cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90", engine.Evaluate(@"SHA256('testing')"));
             Assert.AreEqual("68aa952fc1ee38fd07c7d58e693b5e6bebaf183f1b47a1fc9f41cd42bbb427d2", engine.Evaluate(@"SHA256('Mary had a little lamb, it\'s fleece was white as snow!')"));
             Assert.AreEqual("8efeb7661b801b1f4f1286b262b89ec8550bfbb4b438fe9fb31be551e747a547", engine.Evaluate(@"SHA256('\u2020')"));
@@ -101,7 +101,7 @@ namespace UnitTests
         {
             // From http://rosettacode.org/wiki/LZW_compression#JavaScript
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\lzw.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/lzw.js");
             Assert.AreEqual("109,97,114,121,32,104,97,100,32,97,32,108,105,116,116,108,101,266,97,109,98",
                 engine.Evaluate(@"LZW.compress('mary had a little lamb').toString()"));
             Assert.AreEqual("mary had a little lamb",
@@ -117,7 +117,7 @@ namespace UnitTests
         {
             // From http://xenon.stanford.edu/~tjw/jsbn/
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\rsa.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/rsa.js");
             engine.Execute(@"
                 var rsa = new RSAKey();
                 rsa.setPublic('a5261939975948bb7a58dffe5ff54e65f0498f9175f5a09288810b8975871e99\n' +
@@ -144,7 +144,7 @@ namespace UnitTests
         {
             // From http://phpjs.org/functions/levenshtein
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\levenshtein.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/levenshtein.js");
             Assert.AreEqual(3, engine.Evaluate(@"levenshtein('Kevin van Zonneveld', 'Kevin van Sommeveld')"));
             Assert.AreEqual(5, engine.Evaluate(@"levenshtein('Phoney Malony', 'Fonee Malowney')"));
             Assert.AreEqual(7, engine.Evaluate(@"levenshtein('Phoney Malony', 'Bogey Gilooni')"));
@@ -156,7 +156,7 @@ namespace UnitTests
         {
             // From http://jashkenas.github.com/coffee-script/
             var engine = new ScriptEngine();
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\coffee-script.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/coffee-script.js");
             
             engine.SetGlobalValue("script", @"
                 # Assignment:
@@ -1343,7 +1343,7 @@ namespace UnitTests
         {
             var engine = new ScriptEngine();
             engine.SetGlobalValue("console", new Jurassic.Library.FirebugConsole(engine));
-            engine.ExecuteFile(@"..\..\..\Real-world\Files\bignumber.js");
+            engine.ExecuteFile(@"../../../Real-world/Files/bignumber.js");
             Assert.AreEqual("129963294281830400", engine.Evaluate(@"new BigNumber('129963294281830401').subtract(1).toString()"));
         }
     }
