@@ -13,7 +13,10 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '6.x'
+      - name: Build
+        run: |
+          dotnet build "Jurassic" --configuration Release
       - name: Publish
         run: |
           dotnet pack "Jurassic" -c Release
-          dotnet nuget push "Jurassic/**/*.nupkg" -s "https://api.nuget.org/v3/index.json" -k "${{secrets.NUGET_KEY}}" --skip-duplicate
+          dotnet nuget push "Jurassic/**/*.nupkg" -s "https://api.nuget.org/v3/index.json" -k "${{secrets.NUGET_KEY}}"
