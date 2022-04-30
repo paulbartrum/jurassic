@@ -1,6 +1,6 @@
 ![Jurassic](https://raw.githubusercontent.com/wiki/paulbartrum/jurassic/logo.png)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/rx2xy5srhmv3kbkd/branch/master?svg=true)](https://ci.appveyor.com/project/paulbartrum/jurassic/branch/master)
+[![Build status](https://github.com/paulbartrum/jurassic/actions/workflows/build.yml/badge.svg)](https://github.com/paulbartrum/jurassic/actions/workflows/build.yml)
 
 ## What is Jurassic?
 
