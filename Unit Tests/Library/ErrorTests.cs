@@ -183,8 +183,8 @@ namespace UnitTests
                     catch (e) {
                         e.stack
                     }"));
-            Assert.AreEqual(@"TypeError: 'null' is not a function
-    at unknown:3",
+            Assert.AreEqual(@"TypeError: 'null' is not a function" + Environment.NewLine +
+                "    at unknown:3",
                 Evaluate(@"
                     try {
                         null();
