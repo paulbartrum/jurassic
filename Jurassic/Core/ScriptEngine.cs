@@ -951,7 +951,8 @@ namespace Jurassic
         /// Gets the value of the global variable with the given name.
         /// </summary>
         /// <param name="variableName"> The name of the variable to retrieve the value for. </param>
-        /// <returns> The value of the global variable, or <c>null</c> otherwise. </returns>
+        /// <returns> The value of the global variable, or <c>Undefined.Value</c> if the variable
+        /// doesn't exist. </returns>
         public object GetGlobalValue(string variableName)
         {
             if (variableName == null)
@@ -963,12 +964,14 @@ namespace Jurassic
         /// Gets the value of the global variable with the given name and coerces it to the given
         /// type.
         /// </summary>
-        /// <typeparam name="T"> The type to coerce the value to. </typeparam>
+        /// <typeparam name="T"> The type to coerce the value to. Should be <c>bool</c>,
+        /// <c>int</c>, <c>double</c>, <c>string</c> or <see cref="ObjectInstance"/>. </typeparam>
         /// <param name="variableName"> The name of the variable to retrieve the value for. </param>
-        /// <returns> The value of the global variable, or <c>null</c> otherwise. </returns>
+        /// <returns> The value of the global variable (or <c>Undefined.Value</c> if the variable
+        /// doesn't exist), converted to the given type. </returns>
         /// <remarks> Note that <c>null</c> is coerced to the following values: <c>false</c> (if
         /// <typeparamref name="T"/> is <c>bool</c>), 0 (if <typeparamref name="T"/> is <c>int</c>
-        /// or <c>double</c>), string.Empty (if <typeparamref name="T"/> is <c>string</c>). </remarks>
+        /// or <c>double</c>), "undefined" (if <typeparamref name="T"/> is <c>string</c>). </remarks>
         public T GetGlobalValue<T>(string variableName)
         {
             if (variableName == null)
