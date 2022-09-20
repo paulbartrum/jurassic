@@ -264,12 +264,15 @@ namespace UnitTests
         [TestMethod]
         public void UTC()
         {
-            Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, 0)"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(2010)"));
+            Assert.AreEqual(ToJSDate(new DateTime(2010, 2, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, 1)"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, 0, 5)"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5, 12, 0, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, 0, 5, 12)"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5, 12, 32, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, 0, 5, 12, 32)"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5, 12, 32, 45, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, 0, 5, 12, 32, 45)"));
             Assert.AreEqual(ToJSDate(new DateTime(2010, 1, 5, 12, 32, 45, 123, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, 0, 5, 12, 32, 45, 123)"));
+            Assert.AreEqual(ToJSDate(new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(80)"));
+            Assert.AreEqual(ToJSDate(new DateTime(1980, 2, 2, 3, 4, 5, 6, DateTimeKind.Utc)), Evaluate("Date.UTC(80, 1, 2, 3, 4, 5, 6)"));
 
             // Test overflow.
             Assert.AreEqual(ToJSDate(new DateTime(2009, 12, 1, 0, 0, 0, DateTimeKind.Utc)), Evaluate("Date.UTC(2010, -1)"));

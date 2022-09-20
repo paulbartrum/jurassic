@@ -966,7 +966,7 @@ namespace Jurassic.Library
         public static double UTC(int year, int month, int day = 1, int hour = 0,
             int minute = 0, int second = 0, int millisecond = 0)
         {
-            return ToJSDate(ToDateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc));
+            return ToJSDate(ToDateTime(year >= 0 && year < 100 ? year + 1900 : year, month, day, hour, minute, second, millisecond, DateTimeKind.Utc));
         }
 
         /// <summary>
