@@ -271,16 +271,16 @@ namespace Jurassic.Compiler
                 Parser argumentsParser;
                 using (var argumentsLexer = new Lexer(new StringScriptSource(this.ArgumentsText)))
                 {
-                    argumentsParser = new Parser(argumentsLexer, this.Options, CodeContext.Function);
+                    argumentsParser = new Parser(argumentsLexer, this.Options, Scope.CreateGlobalOrEvalScope(CodeContext.Function), CodeContext.Function);
                     this.Arguments = argumentsParser.ParseFunctionArguments(endToken: null);
                 }
                 using (var lexer = new Lexer(this.Source))
                 {
-                    var parser = new Parser(lexer, this.Options, CodeContext.Function, argumentsParser.MethodOptimizationHints);
+                    this.BaseScope = Scope.CreateFunctionScope(GetMethodName(), Arguments.Select(a => a.Name));
+                    var parser = new Parser(lexer, this.Options, this.BaseScope, CodeContext.Function, argumentsParser.MethodOptimizationHints);
                     this.AbstractSyntaxTree = parser.Parse();
                     this.StrictMode = parser.StrictMode;
                     this.MethodOptimizationHints = parser.MethodOptimizationHints;
-                    this.BaseScope = parser.BaseScope;
                 }
                 Validate(1, this.Source.Path);
             }

@@ -79,7 +79,7 @@ namespace Jurassic.Compiler
                         throw new NotImplementedException();
                 }
 
-                var parser = new Parser(lexer, this.Options, parserContext);
+                var parser = new Parser(lexer, this.Options, Scope.CreateGlobalOrEvalScope(parserContext), parserContext);
                 
                 this.AbstractSyntaxTree = parser.Parse();
                 this.StrictMode = parser.StrictMode;

@@ -25,6 +25,10 @@ namespace UnitTests
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("f = new Function('a,c d,b', 'return a+b')"));
             Assert.AreEqual("SyntaxError", EvaluateExceptionType("f = new Function('a,c d,b', 'return a+b }')"));
 
+            // Variables declared in the function body should NOT affect the global scope.
+            Assert.AreEqual(5, Evaluate("a = 5; f = new Function('a', 'b', 'return a+b'); f(1, 3); a"));
+            Assert.AreEqual(5, Evaluate("d = 5; f = new Function('a', 'b', 'var d = 10; return a+b'); f(1, 3); d"));
+
             // Call
             Assert.AreEqual(4, Evaluate("f = Function('a', 'b', 'return a+b'); f(1, 3)"));
 

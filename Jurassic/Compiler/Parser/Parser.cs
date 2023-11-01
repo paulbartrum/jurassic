@@ -33,14 +33,15 @@ namespace Jurassic.Compiler
         /// </summary>
         /// <param name="lexer"> The lexical analyser that provides the tokens. </param>
         /// <param name="options"> Options that influence the compiler. </param>
+        /// <param name="scope"> The initial scope. </param>
         /// <param name="context"> The context of the code (global, function or eval). </param>
         /// <param name="methodOptimizationHints"> Hints about whether optimization is possible. </param>
-        public Parser(Lexer lexer, CompilerOptions options, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
+        public Parser(Lexer lexer, CompilerOptions options, Scope scope, CodeContext context, MethodOptimizationHints methodOptimizationHints = null)
         {
-            this.lexer = lexer ?? throw new ArgumentNullException(nameof(lexer)); ;
+            this.lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
             this.lexer.ParserExpressionState = ParserExpressionState.Literal;
             this.lexer.CompatibilityMode = options.CompatibilityMode;
-            SetInitialScope(Scope.CreateGlobalOrEvalScope(context));
+            SetInitialScope(scope);
             this.methodOptimizationHints = methodOptimizationHints ?? new MethodOptimizationHints();
             this.options = options;
             this.context = context;

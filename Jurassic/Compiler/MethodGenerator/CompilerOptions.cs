@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Jurassic.Compiler
+﻿namespace Jurassic.Compiler
 {
     /// <summary>
     /// Represents a set of options that influence the compiler.
