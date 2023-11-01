@@ -163,7 +163,7 @@ namespace Jurassic.Compiler
         /// Gets an array of method parameters.
         /// </summary>
         /// <returns> An array of ParameterInfo instances describing the method parameters. </returns>
-        protected override ParameterInfo[] GetParameters()
+        internal override ParameterInfo[] GetParameters()
         {
             // Pull out the first and/or second parameters.
             var result = base.GetParameters();
