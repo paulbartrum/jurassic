@@ -69,6 +69,9 @@ namespace Jurassic
         private ObjectInstance setIteratorPrototype;
         private ObjectInstance arrayIteratorPrototype;
 
+        // Awesomeness
+        private object _stackMutex = new object();
+
         /// <summary>
         /// Initializes a new scripting environment.
         /// </summary>
@@ -1356,7 +1359,9 @@ namespace Jurassic
             // Check the allowed recursion depth.
             if (this.RecursionDepthLimit > 0 && this.stackFrames.Count >= this.RecursionDepthLimit)
                 throw new StackOverflowException("The allowed recursion depth of the script engine has been exceeded.");
-            this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line, CallType = callType });
+            lock (_stackMutex) {
+              this.stackFrames.Push(new StackFrame() { Path = path, Function = function, Line = line, CallType = callType });
+            }
         }
 
         /// <summary>
@@ -1364,7 +1369,9 @@ namespace Jurassic
         /// </summary>
         internal void PopStackFrame()
         {
-            this.stackFrames.Pop();
+            lock (_stackMutex) {
+              this.stackFrames.Pop();
+            }
         }
 
         /// <summary>
