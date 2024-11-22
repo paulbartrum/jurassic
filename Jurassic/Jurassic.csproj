@@ -17,19 +17,13 @@
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);DEBUG</DefineConstants>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Jurassic.xml</DocumentationFile>
     <PackageReleaseNotes>
-      New in 3.2.8: fixed incompatibility with .NET 9.
+v3.2.8: fixed incompatibility with .NET 9.
       
-      New in 3.2.0:
-      
-      Language changes:
-      * Add support for ES6 classes.
-      * Add support for ES6 let and const.
-
-      Library changes:
-      * Add Reflect class &amp; functions.
-      * Add Proxy class &amp; functions.
-
-      .NET 4 specific functionality has been removed, if you need this you'll have to stick with the previous version, sorry!
+v3.2.0:
+* Add support for ES6 classes.
+* Add support for ES6 let and const.
+* Add Reflect class &amp; functions.
+* Add Proxy class &amp; functions.
     </PackageReleaseNotes>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <LangVersion>7.3</LangVersion>
