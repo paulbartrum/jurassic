@@ -300,15 +300,17 @@ namespace Jurassic
         /// <returns> An integer value. </returns>
         public static int ToInteger(object value)
         {
+            // HACK ALERT: per the spec, this should actually return a double.
+
             if (value == null || value is Undefined)
                 return 0;
             double num = ToNumber(value);
             if (num > 2147483647.0)
                 return 2147483647;
-            #pragma warning disable 1718
+#pragma warning disable 1718
             if (num != num)
                 return 0;
-            #pragma warning restore 1718
+#pragma warning restore 1718
             return (int)num;
         }
 
@@ -321,7 +323,14 @@ namespace Jurassic
         {
             if (value is int)
                 return (int)value;
-            return (int)(uint)ToNumber(value);
+            double num = ToNumber(value);
+            if (num < long.MinValue || num > long.MaxValue)
+            {
+                if (double.IsNegativeInfinity(num) || double.IsPositiveInfinity(num))
+                    return 0;
+                return (int)Math.IEEERemainder(num, 4294967296.0);
+            }
+            return (int)(long)num;
         }
 
         /// <summary>
@@ -333,7 +342,7 @@ namespace Jurassic
         {
             if (value is uint)
                 return (uint)value;
-            return (uint)ToNumber(value);
+            return (uint)ToInt32(value);
         }
 
         /// <summary>
@@ -343,7 +352,7 @@ namespace Jurassic
         /// <returns> A signed 16-bit integer value. </returns>
         public static short ToInt16(object value)
         {
-            return (short)(uint)ToNumber(value);
+            return (short)ToInt32(value);
         }
 
         /// <summary>
@@ -353,7 +362,7 @@ namespace Jurassic
         /// <returns> An unsigned 16-bit integer value. </returns>
         public static ushort ToUint16(object value)
         {
-            return (ushort)(uint)ToNumber(value);
+            return (ushort)ToInt32(value);
         }
 
         /// <summary>
@@ -363,7 +372,7 @@ namespace Jurassic
         /// <returns> A signed 8-bit integer value. </returns>
         public static sbyte ToInt8(object value)
         {
-            return (sbyte)(uint)ToNumber(value);
+            return (sbyte)ToInt32(value);
         }
 
         /// <summary>
@@ -373,7 +382,7 @@ namespace Jurassic
         /// <returns> An unsigned 8-bit integer value. </returns>
         public static byte ToUint8(object value)
         {
-            return (byte)(uint)ToNumber(value);
+            return (byte)ToInt32(value);
         }
 
         /// <summary>

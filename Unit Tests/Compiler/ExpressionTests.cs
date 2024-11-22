@@ -329,6 +329,11 @@ namespace UnitTests
             Assert.AreEqual(32, Evaluate("17179869216 >> 0"));
             Assert.AreEqual(-2147483638, Evaluate("2147483658 >> 0"));
             Assert.AreEqual(-2147483637, Evaluate("6442450955 >> 0"));
+            Assert.AreEqual(1215752192, Evaluate("100000000000 >> 0"));
+            Assert.AreEqual(-559939584, Evaluate("10e20 >> 0"));
+            Assert.AreEqual(0, Evaluate("Number.POSITIVE_INFINITY >> 0"));
+            Assert.AreEqual(0, Evaluate("Number.NEGATIVE_INFINITY >> 0"));
+            Assert.AreEqual(0, Evaluate("Number.NaN >> 0"));
 
             // Objects
             Assert.AreEqual(3, Evaluate("new Number(7) >> new Number(1)"));
@@ -358,6 +363,11 @@ namespace UnitTests
             Assert.AreEqual(32, Evaluate("17179869216 >>> 0"));
             Assert.AreEqual(2147483658.0, Evaluate("2147483658 >>> 0"));
             Assert.AreEqual(2147483659.0, Evaluate("6442450955 >>> 0"));
+            Assert.AreEqual(1215752192, Evaluate("100000000000 >>> 0"));
+            Assert.AreEqual(3735027712.0, Evaluate("10e20 >>> 0"));
+            Assert.AreEqual(0, Evaluate("Number.POSITIVE_INFINITY >>> 0"));
+            Assert.AreEqual(0, Evaluate("Number.NEGATIVE_INFINITY >>> 0"));
+            Assert.AreEqual(0, Evaluate("Number.NaN >>> 0"));
 
             // Objects
             Assert.AreEqual(3, Evaluate("new Number(7) >>> new Number(1)"));

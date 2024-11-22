@@ -1299,7 +1299,7 @@ namespace Jurassic.Compiler
 
         private void ExpectNumber()
         {
-            Expect(t => t == typeof(int) || t == typeof(uint) || t == typeof(double), "number");
+            Expect(t => t == typeof(int) || t == typeof(uint) || t == typeof(long) || t == typeof(ulong) || t == typeof(double), "number");
         }
 
         private void Expect(Type expectedType)
@@ -1324,6 +1324,12 @@ namespace Jurassic.Compiler
                 if (operand2 != typeof(int) && operand2 != typeof(uint))
                     throw new InvalidOperationException($"Value on top of stack is {operand2}; expected an integer.");
                 Push(typeof(int));
+            }
+            else if (operand1 == typeof(bool))
+            {
+                if (operand2 != typeof(bool))
+                    throw new InvalidOperationException($"Value on top of stack is {operand2}; expected a boolean.");
+                Push(typeof(bool));
             }
             else if (!integerOnly && operand1 == typeof(double))
             {

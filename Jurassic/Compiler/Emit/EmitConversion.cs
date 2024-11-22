@@ -193,6 +193,8 @@ namespace Jurassic.Compiler
                     break;
 
                 case PrimitiveType.Number:
+                    // HACK ALERT: per the spec, this should actually return a double.
+
                     // Converting from a number produces the following:
                     // Any number between -2147483648 and +2147483647 -> itself
                     // Any number smaller than -2147483648 -> -2147483648
@@ -275,8 +277,41 @@ namespace Jurassic.Compiler
                     break;
 
                 case PrimitiveType.Number:
-                    // Converting from a number produces the number mod 4294967296.  NaN produces 0.
-                    generator.ConvertToUnsignedInteger();
+                    var value = generator.DeclareVariable(typeof(double), "value");
+                    generator.StoreVariable(value);
+
+                    // value < long.MinValue
+                    generator.LoadVariable(value);
+                    generator.LoadDouble(long.MinValue);
+                    generator.CompareLessThan();
+                    
+                    // value > long.MaxValue
+                    generator.LoadVariable(value);
+                    generator.LoadDouble(long.MaxValue);
+                    generator.CompareGreaterThan();
+                    
+                    // value < long.MinValue || value > long.MaxValue
+                    generator.BitwiseOr();
+                    
+                    // if (value < long.MinValue || value > long.MaxValue)
+                    var falseClause = generator.CreateLabel();
+                    var endOfIf = generator.CreateLabel();
+                    generator.BranchIfFalse(falseClause);
+
+                    // TypeConverter.ToInt32(value)
+                    generator.LoadVariable(value);
+                    generator.Box(typeof(double));
+                    generator.Call(ReflectionHelpers.TypeConverter_ToInt32);
+
+                    // else
+                    generator.Branch(endOfIf);
+                    
+                    // (int)(long)value
+                    generator.DefineLabelPosition(falseClause);
+                    generator.LoadVariable(value);
+                    generator.ConvertToInt64();
+                    generator.ConvertToInteger();
+                    generator.DefineLabelPosition(endOfIf);
                     break;
 
                 case PrimitiveType.String:
