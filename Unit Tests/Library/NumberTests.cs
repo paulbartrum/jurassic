@@ -593,18 +593,5 @@ namespace UnitTests
             Assert.AreEqual(9214843084008499.0, Evaluate("Number.parseInt('9214843084008499')"));
             Assert.AreEqual(18014398509481993.0, Evaluate("Number.parseInt('18014398509481993')"));
         }
-
-        [TestMethod]
-        public void clz()
-        {
-            Assert.AreEqual(32, Evaluate("0 .clz()"));
-            Assert.AreEqual(31, Evaluate("1 .clz()"));
-            Assert.AreEqual(28, Evaluate("12 .clz()"));
-            Assert.AreEqual(0, Evaluate("4294967275 .clz()"));
-            Assert.AreEqual(0, Evaluate("4294967295 .clz()"));
-            Assert.AreEqual(16, Evaluate("60000 .clz()"));
-            Assert.AreEqual(0, Evaluate("(-1).clz()"));
-            Assert.AreEqual(31, Evaluate("1.9.clz()"));
-        }
     }
 }

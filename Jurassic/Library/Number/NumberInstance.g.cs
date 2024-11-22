@@ -12,7 +12,7 @@ namespace Jurassic.Library
 	{
 		private static List<PropertyNameAndValue> GetDeclarativeProperties(ScriptEngine engine)
 		{
-			return new List<PropertyNameAndValue>(11)
+			return new List<PropertyNameAndValue>(10)
 			{
 				new PropertyNameAndValue("toExponential", new ClrStubFunction(engine, "toExponential", 1, __STUB__ToExponential), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toFixed", new ClrStubFunction(engine, "toFixed", 1, __STUB__ToFixed), PropertyAttributes.NonEnumerable),
@@ -20,7 +20,6 @@ namespace Jurassic.Library
 				new PropertyNameAndValue("toPrecision", new ClrStubFunction(engine, "toPrecision", 1, __STUB__ToPrecision), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("toString", new ClrStubFunction(engine, "toString", 1, __STUB__ToStringJS), PropertyAttributes.NonEnumerable),
 				new PropertyNameAndValue("valueOf", new ClrStubFunction(engine, "valueOf", 0, __STUB__ValueOf), PropertyAttributes.NonEnumerable),
-				new PropertyNameAndValue("clz", new ClrStubFunction(engine, "clz", 0, __STUB__Clz), PropertyAttributes.NonEnumerable),
 			};
 		}
 
@@ -94,14 +93,6 @@ namespace Jurassic.Library
 			if (!(thisObj is NumberInstance))
 				throw new JavaScriptException(ErrorType.TypeError, "The method 'valueOf' is not generic.");
 			return ((NumberInstance)thisObj).ValueOf();
-		}
-
-		private static object __STUB__Clz(ScriptEngine engine, object thisObj, object[] args)
-		{
-			thisObj = TypeConverter.ToObject(engine, thisObj);
-			if (!(thisObj is NumberInstance))
-				throw new JavaScriptException(ErrorType.TypeError, "The method 'clz' is not generic.");
-			return ((NumberInstance)thisObj).Clz();
 		}
 	}
 
