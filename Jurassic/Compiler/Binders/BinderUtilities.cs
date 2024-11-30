@@ -22,10 +22,48 @@ namespace Jurassic.Compiler
         /// <returns> The index of the selected method. </returns>
         public static int ResolveOverloads(RuntimeMethodHandle[] methodHandles, ScriptEngine engine, object thisValue, object[] arguments)
         {
+            object thisUnwrapped = thisValue;
+            if (thisUnwrapped is Library.ClrInstanceWrapper)
+            {
+                thisUnwrapped = (thisUnwrapped as Library.ClrInstanceWrapper).WrappedInstance;
+            }
+            Type unwrappedType;
+            if (thisUnwrapped is Library.ClrStaticTypeWrapper)
+            {
+                unwrappedType = (thisUnwrapped as Library.ClrStaticTypeWrapper).WrappedType;
+            }
+            else if (thisUnwrapped is Library.ClrInstanceTypeWrapper)
+            {
+                unwrappedType = (thisUnwrapped as Library.ClrInstanceTypeWrapper).WrappedType;
+            }
+            else
+            {
+                unwrappedType = thisUnwrapped.GetType();
+            }
+
             // Get methods from the handles.
             var methods = new BinderMethod[methodHandles.Length];
             for (int i = 0; i < methodHandles.Length; i++)
-                methods[i] = new BinderMethod(MethodBase.GetMethodFromHandle(methodHandles[i]));
+            {
+                if (unwrappedType.IsGenericType)
+                {
+                    // Generic methods. Works for classes which are generic.
+                    methods[i] = new BinderMethod(
+                        MethodBase.GetMethodFromHandle(methodHandles[i], unwrappedType.TypeHandle));
+                }
+                else if (unwrappedType.BaseType != null && unwrappedType.BaseType.IsGenericType)
+                {
+                    // Generic methods. Works for classes which inherit generic type.
+                    // For example: class AlternateViewCollection : Collection<AlternateView> 
+                    methods[i] = new BinderMethod(
+                            MethodBase.GetMethodFromHandle(methodHandles[i],
+                                                            unwrappedType.BaseType.TypeHandle));
+                }
+                else
+                {
+                    methods[i] = new BinderMethod(MethodBase.GetMethodFromHandle(methodHandles[i]));
+                }
+            }
 
             // Keep a score for each method.  Add one point if a type conversion is required, or
             // a million points if a type conversion cannot be performed.
