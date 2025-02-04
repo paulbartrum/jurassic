@@ -10,7 +10,7 @@ namespace Jurassic.Compiler
     internal class MethodOptimizationHints
     {
         private HashSet<string> names = new HashSet<string>();
-        private bool cached, hasArguments, hasEval, hasNestedFunction, hasThis;
+        private bool cached, hasArguments, hasEval, hasNestedFunction, hasThis, hasWith;
 
         /// <summary>
         /// Called by the parser whenever a variable is encountered (variable being any identifier
@@ -105,6 +105,16 @@ namespace Jurassic.Compiler
         {
             get { return this.hasThis || this.HasEval == true; }
             set { this.hasThis = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets a value that indicates whether the function being generated contains a
+        /// "with" statement.
+        /// </summary>
+        public bool HasWith
+        {
+            get { return this.hasWith; }
+            set { this.hasWith = value; }
         }
     }
 

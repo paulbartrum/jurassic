@@ -495,23 +495,23 @@ namespace UnitTests
             Assert.AreEqual(3, Evaluate("x = Object.create({b: 3}); b = 2; with (x) { b }"));
             Assert.AreEqual(Undefined.Value, Evaluate("x = { a: 234 }; a = 1; b = 2; with (x) { a = 12, b = 13 } x.b"));
             Assert.AreEqual("number", Evaluate("x = { a: 234 }; a = 1; b = 2; with (x) { a = 12, typeof(b) }"));
-
+            
             // Implicit this.
             Assert.AreEqual(1970, Evaluate("x = new Date(86400000); x.f = x.getFullYear; with (x) { f() }"));
             Assert.AreEqual(true, Evaluate("x = { a: 1, b: 2 }; with (x) { (function() { return this })() === this }"));
             Assert.AreEqual(1970, Evaluate("x = new Date(86400000); x.f = x.getFullYear; with (x) { (function b() { return f() })() }"));
-
+            
             // With and var.
             Assert.AreEqual(5, Evaluate("x = { a: 234 }; with (x) { var a = 5; } x.a"));
             Assert.AreEqual(0, Evaluate("a = 0; x = { a: 234 }; with (x) { var a = 5; } a"));
             Assert.AreEqual(5, Evaluate("b = 0; x = { a: 234 }; with (x) { var b = 5; } b"));
             Assert.AreEqual(4, Evaluate("foo = {x: 4}; with (foo) { var x; x }"));
             Assert.AreEqual(1123, Evaluate("with ({}) { var with_unique_1 = 1123; } with_unique_1"));
-
+            
             // With and prototype chains.
             Assert.AreEqual(10, Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } x.b"));
             Assert.AreEqual(5, Evaluate("x = Object.create({ b: 5 }); with (x) { b = 10 } Object.getPrototypeOf(x).b"));
-
+            
             // With inside a function.
             Assert.AreEqual(1, Evaluate("function foo() { with ({ a: 1 }) { return a; } } foo()"));
             Assert.AreEqual(1, Evaluate("x = { a: 1 }; function foo() { with (x) { return a; } } foo()"));
@@ -521,21 +521,26 @@ namespace UnitTests
             Assert.AreEqual(1, Evaluate("x = { a: 1 }; y = 2; function foo() { with (x) { y = a; } } foo(); y"));
             Assert.AreEqual(1, Evaluate(@"var x = { eval: 1 }; var f = function(){ with(x){ return st_eval = eval; } }; f();"));
 
+            // With inside a function with local variables.
+            Assert.AreEqual("0, 1, undefined", Evaluate("x = { a: 1 }; (function(obj) { var a = 0; with (obj) { a = 1; } return a; })(x) + ', ' + x.a + ', ' + x.b;"));
+            Assert.AreEqual("1, undefined, 1", Evaluate("x = { b: 1 }; (function(obj) { var a = 0; with (obj) { a = 1; } return a; })(x) + ', ' + x.a + ', ' + x.b;"));
+            Assert.AreEqual(1, Evaluate("(function(obj) { var a = 0; with (obj) { a += b; }; return a; })({ b: 1 });"));
+
             // With and object literals.
             Assert.AreEqual(42, Evaluate("delete a; x = { a: 42 }; with (x) { y = { get z() { return a; }} } y.z"));
-
+            
             // With and function declarations.
             Assert.AreEqual(43, Evaluate("delete a; x = { a: 43 }; with (x) { function y() { return a } } y()"));
             Execute("_f = undefined");
             Assert.AreEqual("undefined", Evaluate("result = typeof _f; with ({a: 2}) { function _f() { return 5 } } result"));
             Assert.AreEqual("function", Evaluate("typeof _f"));
-
+            
             // With statements are syntax errors in strict mode.
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage("'use strict'; var x = {}; with (x) { }"));
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage(@"eval(""'use strict'; var o = {}; with (o) {}"")"));
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage(@"'use strict'; eval(""var o = {}; with (o) {}"")"));
             Assert.AreEqual("SyntaxError: The with statement is not supported in strict mode", EvaluateExceptionMessage(@"eval(""function f() { 'use strict'; var o = {}; with (o) {} }"")"));
-
+            
             // Unscopables.
             Assert.AreEqual(10, Evaluate("var keys = 10; with ([]) { keys }"));
             Assert.AreEqual(2, Evaluate("var bar = 2; with ({ bar: 5, [Symbol.unscopables]: { bar: true } }) { bar }"));

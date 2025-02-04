@@ -991,6 +991,9 @@ namespace Jurassic.Compiler
 
             var result = new WithStatement(this.labelsForCurrentStatement);
 
+            // Make sure the scope isn't optimized away.
+            this.methodOptimizationHints.HasWith = true;
+
             // Read past the "with" token.
             this.Expect(KeywordToken.With);
 

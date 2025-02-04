@@ -5,7 +5,7 @@
     <Authors>Paul Bartrum</Authors>
     <Company />
     <Description>A .NET library to parse and execute JavaScript code.</Description>
-    <Version>3.2.8</Version>
+    <Version>3.2.9</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -17,7 +17,7 @@
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);DEBUG</DefineConstants>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Jurassic.xml</DocumentationFile>
     <PackageReleaseNotes>
-v3.2.8: fixed incompatibility with .NET 9.
+v3.2.9: fixed bug in 'with' statement.
       
 v3.2.0:
 * Add support for ES6 classes.

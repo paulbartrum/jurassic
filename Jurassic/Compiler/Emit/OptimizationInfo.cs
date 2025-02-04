@@ -92,7 +92,8 @@ namespace Jurassic.Compiler
             {
                 return this.MethodOptimizationHints.HasArguments == false &&
                     this.MethodOptimizationHints.HasEval == false &&
-                    this.MethodOptimizationHints.HasNestedFunction == false;
+                    this.MethodOptimizationHints.HasNestedFunction == false &&
+                    this.MethodOptimizationHints.HasWith == false;
             }
         }
 
