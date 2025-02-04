@@ -996,6 +996,9 @@ namespace Jurassic.Compiler
 
             // Read a left parenthesis token "(".
             this.Expect(PunctuatorToken.LeftParenthesis);
+            
+            // This context has a nested function.
+            this.methodOptimizationHints.HasNestedWith = true;
 
             // Keep track of the start of the statement so that source debugging works correctly.
             var start = this.PositionAfterWhitespace;

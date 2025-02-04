@@ -106,6 +106,11 @@ namespace Jurassic.Compiler
             get { return this.hasThis || this.HasEval == true; }
             set { this.hasThis = value; }
         }
+
+        /// <summary>
+        /// Gets or sets a value that indicates whether the function being generated contains a `with` statement.
+        /// </summary>
+        public bool HasNestedWith { get; set; }
     }
 
 }
