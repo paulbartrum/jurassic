@@ -79,7 +79,7 @@ namespace Jurassic.Library
         /// <summary>
         /// The type of each element in the array.
         /// </summary>
-        internal TypedArrayType Type
+        public TypedArrayType Type
         {
             get { return this.type; }
         }
