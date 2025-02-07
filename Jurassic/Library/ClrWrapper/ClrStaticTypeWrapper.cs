@@ -165,13 +165,24 @@ namespace Jurassic.Library
         /// <c>BindingFlags.Instance</c> to populate instance methods. </param>
         internal static void PopulateMembers(ObjectInstance target, Type type, BindingFlags flags)
         {
+            List<string> ownMethods = new List<string>();
+            foreach (var member in type.GetMembers(BindingFlags.Public | BindingFlags.DeclaredOnly | flags))
+            {
+                if (member.MemberType == MemberTypes.Method)
+                    ownMethods.Add(member.Name);
+            }
+
             // Register static methods as functions.
             var methodGroups = new Dictionary<string, List<MethodBase>>();
-            foreach (var member in type.GetMembers(BindingFlags.Public | BindingFlags.DeclaredOnly | flags))
+            foreach (var member in type.GetMembers(BindingFlags.Public | flags))
             {
                 switch (member.MemberType)
                 {
                     case MemberTypes.Method:
+                        // Use base class method only when overriden
+                        if (member.DeclaringType != type && !ownMethods.Contains(member.Name))
+                            continue;
+
                         MethodInfo method = (MethodInfo)member;
                         List<MethodBase> methodGroup;
                         if (methodGroups.TryGetValue(method.Name, out methodGroup) == true)
@@ -181,6 +192,9 @@ namespace Jurassic.Library
                         break;
 
                     case MemberTypes.Property:
+                        if (member.DeclaringType != type) // Skip base class properties
+                            continue;
+
                         PropertyInfo property = (PropertyInfo)member;
                         var getMethod = property.GetGetMethod();
                         ClrFunction getter = getMethod == null ? null : new ClrFunction(target.Engine.Function.InstancePrototype, new ClrBinder(getMethod));
@@ -197,6 +211,9 @@ namespace Jurassic.Library
                         break;
  
                     case MemberTypes.Field:
+                        if (member.DeclaringType != type) // Skip base class fields
+                            continue;
+
                         FieldInfo field = (FieldInfo)member;
                         ClrFunction fieldGetter = new ClrFunction(target.Engine.Function.InstancePrototype, new FieldGetterBinder(field));
                         ClrFunction fieldSetter = new ClrFunction(target.Engine.Function.InstancePrototype, new FieldSetterBinder(field));

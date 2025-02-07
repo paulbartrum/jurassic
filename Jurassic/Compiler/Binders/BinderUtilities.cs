@@ -33,7 +33,8 @@ namespace Jurassic.Compiler
             const int disqualification = 65536;
             for (int i = 0; i < methods.Length; i++)
             {
-                foreach (var argument in methods[i].GetArguments(arguments.Length))
+                IEnumerable<BinderArgument> binderArguments = methods[i].GetArguments(arguments.Length);
+                foreach (var argument in binderArguments)
                 {
                     // Get the input parameter.
                     object input;
@@ -55,8 +56,10 @@ namespace Jurassic.Compiler
 
                     // Get the type of the output parameter.
                     Type outputType = argument.Type;
+                    TypeCode typeCode = Type.GetTypeCode(outputType);
 
-                    switch (Type.GetTypeCode(outputType))
+
+                    switch (typeCode)
                     {
                         case TypeCode.Boolean:
                             if ((input is bool) == false)
@@ -64,23 +67,34 @@ namespace Jurassic.Compiler
                             break;
 
                         case TypeCode.SByte:
-                        case TypeCode.Int16:
-                        case TypeCode.Int32:
-                        case TypeCode.Int64:
                         case TypeCode.Byte:
                         case TypeCode.UInt16:
                         case TypeCode.UInt32:
                         case TypeCode.UInt64:
+                        case TypeCode.Int16:
+                        case TypeCode.Int32:
+                        case TypeCode.Int64:
                         case TypeCode.Single:
                         case TypeCode.Decimal:
-                            if (TypeUtilities.IsNumeric(input) == true)
-                                demeritPoints[i] ++;
-                            else
-                                demeritPoints[i] += disqualification;
-                            break;
-
                         case TypeCode.Double:
-                            if (TypeUtilities.IsNumeric(input) == false)
+                            Dictionary<TypeCode, int> offsetDict = new Dictionary<TypeCode, int>() { { TypeCode.SByte, 10 },
+                                { TypeCode.Byte, 9 },
+                                { TypeCode.UInt16, 8 },
+                                { TypeCode.UInt32, 7 },
+                                { TypeCode.UInt64, 6 },
+                                { TypeCode.Int16, 5 },
+                                { TypeCode.Int32, 4 },
+                                { TypeCode.Int64, 3 },
+                                { TypeCode.Single, 2 },
+                                { TypeCode.Decimal, 1 },
+                                { TypeCode.Double, 0 }
+                            };
+
+                            // To fix ambiguous methods error when there are method with numeric parameters
+                            // double has maximal priority
+                            if (TypeUtilities.IsNumeric(input) == true)
+                                demeritPoints[i] += offsetDict[typeCode];
+                            else
                                 demeritPoints[i] += disqualification;
                             break;
 
@@ -111,6 +125,12 @@ namespace Jurassic.Compiler
                             {
                                 demeritPoints[i] += disqualification;
                             }
+                            else if (outputType != input.GetType())
+                            {
+                                // To fix ambiguous when the parameter is of type object and there is another method 
+                                // with parameter which inherits object.
+                                demeritPoints[i]++;
+                            }
                             break;
 
 
@@ -118,22 +138,47 @@ namespace Jurassic.Compiler
                         case TypeCode.DBNull:
                             throw new NotSupportedException(string.Format("{0} is not a supported parameter type.", outputType));
                     }
+                    // To fix ambiguous methods error when there are method with smilar parameters, for example int32[] and int32
+                    if (argument.IsParamArrayArgument)
+                    {
+                        demeritPoints[i] += 100;
+                    }
                 }
                 
             }
 
             // Find the method(s) with the fewest number of demerit points.
-            int lowestScore = int.MaxValue;
-            var lowestIndices = new List<int>();
-            for (int i = 0; i < methods.Length; i++)
+            int lowestScore;
+            var lowestIndices = _LowestIndices(methods, demeritPoints, out lowestScore);
+
+            // Try to get the method from the most close base type 
+            if (lowestIndices.Count > 1)
             {
-                if (demeritPoints[i] < lowestScore)
+                for (int i = 0; i < demeritPoints.Length; i++)
                 {
-                    lowestScore = demeritPoints[i];
-                    lowestIndices.Clear();
+                    demeritPoints[i] = disqualification;
                 }
-                if (demeritPoints[i] <= lowestScore)
-                    lowestIndices.Add(i);
+                for (int i = 0; i < lowestIndices.Count; i++)
+                {
+                    int index = lowestIndices[i];
+                    demeritPoints[index] = _CalcMethodDistance(_GetThisType(thisValue), methods[index].DeclaringType);
+                }
+                lowestIndices = _LowestIndices(methods, demeritPoints, out lowestScore);
+            }
+
+            // Try to get the method with most close arguments count
+            if (lowestIndices.Count > 1)
+            {
+                for (int i = 0; i < demeritPoints.Length; i++)
+                {
+                    demeritPoints[i] = disqualification;
+                }
+                for (int i = 0; i < lowestIndices.Count; i++)
+                {
+                    int index = lowestIndices[i];
+                    demeritPoints[index] = _CalcArgumentsPoint(methods[index], arguments.Length);
+                }
+                lowestIndices = _LowestIndices(methods, demeritPoints, out lowestScore);
             }
 
             // Throw an error if the match is ambiguous.
@@ -150,6 +195,66 @@ namespace Jurassic.Compiler
                 throw new JavaScriptException(ErrorType.TypeError, string.Format("The best method overload {0} has some invalid arguments", methods[lowestIndices[0]]));
 
             return lowestIndices[0];
+        }
+
+
+        private static List<int> _LowestIndices(BinderMethod[] methods, int[] demeritPoints, out int lowestScore)
+        {
+            lowestScore = int.MaxValue;
+            List<int> lowestIndices = new List<int>();
+            for (int i = 0; i < methods.Length; i++)
+            {
+                if (demeritPoints[i] < lowestScore)
+                {
+                    lowestScore = demeritPoints[i];
+                    lowestIndices.Clear();
+                }
+                if (demeritPoints[i] <= lowestScore)
+                    lowestIndices.Add(i);
+            }
+
+            return lowestIndices;
+        }
+
+
+        private static Type _GetThisType(object thisValue)
+        {
+            object thisUnwrapped = thisValue;
+            if (thisUnwrapped is Jurassic.Library.ClrInstanceWrapper)
+            {
+                thisUnwrapped = ((Jurassic.Library.ClrInstanceWrapper)thisUnwrapped).WrappedInstance;
+            }
+            else if (thisUnwrapped is Jurassic.Library.ClrInstanceTypeWrapper)
+            {
+                thisUnwrapped = ((Jurassic.Library.ClrInstanceTypeWrapper)thisUnwrapped).WrappedType;
+            }
+            else if (thisUnwrapped is Jurassic.Library.ClrStaticTypeWrapper)
+            {
+                thisUnwrapped = ((Jurassic.Library.ClrStaticTypeWrapper)thisUnwrapped).WrappedType;
+            }
+            return thisUnwrapped.GetType();
+        }
+
+
+        private static int _CalcMethodDistance(Type thisType, Type declaringType)
+        {
+            Type currentType = thisType;
+
+            int result = 0;
+            while (currentType != null && currentType != declaringType)
+            {
+                result++;
+                currentType = currentType.BaseType;
+            }
+
+            return result;
+        }
+
+
+        private static int _CalcArgumentsPoint(BinderMethod method, int argumentsCount)
+        {
+            int points = Math.Max(method.GetParameters().Length - argumentsCount, 0);
+            return points;
         }
     }
 
