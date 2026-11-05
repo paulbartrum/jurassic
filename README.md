@@ -56,7 +56,7 @@ Feature|Status
 &nbsp;&nbsp;let|14/16
 &nbsp;&nbsp;block-level function declaration[18]|:x:
 **Functions**|
-&nbsp;&nbsp;arrow functions|:x:
+&nbsp;&nbsp;arrow functions|:white_check_mark: (no destructuring or rest parameters yet)
 &nbsp;&nbsp;class|:white_check_mark: 24/24
 &nbsp;&nbsp;super|:white_check_mark: 8/8
 &nbsp;&nbsp;generators|:x:

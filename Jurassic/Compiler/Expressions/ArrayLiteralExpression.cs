@@ -29,6 +29,11 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Gets the type that results from evaluating this expression.
         /// </summary>
+        public override IEnumerable<AstNode> ChildNodes
+        {
+            get { return this.Items; }
+        }
+
         public override PrimitiveType ResultType
         {
             get { return PrimitiveType.Object; }

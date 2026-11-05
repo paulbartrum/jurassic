@@ -41,7 +41,7 @@ namespace Jurassic.Compiler
         /// <summary>
         /// The scope that was in effect at the time of the function call (used by eval() calls.)
         /// </summary>
-        private Scope Scope { get; set; }
+        internal Scope Scope { get; set; }
 
         /// <summary>
         /// Used to implement function calls without evaluating the left operand twice.

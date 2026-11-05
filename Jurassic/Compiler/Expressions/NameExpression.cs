@@ -30,7 +30,7 @@ namespace Jurassic.Compiler
         public Scope Scope
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <summary>

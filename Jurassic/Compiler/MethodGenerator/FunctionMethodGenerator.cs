@@ -66,9 +66,10 @@ namespace Jurassic.Compiler
         /// <param name="options"> Options that influence the compiler. </param>
         public FunctionMethodGenerator(PropertyName name, FunctionDeclarationType declarationType,
             IList<FunctionArgument> arguments, string bodyText, Statement body, Scope baseScope,
-            string scriptPath, SourceCodeSpan span, CompilerOptions options)
+            string scriptPath, SourceCodeSpan span, CompilerOptions options, bool isArrow = false)
             : base(new DummyScriptSource(scriptPath), options)
         {
+            this.IsArrow = isArrow;
             this.Name = name;
             this.DeclarationType = declarationType;
             this.Arguments = arguments;
@@ -129,6 +130,16 @@ namespace Jurassic.Compiler
         /// <summary>
         /// Indicates how the function was declared.
         /// </summary>
+        /// <summary>
+        /// Indicates whether the function is an arrow function.  Arrow functions have lexical
+        /// "this" and "arguments".
+        /// </summary>
+        public bool IsArrow
+        {
+            get;
+            private set;
+        }
+
         public FunctionDeclarationType DeclarationType
         {
             get;
@@ -325,7 +336,7 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the function name into the scope.
-            if (Name.HasStaticName && !Name.IsGetter && !Name.IsSetter &&
+            if (!this.IsArrow && Name.HasStaticName && !Name.IsGetter && !Name.IsSetter &&
                 this.Arguments.Any(a => a.Name == Name.StaticName) == false &&
                 optimizationInfo.MethodOptimizationHints.HasVariable(Name.StaticName))
             {
@@ -335,7 +346,7 @@ namespace Jurassic.Compiler
             }
 
             // Transfer the arguments object into the scope.
-            if (this.MethodOptimizationHints.HasArguments == true && this.Arguments.Any(a => a.Name == "arguments") == false)
+            if (!this.IsArrow && this.MethodOptimizationHints.HasArguments == true && this.Arguments.Any(a => a.Name == "arguments") == false)
             {
                 // executionContext.CreateArgumentsInstance(object[] arguments)
                 EmitHelpers.LoadExecutionContext(generator);

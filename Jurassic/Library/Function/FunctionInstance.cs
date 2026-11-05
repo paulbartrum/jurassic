@@ -50,6 +50,11 @@
             properties.Add(new PropertyNameAndValue("name", "Empty", PropertyAttributes.Configurable));
             properties.Add(new PropertyNameAndValue("length", 0, PropertyAttributes.Configurable));
             obj.InitializeProperties(properties);
+
+            // Arrow functions cannot access "caller" or "arguments".
+            var restrictedAccessor = new RestrictedPropertyAccessor(obj);
+            obj.DefineProperty("caller", new PropertyDescriptor(restrictedAccessor, restrictedAccessor, PropertyAttributes.Configurable), throwOnError: false);
+            obj.DefineProperty("arguments", new PropertyDescriptor(restrictedAccessor, restrictedAccessor, PropertyAttributes.Configurable), throwOnError: false);
         }
 
 

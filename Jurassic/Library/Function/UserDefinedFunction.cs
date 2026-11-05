@@ -13,6 +13,9 @@ namespace Jurassic.Library
         private readonly GeneratedMethod generatedMethod;
         private readonly FunctionMethodGenerator.FunctionDelegate body;
 
+        // For arrow functions, the "this" value of the code that created the function.
+        private readonly object arrowThis;
+
 
 
         //     INITIALIZATION
@@ -100,7 +103,7 @@ namespace Jurassic.Library
         /// <param name="strictMode"> <c>true</c> if the function body is strict mode; <c>false</c> otherwise. </param>
         /// <param name="container"> A reference to the containing class prototype or object literal (or <c>null</c>). </param>
         /// <remarks> This is used by functions declared in JavaScript code (including getters and setters). </remarks>
-        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, RuntimeScope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
+        internal UserDefinedFunction(ObjectInstance prototype, string name, IList<string> argumentNames, RuntimeScope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container, bool isArrow = false, object arrowThis = null, int length = -1)
             : base(prototype)
         {
             this.ArgumentsText = string.Join(", ", argumentNames);
@@ -111,7 +114,9 @@ namespace Jurassic.Library
             this.ParentScope = parentScope;
             this.StrictMode = strictMode;
             this.Container = container;
-            InitProperties(name, argumentNames.Count);
+            this.IsArrow = isArrow;
+            this.arrowThis = arrowThis;
+            InitProperties(name, length >= 0 ? length : argumentNames.Count);
         }
 
         /// <summary>
@@ -121,6 +126,17 @@ namespace Jurassic.Library
         /// <param name="length"> The expected number of arguments. </param>
         private void InitProperties(string name, int length)
         {
+            // Arrow functions have no prototype property.
+            if (this.IsArrow)
+            {
+                InitializeProperties(new List<PropertyNameAndValue>()
+                {
+                    new PropertyNameAndValue("name", name, PropertyAttributes.Configurable),
+                    new PropertyNameAndValue("length", length, PropertyAttributes.Configurable),
+                });
+                return;
+            }
+
             // Create an object to serve as the instance prototype.
             var instancePrototype = this.Engine.Object.Construct();
             instancePrototype.InitializeProperties(new List<PropertyNameAndValue>
@@ -221,6 +237,11 @@ namespace Jurassic.Library
         /// </summary>
         internal ObjectInstance Container { get; private set; }
 
+        /// <summary>
+        /// Indicates whether this function is an arrow function.
+        /// </summary>
+        internal bool IsArrow { get; private set; }
+
 
 
         //     OVERRIDES
@@ -237,7 +258,7 @@ namespace Jurassic.Library
             var context = ExecutionContext.CreateFunctionContext(
                 engine: this.Engine,
                 parentScope: this.ParentScope,
-                thisValue: thisObject,
+                thisValue: this.IsArrow ? this.arrowThis : thisObject,
                 executingFunction: this);
             return this.body(context, argumentValues) ?? Undefined.Value;
         }
@@ -250,6 +271,9 @@ namespace Jurassic.Library
         /// <returns> The object that was created. </returns>
         public override ObjectInstance ConstructLateBound(FunctionInstance newTarget, params object[] argumentValues)
         {
+            if (this.IsArrow)
+                throw new JavaScriptException(ErrorType.TypeError, $"{(string.IsNullOrEmpty(this.Name) ? "Arrow function" : this.Name)} is not a constructor");
+
             // Create a new object and set the prototype to the instance prototype of the function.
             var newObject = ObjectInstance.CreateRawObject(newTarget.InstancePrototype);
 

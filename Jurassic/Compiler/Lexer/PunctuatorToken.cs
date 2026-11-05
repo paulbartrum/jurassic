@@ -59,6 +59,7 @@ namespace Jurassic.Compiler
         public readonly static PunctuatorToken Conditional = new PunctuatorToken("?");
         public readonly static PunctuatorToken Colon = new PunctuatorToken(":");
         public readonly static PunctuatorToken Assignment = new PunctuatorToken("=");
+        public readonly static PunctuatorToken Arrow = new PunctuatorToken("=>");
         public readonly static PunctuatorToken CompoundAdd = new PunctuatorToken("+=");
         public readonly static PunctuatorToken CompoundSubtract = new PunctuatorToken("-=");
         public readonly static PunctuatorToken CompoundMultiply = new PunctuatorToken("*=");
@@ -115,6 +116,7 @@ namespace Jurassic.Compiler
             {"?", Conditional},
             {":", Colon},
             {"=", Assignment},
+            {"=>", Arrow},
             {"+=", CompoundAdd},
             {"-=", CompoundSubtract},
             {"*=", CompoundMultiply},

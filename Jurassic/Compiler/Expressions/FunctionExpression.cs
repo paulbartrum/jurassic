@@ -156,6 +156,21 @@ namespace Jurassic.Compiler
             else
                 generator.LoadNull();
 
+            // isArrow
+            generator.LoadBoolean(this.context.IsArrow);
+
+            // arrowThis (arrow functions capture the "this" value of the code that creates them).
+            if (this.context.IsArrow)
+                EmitHelpers.LoadThis(generator);
+            else
+                generator.LoadNull();
+
+            // length (the number of parameters before the first one with a default value).
+            int length = 0;
+            while (length < this.Arguments.Count && this.Arguments[length].DefaultValue == null)
+                length++;
+            generator.LoadInt32(length);
+
             // CreateFunction(ObjectInstance prototype, string name, IList<string> argumentNames,
             //   RuntimeScope scope, Func<Scope, object, object[], object> body,
             //   bool strictMode, FunctionInstance container)

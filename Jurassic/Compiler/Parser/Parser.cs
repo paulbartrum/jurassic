@@ -22,6 +22,7 @@ namespace Jurassic.Compiler
         private CompilerOptions options;
         private CodeContext context;
         private bool strictMode;
+        private bool hasUseStrictDirective;     // True if the code being parsed has its own "use strict" directive.
 
 
 
@@ -60,6 +61,7 @@ namespace Jurassic.Compiler
         private static Parser CreateFunctionBodyParser(Parser parser, Scope scope, MethodOptimizationHints optimizationHints, CodeContext codeContext)
         {
             var result = (Parser)parser.MemberwiseClone();
+            result.hasUseStrictDirective = false;
             result.SetInitialScope(scope);
             result.methodOptimizationHints = optimizationHints;
             result.context = codeContext;
@@ -366,7 +368,10 @@ namespace Jurassic.Compiler
 
                 // Strict mode directive.
                 if (directiveToken.Value == "use strict")
+                {
                     this.StrictMode = true;
+                    this.hasUseStrictDirective = true;
+                }
 
                 // Read the end of the statement.  This must happen last so that the lexer has a
                 // chance to act on the strict mode flag.
@@ -1658,6 +1663,81 @@ namespace Jurassic.Compiler
                     // Make sure the token is actually an operator and not just a random keyword.
                     if (newOperator == null)
                     {
+                        if (this.nextToken == PunctuatorToken.Arrow && this.expressionState == ParserExpressionState.Operator)
+                        {
+                            // Arrow function.  The parameters have already been parsed as an
+                            // expression (either a name or a parenthesized list), so find them,
+                            // detach them from the tree and reinterpret them.
+                            Expression cover = null;
+                            if (unboundOperator is GroupingExpression closedGroup && closedGroup.SecondTokenEncountered)
+                            {
+                                cover = closedGroup;
+                                if (root == closedGroup)
+                                {
+                                    root = null;
+                                    unboundOperator = null;
+                                }
+                                else
+                                {
+                                    var parentNode = root as OperatorExpression;
+                                    while (parentNode != null && parentNode.RightBranch != closedGroup)
+                                        parentNode = parentNode.RightBranch;
+                                    if (parentNode == null)
+                                        throw new SyntaxErrorException("Invalid arrow function parameters.", this.LineNumber, this.SourcePath);
+                                    parentNode.Pop();
+                                    unboundOperator = parentNode;
+                                }
+                            }
+                            else if (unboundOperator == null && root is NameExpression)
+                            {
+                                cover = root;
+                                root = null;
+                            }
+                            else if (unboundOperator != null && unboundOperator.OperandCount > 0 && unboundOperator.RightBranch == null &&
+                                unboundOperator.GetRawOperand(unboundOperator.OperandCount - 1) is NameExpression)
+                            {
+                                cover = unboundOperator.Pop();
+                            }
+                            if (cover == null)
+                                throw new SyntaxErrorException("Invalid arrow function parameters.", this.LineNumber, this.SourcePath);
+
+                            // An arrow function is an assignment expression, so it cannot be the
+                            // operand of a higher-precedence operator (e.g. "1 + x => x" or "!x => x").
+                            if (unboundOperator != null && !IsAssignmentExpressionPosition(unboundOperator))
+                                throw new SyntaxErrorException("Arrow functions are not allowed here.", this.LineNumber, this.SourcePath);
+
+                            var arrowArguments = ConvertToArrowArguments(cover);
+                            var arrow = ParseArrowFunction(arrowArguments, endTokens, out bool bodyWasExpression);
+                            if (root == null)
+                                root = arrow;
+                            else
+                            {
+                                Debug.Assert(unboundOperator != null && unboundOperator.AcceptingOperands == true);
+                                unboundOperator.Push(arrow);
+                            }
+                            if (bodyWasExpression)
+                            {
+                                // The terminating token of the body has not been consumed yet.
+                                this.expressionState = ParserExpressionState.Operator;
+                                this.lexer.ParserExpressionState = this.expressionState;
+                                continue;
+                            }
+
+                            // Otherwise consume the closing brace of the body.
+                            this.Consume(ParserExpressionState.Operator);
+
+                            // An arrow function with a block body is a complete assignment expression,
+                            // so it cannot be followed by an operator (e.g. "x => {} + 1").
+                            if (this.consumedLineTerminator == false &&
+                                (this.nextToken is PunctuatorToken || this.nextToken == KeywordToken.In || this.nextToken == KeywordToken.InstanceOf) &&
+                                this.nextToken != PunctuatorToken.Comma && this.nextToken != PunctuatorToken.RightParenthesis &&
+                                this.nextToken != PunctuatorToken.RightBracket && this.nextToken != PunctuatorToken.RightBrace &&
+                                this.nextToken != PunctuatorToken.Colon && this.nextToken != PunctuatorToken.Semicolon &&
+                                Array.IndexOf(endTokens, this.nextToken) < 0)
+                                throw new SyntaxErrorException(string.Format("Unexpected token {0} after arrow function", Token.ToText(this.nextToken)), this.LineNumber, this.SourcePath);
+                            continue;
+                        }
+
                         if (this.nextToken == PunctuatorToken.Dot &&
                             unboundOperator != null &&
                             unboundOperator.OperatorType == OperatorType.New &&
@@ -1906,6 +1986,219 @@ namespace Jurassic.Compiler
 
             // Resolve all the unbound operators into real operators.
             return root;
+        }
+
+        /// <summary>
+        /// Indicates whether an assignment expression (such as an arrow function) is allowed as the
+        /// last operand of the given operator.
+        /// </summary>
+        private static bool IsAssignmentExpressionPosition(OperatorExpression parent)
+        {
+            switch (parent.OperatorType)
+            {
+                case OperatorType.Assignment:
+                case OperatorType.CompoundAdd:
+                case OperatorType.CompoundBitwiseAnd:
+                case OperatorType.CompoundBitwiseOr:
+                case OperatorType.CompoundBitwiseXor:
+                case OperatorType.CompoundDivide:
+                case OperatorType.CompoundExponentiation:
+                case OperatorType.CompoundLeftShift:
+                case OperatorType.CompoundModulo:
+                case OperatorType.CompoundMultiply:
+                case OperatorType.CompoundSignedRightShift:
+                case OperatorType.CompoundSubtract:
+                case OperatorType.CompoundUnsignedRightShift:
+                case OperatorType.Comma:
+                case OperatorType.Grouping:
+                case OperatorType.FunctionCall:
+                case OperatorType.Index:
+                    return true;
+                case OperatorType.Conditional:
+                    // Not allowed as the condition.
+                    return parent.OperandCount >= 1;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Reinterprets an already-parsed expression (a name or a parenthesized list of names, optionally
+        /// with default values) as the parameter list of an arrow function.
+        /// </summary>
+        /// <param name="cover"> A name expression or a grouping expression. </param>
+        /// <returns> A list of arguments. </returns>
+        private List<FunctionArgument> ConvertToArrowArguments(Expression cover)
+        {
+            var result = new List<FunctionArgument>();
+            if (cover is NameExpression singleName)
+            {
+                result.Add(new FunctionArgument() { Name = singleName.Name });
+                return result;
+            }
+
+            var group = (GroupingExpression)cover;
+            if (group.OperandCount == 0)
+                return result;
+            var content = group.GetRawOperand(0);
+            IList<Expression> items = content is ListExpression list ? list.Items : new Expression[] { content };
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                if (item == null && i == items.Count - 1 && i > 0)
+                    break;      // Trailing comma.
+                if (item is NameExpression name)
+                    result.Add(new FunctionArgument() { Name = name.Name });
+                else if (item is AssignmentExpression assignment && assignment.OperatorType == OperatorType.Assignment &&
+                    assignment.GetRawOperand(0) is NameExpression defaultName)
+                    result.Add(new FunctionArgument() { Name = defaultName.Name, DefaultValue = assignment.GetOperand(1) });
+                else
+                    throw new SyntaxErrorException("Invalid arrow function parameters.", this.LineNumber, this.SourcePath);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Rebinds all name lookups within the given expression tree from one scope to another.
+        /// </summary>
+        private static void RebindScope(AstNode node, Scope from, Scope to)
+        {
+            if (node is NameExpression nameExpression && nameExpression.Scope == from)
+                nameExpression.Scope = to;
+            else if (node is FunctionCallExpression callExpression && callExpression.Scope == from)
+                callExpression.Scope = to;
+            else if (node is FunctionExpression functionExpression && functionExpression.Scope == from)
+                functionExpression.Scope = to;
+            foreach (var child in node.ChildNodes)
+                RebindScope(child, from, to);
+        }
+
+        /// <summary>
+        /// Parses the body of an arrow function.  The next token must be the '=>' token.
+        /// </summary>
+        /// <param name="arguments"> The arrow function parameters. </param>
+        /// <param name="endTokens"> The end tokens of the enclosing expression. </param>
+        /// <param name="bodyWasExpression"> Set to <c>true</c> if the body was a concise (expression)
+        /// body, in which case the token that ended the body has not been consumed.  Otherwise the
+        /// closing brace of the body is the next token and has not been consumed. </param>
+        /// <returns> A function expression. </returns>
+        private FunctionExpression ParseArrowFunction(List<FunctionArgument> arguments, Token[] endTokens, out bool bodyWasExpression)
+        {
+            if (this.consumedLineTerminator)
+                throw new SyntaxErrorException("Unexpected line terminator before '=>'", this.LineNumber, this.SourcePath);
+            var startPosition = this.PositionAfterWhitespace;
+
+            // Create the function scope.
+            var scope = Scope.CreateFunctionScope(null, null, isArrow: true);
+            var seenNames = new HashSet<string>();
+            foreach (var argument in arguments)
+            {
+                ValidateVariableName(argument.Name);
+                if (!seenNames.Add(argument.Name))
+                    throw new SyntaxErrorException($"Duplicate parameter name '{argument.Name}' not allowed in arrow functions.", this.LineNumber, this.SourcePath);
+                scope.DeclareVariable(KeywordToken.Var, argument.Name);
+            }
+
+            // Default values were parsed before it was known that this was an arrow function, so
+            // they refer to the outer scope.  Rebind them to the arrow function scope so they can
+            // see the earlier parameters.
+            foreach (var argument in arguments)
+                if (argument.DefaultValue != null)
+                    RebindScope(argument.DefaultValue, this.currentScope, scope);
+
+            var newMethodOptimizationHints = new MethodOptimizationHints();
+            this.methodOptimizationHints.HasNestedFunction = true;
+            foreach (var argument in arguments)
+            {
+                if (argument.DefaultValue == null)
+                    continue;
+
+                // A function nested inside a default value is nested inside this arrow function.
+                if (argument.DefaultValue.ContainsNodeOfType<FunctionExpression>())
+                    newMethodOptimizationHints.HasNestedFunction = true;
+            }
+
+            // Consume the '=>'.
+            this.Consume();
+
+            var options = this.options.Clone();
+            string bodyText;
+            Statement body;
+            SourceCodePosition endPosition;
+            if (this.nextToken == PunctuatorToken.LeftBrace)
+            {
+                bodyWasExpression = false;
+
+                // Since the parser reads one token in advance, start capturing the function body here.
+                var bodyTextBuilder = new System.Text.StringBuilder();
+                var originalBodyTextBuilder = this.lexer.InputCaptureStringBuilder;
+                this.lexer.InputCaptureStringBuilder = bodyTextBuilder;
+
+                // Read the start brace.
+                this.Expect(PunctuatorToken.LeftBrace);
+
+                // Read the function body.
+                var functionParser = CreateFunctionBodyParser(this, scope, newMethodOptimizationHints, CodeContext.Function);
+                body = functionParser.Parse();
+
+                // Transfer state back from the function parser.
+                this.nextToken = functionParser.nextToken;
+                this.lexer.StrictMode = this.StrictMode;
+                this.lexer.InputCaptureStringBuilder = originalBodyTextBuilder;
+                if (originalBodyTextBuilder != null)
+                    originalBodyTextBuilder.Append(bodyTextBuilder);
+                if (this.nextToken != PunctuatorToken.RightBrace)
+                    throw new SyntaxErrorException("Expected '}'", this.LineNumber, this.SourcePath);
+
+                // A "use strict" directive is not allowed if the parameter list is not simple.
+                if (functionParser.hasUseStrictDirective)
+                    foreach (var argument in arguments)
+                        if (argument.DefaultValue != null)
+                            throw new SyntaxErrorException("Illegal 'use strict' directive in function with non-simple parameter list", this.LineNumber, this.SourcePath);
+                endPosition = new SourceCodePosition(this.PositionAfterWhitespace.Line, this.PositionAfterWhitespace.Column + 1);
+                bodyText = bodyTextBuilder.Length > 0 ? bodyTextBuilder.ToString(0, bodyTextBuilder.Length - 1) : string.Empty;
+                options.ForceStrictMode = functionParser.StrictMode;
+                newMethodOptimizationHints = functionParser.methodOptimizationHints;
+            }
+            else
+            {
+                bodyWasExpression = true;
+
+                // Concise body: a single assignment expression.
+                var originalScope = this.currentScope;
+                var originalHints = this.methodOptimizationHints;
+                this.currentScope = scope;
+                this.methodOptimizationHints = newMethodOptimizationHints;
+                var bodyEndTokens = new List<Token>(endTokens)
+                {
+                    PunctuatorToken.Comma, PunctuatorToken.RightParenthesis, PunctuatorToken.RightBracket,
+                    PunctuatorToken.RightBrace, PunctuatorToken.Colon
+                };
+                var startOfBody = this.PositionAfterWhitespace;
+                Expression expression;
+                try
+                {
+                    expression = ParseExpression(bodyEndTokens.ToArray());
+                }
+                finally
+                {
+                    this.currentScope = originalScope;
+                    this.methodOptimizationHints = originalHints;
+                }
+                var returnStatement = new ReturnStatement(new string[0]) { Value = expression };
+                returnStatement.SourceSpan = new SourceCodeSpan(startOfBody, this.PositionBeforeWhitespace);
+                var block = new BlockStatement(new string[0], scope);
+                block.Statements.Add(returnStatement);
+                body = block;
+                bodyText = "return " + expression + ";";
+                endPosition = this.PositionBeforeWhitespace;
+                options.ForceStrictMode = this.StrictMode;
+            }
+
+            var context = new FunctionMethodGenerator(new PropertyName(string.Empty), FunctionDeclarationType.Expression, arguments,
+                bodyText, body, scope, this.SourcePath, new SourceCodeSpan(startPosition, endPosition), options, isArrow: true);
+            context.MethodOptimizationHints = newMethodOptimizationHints;
+            return new FunctionExpression(context, this.currentScope);
         }
 
         /// <summary>

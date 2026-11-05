@@ -261,7 +261,7 @@ namespace Jurassic.Compiler
 
             // Functions
             ReflectionHelpers_CreateFunction = GetStaticMethod(typeof(ReflectionHelpers), "CreateFunction", typeof(ObjectInstance),
-                typeof(string), typeof(IList<string>), typeof(RuntimeScope), typeof(string), typeof(GeneratedMethod), typeof(bool), typeof(ObjectInstance));
+                typeof(string), typeof(IList<string>), typeof(RuntimeScope), typeof(string), typeof(GeneratedMethod), typeof(bool), typeof(ObjectInstance), typeof(bool), typeof(object), typeof(int));
 
             // Object literals
             ReflectionHelpers_SetObjectLiteralValue = GetStaticMethod(typeof(ReflectionHelpers), "SetObjectLiteralValue", typeof(ObjectInstance), typeof(object), typeof(object));
@@ -321,9 +321,9 @@ namespace Jurassic.Compiler
         /// <param name="container"> A reference to the containing class prototype or object literal (or <c>null</c>). </param>
         /// <remarks> This is used by functions declared in JavaScript code (including getters and setters). </remarks>
         public static UserDefinedFunction CreateFunction(ObjectInstance prototype, string name, IList<string> argumentNames,
-            RuntimeScope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container)
+            RuntimeScope parentScope, string bodyText, GeneratedMethod generatedMethod, bool strictMode, ObjectInstance container, bool isArrow, object arrowThis, int length)
         {
-            return new UserDefinedFunction(prototype, name, argumentNames, parentScope, bodyText, generatedMethod, strictMode, container);
+            return new UserDefinedFunction(prototype, name, argumentNames, parentScope, bodyText, generatedMethod, strictMode, container, isArrow, arrowThis, length);
         }
 
         /// <summary>

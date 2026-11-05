@@ -57,13 +57,14 @@ namespace Jurassic.Compiler
         /// <param name="functionName"> The name of the function.  Can be empty for an anonymous function. </param>
         /// <param name="argumentNames"> The names of each of the function arguments.  Can be <c>null</c>. </param>
         /// <returns> A new DeclarativeScope instance. </returns>
-        internal static Scope CreateFunctionScope(string functionName, IEnumerable<string> argumentNames)
+        internal static Scope CreateFunctionScope(string functionName, IEnumerable<string> argumentNames, bool isArrow = false)
         {
             var result = new Scope(null, (argumentNames != null ? argumentNames.Count() : 0) + 3);
             result.Type = ScopeType.TopLevelFunction;
             if (functionName != null)
                 result.DeclareVariable(KeywordToken.Var, functionName);
-            result.DeclareVariable(KeywordToken.Var, "arguments");
+            if (!isArrow)
+                result.DeclareVariable(KeywordToken.Var, "arguments");
             if (argumentNames != null)
             {
                 foreach (var argumentName in argumentNames)
